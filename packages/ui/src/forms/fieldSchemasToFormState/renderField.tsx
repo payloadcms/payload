@@ -51,6 +51,7 @@ export const renderField: RenderFieldMethod = ({
     defaultIDType: req.payload.config.db.defaultIDType,
     field: fieldConfig,
     i18n: req.i18n,
+    importMap: req.payload.importMap,
   })
 
   const permissions =

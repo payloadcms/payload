@@ -86,6 +86,8 @@ export function genImportMapIterateFields({
       }
     }
 
+    hasKey(field?.admin, 'jsx') && addToImportMap(field.admin.jsx) // For Blocks
+
     hasKey(field?.admin?.components, 'Label') && addToImportMap(field.admin.components.Label)
 
     hasKey(field?.admin?.components, 'Block') && addToImportMap(field.admin.components.Block)

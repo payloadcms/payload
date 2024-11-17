@@ -1,15 +1,11 @@
 import type { Transformer } from '@lexical/markdown'
-import type {
-  Klass,
-  LexicalEditor,
-  LexicalNode,
-  LexicalNodeReplacement,
-  SerializedEditorState,
-} from 'lexical'
+import type { Klass, LexicalEditor, LexicalNode, LexicalNodeReplacement } from 'lexical'
+import type { RichTextFieldClient } from 'payload'
 import type React from 'react'
 
 import type { ClientEditorConfig } from '../lexical/config/types.js'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import type { FeatureClientSchemaMap } from '../types.js'
 import type { ToolbarGroup } from './toolbars/types.js'
 
 export type FeatureProviderProviderClient<
@@ -30,10 +26,13 @@ export type FeatureProviderClient<
   clientFeatureProps: BaseClientFeatureProps<UnSanitizedClientFeatureProps>
   feature:
     | ((props: {
+        featureClientSchemaMap: FeatureClientSchemaMap
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ClientFeatureProviderMap
+        field?: RichTextFieldClient
         // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
         resolvedFeatures: ResolvedClientFeatureMap
+        schemaPath: string
         // unSanitized EditorConfig,
         unSanitizedEditorConfig: ClientEditorConfig
       }) => ClientFeature<ClientFeatureProps>)
@@ -49,7 +48,13 @@ export type PluginComponentWithAnchor<ClientFeatureProps = any> = React.FC<{
 }>
 
 export type ClientFeature<ClientFeatureProps> = {
-  markdownTransformers?: Transformer[]
+  markdownTransformers?: (
+    | ((props: {
+        allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>
+        allTransformers: Transformer[]
+      }) => Transformer)
+    | Transformer
+  )[]
   nodes?: Array<Klass<LexicalNode> | LexicalNodeReplacement>
   /**
    * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -198,6 +203,8 @@ export type SanitizedPlugin =
 export type SanitizedClientFeatures = {
   /** The keys of all enabled features */
   enabledFeatures: string[]
+  markdownTransformers: Transformer[]
+
   /**
    * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
    */
@@ -219,8 +226,5 @@ export type SanitizedClientFeatures = {
     groups: SlashMenuGroup[]
   }
 } & Required<
-  Pick<
-    ResolvedClientFeature<unknown>,
-    'markdownTransformers' | 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'
-  >
+  Pick<ResolvedClientFeature<unknown>, 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'>
 >

@@ -40,6 +40,7 @@ let checkedDependencies = false
 export const RootLayout = async ({
   children,
   config: configPromise,
+  importMap,
   serverFunction,
 }: {
   readonly children: React.ReactNode
@@ -136,6 +137,7 @@ export const RootLayout = async ({
   const clientConfig = await getClientConfig({
     config,
     i18n,
+    importMap,
   })
 
   return (

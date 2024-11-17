@@ -18,7 +18,6 @@ import { useEffect, useState } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
 import type { BlockFields, BlockFieldsOptionalID } from '../../server/nodes/BlocksNode.js'
-import type { BlocksFeatureClientProps } from '../index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
@@ -28,7 +27,7 @@ import { INSERT_BLOCK_COMMAND, INSERT_INLINE_BLOCK_COMMAND } from './commands.js
 
 export type InsertBlockPayload = BlockFieldsOptionalID
 
-export const BlocksPlugin: PluginComponent<BlocksFeatureClientProps> = () => {
+export const BlocksPlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
 
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)

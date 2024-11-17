@@ -1105,6 +1105,7 @@ export type {
   ArrayFieldClient,
   BaseValidateOptions,
   Block,
+  BlockJSX,
   BlocksField,
   BlocksFieldClient,
   CheckboxField,

@@ -1186,6 +1186,70 @@ export type RadioFieldClient = {
 } & FieldBaseClient &
   Pick<RadioField, 'options' | 'type'>
 
+type BlockFields = {
+  [key: string]: any
+  blockName?: string
+  blockType?: string
+}
+
+export type BlockJSX = {
+  /**
+   * Override the default regex used to search for the start of the block in the JSX.
+   * By default, it's <BlockSlugHere
+   */
+  customEndRegex?:
+    | {
+        /**
+         * Whether the end match is optional. If true, the end match is
+         * not required to match for the transformer to be triggered.
+         * The entire text from regexpStart to the end of the document will then be matched.
+         */
+        optional?: true
+        regExp: RegExp
+      }
+    | RegExp
+  /**
+   * Override the default regex used to search for the start of the block in the JSX.
+   * By default, it's <BlockSlugHere/>
+   */
+  customStartRegex?: RegExp
+  /**
+   * By default, all spaces at the beginning and end of every line of the
+   * children (text between the open and close match) are removed.
+   * Set this to true to disable this behavior.
+   */
+  doNotTrimChildren?: boolean
+  /**
+   * Function that receives the data for a given block and returns a JSX representation of it.
+   *
+   * This is used to convert Lexical => JSX
+   */
+  export: (props: {
+    fields: BlockFields
+    lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
+  }) =>
+    | {
+        children?: string
+        props?: object
+      }
+    | false
+    | string
+  /**
+   * Function that receives the markdown string and parsed
+   * JSX props for a given matched block and returns a Lexical representation of it.
+   *
+   * This is used to convert JSX => Lexical
+   */
+  import: (props: {
+    children: string
+    closeMatch: null | RegExpMatchArray // Only available when customEndRegex is set
+    htmlToLexical?: ((props: { html: string }) => any) | null
+    markdownToLexical?: (props: { markdown: string }) => Record<string, any>
+    openMatch?: RegExpMatchArray
+    props: Record<string, any>
+  }) => BlockFields | false
+}
+
 export type Block = {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
@@ -1202,6 +1266,7 @@ export type Block = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    jsx?: PayloadComponent
   }
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
@@ -1223,6 +1288,7 @@ export type Block = {
    * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
+  jsx?: BlockJSX
   labels?: Labels
   slug: string
 }
@@ -1231,7 +1297,7 @@ export type ClientBlock = {
   admin?: Pick<Block['admin'], 'custom'>
   fields: ClientField[]
   labels?: LabelsClient
-} & Pick<Block, 'imageAltText' | 'imageURL' | 'slug'>
+} & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>
 
 export type BlocksField = {
   admin?: {
