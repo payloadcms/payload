@@ -1,8 +1,18 @@
-import type { LabelFunction, ServerProps } from '../../config/types.js'
+import type { TFunction } from '@payloadcms/translations'
+
+import type { ServerProps } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { ClientFieldWithOptionalType } from './Field.js'
+import type { Data } from './Form.js'
 
-export type DescriptionFunction = LabelFunction
+export type DescriptionFunction = <T = unknown>({
+  t,
+}: {
+  data: Data
+  path: string
+  t: TFunction
+  value?: T
+}) => string
 
 export type FieldDescriptionClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
