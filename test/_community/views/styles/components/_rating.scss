@@ -1,0 +1,19 @@
+@import '../variables';
+
+.rating {
+  @include flex($align: center, $gap: $spacing-1);
+
+  &__star {
+    width: 1rem;
+    height: 1rem;
+
+    &--filled {
+      color: $color-yellow-400;
+      fill: $color-yellow-400;
+    }
+
+    &--empty {
+      color: $color-gray-300;
+    }
+  }
+}

@@ -1,0 +1,39 @@
+@import '../variables';
+@import '../mixins';
+
+.search-bar {
+  position: relative;
+  width: 100%;
+  max-width: 36rem;
+
+  &__icon {
+    position: absolute;
+    left: $spacing-4;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $color-gray-400;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  &__input {
+    width: 100%;
+    padding: $spacing-3 $spacing-4 $spacing-3 $spacing-12;
+    border-radius: $radius-full;
+    background-color: $color-white;
+    border: 1px solid $color-gray-200;
+    font-size: 0.95rem;
+    outline: none;
+    transition: $transition-all;
+    box-shadow: $shadow-sm;
+
+    &:focus {
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+
+    &::placeholder {
+      color: $color-gray-400;
+    }
+  }
+}

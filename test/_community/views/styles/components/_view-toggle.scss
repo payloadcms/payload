@@ -1,0 +1,36 @@
+@import '../variables';
+@import '../mixins';
+
+.view-toggle {
+  @include flex($justify: center, $align: center);
+  background-color: $color-gray-100;
+  padding: $spacing-1;
+  border-radius: $radius-full;
+  box-shadow: $shadow-sm;
+
+  &__button {
+    @include button-base;
+    padding: $spacing-2 $spacing-3;
+    border-radius: $radius-full;
+
+    &--active {
+      background-color: $color-white;
+      color: $color-primary;
+      box-shadow: $shadow-sm;
+    }
+
+    &:not(&--active) {
+      color: $color-gray-600;
+
+      &:hover {
+        color: $color-gray-900;
+        background-color: rgba($color-gray-200, 0.5);
+      }
+    }
+  }
+
+  &__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}

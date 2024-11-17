@@ -1,0 +1,88 @@
+@import 'variables';
+@import 'mixins';
+
+// Layout
+.container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 $spacing-4;
+
+  @media (min-width: $breakpoint-sm) {
+    padding: 0 $spacing-6;
+  }
+
+  @media (min-width: $breakpoint-lg) {
+    padding: 0 $spacing-8;
+  }
+}
+
+.app {
+  min-height: 100vh;
+  padding-bottom: $spacing-12;
+
+  &__header {
+    @include flex($justify: space-between, $align: center);
+    margin-bottom: $spacing-8;
+    padding-top: $spacing-8;
+
+    &-title {
+      @include flex($align: center, $gap: $spacing-3);
+
+      &-icon {
+        width: 2rem;
+        height: 2rem;
+        color: $color-primary;
+      }
+
+      &-text {
+        font-size: 1.75rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, $color-primary 0%, darken($color-primary, 15%) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+  }
+
+  &__controls {
+    @include flex($direction: column, $gap: $spacing-4);
+    margin-bottom: $spacing-8;
+
+    @media (min-width: $breakpoint-sm) {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  &__content {
+    &--grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: $spacing-6;
+
+      @media (min-width: $breakpoint-sm) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @media (min-width: $breakpoint-lg) {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    &--list {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-4;
+    }
+  }
+}
+
+// Import component styles
+@import 'components/search-bar';
+@import 'components/view-toggle';
+@import 'components/tab-switcher';
+@import 'components/rating';
+@import 'components/package-card';
+@import 'components/empty-state';
+@import 'components/loading';

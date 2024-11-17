@@ -1,0 +1,60 @@
+@mixin flex($direction: row, $justify: flex-start, $align: stretch, $gap: 0) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+  @if $gap != 0 {
+    gap: $gap;
+  }
+}
+
+@mixin button-base {
+  padding: $spacing-2 $spacing-4;
+  border-radius: $radius-full;
+  transition: $transition-all;
+  cursor: pointer;
+  border: none;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-align: center;
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+  }
+}
+
+@mixin button-primary {
+  @include button-base;
+  background-color: $color-primary;
+  color: $color-white;
+  box-shadow: $shadow-sm;
+
+  &:hover {
+    background-color: $color-primary-hover;
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background-color: $color-gray-100;
+  color: $color-gray-700;
+
+  &:hover {
+    background-color: $color-gray-200;
+    color: $color-gray-900;
+  }
+}
+
+@mixin card-base {
+  background-color: $color-white;
+  border-radius: $radius-xl;
+  border: 1px solid $color-gray-200;
+  overflow: hidden;
+}

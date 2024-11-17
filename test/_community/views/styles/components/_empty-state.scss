@@ -1,0 +1,25 @@
+@import '../variables';
+@import '../mixins';
+
+.empty-state {
+  text-align: center;
+  padding: $spacing-12 0;
+
+  &__icon {
+    width: 3rem;
+    height: 3rem;
+    color: $color-gray-400;
+    margin: 0 auto $spacing-4;
+  }
+
+  &__title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: $color-gray-900;
+    margin-bottom: $spacing-2;
+  }
+
+  &__description {
+    color: $color-gray-600;
+  }
+}

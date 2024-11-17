@@ -1,0 +1,42 @@
+@import '../variables';
+@import '../mixins';
+
+.tab-switcher {
+  @include flex($justify: center, $align: center, $gap: $spacing-1);
+  background-color: $color-gray-100;
+  padding: $spacing-1;
+  border-radius: $radius-full;
+  box-shadow: $shadow-sm;
+
+  &__tab {
+    @include button-base;
+    padding: $spacing-2 $spacing-4;
+    border-radius: $radius-full;
+    font-weight: 500;
+
+    &--active {
+      background-color: $color-white;
+      color: $color-primary;
+      box-shadow: $shadow-sm;
+    }
+
+    &:not(&--active) {
+      color: $color-gray-600;
+
+      &:hover {
+        color: $color-gray-900;
+        background-color: rgba($color-gray-200, 0.5);
+      }
+    }
+  }
+
+  &__count {
+    margin-left: $spacing-2;
+    background-color: $color-primary-light;
+    color: $color-primary;
+    padding: 0.125rem $spacing-2;
+    font-size: 0.75rem;
+    border-radius: $radius-full;
+    font-weight: 600;
+  }
+}

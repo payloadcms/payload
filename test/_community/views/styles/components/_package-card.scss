@@ -1,0 +1,92 @@
+@import '../variables';
+@import '../mixins';
+
+.package-card {
+  @include card-base;
+  background-color: $color-white;
+  box-shadow: $shadow-sm;
+  transition: $transition-all;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+
+  &--list {
+    padding: $spacing-5;
+
+    .package-card__content {
+      @include flex($justify: space-between, $align: center, $gap: $spacing-6);
+    }
+
+    .package-card__info {
+      flex: 1;
+    }
+
+    .package-card__button {
+      min-width: 120px;
+    }
+  }
+
+  &--grid {
+    padding: $spacing-6;
+    height: 100%;
+
+    .package-card__content {
+      @include flex($direction: column, $justify: space-between);
+      height: 100%;
+    }
+
+    .package-card__button {
+      margin-top: $spacing-4;
+    }
+  }
+
+  &__title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: $color-gray-900;
+    margin-bottom: $spacing-2;
+  }
+
+  &__description {
+    color: $color-gray-600;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: $spacing-4;
+
+    &--grid {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+
+  &__meta {
+    @include flex($align: center, $gap: $spacing-4);
+    color: $color-gray-500;
+    font-size: 0.875rem;
+  }
+
+  &__downloads {
+    @include flex($align: center, $gap: $spacing-1);
+    color: $color-gray-600;
+    font-weight: 500;
+  }
+
+  &__button {
+    @include button-primary;
+    font-weight: 500;
+    height: 2.5rem;
+
+    &--installed {
+      background-color: $color-primary-light;
+      color: $color-primary;
+
+      &:hover {
+        background-color: darken($color-primary-light, 5%);
+      }
+    }
+  }
+}
