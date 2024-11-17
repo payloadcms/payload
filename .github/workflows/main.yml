@@ -294,6 +294,7 @@ jobs:
           - access-control
           - admin__e2e__1
           - admin__e2e__2
+          - admin__e2e__3
           - admin-root
           - auth
           - field-error-states
