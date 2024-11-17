@@ -1,72 +1,10 @@
 import type { Collection, ErrorResult, PayloadRequest, SanitizedConfig } from 'payload'
 
 import httpStatus from 'http-status'
-import { APIError, APIErrorName, ValidationErrorName } from 'payload'
+import { APIError, formatErrors, getPayload } from 'payload'
 
-import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { mergeHeaders } from '../../utilities/mergeHeaders.js'
-
-const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResult => {
-  if (incoming) {
-    // Cannot use `instanceof` to check error type: https://github.com/microsoft/TypeScript/issues/13965
-    // Instead, get the prototype of the incoming error and check its constructor name
-    const proto = Object.getPrototypeOf(incoming)
-
-    // Payload 'ValidationError' and 'APIError'
-    if (
-      (proto.constructor.name === ValidationErrorName || proto.constructor.name === APIErrorName) &&
-      incoming.data
-    ) {
-      return {
-        errors: [
-          {
-            name: incoming.name,
-            data: incoming.data,
-            message: incoming.message,
-          },
-        ],
-      }
-    }
-
-    // Mongoose 'ValidationError': https://mongoosejs.com/docs/api/error.html#Error.ValidationError
-    if (proto.constructor.name === ValidationErrorName && 'errors' in incoming && incoming.errors) {
-      return {
-        errors: Object.keys(incoming.errors).reduce((acc, key) => {
-          acc.push({
-            field: incoming.errors[key].path,
-            message: incoming.errors[key].message,
-          })
-          return acc
-        }, []),
-      }
-    }
-
-    if (Array.isArray(incoming.message)) {
-      return {
-        errors: incoming.message,
-      }
-    }
-
-    if (incoming.name) {
-      return {
-        errors: [
-          {
-            message: incoming.message,
-          },
-        ],
-      }
-    }
-  }
-
-  return {
-    errors: [
-      {
-        message: 'An unknown error occurred.',
-      },
-    ],
-  }
-}
 
 export const routeError = async ({
   collection,
@@ -83,7 +21,7 @@ export const routeError = async ({
 
   if (!payload) {
     try {
-      payload = await getPayloadHMR({ config: configArg })
+      payload = await getPayload({ config: configArg })
     } catch (e) {
       return Response.json(
         {
@@ -108,7 +46,10 @@ export const routeError = async ({
 
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR
 
-  logger.error(err.stack)
+  const level = payload.config.loggingLevels[err.name] ?? 'error'
+  if (level) {
+    logger[level](level === 'info' ? { msg: err.message } : { err })
+  }
 
   // Internal server errors can contain anything, including potentially sensitive data.
   // Therefore, error details will be hidden from the response unless `config.debug` is `true`

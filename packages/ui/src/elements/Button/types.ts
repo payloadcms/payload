@@ -20,10 +20,11 @@ export type Props = {
   Link?: React.ElementType
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
+  onMouseDown?: (event: MouseEvent) => void
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
   size?: 'large' | 'medium' | 'small'
-  SubMenuPopupContent?: React.ReactNode
+  SubMenuPopupContent?: (props: { close: () => void }) => React.ReactNode
   to?: string
   tooltip?: string
   type?: 'button' | 'submit'

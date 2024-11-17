@@ -15,22 +15,6 @@ import {
 } from './slugs.js'
 
 export const seed = async (_payload) => {
-  if (_payload.db.name === 'mongoose') {
-    await Promise.all(
-      _payload.config.collections.map(async (coll) => {
-        await new Promise((resolve, reject) => {
-          _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
-            if (err) {
-              // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-              reject(err)
-            }
-            resolve(true)
-          })
-        })
-      }),
-    )
-  }
-
   await executePromises(
     [
       () =>
@@ -39,6 +23,24 @@ export const seed = async (_payload) => {
           data: {
             email: devUser.email,
             password: devUser.password,
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: 'base-list-filters',
+          data: {
+            title: 'show me',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: 'base-list-filters',
+          data: {
+            title: 'hide me',
           },
           depth: 0,
           overrideAccess: true,
@@ -141,6 +143,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs,
     seedFunction: seed,
-    snapshotKey: 'adminTest',
+    snapshotKey: 'adminTests',
   })
 }

@@ -5,7 +5,6 @@ on:
     types:
       - opened
       - edited
-      - synchronize
 
 permissions:
   pull-requests: write
@@ -47,6 +46,7 @@ jobs:
             live-preview
             live-preview-react
             next
+            payload-cloud
             plugin-cloud
             plugin-cloud-storage
             plugin-form-builder
@@ -109,13 +109,13 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.action == 'opened'
     steps:
-      - name: Tag with main branch with v2
-        if: github.event.pull_request.base.ref == 'main'
+      - name: Tag with 2.x branch with v2
+        if: github.event.pull_request.base.ref == '2.x'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: v2
-      - name: Tag with beta branch with v3
-        if: github.event.pull_request.base.ref == 'beta'
+      - name: Tag with main branch with v3
+        if: github.event.pull_request.base.ref == 'main'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: v3

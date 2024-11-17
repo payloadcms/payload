@@ -6,7 +6,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { AllOperations, Document, PayloadRequest, Where } from '../types/index.js'
 
 import { combineQueries } from '../database/combineQueries.js'
-import { tabHasName } from '../fields/config/types.js'
+import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 
 type Args = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
@@ -132,6 +132,11 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
   }) => {
     const mutablePolicies = policiesObj.fields
 
+    // Fields don't have all operations of a collection
+    if (operation === 'delete' || operation === 'readVersions' || operation === 'unlock') {
+      return
+    }
+
     await Promise.all(
       fields.map(async (field) => {
         if ('name' in field && field.name) {
@@ -166,7 +171,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             })
           }
 
-          if ('blocks' in field && field?.blocks) {
+          if ('blocks' in field && field.blocks) {
             if (!mutablePolicies[field.name]?.blocks) {
               mutablePolicies[field.name].blocks = {}
             }

@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { categoriesSlug } from '../shared.js'
+
 const Categories: CollectionConfig = {
-  slug: 'categories',
+  slug: categoriesSlug,
   admin: {
     useAsTitle: 'title',
   },

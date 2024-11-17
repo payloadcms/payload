@@ -9,11 +9,11 @@ import {
   useConfig,
   useDocumentInfo,
   useField,
-  useFieldProps,
   useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
+import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -31,18 +31,15 @@ type MetaDescriptionProps = {
 export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) => {
   const {
     field: {
-      admin: {
-        components: { Label },
-      },
       label,
+      localized,
       maxLength: maxLengthFromProps,
       minLength: minLengthFromProps,
       required,
     },
     hasGenerateDescriptionFn,
-    labelProps,
+    path,
   } = props
-  const { path: pathFromContext } = useFieldProps()
 
   const {
     config: {
@@ -60,11 +57,15 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const maxLength = maxLengthFromProps || maxLengthDefault
   const minLength = minLengthFromProps || minLengthDefault
 
-  const field: FieldType<string> = useField({
-    path: pathFromContext,
+  const {
+    customComponents: { AfterInput, BeforeInput, Label },
+    errorMessage,
+    setValue,
+    showError,
+    value,
+  }: FieldType<string> = useField({
+    path,
   } as Options)
-
-  const { errorMessage, setValue, showError, value } = field
 
   const regenerateDescription = useCallback(async () => {
     if (!hasGenerateDescriptionFn) {
@@ -83,12 +84,12 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         hasPublishPermission: docInfo.hasPublishPermission,
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
-        initialState: docInfo.initialState,
+        initialState: reduceToSerializableFields(docInfo.initialState),
         locale: typeof locale === 'object' ? locale?.code : locale,
         title: docInfo.title,
       } satisfies Omit<
         Parameters<GenerateDescription>[0],
-        'collectionConfig' | 'globalConfig' | 'req'
+        'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
       >),
       credentials: 'include',
       headers: {
@@ -131,13 +132,9 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         }}
       >
         <div className="plugin-seo__field">
-          <FieldLabel
-            field={null}
-            Label={Label}
-            label={label}
-            required={required}
-            {...(labelProps || {})}
-          />
+          {Label ?? (
+            <FieldLabel label={label} localized={localized} path={path} required={required} />
+          )}
           {hasGenerateDescriptionFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -183,13 +180,11 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         }}
       >
         <TextareaInput
-          Error={{
-            type: 'client',
-            Component: null,
-            RenderedComponent: errorMessage,
-          }}
+          AfterInput={AfterInput}
+          BeforeInput={BeforeInput}
+          Error={errorMessage}
           onChange={setValue}
-          path={pathFromContext}
+          path={path}
           required={required}
           showError={showError}
           style={{

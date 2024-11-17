@@ -3,7 +3,7 @@ import type { PayloadRequest } from 'payload'
 import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
 import prompts from 'prompts'
 
-import type { DrizzleAdapter, Migration } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { parseError } from './utilities/parseError.js'
 
@@ -48,6 +48,11 @@ export async function migrateFresh(
   })
 
   const req = { payload } as PayloadRequest
+
+  if ('createExtensions' in this && typeof this.createExtensions === 'function') {
+    await this.createExtensions()
+  }
+
   // Run all migrate up
   for (const migration of migrationFiles) {
     payload.logger.info({ msg: `Migrating: ${migration.name}` })

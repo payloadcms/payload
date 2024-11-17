@@ -13,7 +13,42 @@ export const Posts: CollectionConfig = {
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
     components: {
-      beforeListTable: ['/components/ResetColumns/index.js#ResetDefaultColumnsButton'],
+      beforeListTable: [
+        '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'BeforeListTable custom component',
+          },
+        },
+      ],
+      Description: {
+        path: '/components/ViewDescription/index.js#ViewDescription',
+      },
+      afterListTable: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'AfterListTable custom component',
+          },
+        },
+      ],
+      afterList: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'AfterList custom component',
+          },
+        },
+      ],
+      beforeList: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'BeforeList custom component',
+          },
+        },
+      ],
     },
     meta: {
       description: 'This is a custom meta description for posts',

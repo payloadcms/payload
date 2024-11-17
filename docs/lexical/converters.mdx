@@ -385,8 +385,7 @@ This has been taken from the [lexical serialization & deserialization docs](http
 Convert markdown content to the Lexical editor format with the following:
 
 ```ts
-import { $convertFromMarkdownString } from '@lexical/markdown'
-import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
+import { sanitizeServerEditorConfig, $convertFromMarkdownString } from '@payloadcms/richtext-lexical'
 
 const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & Payload Config here
 const markdown = `# Hello World`
@@ -421,7 +420,12 @@ const yourEditorState: SerializedEditorState // <= your current editor state her
 
 // Import editor state into your headless editor
 try {
-  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
+  headlessEditor.update(
+    () => {
+      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+    },
+    { discrete: true },  // This should commit the editor state immediately
+  )
 } catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
 }
@@ -432,8 +436,6 @@ headlessEditor.getEditorState().read(() => {
   markdown = $convertToMarkdownString(yourSanitizedEditorConfig?.features?.markdownTransformers)
 })
 ```
-
-The `.setEditorState()` function immediately updates your editor state. Thus, there's no need for the `discrete: true` flag when reading the state afterward.
 
 ## Lexical => Plain Text
 
@@ -452,8 +454,13 @@ const yourEditorState: SerializedEditorState // <= your current editor state her
 
 // Import editor state into your headless editor
 try {
-  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
-} catch (e) {
+    headlessEditor.update(
+    () => {
+      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+    },
+    { discrete: true },  // This should commit the editor state immediately
+  )
+  } catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
 }
 

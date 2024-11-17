@@ -6,6 +6,7 @@ import type { CollectionRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
+import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
 
 export const restoreVersion: CollectionRouteHandlerWithID = async ({
   id: incomingID,
@@ -27,6 +28,7 @@ export const restoreVersion: CollectionRouteHandlerWithID = async ({
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true' ? true : undefined,
+    populate: sanitizePopulate(req.query.populate),
     req,
   })
 

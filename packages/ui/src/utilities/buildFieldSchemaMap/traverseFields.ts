@@ -1,66 +1,86 @@
 import type { I18n } from '@payloadcms/translations'
-import type { Field, SanitizedConfig } from 'payload'
+import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { tabHasName } from 'payload/shared'
-
-import type { FieldSchemaMap } from './types.js'
+import { getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
   fields: Field[]
   i18n: I18n<any, any>
+  parentIndexPath: string
+  parentSchemaPath: string
   schemaMap: FieldSchemaMap
-  schemaPath: string
 }
 
-export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: Args) => {
-  for (const field of fields) {
-    switch (field.type) {
-      case 'group':
-      case 'array':
-        schemaMap.set(`${schemaPath}.${field.name}`, field.fields)
+export const traverseFields = ({
+  config,
+  fields,
+  i18n,
+  parentIndexPath,
+  parentSchemaPath,
+  schemaMap,
+}: Args) => {
+  for (const [index, field] of fields.entries()) {
+    const { indexPath, schemaPath } = getFieldPaths({
+      field,
+      index,
+      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentPath: '',
+      parentSchemaPath,
+    })
 
+    schemaMap.set(schemaPath, field)
+
+    switch (field.type) {
+      case 'array':
+      case 'group':
         traverseFields({
           config,
           fields: field.fields,
           i18n,
+          parentIndexPath: '',
+          parentSchemaPath: schemaPath,
           schemaMap,
-          schemaPath: `${schemaPath}.${field.name}`,
         })
+
         break
 
+      case 'blocks':
+        field.blocks.map((block) => {
+          const blockSchemaPath = `${schemaPath}.${block.slug}`
+
+          schemaMap.set(blockSchemaPath, block)
+          traverseFields({
+            config,
+            fields: block.fields,
+            i18n,
+            parentIndexPath: '',
+            parentSchemaPath: blockSchemaPath,
+            schemaMap,
+          })
+        })
+
+        break
       case 'collapsible':
+
       case 'row':
         traverseFields({
           config,
           fields: field.fields,
           i18n,
+          parentIndexPath: indexPath,
+          parentSchemaPath,
           schemaMap,
-          schemaPath,
         })
-        break
 
-      case 'blocks':
-        field.blocks.map((block) => {
-          const blockSchemaPath = `${schemaPath}.${field.name}.${block.slug}`
-
-          schemaMap.set(blockSchemaPath, block.fields)
-
-          traverseFields({
-            config,
-            fields: block.fields,
-            i18n,
-            schemaMap,
-            schemaPath: blockSchemaPath,
-          })
-        })
         break
 
       case 'richText':
         if (!field?.editor) {
           throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
         }
+
         if (typeof field.editor === 'function') {
           throw new Error('Attempted to access unsanitized rich text editor.')
         }
@@ -71,28 +91,37 @@ export const traverseFields = ({ config, fields, i18n, schemaMap, schemaPath }: 
             field,
             i18n,
             schemaMap,
-            schemaPath: `${schemaPath}.${field.name}`,
+            schemaPath,
           })
         }
 
         break
 
       case 'tabs':
-        field.tabs.map((tab) => {
-          const tabSchemaPath = tabHasName(tab) ? `${schemaPath}.${tab.name}` : schemaPath
+        field.tabs.map((tab, tabIndex) => {
+          const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
+            field: {
+              ...tab,
+              type: 'tab',
+            },
+            index: tabIndex,
+            parentIndexPath: indexPath,
+            parentPath: '',
+            parentSchemaPath,
+          })
 
-          if (tabHasName(tab)) {
-            schemaMap.set(tabSchemaPath, tab.fields)
-          }
+          schemaMap.set(tabSchemaPath, tab)
 
           traverseFields({
             config,
             fields: tab.fields,
             i18n,
+            parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
+            parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
             schemaMap,
-            schemaPath: tabSchemaPath,
           })
         })
+
         break
     }
   }

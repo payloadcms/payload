@@ -1,13 +1,12 @@
-import React from 'react'
 import Link from 'next/link'
+import React from 'react'
 
 import './app.scss'
-
 import classes from './layout.module.scss'
 
 export const metadata = {
-  title: 'Payload Custom Server',
   description: 'Serve Payload alongside any front-end framework.',
+  title: 'Payload Custom Server',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -15,16 +14,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={classes.body}>
         <header className={classes.header}>
-          <Link href="https://payloadcms.com" target="_blank" rel="noopener noreferrer">
+          <Link href="https://payloadcms.com" rel="noopener noreferrer" target="_blank">
             <picture>
               <source
                 media="(prefers-color-scheme: dark)"
-                srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
+                srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
               />
               <img
-                className={classes.logo}
                 alt="Payload Logo"
-                src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-dark.svg"
+                className={classes.logo}
+                src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-dark.svg"
               />
             </picture>
           </Link>

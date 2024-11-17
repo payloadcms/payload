@@ -16,13 +16,14 @@ export const findVersions: FindVersions = async function findVersions(
     page,
     pagination,
     req = {} as PayloadRequest,
+    select,
     skip,
     sort: sortArg,
     where,
   },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort
+  const sort = sortArg !== undefined && sortArg !== null ? sortArg : collectionConfig.defaultSort
 
   const tableName = this.tableNameMap.get(
     `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
@@ -38,6 +39,7 @@ export const findVersions: FindVersions = async function findVersions(
     page,
     pagination,
     req,
+    select,
     skip,
     sort,
     tableName,

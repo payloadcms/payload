@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -64,6 +65,7 @@ describe('access control', () => {
   let restrictedUrl: AdminUrlUtil
   let unrestrictedURL: AdminUrlUtil
   let readOnlyCollectionUrl: AdminUrlUtil
+  let richTextUrl: AdminUrlUtil
   let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
   let userRestrictedCollectionURL: AdminUrlUtil
@@ -79,6 +81,7 @@ describe('access control', () => {
 
     url = new AdminUrlUtil(serverURL, slug)
     restrictedUrl = new AdminUrlUtil(serverURL, fullyRestrictedSlug)
+    richTextUrl = new AdminUrlUtil(serverURL, 'rich-text')
     unrestrictedURL = new AdminUrlUtil(serverURL, unrestrictedSlug)
     readOnlyCollectionUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
@@ -91,7 +94,10 @@ describe('access control', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
+    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+
     await login({ page, serverURL })
+
     await ensureCompilationIsDone({ page, serverURL })
 
     const {
@@ -140,6 +146,28 @@ describe('access control', () => {
     test('should not show field without permission', async () => {
       await page.goto(url.account)
       await expect(page.locator('#field-roles')).toBeHidden()
+    })
+  })
+
+  describe('rich text', () => {
+    test('rich text within block should render as editable', async () => {
+      await page.goto(richTextUrl.create)
+
+      await page.locator('.blocks-field__drawer-toggler').click()
+      await page.locator('.thumbnail-card').click()
+      const richTextField = page.locator('.rich-text-lexical')
+      const contentEditable = richTextField.locator('.ContentEditable__root').first()
+      await expect(contentEditable).toBeVisible()
+      await contentEditable.click()
+
+      const typedText = 'Hello, this field is editable!'
+      await page.keyboard.type(typedText)
+
+      await expect(
+        page.locator('[data-lexical-text="true"]', {
+          hasText: exactText(typedText),
+        }),
+      ).toHaveCount(1)
     })
   })
 
@@ -342,6 +370,7 @@ describe('access control', () => {
         const documentDrawer = page.locator('[id^=doc-drawer_user-restricted-collection_1_]')
         await expect(documentDrawer).toBeVisible()
         await documentDrawer.locator('#field-name').fill('anonymous@email.com')
+        await wait(500)
         await documentDrawer.locator('#action-save').click()
         await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect(documentDrawer.locator('#field-name')).toBeDisabled()
@@ -439,26 +468,18 @@ describe('access control', () => {
 
     test('should disable field based on document data', async () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
-
-      // validate that the text input is disabled because the field is "locked"
       const isDisabled = page.locator('#field-approvedTitle')
       await expect(isDisabled).toBeDisabled()
     })
 
     test('should disable operation based on document data', async () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
-
-      // validate that the delete action is not displayed
       await openDocControls(page)
-      const deleteAction = page.locator('#action-delete')
-      await expect(deleteAction).toBeHidden()
-
+      await expect(page.locator('#action-delete')).toBeHidden()
       await page.locator('#field-approvedForRemoval').check()
       await saveDocAndAssert(page)
-
       await openDocControls(page)
-      const deleteAction2 = page.locator('#action-delete')
-      await expect(deleteAction2).toBeVisible()
+      await expect(page.locator('#action-delete')).toBeVisible()
     })
   })
 
@@ -484,10 +505,8 @@ describe('access control', () => {
 
       await expect(page.locator('.unauthorized')).toBeVisible()
 
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
-
       // Log back in for the next test
+      await page.goto(logoutURL)
       await login({
         data: {
           email: devUser.email,
@@ -531,6 +550,19 @@ describe('access control', () => {
       await page.waitForURL(unauthorizedURL)
 
       await expect(page.locator('.unauthorized')).toBeVisible()
+
+      // Log back in for the next test
+      await context.clearCookies()
+      await page.goto(logoutURL)
+      await page.waitForURL(logoutURL)
+      await login({
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+        page,
+        serverURL,
+      })
     })
   })
 

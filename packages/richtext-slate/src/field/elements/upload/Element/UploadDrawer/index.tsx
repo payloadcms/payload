@@ -6,17 +6,17 @@ import type { ClientCollectionConfig } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Drawer,
+  EditDepthProvider,
   Form,
   FormSubmit,
   RenderFields,
-  useAuth,
   useConfig,
   useDocumentInfo,
   useLocale,
   useModal,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import { deepCopyObject } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
@@ -40,16 +40,16 @@ export const UploadDrawer: React.FC<{
 
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
-  const { user } = useAuth()
   const { closeModal } = useModal()
-  const { id, collectionSlug } = useDocumentInfo()
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
+
+  const { getFormState } = useServerFunctions()
+
   const [initialState, setInitialState] = useState({})
-  const {
-    field: { richTextComponentMap },
-  } = fieldProps
+  const { componentMap } = fieldProps
 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
-  const fields = richTextComponentMap.get(relatedFieldSchemaPath)
+  const fields = componentMap[relatedFieldSchemaPath]
 
   const { config } = useConfig()
 
@@ -72,15 +72,15 @@ export const UploadDrawer: React.FC<{
 
     const awaitInitialState = async () => {
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id,
-          collectionSlug,
-          data,
-          operation: 'update',
-          schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
-        },
-        serverURL: config.serverURL,
+        id,
+        collectionSlug,
+        data,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        globalSlug,
+        operation: 'update',
+        renderAllFields: true,
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
       })
 
       setInitialState(state)
@@ -90,56 +90,72 @@ export const UploadDrawer: React.FC<{
   }, [
     config,
     element?.fields,
-    user,
     locale,
     t,
     collectionSlug,
     id,
     schemaPath,
     relatedCollection.slug,
+    getFormState,
+    globalSlug,
+    getDocPreferences,
+    docPermissions,
   ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
-        },
-        serverURL: config.serverURL,
+        id,
+        collectionSlug,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        formState: prevFormState,
+        globalSlug,
+        operation: 'update',
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
       })
 
       return state
     },
 
-    [config.routes.api, config.serverURL, relatedCollection.slug, schemaPath, id],
+    [
+      getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
+      getDocPreferences,
+      globalSlug,
+      schemaPath,
+      relatedCollection.slug,
+    ],
   )
 
   return (
-    <Drawer
-      slug={drawerSlug}
-      title={t('general:editLabel', {
-        label: getTranslation(relatedCollection.labels.singular, i18n),
-      })}
-    >
-      <Form
-        beforeSubmit={[onChange]}
-        disableValidationOnSubmit
-        initialState={initialState}
-        onChange={[onChange]}
-        onSubmit={handleUpdateEditData}
+    <EditDepthProvider>
+      <Drawer
+        slug={drawerSlug}
+        title={t('general:editLabel', {
+          label: getTranslation(relatedCollection.labels.singular, i18n),
+        })}
       >
-        <RenderFields
-          fields={Array.isArray(fields) ? fields : []}
-          path=""
-          readOnly={false}
-          schemaPath=""
-        />
-        <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-      </Form>
-    </Drawer>
+        <Form
+          beforeSubmit={[onChange]}
+          disableValidationOnSubmit
+          initialState={initialState}
+          onChange={[onChange]}
+          onSubmit={handleUpdateEditData}
+        >
+          <RenderFields
+            fields={Array.isArray(fields) ? fields : []}
+            parentIndexPath=""
+            parentPath=""
+            parentSchemaPath=""
+            permissions={docPermissions.fields}
+            readOnly={false}
+          />
+          <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+        </Form>
+      </Drawer>
+    </EditDepthProvider>
   )
 }

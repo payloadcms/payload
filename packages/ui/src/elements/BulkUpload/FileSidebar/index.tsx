@@ -36,6 +36,7 @@ export function FileSidebar() {
     isInitializing,
     removeFile,
     setActiveIndex,
+    thumbnailUrls,
     totalErrorCount,
   } = useFormsManager()
   const { initialFiles, maxFiles } = useBulkUpload()
@@ -98,6 +99,14 @@ export function FileSidebar() {
               className={`${baseClass}__toggler`}
               onClick={() => setShowFiles((prev) => !prev)}
             >
+              <span className={`${baseClass}__toggler__label`}>
+                <strong
+                  title={`${totalFileCount} ${t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
+                >
+                  {totalFileCount}{' '}
+                  {t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
+                </strong>
+              </span>
               <ChevronIcon direction={showFiles ? 'down' : 'up'} />
             </Button>
 
@@ -148,9 +157,7 @@ export function FileSidebar() {
                   >
                     <Thumbnail
                       className={`${baseClass}__thumbnail`}
-                      fileSrc={
-                        isImage(currentFile.type) ? URL.createObjectURL(currentFile) : undefined
-                      }
+                      fileSrc={isImage(currentFile.type) ? thumbnailUrls[index] : undefined}
                     />
                     <div className={`${baseClass}__fileDetails`}>
                       <p className={`${baseClass}__fileName`} title={currentFile.name}>

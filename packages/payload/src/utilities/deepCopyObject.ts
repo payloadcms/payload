@@ -32,6 +32,8 @@ const constructorHandlers = new Map()
 constructorHandlers.set(Date, (o) => new Date(o))
 constructorHandlers.set(Map, (o, fn) => new Map(cloneArray<any>(Array.from(o), fn)))
 constructorHandlers.set(Set, (o, fn) => new Set(cloneArray(Array.from(o), fn)))
+constructorHandlers.set(RegExp, (regex: RegExp) => new RegExp(regex.source, regex.flags))
+
 let handler = null
 
 function cloneArray<T>(a: T, fn): T {
@@ -42,6 +44,8 @@ function cloneArray<T>(a: T, fn): T {
     const cur = a[k]
     if (typeof cur !== 'object' || cur === null) {
       a2[k] = cur
+    } else if (cur instanceof RegExp) {
+      a2[k] = new RegExp(cur.source, cur.flags)
     } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
       a2[k] = handler(cur, fn)
     } else if (ArrayBuffer.isView(cur)) {
@@ -60,6 +64,10 @@ export const deepCopyObject = <T>(o: T): T => {
   if (Array.isArray(o)) {
     return cloneArray(o, deepCopyObject)
   }
+  if (o instanceof RegExp) {
+    return new RegExp(o.source, o.flags) as T
+  }
+
   if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
     return handler(o, deepCopyObject)
   }
@@ -71,6 +79,8 @@ export const deepCopyObject = <T>(o: T): T => {
     const cur = o[k]
     if (typeof cur !== 'object' || cur === null) {
       o2[k as string] = cur
+    } else if (cur instanceof RegExp) {
+      o2[k as string] = new RegExp(cur.source, cur.flags)
     } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
       o2[k as string] = handler(cur, deepCopyObject)
     } else if (ArrayBuffer.isView(cur)) {
@@ -98,12 +108,12 @@ Benchmark: https://github.com/AlessioGr/fastest-deep-clone-json/blob/main/test/b
  *              `Set`, `Buffer`, ... are not allowed.
  * @returns The cloned JSON value.
  */
-export function deepCopyObjectSimple<T extends JsonValue>(value: T): T {
+export function deepCopyObjectSimple<T extends JsonValue>(value: T, filterUndefined = false): T {
   if (typeof value !== 'object' || value === null) {
     return value
   } else if (Array.isArray(value)) {
     return value.map((e) =>
-      typeof e !== 'object' || e === null ? e : deepCopyObjectSimple(e),
+      typeof e !== 'object' || e === null ? e : deepCopyObjectSimple(e, filterUndefined),
     ) as T
   } else {
     if (value instanceof Date) {
@@ -112,7 +122,43 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T): T {
     const ret: { [key: string]: T } = {}
     for (const k in value) {
       const v = value[k]
-      ret[k] = typeof v !== 'object' || v === null ? v : (deepCopyObjectSimple(v as T) as any)
+      if (filterUndefined && v === undefined) {
+        continue
+      }
+      ret[k] =
+        typeof v !== 'object' || v === null
+          ? v
+          : (deepCopyObjectSimple(v as T, filterUndefined) as any)
+    }
+    return ret as unknown as T
+  }
+}
+
+export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(value: T): T {
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    '$$typeof' in value &&
+    typeof value.$$typeof === 'symbol'
+  ) {
+    return undefined
+  } else if (typeof value !== 'object' || value === null) {
+    return value
+  } else if (Array.isArray(value)) {
+    return value.map((e) =>
+      typeof e !== 'object' || e === null ? e : deepCopyObjectSimpleWithoutReactComponents(e),
+    ) as T
+  } else {
+    if (value instanceof Date) {
+      return new Date(value) as unknown as T
+    }
+    const ret: { [key: string]: T } = {}
+    for (const k in value) {
+      const v = value[k]
+      ret[k] =
+        typeof v !== 'object' || v === null
+          ? v
+          : (deepCopyObjectSimpleWithoutReactComponents(v as T) as any)
     }
     return ret as unknown as T
   }
@@ -129,6 +175,11 @@ export function deepCopyObjectComplex<T>(object: T, cache: WeakMap<any, any> = n
 
   if (cache.has(object)) {
     return cache.get(object)
+  }
+
+  // Handle File
+  if (object instanceof File) {
+    return object as unknown as T
   }
 
   // Handle Date

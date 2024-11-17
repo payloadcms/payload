@@ -31,7 +31,7 @@ The following options are available:
 | **`hidden`**                     | Set to true or a function, called with the current user, returning true to exclude this Collection from navigation and admin routing.                                                                                 |
 | **`hooks`**                      | Admin-specific hooks for this Collection. [More details](../hooks/collections).                                                                                                                                       |
 | **`useAsTitle`**                 | Specify a top-level field to use for a document title throughout the Admin Panel. If no field is defined, the ID of the document is used as the title. A field with `virtual: true` cannot be used as the title.      |
-| **`description`**                | Text to display below the Collection label in the List View to give editors more information. Alternatively, you can use the `admin.components.Description` to render a React component. [More details](#components). |
+| **`description`**                | Text to display below the Collection label in the List View to give editors more information. Alternatively, you can use the `admin.components.Description` to render a React component. [More details](#custom-components). |
 | **`defaultColumns`**             | Array of field names that correspond to which columns to show by default in this Collection's List View.                                                                                                              |
 | **`hideAPIURL`**                 | Hides the "API URL" meta field while editing documents within this Collection.                                                                                                                                        |
 | **`enableRichTextLink`**         | The [Rich Text](../fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                            |
@@ -39,11 +39,12 @@ The following options are available:
 | **`meta`**                       | Page metadata overrides to apply to this Collection within the Admin Panel. [More details](./metadata).                                                                                                               |
 | **`preview`**                    | Function to generate preview URLs within the Admin Panel that can point to your app. [More details](#preview).                                                                                                        |
 | **`livePreview`**                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                         |
-| **`components`**                 | Swap in your own React components to be used within this Collection. [More details](#components).                                                                                                                     |
+| **`components`**                 | Swap in your own React components to be used within this Collection. [More details](#custom-components).                                                                                                                     |
 | **`listSearchableFields`**       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                             |
 | **`pagination`**                 | Set pagination-specific options for this Collection. [More details](#pagination).                                                                                                                                     |
+| **`baseListFilter`**             | You can define a default base filter for this collection's List view, which will be merged into any filters that the user performs.                                                                                   |
 
-### Components
+### Custom Components
 
 Collections can set their own [Custom Components](./components) which only apply to [Collection](../configuration/collections)-specific UI within the [Admin Panel](./overview). This includes elements such as the Save Button, or entire layouts such as the Edit View.
 

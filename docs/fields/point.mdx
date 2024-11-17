@@ -28,7 +28,7 @@ export const MyPointField: Field = {
 
 <Banner type="warning">
   <strong>Important:</strong>
-  The Point Field is currently only supported in MongoDB.
+  The Point Field currently is not supported in SQLite.
 </Banner>
 
 ## Config
@@ -73,6 +73,59 @@ export const ExampleCollection: CollectionConfig = {
 }
 ```
 
-## Querying
+## Querying - near
 
 In order to do query based on the distance to another point, you can use the `near` operator. When querying using the near operator, the returned documents will be sorted by nearest first.
+
+## Querying - within
+
+In order to do query based on whether points are within a specific area defined in GeoJSON, you can use the `within` operator.
+Example:
+```ts
+const polygon: Point[] = [
+  [9.0, 19.0], // bottom-left
+  [9.0, 21.0], // top-left
+  [11.0, 21.0], // top-right
+  [11.0, 19.0], // bottom-right
+  [9.0, 19.0], // back to starting point to close the polygon
+]
+
+payload.find({
+  collection: "points",
+  where: {
+    point: {
+      within: {
+        type: 'Polygon',
+        coordinates: [polygon],
+      },
+    },
+  },
+})
+```
+
+
+## Querying - intersects
+
+In order to do query based on whether points intersect a specific area defined in GeoJSON, you can use the `intersects` operator.
+Example:
+```ts
+const polygon: Point[] = [
+  [9.0, 19.0], // bottom-left
+  [9.0, 21.0], // top-left
+  [11.0, 21.0], // top-right
+  [11.0, 19.0], // bottom-right
+  [9.0, 19.0], // back to starting point to close the polygon
+]
+
+payload.find({
+  collection: "points",
+  where: {
+    point: {
+      intersects: {
+        type: 'Polygon',
+        coordinates: [polygon],
+      },
+    },
+  },
+})
+```

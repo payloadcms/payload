@@ -3,6 +3,7 @@ import { compile } from 'json-schema-to-typescript'
 
 import type { SanitizedConfig } from '../config/types.js'
 
+import { addSelectGenericsToGeneratedTypes } from '../utilities/addSelectGenericsToGeneretedTypes.js'
 import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
 import { getLogger } from '../utilities/logger.js'
 
@@ -35,6 +36,8 @@ export async function generateTypes(
     // even if it's not used by another type. Reason: the user might want to use it in their own code.
     unreachableDefinitions: true,
   })
+
+  compiled = addSelectGenericsToGeneratedTypes({ compiledGeneratedTypes: compiled })
 
   if (config.typescript.declare !== false) {
     if (config.typescript.declare?.ignoreTSError) {

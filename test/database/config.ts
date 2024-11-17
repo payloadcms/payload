@@ -4,6 +4,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { TextField } from 'payload'
 
+import { v4 as uuid } from 'uuid'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
@@ -100,6 +102,11 @@ export default buildConfigWithDefaults({
             { value: 'option1', label: 'Option 1' },
             { value: 'default', label: 'Default' },
           ],
+        },
+        {
+          name: 'point',
+          type: 'point',
+          defaultValue: [10, 20],
         },
       ],
     },
@@ -355,6 +362,82 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+    },
+    {
+      slug: 'custom-ids',
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+          admin: {
+            readOnly: true,
+          },
+          hooks: {
+            beforeChange: [
+              ({ value, operation }) => {
+                if (operation === 'create') {
+                  return uuid()
+                }
+                return value
+              },
+            ],
+          },
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      versions: { drafts: true },
+    },
+    {
+      slug: 'fake-custom-ids',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'id',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'myTab',
+              fields: [
+                {
+                  name: 'id',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'relationships-migration',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'default-values',
+          name: 'relationship',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['default-values'],
+          name: 'relationship_2',
+        },
+      ],
+      versions: true,
     },
   ],
   globals: [
