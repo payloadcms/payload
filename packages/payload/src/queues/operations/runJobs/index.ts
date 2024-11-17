@@ -219,7 +219,7 @@ export const runJobs = async ({
 
   const resultsArray = await Promise.all(jobPromises)
 
-  if (jobsToDelete) {
+  if (jobsToDelete && jobsToDelete.length > 0) {
     try {
       await req.payload.delete({
         collection: 'payload-jobs',
