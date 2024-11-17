@@ -19,8 +19,8 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { reduceFieldsToValues } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
 const baseClass = 'lexical-block'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -36,6 +36,7 @@ import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalD
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import { BlockContent } from './BlockContent.js'
 import './index.scss'
+import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 type Props = {
   readonly children?: React.ReactNode
@@ -51,6 +52,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     fieldProps: {
       featureClientSchemaMap,
       field: parentLexicalRichTextField,
+      initialLexicalFormState,
       permissions,
       readOnly,
       schemaPath,
@@ -59,6 +61,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   } = useEditorConfigContext()
   const onChangeAbortControllerRef = useRef(new AbortController())
   const editDepth = useEditDepth()
+  const [errorCount, setErrorCount] = React.useState(0)
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-blocks-create-${uuidFromContext}-${formData.id}`,
@@ -69,32 +72,36 @@ export const BlockComponent: React.FC<Props> = (props) => {
   // Used for saving collapsed to preferences (and gettin' it from there again)
   // Remember, these preferences are scoped to the whole document, not just this form. This
   // is important to consider for the data path used in setDocFieldPreferences
-  const { docPermissions, getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
+  const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const [editor] = useLexicalComposerContext()
 
   const { getFormState } = useServerFunctions()
-
-  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
-
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}.fields`
 
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}`
+  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
+    initialLexicalFormState?.[formData.id]?.formState
+      ? {
+          ...initialLexicalFormState?.[formData.id]?.formState,
+          blockName: {
+            initialValue: formData.blockName,
+            passesCondition: true,
+            valid: true,
+            value: formData.blockName,
+          },
+        }
+      : false,
+  )
 
-  const clientSchemaMap = featureClientSchemaMap['blocks']
-
-  const blocksField: BlocksFieldClient = clientSchemaMap[
-    componentMapRenderedBlockPath
-  ][0] as BlocksFieldClient
-
-  const clientBlock = blocksField.blocks[0]
-
-  const { i18n, t } = useTranslation<object, string>()
-
-  // Field Schema
+  // Initial state for newly created blocks
   useEffect(() => {
     const abortController = new AbortController()
 
     const awaitInitialState = async () => {
+      /*
+       * This will only run if a new block is created. For all existing blocks that are loaded when the document is loaded, or when the form is saved,
+       * this is not run, as the lexical field RSC will fetch the state server-side and pass it to the client. That way, we avoid unnecessary client-side
+       * requests. Though for newly created blocks, we need to fetch the state client-side, as the server doesn't know about the block yet.
+       */
       const { state } = await getFormState({
         id,
         collectionSlug,
@@ -110,7 +117,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
       if (state) {
         state.blockName = {
-          initialValue: '',
+          initialValue: formData.blockName,
           passesCondition: true,
           valid: true,
           value: formData.blockName,
@@ -120,7 +127,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       }
     }
 
-    if (formData) {
+    if (formData && !initialState) {
       void awaitInitialState()
     }
 
@@ -131,14 +138,31 @@ export const BlockComponent: React.FC<Props> = (props) => {
     getFormState,
     schemaFieldsPath,
     id,
+    formData,
+    initialState,
     collectionSlug,
     globalSlug,
     getDocPreferences,
-    // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
   ])
 
+  const [isCollapsed, setIsCollapsed] = React.useState<boolean>(
+    initialLexicalFormState?.[formData.id]?.collapsed ?? false,
+  )
+
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}`
+
+  const clientSchemaMap = featureClientSchemaMap['blocks']
+
+  const blocksField: BlocksFieldClient = clientSchemaMap[
+    componentMapRenderedBlockPath
+  ][0] as BlocksFieldClient
+
+  const clientBlock = blocksField.blocks[0]
+
+  const { i18n, t } = useTranslation<object, string>()
+
   const onChange = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submit }) => {
       abortAndIgnore(onChangeAbortControllerRef.current)
 
       const controller = new AbortController()
@@ -147,7 +171,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
       const { state: newFormState } = await getFormState({
         id,
         collectionSlug,
-        docPermissions,
+        docPermissions: {
+          fields: true,
+        },
         docPreferences: await getDocPreferences(),
         formState: prevFormState,
         globalSlug,
@@ -160,11 +186,36 @@ export const BlockComponent: React.FC<Props> = (props) => {
         return prevFormState
       }
 
-      newFormState.blockName = {
-        initialValue: '',
-        passesCondition: true,
-        valid: true,
-        value: formData.blockName,
+      newFormState.blockName = prevFormState.blockName
+
+      const newFormStateData: BlockFields = reduceFieldsToValues(
+        removeEmptyArrayValues({
+          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState),
+        }),
+        true,
+      ) as BlockFields
+
+      setTimeout(() => {
+        editor.update(() => {
+          const node = $getNodeByKey(nodeKey)
+          if (node && $isBlockNode(node)) {
+            const newData = {
+              ...newFormStateData,
+              blockType: formData.blockType,
+            }
+            node.setFields(newData)
+          }
+        })
+      }, 0)
+
+      if (submit) {
+        let rowErrorCount = 0
+        for (const formField of Object.values(newFormState)) {
+          if (formField?.valid === false) {
+            rowErrorCount++
+          }
+        }
+        setErrorCount(rowErrorCount)
       }
 
       return newFormState
@@ -174,11 +225,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
       getFormState,
       id,
       collectionSlug,
-      docPermissions,
       getDocPreferences,
       globalSlug,
       schemaFieldsPath,
-      formData.blockName,
+      formData.blockType,
+      editor,
+      nodeKey,
     ],
   )
 
@@ -200,17 +252,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const blockDisplayName = clientBlock?.labels?.singular
     ? getTranslation(clientBlock.labels.singular, i18n)
     : clientBlock?.slug
-
-  const [isCollapsed, setIsCollapsed] = React.useState<boolean>()
-
-  // TODO: Load collapsed preferences in RSC Field component
-  useEffect(() => {
-    void getDocPreferences().then((currentDocPreferences) => {
-      const currentFieldPreferences = currentDocPreferences?.fields[parentLexicalRichTextField.name]
-      const collapsedArray = currentFieldPreferences?.collapsed
-      setIsCollapsed(collapsedArray ? collapsedArray.includes(formData.id) : false)
-    })
-  }, [parentLexicalRichTextField.name, formData.id, getDocPreferences])
 
   const onCollapsedChange = useCallback(
     (changedCollapsed: boolean) => {
@@ -408,7 +449,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
     return (
       <Form
-        beforeSubmit={[onChange]}
+        beforeSubmit={[
+          async ({ formState }) => {
+            return await onChange({ formState, submit: true })
+          },
+        ]}
         fields={clientBlock.fields}
         initialState={initialState}
         onChange={[onChange]}
@@ -433,7 +478,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           Collapsible={BlockCollapsible}
           CustomBlock={CustomBlock}
           EditButton={EditButton}
-          formData={formData}
+          errorCount={errorCount}
           formSchema={clientBlock.fields}
           initialState={initialState}
           nodeKey={nodeKey}
@@ -448,6 +493,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     RemoveButton,
     EditButton,
     editor,
+    errorCount,
     toggleDrawer,
     clientBlock.fields,
     // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.

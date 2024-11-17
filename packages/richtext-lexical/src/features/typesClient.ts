@@ -1,11 +1,5 @@
 import type { Transformer } from '@lexical/markdown'
-import type {
-  Klass,
-  LexicalEditor,
-  LexicalNode,
-  LexicalNodeReplacement,
-  SerializedEditorState,
-} from 'lexical'
+import type { Klass, LexicalEditor, LexicalNode, LexicalNodeReplacement } from 'lexical'
 import type { RichTextFieldClient } from 'payload'
 import type React from 'react'
 
@@ -54,18 +48,6 @@ export type PluginComponentWithAnchor<ClientFeatureProps = any> = React.FC<{
 }>
 
 export type ClientFeature<ClientFeatureProps> = {
-  hooks?: {
-    load?: ({
-      incomingEditorState,
-    }: {
-      incomingEditorState: SerializedEditorState
-    }) => SerializedEditorState
-    save?: ({
-      incomingEditorState,
-    }: {
-      incomingEditorState: SerializedEditorState
-    }) => SerializedEditorState
-  }
   markdownTransformers?: (
     | ((props: {
         allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>
@@ -221,23 +203,8 @@ export type SanitizedPlugin =
 export type SanitizedClientFeatures = {
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  hooks: {
-    load: Array<
-      ({
-        incomingEditorState,
-      }: {
-        incomingEditorState: SerializedEditorState
-      }) => SerializedEditorState
-    >
-    save: Array<
-      ({
-        incomingEditorState,
-      }: {
-        incomingEditorState: SerializedEditorState
-      }) => SerializedEditorState
-    >
-  }
   markdownTransformers: Transformer[]
+
   /**
    * Plugins are react components which get added to the editor. You can use them to interact with lexical, e.g. to create a command which creates a node, or opens a modal, or some other more "outside" functionality
    */

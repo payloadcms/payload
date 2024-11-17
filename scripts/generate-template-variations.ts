@@ -49,7 +49,7 @@ async function main() {
   const templatesDir = path.resolve(dirname, '../templates')
 
   // WARNING: This will need to be updated when this merges into main
-  const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/beta/templates`
+  const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
 
   const variations: TemplateVariations[] = [
     {

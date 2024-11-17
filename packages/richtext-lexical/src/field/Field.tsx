@@ -1,5 +1,5 @@
 'use client'
-import type { SerializedEditorState } from 'lexical'
+import type { EditorState, SerializedEditorState } from 'lexical'
 
 import { FieldLabel, useEditDepth, useField, withCondition } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
@@ -42,7 +42,7 @@ const RichTextComponent: React.FC<
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
       if (typeof validate === 'function') {
-        return validate(value, { ...validationOptions, props, required })
+        return validate(value, { ...validationOptions, required })
       }
     },
     // Important: do not add props to the dependencies array.
@@ -80,6 +80,13 @@ const RichTextComponent: React.FC<
 
   const pathWithEditDepth = `${path}.${editDepth}`
 
+  const handleChange = useCallback(
+    (editorState: EditorState) => {
+      setValue(editorState.toJSON())
+    },
+    [setValue],
+  )
+
   return (
     <div
       className={classes}
@@ -99,18 +106,7 @@ const RichTextComponent: React.FC<
             editorConfig={editorConfig}
             fieldProps={props}
             key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
-            onChange={(editorState) => {
-              let serializedEditorState = editorState.toJSON()
-
-              // Transform state through save hooks
-              if (editorConfig?.features?.hooks?.save?.length) {
-                editorConfig.features.hooks.save.forEach((hook) => {
-                  serializedEditorState = hook({ incomingEditorState: serializedEditorState })
-                })
-              }
-
-              setValue(serializedEditorState)
-            }}
+            onChange={handleChange}
             readOnly={disabled}
             value={value}
           />

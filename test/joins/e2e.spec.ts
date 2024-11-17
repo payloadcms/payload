@@ -5,7 +5,12 @@ import { reorderColumns } from 'helpers/e2e/reorderColumns.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, exactText, initPageConsoleErrorCatch } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -55,6 +60,14 @@ test.describe('Admin Panel', () => {
     await expect(joinField).toBeVisible()
     const columns = await joinField.locator('.relationship-table tbody tr').count()
     expect(columns).toBe(3)
+  })
+
+  test('should render the create page and create doc with the join field', async () => {
+    await page.goto(categoriesURL.create)
+    const nameField = page.locator('#field-name')
+    await expect(nameField).toBeVisible()
+    await nameField.fill('test category')
+    await saveDocAndAssert(page)
   })
 
   test('should render collection type in first column of relationship table', async () => {
