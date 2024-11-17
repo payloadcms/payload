@@ -79,6 +79,8 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       },
       theme: editorConfig.lexical.theme,
     }
+    // Important: do not add readOnly and value to the dependencies array. This will cause the entire lexical editor to re-render if the document is saved, which will
+    // cause the editor to lose focus.
   }, [editorConfig])
 
   if (!initialConfig) {
