@@ -1,9 +1,9 @@
 import { Download } from 'lucide-react'
 import React from 'react'
 
-import type { Package } from '../types'
+import type { Package } from './usePackages.js'
 
-import { Rating } from './Rating'
+import { Rating } from './Rating.js'
 
 interface PackageCardProps {
   pkg: Package
@@ -12,8 +12,12 @@ interface PackageCardProps {
 
 export const PackageCard: React.FC<PackageCardProps> = ({ pkg, view }) => {
   const formatDownloads = (num: number) => {
-    if (num >= 1000000) {return `${(num / 1000000).toFixed(1)}M`}
-    if (num >= 1000) {return `${(num / 1000).toFixed(1)}K`}
+    if (num >= 1000000) {
+      return `${(num / 1000000).toFixed(1)}M`
+    }
+    if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}K`
+    }
     return num.toString()
   }
 
@@ -44,6 +48,7 @@ export const PackageCard: React.FC<PackageCardProps> = ({ pkg, view }) => {
           className={`package-card__button ${
             pkg.isInstalled ? 'package-card__button--installed' : ''
           }`}
+          type="button"
         >
           {pkg.isInstalled ? 'Installed' : 'Install'}
         </button>

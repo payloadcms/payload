@@ -168,6 +168,7 @@ export const getViewFromConfig = ({
         // --> /logout
         // --> /logout-inactivity
         // --> /unauthorized
+        // --> /plugins
 
         ViewToRender = {
           Component: oneSegmentViews[viewKey],
@@ -176,7 +177,7 @@ export const getViewFromConfig = ({
         templateClassName = baseClasses[viewKey]
         templateType = 'minimal'
 
-        if (viewKey === 'account') {
+        if (viewKey === 'account' || viewKey === 'plugins') {
           templateType = 'default'
         }
       }

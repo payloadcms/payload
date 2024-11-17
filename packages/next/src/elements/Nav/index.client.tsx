@@ -27,6 +27,9 @@ export const DefaultNavClient: React.FC<{
   const { i18n } = useTranslation()
   const { navOpen } = useNav()
 
+  const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
+  const LinkElement = Link || 'a'
+
   return (
     <Fragment>
       {groups.map(({ entities, label }, key) => {
@@ -46,10 +49,6 @@ export const DefaultNavClient: React.FC<{
                 id = `nav-global-${slug}`
               }
 
-              const Link = (LinkWithDefault.default ||
-                LinkWithDefault) as typeof LinkWithDefault.default
-
-              const LinkElement = Link || 'a'
               const activeCollection =
                 pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 
@@ -73,18 +72,9 @@ export const DefaultNavClient: React.FC<{
         )
       })}
       <div className="nav-group Plugins" id="nav-group-Plugins">
-        <button className="nav-group__toggle nav-group__toggle--open" tabIndex={0} type="button">
+        <LinkElement href={`/admin/plugins`}>
           <div className="nav-group__label">Plugins</div>
-        </button>
-        <div
-          aria-hidden="false"
-          className="rah-static rah-static--height-auto"
-          style={{ height: 'auto' }}
-        >
-          <div>
-            <div className="nav-group__content"></div>
-          </div>
-        </div>
+        </LinkElement>
       </div>
     </Fragment>
   )

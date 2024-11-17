@@ -71,7 +71,6 @@
     "http-status": "1.6.2",
     "jwt-decode": "4.0.0",
     "lexical": "0.20.0",
-    "lucide-react": "^0.460.0",
     "mongoose": "8.8.1",
     "next": "15.0.0",
     "payload": "workspace:*",

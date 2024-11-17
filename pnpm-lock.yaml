@@ -718,6 +718,9 @@ importers:
       http-status:
         specifier: 1.6.2
         version: 1.6.2
+      lucide-react:
+        specifier: ^0.460.0
+        version: 0.460.0(react@19.0.0-rc-65a56d0e-20241020)
       next:
         specifier: ^15.0.0
         version: 15.0.0(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.48.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@0.0.0-experimental-24ec0eb-20240918)(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(sass@1.77.4)
@@ -1747,9 +1750,6 @@ importers:
       lexical:
         specifier: 0.20.0
         version: 0.20.0
-      lucide-react:
-        specifier: ^0.460.0
-        version: 0.460.0(react@19.0.0-rc-65a56d0e-20241020)
       mongoose:
         specifier: 8.8.1
         version: 8.8.1(@aws-sdk/credential-providers@3.687.0(@aws-sdk/client-sso-oidc@3.687.0(@aws-sdk/client-sts@3.687.0)))(socks@2.8.3)

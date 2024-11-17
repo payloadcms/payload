@@ -18,14 +18,6 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
-    components: {
-      views: {
-        pluginView: {
-          Component: './views/PluginView.tsx',
-          path: '/plugins2',
-        },
-      },
-    },
   },
   editor: lexicalEditor({}),
   globals: [
