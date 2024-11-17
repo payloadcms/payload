@@ -3,10 +3,9 @@ import type { PayloadRequest, SanitizedConfig, SanitizedPermissions, User } from
 
 import { initI18n } from '@payloadcms/translations'
 import { headers as getHeaders } from 'next/headers.js'
-import { createLocalReq, parseCookies } from 'payload'
+import { createLocalReq, getPayload, parseCookies } from 'payload'
 import { cache } from 'react'
 
-import { getPayloadHMR } from './getPayloadHMR.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 
 type Result = {
@@ -20,7 +19,7 @@ export const initReq = cache(async function (
   configPromise: Promise<SanitizedConfig> | SanitizedConfig,
 ): Promise<Result> {
   const config = await configPromise
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
 
   const headers = await getHeaders()
   const cookies = parseCookies(headers)

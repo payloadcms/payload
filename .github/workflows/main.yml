@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - main
-      - beta
 
 concurrency:
   # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
@@ -294,6 +293,7 @@ jobs:
           - access-control
           - admin__e2e__1
           - admin__e2e__2
+          - admin__e2e__3
           - admin-root
           - auth
           - field-error-states
@@ -529,7 +529,7 @@ jobs:
   publish-canary:
     name: Publish Canary
     runs-on: ubuntu-latest
-    if: ${{ needs.all-green.result == 'success' && github.ref_name == 'beta' }}
+    if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
     needs:
       - all-green
 
@@ -537,4 +537,4 @@ jobs:
       # debug github.ref output
       - run: |
           echo github.ref: ${{ github.ref }}
-          echo isBeta: ${{ github.ref == 'refs/heads/beta' }}
+          echo isV3: ${{ github.ref == 'refs/heads/main' }}

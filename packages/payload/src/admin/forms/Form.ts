@@ -22,6 +22,11 @@ export type FilterOptionsResult = {
 
 export type FieldState = {
   customComponents?: {
+    /**
+     * This is used by UI fields, as they can have arbitrary components defined if used
+     * as a vessel to bring in custom components.
+     */
+    [key: string]: React.ReactNode | React.ReactNode[] | undefined
     AfterInput?: React.ReactNode
     BeforeInput?: React.ReactNode
     Description?: React.ReactNode

@@ -4,12 +4,11 @@ import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { parseCookies } from 'payload'
+import { getPayload, parseCookies } from 'payload'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
-import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -52,7 +51,7 @@ export const RootLayout = async ({
     headers,
   })
 
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
 
   const { i18n, permissions, user } = await initReq(config)
 

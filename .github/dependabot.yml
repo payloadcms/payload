@@ -8,7 +8,7 @@ updates:
       - /.github/workflows
       - /.github/actions/* # Not working until resolved: https://github.com/dependabot/dependabot-core/issues/6345
       - /.github/actions/setup
-    target-branch: beta
+    target-branch: main
     schedule:
       interval: monthly
       timezone: America/Detroit
@@ -20,7 +20,7 @@ updates:
 
   - package-ecosystem: npm
     directory: /
-    target-branch: beta
+    target-branch: main
     schedule:
       interval: weekly
       day: sunday
@@ -53,7 +53,7 @@ updates:
   # Only bump patch versions for 2.x
   - package-ecosystem: npm
     directory: /
-    target-branch: main
+    target-branch: 2.x
     schedule:
       interval: weekly
       day: sunday

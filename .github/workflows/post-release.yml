@@ -5,6 +5,11 @@ on:
     types:
       - published
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to process (optional)'
+        required: false
+        default: ''
 
 env:
   NODE_VERSION: 22.6.0
@@ -15,12 +20,11 @@ env:
 jobs:
   post_release:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # Only needed if debugging on a branch other than default
-          # ref: ${{ github.event.release.target_commitish || github.ref }}
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
         env:
@@ -35,13 +39,11 @@ jobs:
           comment-template: |
             🚀 This is included in version {release_link}
 
-  # Some templates have lockfiles that must point to the new release
-  # This runs the necessary script and creates a PR with the changes
   update_templates:
     runs-on: ubuntu-latest
-    if: startsWith(github.event.release.tag_name, 'v3')
     permissions:
-      pull-request: write
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,6 +56,17 @@ jobs:
       - name: Update template lockfiles and migrations
         run: pnpm script:gen-templates
 
+      - name: Determine Release Tag
+        id: determine_tag
+        run: |
+          if [ "${{ github.event.inputs.tag }}" != "" ]; then
+            echo "Using tag from input: ${{ github.event.inputs.tag }}"
+            echo "release_tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "Using tag from release event: ${{ github.event.release.tag_name }}"
+            echo "release_tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Commit and push changes
         id: commit
         env:
@@ -62,29 +75,33 @@ jobs:
           set -ex
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          export RELEASE_TAG=$(echo ${{ github.event.release.tag_name }})
-          export BRANCH_NAME=chore/templates-$RELEASE_TAG
+          export BRANCH_NAME=chore/templates-${{ steps.determine_tag.outputs.release_tag }}
           git checkout -b $BRANCH_NAME
           git add -A
 
           # If no files have changed, exit early with success
           git diff --cached --quiet --exit-code && exit 0
 
-          git commit -m "chore(templates): bump lockfiles after $RELEASE_TAG"
+          git commit -m "chore(templates): bump lockfiles after ${{ steps.determine_tag.outputs.release_tag }}"
           git push origin $BRANCH_NAME
-          # export the tag for use in the next job
-          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
           echo "committed=true" >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Debug Branches
+        run: |
+          echo "Target Commitish: ${{ github.event.release.target_commitish }}"
+          echo "Branch: ${{ steps.commit.outputs.branch }}"
+          echo "Ref: ${{ github.ref }}"
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         if: steps.commit.outputs.committed == 'true'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           labels: 'area: templates'
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           commit-message: 'Automated update after release'
-          branch: chore/templates-$RELEASE_TAG
-          base: ${{ github.event.release.target_commitish }}
-          title: 'chore(templates): bump lockfiles after $RELEASE_TAG'
-          body: 'Automated bump of template lockfiles after release $RELEASE_TAG'
+          branch: ${{ steps.commit.outputs.branch }}
+          base: ${{ github.event_name != 'workflow_dispatch' && github.event.release.target_commitish || github.ref }}
+          title: 'chore(templates): bump lockfiles after ${{ steps.determine_tag.outputs.release_tag }}'
+          body: 'Automated bump of template lockfiles after release ${{ steps.determine_tag.outputs.release_tag }}'

@@ -764,9 +764,9 @@ export type Config = {
         /** Add custom admin views */
         [key: string]: AdminViewConfig
         /** Replace the account screen */
-        Account?: AdminViewConfig
+        account?: AdminViewConfig
         /** Replace the admin homepage */
-        Dashboard?: AdminViewConfig
+        dashboard?: AdminViewConfig
       }
     }
     /** Extension point to add your custom data. Available in server and client. */

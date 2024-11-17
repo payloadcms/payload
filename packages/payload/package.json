@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.133",
+  "version": "3.0.0-beta.134",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -109,7 +109,8 @@
     "scmp": "2.1.0",
     "ts-essentials": "10.0.3",
     "tsx": "4.19.2",
-    "uuid": "10.0.0"
+    "uuid": "10.0.0",
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
@@ -120,6 +121,7 @@
     "@types/pluralize": "0.0.33",
     "@types/react-datepicker": "6.2.0",
     "@types/uuid": "10.0.0",
+    "@types/ws": "^8.5.10",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "esbuild": "0.23.1",

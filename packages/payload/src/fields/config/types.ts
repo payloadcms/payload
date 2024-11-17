@@ -748,8 +748,14 @@ export type TabAsFieldClient = ClientTab & Pick<TabAsField, 'name' | 'type'>
 export type UIField = {
   admin: {
     components?: {
+      /**
+       * Allow any custom components to be added to the UI field. This allows
+       * the UI field to be used as a vessel for getting components rendered.
+       */
+      [key: string]: PayloadComponent | undefined
       Cell?: CustomComponent
-      Field: CustomComponent
+      // Can be optional, in case the UI field is just used as a vessel for custom components
+      Field?: CustomComponent
       /**
        * The Filter component has to be a client component
        */
@@ -1188,16 +1194,11 @@ export type Block = {
   _sanitized?: boolean
   admin?: {
     components?: {
-      Label?: PayloadComponent<
-        never,
-        {
-          blockKind: 'block' | 'lexicalBlock' | 'lexicalInlineBlock' | string
-          /**
-           * May contain the formData
-           */
-          formData: Record<string, any>
-        }
-      >
+      /**
+       * This will replace the entire block component, including the block header / collapsible.
+       */
+      Block?: PayloadComponent<any, any>
+      Label?: PayloadComponent<any, any>
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
@@ -1227,11 +1228,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  admin?: {
-    components?: {
-      Label?: React.ReactNode
-    }
-  } & Pick<Block['admin'], 'custom'>
+  admin?: Pick<Block['admin'], 'custom'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'slug'>

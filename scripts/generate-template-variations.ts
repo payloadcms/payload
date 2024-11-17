@@ -49,7 +49,7 @@ async function main() {
   const templatesDir = path.resolve(dirname, '../templates')
 
   // WARNING: This will need to be updated when this merges into main
-  const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/beta/templates`
+  const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
 
   const variations: TemplateVariations[] = [
     {
@@ -301,6 +301,7 @@ function log(message: string) {
 }
 function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1]) {
   try {
+    console.log(`Executing: ${command}`)
     execSync(command, options)
   } catch (error) {
     if (error instanceof Error) {
@@ -317,5 +318,6 @@ function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1])
     } else {
       console.error('An unexpected error occurred:', error)
     }
+    throw error
   }
 }
