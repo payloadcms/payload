@@ -28,7 +28,7 @@
   "dependencies": {
     "@rollup/plugin-image": "^3.0.2",
     "@vitejs/plugin-react": "^4.0.4",
-    "compression": "1.7.4",
+    "compression": "1.7.5",
     "connect-history-api-fallback": "1.6.0",
     "get-port": "5.1.1",
     "path-browserify": "1.0.1",
