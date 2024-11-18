@@ -21,7 +21,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
   const {
     field,
     field: {
-      admin: { className, description, placeholder, step, style, width } = {},
+      admin: { className, description, placeholder, step } = {},
       label,
       localized,
       required,

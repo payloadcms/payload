@@ -2,7 +2,8 @@
 import type { EditorState, SerializedEditorState } from 'lexical'
 
 import { FieldLabel, useEditDepth, useField, withCondition } from '@payloadcms/ui'
-import React, { useCallback } from 'react'
+import { mergeFieldStyles } from '@payloadcms/ui/shared'
+import React, { useCallback, useMemo } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
@@ -22,9 +23,10 @@ const RichTextComponent: React.FC<
 > = (props) => {
   const {
     editorConfig,
+    field,
     field: {
       name,
-      admin: { className, readOnly: readOnlyFromAdmin, style, width } = {},
+      admin: { className, readOnly: readOnlyFromAdmin } = {},
       label,
       localized,
       required,
@@ -87,15 +89,10 @@ const RichTextComponent: React.FC<
     [setValue],
   )
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
-    <div
-      className={classes}
-      key={pathWithEditDepth}
-      style={{
-        ...style,
-        width,
-      }}
-    >
+    <div className={classes} key={pathWithEditDepth} style={styles}>
       {Error}
       {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${baseClass}__wrap`}>
