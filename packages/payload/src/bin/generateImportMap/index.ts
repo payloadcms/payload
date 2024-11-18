@@ -175,14 +175,13 @@ export async function writeImportMap({
   rootDir: string
 }) {
   let importMapFolderPath = ''
-  const adminPath = config.routes.admin || '/admin'
-  if (fs.existsSync(path.resolve(rootDir, `app/(payload)${adminPath}/`))) {
-    importMapFolderPath = path.resolve(rootDir, `app/(payload)${adminPath}/`)
-  } else if (fs.existsSync(path.resolve(rootDir, `src/app/(payload)${adminPath}/`))) {
-    importMapFolderPath = path.resolve(rootDir, `src/app/(payload)${adminPath}/`)
+  if (fs.existsSync(path.resolve(rootDir, `app/(payload)${config.routes.admin}/`))) {
+    importMapFolderPath = path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)
+  } else if (fs.existsSync(path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`))) {
+    importMapFolderPath = path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)
   } else {
     throw new Error(
-      `Could not find the payload admin directory. Looked in ${path.resolve(rootDir, `app/(payload)${adminPath}/`)} and ${path.resolve(rootDir, `src/app/(payload)${adminPath}/`)}`,
+      `Could not find the payload admin directory. Looked in ${path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)} and ${path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)}`,
     )
   }
 
