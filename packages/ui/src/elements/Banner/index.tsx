@@ -4,7 +4,7 @@ import type { MouseEvent } from 'react'
 import React from 'react'
 
 import './index.scss'
-import { LinkTransition } from '../LinkTransition/index.js'
+import { Link } from '../LinkTransition/index.js'
 
 const baseClass = 'banner'
 
@@ -54,7 +54,7 @@ export const Banner: React.FC<Props> = ({
     RenderedType = 'button'
   }
   if (to) {
-    RenderedType = LinkTransition
+    RenderedType = Link
   }
 
   return (

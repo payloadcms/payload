@@ -1,6 +1,6 @@
 import type { AdminViewComponent, PayloadServerReactComponent } from 'payload'
 
-import { Button, LinkTransition } from '@payloadcms/ui'
+import { Button, Link } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import React from 'react'
 
@@ -38,7 +38,7 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
       <Button
         className={`${baseClass}__button`}
         el="link"
-        Link={LinkTransition}
+        Link={Link}
         size="large"
         to={formatAdminURL({
           adminRoute,

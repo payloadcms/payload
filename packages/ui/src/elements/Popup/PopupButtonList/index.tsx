@@ -5,7 +5,7 @@ import type { LinkProps } from 'next/link.js'
 import * as React from 'react' // TODO: abstract this out to support all routers
 
 import './index.scss'
-import { LinkTransition } from '../../LinkTransition/index.js'
+import { Link } from '../../LinkTransition/index.js'
 
 const baseClass = 'popup-button-list'
 
@@ -49,7 +49,7 @@ export const Button: React.FC<MenuButtonProps> = ({
 
   if (href) {
     return (
-      <LinkTransition
+      <Link
         className={classes}
         href={href}
         id={id}
@@ -61,7 +61,7 @@ export const Button: React.FC<MenuButtonProps> = ({
         prefetch={false}
       >
         {children}
-      </LinkTransition>
+      </Link>
     )
   }
 

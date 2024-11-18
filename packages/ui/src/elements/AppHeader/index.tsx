@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
 
-import { LinkTransition } from '../../elements/LinkTransition/index.js'
+import { Link } from '../../elements/LinkTransition/index.js'
 import { Account } from '../../graphics/Account/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -59,7 +59,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
     }
   }, [Actions])
 
-  const LinkElement = LinkTransition || 'a'
+  const LinkElement = Link || 'a'
 
   const ActionComponents = Actions ? Object.values(Actions) : []
 
@@ -73,11 +73,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
           </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <StepNav
-                className={`${baseClass}__step-nav`}
-                CustomIcon={CustomIcon}
-                Link={LinkTransition}
-              />
+              <StepNav className={`${baseClass}__step-nav`} CustomIcon={CustomIcon} Link={Link} />
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
@@ -103,7 +99,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
               href={formatAdminURL({ adminRoute, path: accountRoute })}
-              prefetch={LinkTransition ? false : undefined}
+              prefetch={Link ? false : undefined}
               tabIndex={0}
             >
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />

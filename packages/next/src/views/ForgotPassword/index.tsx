@@ -1,6 +1,6 @@
 import type { AdminViewProps } from 'payload'
 
-import { Button, LinkTransition } from '@payloadcms/ui'
+import { Button, Link } from '@payloadcms/ui'
 import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
@@ -35,7 +35,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
             <Translation
               elements={{
                 '0': ({ children }) => (
-                  <LinkTransition
+                  <Link
                     href={formatAdminURL({
                       adminRoute,
                       path: accountRoute,
@@ -43,7 +43,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
                     prefetch={false}
                   >
                     {children}
-                  </LinkTransition>
+                  </Link>
                 ),
               }}
               i18nKey="authentication:loggedInChangePassword"
@@ -52,13 +52,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
           }
           heading={i18n.t('authentication:alreadyLoggedIn')}
         />
-        <Button
-          buttonStyle="secondary"
-          el="link"
-          Link={LinkTransition}
-          size="large"
-          to={adminRoute}
-        >
+        <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
           {i18n.t('general:backToDashboard')}
         </Button>
       </Fragment>
@@ -68,7 +62,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
   return (
     <Fragment>
       <ForgotPasswordForm />
-      <LinkTransition
+      <Link
         href={formatAdminURL({
           adminRoute,
           path: loginRoute,
@@ -76,7 +70,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
         prefetch={false}
       >
         {i18n.t('authentication:backToLogin')}
-      </LinkTransition>
+      </Link>
     </Fragment>
   )
 }

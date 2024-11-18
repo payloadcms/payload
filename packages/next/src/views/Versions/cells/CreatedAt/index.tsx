@@ -1,5 +1,5 @@
 'use client'
-import { LinkTransition, useConfig, useTranslation } from '@payloadcms/ui'
+import { Link, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
 import React from 'react'
 
@@ -45,8 +45,8 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   }
 
   return (
-    <LinkTransition href={to} prefetch={false}>
+    <Link href={to} prefetch={false}>
       {formatDate({ date: updatedAt, i18n, pattern: dateFormat })}
-    </LinkTransition>
+    </Link>
   )
 }

@@ -1,6 +1,6 @@
 import type { AdminViewProps } from 'payload'
 
-import { Button, LinkTransition } from '@payloadcms/ui'
+import { Button, Link } from '@payloadcms/ui'
 import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
 import React from 'react'
 
@@ -40,7 +40,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
             <Translation
               elements={{
                 '0': ({ children }) => (
-                  <LinkTransition
+                  <Link
                     href={formatAdminURL({
                       adminRoute,
                       path: accountRoute,
@@ -48,7 +48,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
                     prefetch={false}
                   >
                     {children}
-                  </LinkTransition>
+                  </Link>
                 ),
               }}
               i18nKey="authentication:loggedInChangePassword"
@@ -57,13 +57,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
           }
           heading={i18n.t('authentication:alreadyLoggedIn')}
         />
-        <Button
-          buttonStyle="secondary"
-          el="link"
-          Link={LinkTransition}
-          size="large"
-          to={adminRoute}
-        >
+        <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
           {i18n.t('general:backToDashboard')}
         </Button>
       </div>
@@ -74,7 +68,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
     <div className={`${resetPasswordBaseClass}__wrap`}>
       <FormHeader heading={i18n.t('authentication:resetPassword')} />
       <ResetPasswordForm token={token} />
-      <LinkTransition
+      <Link
         href={formatAdminURL({
           adminRoute,
           path: loginRoute,
@@ -82,7 +76,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
         prefetch={false}
       >
         {i18n.t('authentication:backToLogin')}
-      </LinkTransition>
+      </Link>
     </div>
   )
 }

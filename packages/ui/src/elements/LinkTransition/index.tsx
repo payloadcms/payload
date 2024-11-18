@@ -1,12 +1,13 @@
 'use client'
-import LinkImport from 'next/link.js'
+import NextLinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
 import React, { startTransition } from 'react'
 
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { formatUrl } from './formatUrl.js'
 
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+const NextLink = (NextLinkImport.default ||
+  NextLinkImport) as unknown as typeof NextLinkImport.default
 
 // Copied from  https://github.com/vercel/next.js/blob/canary/packages/next/src/client/link.tsx#L180-L191
 function isModifiedEvent(event: React.MouseEvent): boolean {
@@ -22,7 +23,7 @@ function isModifiedEvent(event: React.MouseEvent): boolean {
   )
 }
 
-export const LinkTransition: React.FC<Parameters<typeof Link>[0]> = ({
+export const Link: React.FC<Parameters<typeof NextLink>[0]> = ({
   children,
   href,
   ref,
@@ -34,7 +35,7 @@ export const LinkTransition: React.FC<Parameters<typeof Link>[0]> = ({
   const { startRouteTransition } = useRouteTransition()
 
   return (
-    <Link
+    <NextLink
       href={href}
       onClick={(e) => {
         if (isModifiedEvent(e)) {
@@ -60,6 +61,6 @@ export const LinkTransition: React.FC<Parameters<typeof Link>[0]> = ({
       {...rest}
     >
       {children}
-    </Link>
+    </NextLink>
   )
 }

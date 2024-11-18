@@ -1,12 +1,5 @@
 'use client'
-import {
-  Button,
-  Gutter,
-  LinkTransition,
-  useConfig,
-  useStepNav,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Button, Gutter, Link, useConfig, useStepNav, useTranslation } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
 import './index.scss'
@@ -49,7 +42,7 @@ export const NotFoundClient: React.FC<{
         <Button
           className={`${baseClass}__button`}
           el="link"
-          Link={LinkTransition}
+          Link={Link}
           size="large"
           to={adminRoute}
         >

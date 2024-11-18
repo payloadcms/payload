@@ -21,7 +21,7 @@ export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
 // elements
-export { LinkTransition } from '../../elements/LinkTransition/index.js'
+export { Link } from '../../elements/LinkTransition/index.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 export { DocumentLocked } from '../../elements/DocumentLocked/index.js'

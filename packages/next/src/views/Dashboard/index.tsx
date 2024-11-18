@@ -1,7 +1,7 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { AdminViewProps } from 'payload'
 
-import { HydrateAuthProvider, LinkTransition, SetStepNav } from '@payloadcms/ui'
+import { HydrateAuthProvider, Link, SetStepNav } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
@@ -107,7 +107,7 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
       <SetStepNav nav={[]} />
       <RenderServerComponent
         clientProps={{
-          Link: LinkTransition,
+          Link,
           locale,
         }}
         Component={config.admin?.components?.views?.dashboard?.Component}
@@ -116,7 +116,7 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
         serverProps={{
           globalData,
           i18n,
-          Link: LinkTransition,
+          Link,
           locale,
           navGroups,
           params,

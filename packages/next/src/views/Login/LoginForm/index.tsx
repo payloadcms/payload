@@ -10,7 +10,7 @@ import type { FormState } from 'payload'
 import {
   Form,
   FormSubmit,
-  LinkTransition,
+  Link,
   PasswordField,
   useAuth,
   useConfig,
@@ -107,7 +107,7 @@ export const LoginForm: React.FC<{
           path="password"
         />
       </div>
-      <LinkTransition
+      <Link
         href={formatAdminURL({
           adminRoute,
           path: forgotRoute,
@@ -115,7 +115,7 @@ export const LoginForm: React.FC<{
         prefetch={false}
       >
         {t('authentication:forgotPasswordQuestion')}
-      </LinkTransition>
+      </Link>
       <FormSubmit size="large">{t('authentication:login')}</FormSubmit>
     </Form>
   )
