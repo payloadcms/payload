@@ -254,61 +254,61 @@ describe('Localization', () => {
   })
 
   describe('copy localized data', () => {
-    // test('should show copy button', async () => {
-    //   await page.goto(url.create)
-    //   await fillValues({ description, title })
-    //   await saveDocAndAssert(page)
-    //   await expect(page.locator('.copy-locale-data')).toBeVisible()
-    // })
-    // test('should show popup', async () => {
-    //   await changeLocale(page, englishLocale)
-    //   await page.goto(url.create)
-    //   await fillValues({ description, title })
-    //   await saveDocAndAssert(page)
-    //   await page.locator('.copy-locale-data').click()
-    //   const firstButton = page.locator('.copy-locale-data button').nth(1)
-    //   await expect(firstButton).toBeVisible()
-    //   await expect(firstButton).toContainText('English to Spanish')
-    // })
-    // test('should show correct locales', async () => {
-    //   const firstOption = 'English to Spanish'
-    //   const secondOption = 'English to Portuguese'
-    //   const thirdOption = 'English to Arabic'
-    //   const fourthOption = 'English to Hungarian'
-    //   await page.goto(url.create)
-    //   await changeLocale(page, englishLocale)
-    //   await fillValues({ description, title })
-    //   await saveDocAndAssert(page)
-    //   await page.locator('.copy-locale-data').click()
-    //   const firstButton = page.locator('.copy-locale-data button').nth(1)
-    //   const secondButton = page.locator('.copy-locale-data button').nth(2)
-    //   const thirdButton = page.locator('.copy-locale-data button').nth(3)
-    //   const fourthButton = page.locator('.copy-locale-data button').nth(4)
-    //   await expect(firstButton).toContainText(firstOption)
-    //   await expect(secondButton).toContainText(secondOption)
-    //   await expect(thirdButton).toContainText(thirdOption)
-    //   await expect(fourthButton).toContainText(fourthOption)
-    // })
-    // test('should copy data to correct locale', async () => {
-    //   await page.goto(url.create)
-    //   await fillValues({ description, title })
-    //   await saveDocAndAssert(page)
-    //   await page.locator('.copy-locale-data').click()
-    //   const firstButton = page.locator('.copy-locale-data button').nth(1)
-    //   await firstButton.click()
-    //   // wait for rereoute
-    //   await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    //   await expect(page.locator('#field-title')).toHaveValue(title)
-    //   await expect(page.locator('#field-description')).toHaveValue(description)
-    // })
-    // test('should throw error if unsaved data', async () => {
-    //   await page.goto(url.create)
-    //   await fillValues({ title })
-    //   await saveDocAndAssert(page)
-    //   await fillValues({ title: 'updated' })
-    //   await page.locator('.copy-locale-data').click()
-    //   await expect(page.locator('.payload-toast-container')).toContainText('unsaved')
-    // })
+    test('should show Copy To Locale button and drawer', async () => {
+      await page.goto(url.create)
+      await fillValues({ description, title })
+      await saveDocAndAssert(page)
+
+      const docControls = page.locator('.doc-controls__popup')
+      await docControls.click()
+
+      await expect(page.locator('.copy-locale-data__button')).toBeVisible()
+      await page.locator('.copy-locale-data__button').click()
+
+      await expect(page.locator('.copy-locale-data .drawer')).toBeVisible()
+    })
+
+    test('should copy data to correct locale', async () => {
+      await page.goto(url.create)
+      await fillValues({ title })
+      await saveDocAndAssert(page)
+
+      const docControls = page.locator('.doc-controls__popup')
+      await docControls.click()
+      await expect(page.locator('.copy-locale-data__button')).toBeVisible()
+      await page.locator('.copy-locale-data__button').click()
+
+      await expect(page.locator('.copy-locale-data .drawer')).toBeVisible()
+
+      const fromField = page.locator('#field-fromLocale')
+      await fromField.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      await options.locator('English').click()
+
+      const toField = page.locator('#field-toLocale')
+      await toField.click({ delay: 100 })
+      await options.locator('Spanish').click()
+
+      const copyButton = page.locator('.copy-locale-data__sub-header button')
+      await copyButton.click()
+
+      await expect(page.locator('#field-title')).toHaveValue(title)
+    })
+
+    test('should throw error if unsaved data', async () => {
+      await page.goto(url.create)
+      await fillValues({ title })
+      await saveDocAndAssert(page)
+      await fillValues({ title: 'updated' })
+
+      const docControls = page.locator('.doc-controls__popup')
+      await docControls.click()
+
+      await expect(page.locator('.copy-locale-data__button')).toBeVisible()
+      await page.locator('.copy-locale-data__button').click()
+
+      await expect(page.locator('.payload-toast-container')).toContainText('unsaved')
+    })
   })
 })
 
