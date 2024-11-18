@@ -5,6 +5,7 @@ import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { CheckboxField } from '../../fields/Checkbox/index.js'
+import { SelectField } from '../../fields/Select/index.js'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -16,7 +17,6 @@ import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { PopupList } from '../Popup/index.js'
 import './index.scss'
-import { LocaleSelectField } from './LocaleSelect.js'
 
 const baseClass = 'copy-locale-data'
 
@@ -25,7 +25,7 @@ export const CopyLocaleData: React.FC = () => {
   const {
     config: {
       localization,
-      routes: { api },
+      routes: { admin, api },
       serverURL,
     },
   } = useConfig()
@@ -49,7 +49,7 @@ export const CopyLocaleData: React.FC = () => {
     async ({ from, to }) => {
       const isCollection = Boolean(collectionSlug)
       const url = `${serverURL}${api}/${isCollection ? `${collectionSlug}/${id}` : `globals/${globalSlug}`}?depth=0&locale=${from}`
-      const redirect = `${serverURL}/admin/${isCollection ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}?locale=${to}`
+      const redirect = `${serverURL}${admin}/${isCollection ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}?locale=${to}`
       const method = isCollection ? 'PATCH' : 'POST'
       const action = url.replace(`locale=${from}`, `locale=${to}`)
       let data = {}
@@ -83,7 +83,7 @@ export const CopyLocaleData: React.FC = () => {
         toast.error(error.message)
       }
     },
-    [collectionSlug, globalSlug, submit, serverURL, api, id, toggleModal],
+    [collectionSlug, globalSlug, id, serverURL, api, admin, submit, overwriteExisting],
   )
 
   if (!id && !globalSlug) {
@@ -148,18 +148,24 @@ export const CopyLocaleData: React.FC = () => {
         </div>
 
         <div className={`${baseClass}__content`}>
-          <LocaleSelectField
-            label={t('localization:copyFrom')}
-            name="fromLocale"
-            onChange={setFromLocale}
-            options={localeOptions}
+          <SelectField
+            field={{
+              name: 'fromLocale',
+              label: t('localization:copyFrom'),
+              options: localeOptions,
+            }}
+            onChange={(val: string) => setFromLocale(val)}
+            path="fromLocale"
             value={fromLocale}
           />
-          <LocaleSelectField
-            label={t('localization:copyTo')}
-            name="toLocale"
-            onChange={setToLocale}
-            options={localeOptions}
+          <SelectField
+            field={{
+              name: 'toLocale',
+              label: t('localization:copyTo'),
+              options: localeOptions,
+            }}
+            onChange={(val: string) => setToLocale(val)}
+            path="toLocale"
             value={toLocale}
           />
           <CheckboxField

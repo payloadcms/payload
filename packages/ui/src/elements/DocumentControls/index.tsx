@@ -130,13 +130,6 @@ export const DocumentControls: React.FC<{
 
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
-  const hasCollectionLocalizedFields =
-    collectionConfig?.fields?.some((field) => 'localized' in field && field.localized) || false
-
-  const hasGlobalLocalizedFields =
-    globalConfig?.fields?.some((field) => 'localized' in field && field.localized) || false
-
-  const hasLocalizedFields = hasCollectionLocalizedFields || hasGlobalLocalizedFields
 
   const autosaveEnabled =
     (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
@@ -267,7 +260,7 @@ export const DocumentControls: React.FC<{
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
-                {localization && hasLocalizedFields && <CopyLocaleData />}
+                {localization && <CopyLocaleData />}
                 {hasCreatePermission && (
                   <React.Fragment>
                     {!disableCreate && (

@@ -41,7 +41,6 @@ let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
 
 const defaultLocale = 'en'
-const englishLocale = 'en'
 const title = 'english title'
 const spanishTitle = 'spanish title'
 const arabicTitle = 'arabic title'
