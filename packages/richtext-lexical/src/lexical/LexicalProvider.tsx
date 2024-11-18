@@ -30,7 +30,9 @@ const NestProviders = ({ children, providers }) => {
   if (!providers?.length) {
     return children
   }
+
   const Component = providers[0]
+
   if (providers.length > 1) {
     return (
       <Component>
