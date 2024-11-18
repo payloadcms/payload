@@ -93,7 +93,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 #### Description Functions
 
-Custom Descriptions can also be defined as a function. Description Functions are executed on the server and can be used to format simple descriptions based on the user's current [Locale](../configuration/localization), document data, etc.
+Custom Descriptions can also be defined as a function. Description Functions are executed on the server and can be used to format simple descriptions based on the user's current [Locale](../configuration/localization).
 
 To easily add a Description Function to a field, set the `admin.description` property to a _function_ in your [Field Config](../fields/overview):
 
@@ -119,15 +119,11 @@ All Description Functions receive the following arguments:
 
 | Argument       | Description                                                      |
 | -------------- | ---------------------------------------------------------------- |
-| **`data`**     | The initial data of the document. |
-| **`path`**     | A string representing the direct, dynamic path to the field at runtime, i.e. `myGroup.myArray.0.myField`. |
-| **`siblingData`** | The data of the field's siblings. |
 | **`t`**        | The `t` function used to internationalize the Admin Panel. [More details](../configuration/i18n) |
-| **`value`**    | The value of the field at render-time. |
 
 <Banner type="info">
   <strong>Note:</strong>
-  If you need to subscribe to live changes within your form, use must use a Description Component instead. [More details](#description).
+  If you need to subscribe to live changes within your form, use must use a Client Description Component instead. [More details](#description).
 </Banner>
 
 ## Conditional Logic

@@ -3,17 +3,8 @@ import type { TFunction } from '@payloadcms/translations'
 import type { ServerProps } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { ClientFieldWithOptionalType } from './Field.js'
-import type { Data } from './Form.js'
 
-export type DescriptionFunction = <T = unknown>({
-  t,
-}: {
-  data: Data
-  path: string
-  siblingData?: Data
-  t: TFunction
-  value?: T
-}) => string
+export type DescriptionFunction = ({ t }: { t: TFunction }) => string
 
 export type FieldDescriptionClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
