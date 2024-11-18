@@ -39,7 +39,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
 
 1. **Install new dependencies of payload, next.js and react**:
 
-    Refer to the package.json file made in the create-payload-app, including peerDependencies, devDependencies, and dependencies.
+    Refer to the package.json file made in the create-payload-app, including peerDependencies, devDependencies, and dependencies. The core package and plugins require all versions to be synced. Previously, on 2.x it was possible to be running the latest version of payload 2.x with an older version of db-mongodb for example. This is no longer the case.
 
     ```bash
       pnpm i next react react-dom payload @payloadcms/ui @payloadcms/next
