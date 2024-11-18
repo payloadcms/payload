@@ -2,7 +2,7 @@
 import type { CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -99,6 +99,8 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     void fetchInitialState()
   }, [getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   if (typeof collapsedOnMount !== 'boolean') {
     return null
   }
@@ -116,7 +118,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           .filter(Boolean)
           .join(' ')}
         id={`field-${fieldPreferencesKey}`}
-        style={mergeFieldStyles(field)}
+        style={styles}
       >
         <CollapsibleElement
           className={`${baseClass}__collapsible`}

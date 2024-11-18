@@ -2,7 +2,7 @@
 import type { DateFieldClientComponent, DateFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -53,6 +53,8 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -64,7 +66,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={mergeFieldStyles(field)}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}

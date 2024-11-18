@@ -5,7 +5,7 @@ import type {
   CheckboxFieldValidation,
 } from 'payload'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
 
@@ -81,6 +81,8 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
 
   const fieldID = id || generateFieldID(path, editDepth, uuid)
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -93,7 +95,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={mergeFieldStyles(field)}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Error}

@@ -6,7 +6,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -59,12 +59,14 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
         .filter(Boolean)
         .join(' ')}
-      style={mergeFieldStyles(field)}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}

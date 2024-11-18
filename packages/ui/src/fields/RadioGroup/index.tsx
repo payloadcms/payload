@@ -2,7 +2,7 @@
 import type { RadioFieldClientComponent, RadioFieldClientProps } from 'payload'
 
 import { optionIsObject } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -63,6 +63,8 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
 
   const value = valueFromContext || valueFromProps
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -75,7 +77,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={mergeFieldStyles(field)}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Error}

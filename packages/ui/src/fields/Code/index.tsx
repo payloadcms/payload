@@ -1,7 +1,7 @@
 'use client'
 import type { CodeFieldClientComponent } from 'payload'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -54,6 +54,8 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -65,7 +67,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={mergeFieldStyles(field)}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}

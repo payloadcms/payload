@@ -3,7 +3,7 @@
 import type { GroupFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -47,6 +47,8 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -64,7 +66,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
-      style={mergeFieldStyles(field)}
+      style={styles}
     >
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>

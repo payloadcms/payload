@@ -2,7 +2,7 @@
 import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -72,6 +72,8 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     return `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`
   }
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -83,7 +85,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={mergeFieldStyles(field)}
+      style={styles}
     >
       <ul className={`${baseClass}__wrap`}>
         <li>

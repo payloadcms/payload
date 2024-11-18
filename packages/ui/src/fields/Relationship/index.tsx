@@ -3,7 +3,7 @@ import type { PaginatedDocs, RelationshipFieldClientComponent, Where } from 'pay
 
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
@@ -574,6 +574,8 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     valueToRender.value = null
   }
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -588,7 +590,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
-      style={mergeFieldStyles(field)}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}

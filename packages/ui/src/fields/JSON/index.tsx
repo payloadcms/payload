@@ -1,7 +1,7 @@
 'use client'
 import type { JSONFieldClientComponent } from 'payload'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -106,6 +106,8 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     setHasLoadedValue(true)
   }, [initialValue, value, hasLoadedValue])
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -117,7 +119,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={mergeFieldStyles(field)}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}

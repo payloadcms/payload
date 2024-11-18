@@ -3,7 +3,7 @@ import type { NumberFieldClientComponent, NumberFieldClientProps } from 'payload
 
 import { getTranslation } from '@payloadcms/translations'
 import { isNumber } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
 
@@ -122,6 +122,8 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     }
   }, [value, hasMany])
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -134,7 +136,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={mergeFieldStyles(field)}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}

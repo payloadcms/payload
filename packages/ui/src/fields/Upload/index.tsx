@@ -2,7 +2,7 @@
 
 import type { UploadFieldClientProps } from 'payload'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -55,6 +55,8 @@ export function UploadComponent(props: UploadFieldClientProps) {
     validate: memoizedValidate,
   })
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <UploadInput
       AfterInput={AfterInput}
@@ -79,7 +81,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       required={required}
       serverURL={config.serverURL}
       showError={showError}
-      style={mergeFieldStyles(field)}
+      style={styles}
       value={value}
     />
   )

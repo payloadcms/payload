@@ -6,7 +6,7 @@ import type {
   SelectFieldClientProps,
 } from 'payload'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { SelectInputProps } from './Input.js'
@@ -96,6 +96,8 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
     [readOnly, hasMany, setValue, onChangeFromProps],
   )
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <SelectInput
       AfterInput={AfterInput}
@@ -116,7 +118,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       path={path}
       readOnly={readOnly}
       showError={showError}
-      style={mergeFieldStyles(field)}
+      style={styles}
       value={value as string | string[]}
     />
   )

@@ -2,7 +2,7 @@
 import type { TextareaFieldClientComponent, TextareaFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
@@ -68,6 +68,8 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <TextareaInput
       AfterInput={AfterInput}
@@ -89,7 +91,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       rows={rows}
       rtl={isRTL}
       showError={showError}
-      style={mergeFieldStyles(field)}
+      style={styles}
       value={value}
     />
   )

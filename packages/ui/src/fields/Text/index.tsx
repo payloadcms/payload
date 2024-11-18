@@ -1,7 +1,7 @@
 'use client'
 import type { TextFieldClientComponent } from 'payload'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { TextInputProps } from './types.js'
@@ -110,6 +110,8 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     }
   }, [value, hasMany])
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <TextInput
       AfterInput={AfterInput}
@@ -138,7 +140,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       required={required}
       rtl={renderRTL}
       showError={showError}
-      style={mergeFieldStyles(field)}
+      style={styles}
       value={(value as string) || ''}
       valueToRender={valueToRender as Option[]}
     />

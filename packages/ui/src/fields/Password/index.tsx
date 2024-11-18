@@ -2,7 +2,7 @@
 import type { PasswordFieldValidation, PayloadRequest } from 'payload'
 
 import { password } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { PasswordFieldProps } from './types.js'
 
@@ -85,6 +85,8 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     localizationConfig: config.localization || undefined,
   })
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <PasswordInput
       AfterInput={AfterInput}
@@ -106,7 +108,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       required={required}
       rtl={renderRTL}
       showError={showError}
-      style={mergeFieldStyles(field)}
+      style={styles}
       value={(value as string) || ''}
     />
   )
