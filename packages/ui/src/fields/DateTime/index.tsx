@@ -2,7 +2,7 @@
 import type { DateFieldClientComponent, DateFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -12,16 +12,17 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'date-time-field'
 
 const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
-      admin: { className, date: datePickerProps, description, placeholder, style, width } = {},
+      admin: { className, date: datePickerProps, description, placeholder } = {},
       label,
       localized,
       required,
@@ -52,6 +53,8 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -63,10 +66,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}
