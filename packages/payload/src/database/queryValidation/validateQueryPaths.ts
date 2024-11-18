@@ -6,7 +6,6 @@ import type { EntityPolicies } from './types.js'
 
 import { QueryError } from '../../errors/QueryError.js'
 import { validOperators } from '../../types/constants.js'
-import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
