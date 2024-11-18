@@ -1,5 +1,5 @@
 'use client'
-import type { SerializedEditorState } from 'lexical'
+import type { EditorState, SerializedEditorState } from 'lexical'
 import type { Validate } from 'payload'
 
 import { FieldLabel, useEditDepth, useField, withCondition } from '@payloadcms/ui'
@@ -45,6 +45,7 @@ const RichTextComponent: React.FC<
   const memoizedValidate = useCallback<Validate>(
     (value, validationOptions) => {
       if (typeof validate === 'function') {
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         return validate(value, { ...validationOptions, required })
       }
       return true
