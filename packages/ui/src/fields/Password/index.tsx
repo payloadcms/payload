@@ -11,22 +11,21 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { isFieldRTL } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { isFieldRTL } from '../shared/index.js'
 import { PasswordInput } from './input.js'
 
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
     autoComplete,
+    field,
     field: {
-      name,
       admin: {
         className,
         disabled: disabledFromProps,
         placeholder,
         rtl,
-        style,
-        width,
       } = {} as PasswordFieldProps['field']['admin'],
       label,
       localized,
@@ -107,9 +106,8 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       required={required}
       rtl={renderRTL}
       showError={showError}
-      style={style}
+      style={mergeFieldStyles(field)}
       value={(value as string) || ''}
-      width={width}
     />
   )
 }

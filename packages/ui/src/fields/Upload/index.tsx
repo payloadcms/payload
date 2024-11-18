@@ -8,6 +8,7 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import './index.scss'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { UploadInput } from './Input.js'
 
 export { UploadInput } from './Input.js'
@@ -17,9 +18,9 @@ export const baseClass = 'upload'
 
 export function UploadComponent(props: UploadFieldClientProps) {
   const {
+    field,
     field: {
-      name,
-      admin: { allowCreate, className, description, isSortable, style, width } = {},
+      admin: { allowCreate, className, description, isSortable } = {},
       hasMany,
       label,
       localized,
@@ -78,9 +79,8 @@ export function UploadComponent(props: UploadFieldClientProps) {
       required={required}
       serverURL={config.serverURL}
       showError={showError}
-      style={style}
+      style={mergeFieldStyles(field)}
       value={value}
-      width={width}
     />
   )
 }

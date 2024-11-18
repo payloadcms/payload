@@ -1,5 +1,5 @@
 'use client'
-import type { AdminClient, CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
+import type { CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
@@ -16,8 +16,9 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'collapsible-field'
 
@@ -102,11 +103,6 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     return null
   }
 
-  const style: AdminClient['style'] = {
-    ...field.admin?.style,
-    '--field-width': field.admin.width,
-  }
-
   return (
     <Fragment>
       <WatchChildErrors fields={fields} path={path.split('.')} setErrorCount={setErrorCount} />
@@ -120,7 +116,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           .filter(Boolean)
           .join(' ')}
         id={`field-${fieldPreferencesKey}`}
-        style={style}
+        style={mergeFieldStyles(field)}
       >
         <CollapsibleElement
           className={`${baseClass}__collapsible`}

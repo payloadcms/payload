@@ -11,8 +11,9 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 import { Radio } from './Radio/index.js'
 
 const baseClass = 'radio-group'
@@ -20,13 +21,12 @@ const baseClass = 'radio-group'
 const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
     disableModifyingForm: disableModifyingFormFromProps,
+    field,
     field: {
       admin: {
         className,
         description,
         layout = 'horizontal',
-        style,
-        width,
       } = {} as RadioFieldClientProps['field']['admin'],
       label,
       localized,
@@ -75,10 +75,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={mergeFieldStyles(field)}
     >
       <RenderCustomComponent
         CustomComponent={Error}

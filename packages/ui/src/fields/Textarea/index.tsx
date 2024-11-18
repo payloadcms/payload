@@ -11,17 +11,18 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { isFieldRTL } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { isFieldRTL } from '../shared/index.js'
 import { TextareaInput } from './Input.js'
 
 export { TextareaInput, TextAreaInputProps }
 
 const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
-      admin: { className, description, placeholder, rows, rtl, style, width } = {},
+      admin: { className, description, placeholder, rows, rtl } = {},
       label,
       localized,
       maxLength,
@@ -88,9 +89,8 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       rows={rows}
       rtl={isRTL}
       showError={showError}
-      style={style}
+      style={mergeFieldStyles(field)}
       value={value}
-      width={width}
     />
   )
 }

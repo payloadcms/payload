@@ -17,8 +17,9 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 import { CheckboxInput } from './Input.js'
 
 const baseClass = 'checkbox'
@@ -30,14 +31,9 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     id,
     checked: checkedFromProps,
     disableFormData,
+    field,
     field: {
-      name,
-      admin: {
-        className,
-        description,
-        style,
-        width,
-      } = {} as CheckboxFieldClientProps['field']['admin'],
+      admin: { className, description } = {} as CheckboxFieldClientProps['field']['admin'],
       label,
       required,
     } = {} as CheckboxFieldClientProps['field'],
@@ -97,10 +93,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={mergeFieldStyles(field)}
     >
       <RenderCustomComponent
         CustomComponent={Error}

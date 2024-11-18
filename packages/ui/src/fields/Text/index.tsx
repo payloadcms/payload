@@ -10,17 +10,18 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { isFieldRTL } from '../shared/index.js'
-import { TextInput } from './Input.js'
 import './index.scss'
+import { TextInput } from './Input.js'
 
 export { TextInput, TextInputProps }
 
 const TextFieldComponent: TextFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
-      admin: { className, description, placeholder, rtl, style, width } = {},
+      admin: { className, description, placeholder, rtl } = {},
       hasMany,
       label,
       localized,
@@ -137,10 +138,9 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       required={required}
       rtl={renderRTL}
       showError={showError}
-      style={style}
+      style={mergeFieldStyles(field)}
       value={(value as string) || ''}
       valueToRender={valueToRender as Option[]}
-      width={width}
     />
   )
 }

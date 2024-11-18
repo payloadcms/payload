@@ -15,20 +15,19 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
 const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
       admin: {
         className,
         description,
         placeholder,
         step = 1,
-        style,
-        width,
       } = {} as NumberFieldClientProps['field']['admin'],
       hasMany = false,
       label,
@@ -135,10 +134,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={mergeFieldStyles(field)}
     >
       <RenderCustomComponent
         CustomComponent={Label}

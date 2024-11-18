@@ -13,6 +13,7 @@ import type { SelectInputProps } from './Input.js'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { SelectInput } from './Input.js'
 
 const formatOptions = (options: Option[]): OptionObject[] =>
@@ -29,6 +30,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
 
 const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   const {
+    field,
     field: {
       name,
       admin: {
@@ -36,8 +38,6 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
         description,
         isClearable = true,
         isSortable = true,
-        style,
-        width,
       } = {} as SelectFieldClientProps['field']['admin'],
       hasMany = false,
       label,
@@ -116,9 +116,8 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       path={path}
       readOnly={readOnly}
       showError={showError}
-      style={style}
+      style={mergeFieldStyles(field)}
       value={value as string | string[]}
-      width={width}
     />
   )
 }

@@ -10,8 +10,9 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
 const prismToMonacoLanguageMap = {
   js: 'javascript',
@@ -22,16 +23,9 @@ const baseClass = 'code-field'
 
 const CodeFieldComponent: CodeFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
-      admin: {
-        className,
-        description,
-        editorOptions = {},
-        language = 'javascript',
-        style,
-        width,
-      } = {},
+      admin: { className, description, editorOptions = {}, language = 'javascript' } = {},
       label,
       localized,
       required,
@@ -71,10 +65,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={mergeFieldStyles(field)}
     >
       <RenderCustomComponent
         CustomComponent={Label}
