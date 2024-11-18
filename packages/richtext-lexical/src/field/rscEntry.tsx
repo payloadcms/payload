@@ -29,7 +29,7 @@ export const RscEntryLexicalField: React.FC<
   const field: RichTextFieldType = args.field as RichTextFieldType
   const path = args.path ?? (args.clientField as RichTextFieldClient).name
   const schemaPath = args.schemaPath ?? path
-  const { clientFeatures, featureClientSchemaMap } = initLexicalFeatures({
+  const { clientFeatures, featureClientImportMap, featureClientSchemaMap } = initLexicalFeatures({
     fieldSchemaMap: args.fieldSchemaMap,
     i18n: args.i18n,
     path,
@@ -61,6 +61,7 @@ export const RscEntryLexicalField: React.FC<
     <RichTextField
       admin={args.admin}
       clientFeatures={clientFeatures}
+      featureClientImportMap={featureClientImportMap}
       featureClientSchemaMap={featureClientSchemaMap}
       field={args.clientField as RichTextFieldClient}
       forceRender={args.forceRender}

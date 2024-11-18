@@ -17,11 +17,11 @@ import {
 import { useEffect, useState } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
-import type { BlockFields, BlockFieldsOptionalID } from '../../server/nodes/BlocksNode.js'
+import type { BlockFields, BlockFieldsOptionalID } from '../../server/nodes/BlockNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import { $createBlockNode, BlockNode } from '../nodes/BlocksNode.js'
+import { $createBlockNode } from '../nodes/BlocksNode.js'
 import { $createInlineBlockNode, $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 import { INSERT_BLOCK_COMMAND, INSERT_INLINE_BLOCK_COMMAND } from './commands.js'
 
@@ -43,10 +43,6 @@ export const BlocksPlugin: PluginComponent = () => {
   const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
 
   useEffect(() => {
-    if (!editor.hasNodes([BlockNode])) {
-      throw new Error('BlocksPlugin: BlocksNode not registered on editor')
-    }
-
     return mergeRegister(
       editor.registerCommand<InsertBlockPayload>(
         INSERT_BLOCK_COMMAND,

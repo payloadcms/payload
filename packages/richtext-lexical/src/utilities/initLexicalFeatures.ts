@@ -23,6 +23,7 @@ type Args = {
 
 export function initLexicalFeatures(args: Args): {
   clientFeatures: LexicalRichTextFieldProps['clientFeatures']
+  featureClientImportMap: Record<string, any>
   featureClientSchemaMap: FeatureClientSchemaMap
 } {
   const clientFeatures: LexicalRichTextFieldProps['clientFeatures'] = {}
@@ -36,6 +37,10 @@ export function initLexicalFeatures(args: Args): {
   ).sort((a, b) => a[1].order - b[1].order)
 
   const featureClientSchemaMap: FeatureClientSchemaMap = {}
+  /**
+   * All modules added to the import map, keyed by the provided key, if feature.componentImports with type object is used
+   */
+  const featureClientImportMap: Record<string, any> = {}
 
   for (const [featureKey, resolvedFeature] of resolvedFeatureMapArray) {
     clientFeatures[featureKey] = {}
@@ -84,10 +89,6 @@ export function initLexicalFeatures(args: Args): {
         featureKey,
       ].join('.')
 
-      const featurePath = [...args.path.split('.'), 'lexical_internal_feature', featureKey].join(
-        '.',
-      )
-
       // Like args.fieldSchemaMap, we only want to include the sub-fields of the current feature
       const featureSchemaMap: typeof fieldSchemaMap = {}
       for (const key in fieldSchemaMap) {
@@ -115,37 +116,26 @@ export function initLexicalFeatures(args: Args): {
         })
         featureClientSchemaMap[featureKey][key] = clientFields
       }
+    }
 
-      /*
-      This is for providing an initial form state. Right now we only want to provide the clientfields though
-      const schemaMap: {
-        [key: string]: FieldState
-      } = {}
+    if (resolvedFeature.componentImports && typeof resolvedFeature.componentImports === 'object') {
+      for (const key in resolvedFeature.componentImports) {
+        const payloadComponent = resolvedFeature.componentImports[key]
 
-      const lexicalDeepIterate = (editorState) => {
-        console.log('STATE', editorState)
+        const resolvedComponent = getFromImportMap({
+          importMap: args.payload.importMap,
+          PayloadComponent: payloadComponent,
+          schemaPath: 'lexical-clientComponent',
+          silent: true,
+        })
 
-        if (
-          editorState &&
-          typeof editorState === 'object' &&
-          'children' in editorState &&
-          Array.isArray(editorState.children)
-        ) {
-          for (const childKey in editorState.children) {
-            const childState = editorState.children[childKey]
-
-            if (childState && typeof childState === 'object') {
-              lexicalDeepIterate(childState)
-            }
-          }
-        }
+        featureClientImportMap[`${resolvedFeature.key}.${key}`] = resolvedComponent
       }
-
-      lexicalDeepIterate(value.root)*/
     }
   }
   return {
     clientFeatures,
+    featureClientImportMap,
     featureClientSchemaMap,
   }
 }

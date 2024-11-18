@@ -10,9 +10,9 @@ import type {
 import ObjectID from 'bson-objectid'
 import React, { type JSX } from 'react'
 
-import type { SerializedServerInlineBlockNode } from '../../server/nodes/InlineBlocksNode.js'
+import type { SerializedServerInlineBlockNode } from '../../server/nodes/InlineBlockNode.js'
 
-import { ServerInlineBlockNode } from '../../server/nodes/InlineBlocksNode.js'
+import { ServerInlineBlockNode } from '../../server/nodes/InlineBlockNode.js'
 
 export type InlineBlockFields = {
   /** Block form data */

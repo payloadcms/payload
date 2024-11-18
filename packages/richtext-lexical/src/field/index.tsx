@@ -21,6 +21,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   const {
     admin = {},
     clientFeatures,
+    featureClientImportMap,
     featureClientSchemaMap,
     field,
     lexicalEditorConfig,
@@ -50,6 +51,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
       : defaultEditorLexicalConfig
 
     const resolvedClientFeatures = loadClientFeatures({
+      featureClientImportMap,
       featureClientSchemaMap,
       field: field as RichTextFieldClient,
       schemaPath: schemaPath ?? field.name,
@@ -68,6 +70,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     finalSanitizedEditorConfig,
     clientFeatures,
     featureClientSchemaMap,
+    featureClientImportMap,
     field,
     schemaPath,
   ]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate

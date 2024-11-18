@@ -293,8 +293,18 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
-  // @ts-expect-error - TODO: fix this
-  componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
+  /**
+   * Adds payload components to the importMap.
+   *
+   * If an object is provided, the imported components will automatically be made available to the client feature, keyed by the object's keys.
+   */
+  componentImports?:
+    | {
+        [key: string]: PayloadComponent
+      }
+    // @ts-expect-error - TODO: fix this
+    | Config['admin']['importMap']['generators'][0]
+    | PayloadComponent[]
   generatedTypes?: {
     modifyOutputSchema: ({
       collectionIDFieldTypes,

@@ -21,10 +21,17 @@ export const getGenerateImportMap =
             importMap,
             imports,
           })
-        } else if (resolvedFeature.componentImports?.length) {
+        } else if (
+          Array.isArray(resolvedFeature.componentImports) &&
+          resolvedFeature.componentImports?.length
+        ) {
           resolvedFeature.componentImports.forEach((component) => {
             addToImportMap(component)
           })
+        } else if (typeof resolvedFeature.componentImports === 'object') {
+          for (const component of Object.values(resolvedFeature.componentImports)) {
+            addToImportMap(component)
+          }
         }
       }
 

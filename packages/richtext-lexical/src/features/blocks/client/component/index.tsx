@@ -29,7 +29,7 @@ import { $getNodeByKey } from 'lexical'
 import { type BlocksFieldClient, type CollapsedPreferences, type FormState } from 'payload'
 import { v4 as uuid } from 'uuid'
 
-import type { BlockFields } from '../../server/nodes/BlocksNode.js'
+import type { BlockFields } from '../../server/nodes/BlockNode.jsx'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'

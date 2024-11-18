@@ -54,6 +54,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Remove {{label}}',
     },
     label: 'Blocks',
+    wrapperBlocks: {
+      label: 'Wrapper Blocks',
+    },
   },
   es: {
     inlineBlocks: {

@@ -4,9 +4,9 @@ import type { EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
 import ObjectID from 'bson-objectid'
 import React, { type JSX } from 'react'
 
-import type { BlockFieldsOptionalID, SerializedBlockNode } from '../../server/nodes/BlocksNode.js'
+import type { BlockFieldsOptionalID, SerializedBlockNode } from '../../server/nodes/BlockNode.js'
 
-import { ServerBlockNode } from '../../server/nodes/BlocksNode.js'
+import { ServerBlockNode } from '../../server/nodes/BlockNode.js'
 import { BlockComponent } from '../component/index.js'
 
 export class BlockNode extends ServerBlockNode {

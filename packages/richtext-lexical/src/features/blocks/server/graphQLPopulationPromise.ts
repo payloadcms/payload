@@ -2,7 +2,7 @@ import type { Block } from 'payload'
 
 import type { PopulationPromise } from '../../typesServer.js'
 import type { SerializedInlineBlockNode } from '../client/nodes/InlineBlocksNode.js'
-import type { SerializedBlockNode } from './nodes/BlocksNode.js'
+import type { SerializedBlockNode } from './nodes/BlockNode.jsx'
 
 import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/recursivelyPopulateFieldsForGraphQL.js'
 

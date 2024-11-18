@@ -15,11 +15,13 @@ import type { ClientEditorConfig } from '../types.js'
  * @param unSanitizedEditorConfig
  */
 export function loadClientFeatures({
+  featureClientImportMap,
   featureClientSchemaMap,
   field,
   schemaPath,
   unSanitizedEditorConfig,
 }: {
+  featureClientImportMap: Record<string, any>
   featureClientSchemaMap: FeatureClientSchemaMap
   field?: RichTextFieldClient
   schemaPath: string
@@ -55,6 +57,7 @@ export function loadClientFeatures({
     const feature: Partial<ResolvedClientFeature<any>> =
       typeof featureProvider.feature === 'function'
         ? featureProvider.feature({
+            featureClientImportMap,
             featureClientSchemaMap,
             featureProviderMap,
             field,

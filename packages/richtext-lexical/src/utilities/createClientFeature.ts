@@ -13,6 +13,7 @@ import type { FeatureClientSchemaMap } from '../types.js'
 
 export type CreateClientFeatureArgs<UnSanitizedClientProps, ClientProps> =
   | ((props: {
+      featureClientImportMap: Record<string, any>
       featureClientSchemaMap: FeatureClientSchemaMap
       /** unSanitizedEditorConfig.features, but mapped */
       featureProviderMap: ClientFeatureProviderMap
@@ -39,6 +40,7 @@ export const createClientFeature: <
 
     if (typeof feature === 'function') {
       featureProviderClient.feature = ({
+        featureClientImportMap,
         featureClientSchemaMap,
         featureProviderMap,
         field,
@@ -47,6 +49,7 @@ export const createClientFeature: <
         unSanitizedEditorConfig,
       }) => {
         const toReturn = feature({
+          featureClientImportMap,
           featureClientSchemaMap,
           featureProviderMap,
           field,

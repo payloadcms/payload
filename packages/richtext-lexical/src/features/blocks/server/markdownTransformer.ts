@@ -17,12 +17,12 @@ import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPr
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
 import { $convertFromMarkdownString } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'
-import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
+import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlockNode.js'
 import {
   $createServerInlineBlockNode,
   $isServerInlineBlockNode,
   ServerInlineBlockNode,
-} from './nodes/InlineBlocksNode.js'
+} from './nodes/InlineBlockNode.js'
 
 export function createTagRegexes(tagName: string) {
   const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -348,7 +348,7 @@ function getMarkdownTransformerForBlock(
           const node = $createServerBlockNode({
             blockType: block.slug,
             ...blockFields,
-          } as any)
+          })
 
           if (node) {
             // Now handle beforeStartLine and afterEndLine. If those are not empty, we need to add them as text nodes before and after the block node.
@@ -432,7 +432,7 @@ function getMarkdownTransformerForBlock(
         const node = $createServerBlockNode({
           blockType: block.slug,
           ...blockFields,
-        } as any)
+        })
 
         if (node) {
           rootNode.append(node)

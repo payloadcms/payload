@@ -26,6 +26,7 @@ export type FeatureProviderClient<
   clientFeatureProps: BaseClientFeatureProps<UnSanitizedClientFeatureProps>
   feature:
     | ((props: {
+        featureClientImportMap: Record<string, any>
         featureClientSchemaMap: FeatureClientSchemaMap
         /** unSanitizedEditorConfig.features, but mapped */
         featureProviderMap: ClientFeatureProviderMap
@@ -42,10 +43,12 @@ export type FeatureProviderClient<
 export type PluginComponent<ClientFeatureProps = any> = React.FC<{
   clientProps: ClientFeatureProps
 }>
-export type PluginComponentWithAnchor<ClientFeatureProps = any> = React.FC<{
-  anchorElem: HTMLElement
-  clientProps: ClientFeatureProps
-}>
+export type PluginComponentWithAnchor<ClientFeatureProps = any, ExtraProps = object> = React.FC<
+  {
+    anchorElem: HTMLElement
+    clientProps: ClientFeatureProps
+  } & ExtraProps
+>
 
 export type ClientFeature<ClientFeatureProps> = {
   markdownTransformers?: (
