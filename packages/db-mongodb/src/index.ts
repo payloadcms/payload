@@ -1,7 +1,17 @@
 import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
 import type { ClientSession, Connection, ConnectOptions, QueryOptions } from 'mongoose'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload, UpdateOneArgs } from 'payload'
+import type {
+  BaseDatabaseAdapter,
+  DatabaseAdapterObj,
+  Payload,
+  TypeWithID,
+  TypeWithVersion,
+  UpdateGlobalArgs,
+  UpdateGlobalVersionArgs,
+  UpdateOneArgs,
+  UpdateVersionArgs,
+} from 'payload'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
@@ -135,7 +145,16 @@ declare module 'payload' {
     }[]
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
+    updateGlobal: <T extends Record<string, unknown>>(
+      args: { options?: QueryOptions } & UpdateGlobalArgs<T>,
+    ) => Promise<T>
+    updateGlobalVersion: <T extends TypeWithID = TypeWithID>(
+      args: { options?: QueryOptions } & UpdateGlobalVersionArgs<T>,
+    ) => Promise<TypeWithVersion<T>>
     updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
+    updateVersion: <T extends TypeWithID = TypeWithID>(
+      args: { options?: QueryOptions } & UpdateVersionArgs<T>,
+    ) => Promise<TypeWithVersion<T>>
     versions: {
       [slug: string]: CollectionModel
     }

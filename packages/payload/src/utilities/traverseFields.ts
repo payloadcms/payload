@@ -50,6 +50,8 @@ export type TraverseFieldsCallback = (args: {
 type TraverseFieldsArgs = {
   callback: TraverseFieldsCallback
   fields: (Field | TabAsField)[]
+  /** fill empty properties to use this without data */
+  fillEmpty?: boolean
   parentRef?: Record<string, unknown> | unknown
   ref?: Record<string, unknown> | unknown
 }
@@ -65,6 +67,7 @@ type TraverseFieldsArgs = {
 export const traverseFields = ({
   callback,
   fields,
+  fillEmpty = true,
   parentRef = {},
   ref = {},
 }: TraverseFieldsArgs): void => {
@@ -79,43 +82,99 @@ export const traverseFields = ({
     if (skip) {
       return false
     }
+
+    // avoid mutation of ref for all fields
+    let currentRef = ref
+    let currentParentRef = parentRef
+
     if (field.type === 'tabs' && 'tabs' in field) {
-      field.tabs.forEach((tab) => {
+      for (const tab of field.tabs) {
         if ('name' in tab && tab.name) {
-          if (typeof ref[tab.name] === 'undefined') {
-            ref[tab.name] = {}
+          if (!ref[tab.name] || typeof ref[tab.name] !== 'object') {
+            if (fillEmpty) {
+              ref[tab.name] = {}
+            } else {
+              continue
+            }
           }
-          ref = ref[tab.name]
+
+          parentRef = ref
+          currentRef = ref[tab.name]
+
+          if (tab.localized) {
+            for (const key in currentRef as Record<string, unknown>) {
+              if (currentRef[key] && typeof currentRef[key] === 'object') {
+                traverseFields({ callback, fields: tab.fields, parentRef, ref: currentRef[key] })
+              }
+            }
+            continue
+          }
         }
-        if (callback && callback({ field: { ...tab, type: 'tab' }, next, parentRef, ref })) {
+
+        if (
+          callback &&
+          callback({ field: { ...tab, type: 'tab' }, next, parentRef, ref: currentRef })
+        ) {
           return true
         }
-        traverseFields({ callback, fields: tab.fields, parentRef, ref })
-      })
+
+        traverseFields({ callback, fields: tab.fields, parentRef, ref: currentRef })
+      }
+
       return
     }
     if (field.type !== 'tab' && (fieldHasSubFields(field) || field.type === 'blocks')) {
-      const parentRef = ref
       if ('name' in field && field.name) {
-        if (typeof ref[field.name] === 'undefined') {
-          if (field.type === 'array' || field.type === 'blocks') {
-            if (field.localized) {
+        currentParentRef = currentRef
+        if (!ref[field.name]) {
+          if (fillEmpty) {
+            if (field.type === 'group') {
               ref[field.name] = {}
-            } else {
-              ref[field.name] = []
+            } else if (field.type === 'array' || field.type === 'blocks') {
+              if (field.localized) {
+                ref[field.name] = {}
+              } else {
+                ref[field.name] = []
+              }
             }
-          }
-          if (field.type === 'group') {
-            ref[field.name] = {}
+          } else {
+            return
           }
         }
-        ref = ref[field.name]
+        currentRef = ref[field.name]
       }
 
-      if (field.type === 'blocks' || field.type === 'array') {
+      if (
+        field.type === 'group' &&
+        field.localized &&
+        currentRef &&
+        typeof currentRef === 'object'
+      ) {
+        for (const key in currentRef as Record<string, unknown>) {
+          if (currentRef[key]) {
+            traverseFields({
+              callback,
+              fields: field.fields,
+              parentRef: currentParentRef,
+              ref: currentRef[key],
+            })
+          }
+        }
+        return
+      }
+
+      if (
+        (field.type === 'blocks' || field.type === 'array') &&
+        currentRef &&
+        typeof currentRef === 'object'
+      ) {
         if (field.localized) {
-          for (const key in (ref ?? {}) as Record<string, unknown>) {
-            const localeData = ref[key]
+          if (Array.isArray(currentRef)) {
+            return
+          }
+
+          for (const key in currentRef as Record<string, unknown>) {
+            const localeData = currentRef[key]
             if (!Array.isArray(localeData)) {
               continue
             }
@@ -124,19 +183,24 @@ export const traverseFields = ({
               callback,
               data: localeData,
               field,
-              parentRef,
+              parentRef: currentParentRef,
             })
           }
-        } else if (Array.isArray(ref)) {
+        } else if (Array.isArray(currentRef)) {
           traverseArrayOrBlocksField({
             callback,
-            data: ref,
+            data: currentRef as Record<string, unknown>[],
             field,
-            parentRef,
+            parentRef: currentParentRef,
           })
         }
-      } else {
-        traverseFields({ callback, fields: field.fields, parentRef, ref })
+      } else if (currentRef && typeof currentRef === 'object' && 'fields' in field) {
+        traverseFields({
+          callback,
+          fields: field.fields,
+          parentRef: currentParentRef,
+          ref: currentRef,
+        })
       }
     }
   })

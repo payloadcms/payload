@@ -66,7 +66,7 @@ export const renderListView = async (
     visibleEntities,
   } = initPageResult
 
-  if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
+  if (!permissions?.collections?.[collectionSlug]?.read) {
     throw new Error('not-found')
   }
 
@@ -190,7 +190,7 @@ export const renderListView = async (
 
     const sharedClientProps: ListComponentClientProps = {
       collectionSlug,
-      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
+      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create,
       newDocumentURL: formatAdminURL({
         adminRoute,
         path: `/collections/${collectionSlug}/create`,

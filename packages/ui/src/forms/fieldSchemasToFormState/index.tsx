@@ -1,12 +1,12 @@
 import type {
   Data,
-  DocumentPermissions,
   DocumentPreferences,
   Field,
   FieldSchemaMap,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
+  SanitizedDocumentPermissions,
 } from 'payload'
 
 import type { RenderFieldMethod } from './types.js'
@@ -26,7 +26,7 @@ type Args = {
   fieldSchemaMap: FieldSchemaMap | undefined
   id?: number | string
   operation?: 'create' | 'update'
-  permissions: DocumentPermissions['fields']
+  permissions: SanitizedDocumentPermissions['fields']
   preferences: DocumentPreferences
   /**
    * Optionally accept the previous form state,

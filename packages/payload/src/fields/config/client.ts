@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import type {
   AdminClient,
+  BlockJSX,
   BlocksFieldClient,
   ClientBlock,
   ClientField,
@@ -15,9 +16,10 @@ import type {
 } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 
+import { getFromImportMap } from '../../bin/generateImportMap/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { flattenTopLevelFields } from '../../index.js'
+import { flattenTopLevelFields, type ImportMap } from '../../index.js'
 import { removeUndefined } from '../../utilities/removeUndefined.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
@@ -42,11 +44,13 @@ export const createClientField = ({
   defaultIDType,
   field: incomingField,
   i18n,
+  importMap,
 }: {
   clientField?: ClientField
   defaultIDType: Payload['config']['db']['defaultIDType']
   field: Field
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
@@ -92,25 +96,6 @@ export const createClientField = ({
     clientField.label = incomingField.label({ t: i18n.t })
   }
 
-  if (!(clientField.admin instanceof Object)) {
-    clientField.admin = {} as AdminClient
-  }
-
-  if ('admin' in incomingField && 'width' in incomingField.admin) {
-    clientField.admin.style = {
-      ...clientField.admin.style,
-      '--field-width': clientField.admin.width,
-    }
-
-    delete clientField.admin.style.width // avoid needlessly adding this to the element's style attribute
-  } else {
-    if (!(clientField.admin.style instanceof Object)) {
-      clientField.admin.style = {}
-    }
-
-    clientField.admin.style.flex = '1 1 auto'
-  }
-
   switch (incomingField.type) {
     case 'array':
     case 'collapsible':
@@ -128,6 +113,7 @@ export const createClientField = ({
         disableAddingID: incomingField.type !== 'array',
         fields: incomingField.fields,
         i18n,
+        importMap,
       })
 
       break
@@ -154,6 +140,15 @@ export const createClientField = ({
             }
           }
 
+          if (block?.admin?.jsx) {
+            const jsxResolved = getFromImportMap<BlockJSX>({
+              importMap,
+              PayloadComponent: block.admin.jsx,
+              schemaPath: '',
+            })
+            clientBlock.jsx = jsxResolved
+          }
+
           if (block.labels) {
             clientBlock.labels = {} as unknown as LabelsClient
 
@@ -176,6 +171,7 @@ export const createClientField = ({
             defaultIDType,
             fields: block.fields,
             i18n,
+            importMap,
           })
 
           if (!field.blocks) {
@@ -190,8 +186,7 @@ export const createClientField = ({
     }
 
     case 'radio':
-
-    // eslint-disable-next-line no-fallthrough
+    // falls through
     case 'select': {
       const field = clientField as RadioFieldClient | SelectFieldClient
 
@@ -246,6 +241,7 @@ export const createClientField = ({
             disableAddingID: true,
             fields: tab.fields,
             i18n,
+            importMap,
           })
         }
       }
@@ -274,15 +270,10 @@ export const createClientField = ({
   } & ClientField
 
   if (incomingField.admin && 'description' in incomingField.admin) {
-    if (
-      typeof incomingField.admin?.description === 'string' ||
-      typeof incomingField.admin?.description === 'object'
-    ) {
+    if (typeof incomingField.admin?.description === 'function') {
+      delete (clientField as FieldWithDescription).admin.description
+    } else {
       ;(clientField as FieldWithDescription).admin.description = incomingField.admin.description
-    } else if (typeof incomingField.admin?.description === 'function') {
-      ;(clientField as FieldWithDescription).admin.description = incomingField.admin?.description({
-        t: i18n.t,
-      })
     }
   }
 
@@ -295,12 +286,14 @@ export const createClientFields = ({
   disableAddingID,
   fields,
   i18n,
+  importMap,
 }: {
   clientFields: ClientField[]
   defaultIDType: Payload['config']['db']['defaultIDType']
   disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientField[] => {
   const newClientFields: ClientField[] = []
 
@@ -312,6 +305,7 @@ export const createClientFields = ({
       defaultIDType,
       field,
       i18n,
+      importMap,
     })
 
     if (newField) {

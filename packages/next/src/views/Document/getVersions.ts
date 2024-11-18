@@ -1,14 +1,14 @@
 import type {
-  DocumentPermissions,
   Payload,
   SanitizedCollectionConfig,
+  SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
   TypedUser,
 } from 'payload'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
-  docPermissions: DocumentPermissions
+  docPermissions: SanitizedDocumentPermissions
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
   locale?: string
@@ -43,7 +43,7 @@ export const getVersions = async ({
   const entityConfig = collectionConfig || globalConfig
   const versionsConfig = entityConfig?.versions
 
-  const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
+  const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions)
 
   if (!shouldFetchVersions) {
     const hasPublishedDoc = Boolean((collectionConfig && id) || globalConfig)

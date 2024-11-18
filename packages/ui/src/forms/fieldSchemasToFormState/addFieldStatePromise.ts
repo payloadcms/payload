@@ -1,6 +1,5 @@
 import type {
   Data,
-  DocumentPermissions,
   DocumentPreferences,
   Field,
   FieldSchemaMap,
@@ -8,6 +7,7 @@ import type {
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
+  SanitizedFieldPermissions,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
@@ -61,7 +61,12 @@ export type AddFieldStatePromiseArgs = {
   parentPath: string
   parentSchemaPath: string
   passesCondition: boolean
-  permissions: DocumentPermissions['fields']
+  permissions:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | null
+    | SanitizedFieldPermissions
   preferences: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
@@ -131,8 +136,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
   if (fieldAffectsData(field) && !(isHiddenField || disabledFromAdmin)) {
-    let hasPermission =
-      typeof permissions?.[field.name]?.read === 'boolean' ? permissions[field.name].read : true
+    const fieldPermissions = permissions === true ? permissions : permissions?.[field.name]
+
+    let hasPermission: boolean = fieldPermissions === true || fieldPermissions?.read
 
     if (typeof field?.access?.read === 'function') {
       hasPermission = await field.access.read({ doc: fullData, req, siblingData: data })
@@ -243,7 +249,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 parentPassesCondition: passesCondition,
                 parentPath,
                 parentSchemaPath: schemaPath,
-                permissions: permissions?.[field.name]?.fields || {},
+                permissions:
+                  fieldPermissions === true ? fieldPermissions : fieldPermissions?.fields || {},
                 preferences,
                 previousFormState,
                 renderAllFields: requiresRender,
@@ -375,7 +382,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   parentPassesCondition: passesCondition,
                   parentPath,
                   parentSchemaPath: rowSchemaPath,
-                  permissions: permissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
+                  permissions:
+                    fieldPermissions === true
+                      ? fieldPermissions
+                      : permissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
                   preferences,
                   previousFormState,
                   renderAllFields: requiresRender,
@@ -460,7 +470,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           parentPassesCondition: passesCondition,
           parentPath: path,
           parentSchemaPath: schemaPath,
-          permissions: permissions?.[field.name]?.fields || {},
+          permissions: fieldPermissions ?? permissions?.[field.name]?.fields ?? {},
           preferences,
           previousFormState,
           renderAllFields,
@@ -651,7 +661,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         parentPassesCondition: passesCondition,
         parentPath: tabHasName(tab) ? tabPath : parentPath,
         parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
-        permissions: tabHasName(tab) ? permissions?.[tab.name]?.fields || {} : permissions,
+        permissions: tabHasName(tab)
+          ? typeof permissions === 'boolean'
+            ? permissions
+            : permissions?.[tab.name] || {}
+          : permissions,
         preferences,
         previousFormState,
         renderAllFields,
@@ -701,6 +715,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
 
     renderFieldFn({
+      id,
+      collectionSlug,
       data: fullData,
       fieldConfig: fieldConfig as Field,
       fieldSchemaMap,
@@ -712,6 +728,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentSchemaPath,
       path,
       permissions,
+      preferences,
       previousFieldState: previousFormState?.[path],
       req,
       schemaPath,

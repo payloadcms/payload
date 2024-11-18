@@ -334,8 +334,7 @@ This has been taken from the [lexical serialization & deserialization docs](http
 Convert markdown content to the Lexical editor format with the following:
 
 ```ts
-import { $convertFromMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
-import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
+import { sanitizeServerEditorConfig, $convertFromMarkdownString } from '@payloadcms/richtext-lexical'
 
 const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & Payload Config here
 const markdown = `# Hello World`

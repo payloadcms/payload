@@ -20,7 +20,7 @@ import type {
   ServerSideEditViewProps,
   VisibleEntities,
 } from '../admin/views/types.js'
-import type { Permissions } from '../auth/index.js'
+import type { SanitizedPermissions } from '../auth/index.js'
 import type {
   AddToImportMap,
   ImportMap,
@@ -398,7 +398,7 @@ export type ServerProps = {
   readonly locale?: Locale
   readonly params?: { [key: string]: string | string[] | undefined }
   readonly payload: Payload
-  readonly permissions?: Permissions
+  readonly permissions?: SanitizedPermissions
   readonly searchParams?: { [key: string]: string | string[] | undefined }
   readonly user?: TypedUser
   readonly visibleEntities?: VisibleEntities
@@ -764,9 +764,9 @@ export type Config = {
         /** Add custom admin views */
         [key: string]: AdminViewConfig
         /** Replace the account screen */
-        Account?: AdminViewConfig
+        account?: AdminViewConfig
         /** Replace the admin homepage */
-        Dashboard?: AdminViewConfig
+        dashboard?: AdminViewConfig
       }
     }
     /** Extension point to add your custom data. Available in server and client. */

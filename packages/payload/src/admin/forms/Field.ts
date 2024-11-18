@@ -1,9 +1,10 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { MarkOptional } from 'ts-essentials'
 
-import type { FieldPermissions, User } from '../../auth/types.js'
+import type { SanitizedFieldPermissions, User } from '../../auth/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
-import type { Payload } from '../../types/index.js'
+import type { DocumentPreferences } from '../../preferences/types.js'
+import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
 import type {
   ClientTab,
   Data,
@@ -66,6 +67,7 @@ export type FieldPaths = {
 
 export type ServerComponentProps = {
   clientField: ClientFieldWithOptionalType
+  collectionSlug: string
   data: Data
   field: Field
   /**
@@ -78,8 +80,12 @@ export type ServerComponentProps = {
    */
   formState: FormState
   i18n: I18nClient
+  id?: number | string
+  operation: Operation
   payload: Payload
-  permissions: FieldPermissions
+  permissions: SanitizedFieldPermissions
+  preferences: DocumentPreferences
+  req: PayloadRequest
   siblingData: Data
   user: User
 }

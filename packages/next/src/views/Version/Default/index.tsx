@@ -65,7 +65,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const comparison = compareValue?.value && currentComparisonDoc?.version // the `version` key is only present on `versions` documents
 
-  const canUpdate = docPermissions?.update?.permission
+  const canUpdate = docPermissions?.update
 
   const localeValues = locales && locales.map((locale) => locale.value)
 

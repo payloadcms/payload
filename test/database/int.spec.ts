@@ -4,11 +4,16 @@ import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
+import {
+  migrateRelationshipsV2_V3,
+  migrateVersionsV1_V2,
+} from '@payloadcms/db-mongodb/migration-utils'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
+import { Types } from 'mongoose'
 import path from 'path'
-import { commitTransaction, initTransaction, QueryError } from 'payload'
+import { commitTransaction, initTransaction, killTransaction, QueryError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
@@ -84,6 +89,46 @@ describe('database', () => {
       })
 
       expect(doc.id).toBeDefined()
+    })
+
+    it('should not create duplicate versions with custom id type', async () => {
+      const doc = await payload.create({
+        collection: 'custom-ids',
+        data: {
+          title: 'hey',
+        },
+      })
+
+      await payload.update({
+        collection: 'custom-ids',
+        id: doc.id,
+        data: {},
+      })
+
+      await payload.update({
+        collection: 'custom-ids',
+        id: doc.id,
+        data: {},
+      })
+
+      const versionsQuery = await payload.db.findVersions({
+        collection: 'custom-ids',
+        req: {} as PayloadRequest,
+        where: {
+          'version.title': {
+            equals: 'hey',
+          },
+          latest: {
+            equals: true,
+          },
+        },
+      })
+
+      expect(versionsQuery.totalDocs).toStrictEqual(1)
+    })
+
+    it('should not accidentally treat nested id fields as custom id', () => {
+      expect(payload.collections['fake-custom-ids'].customIDType).toBeUndefined()
     })
   })
 
@@ -227,6 +272,7 @@ describe('database', () => {
 
     it('should run migrate:refresh', async () => {
       // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (!isMongoose(payload)) {
         return
       }
@@ -243,6 +289,113 @@ describe('database', () => {
 
       expect(error).toBeUndefined()
       expect(migrations.docs).toHaveLength(1)
+    })
+  })
+
+  describe('predefined migrations', () => {
+    it('mongoose - should execute migrateVersionsV1_V2', async () => {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name !== 'mongoose') {
+        return
+      }
+
+      const req = { payload } as PayloadRequest
+
+      let hasErr = false
+
+      await initTransaction(req)
+      await migrateVersionsV1_V2({ req }).catch(async (err) => {
+        payload.logger.error(err)
+        hasErr = true
+        await killTransaction(req)
+      })
+      await commitTransaction(req)
+
+      expect(hasErr).toBeFalsy()
+    })
+
+    it('mongoose - should execute migrateRelationshipsV2_V3', async () => {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name !== 'mongoose') {
+        return
+      }
+
+      const req = { payload } as PayloadRequest
+
+      let hasErr = false
+
+      const docs_before = Array.from({ length: 174 }, () => ({
+        relationship: new Types.ObjectId().toHexString(),
+        relationship_2: {
+          relationTo: 'default-values',
+          value: new Types.ObjectId().toHexString(),
+        },
+      }))
+
+      const inserted = await payload.db.collections['relationships-migration'].insertMany(
+        docs_before,
+        {
+          lean: true,
+        },
+      )
+
+      const versions_before = await payload.db.versions['relationships-migration'].insertMany(
+        docs_before.map((doc, i) => ({
+          version: doc,
+          parent: inserted[i]._id.toHexString(),
+        })),
+        {
+          lean: true,
+        },
+      )
+
+      expect(inserted.every((doc) => typeof doc.relationship === 'string')).toBeTruthy()
+
+      await initTransaction(req)
+      await migrateRelationshipsV2_V3({ req, batchSize: 66 }).catch(async (err) => {
+        await killTransaction(req)
+        payload.logger.error(err)
+        hasErr = true
+      })
+      await commitTransaction(req)
+
+      expect(hasErr).toBeFalsy()
+
+      const docs = await payload.db.collections['relationships-migration'].find(
+        {},
+        {},
+        { lean: true },
+      )
+
+      docs.forEach((doc, i) => {
+        expect(doc.relationship).toBeInstanceOf(Types.ObjectId)
+        expect(doc.relationship.toHexString()).toBe(docs_before[i].relationship)
+
+        expect(doc.relationship_2.value).toBeInstanceOf(Types.ObjectId)
+        expect(doc.relationship_2.value.toHexString()).toBe(docs_before[i].relationship_2.value)
+      })
+
+      const versions = await payload.db.versions['relationships-migration'].find(
+        {},
+        {},
+        { lean: true },
+      )
+
+      versions.forEach((doc, i) => {
+        expect(doc.parent).toBeInstanceOf(Types.ObjectId)
+        expect(doc.parent.toHexString()).toBe(versions_before[i].parent)
+
+        expect(doc.version.relationship).toBeInstanceOf(Types.ObjectId)
+        expect(doc.version.relationship.toHexString()).toBe(versions_before[i].version.relationship)
+
+        expect(doc.version.relationship_2.value).toBeInstanceOf(Types.ObjectId)
+        expect(doc.version.relationship_2.value.toHexString()).toBe(
+          versions_before[i].version.relationship_2.value,
+        )
+      })
+
+      await payload.db.collections['relationships-migration'].deleteMany({})
+      await payload.db.versions['relationships-migration'].deleteMany({})
     })
   })
 

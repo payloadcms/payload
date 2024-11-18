@@ -68,6 +68,7 @@
     "file-type": "19.3.0",
     "http-status": "1.6.2",
     "jwt-decode": "4.0.0",
+    "mongoose": "8.8.1",
     "next": "15.0.0",
     "payload": "workspace:*",
     "qs-esm": "7.0.2",

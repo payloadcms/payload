@@ -73,7 +73,6 @@ export type UploadInputProps = {
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: (number | string)[] | (number | string)
-  readonly width?: React.CSSProperties['width']
 }
 
 export function UploadInput(props: UploadInputProps) {
@@ -102,7 +101,6 @@ export function UploadInput(props: UploadInputProps) {
     showError,
     style,
     value,
-    width,
   } = props
 
   const [populatedDocs, setPopulatedDocs] = React.useState<
@@ -164,14 +162,12 @@ export function UploadInput(props: UploadInputProps) {
 
     if (typeof activeRelationTo === 'string') {
       if (permissions?.collections && permissions.collections?.[activeRelationTo]?.create) {
-        if (permissions.collections[activeRelationTo].create?.permission === true) {
-          return true
-        }
+        return true
       }
     }
 
     return false
-  }, [activeRelationTo, permissions, readOnly, allowCreate])
+  }, [activeRelationTo, permissions, allowCreate])
 
   const onChange = React.useCallback(
     (newValue) => {
@@ -449,10 +445,7 @@ export function UploadInput(props: UploadInputProps) {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      style={style}
     >
       <RenderCustomComponent
         CustomComponent={Label}

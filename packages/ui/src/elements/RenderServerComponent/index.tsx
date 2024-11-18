@@ -1,43 +1,9 @@
 import type { ImportMap, PayloadComponent } from 'payload'
 
-import {
-  isPlainObject,
-  isReactServerComponentOrFunction,
-  parsePayloadComponent,
-} from 'payload/shared'
+import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import { removeUndefined } from '../../utilities/removeUndefined.js'
-
-export const getFromImportMap = <TOutput,>(args: {
-  importMap: ImportMap
-  PayloadComponent: PayloadComponent
-  schemaPath?: string
-  silent?: boolean
-}): TOutput => {
-  const { importMap, PayloadComponent, schemaPath, silent } = args
-
-  const { exportName, path } = parsePayloadComponent(PayloadComponent)
-
-  const key = path + '#' + exportName
-
-  const importMapEntry = importMap[key]
-
-  if (!importMapEntry && !silent) {
-    // eslint-disable-next-line no-console
-    console.error(
-      `getFromImportMap: PayloadComponent not found in importMap`,
-      {
-        key,
-        PayloadComponent,
-        schemaPath,
-      },
-      'You may need to run the `payload generate:importmap` command to generate the importMap ahead of runtime.',
-    )
-  }
-
-  return importMapEntry
-}
 
 /**
  * Can be used to render both MappedComponents and React Components.

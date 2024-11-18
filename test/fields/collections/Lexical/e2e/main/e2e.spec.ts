@@ -18,6 +18,7 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  saveDocHotkeyAndAssert,
   throttleTest,
 } from '../../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
@@ -205,6 +206,63 @@ describe('lexicalMain', () => {
       timeout: POLL_TOPASS_TIMEOUT,
     })
   })
+
+  test('ensure saving document does not kick cursor / focus out of rich text field', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').nth(2) // second
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
+    await expect(spanInEditor).toBeVisible()
+
+    await spanInEditor.click() // Click works better than focus
+    // Now go to the END of the span
+    for (let i = 0; i < 6; i++) {
+      await page.keyboard.press('ArrowRight')
+    }
+
+    await page.keyboard.type('more')
+    await expect(spanInEditor).toHaveText('Upload Node:more')
+
+    await wait(500)
+
+    await saveDocHotkeyAndAssert(page) // Use hotkey to save, as clicking the save button will obviously remove focus from the richtext field
+    await wait(500)
+    // Keep writing after save, assuming the cursor position is still at the end of the span
+    await page.keyboard.type('text')
+    await expect(spanInEditor).toHaveText('Upload Node:moretext')
+    await wait(500)
+    await saveDocAndAssert(page) // Use hotkey to save, as clicking the save button will obviously remove focus from the richtext field
+
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const firstParagraphTextNode: SerializedTextNode = (
+        lexicalField.root.children[0] as SerializedParagraphNode
+      ).children[0] as SerializedTextNode
+
+      expect(firstParagraphTextNode.text).toBe('Upload Node:moretext')
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
   test('should be able to bold text using floating select toolbar', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').nth(2) // second

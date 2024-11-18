@@ -1,12 +1,12 @@
 import type {
   Data,
-  DocumentPermissions,
   DocumentPreferences,
   Field as FieldSchema,
   FieldSchemaMap,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
+  SanitizedFieldPermissions,
 } from 'payload'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
@@ -47,7 +47,12 @@ type Args = {
   parentPassesCondition?: boolean
   parentPath: string
   parentSchemaPath: string
-  permissions: DocumentPermissions['fields']
+  permissions:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | null
+    | SanitizedFieldPermissions
   preferences?: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
