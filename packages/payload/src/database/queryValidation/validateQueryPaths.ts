@@ -68,7 +68,7 @@ export async function validateQueryPaths({
                 collectionConfig,
                 errors,
                 fields,
-                globalConfig: deepCopyObject(globalConfig),
+                globalConfig,
                 operator,
                 overrideAccess,
                 path,
