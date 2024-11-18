@@ -32,7 +32,7 @@ Examples:
 
 **Periodic sync or similar scheduled action**
 
-Some applications may need to perform a regularly scheduled operation of some type. Jobs are perfect for this because you can execute their logic using `cron`, scheduled nightly, every twelve hours, or some similar time period. 
+Some applications may need to perform a regularly scheduled operation of some type. Jobs are perfect for this because you can execute their logic using `cron`, scheduled nightly, every twelve hours, or some similar time period.
 
 Examples:
 
@@ -49,22 +49,22 @@ Examples:
 - You need to create (and then keep in sync) vector embeddings of your documents as they change, but you use an open source model to generate embeddings
 - You have a PDF generator that needs to dynamically build and send PDF versions of documents to customers
 - You need to use a headless browser to perform some type of logic
-- You need to perform a series of actions, each of which depends on a prior action and should be run in as "durable" of a fashion as possible 
+- You need to perform a series of actions, each of which depends on a prior action and should be run in as "durable" of a fashion as possible
 
 ### How it works
 
 There are a few concepts that you should become familiarized with before using Payload's Jobs Queue. We recommend learning what each of these does in order to fully understand how to leverage the power of Payload's Jobs Queue.
 
-1. [Tasks](/docs/beta/jobs-queue/tasks)
-1. [Workflows](/docs/beta/jobs-queue/workflows)
-1. [Jobs](/docs/beta/jobs-queue/jobs)
-1. [Queues](/docs/beta/jobs-queue/queues)
+1. [Tasks](/docs/main/jobs-queue/tasks)
+1. [Workflows](/docs/main/jobs-queue/workflows)
+1. [Jobs](/docs/main/jobs-queue/jobs)
+1. [Queues](/docs/main/jobs-queue/queues)
 
-All of these pieces work together in order to allow you to offload long-running, expensive, or future scheduled work from your main APIs. 
+All of these pieces work together in order to allow you to offload long-running, expensive, or future scheduled work from your main APIs.
 
 Here's a quick overview:
 
 - A Task is a specific function that performs business logic
 - Workflows are groupings of specific tasks which should be run in-order, and can be retried from a specific point of failure
 - A Job is an instance of a single task or workflow which will be executed
-- A Queue is a way to segment your jobs into different "groups" - for example, some to run nightly, and others to run every 10 minutes 
+- A Queue is a way to segment your jobs into different "groups" - for example, some to run nightly, and others to run every 10 minutes
