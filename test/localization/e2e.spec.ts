@@ -262,10 +262,11 @@ describe('Localization', () => {
       const docControls = page.locator('.doc-controls__popup')
       await docControls.click()
 
-      await expect(page.locator('.copy-locale-data__button')).toBeVisible()
-      await page.locator('.copy-locale-data__button').click()
+      const copyButton = page.locator('#copy-locale-data__button')
+      await expect(copyButton).toBeVisible()
+      await copyButton.click()
 
-      await expect(page.locator('.copy-locale-data .drawer')).toBeVisible()
+      await expect(page.locator('copy-locale-data__content')).toBeVisible()
     })
 
     test('should copy data to correct locale', async () => {
@@ -275,10 +276,12 @@ describe('Localization', () => {
 
       const docControls = page.locator('.doc-controls__popup')
       await docControls.click()
-      await expect(page.locator('.copy-locale-data__button')).toBeVisible()
-      await page.locator('.copy-locale-data__button').click()
 
-      await expect(page.locator('.copy-locale-data .drawer')).toBeVisible()
+      const copyButton = page.locator('#copy-locale-data__button')
+      await expect(copyButton).toBeVisible()
+      await copyButton.click()
+
+      await expect(page.locator('.copy-locale-data__content')).toBeVisible()
 
       const fromField = page.locator('#field-fromLocale')
       await fromField.click({ delay: 100 })
@@ -289,8 +292,8 @@ describe('Localization', () => {
       await toField.click({ delay: 100 })
       await options.locator('Spanish').click()
 
-      const copyButton = page.locator('.copy-locale-data__sub-header button')
-      await copyButton.click()
+      const copyDrawerClose = page.locator('.copy-locale-data__sub-header button')
+      await copyDrawerClose.click()
 
       await expect(page.locator('#field-title')).toHaveValue(title)
     })
@@ -304,8 +307,9 @@ describe('Localization', () => {
       const docControls = page.locator('.doc-controls__popup')
       await docControls.click()
 
-      await expect(page.locator('.copy-locale-data__button')).toBeVisible()
-      await page.locator('.copy-locale-data__button').click()
+      const copyButton = page.locator('#copy-locale-data__button')
+      await expect(copyButton).toBeVisible()
+      await copyButton.click()
 
       await expect(page.locator('.payload-toast-container')).toContainText('unsaved')
     })
