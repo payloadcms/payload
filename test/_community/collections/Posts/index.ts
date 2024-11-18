@@ -12,6 +12,21 @@ export const PostsCollection: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'ui',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '/Field.tsx',
+            },
+          },
+        },
+      ],
+    },
   ],
   versions: {
     drafts: true,

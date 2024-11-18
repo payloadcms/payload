@@ -397,7 +397,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     ```
 
     3. For Fields, use the `admin.components.Description` key:
-    
+
     ```diff
     // fields/MyField.ts
     import type { FieldConfig } from 'payload'
@@ -501,7 +501,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
       slug: 'my-collection',
       admin: {
         views: {
-    -     Edit: MyCustomView  
+    -     Edit: MyCustomView
     +     edit: {
     +       Component: './components/MyCustomView.tsx'
     +     }
@@ -552,8 +552,8 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     +       edit: {
     +         tab: {
     +           isActive: ({ href }) => true,
-    +           href: ({ href }) => ''
-    +           Component: './path/to/CustomComponent.tsx', // Or use a Custom Component
+    +           href: ({ href }) => '' // or use a Custom Component (see below)
+    +           // Component: './path/to/CustomComponent.tsx'
     +         }
     +       },
           },
