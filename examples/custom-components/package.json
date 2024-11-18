@@ -5,40 +5,53 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "_dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm generate:importmap && next dev",
+    "_dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm generate:importmap && pnpm seed && next dev --turbo",
-    "generate:importmap": "payload generate:importmap",
+    "dev": "cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true NODE_OPTIONS=--no-deprecation next dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:schema": "payload-graphql generate:schema",
     "generate:types": "payload generate:types",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "seed": "npm run payload migrate:fresh",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "seed": "npm run payload migrate:fresh"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "3.0.0-beta.127",
-    "@payloadcms/next": "3.0.0-beta.127",
-    "@payloadcms/richtext-lexical": "3.0.0-beta.127",
-    "@payloadcms/ui": "3.0.0-beta.127",
+    "@payloadcms/db-mongodb": "beta",
+    "@payloadcms/next": "beta",
+    "@payloadcms/richtext-lexical": "beta",
+    "@payloadcms/ui": "beta",
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
+    "ejs": "3.1.10",
     "graphql": "^16.9.0",
     "install": "^0.13.0",
-    "next": "15.0.0-canary.160",
-    "payload": "3.0.0-beta.127",
+    "next": "15.0.0",
+    "payload": "beta",
     "react": "19.0.0-rc-5dcb0097-20240918",
     "react-dom": "19.0.0-rc-5dcb0097-20240918"
   },
   "devDependencies": {
-    "@payloadcms/graphql": "3.0.0-beta.127",
-    "@types/react": "npm:types-react@19.0.0-beta.2",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-beta.2",
+    "@payloadcms/graphql": "beta",
+    "@swc/core": "^1.6.13",
+    "@types/ejs": "^3.1.5",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "eslint": "^8.57.0",
-    "eslint-config-next": "15.0.0-canary.146",
-    "tsx": "^4.7.1",
+    "eslint-config-next": "15.0.0",
+    "tsx": "^4.16.2",
     "typescript": "5.5.2"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "npm:types-react@19.0.0-rc.1",
+      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
+    }
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }
