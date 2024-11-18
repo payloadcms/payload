@@ -48,7 +48,7 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
         depth: 0,
         draft: true,
         fallbackLocale: false,
-        locale: locale.code,
+        locale: locale?.code,
       })
     }
   } catch (error) {
