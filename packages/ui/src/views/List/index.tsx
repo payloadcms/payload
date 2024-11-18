@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
 
-import type { ListQueryProps } from '../../providers/ListQuery/index.js'
 import type { GetTableStateClient } from '../../providers/ServerFunctions/types.js'
 import type { DefaultListViewProps, ListPreferences } from './types.js'
 
@@ -33,12 +32,12 @@ import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { ListQueryProvider, useListQuery } from '../../providers/ListQuery/index.js'
+import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import './index.scss'
 import { ListHeader } from './ListHeader/index.js'
+import './index.scss'
 
 const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
@@ -67,9 +66,7 @@ export type ListViewClientProps = {
   renderedFilters?: Map<string, React.ReactNode>
 } & ListViewSlots
 
-const DefaultListViewWithContext: React.FC<
-  Omit<DefaultListViewProps, keyof Omit<ListQueryProps, 'collectionSlug' | 'preferenceKey'>>
-> = (props) => {
+export const DefaultListView: React.FC<DefaultListViewProps> = (props) => {
   const {
     AfterList,
     AfterListTable,
@@ -293,28 +290,5 @@ const DefaultListViewWithContext: React.FC<
         </div>
       </TableColumnsProvider>
     </Fragment>
-  )
-}
-
-export function DefaultListView({
-  data,
-  defaultLimit,
-  defaultSort,
-  modifySearchParams,
-  onQueryChange,
-  preferenceKey,
-  ...rest
-}: Omit<DefaultListViewProps, 'children'>) {
-  return (
-    <ListQueryProvider
-      data={data}
-      defaultLimit={defaultLimit}
-      defaultSort={defaultSort}
-      modifySearchParams={modifySearchParams}
-      onQueryChange={onQueryChange}
-      preferenceKey={preferenceKey}
-    >
-      <DefaultListViewWithContext {...rest} />
-    </ListQueryProvider>
   )
 }

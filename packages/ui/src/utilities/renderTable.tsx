@@ -51,7 +51,6 @@ export const renderTable = ({
   payload,
   renderRowTypes,
   tableAppearance,
-  useAsTitle,
 }: {
   collectionConfig: ClientCollectionConfig
   columnPreferences: ColumnPreferences
@@ -65,14 +64,17 @@ export const renderTable = ({
   payload: Payload
   renderRowTypes?: boolean
   tableAppearance?: 'condensed' | 'default'
-  useAsTitle: CollectionConfig['admin']['useAsTitle']
 }): {
   columnState: Column[]
   Table: React.ReactNode
 } => {
   const columns =
     columnsFromArgs ||
-    getInitialColumns(filterFields(fields), useAsTitle, collectionConfig?.admin?.defaultColumns)
+    getInitialColumns(
+      filterFields(fields),
+      collectionConfig.admin?.useAsTitle,
+      collectionConfig.admin?.defaultColumns,
+    )
 
   const columnState = buildColumnState({
     beforeRows: renderRowTypes
@@ -98,7 +100,7 @@ export const renderTable = ({
     customCellProps,
     docs,
     payload,
-    useAsTitle,
+    useAsTitle: collectionConfig.admin?.useAsTitle,
   })
 
   return {

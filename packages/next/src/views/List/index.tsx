@@ -164,11 +164,15 @@ export const renderListView = async (
       clientCollectionConfig,
       collectionConfig,
       customCellProps,
+      defaultLimit: limit,
+      defaultSort: sort,
+      drawerSlug,
       fields,
       i18n,
       limit,
       listPreferences,
       locale: fullLocale,
+      modifySearchParams: !drawerSlug,
       page,
       payload,
       sort,
@@ -185,13 +189,10 @@ export const renderListView = async (
         serverProps: sharedServerProps,
       }),
       ...sharedClientProps,
-      defaultLimit: limit,
-      defaultSort: sort,
       disableBulkDelete,
       disableBulkEdit,
       enableRowSelections,
       listPreferences,
-      modifySearchParams: !drawerSlug,
       preferenceKey,
       renderedFilters,
     }
@@ -205,10 +206,7 @@ export const renderListView = async (
             Component={collectionConfig?.admin?.components?.views?.list?.Component}
             Fallback={DefaultListViewWithData}
             importMap={payload.importMap}
-            serverProps={{
-              ...sharedServerProps,
-              listPreferences,
-            }}
+            serverProps={sharedServerProps}
           />
         </Fragment>
       ),

@@ -2,6 +2,7 @@ import React from 'react'
 
 import type { DefaultListViewProps, ListComponentServerProps } from './types.js'
 
+import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { renderTable } from '../../utilities/renderTable.js'
 import { DefaultListView } from './index.js'
 
@@ -9,8 +10,8 @@ type Args = ListComponentServerProps & Omit<DefaultListViewProps, 'data' | 'Tabl
 export async function DefaultListViewWithData(args: Args) {
   const {
     clientCollectionConfig,
-    collectionConfig,
     customCellProps,
+    drawerSlug,
     fields,
     i18n,
     limit,
@@ -43,11 +44,11 @@ export async function DefaultListViewWithData(args: Args) {
     columnPreferences: listPreferences?.columns,
     customCellProps,
     docs: data.docs,
+    drawerSlug,
     enableRowSelections: args.enableRowSelections,
     fields,
     i18n,
     payload,
-    useAsTitle: collectionConfig.admin.useAsTitle,
   })
 
   const clientProps: Required<
@@ -60,21 +61,37 @@ export async function DefaultListViewWithData(args: Args) {
     BeforeListTable: args.BeforeListTable,
     collectionSlug: args.collectionSlug,
     columnState,
-    data,
-    defaultLimit: limit,
-    defaultSort: sort,
     Description: args.Description,
     disableBulkDelete: args.disableBulkDelete,
     disableBulkEdit: args.disableBulkEdit,
     enableRowSelections: args.enableRowSelections,
     hasCreatePermission: args.hasCreatePermission,
     listPreferences: args.listPreferences,
-    modifySearchParams: args.modifySearchParams,
     newDocumentURL: args.newDocumentURL,
     preferenceKey: args.preferenceKey,
     renderedFilters: args.renderedFilters,
     Table,
   }
 
-  return <DefaultListView {...clientProps} />
+  const reducedClientProps = Object.keys(clientProps).reduce(
+    (acc, key) => {
+      if (clientProps[key] !== undefined) {
+        acc[key] = clientProps[key]
+      }
+      return acc
+    },
+    {} as typeof clientProps,
+  )
+
+  return (
+    <ListQueryProvider
+      data={data}
+      defaultLimit={limit}
+      defaultSort={sort}
+      modifySearchParams={!drawerSlug}
+      preferenceKey={args.preferenceKey}
+    >
+      <DefaultListView {...reducedClientProps} />
+    </ListQueryProvider>
+  )
 }

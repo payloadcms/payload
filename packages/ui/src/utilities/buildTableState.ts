@@ -253,7 +253,6 @@ export const buildTableState = async (
     payload,
     renderRowTypes,
     tableAppearance,
-    useAsTitle: collectionConfig.admin.useAsTitle,
   })
 
   const renderedFilters = renderFilters(fields, req.payload.importMap)

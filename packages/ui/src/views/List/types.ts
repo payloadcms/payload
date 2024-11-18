@@ -34,11 +34,15 @@ export type ListComponentServerProps = {
   clientCollectionConfig: ClientCollectionConfig
   collectionConfig: SanitizedCollectionConfig
   customCellProps?: Record<string, any>
+  defaultLimit: number
+  defaultSort: string
+  drawerSlug?: string
   fields: Field[]
   i18n: I18n
   limit: number
   listPreferences?: ListPreferences
   locale?: Locale
+  modifySearchParams: boolean
   page?: number
   payload: Payload
   sort?: string
@@ -70,4 +74,4 @@ export type ListViewClientProps = {
   renderedFilters?: Map<string, React.ReactNode>
 } & ListViewSlots
 
-export type DefaultListViewProps = ListQueryProps & ListViewClientProps & ListViewSlots
+export type DefaultListViewProps = ListViewClientProps
