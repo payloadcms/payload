@@ -1,5 +1,5 @@
 import type { TransactionPg } from '@payloadcms/drizzle/types'
-import type { Field, Payload, PayloadRequest } from 'payload'
+import type { FlattenField, Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
 
@@ -13,7 +13,7 @@ type Args = {
   collectionSlug?: string
   db: TransactionPg
   debug: boolean
-  fields: Field[]
+  fields: FlattenField[]
   globalSlug?: string
   isVersions: boolean
   pathsToQuery: PathsToQuery

@@ -91,7 +91,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
       columnPrefix: '',
       db,
       disableNotNull: false,
-      fields: collection.fields,
+      fields: collection.flattenFields,
       isVersions: false,
       newTableName: tableName,
       parentTableName: tableName,
@@ -106,7 +106,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
       collectionSlug: collection.slug,
       db,
       debug,
-      fields: collection.fields,
+      fields: collection.flattenFields,
       isVersions: false,
       pathsToQuery,
       payload,
@@ -119,7 +119,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
         `_${toSnakeCase(collection.slug)}${adapter.versionsSuffix}`,
       )
 
-      const versionFields = buildVersionCollectionFields(payload.config, collection)
+      const versionFields = buildVersionCollectionFields(payload.config, collection, true)
       const versionPathsToQuery: PathsToQuery = new Set()
 
       traverseFields({
@@ -163,7 +163,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
       columnPrefix: '',
       db,
       disableNotNull: false,
-      fields: global.fields,
+      fields: global.flattenFields,
       globalSlug: global.slug,
       isVersions: false,
       newTableName: tableName,
@@ -178,7 +178,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
       adapter,
       db,
       debug,
-      fields: global.fields,
+      fields: global.flattenFields,
       globalSlug: global.slug,
       isVersions: false,
       pathsToQuery,
@@ -192,7 +192,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
         `_${toSnakeCase(global.slug)}${adapter.versionsSuffix}`,
       )
 
-      const versionFields = buildVersionGlobalFields(payload.config, global)
+      const versionFields = buildVersionGlobalFields(payload.config, global, true)
 
       const versionPathsToQuery: PathsToQuery = new Set()
 

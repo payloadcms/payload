@@ -1,5 +1,5 @@
 import type { TransactionPg } from '@payloadcms/drizzle/types'
-import type { Field, Payload, PayloadRequest } from 'payload'
+import type { FlattenField, Payload, PayloadRequest } from 'payload'
 
 import { upsertRow } from '@payloadcms/drizzle'
 
@@ -14,7 +14,7 @@ type Args = {
   db: TransactionPg
   debug: boolean
   docsToResave: DocsToResave
-  fields: Field[]
+  fields: FlattenField[]
   globalSlug?: string
   isVersions: boolean
   payload: Payload
