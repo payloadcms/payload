@@ -16,7 +16,6 @@ export const FileCell: React.FC<FileCellProps> = ({
   collectionConfig,
   rowData,
 }) => {
-  const { collectionSlug, uploadConfig } = customCellContext
   const src = rowData?.thumbnailURL || rowData?.url
 
   return (
