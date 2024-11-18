@@ -278,6 +278,7 @@ export const trTranslations: DefaultTranslationsObject = {
     open: 'Aç',
     or: 'Or',
     order: 'Order',
+    overwriteExistingData: 'Mevcut alan verilerinin üzerine yazın',
     pageNotFound: 'Sayfa bulunamadı',
     password: 'Parola',
     payloadSettings: 'Ayarlar',
@@ -326,6 +327,14 @@ export const trTranslations: DefaultTranslationsObject = {
     value: 'Değer',
     viewReadOnly: 'Salt okunur olarak görüntüle',
     welcome: 'Hoşgeldiniz',
+  },
+  localization: {
+    cannotCopySameLocale: 'Aynı yerel ayara kopyalanamaz.',
+    copyFrom: 'Kopyala',
+    copyFromTo: "{{from}} 'dan {{to}} 'ya kopyalama",
+    copyTo: 'Kopyala',
+    copyToLocale: 'Yerel hafızaya kopyala',
+    selectLocaleToCopy: 'Kopyalamak için yerel seçimi yapın',
   },
   operators: {
     contains: 'içerir',

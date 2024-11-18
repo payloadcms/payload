@@ -275,6 +275,7 @@ export const skTranslations: DefaultTranslationsObject = {
     open: 'Otvoriť',
     or: 'Alebo',
     order: 'Poradie',
+    overwriteExistingData: 'Prepísať existujúce pole dát',
     pageNotFound: 'Stránka nenájdená',
     password: 'Heslo',
     payloadSettings: 'Nastavenia dátového záznamu',
@@ -322,6 +323,14 @@ export const skTranslations: DefaultTranslationsObject = {
     value: 'Hodnota',
     viewReadOnly: 'Zobraziť iba na čítanie',
     welcome: 'Vitajte',
+  },
+  localization: {
+    cannotCopySameLocale: 'Nemožno kopírovať do rovnakej lokalizácie.',
+    copyFrom: 'Kopírovať z',
+    copyFromTo: 'Kopírovanie z {{from}} do {{to}}',
+    copyTo: 'Kopírovať do',
+    copyToLocale: 'Kopírovať do lokalizácie',
+    selectLocaleToCopy: 'Vyberte miestny systém na kopírovanie',
   },
   operators: {
     contains: 'obsahuje',

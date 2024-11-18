@@ -266,6 +266,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     open: '打开',
     or: '或',
     order: '排序',
+    overwriteExistingData: '覆盖现有字段数据',
     pageNotFound: '未找到页面',
     password: '密码',
     payloadSettings: 'Payload设置',
@@ -313,6 +314,14 @@ export const zhTranslations: DefaultTranslationsObject = {
     value: '值',
     viewReadOnly: '只读查看',
     welcome: '欢迎',
+  },
+  localization: {
+    cannotCopySameLocale: '无法复制到相同的位置',
+    copyFrom: '从复制',
+    copyFromTo: '从{{from}}复制到{{to}}',
+    copyTo: '复制到',
+    copyToLocale: '复制到本地化',
+    selectLocaleToCopy: '选择要复制的地区设置',
   },
   operators: {
     contains: '包含',

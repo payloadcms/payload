@@ -277,6 +277,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     open: 'Open',
     or: 'Of',
     order: 'Volgorde',
+    overwriteExistingData: 'Overschrijf bestaande veldgegevens',
     pageNotFound: 'Pagina niet gevonden',
     password: 'Wachtwoord',
     payloadSettings: 'Payload Instellingen',
@@ -324,6 +325,14 @@ export const nlTranslations: DefaultTranslationsObject = {
     value: 'Waarde',
     viewReadOnly: 'Alleen-lezen weergave',
     welcome: 'Welkom',
+  },
+  localization: {
+    cannotCopySameLocale: 'Kan niet naar dezelfde locatie kopiëren',
+    copyFrom: 'Kopiëren van',
+    copyFromTo: 'Kopiëren van {{from}} naar {{to}}',
+    copyTo: 'Kopiëren naar',
+    copyToLocale: 'Kopieer naar locatie',
+    selectLocaleToCopy: 'Selecteer locatie om te kopiëren',
   },
   operators: {
     contains: 'bevat',

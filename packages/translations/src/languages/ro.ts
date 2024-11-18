@@ -279,6 +279,7 @@ export const roTranslations: DefaultTranslationsObject = {
     open: 'Deschide',
     or: 'Sau',
     order: 'ORdine',
+    overwriteExistingData: 'Suprascrieți datele existente din câmp',
     pageNotFound: 'Pagina nu a fost găsită',
     password: 'Parola',
     payloadSettings: 'Setări de Payload',
@@ -326,6 +327,14 @@ export const roTranslations: DefaultTranslationsObject = {
     value: 'Valoare',
     viewReadOnly: 'Vizualizare doar pentru citire',
     welcome: 'Bine ați venit',
+  },
+  localization: {
+    cannotCopySameLocale: 'Nu se poate copia în aceeași localizare',
+    copyFrom: 'Copiază de la',
+    copyFromTo: 'Copierea de la {{from}} la {{to}}',
+    copyTo: 'Copiați în',
+    copyToLocale: 'Copiați în localizare',
+    selectLocaleToCopy: 'Selectați localizarea pentru copiere',
   },
   operators: {
     contains: 'conține',

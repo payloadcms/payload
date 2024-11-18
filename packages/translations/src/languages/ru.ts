@@ -277,6 +277,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     open: 'Открыть',
     or: 'Или же',
     order: 'Порядок',
+    overwriteExistingData: 'Перезаписать существующие данные поля',
     pageNotFound: 'Страница не найдена',
     password: 'Пароль',
     payloadSettings: 'Настройки Payload',
@@ -326,6 +327,14 @@ export const ruTranslations: DefaultTranslationsObject = {
     value: 'Значение',
     viewReadOnly: 'Просмотр только для чтения',
     welcome: 'Добро пожаловать',
+  },
+  localization: {
+    cannotCopySameLocale: 'Невозможно скопировать в ту же локаль',
+    copyFrom: 'Скопировать из',
+    copyFromTo: 'Копирование из {{from}} в {{to}}',
+    copyTo: 'Копировать в',
+    copyToLocale: 'Копировать в локаль',
+    selectLocaleToCopy: 'Выберите локаль для копирования',
   },
   operators: {
     contains: 'содержит',

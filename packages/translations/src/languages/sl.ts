@@ -274,6 +274,7 @@ export const slTranslations = {
     open: 'Odpri',
     or: 'Ali',
     order: 'Vrstni red',
+    overwriteExistingData: 'Prepišite obstoječe podatke polja',
     pageNotFound: 'Stran ni najdena',
     password: 'Geslo',
     payloadSettings: 'Nastavitve Payloada',
@@ -321,6 +322,14 @@ export const slTranslations = {
     value: 'Vrednost',
     viewReadOnly: 'Ogled samo za branje',
     welcome: 'Dobrodošli',
+  },
+  localization: {
+    cannotCopySameLocale: 'Ni mogoče kopirati v isti jezik',
+    copyFrom: 'Kopiraj iz',
+    copyFromTo: 'Kopiranje iz {{from}} v {{to}}',
+    copyTo: 'Kopiraj v',
+    copyToLocale: 'Kopiraj v jezik',
+    selectLocaleToCopy: 'Izberite jezik za kopiranje',
   },
   operators: {
     contains: 'vsebuje',

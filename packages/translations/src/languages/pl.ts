@@ -275,6 +275,7 @@ export const plTranslations: DefaultTranslationsObject = {
     open: 'Otwórz',
     or: 'lub',
     order: 'Kolejność',
+    overwriteExistingData: 'Nadpisz istniejące dane pola',
     pageNotFound: 'Strona nie znaleziona',
     password: 'Hasło',
     payloadSettings: 'Ustawienia Payload',
@@ -322,6 +323,14 @@ export const plTranslations: DefaultTranslationsObject = {
     value: 'Wartość',
     viewReadOnly: 'Widok tylko do odczytu',
     welcome: 'Witaj',
+  },
+  localization: {
+    cannotCopySameLocale: 'Nie można skopiować do tego samego miejsca.',
+    copyFrom: 'Kopiuj z',
+    copyFromTo: 'Kopiowanie z {{from}} do {{to}}',
+    copyTo: 'Kopiuj do',
+    copyToLocale: 'Kopiuj do lokalizacji',
+    selectLocaleToCopy: 'Wybierz lokalizację do skopiowania',
   },
   operators: {
     contains: 'zawiera',

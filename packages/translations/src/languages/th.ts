@@ -271,6 +271,7 @@ export const thTranslations: DefaultTranslationsObject = {
     open: 'เปิด',
     or: 'หรือ',
     order: 'เรียงตาม',
+    overwriteExistingData: 'เขียนทับข้อมูลในฟิลด์ที่มีอยู่แล้ว',
     pageNotFound: 'ไม่พบหน้าที่ต้องการ',
     password: 'รหัสผ่าน',
     payloadSettings: 'การตั้งค่า Payload',
@@ -318,6 +319,14 @@ export const thTranslations: DefaultTranslationsObject = {
     value: 'ค่า',
     viewReadOnly: 'ดูในโหมดอ่านอย่างเดียว',
     welcome: 'ยินดีต้อนรับ',
+  },
+  localization: {
+    cannotCopySameLocale: 'ไม่สามารถคัดลอกไปยังตำแหน่งที่ตั้งเดียวกัน',
+    copyFrom: 'คัดลอกจาก',
+    copyFromTo: 'คัดลอกจาก {{from}} ไปยัง {{to}}',
+    copyTo: 'คัดลอกไปที่',
+    copyToLocale: 'คัดลอกไปยังสถานที่',
+    selectLocaleToCopy: 'เลือกสถานที่ท้องถิ่นเพื่อคัดลอก',
   },
   operators: {
     contains: 'มี',

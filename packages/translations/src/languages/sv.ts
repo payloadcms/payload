@@ -275,6 +275,7 @@ export const svTranslations: DefaultTranslationsObject = {
     open: 'Öppna',
     or: 'Eller',
     order: 'Ordning',
+    overwriteExistingData: 'Skriv över befintlig fältdatabas',
     pageNotFound: 'Sidan hittas inte',
     password: 'Lösenord',
     payloadSettings: 'Payload Inställningar',
@@ -322,6 +323,14 @@ export const svTranslations: DefaultTranslationsObject = {
     value: 'Värde',
     viewReadOnly: 'Visa endast läsning',
     welcome: 'Välkommen',
+  },
+  localization: {
+    cannotCopySameLocale: 'Kan inte kopiera till samma plats',
+    copyFrom: 'Kopiera från',
+    copyFromTo: 'Kopierar från {{from}} till {{to}}',
+    copyTo: 'Kopiera till',
+    copyToLocale: 'Kopiera till plats',
+    selectLocaleToCopy: 'Välj plats att kopiera',
   },
   operators: {
     contains: 'innehåller',

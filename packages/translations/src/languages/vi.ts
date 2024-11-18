@@ -273,6 +273,7 @@ export const viTranslations: DefaultTranslationsObject = {
     open: 'Mở',
     or: 'hoặc',
     order: 'Thứ tự',
+    overwriteExistingData: 'Ghi đè dữ liệu trường hiện tại',
     pageNotFound: 'Không tìm thấy trang',
     password: 'Mật khẩu',
     payloadSettings: 'Cài đặt',
@@ -320,6 +321,14 @@ export const viTranslations: DefaultTranslationsObject = {
     value: 'Giá trị',
     viewReadOnly: 'Xem chỉ đọc',
     welcome: 'Xin chào',
+  },
+  localization: {
+    cannotCopySameLocale: 'Không thể sao chép vào cùng một vị trí',
+    copyFrom: 'Sao chép từ',
+    copyFromTo: 'Sao chép từ {{from}} đến {{to}}',
+    copyTo: 'Sao chép đến',
+    copyToLocale: 'Sao chép vào địa phương',
+    selectLocaleToCopy: 'Chọn địa phương để sao chép',
   },
   operators: {
     contains: 'có chứa',

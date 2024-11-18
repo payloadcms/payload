@@ -274,6 +274,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     open: 'Відкрити',
     or: 'або',
     order: 'Порядок',
+    overwriteExistingData: 'Перезаписати існуючі дані поля',
     pageNotFound: 'Сторінка не знайдена',
     password: 'Пароль',
     payloadSettings: 'Налаштування Payload',
@@ -321,6 +322,14 @@ export const ukTranslations: DefaultTranslationsObject = {
     value: 'Значення',
     viewReadOnly: 'Перегляд тільки для читання',
     welcome: 'Вітаю',
+  },
+  localization: {
+    cannotCopySameLocale: 'Не можна копіювати в ту ж саму локалізацію',
+    copyFrom: 'Копіювати з',
+    copyFromTo: 'Копіювання з {{from}} до {{to}}',
+    copyTo: 'Копіювати в',
+    copyToLocale: 'Копіювати до локалі',
+    selectLocaleToCopy: 'Виберіть локалізацію для копіювання',
   },
   operators: {
     contains: 'містить',

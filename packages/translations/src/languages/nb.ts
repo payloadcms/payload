@@ -275,6 +275,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     open: 'Åpne',
     or: 'Eller',
     order: 'Rekkefølge',
+    overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden ble ikke funnet',
     password: 'Passord',
     payloadSettings: 'Payload-innstillinger',
@@ -322,6 +323,14 @@ export const nbTranslations: DefaultTranslationsObject = {
     value: 'Verdi',
     viewReadOnly: 'Vis skrivebeskyttet',
     welcome: 'Velkommen',
+  },
+  localization: {
+    cannotCopySameLocale: 'Kan ikke kopiere til samme sted',
+    copyFrom: 'Kopier fra',
+    copyFromTo: 'Kopiering fra {{fra}} til {{til}}',
+    copyTo: 'Kopier til',
+    copyToLocale: 'Kopiere til lokalt',
+    selectLocaleToCopy: 'Velg lokalitet for å kopiere',
   },
   operators: {
     contains: 'contains',

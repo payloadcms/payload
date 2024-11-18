@@ -274,6 +274,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     open: 'Отвори',
     or: 'Или',
     order: 'Редослед',
+    overwriteExistingData: 'Prepišite postojeće podatke u polju',
     pageNotFound: 'Страница није пронађена',
     password: 'Лозинка',
     payloadSettings: 'Payload поставке',
@@ -321,6 +322,14 @@ export const rsTranslations: DefaultTranslationsObject = {
     value: 'Вредност',
     viewReadOnly: 'Прегледај само за читање',
     welcome: 'Добродошли',
+  },
+  localization: {
+    cannotCopySameLocale: 'Не може се копирати на исту локацију.',
+    copyFrom: 'Kopiraj iz',
+    copyFromTo: 'Kopiranje iz {{from}} u {{to}}',
+    copyTo: 'Kopiraj na',
+    copyToLocale: 'Kopiraj na lokaciju',
+    selectLocaleToCopy: 'Izaberite lokalitet za kopiranje',
   },
   operators: {
     contains: 'садржи',
