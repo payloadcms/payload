@@ -266,7 +266,7 @@ describe('Localization', () => {
       await expect(copyButton).toBeVisible()
       await copyButton.click()
 
-      await expect(page.locator('copy-locale-data__content')).toBeVisible()
+      await expect(page.locator('.copy-locale-data__content')).toBeVisible()
     })
 
     test('should copy data to correct locale', async () => {
@@ -286,11 +286,11 @@ describe('Localization', () => {
       const fromField = page.locator('#field-fromLocale')
       await fromField.click({ delay: 100 })
       const options = page.locator('.rs__option')
-      await options.locator('English').click()
+      await options.locator('text=English').click()
 
       const toField = page.locator('#field-toLocale')
       await toField.click({ delay: 100 })
-      await options.locator('Spanish').click()
+      await options.locator('text=Spanish').click()
 
       const copyDrawerClose = page.locator('.copy-locale-data__sub-header button')
       await copyDrawerClose.click()
