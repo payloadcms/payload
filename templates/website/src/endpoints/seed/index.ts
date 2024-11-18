@@ -1,8 +1,4 @@
-import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest } from 'payload'
-
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
 
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
@@ -12,9 +8,6 @@ import { image2 } from './image-2'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 const collections: CollectionSlug[] = [
   'categories',
@@ -46,12 +39,6 @@ export const seed = async ({
   // the custom `/api/seed` endpoint does not
 
   payload.logger.info(`— Clearing media...`)
-
-  const mediaDir = path.resolve(dirname, '../../public/media')
-  if (fs.existsSync(mediaDir)) {
-    fs.rmdirSync(mediaDir, { recursive: true })
-  }
-
   payload.logger.info(`— Clearing collections and globals...`)
 
   // clear the database
@@ -110,28 +97,65 @@ export const seed = async ({
   let demoAuthorID: number | string = demoAuthor.id
 
   payload.logger.info(`— Seeding media...`)
+  const [image1Buffer, image2Buffer, image3Buffer, hero1Buffer] = await Promise.all([
+    fetchFileByURL(
+      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post1.webp',
+    ),
+    fetchFileByURL(
+      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post2.webp',
+    ),
+    fetchFileByURL(
+      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post3.webp',
+    ),
+    fetchFileByURL(
+      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
+    ),
+  ])
+  // Log all but not the buffer
+  req.payload.logger.info({
+    image1Buffer: {
+      name: image1Buffer.name,
+      mimetype: image1Buffer.mimetype,
+      size: image1Buffer.size,
+    },
+    image2Buffer: {
+      name: image2Buffer.name,
+      mimetype: image2Buffer.mimetype,
+      size: image2Buffer.size,
+    },
+    image3Buffer: {
+      name: image3Buffer.name,
+      mimetype: image3Buffer.mimetype,
+      size: image3Buffer.size,
+    },
+    hero1Buffer: {
+      name: hero1Buffer.name,
+      mimetype: hero1Buffer.mimetype,
+      size: hero1Buffer.size,
+    },
+  })
   const image1Doc = await payload.create({
     collection: 'media',
     data: image1,
-    filePath: path.resolve(dirname, 'image-post1.webp'),
+    file: image1Buffer,
     req,
   })
   const image2Doc = await payload.create({
     collection: 'media',
     data: image2,
-    filePath: path.resolve(dirname, 'image-post2.webp'),
+    file: image2Buffer,
     req,
   })
   const image3Doc = await payload.create({
     collection: 'media',
     data: image2,
-    filePath: path.resolve(dirname, 'image-post3.webp'),
+    file: image3Buffer,
     req,
   })
   const imageHomeDoc = await payload.create({
     collection: 'media',
     data: image2,
-    filePath: path.resolve(dirname, 'image-hero1.webp'),
+    file: hero1Buffer,
     req,
   })
 
@@ -359,4 +383,24 @@ export const seed = async ({
   })
 
   payload.logger.info('Seeded database successfully!')
+}
+
+async function fetchFileByURL(url: string): Promise<File> {
+  const res = await fetch(url, {
+    credentials: 'include',
+    method: 'GET',
+  })
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch file from ${url}, status: ${res.status}`)
+  }
+
+  const data = await res.arrayBuffer()
+
+  return {
+    name: url.split('/').pop() || `file-${Date.now()}`,
+    data: Buffer.from(data),
+    mimetype: `image/${url.split('.').pop()}`,
+    size: data.byteLength,
+  }
 }
