@@ -7,7 +7,7 @@ import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { CheckboxField } from '../../fields/Checkbox/index.js'
-import { SelectField } from '../../fields/Select/index.js'
+import { SelectInput } from '../../fields/Select/index.js'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -30,7 +30,7 @@ export const CopyLocaleData: React.FC = () => {
       serverURL,
     },
   } = useConfig()
-  const { code: currentLocale } = useLocale()
+  const { code } = useLocale()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const { t } = useTranslation()
   const { submit } = useForm()
@@ -50,8 +50,15 @@ export const CopyLocaleData: React.FC = () => {
 
   const [copying, setCopying] = React.useState(false)
   const [toLocale, setToLocale] = React.useState<null | string>(null)
-  const [fromLocale, setFromLocale] = React.useState<null | string>(currentLocale)
+  const [fromLocale, setFromLocale] = React.useState<null | string>(code)
   const [overwriteExisting, setOverwriteExisting] = React.useState(false)
+
+  React.useEffect(() => {
+    if (fromLocale !== code) {
+      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+      setFromLocale(code)
+    }
+  }, [code, fromLocale])
 
   const copyLocaleData = useCallback(
     async ({ from, to }) => {
@@ -140,7 +147,7 @@ export const CopyLocaleData: React.FC = () => {
             )}
           </span>
           <Button
-            buttonStyle="pill"
+            buttonStyle="primary"
             disabled={!fromLocale || !toLocale}
             iconPosition="left"
             onClick={async () => {
@@ -155,30 +162,34 @@ export const CopyLocaleData: React.FC = () => {
                 })
               }
             }}
-            size="small"
+            size="medium"
           >
             {copying ? t('general:copying') + '...' : t('general:copy')}
           </Button>
         </div>
 
         <div className={`${baseClass}__content`}>
-          <SelectField
-            field={{
-              name: 'fromLocale',
-              label: t('localization:copyFrom'),
-              options: localeOptions,
+          <SelectInput
+            label={t('localization:copyFrom')}
+            name={'fromLocale'}
+            onChange={(selectedOption: { value: string }) => {
+              if (selectedOption?.value) {
+                setFromLocale(selectedOption.value)
+              }
             }}
-            onChange={(val: string) => setFromLocale(val)}
+            options={localeOptions}
             path="fromLocale"
             value={fromLocale}
           />
-          <SelectField
-            field={{
-              name: 'toLocale',
-              label: t('localization:copyTo'),
-              options: localeOptions,
+          <SelectInput
+            label={t('localization:copyTo')}
+            name="toLocale"
+            onChange={(selectedOption: { value: string }) => {
+              if (selectedOption?.value) {
+                setToLocale(selectedOption.value)
+              }
             }}
-            onChange={(val: string) => setToLocale(val)}
+            options={localeOptions}
             path="toLocale"
             value={toLocale}
           />
