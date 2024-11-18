@@ -159,7 +159,8 @@ export const renderDocument = async ({
     }),
   ])
 
-  const serverProps: ServerProps = {
+  const serverProps: ServerSideEditViewProps = {
+    doc,
     i18n,
     initPageResult,
     locale,

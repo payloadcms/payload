@@ -52,7 +52,7 @@ export const RootLayout = async ({
     headers,
   })
 
-  const payload = await getPayload({ config })
+  const payload = await getPayload({ config, importMap })
 
   const { i18n, permissions, user } = await initReq(config)
 
@@ -102,7 +102,7 @@ export const RootLayout = async ({
           config={clientConfig}
           dateFNSKey={i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
-          isNavOpen={navPrefs?.open}
+          isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}
           permissions={permissions}

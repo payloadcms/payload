@@ -107,7 +107,7 @@ const getPosts = async () => {
 The `defaultPopulate` property allows you specify which fields to select when populating the collection from another document.
 This is especially useful for links where only the `slug` is needed instead of the entire document.
 
-With this feature, you can dramatically reduce the amount of JSON that is populated from [Relationship](/docs/main/fields/relationship) or [Upload](/docs/main/fields/upload) fields.
+With this feature, you can dramatically reduce the amount of JSON that is populated from [Relationship](/docs/fields/relationship) or [Upload](/docs/fields/upload) fields.
 
 For example, in your content model, you might have a `Link` field which links out to a different page. When you go to retrieve these links, you really only need the `slug` of the page.
 
