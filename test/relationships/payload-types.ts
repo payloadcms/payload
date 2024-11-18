@@ -27,6 +27,7 @@ export interface Config {
     pages: Page;
     'rels-to-pages': RelsToPage;
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextId;
+    'object-writes': ObjectWrite;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -50,6 +51,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'rels-to-pages': RelsToPagesSelect<false> | RelsToPagesSelect<true>;
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextIdsSelect<false> | RelsToPagesAndCustomTextIdsSelect<true>;
+    'object-writes': ObjectWritesSelect<false> | ObjectWritesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -97,6 +99,14 @@ export interface Post {
   description?: string | null;
   number?: number | null;
   relationField?: (string | null) | Relation;
+  blocks?:
+    | {
+        relationField?: (string | null) | Relation;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   defaultAccessRelation?: (string | null) | StrictAccess;
   chainedRelation?: (string | null) | Chained;
   maxDepthRelation?: (string | null) | Relation;
@@ -305,6 +315,27 @@ export interface RelsToPagesAndCustomTextId {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "object-writes".
+ */
+export interface ObjectWrite {
+  id: string;
+  one?: (string | null) | Movie;
+  many?: (string | Movie)[] | null;
+  onePoly?: {
+    relationTo: 'movies';
+    value: string | Movie;
+  } | null;
+  manyPoly?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -375,6 +406,10 @@ export interface PayloadLockedDocument {
         value: string | RelsToPagesAndCustomTextId;
       } | null)
     | ({
+        relationTo: 'object-writes';
+        value: string | ObjectWrite;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -429,6 +464,17 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   relationField?: T;
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              relationField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   defaultAccessRelation?: T;
   chainedRelation?: T;
   maxDepthRelation?: T;
@@ -587,6 +633,18 @@ export interface RelsToPagesSelect<T extends boolean = true> {
  */
 export interface RelsToPagesAndCustomTextIdsSelect<T extends boolean = true> {
   rel?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "object-writes_select".
+ */
+export interface ObjectWritesSelect<T extends boolean = true> {
+  one?: T;
+  many?: T;
+  onePoly?: T;
+  manyPoly?: T;
   updatedAt?: T;
   createdAt?: T;
 }

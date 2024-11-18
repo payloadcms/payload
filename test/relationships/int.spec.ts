@@ -334,6 +334,35 @@ describe('Relationships', () => {
         expect(query.docs).toHaveLength(1) // Due to limit: 1
       })
 
+      it('should allow querying within blocks', async () => {
+        const rel = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'test',
+            disableRelation: false,
+          },
+        })
+
+        const doc = await payload.create({
+          collection: slug,
+          data: {
+            blocks: [
+              {
+                blockType: 'block',
+                relationField: rel.id,
+              },
+            ],
+          },
+        })
+
+        const { docs } = await payload.find({
+          collection: slug,
+          where: { 'blocks.relationField': { equals: rel.id } },
+        })
+
+        expect(docs[0].id).toBe(doc.id)
+      })
+
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
           const { customIdRelation } = await restClient
@@ -1152,7 +1181,7 @@ describe('Relationships', () => {
     })
   })
 
-  describe('Creating', () => {
+  describe('Writing', () => {
     describe('With transactions', () => {
       it('should be able to create filtered relations within a transaction', async () => {
         const req = {} as PayloadRequest
@@ -1177,6 +1206,52 @@ describe('Relationships', () => {
         }
 
         expect(withRelation.filteredRelation.id).toEqual(related.id)
+      })
+    })
+
+    describe('With passing an object', () => {
+      it('should create with passing an object', async () => {
+        const movie = await payload.create({ collection: 'movies', data: {} })
+        const result = await payload.create({
+          collection: 'object-writes',
+          data: {
+            many: [movie],
+            manyPoly: [{ relationTo: 'movies', value: movie }],
+            one: movie,
+            onePoly: {
+              relationTo: 'movies',
+              value: movie,
+            },
+          },
+        })
+
+        expect(result.many[0]).toStrictEqual(movie)
+        expect(result.one).toStrictEqual(movie)
+        expect(result.manyPoly[0]).toStrictEqual({ relationTo: 'movies', value: movie })
+        expect(result.onePoly).toStrictEqual({ relationTo: 'movies', value: movie })
+      })
+
+      it('should update with passing an object', async () => {
+        const movie = await payload.create({ collection: 'movies', data: {} })
+        const { id } = await payload.create({ collection: 'object-writes', data: {} })
+        const result = await payload.update({
+          collection: 'object-writes',
+          id,
+          data: {
+            many: [movie],
+            manyPoly: [{ relationTo: 'movies', value: movie }],
+            one: movie,
+            onePoly: {
+              relationTo: 'movies',
+              value: movie,
+            },
+          },
+        })
+
+        expect(result.many[0]).toStrictEqual(movie)
+        expect(result.one).toStrictEqual(movie)
+        expect(result.manyPoly[0]).toStrictEqual({ relationTo: 'movies', value: movie })
+        expect(result.onePoly).toStrictEqual({ relationTo: 'movies', value: movie })
       })
     })
   })

@@ -190,6 +190,7 @@ export { Account } from '../../graphics/Account/index.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 
 export { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'
+export { ExternalLinkIcon } from '../../graphics/ExternalLink/index.js'
 export { File } from '../../graphics/File/index.js'
 
 // icons
@@ -233,10 +234,6 @@ export {
   EntityVisibilityProvider,
   useEntityVisibility,
 } from '../../providers/EntityVisibility/index.js'
-export {
-  FieldComponentsProvider,
-  useFieldComponents,
-} from '../../providers/FieldComponents/index.js'
 export { UploadEditsProvider, useUploadEdits } from '../../providers/UploadEdits/index.js'
 export {
   ListDrawerContextProvider,
@@ -272,7 +269,12 @@ export {
   type ListViewClientProps,
   type ListViewSlots,
 } from '../../views/List/index.js'
-export type { ListPreferences } from '../../views/List/types.js'
+export type {
+  ListComponentClientProps,
+  ListComponentServerProps,
+  ListPreferences,
+} from '../../views/List/types.js'
+export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 
 export { DefaultEditView } from '../../views/Edit/index.js'
 export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'

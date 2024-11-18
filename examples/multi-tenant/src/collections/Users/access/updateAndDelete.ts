@@ -5,9 +5,13 @@ import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAcces
 
 export const updateAndDeleteAccess: Access = (args) => {
   const { req } = args
-  if (!req.user) {return false}
+  if (!req.user) {
+    return false
+  }
 
-  if (isSuperAdmin(args)) {return true}
+  if (isSuperAdmin(args)) {
+    return true
+  }
 
   const adminTenantAccessIDs = getTenantAdminTenantAccessIDs(req.user)
 

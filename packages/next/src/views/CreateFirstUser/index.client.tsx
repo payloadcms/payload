@@ -2,10 +2,10 @@
 import type { FormProps, UserWithToken } from '@payloadcms/ui'
 import type {
   ClientCollectionConfig,
-  DocumentPermissions,
   DocumentPreferences,
   FormState,
   LoginWithUsernameOptions,
+  SanitizedDocumentPermissions,
 } from 'payload'
 
 import {
@@ -24,7 +24,7 @@ import { abortAndIgnore } from '@payloadcms/ui/shared'
 import React, { useEffect } from 'react'
 
 export const CreateFirstUserClient: React.FC<{
-  docPermissions: DocumentPermissions
+  docPermissions: SanitizedDocumentPermissions
   docPreferences: DocumentPreferences
   initialState: FormState
   loginWithUsername?: false | LoginWithUsernameOptions
@@ -54,7 +54,7 @@ export const CreateFirstUserClient: React.FC<{
       const controller = new AbortController()
       formStateAbortControllerRef.current = controller
 
-      const { state } = await getFormState({
+      const response = await getFormState({
         collectionSlug: userSlug,
         docPermissions,
         docPreferences,
@@ -64,7 +64,9 @@ export const CreateFirstUserClient: React.FC<{
         signal: controller.signal,
       })
 
-      return state
+      if (response && response.state) {
+        return response.state
+      }
     },
     [userSlug, getFormState, docPermissions, docPreferences],
   )
@@ -103,6 +105,7 @@ export const CreateFirstUserClient: React.FC<{
           label: t('authentication:newPassword'),
           required: true,
         }}
+        path="password"
       />
       <ConfirmPasswordField />
       <RenderFields
@@ -111,7 +114,7 @@ export const CreateFirstUserClient: React.FC<{
         parentIndexPath=""
         parentPath=""
         parentSchemaPath={userSlug}
-        permissions={null}
+        permissions={true}
         readOnly={false}
       />
       <FormSubmit size="large">{t('general:create')}</FormSubmit>

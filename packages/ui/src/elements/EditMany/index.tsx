@@ -132,7 +132,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasUpdatePermission = collectionPermissions?.update?.permission
+  const hasUpdatePermission = collectionPermissions?.update
 
   const drawerSlug = `edit-${slug}`
 
@@ -156,10 +156,10 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
       }
 
       void getInitialState()
+    }
 
-      return () => {
-        abortAndIgnore(controller)
-      }
+    return () => {
+      abortAndIgnore(controller)
     }
   }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
 
@@ -186,7 +186,9 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   )
 
   useEffect(() => {
-    abortAndIgnore(formStateAbortControllerRef.current)
+    return () => {
+      abortAndIgnore(formStateAbortControllerRef.current)
+    }
   }, [])
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
@@ -259,7 +261,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                       parentIndexPath=""
                       parentPath=""
                       parentSchemaPath={slug}
-                      permissions={permissions?.collections?.[slug]?.fields}
+                      permissions={collectionPermissions?.fields}
                       readOnly={false}
                     />
                   )}

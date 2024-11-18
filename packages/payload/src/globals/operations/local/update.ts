@@ -19,8 +19,8 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   depth?: number
   draft?: boolean
-  fallbackLocale?: TypedLocale
-  locale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   overrideLock?: boolean
   populate?: PopulateType

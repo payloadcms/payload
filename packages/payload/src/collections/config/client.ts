@@ -1,6 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 
 import type { StaticDescription } from '../../admin/types.js'
+import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type {
   LivePreviewConfig,
   ServerOnlyLivePreviewProperties,
@@ -20,7 +21,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
   SanitizedCollectionConfig['admin'],
-  'hidden'
+  'baseListFilter' | 'components' | 'hidden'
 >
 
 export type ServerOnlyUploadProperties = keyof Pick<
@@ -34,7 +35,6 @@ export type ServerOnlyUploadProperties = keyof Pick<
 
 export type ClientCollectionConfig = {
   admin: {
-    components: null
     description?: StaticDescription
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
     preview?: boolean
@@ -75,6 +75,8 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
 
 const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
   'hidden',
+  'baseListFilter',
+  'components',
   // 'preview' is handled separately
   // `livePreview` is handled separately
 ]
@@ -83,18 +85,24 @@ export const createClientCollectionConfig = ({
   collection,
   defaultIDType,
   i18n,
+  importMap,
 }: {
   collection: SanitizedCollectionConfig
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientCollectionConfig => {
-  const clientCollection = deepCopyObjectSimple(collection) as unknown as ClientCollectionConfig
+  const clientCollection = deepCopyObjectSimple(
+    collection,
+    true,
+  ) as unknown as ClientCollectionConfig
 
   clientCollection.fields = createClientFields({
     clientFields: clientCollection?.fields || [],
     defaultIDType,
     fields: collection.fields,
     i18n,
+    importMap,
   })
 
   serverOnlyCollectionProperties.forEach((key) => {
@@ -149,8 +157,6 @@ export const createClientCollectionConfig = ({
     clientCollection.admin.preview = true
   }
 
-  clientCollection.admin.components = null
-
   let description = undefined
 
   if (collection.admin?.description) {
@@ -164,7 +170,9 @@ export const createClientCollectionConfig = ({
     }
   }
 
-  clientCollection.admin.description = description
+  if (description) {
+    clientCollection.admin.description = description
+  }
 
   if (
     'livePreview' in clientCollection.admin &&
@@ -181,10 +189,12 @@ export const createClientCollectionConfigs = ({
   collections,
   defaultIDType,
   i18n,
+  importMap,
 }: {
   collections: SanitizedCollectionConfig[]
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientCollectionConfig[] => {
   const clientCollections = new Array(collections.length)
 
@@ -195,6 +205,7 @@ export const createClientCollectionConfigs = ({
       collection,
       defaultIDType,
       i18n,
+      importMap,
     })
   }
 

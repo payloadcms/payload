@@ -128,3 +128,11 @@ export {
 } from '../../features/blocks/client/nodes/InlineBlocksNode.js'
 
 export { FieldsDrawer } from '../../utilities/fieldsDrawer/Drawer.js'
+
+export { InlineBlockEditButton } from '../../features/blocks/client/componentInline/components/InlineBlockEditButton.js'
+export { InlineBlockRemoveButton } from '../../features/blocks/client/componentInline/components/InlineBlockRemoveButton.js'
+export { InlineBlockLabel } from '../../features/blocks/client/componentInline/components/InlineBlockLabel.js'
+export { InlineBlockContainer } from '../../features/blocks/client/componentInline/components/InlineBlockContainer.js'
+export { BlockCollapsible } from '../../features/blocks/client/component/components/BlockCollapsible.js'
+export { BlockEditButton } from '../../features/blocks/client/component/components/BlockEditButton.js'
+export { BlockRemoveButton } from '../../features/blocks/client/component/components/BlockRemoveButton.js'

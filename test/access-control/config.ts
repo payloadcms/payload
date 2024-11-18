@@ -9,6 +9,7 @@ import type { Config, User } from './payload-types.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Disabled } from './collections/Disabled/index.js'
+import { RichText } from './collections/RichText/index.js'
 import {
   createNotUpdateCollectionSlug,
   docLevelAccessSlug,
@@ -506,6 +507,7 @@ export default buildConfigWithDefaults({
       ],
     },
     Disabled,
+    RichText,
   ],
   globals: [
     {

@@ -3,7 +3,7 @@ import type { PaginatedDocs, RelationshipFieldClientComponent, Where } from 'pay
 
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
@@ -24,10 +24,11 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
-import { findOptionsByValue } from './findOptionsByValue.js'
 import './index.scss'
+import { findOptionsByValue } from './findOptionsByValue.js'
 import { optionsReducer } from './optionsReducer.js'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
@@ -38,8 +39,8 @@ const baseClass = 'relationship'
 
 const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
       admin: {
         allowCreate = true,
         allowEdit = true,
@@ -47,8 +48,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         description,
         isSortable = true,
         sortOptions,
-        style,
-        width,
       } = {},
       hasMany,
       label,
@@ -56,11 +55,10 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       relationTo,
       required,
     },
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const { config } = useConfig()
 
@@ -576,6 +574,8 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     valueToRender.value = null
   }
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -590,10 +590,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}

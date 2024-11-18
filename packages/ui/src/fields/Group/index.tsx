@@ -3,7 +3,7 @@
 import type { GroupFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -15,28 +15,24 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { useRow } from '../Row/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { useTabs } from '../Tabs/provider.js'
 import './index.scss'
+import { useTabs } from '../Tabs/provider.js'
 import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
 export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
-    field: {
-      name,
-      admin: { className, description, hideGutter, style, width } = {},
-      fields,
-      label,
-    },
-    path: pathFromProps,
+    field,
+    field: { name, admin: { className, description, hideGutter } = {}, fields, label },
+    path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
   } = props
-  const path = pathFromProps ?? name
   const schemaPath = schemaPathFromProps ?? name
 
   const { i18n } = useTranslation()
@@ -50,6 +46,8 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const fieldHasErrors = submitted && errorCount > 0
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -68,10 +66,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
@@ -105,7 +100,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             parentIndexPath=""
             parentPath={path}
             parentSchemaPath={schemaPath}
-            permissions={permissions?.fields}
+            permissions={permissions === true ? permissions : permissions?.fields}
             readOnly={readOnly}
           />
         </div>
