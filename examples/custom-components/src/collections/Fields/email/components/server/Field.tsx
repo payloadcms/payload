@@ -3,6 +3,7 @@ import type React from 'react'
 
 import { EmailField } from '@payloadcms/ui'
 
-export const CustomEmailFieldServer: EmailFieldServerComponent = ({ clientField }) => {
-  return <EmailField field={clientField} />
+export const CustomEmailFieldServer: EmailFieldServerComponent = (props) => {
+  const path = (props?.path || props?.field?.name || '') as string
+  return <EmailField field={props?.clientField} path={path} />
 }
