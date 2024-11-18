@@ -477,7 +477,7 @@ export function buildObjectType({
             }
 
             await Promise.all(resultPromises)
-            return results
+            return results.filter((result) => result !== null) // remove null entries for items that were unreadable
           }
 
           let id = value
