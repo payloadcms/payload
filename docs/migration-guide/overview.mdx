@@ -32,7 +32,7 @@ All breaking changes are listed below. If you encounter changes that are not exp
 Payload 3.0 requires a set of auto-generated files that you will need to bring into your existing project. The easiest way of acquiring these is by initializing a new project via `create-payload-app`, then replace the provided Payload Config with your own.
 
 ```bash
-  npx create-payload-app@beta
+  npx create-payload-app
 ```
 
 For more details, see the [Documentation](https://payloadcms.com/docs/getting-started/installation).
@@ -153,7 +153,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     + const var = process.env.NEXT_PUBLIC_MY_ENV_VAR
     ```
 
-    For more details, see the [Documentation](https://payloadcms.com/docs/beta/configuration/environment-vars).
+    For more details, see the [Documentation](https://payloadcms.com/docs/configuration/environment-vars).
 
 1. The `req` object used to extend the [Express Request](https://expressjs.com/), but now extends the [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request). You may need to update your code accordingly to reflect this change. For example:
 
@@ -310,7 +310,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     })
     ```
 
-    For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/metadata#icons).
+    For more details, see the [Documentation](https://payloadcms.com/docs/admin/metadata#icons).
 
 1. The `admin.meta.ogImage` property has been replaced by `admin.meta.openGraph.images`:
 
@@ -331,7 +331,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     })
     ```
 
-    For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/metadata#open-graph).
+    For more details, see the [Documentation](https://payloadcms.com/docs/admin/metadata#open-graph).
 
 1. The args of the `admin.livePreview.url` function have changed. It no longer receives `documentInfo` as an arg, and instead, now has `collectionConfig` and `globalConfig`.
 
@@ -436,7 +436,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     })
     ```
 
-    For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/components#component-paths).
+    For more details, see the [Documentation](https://payloadcms.com/docs/admin/components#component-paths).
 
 1. All Custom Components are now server-rendered by default, and therefore, cannot use state or hooks directly. If you’re using Custom Components in your app that requires state or hooks, add the `'use client'` directive at the top of the file.
 
@@ -456,7 +456,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     }
     ```
 
-    For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/components#client-components).
+    For more details, see the [Documentation](https://payloadcms.com/docs/admin/components#client-components).
 
 1. The `admin.description` property within Collection, Globals, and Fields no longer accepts a React Component. Instead, you must define it as a Custom Component.
 
@@ -847,7 +847,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     }
     ```
 
-    For more details, see the [Documentation](https://payloadcms.com/docs/beta/admin/components#accessing-the-payload-config).
+    For more details, see the [Documentation](https://payloadcms.com/docs/admin/components#accessing-the-payload-config).
 
 1. The `useCollapsible` hook has had slight changes to its property names. `collapsed` is now `isCollapsed` and `withinCollapsible` is now `isWithinCollapsible`.
 
@@ -979,11 +979,11 @@ export default buildConfig({
 - If you have created a custom adapter, the type must now provide a `name` property.
 
 | Service              | Package                                                                      |
-| -------------------- | ---------------------------------------------------------------------------- |
-| Vercel Blob          | https://github.com/payloadcms/payload/tree/beta/packages/storage-vercel-blob |
-| AWS S3               | https://github.com/payloadcms/payload/tree/beta/packages/storage-s3          |
-| Azure                | https://github.com/payloadcms/payload/tree/beta/packages/storage-azure       |
-| Google Cloud Storage | https://github.com/payloadcms/payload/tree/beta/packages/storage-gcs         |
+| -------------------- |------------------------------------------------------------------------------|
+| Vercel Blob          | https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob |
+| AWS S3               | https://github.com/payloadcms/payload/tree/main/packages/storage-s3          |
+| Azure                | https://github.com/payloadcms/payload/tree/main/packages/storage-azure       |
+| Google Cloud Storage | https://github.com/payloadcms/payload/tree/main/packages/storage-gcs         |
 
 ```tsx
 // ❌ Before (required peer dependencies depending on adapter)
@@ -1095,4 +1095,4 @@ plugins: [
 
 ## `@payloadcms/richtext-lexical`
 
-// TODO: Add migration guide for `@payloadcms/richtext-lexical`
+If you have custom features for `@payloadcms/richtext-lexical` you will need to migrate your code to the new API. Read more about the new API in the [documentation](https://payloadcms.com/docs/lexical/building-custom-features).
