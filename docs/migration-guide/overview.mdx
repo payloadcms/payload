@@ -21,13 +21,89 @@ All breaking changes are listed below. If you encounter changes that are not exp
 
 ## Installation
 
-Payload 3.0 requires a set of auto-generated files that you will need to bring into your existing project. The easiest way of aquiring these is by initializing a new project via `create-payload-app`, then replace the provided Payload Config with your own.
+Payload 3.0 requires a set of auto-generated files that you will need to bring into your existing project. The easiest way of acquiring these is by initializing a new project via `create-payload-app`, then replace the provided Payload Config with your own.
 
 ```bash
   npx create-payload-app@beta
 ```
 
 For more details, see the [Documentation](https://payloadcms.com/docs/getting-started/installation).
+
+1. **Install new dependencies of payload, next.js and react**:
+
+    ```bash
+      pnpm i next react react-dom payload @payloadcms/ui @payloadcms/next
+    ```
+
+    Also install the other @payloadcms packages specific to the plugins and adapters you are using. Depending on your project, these may include:
+      - @payloadcms/db-mongodb
+      - @payloadcms/db-postgres
+      - @payloadcms/richtext-slate
+      - @payloadcms/richtext-lexical
+      - @payloadcms/plugin-form-builder
+      - @payloadcms/plugin-nested-docs
+      - @payloadcms/plugin-redirects
+      - @payloadcms/plugin-relationship
+      - @payloadcms/plugin-search
+      - @payloadcms/plugin-sentry
+      - @payloadcms/plugin-seo
+      - @payloadcms/plugin-stripe
+      - @payloadcms/plugin-cloud-storage - Read [More](#@payloadcms/plugin-cloud-storage).
+
+1. Uninstall deprecated packages:
+
+    ```bash
+    pnpm remove express nodemon @payloadcms/bundler-webpack @payloadcms/bundler-vite
+    ```
+
+1. For Payload Cloud users, the plugin has changed.
+
+    Uninstall the old package:
+
+    ```bash
+    pnpm remove @payloadcms/plugin-cloud
+    ```
+
+    Install the new package:
+
+    ```bash
+    pnpm i @payloadcms/payload-cloud
+    ```
+
+    ```diff
+    // payload.config.ts
+    - import { payloadCloud } from '@payloadcms/plugin-cloud'
+    + import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
+
+    buildConfig({
+      // ...
+      plugins: [
+    -   payloadCloud()
+    +   payloadCloudPlugin()
+      ]
+    })
+    ```
+
+1. **Optional** sharp dependency
+
+   If you have upload enabled collections that use `formatOptions`, `imageSizes`, or `resizeOptions`—payload expects to have `sharp` installed. In 2.0 this was a dependency was installed for you. Now it is only installed if needed. If you have any of these options set, you will need to install `sharp` and add it to your payload.config.ts:
+
+    ```bash
+    pnpm i sharp
+    ```
+
+    ```diff
+    // payload.config.ts
+    import sharp from 'sharp'
+    buildConfig({
+    // ...
+    +   sharp,
+    })
+    ```
+
+1. Database Adapter Migrations
+
+    If you have existing data and are using the MongoDB or Postgres adapters, you will need to run the database migrations to ensure your database schema is up-to-date. Follow the instructions from the release notes for [postgres](https://github.com/payloadcms/payload/releases/edit/v3.0.0-beta.39) or [mongodb](https://github.com/payloadcms/payload/releases/edit/v3.0.0-beta.131) depending on your chosen adapter.
 
 ## Breaking Changes
 
@@ -397,7 +473,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     ```
 
     3. For Fields, use the `admin.components.Description` key:
-    
+
     ```diff
     // fields/MyField.ts
     import type { FieldConfig } from 'payload'
@@ -501,7 +577,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
       slug: 'my-collection',
       admin: {
         views: {
-    -     Edit: MyCustomView  
+    -     Edit: MyCustomView
     +     edit: {
     +       Component: './components/MyCustomView.tsx'
     +     }
