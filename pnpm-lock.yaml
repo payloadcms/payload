@@ -1606,9 +1606,6 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
         version: 3.687.0
-      '@lexical/headless':
-        specifier: 0.20.0
-        version: 0.20.0
       '@payloadcms/db-mongodb':
         specifier: workspace:*
         version: link:../packages/db-mongodb

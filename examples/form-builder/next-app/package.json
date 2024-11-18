@@ -13,7 +13,7 @@
     "@faceless-ui/css-grid": "^1.2.0",
     "@faceless-ui/modal": "^2.0.2",
     "@payloadcms/plugin-form-builder": "beta",
-    "@payloadcms/richtext-lexical": "file:../../../packages/richtext-lexical",
+    "@payloadcms/richtext-lexical": "beta",
     "escape-html": "^1.0.3",
     "graphql": "^16.8.1",
     "next": "^14.3.0-canary.68",
