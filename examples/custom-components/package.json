@@ -12,8 +12,8 @@
     "generate:schema": "payload-graphql generate:schema",
     "generate:types": "payload generate:types",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "seed": "npm run payload migrate:fresh"
+    "seed": "npm run payload migrate:fresh",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "beta",
@@ -22,13 +22,12 @@
     "@payloadcms/ui": "beta",
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
-    "ejs": "3.1.10",
     "graphql": "^16.9.0",
     "install": "^0.13.0",
     "next": "15.0.0",
     "payload": "beta",
-    "react": "19.0.0-rc-5dcb0097-20240918",
-    "react-dom": "19.0.0-rc-5dcb0097-20240918"
+    "react": "19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "19.0.0-rc-65a56d0e-20241020"
   },
   "devDependencies": {
     "@payloadcms/graphql": "beta",
