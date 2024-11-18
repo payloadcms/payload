@@ -191,7 +191,7 @@ export const renderListView = async (
       disableBulkEdit,
       enableRowSelections,
       listPreferences,
-      modifySearchParams: Boolean(drawerSlug),
+      modifySearchParams: !drawerSlug,
       preferenceKey,
       renderedFilters,
     }
