@@ -24,7 +24,6 @@ const baseClass = 'relationship-cell'
 const totalToShow = 3
 
 export type RelationshipCellProps = DefaultCellComponentProps<
-  any,
   JoinFieldClient | RelationshipFieldClient | UploadFieldClient
 >
 

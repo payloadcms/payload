@@ -44,7 +44,7 @@ export const initPage = async ({
   // we get above. Clone the req? We'll look into that eventually.
   const req = await createLocalReq(
     {
-      fallbackLocale: null,
+      fallbackLocale: false,
       req: {
         headers,
         host: headers.get('host'),

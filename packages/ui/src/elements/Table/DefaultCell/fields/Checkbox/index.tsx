@@ -6,7 +6,7 @@ import React from 'react'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import './index.scss'
 
-export const CheckboxCell: React.FC<DefaultCellComponentProps<boolean, CheckboxFieldClient>> = ({
+export const CheckboxCell: React.FC<DefaultCellComponentProps<CheckboxFieldClient>> = ({
   cellData,
 }) => {
   const { t } = useTranslation()

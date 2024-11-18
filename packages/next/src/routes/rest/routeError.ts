@@ -47,7 +47,10 @@ export const routeError = async ({
 
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR
 
-  logger.error(err.stack)
+  const level = payload.config.loggingLevels[err.name] ?? 'error'
+  if (level) {
+    logger[level](level === 'info' ? { msg: err.message } : { err })
+  }
 
   // Internal server errors can contain anything, including potentially sensitive data.
   // Therefore, error details will be hidden from the response unless `config.debug` is `true`

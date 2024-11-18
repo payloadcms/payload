@@ -39,12 +39,14 @@ import type {
   TypedAuthOperations,
   TypedCollection,
   TypedCollectionSelect,
+  TypedLocale,
 } from '../../index.js'
 import type {
   PayloadRequest,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
+  Where,
 } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -253,7 +255,16 @@ export type AfterForgotPasswordHook = (args: {
   context: RequestContext
 }) => any
 
+export type BaseListFilter = (args: {
+  limit: number
+  locale?: TypedLocale
+  page: number
+  req: PayloadRequest
+  sort: string
+}) => null | Promise<null | Where> | Where
+
 export type CollectionAdminOptions = {
+  baseListFilter?: BaseListFilter
   /**
    * Custom admin components
    */
@@ -509,11 +520,12 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
+    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
+  slug: CollectionSlug
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */

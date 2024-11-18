@@ -65,7 +65,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
     options,

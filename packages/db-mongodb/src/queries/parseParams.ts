@@ -71,7 +71,10 @@ export async function parseParams({
                   [searchParam.path]: searchParam.value,
                 }
               } else if (typeof searchParam?.value === 'object') {
-                result = deepMergeWithCombinedArrays(result, searchParam.value)
+                result = deepMergeWithCombinedArrays(result, searchParam.value, {
+                  // dont clone Types.ObjectIDs
+                  clone: false,
+                })
               }
             }
           }

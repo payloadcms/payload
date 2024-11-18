@@ -20,7 +20,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
   SanitizedCollectionConfig['admin'],
-  'hidden'
+  'baseListFilter' | 'components' | 'hidden'
 >
 
 export type ServerOnlyUploadProperties = keyof Pick<
@@ -34,7 +34,6 @@ export type ServerOnlyUploadProperties = keyof Pick<
 
 export type ClientCollectionConfig = {
   admin: {
-    components: null
     description?: StaticDescription
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
     preview?: boolean
@@ -75,6 +74,8 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
 
 const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
   'hidden',
+  'baseListFilter',
+  'components',
   // 'preview' is handled separately
   // `livePreview` is handled separately
 ]
@@ -88,7 +89,10 @@ export const createClientCollectionConfig = ({
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
 }): ClientCollectionConfig => {
-  const clientCollection = deepCopyObjectSimple(collection) as unknown as ClientCollectionConfig
+  const clientCollection = deepCopyObjectSimple(
+    collection,
+    true,
+  ) as unknown as ClientCollectionConfig
 
   clientCollection.fields = createClientFields({
     clientFields: clientCollection?.fields || [],
@@ -149,8 +153,6 @@ export const createClientCollectionConfig = ({
     clientCollection.admin.preview = true
   }
 
-  clientCollection.admin.components = null
-
   let description = undefined
 
   if (collection.admin?.description) {
@@ -164,7 +166,9 @@ export const createClientCollectionConfig = ({
     }
   }
 
-  clientCollection.admin.description = description
+  if (description) {
+    clientCollection.admin.description = description
+  }
 
   if (
     'livePreview' in clientCollection.admin &&

@@ -27,6 +27,8 @@ import type {
 } from './collections/config/types.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
+import type { NonNever } from 'ts-essentials'
+
 import type { Options as CountOptions } from './collections/operations/local/count.js'
 import type { Options as CreateOptions } from './collections/operations/local/create.js'
 import type {
@@ -166,6 +168,16 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
 
+export type TypedUploadCollection = NonNever<{
+  [K in keyof TypedCollection]:
+    | 'filename'
+    | 'filesize'
+    | 'mimeType'
+    | 'url' extends keyof TypedCollection[K]
+    ? TypedCollection[K]
+    : never
+}>
+
 export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
 
 export type TypedCollectionJoins = ResolveCollectionJoinsType<GeneratedTypes>
@@ -179,6 +191,8 @@ export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
+
+export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
 
 type ResolveDbType<T> = 'db' extends keyof T
   ? T['db']
@@ -228,7 +242,7 @@ export class BasePayload {
   authStrategies: AuthStrategy[]
 
   collections: {
-    [slug: string]: Collection
+    [slug: CollectionSlug]: Collection
   } = {}
 
   config: SanitizedConfig
@@ -764,6 +778,7 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -774,9 +789,15 @@ export type {
   IncomingAuthType,
   Permission,
   Permissions,
+  SanitizedCollectionPermission,
+  SanitizedDocumentPermissions,
+  SanitizedFieldPermissions,
+  SanitizedGlobalPermission,
+  SanitizedPermissions,
   User,
   VerifyConfig,
 } from './auth/types.js'
+
 export { generateImportMap } from './bin/generateImportMap/index.js'
 export type { ImportMap } from './bin/generateImportMap/index.js'
 
@@ -804,6 +825,7 @@ export type {
   AfterRefreshHook as CollectionAfterRefreshHook,
   AuthCollection,
   AuthOperationsFromCollectionSlug,
+  BaseListFilter,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
   BeforeLoginHook as CollectionBeforeLoginHook,
@@ -1202,6 +1224,8 @@ export { isPlainObject } from './utilities/isPlainObject.js'
 export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
+export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
+export { recursivelySanitizePermissions as sanitizePermissions } from './utilities/sanitizePermissions.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
@@ -1211,7 +1235,7 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-export { saveVersion } from './versions/saveVersion.js'
 
+export { saveVersion } from './versions/saveVersion.js'
 export type { TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

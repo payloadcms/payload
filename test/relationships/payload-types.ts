@@ -97,6 +97,14 @@ export interface Post {
   description?: string | null;
   number?: number | null;
   relationField?: (string | null) | Relation;
+  blocks?:
+    | {
+        relationField?: (string | null) | Relation;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   defaultAccessRelation?: (string | null) | StrictAccess;
   chainedRelation?: (string | null) | Chained;
   maxDepthRelation?: (string | null) | Relation;
@@ -429,6 +437,17 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   relationField?: T;
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              relationField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   defaultAccessRelation?: T;
   chainedRelation?: T;
   maxDepthRelation?: T;

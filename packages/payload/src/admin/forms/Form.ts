@@ -1,7 +1,8 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
-import type { DocumentPermissions } from '../../auth/types.js'
+import type { SanitizedDocumentPermissions } from '../../auth/types.js'
 import type { Field, Validate } from '../../fields/config/types.js'
+import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
@@ -60,8 +61,9 @@ export type FormStateWithoutComponents = {
 
 export type BuildFormStateArgs = {
   data?: Data
-  docPermissions: DocumentPermissions | undefined
+  docPermissions: SanitizedDocumentPermissions | undefined
   docPreferences: DocumentPreferences
+  fallbackLocale?: false | TypedLocale
   formState?: FormState
   id?: number | string
   /*

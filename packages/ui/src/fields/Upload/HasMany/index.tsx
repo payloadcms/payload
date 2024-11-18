@@ -76,7 +76,7 @@ export function UploadComponentHasMany(props: Props) {
           }
 
           return (
-            <DraggableSortableItem disabled={!isSortable} id={id} key={id}>
+            <DraggableSortableItem disabled={!isSortable || readonly} id={id} key={id}>
               {(draggableSortableItemProps) => (
                 <div
                   className={[
@@ -93,7 +93,7 @@ export function UploadComponentHasMany(props: Props) {
                   }}
                 >
                   <UploadCard size="small">
-                    {isSortable && draggableSortableItemProps && (
+                    {draggableSortableItemProps && (
                       <div
                         className={`${baseClass}__drag`}
                         {...draggableSortableItemProps.attributes}

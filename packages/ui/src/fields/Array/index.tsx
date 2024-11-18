@@ -46,13 +46,12 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       required,
     },
     forceRender = false,
-    path: pathFromProps,
+    path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
     validate,
   } = props
-  const path = pathFromProps ?? name
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
@@ -336,10 +335,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!readOnly && !hasMaxRows && (
+      {!hasMaxRows && (
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
+          disabled={readOnly}
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"

@@ -21,7 +21,6 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
     disableModifyingForm: disableModifyingFormFromProps,
     field: {
-      name,
       admin: {
         className,
         description,
@@ -35,12 +34,11 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       required,
     } = {} as RadioFieldClientProps['field'],
     onChange: onChangeFromProps,
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
     value: valueFromProps,
   } = props
-  const path = pathFromProps ?? name
 
   const { uuid } = useForm()
 

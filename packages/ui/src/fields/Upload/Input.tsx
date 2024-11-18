@@ -158,15 +158,13 @@ export function UploadInput(props: UploadInputProps) {
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
-    if (readOnly || !allowCreate) {
+    if (!allowCreate) {
       return false
     }
 
     if (typeof activeRelationTo === 'string') {
       if (permissions?.collections && permissions.collections?.[activeRelationTo]?.create) {
-        if (permissions.collections[activeRelationTo].create?.permission === true) {
-          return true
-        }
+        return true
       }
     }
 
@@ -558,7 +556,7 @@ export function UploadInput(props: UploadInputProps) {
                 />
               </div>
 
-              {canCreate && (
+              {canCreate && !readOnly && (
                 <p className={`${baseClass}__dragAndDropText`}>
                   {t('general:or')} {t('upload:dragAndDrop')}
                 </p>

@@ -33,10 +33,9 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       required,
     } = {} as PasswordFieldProps['field'],
     inputRef,
-    path: pathFromProps,
+    path,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const { t } = useTranslation()
   const locale = useLocale()

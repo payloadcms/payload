@@ -1112,6 +1112,20 @@ describe('collections-rest', () => {
 
           expect(response.status).toEqual(200)
           expect(result.docs).toHaveLength(1)
+
+          const responseCount = await restClient.GET(`/${pointSlug}/count`, {
+            query: {
+              where: {
+                point: {
+                  near,
+                },
+              },
+            },
+          })
+          const resultCount = await responseCount.json()
+
+          expect(responseCount.status).toEqual(200)
+          expect(resultCount.totalDocs).toBe(1)
         })
 
         it('should not return a point far away', async () => {

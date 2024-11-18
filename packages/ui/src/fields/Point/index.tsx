@@ -25,11 +25,10 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       localized,
       required,
     },
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const { i18n, t } = useTranslation()
 
