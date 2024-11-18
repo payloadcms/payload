@@ -48,7 +48,6 @@ export const seed = async ({
       data: {
         navItems: [],
       },
-      req,
     })
   }
 
@@ -60,17 +59,13 @@ export const seed = async ({
           exists: true,
         },
       },
-      req,
     })
   }
 
   const pages = await payload.delete({
     collection: 'pages',
     where: {},
-    req,
   })
-
-  console.log({ pages })
 
   payload.logger.info(`— Seeding demo author and user...`)
 
@@ -81,7 +76,6 @@ export const seed = async ({
         equals: 'demo-author@payloadcms.com',
       },
     },
-    req,
   })
 
   const demoAuthor = await payload.create({
@@ -91,7 +85,6 @@ export const seed = async ({
       email: 'demo-author@payloadcms.com',
       password: 'password',
     },
-    req,
   })
 
   let demoAuthorID: number | string = demoAuthor.id
@@ -111,34 +104,11 @@ export const seed = async ({
       'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
     ),
   ])
-  // Log all but not the buffer
-  req.payload.logger.info({
-    image1Buffer: {
-      name: image1Buffer.name,
-      mimetype: image1Buffer.mimetype,
-      size: image1Buffer.size,
-    },
-    image2Buffer: {
-      name: image2Buffer.name,
-      mimetype: image2Buffer.mimetype,
-      size: image2Buffer.size,
-    },
-    image3Buffer: {
-      name: image3Buffer.name,
-      mimetype: image3Buffer.mimetype,
-      size: image3Buffer.size,
-    },
-    hero1Buffer: {
-      name: hero1Buffer.name,
-      mimetype: hero1Buffer.mimetype,
-      size: hero1Buffer.size,
-    },
-  })
+
   const image1Doc = await payload.create({
     collection: 'media',
     data: image1,
     file: image1Buffer,
-    req,
   })
   const image2Doc = await payload.create({
     collection: 'media',
@@ -150,13 +120,11 @@ export const seed = async ({
     collection: 'media',
     data: image2,
     file: image3Buffer,
-    req,
   })
   const imageHomeDoc = await payload.create({
     collection: 'media',
     data: image2,
     file: hero1Buffer,
-    req,
   })
 
   payload.logger.info(`— Seeding categories...`)
@@ -165,7 +133,6 @@ export const seed = async ({
     data: {
       title: 'Technology',
     },
-    req,
   })
 
   const newsCategory = await payload.create({
@@ -173,7 +140,6 @@ export const seed = async ({
     data: {
       title: 'News',
     },
-    req,
   })
 
   const financeCategory = await payload.create({
@@ -181,7 +147,6 @@ export const seed = async ({
     data: {
       title: 'Finance',
     },
-    req,
   })
 
   await payload.create({
@@ -189,7 +154,6 @@ export const seed = async ({
     data: {
       title: 'Design',
     },
-    req,
   })
 
   await payload.create({
@@ -197,7 +161,6 @@ export const seed = async ({
     data: {
       title: 'Software',
     },
-    req,
   })
 
   await payload.create({
@@ -205,7 +168,6 @@ export const seed = async ({
     data: {
       title: 'Engineering',
     },
-    req,
   })
 
   let image1ID: number | string = image1Doc.id
@@ -233,7 +195,6 @@ export const seed = async ({
         .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID))
         .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
     ),
-    req,
   })
 
   const post2Doc = await payload.create({
@@ -244,7 +205,6 @@ export const seed = async ({
         .replace(/"\{\{IMAGE_2\}\}"/g, String(image3ID))
         .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
     ),
-    req,
   })
 
   const post3Doc = await payload.create({
@@ -255,7 +215,6 @@ export const seed = async ({
         .replace(/"\{\{IMAGE_2\}\}"/g, String(image1ID))
         .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
     ),
-    req,
   })
 
   // update each post with related posts
@@ -265,7 +224,6 @@ export const seed = async ({
     data: {
       relatedPosts: [post2Doc.id, post3Doc.id],
     },
-    req,
   })
   await payload.update({
     id: post2Doc.id,
@@ -273,7 +231,6 @@ export const seed = async ({
     data: {
       relatedPosts: [post1Doc.id, post3Doc.id],
     },
-    req,
   })
   await payload.update({
     id: post3Doc.id,
@@ -281,7 +238,6 @@ export const seed = async ({
     data: {
       relatedPosts: [post1Doc.id, post2Doc.id],
     },
-    req,
   })
 
   payload.logger.info(`— Seeding home page...`)
@@ -293,7 +249,6 @@ export const seed = async ({
         .replace(/"\{\{IMAGE_1\}\}"/g, String(imageHomeID))
         .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID)),
     ),
-    req,
   })
 
   payload.logger.info(`— Seeding contact form...`)
@@ -301,7 +256,6 @@ export const seed = async ({
   const contactForm = await payload.create({
     collection: 'forms',
     data: JSON.parse(JSON.stringify(contactFormData)),
-    req,
   })
 
   let contactFormID: number | string = contactForm.id
@@ -317,7 +271,6 @@ export const seed = async ({
     data: JSON.parse(
       JSON.stringify(contactPageData).replace(/"\{\{CONTACT_FORM_ID\}\}"/g, String(contactFormID)),
     ),
-    req,
   })
 
   payload.logger.info(`— Seeding header...`)
@@ -345,7 +298,6 @@ export const seed = async ({
         },
       ],
     },
-    req,
   })
 
   payload.logger.info(`— Seeding footer...`)
@@ -379,7 +331,6 @@ export const seed = async ({
         },
       ],
     },
-    req,
   })
 
   payload.logger.info('Seeded database successfully!')
