@@ -5,7 +5,7 @@ import { parseCookies } from 'payload'
 import { isSuperAdmin } from '../../../access/isSuperAdmin'
 import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
-export const externalReadAccess: Access = (args) => {
+export const readAccess: Access = (args) => {
   const req = args.req
   const cookies = parseCookies(req.headers)
   const superAdmin = isSuperAdmin(args)
@@ -18,38 +18,18 @@ export const externalReadAccess: Access = (args) => {
     },
   }
 
-  // First check for manually selected tenant from cookies
-  if (selectedTenant) {
-    // If it's a super admin,
-    // give them read access to only pages for that tenant
-    if (superAdmin) {
-      return {
-        or: [
-          publicPageConstraint,
-          {
-            tenant: {
-              equals: selectedTenant,
-            },
+  // If it's a super admin or has access to the selected tenant
+  if (selectedTenant && (superAdmin || tenantAccessIDs.some((id) => id === selectedTenant))) {
+    // filter access by selected tenant
+    return {
+      or: [
+        publicPageConstraint,
+        {
+          tenant: {
+            equals: selectedTenant,
           },
-        ],
-      }
-    }
-
-    const hasTenantAccess = tenantAccessIDs.some((id) => id === selectedTenant)
-
-    // If NOT super admin,
-    // give them access only if they have access to tenant ID set in cookie
-    if (hasTenantAccess) {
-      return {
-        or: [
-          publicPageConstraint,
-          {
-            tenant: {
-              equals: selectedTenant,
-            },
-          },
-        ],
-      }
+        },
+      ],
     }
   }
 
