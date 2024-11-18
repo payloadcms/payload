@@ -1,4 +1,9 @@
-import type { ListPreferences, ListViewClientProps } from '@payloadcms/ui'
+import type {
+  ListComponentClientProps,
+  ListComponentServerProps,
+  ListPreferences,
+  ListViewClientProps,
+} from '@payloadcms/ui'
 import type { AdminViewProps, ListQuery, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
@@ -61,7 +66,7 @@ export const renderListView = async (
     visibleEntities,
   } = initPageResult
 
-  if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
+  if (!permissions?.collections?.[collectionSlug]?.read) {
     throw new Error('not-found')
   }
 
@@ -112,7 +117,7 @@ export const renderListView = async (
 
     const page = isNumber(query?.page) ? Number(query.page) : 0
 
-    const whereQuery = mergeListSearchAndWhere({
+    let whereQuery = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
       where: (query?.where as Where) || undefined,
@@ -130,11 +135,26 @@ export const renderListView = async (
             ? collectionConfig.defaultSort
             : undefined)
 
+    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
+      const baseListFilter = await collectionConfig.admin.baseListFilter({
+        limit,
+        page,
+        req,
+        sort,
+      })
+
+      if (baseListFilter) {
+        whereQuery = {
+          and: [whereQuery, baseListFilter].filter(Boolean),
+        }
+      }
+    }
+
     const data = await payload.find({
       collection: collectionSlug,
       depth: 0,
       draft: true,
-      fallbackLocale: null,
+      fallbackLocale: false,
       includeLockStatus: true,
       limit,
       locale,
@@ -168,25 +188,43 @@ export const renderListView = async (
         ? collectionConfig.admin.description({ t: i18n.t })
         : collectionConfig.admin.description
 
-    const listViewSlots = renderListViewSlots({
-      collectionConfig,
-      description: staticDescription,
-      payload,
-    })
-
-    const clientProps: ListViewClientProps = {
-      ...listViewSlots,
+    const sharedClientProps: ListComponentClientProps = {
       collectionSlug,
-      columnState,
-      disableBulkDelete,
-      disableBulkEdit,
-      enableRowSelections,
-      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
-      listPreferences,
+      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create,
       newDocumentURL: formatAdminURL({
         adminRoute,
         path: `/collections/${collectionSlug}/create`,
       }),
+    }
+
+    const sharedServerProps: ListComponentServerProps = {
+      collectionConfig,
+      i18n,
+      limit,
+      locale: fullLocale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    }
+
+    const listViewSlots = renderListViewSlots({
+      clientProps: sharedClientProps,
+      collectionConfig,
+      description: staticDescription,
+      payload,
+      serverProps: sharedServerProps,
+    })
+
+    const clientProps: ListViewClientProps = {
+      ...listViewSlots,
+      ...sharedClientProps,
+      columnState,
+      disableBulkDelete,
+      disableBulkEdit,
+      enableRowSelections,
+      listPreferences,
       renderedFilters,
       Table,
     }
@@ -211,19 +249,10 @@ export const renderListView = async (
               Fallback={DefaultListView}
               importMap={payload.importMap}
               serverProps={{
-                collectionConfig,
-                collectionSlug,
+                ...sharedServerProps,
                 data,
-                i18n,
-                limit,
                 listPreferences,
                 listSearchableFields: collectionConfig.admin.listSearchableFields,
-                locale: fullLocale,
-                params,
-                payload,
-                permissions,
-                searchParams,
-                user,
               }}
             />
           </ListQueryProvider>

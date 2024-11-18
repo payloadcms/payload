@@ -37,7 +37,8 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
         collection: collectionConfig.slug,
         depth: 0,
         draft: true,
-        fallbackLocale: null,
+        fallbackLocale: false,
+        locale: locale?.code,
       })
     }
 
@@ -46,7 +47,8 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
         slug: globalConfig.slug,
         depth: 0,
         draft: true,
-        fallbackLocale: null,
+        fallbackLocale: false,
+        locale: locale?.code,
       })
     }
   } catch (error) {

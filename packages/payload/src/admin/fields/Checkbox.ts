@@ -24,7 +24,7 @@ type CheckboxFieldBaseClientProps = {
   readonly id?: string
   readonly onChange?: (value: boolean) => void
   readonly partialChecked?: boolean
-  readonly path?: string
+  readonly path: string
   readonly validate?: CheckboxFieldValidation
 }
 

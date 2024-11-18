@@ -19,7 +19,7 @@ import type {
 type UploadFieldClientWithoutType = MarkOptional<UploadFieldClient, 'type'>
 
 type UploadFieldBaseClientProps = {
-  readonly path?: string
+  readonly path: string
   readonly validate?: UploadFieldValidation
 }
 

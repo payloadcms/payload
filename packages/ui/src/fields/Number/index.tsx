@@ -3,7 +3,7 @@ import type { NumberFieldClientComponent, NumberFieldClientProps } from 'payload
 
 import { getTranslation } from '@payloadcms/translations'
 import { isNumber } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
 
@@ -15,20 +15,19 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
 const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
       admin: {
         className,
         description,
         placeholder,
         step = 1,
-        style,
-        width,
       } = {} as NumberFieldClientProps['field']['admin'],
       hasMany = false,
       label,
@@ -39,11 +38,10 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       required,
     },
     onChange: onChangeFromProps,
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const { i18n, t } = useTranslation()
 
@@ -124,6 +122,8 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     }
   }, [value, hasMany])
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -136,10 +136,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}

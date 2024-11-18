@@ -1,6 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
 
-import { getFromImportMap } from '@payloadcms/ui/elements/RenderServerComponent'
 import {
   type ClientField,
   createClientFields,
@@ -8,6 +7,7 @@ import {
   type FieldSchemaMap,
   type Payload,
 } from 'payload'
+import { getFromImportMap } from 'payload/shared'
 
 import type { FeatureProviderProviderClient } from '../features/typesClient.js'
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
@@ -111,6 +111,7 @@ export function initLexicalFeatures(args: Args): {
           disableAddingID: true,
           fields: 'fields' in state ? state.fields : [state],
           i18n: args.i18n,
+          importMap: args.payload.importMap,
         })
         featureClientSchemaMap[featureKey][key] = clientFields
       }

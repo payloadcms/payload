@@ -84,7 +84,7 @@ export const ServerFunctionsProvider: React.FC<{
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'form-state',
-            args: rest,
+            args: { fallbackLocale: false, ...rest },
           })) as ReturnType<typeof buildFormStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
@@ -108,7 +108,7 @@ export const ServerFunctionsProvider: React.FC<{
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'table-state',
-            args: rest,
+            args: { fallbackLocale: false, ...rest },
           })) as ReturnType<typeof buildTableStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
@@ -132,7 +132,7 @@ export const ServerFunctionsProvider: React.FC<{
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'render-document',
-            args: rest,
+            args: { fallbackLocale: false, ...rest },
           })) as { docID: string; Document: React.ReactNode }
 
           if (!remoteSignal?.aborted) {

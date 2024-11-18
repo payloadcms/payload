@@ -58,8 +58,8 @@ export const traverseFields = (args: Args) => {
           })
         })
       }
-      case 'collapsible':
 
+      case 'collapsible':
       case 'row': {
         return traverseFields({
           ...args,
@@ -84,7 +84,6 @@ export const traverseFields = (args: Args) => {
       }
 
       case 'relationship':
-
       case 'upload': {
         if (typeof field.relationTo === 'string') {
           if (field.type === 'upload' || !field.hasMany) {

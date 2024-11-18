@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import type {
   AdminClient,
+  BlockJSX,
   BlocksFieldClient,
   ClientBlock,
   ClientField,
@@ -15,9 +16,11 @@ import type {
 } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 
+import { getFromImportMap } from '../../bin/generateImportMap/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { flattenTopLevelFields } from '../../index.js'
+import { flattenTopLevelFields, type ImportMap } from '../../index.js'
+import { removeUndefined } from '../../utilities/removeUndefined.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -41,11 +44,13 @@ export const createClientField = ({
   defaultIDType,
   field: incomingField,
   i18n,
+  importMap,
 }: {
   clientField?: ClientField
   defaultIDType: Payload['config']['db']['defaultIDType']
   field: Field
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientField => {
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
@@ -91,24 +96,6 @@ export const createClientField = ({
     clientField.label = incomingField.label({ t: i18n.t })
   }
 
-  if (!(clientField.admin instanceof Object)) {
-    clientField.admin = {} as AdminClient
-  }
-
-  if ('admin' in incomingField && 'width' in incomingField.admin) {
-    clientField.admin.style = {
-      ...clientField.admin.style,
-      '--field-width': clientField.admin.width,
-      width: undefined, // avoid needlessly adding this to the element's style attribute
-    }
-  } else {
-    if (!(clientField.admin.style instanceof Object)) {
-      clientField.admin.style = {}
-    }
-
-    clientField.admin.style.flex = '1 1 auto'
-  }
-
   switch (incomingField.type) {
     case 'array':
     case 'collapsible':
@@ -126,6 +113,7 @@ export const createClientField = ({
         disableAddingID: incomingField.type !== 'array',
         fields: incomingField.fields,
         i18n,
+        importMap,
       })
 
       break
@@ -137,19 +125,33 @@ export const createClientField = ({
       if (incomingField.blocks?.length) {
         for (let i = 0; i < incomingField.blocks.length; i++) {
           const block = incomingField.blocks[i]
-          const clientBlock: ClientBlock = {
+
+          // prevent $undefined from being passed through the rsc requests
+          const clientBlock = removeUndefined<ClientBlock>({
             slug: block.slug,
-            admin: {
-              components: {},
-              custom: block.admin?.custom,
-            },
             fields: field.blocks?.[i]?.fields || [],
             imageAltText: block.imageAltText,
             imageURL: block.imageURL,
+          }) satisfies ClientBlock
+
+          if (block.admin?.custom) {
+            clientBlock.admin = {
+              custom: block.admin.custom,
+            }
+          }
+
+          if (block?.admin?.jsx) {
+            const jsxResolved = getFromImportMap<BlockJSX>({
+              importMap,
+              PayloadComponent: block.admin.jsx,
+              schemaPath: '',
+            })
+            clientBlock.jsx = jsxResolved
           }
 
           if (block.labels) {
             clientBlock.labels = {} as unknown as LabelsClient
+
             if (block.labels.singular) {
               if (typeof block.labels.singular === 'function') {
                 clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
@@ -169,6 +171,7 @@ export const createClientField = ({
             defaultIDType,
             fields: block.fields,
             i18n,
+            importMap,
           })
 
           if (!field.blocks) {
@@ -183,7 +186,7 @@ export const createClientField = ({
     }
 
     case 'radio':
-
+    // falls through
     case 'select': {
       const field = clientField as RadioFieldClient | SelectFieldClient
 
@@ -206,7 +209,6 @@ export const createClientField = ({
 
       break
     }
-
     case 'richText': {
       if (!incomingField?.editor) {
         throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
@@ -218,6 +220,7 @@ export const createClientField = ({
 
       break
     }
+
     case 'tabs': {
       const field = clientField as unknown as TabsFieldClient
 
@@ -238,6 +241,7 @@ export const createClientField = ({
             disableAddingID: true,
             fields: tab.fields,
             i18n,
+            importMap,
           })
         }
       }
@@ -266,15 +270,10 @@ export const createClientField = ({
   } & ClientField
 
   if (incomingField.admin && 'description' in incomingField.admin) {
-    if (
-      typeof incomingField.admin?.description === 'string' ||
-      typeof incomingField.admin?.description === 'object'
-    ) {
+    if (typeof incomingField.admin?.description === 'function') {
+      delete (clientField as FieldWithDescription).admin.description
+    } else {
       ;(clientField as FieldWithDescription).admin.description = incomingField.admin.description
-    } else if (typeof incomingField.admin?.description === 'function') {
-      ;(clientField as FieldWithDescription).admin.description = incomingField.admin?.description({
-        t: i18n.t,
-      })
     }
   }
 
@@ -287,12 +286,14 @@ export const createClientFields = ({
   disableAddingID,
   fields,
   i18n,
+  importMap,
 }: {
   clientFields: ClientField[]
   defaultIDType: Payload['config']['db']['defaultIDType']
   disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientField[] => {
   const newClientFields: ClientField[] = []
 
@@ -304,6 +305,7 @@ export const createClientFields = ({
       defaultIDType,
       field,
       i18n,
+      importMap,
     })
 
     if (newField) {
@@ -325,7 +327,6 @@ export const createClientFields = ({
       },
       hidden: true,
       label: 'ID',
-      localized: undefined,
     })
   }
 

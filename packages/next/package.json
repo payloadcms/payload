@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.127",
+  "version": "3.0.0-beta.134",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -96,8 +96,7 @@
     "react-diff-viewer-continued": "3.2.6",
     "sass": "1.77.4",
     "sonner": "^1.5.0",
-    "uuid": "10.0.0",
-    "ws": "^8.16.0"
+    "uuid": "10.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.5",
@@ -111,7 +110,6 @@
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@types/uuid": "10.0.0",
-    "@types/ws": "^8.5.10",
     "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
     "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",

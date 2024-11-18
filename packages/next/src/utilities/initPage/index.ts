@@ -4,12 +4,11 @@ import type { InitPageResult, Locale, VisibleEntities } from 'payload'
 import { findLocaleFromCode } from '@payloadcms/ui/shared'
 import { headers as getHeaders } from 'next/headers.js'
 import { notFound } from 'next/navigation.js'
-import { createLocalReq, isEntityHidden, parseCookies } from 'payload'
+import { createLocalReq, getPayload, isEntityHidden, parseCookies } from 'payload'
 import * as qs from 'qs-esm'
 
 import type { Args } from './types.js'
 
-import { getPayloadHMR } from '../getPayloadHMR.js'
 import { initReq } from '../initReq.js'
 import { getRouteInfo } from './handleAdminPage.js'
 import { handleAuthRedirect } from './handleAuthRedirect.js'
@@ -23,7 +22,7 @@ export const initPage = async ({
   searchParams,
 }: Args): Promise<InitPageResult> => {
   const headers = await getHeaders()
-  const payload = await getPayloadHMR({ config: configPromise, importMap })
+  const payload = await getPayload({ config: configPromise, importMap })
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
 
   const {
@@ -44,7 +43,7 @@ export const initPage = async ({
   // we get above. Clone the req? We'll look into that eventually.
   const req = await createLocalReq(
     {
-      fallbackLocale: null,
+      fallbackLocale: false,
       req: {
         headers,
         host: headers.get('host'),

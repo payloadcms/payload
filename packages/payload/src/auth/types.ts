@@ -1,18 +1,30 @@
 import type { DeepRequired } from 'ts-essentials'
 
-import type { Payload } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
+/**
+ * A permission object that can be used to determine if a user has access to a specific operation.
+ */
 export type Permission = {
   permission: boolean
-  where?: Record<string, unknown>
+  where?: Where
 }
 
 export type FieldPermissions = {
   blocks?: {
     [blockSlug: string]: {
+      create: {
+        permission: boolean
+      }
       fields: {
         [fieldName: string]: FieldPermissions
+      }
+      read: {
+        permission: boolean
+      }
+      update: {
+        permission: boolean
       }
     }
   }
@@ -30,6 +42,24 @@ export type FieldPermissions = {
   }
 }
 
+export type SanitizedFieldPermissions =
+  | {
+      blocks?: {
+        [blockSlug: string]: {
+          fields: {
+            [fieldName: string]: SanitizedFieldPermissions
+          }
+        }
+      }
+      create: true
+      fields?: {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+      read: true
+      update: true
+    }
+  | true
+
 export type CollectionPermission = {
   create: Permission
   delete: Permission
@@ -41,6 +71,19 @@ export type CollectionPermission = {
   update: Permission
 }
 
+export type SanitizedCollectionPermission = {
+  create?: true
+  delete?: true
+  fields:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | true
+  read?: true
+  readVersions?: true
+  update?: true
+}
+
 export type GlobalPermission = {
   fields: {
     [fieldName: string]: FieldPermissions
@@ -50,14 +93,54 @@ export type GlobalPermission = {
   update: Permission
 }
 
+export type SanitizedGlobalPermission = {
+  fields:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | true
+  read?: true
+  readVersions?: true
+  update?: true
+}
+
 export type DocumentPermissions = CollectionPermission | GlobalPermission
+
+export type SanitizedDocumentPermissions = SanitizedCollectionPermission | SanitizedGlobalPermission
+
 export type Permissions = {
   canAccessAdmin: boolean
   collections: {
-    [collectionSlug: string]: CollectionPermission
+    [collectionSlug: CollectionSlug]: CollectionPermission
   }
   globals?: {
-    [globalSlug: string]: GlobalPermission
+    [globalSlug: GlobalSlug]: GlobalPermission
+  }
+}
+
+export type SanitizedPermissions = {
+  canAccessAdmin?: boolean
+  collections?: {
+    [collectionSlug: string]: {
+      create?: true
+      delete?: true
+      fields: {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+      read?: true
+      readVersions?: true
+      update?: true
+    }
+  }
+  globals?: {
+    [globalSlug: string]: {
+      fields: {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+      read?: true
+      readVersions?: true
+      update?: true
+    }
   }
 }
 

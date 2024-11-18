@@ -3,11 +3,11 @@ import type {
   ClientGlobalConfig,
   ClientUser,
   Data,
-  DocumentPermissions,
   DocumentPreferences,
   FormState,
   InsideFieldsPreferences,
   SanitizedCollectionConfig,
+  SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
   TypedUser,
 } from 'payload'
@@ -24,7 +24,7 @@ export type DocumentInfoProps = {
   readonly disableActions?: boolean
   readonly disableCreate?: boolean
   readonly disableLeaveWithoutSaving?: boolean
-  readonly docPermissions?: DocumentPermissions
+  readonly docPermissions?: SanitizedDocumentPermissions
   readonly globalSlug?: SanitizedGlobalConfig['slug']
   readonly hasPublishedDoc: boolean
   readonly hasPublishPermission?: boolean

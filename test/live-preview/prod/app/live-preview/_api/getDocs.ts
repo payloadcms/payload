@@ -1,8 +1,8 @@
 import config from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
+import { getPayload } from 'payload'
 
 export const getDocs = async <T>(collection: string): Promise<T[]> => {
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
 
   try {
     const { docs } = await payload.find({
