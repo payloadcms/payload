@@ -39,6 +39,7 @@ const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
   readonly allowCreate?: boolean
+  readonly disableTable?: boolean
   readonly field: JoinFieldClient
   readonly filterOptions?: Where
   readonly initialData?: PaginatedDocs
@@ -50,6 +51,7 @@ type RelationshipTableComponentProps = {
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
     allowCreate = true,
+    disableTable = false,
     filterOptions,
     initialData: initialDataFromProps,
     initialDrawerData,
@@ -132,11 +134,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   useIgnoredEffect(
     () => {
-      if (!Table || query) {
+      if (!disableTable && (!Table || query)) {
         void renderTable()
       }
     },
-    [query],
+    [query, disableTable],
     [Table, renderTable],
   )
 

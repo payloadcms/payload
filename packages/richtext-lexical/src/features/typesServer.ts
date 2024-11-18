@@ -346,7 +346,10 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    * In order to access these translations, you would use `i18n.t('lexical:horizontalRule:label')`.
    */
   i18n?: Partial<GenericLanguages>
-  markdownTransformers?: Transformer[]
+  markdownTransformers?: (
+    | ((props: { allNodes: Array<NodeWithHooks>; allTransformers: Transformer[] }) => Transformer)
+    | Transformer
+  )[]
   nodes?: Array<NodeWithHooks>
 
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
@@ -411,6 +414,7 @@ export type SanitizedServerFeatures = {
   >
   graphQLPopulationPromises: Map<string, Array<PopulationPromise>>
   hooks: RichTextHooks
+  markdownTransformers: Transformer[]
   nodeHooks?: {
     afterChange?: Map<string, Array<AfterChangeNodeHook<SerializedLexicalNode>>>
     afterRead?: Map<string, Array<AfterReadNodeHook<SerializedLexicalNode>>>
@@ -419,4 +423,4 @@ export type SanitizedServerFeatures = {
   } /**  The node types mapped to their populationPromises */
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>
-} & Required<Pick<ResolvedServerFeature<any, any>, 'i18n' | 'markdownTransformers' | 'nodes'>>
+} & Required<Pick<ResolvedServerFeature<any, any>, 'i18n' | 'nodes'>>

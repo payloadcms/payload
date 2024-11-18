@@ -1,5 +1,7 @@
 'use client'
 
+import type { RichTextFieldClient } from 'payload'
+
 import { ShimmerEffect } from '@payloadcms/ui'
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 
@@ -16,7 +18,14 @@ const RichTextEditor = lazy(() =>
 )
 
 export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
-  const { admin = {}, clientFeatures, lexicalEditorConfig } = props
+  const {
+    admin = {},
+    clientFeatures,
+    featureClientSchemaMap,
+    field,
+    lexicalEditorConfig,
+    schemaPath,
+  } = props
 
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<null | SanitizedClientEditorConfig>(null)
@@ -41,6 +50,9 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
       : defaultEditorLexicalConfig
 
     const resolvedClientFeatures = loadClientFeatures({
+      featureClientSchemaMap,
+      field: field as RichTextFieldClient,
+      schemaPath: schemaPath ?? field.name,
       unSanitizedEditorConfig: {
         features: featureProvidersLocal,
         lexical: finalLexicalEditorConfig,
@@ -50,7 +62,15 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     setFinalSanitizedEditorConfig(
       sanitizeClientEditorConfig(resolvedClientFeatures, finalLexicalEditorConfig, admin),
     )
-  }, [lexicalEditorConfig, admin, finalSanitizedEditorConfig, clientFeatures]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
+  }, [
+    lexicalEditorConfig,
+    admin,
+    finalSanitizedEditorConfig,
+    clientFeatures,
+    featureClientSchemaMap,
+    field,
+    schemaPath,
+  ]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
 
   return (
     <Suspense fallback={<ShimmerEffect height="35vh" />}>

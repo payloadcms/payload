@@ -1,7 +1,7 @@
 import type { CollectionSlug, Where } from 'payload'
 
 import config from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities/getPayloadHMR.js'
+import { getPayload } from 'payload'
 
 export const getDoc = async <T>(args: {
   collection: CollectionSlug
@@ -9,7 +9,7 @@ export const getDoc = async <T>(args: {
   draft?: boolean
   slug?: string
 }): Promise<T> => {
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
   const { slug, collection, depth = 2, draft } = args || {}
 
   const where: Where = {}
@@ -28,7 +28,9 @@ export const getDoc = async <T>(args: {
       draft,
     })
 
-    if (docs[0]) return docs[0] as T
+    if (docs[0]) {
+      return docs[0] as T
+    }
   } catch (err) {
     console.log('Error getting doc', err)
   }

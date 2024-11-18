@@ -341,6 +341,33 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'object-writes',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'movies',
+          name: 'one',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'movies',
+          name: 'many',
+          hasMany: true,
+        },
+        {
+          type: 'relationship',
+          relationTo: ['movies'],
+          name: 'onePoly',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['movies'],
+          name: 'manyPoly',
+          hasMany: true,
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

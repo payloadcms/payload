@@ -27,7 +27,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   schemaPathSuffix,
 }) => {
   const { t } = useTranslation()
-  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const onChangeAbortControllerRef = useRef(new AbortController())
 
@@ -53,7 +53,9 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         id,
         collectionSlug,
         data: data ?? {},
-        docPermissions,
+        docPermissions: {
+          fields: true,
+        },
         docPreferences: await getDocPreferences(),
         globalSlug,
         operation: 'update',
@@ -70,16 +72,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     return () => {
       abortAndIgnore(controller)
     }
-  }, [
-    schemaFieldsPath,
-    id,
-    data,
-    getFormState,
-    collectionSlug,
-    globalSlug,
-    docPermissions,
-    getDocPreferences,
-  ])
+  }, [schemaFieldsPath, id, data, getFormState, collectionSlug, globalSlug, getDocPreferences])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }) => {
@@ -91,7 +84,9 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       const { state } = await getFormState({
         id,
         collectionSlug,
-        docPermissions,
+        docPermissions: {
+          fields: true,
+        },
         docPreferences: await getDocPreferences(),
         formState: prevFormState,
         globalSlug,
@@ -106,15 +101,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
       return state
     },
-    [
-      getFormState,
-      id,
-      collectionSlug,
-      docPermissions,
-      getDocPreferences,
-      globalSlug,
-      schemaFieldsPath,
-    ],
+    [getFormState, id, collectionSlug, getDocPreferences, globalSlug, schemaFieldsPath],
   )
 
   // cleanup effect

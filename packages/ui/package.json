@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.131",
+  "version": "3.0.0-beta.134",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -62,6 +62,11 @@
       "import": "./src/forms/fieldSchemasToFormState/index.tsx",
       "types": "./src/forms/fieldSchemasToFormState/index.tsx",
       "default": "./src/forms/fieldSchemasToFormState/index.tsx"
+    },
+    "./forms/renderField": {
+      "import": "./src/forms/fieldSchemasToFormState/renderField.tsx",
+      "types": "./src/forms/fieldSchemasToFormState/renderField.tsx",
+      "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
     },
     "./scss/app.scss": "./src/scss/app.scss",
     "./assets": {
@@ -189,6 +194,16 @@
         "import": "./dist/fields/*/index.js",
         "types": "./dist/fields/*/index.d.ts",
         "default": "./dist/fields/*/index.js"
+      },
+      "./forms/fieldSchemasToFormState": {
+        "import": "./dist/forms/fieldSchemasToFormState/index.js",
+        "types": "./dist/forms/fieldSchemasToFormState/index.d.ts",
+        "default": "./dist/forms/fieldSchemasToFormState/index.js"
+      },
+      "./forms/renderField": {
+        "import": "./dist/forms/fieldSchemasToFormState/renderField.js",
+        "types": "./dist/forms/fieldSchemasToFormState/renderField.d.ts",
+        "default": "./dist/forms/fieldSchemasToFormState/renderField.js"
       },
       "./forms/*": {
         "import": "./dist/forms/*/index.js",
