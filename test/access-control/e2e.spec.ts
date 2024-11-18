@@ -65,6 +65,7 @@ describe('access control', () => {
   let restrictedUrl: AdminUrlUtil
   let unrestrictedURL: AdminUrlUtil
   let readOnlyCollectionUrl: AdminUrlUtil
+  let richTextUrl: AdminUrlUtil
   let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
   let userRestrictedCollectionURL: AdminUrlUtil
@@ -80,6 +81,7 @@ describe('access control', () => {
 
     url = new AdminUrlUtil(serverURL, slug)
     restrictedUrl = new AdminUrlUtil(serverURL, fullyRestrictedSlug)
+    richTextUrl = new AdminUrlUtil(serverURL, 'rich-text')
     unrestrictedURL = new AdminUrlUtil(serverURL, unrestrictedSlug)
     readOnlyCollectionUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
@@ -144,6 +146,28 @@ describe('access control', () => {
     test('should not show field without permission', async () => {
       await page.goto(url.account)
       await expect(page.locator('#field-roles')).toBeHidden()
+    })
+  })
+
+  describe('rich text', () => {
+    test('rich text within block should render as editable', async () => {
+      await page.goto(richTextUrl.create)
+
+      await page.locator('.blocks-field__drawer-toggler').click()
+      await page.locator('.thumbnail-card').click()
+      const richTextField = page.locator('.rich-text-lexical')
+      const contentEditable = richTextField.locator('.ContentEditable__root').first()
+      await expect(contentEditable).toBeVisible()
+      await contentEditable.click()
+
+      const typedText = 'Hello, this field is editable!'
+      await page.keyboard.type(typedText)
+
+      await expect(
+        page.locator('[data-lexical-text="true"]', {
+          hasText: exactText(typedText),
+        }),
+      ).toHaveCount(1)
     })
   })
 

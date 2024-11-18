@@ -1,5 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 
+import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,
@@ -74,9 +75,11 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
 export const createClientConfig = ({
   config,
   i18n,
+  importMap,
 }: {
   config: SanitizedConfig
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientConfig => {
   // We can use deepCopySimple here, as the clientConfig should be JSON serializable anyways, since it will be sent from server => client
   const clientConfig = deepCopyObjectSimple(config, true) as unknown as ClientConfig
@@ -119,12 +122,14 @@ export const createClientConfig = ({
     collections: config.collections,
     defaultIDType: config.db.defaultIDType,
     i18n,
+    importMap,
   })
 
   clientConfig.globals = createClientGlobalConfigs({
     defaultIDType: config.db.defaultIDType,
     globals: config.globals,
     i18n,
+    importMap,
   })
 
   return clientConfig

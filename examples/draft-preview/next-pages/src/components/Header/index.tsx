@@ -1,13 +1,14 @@
-import React, { useState } from 'react'
+import type { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
+
 import Image from 'next/image'
 import Link from 'next/link'
-import { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
+import React, { useState } from 'react'
 
-import { MainMenu } from '../../payload-types'
+import type { MainMenu } from '../../payload-types'
+
 import { AdminBar } from '../AdminBar'
 import { CMSLink } from '../CMSLink'
 import { Gutter } from '../Gutter'
-
 import classes from './index.module.scss'
 
 type HeaderBarProps = {
@@ -18,17 +19,17 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
   return (
     <header className={classes.header}>
       <Gutter className={classes.wrap}>
-        <Link href="/" className={classes.logo}>
+        <Link className={classes.logo} href="/">
           <picture>
             <source
-              srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
               media="(prefers-color-scheme: dark)"
+              srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
             />
             <Image
-              width={150}
-              height={30}
               alt="Payload Logo"
-              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-dark.svg"
+              height={30}
+              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-dark.svg"
+              width={150}
             />
           </picture>
         </Link>
@@ -39,12 +40,12 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
 }
 
 export const Header: React.FC<{
+  adminBarProps: PayloadAdminBarProps
   globals: {
     mainMenu: MainMenu
   }
-  adminBarProps: PayloadAdminBarProps
 }> = (props) => {
-  const { globals, adminBarProps } = props
+  const { adminBarProps, globals } = props
 
   const [user, setUser] = useState<PayloadMeUser>()
 
@@ -56,7 +57,7 @@ export const Header: React.FC<{
 
   return (
     <div>
-      <AdminBar adminBarProps={adminBarProps} user={user} setUser={setUser} />
+      <AdminBar adminBarProps={adminBarProps} setUser={setUser} user={user} />
       <HeaderBar>
         {hasNavItems && (
           <nav className={classes.nav}>

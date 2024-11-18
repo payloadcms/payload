@@ -37,5 +37,4 @@ export type TextInputProps = {
   readonly style?: React.CSSProperties
   readonly value?: string
   readonly valueToRender?: Option[]
-  readonly width?: React.CSSProperties['width']
 } & SharedTextFieldProps

@@ -90,6 +90,46 @@ describe('database', () => {
 
       expect(doc.id).toBeDefined()
     })
+
+    it('should not create duplicate versions with custom id type', async () => {
+      const doc = await payload.create({
+        collection: 'custom-ids',
+        data: {
+          title: 'hey',
+        },
+      })
+
+      await payload.update({
+        collection: 'custom-ids',
+        id: doc.id,
+        data: {},
+      })
+
+      await payload.update({
+        collection: 'custom-ids',
+        id: doc.id,
+        data: {},
+      })
+
+      const versionsQuery = await payload.db.findVersions({
+        collection: 'custom-ids',
+        req: {} as PayloadRequest,
+        where: {
+          'version.title': {
+            equals: 'hey',
+          },
+          latest: {
+            equals: true,
+          },
+        },
+      })
+
+      expect(versionsQuery.totalDocs).toStrictEqual(1)
+    })
+
+    it('should not accidentally treat nested id fields as custom id', () => {
+      expect(payload.collections['fake-custom-ids'].customIDType).toBeUndefined()
+    })
   })
 
   describe('timestamps', () => {

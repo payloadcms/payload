@@ -28,8 +28,6 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
     visibleEntities,
   } = initPageResult
 
-  const CustomDashboardComponent = config.admin.components?.views?.Dashboard
-
   const collections = config.collections.filter(
     (collection) =>
       permissions?.collections?.[collection.slug]?.read &&
@@ -112,7 +110,7 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
           Link: LinkTransition,
           locale,
         }}
-        Component={CustomDashboardComponent}
+        Component={config.admin?.components?.views?.dashboard?.Component}
         Fallback={DefaultDashboard}
         importMap={payload.importMap}
         serverProps={{

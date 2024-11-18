@@ -1,6 +1,6 @@
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { headers as getHeaders } from 'next/headers.js'
 import Link from 'next/link'
+import { getPayload } from 'payload'
 import React, { Fragment } from 'react'
 
 import config from '../../payload.config'
@@ -9,7 +9,7 @@ import { HydrateClientUser } from './_components/HydrateClientUser'
 
 export default async function HomePage() {
   const headers = getHeaders()
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
   const { permissions, user } = await payload.auth({ headers })
 
   return (
