@@ -1,11 +1,11 @@
 import type { SQL } from 'drizzle-orm'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
-import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload'
+import type { FlattenField, NumberField, TextField } from 'payload'
 
 import { and, eq, like, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
-import { APIError, flattenTopLevelFields } from 'payload'
-import { fieldAffectsData, tabHasName } from 'payload/shared'
+import { APIError } from 'payload'
+import { tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 import { validate as uuidValidate } from 'uuid'
 
@@ -29,7 +29,7 @@ type TableColumn = {
     rawColumn: SQL<unknown>
   }[]
   constraints: Constraint[]
-  field: FieldAffectingData
+  field: FlattenField
   getNotNullColumnByValue?: (val: unknown) => string
   pathSegments?: string[]
   rawColumn?: SQL
@@ -43,7 +43,7 @@ type Args = {
   columnPrefix?: string
   constraintPath?: string
   constraints?: Constraint[]
-  fields: (Field | TabAsField)[]
+  fields: FlattenField[]
   joins: BuildQueryJoinAliases
   locale?: string
   pathSegments: string[]
@@ -86,9 +86,7 @@ export const getTableColumnFromPath = ({
   const rootTableName = incomingRootTableName || tableName
   let constraintPath = incomingConstraintPath || ''
 
-  const field = flattenTopLevelFields(fields as Field[]).find(
-    (fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath,
-  ) as Field | TabAsField
+  const field = fields.find((fieldToFind) => fieldToFind.name === fieldPath)
   let newTableName = tableName
 
   if (!field && fieldPath === 'id') {
@@ -152,7 +150,7 @@ export const getTableColumnFromPath = ({
           collectionPath,
           constraintPath,
           constraints,
-          fields: field.fields,
+          fields: field.flattenFields,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
@@ -209,7 +207,7 @@ export const getTableColumnFromPath = ({
               collectionPath,
               constraintPath,
               constraints: blockConstraints,
-              fields: block.fields,
+              fields: block.flattenFields,
               joins,
               locale,
               pathSegments: pathSegments.slice(1),
@@ -290,7 +288,7 @@ export const getTableColumnFromPath = ({
           columnPrefix: `${columnPrefix}${field.name}_`,
           constraintPath: `${constraintPath}${field.name}.`,
           constraints,
-          fields: field.fields,
+          fields: field.flattenFields,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
@@ -303,7 +301,6 @@ export const getTableColumnFromPath = ({
       }
 
       case 'number':
-
       case 'text': {
         if (field.hasMany) {
           let tableType = 'texts'
@@ -346,8 +343,8 @@ export const getTableColumnFromPath = ({
         }
         break
       }
-      case 'relationship':
 
+      case 'relationship':
       case 'upload': {
         const newCollectionPath = pathSegments.slice(1).join('.')
         if (Array.isArray(field.relationTo) || field.hasMany) {
@@ -580,7 +577,7 @@ export const getTableColumnFromPath = ({
             collectionPath: newCollectionPath,
             constraintPath: '',
             constraints,
-            fields: adapter.payload.collections[field.relationTo].config.fields,
+            fields: adapter.payload.collections[field.relationTo].config.flattenFields,
             joins,
             locale,
             pathSegments: pathSegments.slice(1),
@@ -640,7 +637,7 @@ export const getTableColumnFromPath = ({
             columnPrefix: `${columnPrefix}${field.name}_`,
             constraintPath: `${constraintPath}${field.name}.`,
             constraints,
-            fields: field.fields,
+            fields: field.flattenFields,
             joins,
             locale,
             pathSegments: pathSegments.slice(1),
@@ -658,29 +655,7 @@ export const getTableColumnFromPath = ({
           columnPrefix,
           constraintPath,
           constraints,
-          fields: field.fields,
-          joins,
-          locale,
-          pathSegments: pathSegments.slice(1),
-          rootTableName,
-          selectFields,
-          tableName: newTableName,
-          tableNameSuffix,
-          value,
-        })
-      }
-      case 'tabs': {
-        return getTableColumnFromPath({
-          adapter,
-          aliasTable,
-          collectionPath,
-          columnPrefix,
-          constraintPath,
-          constraints,
-          fields: field.tabs.map((tab) => ({
-            ...tab,
-            type: 'tab',
-          })),
+          fields: field.flattenFields,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
@@ -698,44 +673,42 @@ export const getTableColumnFromPath = ({
       }
     }
 
-    if (fieldAffectsData(field)) {
-      let newTable = adapter.tables[newTableName]
+    let newTable = adapter.tables[newTableName]
 
-      if (field.localized && adapter.payload.config.localization) {
-        // If localized, we go to localized table and set aliasTable to undefined
-        // so it is not picked up below to be used as targetTable
-        const parentTable = aliasTable || adapter.tables[tableName]
-        newTableName = `${tableName}${adapter.localesSuffix}`
+    if (field.localized && adapter.payload.config.localization) {
+      // If localized, we go to localized table and set aliasTable to undefined
+      // so it is not picked up below to be used as targetTable
+      const parentTable = aliasTable || adapter.tables[tableName]
+      newTableName = `${tableName}${adapter.localesSuffix}`
 
-        newTable = adapter.tables[newTableName]
+      newTable = adapter.tables[newTableName]
 
-        let condition = eq(parentTable.id, newTable._parentID)
+      let condition = eq(parentTable.id, newTable._parentID)
 
-        if (locale !== 'all') {
-          condition = and(condition, eq(newTable._locale, locale))
-        }
-
-        addJoinTable({
-          condition,
-          joins,
-          table: newTable,
-        })
-
-        aliasTable = undefined
+      if (locale !== 'all') {
+        condition = and(condition, eq(newTable._locale, locale))
       }
 
-      const targetTable = aliasTable || newTable
+      addJoinTable({
+        condition,
+        joins,
+        table: newTable,
+      })
 
-      selectFields[`${newTableName}.${columnPrefix}${field.name}`] =
-        targetTable[`${columnPrefix}${field.name}`]
+      aliasTable = undefined
+    }
 
-      return {
-        columnName: `${columnPrefix}${field.name}`,
-        constraints,
-        field,
-        pathSegments,
-        table: targetTable,
-      }
+    const targetTable = aliasTable || newTable
+
+    selectFields[`${newTableName}.${columnPrefix}${field.name}`] =
+      targetTable[`${columnPrefix}${field.name}`]
+
+    return {
+      columnName: `${columnPrefix}${field.name}`,
+      constraints,
+      field,
+      pathSegments,
+      table: targetTable,
     }
   }
 

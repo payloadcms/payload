@@ -147,7 +147,7 @@ export const findOperation = async <
         collectionConfig: collection.config,
         overrideAccess,
         req,
-        versionFields: buildVersionCollectionFields(payload.config, collection.config),
+        versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
         where: fullWhere,
       })
 

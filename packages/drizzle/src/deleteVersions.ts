@@ -19,7 +19,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
     `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
   const { docs } = await findMany({
     adapter: this,

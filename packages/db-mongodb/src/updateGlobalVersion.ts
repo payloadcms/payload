@@ -28,17 +28,20 @@ export async function updateGlobalVersion<T extends TypeWithID>(
 ) {
   const VersionModel = this.versions[globalSlug]
   const whereToUse = where || { id: { equals: id } }
-  const fields = buildVersionGlobalFields(
-    this.payload.config,
-    this.payload.config.globals.find((global) => global.slug === globalSlug),
-  )
+
+  const currentGlobal = this.payload.config.globals.find((global) => global.slug === globalSlug)
+  const fields = buildVersionGlobalFields(this.payload.config, currentGlobal)
 
   const options: QueryOptions = {
     ...optionsArgs,
     ...(await withSession(this, req)),
     lean: true,
     new: true,
-    projection: buildProjectionFromSelect({ adapter: this, fields, select }),
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: buildVersionGlobalFields(this.payload.config, currentGlobal, true),
+      select,
+    }),
   }
 
   const query = await VersionModel.buildQuery({

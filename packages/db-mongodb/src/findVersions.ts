@@ -44,7 +44,7 @@ export const findVersions: FindVersions = async function findVersions(
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
-      fields: collectionConfig.fields,
+      fields: collectionConfig.flattenFields,
       locale,
       sort: sortArg || '-updatedAt',
       timestamps: true,
@@ -68,7 +68,7 @@ export const findVersions: FindVersions = async function findVersions(
     pagination,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
+      fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
       select,
     }),
     sort,

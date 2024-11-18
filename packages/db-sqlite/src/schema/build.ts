@@ -8,7 +8,7 @@ import type {
   SQLiteTableWithColumns,
   UniqueConstraintBuilder,
 } from 'drizzle-orm/sqlite-core'
-import type { Field } from 'payload'
+import type { Field, FlattenField } from 'payload'
 
 import { buildIndexName, createTableName } from '@payloadcms/drizzle'
 import { relations, sql } from 'drizzle-orm'
@@ -60,7 +60,7 @@ type Args = {
   disableNotNull: boolean
   disableRelsTableUnique?: boolean
   disableUnique: boolean
-  fields: Field[]
+  fields: FlattenField[]
   locales?: [string, ...string[]]
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap

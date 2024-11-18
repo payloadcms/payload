@@ -3,7 +3,7 @@
 import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
-import type { DeepUndefinable } from 'ts-essentials'
+import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
 
 import type {
   JoinFieldClientProps,
@@ -1330,6 +1330,46 @@ export type JoinFieldClient = {
 } & FieldBaseClient &
   Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
 
+export type FlattenBlock = {
+  flattenFields: FlattenField[]
+} & Block
+
+export type FlattenBlocksField = {
+  blocks: FlattenBlock[]
+} & BlocksField
+
+export type FlattenGroupField = {
+  flattenFields: FlattenField[]
+} & GroupField
+
+export type FlattenArrayField = {
+  flattenFields: FlattenField[]
+} & ArrayField
+
+export type FlattenTabAsField = {
+  flattenFields: FlattenField[]
+} & MarkRequired<TabAsField, 'name'>
+
+export type FlattenField =
+  | CheckboxField
+  | CodeField
+  | DateField
+  | EmailField
+  | FlattenArrayField
+  | FlattenBlocksField
+  | FlattenGroupField
+  | FlattenTabAsField
+  | JoinField
+  | JSONField
+  | NumberField
+  | PointField
+  | RadioField
+  | RelationshipField
+  | RichTextField
+  | SelectField
+  | TextareaField
+  | TextField
+  | UploadField
 export type Field =
   | ArrayField
   | BlocksField

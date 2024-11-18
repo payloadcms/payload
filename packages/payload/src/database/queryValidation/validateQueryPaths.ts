@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { Field, FieldAffectingData } from '../../fields/config/types.js'
+import type { FlattenField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
 import type { EntityPolicies } from './types.js'
@@ -7,7 +7,6 @@ import type { EntityPolicies } from './types.js'
 import { QueryError } from '../../errors/QueryError.js'
 import { validOperators } from '../../types/constants.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
-import flattenFields from '../../utilities/flattenTopLevelFields.js'
 import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
@@ -15,7 +14,7 @@ type Args = {
   overrideAccess: boolean
   policies?: EntityPolicies
   req: PayloadRequest
-  versionFields?: Field[]
+  versionFields?: FlattenField[]
   where: Where
 } & (
   | {
@@ -54,9 +53,8 @@ export async function validateQueryPaths({
   versionFields,
   where,
 }: Args): Promise<void> {
-  const fields = flattenFields(
-    versionFields || (globalConfig || collectionConfig).fields,
-  ) as FieldAffectingData[]
+  const fields = versionFields || (globalConfig || collectionConfig).flattenFields
+
   if (typeof where === 'object') {
     const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
@@ -67,9 +65,9 @@ export async function validateQueryPaths({
           if (validOperators.includes(operator as Operator)) {
             promises.push(
               validateSearchParam({
-                collectionConfig: deepCopyObject(collectionConfig),
+                collectionConfig,
                 errors,
-                fields: fields as Field[],
+                fields,
                 globalConfig: deepCopyObject(globalConfig),
                 operator,
                 overrideAccess,

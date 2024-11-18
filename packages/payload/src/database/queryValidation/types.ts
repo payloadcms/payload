@@ -1,5 +1,5 @@
 import type { CollectionPermission, GlobalPermission } from '../../auth/index.js'
-import type { Field, FieldAffectingData, TabAsField, UIField } from '../../fields/config/types.js'
+import type { FlattenField } from '../../fields/config/types.js'
 
 export type EntityPolicies = {
   collections?: {
@@ -13,8 +13,8 @@ export type EntityPolicies = {
 export type PathToQuery = {
   collectionSlug?: string
   complete: boolean
-  field: Field | TabAsField
-  fields?: (FieldAffectingData | TabAsField | UIField)[]
+  field: FlattenField
+  fields?: FlattenField[]
   globalSlug?: string
   invalid?: boolean
   path: string

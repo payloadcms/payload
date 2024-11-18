@@ -21,7 +21,7 @@ export async function updateGlobal<T extends Record<string, unknown>>(
     adapter: this,
     data,
     db,
-    fields: globalConfig.fields,
+    fields: globalConfig.flattenFields,
     req,
     select,
     tableName,

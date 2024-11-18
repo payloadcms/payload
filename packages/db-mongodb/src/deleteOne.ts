@@ -22,7 +22,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     ...options,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: this.payload.collections[collection].config.fields,
+      fields: this.payload.collections[collection].config.flattenFields,
       select,
     }),
   }).lean()

@@ -15,7 +15,7 @@ import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
-  'access' | 'custom' | 'endpoints' | 'hooks' | 'joins'
+  'access' | 'custom' | 'endpoints' | 'flattenFields' | 'hooks' | 'joins'
 >
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
@@ -59,6 +59,7 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'endpoints',
   'custom',
   'joins',
+  'flattenFields',
   // `upload`
   // `admin`
   // are all handled separately

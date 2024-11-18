@@ -1,5 +1,5 @@
 import type { FilterQuery } from 'mongoose'
-import type { Field, Operator, Payload, Where } from 'payload'
+import type { FlattenField, Operator, Payload, Where } from 'payload'
 
 import { deepMergeWithCombinedArrays } from 'payload'
 import { validOperators } from 'payload/shared'
@@ -16,7 +16,7 @@ export async function parseParams({
   where,
 }: {
   collectionSlug?: string
-  fields: Field[]
+  fields: FlattenField[]
   globalSlug?: string
   locale: string
   payload: Payload

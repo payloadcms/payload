@@ -18,7 +18,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     lean: true,
     select: buildProjectionFromSelect({
       adapter: this,
-      fields: this.payload.globals.config.find((each) => each.slug === slug).fields,
+      fields: this.payload.globals.config.find((each) => each.slug === slug).flattenFields,
       select,
     }),
   }

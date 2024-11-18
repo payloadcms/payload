@@ -19,7 +19,7 @@ export async function createGlobal<T extends Record<string, unknown>>(
     adapter: this,
     data,
     db,
-    fields: globalConfig.fields,
+    fields: globalConfig.flattenFields,
     operation: 'create',
     req,
     tableName,
