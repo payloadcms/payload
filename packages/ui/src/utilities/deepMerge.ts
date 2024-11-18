@@ -31,23 +31,52 @@ export function deepMergeSimple<T = object>(obj1: object, obj2: object): T {
  * @param obj2 object to merge "into" obj1
  */
 
-export function deepMerge<T = object>(obj1: any, obj2: any): T {
-  const output = Array.isArray(obj1) ? [...obj1] : { ...obj1 }
+export function deepMerge(obj1: any, obj2: any, doNotMergeInNulls = true) {
+  const output = { ...obj1 }
 
   for (const key in obj2) {
     if (Object.prototype.hasOwnProperty.call(obj2, key)) {
-      const val1 = obj1[key]
-      const val2 = obj2[key]
+      if (doNotMergeInNulls) {
+        if (
+          (obj2[key] === null || obj2[key] === undefined) &&
+          obj1[key] !== null &&
+          obj1[key] !== undefined
+        ) {
+          continue
+        }
+      }
 
-      if (Array.isArray(val1) && Array.isArray(val2)) {
-        output[key] = [...val1, ...val2]
-      } else if (typeof val1 === 'object' && typeof val2 === 'object' && val1 && val2) {
-        output[key] = deepMerge(val1, val2)
+      // Check if both are arrays
+      if (Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
+        // Merge each element in the arrays
+
+        // We need the Array.from, map rather than a normal map because this handles holes in arrays properly. A simple .map would skip holes.
+        output[key] = Array.from(obj2[key], (item, index) => {
+          if (doNotMergeInNulls) {
+            if (
+              (item === undefined || item === null) &&
+              obj1[key][index] !== null &&
+              obj1[key][index] !== undefined
+            ) {
+              return obj1[key][index]
+            }
+          }
+
+          if (typeof item === 'object' && !Array.isArray(item) && obj1[key][index]) {
+            // Deep merge for objects in arrays
+            return deepMerge(obj1[key][index], item, doNotMergeInNulls)
+          }
+          return item
+        })
+      } else if (typeof obj2[key] === 'object' && !Array.isArray(obj2[key]) && obj1[key]) {
+        // Existing behavior for objects
+        output[key] = deepMerge(obj1[key], obj2[key], doNotMergeInNulls)
       } else {
-        output[key] = val2
+        // Direct assignment for values
+        output[key] = obj2[key]
       }
     }
   }
 
-  return output as T
+  return output
 }
