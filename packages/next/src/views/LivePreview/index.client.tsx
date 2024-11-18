@@ -28,7 +28,12 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { handleBackToDashboard, handleGoBack, handleTakeOver } from '@payloadcms/ui/shared'
+import {
+  abortAndIgnore,
+  handleBackToDashboard,
+  handleGoBack,
+  handleTakeOver,
+} from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
@@ -116,7 +121,7 @@ const PreviewView: React.FC<Props> = ({
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
 
-  const abortControllerRef = useRef(new AbortController())
+  const formStateAbortControllerRef = useRef(new AbortController())
 
   const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
 
@@ -176,16 +181,10 @@ const PreviewView: React.FC<Props> = ({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      if (abortControllerRef.current) {
-        try {
-          abortControllerRef.current.abort()
-        } catch (_err) {
-          // swallow error
-        }
-      }
+      abortAndIgnore(formStateAbortControllerRef.current)
 
-      const abortController = new AbortController()
-      abortControllerRef.current = abortController
+      const controller = new AbortController()
+      formStateAbortControllerRef.current = controller
 
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - editSessionStartTime
@@ -208,7 +207,7 @@ const PreviewView: React.FC<Props> = ({
         operation,
         returnLockStatus: isLockingEnabled ? true : false,
         schemaPath,
-        signal: abortController.signal,
+        signal: controller.signal,
         updateLastEdited,
       })
 
@@ -265,14 +264,6 @@ const PreviewView: React.FC<Props> = ({
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
-      if (abortControllerRef.current) {
-        try {
-          abortControllerRef.current.abort()
-        } catch (_err) {
-          // swallow error
-        }
-      }
-
       if (!isLockingEnabled) {
         return
       }
@@ -315,6 +306,12 @@ const PreviewView: React.FC<Props> = ({
     documentIsLocked,
     setDocumentIsLocked,
   ])
+
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(formStateAbortControllerRef.current)
+    }
+  })
 
   const shouldShowDocumentLockedModal =
     documentIsLocked &&

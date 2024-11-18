@@ -1,5 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 
+import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,
@@ -44,18 +45,21 @@ export const createClientGlobalConfig = ({
   defaultIDType,
   global,
   i18n,
+  importMap,
 }: {
   defaultIDType: Payload['config']['db']['defaultIDType']
   global: SanitizedConfig['globals'][0]
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientGlobalConfig => {
-  const clientGlobal = deepCopyObjectSimple(global) as unknown as ClientGlobalConfig
+  const clientGlobal = deepCopyObjectSimple(global, true) as unknown as ClientGlobalConfig
 
   clientGlobal.fields = createClientFields({
     clientFields: clientGlobal?.fields || [],
     defaultIDType,
     fields: global.fields,
     i18n,
+    importMap,
   })
 
   serverOnlyProperties.forEach((key) => {
@@ -95,10 +99,12 @@ export const createClientGlobalConfigs = ({
   defaultIDType,
   globals,
   i18n,
+  importMap,
 }: {
   defaultIDType: Payload['config']['db']['defaultIDType']
   globals: SanitizedConfig['globals']
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientGlobalConfig[] => {
   const clientGlobals = new Array(globals.length)
 
@@ -109,6 +115,7 @@ export const createClientGlobalConfigs = ({
       defaultIDType,
       global,
       i18n,
+      importMap,
     })
   }
 

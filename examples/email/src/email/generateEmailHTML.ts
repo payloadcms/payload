@@ -1,24 +1,17 @@
+import ejs from 'ejs'
 import fs from 'fs'
-import Handlebars from 'handlebars'
-import inlineCSS from 'inline-css'
+import juice from 'juice'
 import path from 'path'
 
-const template = fs.readFileSync
-  ? fs.readFileSync(path.join(__dirname, './template.html'), 'utf8')
-  : ''
+export const generateEmailHTML = async (data: any): Promise<string> => {
+  const templatePath = path.join(process.cwd(), 'src/email/template.ejs')
+  const templateContent = fs.readFileSync(templatePath, 'utf8')
 
-// Compile the template
-const getHTML = Handlebars.compile(template)
+  // Compile and render the template with EJS
+  const preInlinedCSS = ejs.render(templateContent, { ...data, cta: data.cta || {} })
 
-const generateEmailHTML = async (data): Promise<string> => {
-  const preInlinedCSS = getHTML(data)
+  // Inline CSS
+  const html = juice(preInlinedCSS)
 
-  const html = await inlineCSS(preInlinedCSS, {
-    url: ' ',
-    removeStyleTags: false,
-  })
-
-  return html
+  return Promise.resolve(html)
 }
-
-export default generateEmailHTML

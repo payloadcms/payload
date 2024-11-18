@@ -7,6 +7,7 @@ import type { ReactEditor } from 'slate-react'
 
 import { getTranslation } from '@payloadcms/translations'
 import { FieldLabel, useEditDepth, useField, useTranslation, withCondition } from '@payloadcms/ui'
+import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { isHotkey } from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { createEditor, Node, Element as SlateElement, Text, Transforms } from 'slate'
@@ -19,8 +20,8 @@ import type { LoadedSlateFieldProps } from './types.js'
 import { defaultRichTextValue } from '../data/defaultValue.js'
 import { richTextValidate } from '../data/validation.js'
 import { listTypes } from './elements/listTypes.js'
-import { hotkeys } from './hotkeys.js'
 import './index.scss'
+import { hotkeys } from './hotkeys.js'
 import { toggleLeaf } from './leaves/toggle.js'
 import { withEnterBreakOut } from './plugins/withEnterBreakOut.js'
 import { withHTML } from './plugins/withHTML.js'
@@ -42,9 +43,10 @@ declare module 'slate' {
 const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   const {
     elements,
+    field,
     field: {
       name,
-      admin: { className, placeholder, readOnly: readOnlyFromAdmin, style, width } = {},
+      admin: { className, placeholder, readOnly: readOnlyFromAdmin } = {},
       label,
       required,
     },
@@ -124,14 +126,14 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
       if (element.textAlign) {
         if (element.type === 'relationship' || element.type === 'upload') {
           switch (element.textAlign) {
+            case 'center':
+              attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } }
+              break
             case 'left':
               attr = { ...attr, style: { marginRight: 'auto' } }
               break
             case 'right':
               attr = { ...attr, style: { marginLeft: 'auto' } }
-              break
-            case 'center':
-              attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } }
               break
             default:
               attr = { ...attr, style: { textAlign: element.textAlign } }
@@ -139,11 +141,11 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
           }
         } else if (element.type === 'li') {
           switch (element.textAlign) {
-            case 'right':
-              attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } }
-              break
             case 'center':
               attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'center' } }
+              break
+            case 'right':
+              attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } }
               break
             case 'left':
             default:
@@ -274,6 +276,8 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   //   }
   // }, [path, editor]);
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   const classes = [
     baseClass,
     'field-type',
@@ -300,13 +304,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   }
 
   return (
-    <div
-      className={classes}
-      style={{
-        ...style,
-        width,
-      }}
-    >
+    <div className={classes} style={styles}>
       {Label || <FieldLabel label={label} required={required} />}
       <div className={`${baseClass}__wrap`}>
         {Error}

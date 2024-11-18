@@ -2,9 +2,9 @@ import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
-import type { RequestContext } from '../../../index.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
@@ -200,60 +200,6 @@ export const promise = async ({
   }
 
   switch (field.type) {
-    case 'point': {
-      // Transform point data for storage
-      if (
-        Array.isArray(siblingData[field.name]) &&
-        siblingData[field.name][0] !== null &&
-        siblingData[field.name][1] !== null
-      ) {
-        siblingData[field.name] = {
-          type: 'Point',
-          coordinates: [
-            parseFloat(siblingData[field.name][0]),
-            parseFloat(siblingData[field.name][1]),
-          ],
-        }
-      }
-
-      break
-    }
-
-    case 'group': {
-      if (typeof siblingData[field.name] !== 'object') {
-        siblingData[field.name] = {}
-      }
-      if (typeof siblingDoc[field.name] !== 'object') {
-        siblingDoc[field.name] = {}
-      }
-      if (typeof siblingDocWithLocales[field.name] !== 'object') {
-        siblingDocWithLocales[field.name] = {}
-      }
-
-      await traverseFields({
-        id,
-        collection,
-        context,
-        data,
-        doc,
-        docWithLocales,
-        errors,
-        fields: field.fields,
-        global,
-        mergeLocaleActions,
-        operation,
-        path: fieldPath,
-        req,
-        schemaPath: fieldSchemaPath,
-        siblingData: siblingData[field.name] as JsonObject,
-        siblingDoc: siblingDoc[field.name] as JsonObject,
-        siblingDocWithLocales: siblingDocWithLocales[field.name] as JsonObject,
-        skipValidation: skipValidationFromHere,
-      })
-
-      break
-    }
-
     case 'array': {
       const rows = siblingData[field.name]
 
@@ -339,8 +285,9 @@ export const promise = async ({
       break
     }
 
-    case 'row':
-    case 'collapsible': {
+    case 'collapsible':
+
+    case 'row': {
       await traverseFields({
         id,
         collection,
@@ -361,6 +308,104 @@ export const promise = async ({
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
       })
+
+      break
+    }
+
+    case 'group': {
+      if (typeof siblingData[field.name] !== 'object') {
+        siblingData[field.name] = {}
+      }
+      if (typeof siblingDoc[field.name] !== 'object') {
+        siblingDoc[field.name] = {}
+      }
+      if (typeof siblingDocWithLocales[field.name] !== 'object') {
+        siblingDocWithLocales[field.name] = {}
+      }
+
+      await traverseFields({
+        id,
+        collection,
+        context,
+        data,
+        doc,
+        docWithLocales,
+        errors,
+        fields: field.fields,
+        global,
+        mergeLocaleActions,
+        operation,
+        path: fieldPath,
+        req,
+        schemaPath: fieldSchemaPath,
+        siblingData: siblingData[field.name] as JsonObject,
+        siblingDoc: siblingDoc[field.name] as JsonObject,
+        siblingDocWithLocales: siblingDocWithLocales[field.name] as JsonObject,
+        skipValidation: skipValidationFromHere,
+      })
+
+      break
+    }
+    case 'point': {
+      // Transform point data for storage
+      if (
+        Array.isArray(siblingData[field.name]) &&
+        siblingData[field.name][0] !== null &&
+        siblingData[field.name][1] !== null
+      ) {
+        siblingData[field.name] = {
+          type: 'Point',
+          coordinates: [
+            parseFloat(siblingData[field.name][0]),
+            parseFloat(siblingData[field.name][1]),
+          ],
+        }
+      }
+
+      break
+    }
+
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.beforeChange?.length) {
+        await editor.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const hookedValue = await currentHook({
+            collection,
+            context,
+            data,
+            docWithLocales,
+            errors,
+            field,
+            global,
+            mergeLocaleActions,
+            operation,
+            originalDoc: doc,
+            path: fieldPath,
+            previousSiblingDoc: siblingDoc,
+            previousValue: siblingDoc[field.name],
+            req,
+            schemaPath: parentSchemaPath,
+            siblingData,
+            siblingDocWithLocales,
+            skipValidation,
+            value: siblingData[field.name],
+          })
+
+          if (hookedValue !== undefined) {
+            siblingData[field.name] = hookedValue
+          }
+        }, Promise.resolve())
+      }
 
       break
     }
@@ -431,51 +476,6 @@ export const promise = async ({
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
       })
-
-      break
-    }
-
-    case 'richText': {
-      if (!field?.editor) {
-        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-      }
-      if (typeof field?.editor === 'function') {
-        throw new Error('Attempted to access unsanitized rich text editor.')
-      }
-
-      const editor: RichTextAdapter = field?.editor
-
-      if (editor?.hooks?.beforeChange?.length) {
-        await editor.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
-            collection,
-            context,
-            data,
-            docWithLocales,
-            errors,
-            field,
-            global,
-            mergeLocaleActions,
-            operation,
-            originalDoc: doc,
-            path: fieldPath,
-            previousSiblingDoc: siblingDoc,
-            previousValue: siblingDoc[field.name],
-            req,
-            schemaPath: parentSchemaPath,
-            siblingData,
-            siblingDocWithLocales,
-            skipValidation,
-            value: siblingData[field.name],
-          })
-
-          if (hookedValue !== undefined) {
-            siblingData[field.name] = hookedValue
-          }
-        }, Promise.resolve())
-      }
 
       break
     }

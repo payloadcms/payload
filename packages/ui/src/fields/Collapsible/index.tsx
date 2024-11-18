@@ -1,8 +1,8 @@
 'use client'
-import type { AdminClient, CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
+import type { CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -16,8 +16,9 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'collapsible-field'
 
@@ -25,10 +26,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
     field,
     field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
-    indexPath = '',
-    parentPath = '',
-    parentSchemaPath = '',
-    path = '',
+    indexPath,
+    parentPath,
+    parentSchemaPath,
+    path,
     permissions,
     readOnly,
   } = props
@@ -98,13 +99,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
     void fetchInitialState()
   }, [getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   if (typeof collapsedOnMount !== 'boolean') {
     return null
-  }
-
-  const style: AdminClient['style'] = {
-    ...field.admin?.style,
-    '--field-width': field.admin.width,
   }
 
   return (
@@ -120,7 +118,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
           .filter(Boolean)
           .join(' ')}
         id={`field-${fieldPreferencesKey}`}
-        style={style}
+        style={styles}
       >
         <CollapsibleElement
           className={`${baseClass}__collapsible`}

@@ -3,7 +3,7 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 
 import type { EditFormProps } from './types.js'
 
@@ -17,6 +17,7 @@ import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
+import { abortAndIgnore } from '../../../utilities/abortAndIgnore.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
@@ -55,8 +56,9 @@ export function EditForm({ submitted }: EditFormProps) {
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug: docSlug }) as ClientCollectionConfig
+  const formStateAbortControllerRef = React.useRef<AbortController>(null)
 
+  const collectionConfig = getEntityConfig({ collectionSlug: docSlug }) as ClientCollectionConfig
   const router = useRouter()
   const depth = useEditDepth()
   const params = useSearchParams()
@@ -109,6 +111,11 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
+      abortAndIgnore(formStateAbortControllerRef.current)
+
+      const controller = new AbortController()
+      formStateAbortControllerRef.current = controller
+
       const docPreferences = await getDocPreferences()
       const { state: newFormState } = await getFormState({
         collectionSlug,
@@ -117,12 +124,19 @@ export function EditForm({ submitted }: EditFormProps) {
         formState: prevFormState,
         operation: 'create',
         schemaPath,
+        signal: controller.signal,
       })
 
       return newFormState
     },
     [collectionSlug, schemaPath, getDocPreferences, getFormState, docPermissions],
   )
+
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(formStateAbortControllerRef.current)
+    }
+  }, [])
 
   return (
     <OperationProvider operation="create">

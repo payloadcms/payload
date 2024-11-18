@@ -77,7 +77,6 @@ export const UploadDrawer: React.FC<{
         data,
         docPermissions,
         docPreferences: await getDocPreferences(),
-        doNotAbort: true,
         globalSlug,
         operation: 'update',
         renderAllFields: true,
@@ -151,7 +150,7 @@ export const UploadDrawer: React.FC<{
             parentIndexPath=""
             parentPath=""
             parentSchemaPath=""
-            permissions={{}}
+            permissions={docPermissions.fields}
             readOnly={false}
           />
           <FormSubmit>{t('fields:saveChanges')}</FormSubmit>

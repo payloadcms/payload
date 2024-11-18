@@ -103,7 +103,6 @@ export const LinkElement = () => {
         data,
         docPermissions,
         docPreferences: await getDocPreferences(),
-        doNotAbort: true,
         globalSlug,
         operation: 'update',
         renderAllFields: true,

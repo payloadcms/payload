@@ -33,27 +33,14 @@ export const traverseFields = ({
     schemaMap.set(schemaPath, field)
 
     switch (field.type) {
-      case 'group':
       case 'array':
+      case 'group':
         traverseFields({
           config,
           fields: field.fields,
           i18n,
           parentIndexPath: '',
           parentSchemaPath: schemaPath,
-          schemaMap,
-        })
-
-        break
-
-      case 'collapsible':
-      case 'row':
-        traverseFields({
-          config,
-          fields: field.fields,
-          i18n,
-          parentIndexPath: indexPath,
-          parentSchemaPath,
           schemaMap,
         })
 
@@ -72,6 +59,19 @@ export const traverseFields = ({
             parentSchemaPath: blockSchemaPath,
             schemaMap,
           })
+        })
+
+        break
+      case 'collapsible':
+
+      case 'row':
+        traverseFields({
+          config,
+          fields: field.fields,
+          i18n,
+          parentIndexPath: indexPath,
+          parentSchemaPath,
+          schemaMap,
         })
 
         break

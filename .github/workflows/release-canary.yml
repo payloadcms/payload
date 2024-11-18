@@ -3,7 +3,7 @@ name: release-canary
 on:
   workflow_dispatch:
     branches:
-      - beta
+      - main
 
 env:
   NODE_VERSION: 22.6.0

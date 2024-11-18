@@ -209,7 +209,12 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   } else {
     await page.keyboard.down('Control')
   }
-  await page.keyboard.down('s')
+  await page.keyboard.press('s')
+  if (isMac) {
+    await page.keyboard.up('Meta')
+  } else {
+    await page.keyboard.up('Control')
+  }
   await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 }
 
@@ -348,7 +353,8 @@ export function initPageConsoleErrorCatch(page: Page) {
       !msg.text().includes('Error: NEXT_REDIRECT') &&
       !msg.text().includes('Error getting document data') &&
       !msg.text().includes('Failed trying to load default language strings') &&
-      !msg.text().includes('TypeError: Failed to fetch') // This happens when server actions are aborted
+      !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
+      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') // This is a weird error that happens in the console
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.

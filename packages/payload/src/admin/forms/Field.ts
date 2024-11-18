@@ -1,9 +1,10 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { MarkOptional } from 'ts-essentials'
 
-import type { FieldPermissions, User } from '../../auth/types.js'
+import type { SanitizedFieldPermissions, User } from '../../auth/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
-import type { Payload } from '../../types/index.js'
+import type { DocumentPreferences } from '../../preferences/types.js'
+import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
 import type {
   ClientTab,
   Data,
@@ -19,6 +20,19 @@ export type ClientComponentProps = {
   customComponents: FormField['customComponents']
   field: ClientBlock | ClientField | ClientTab
   forceRender?: boolean
+  readOnly?: boolean
+  renderedBlocks?: RenderedField[]
+  /**
+   * Used to extract field configs from a schemaMap.
+   * Does not include indexes.
+   *
+   * @default field.name
+   **/
+  schemaPath?: string
+}
+
+// TODO: maybe we can come up with a better name?
+export type FieldPaths = {
   /**
    * @default ''
    */
@@ -28,23 +42,32 @@ export type ClientComponentProps = {
    */
   parentPath?: string
   /**
-   * @default '''
+   * The path built up to the point of the field
+   * excluding the field name.
+   *
+   * @default ''
    */
   parentSchemaPath?: string
   /**
+   * A built up path to access FieldState in the form state.
+   * Nested fields will have a path that includes the parent field names
+   * if they are nested within a group, array, block or named tab.
+   *
+   * Collapsibles and unnamed tabs will have arbitrary paths
+   * that look like _index-0, _index-1, etc.
+   *
+   * Row fields will not have a path.
+   *
+   * @example 'parentGroupField.childTextField'
+   *
    * @default field.name
    */
-  path?: string
-  readOnly?: boolean
-  renderedBlocks?: RenderedField[]
-  /**
-   * @default field.name
-   **/
-  schemaPath?: string
+  path: string
 }
 
 export type ServerComponentProps = {
   clientField: ClientFieldWithOptionalType
+  collectionSlug: string
   data: Data
   field: Field
   /**
@@ -57,8 +80,12 @@ export type ServerComponentProps = {
    */
   formState: FormState
   i18n: I18nClient
+  id?: number | string
+  operation: Operation
   payload: Payload
-  permissions: FieldPermissions
+  permissions: SanitizedFieldPermissions
+  preferences: DocumentPreferences
+  req: PayloadRequest
   siblingData: Data
   user: User
 }

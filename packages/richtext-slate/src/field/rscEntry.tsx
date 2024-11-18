@@ -1,13 +1,13 @@
+import type {
+  ClientComponentProps,
+  ClientField,
+  Field,
+  FieldPaths,
+  RichTextFieldClient,
+ ServerComponentProps } from 'payload'
+
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import {
-  type ClientComponentProps,
-  type ClientField,
-  createClientFields,
-  deepCopyObjectSimple,
-  type Field,
-  type RichTextFieldClient,
-  type ServerComponentProps,
-} from 'payload'
+import { createClientFields, deepCopyObjectSimple } from 'payload'
 import React from 'react'
 
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from '../types.js'
@@ -22,15 +22,13 @@ export const RscEntrySlateField: React.FC<
   {
     args: AdapterArguments
   } & ClientComponentProps &
+    Pick<FieldPaths, 'path'> &
     ServerComponentProps
 > = ({
   args,
   clientField,
   forceRender,
   i18n,
-  indexPath,
-  parentPath,
-  parentSchemaPath,
   path,
   payload,
   readOnly,
@@ -143,12 +141,16 @@ export const RscEntrySlateField: React.FC<
             defaultIDType: payload.config.db.defaultIDType,
             fields: args.admin?.link?.fields as Field[],
             i18n,
+            importMap: payload.importMap,
           })
 
           componentMap.set(linkFieldsSchemaPath, clientFields)
 
           break
         }
+
+        case 'relationship':
+          break
 
         case 'upload': {
           const uploadEnabledCollections = payload.config.collections.filter(
@@ -171,6 +173,7 @@ export const RscEntrySlateField: React.FC<
                 defaultIDType: payload.config.db.defaultIDType,
                 fields: args?.admin?.upload?.collections[collection.slug]?.fields,
                 i18n,
+                importMap: payload.importMap,
               })
 
               componentMap.set(`${uploadFieldsSchemaPath}.${collection.slug}`, clientFields)
@@ -179,9 +182,6 @@ export const RscEntrySlateField: React.FC<
 
           break
         }
-
-        case 'relationship':
-          break
       }
     }
   })
@@ -191,9 +191,6 @@ export const RscEntrySlateField: React.FC<
       componentMap={Object.fromEntries(componentMap)}
       field={clientField as RichTextFieldClient}
       forceRender={forceRender}
-      indexPath={indexPath}
-      parentPath={parentPath}
-      parentSchemaPath={parentSchemaPath}
       path={path}
       readOnly={readOnly}
       renderedBlocks={renderedBlocks}

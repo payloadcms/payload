@@ -237,7 +237,7 @@ export function LexicalTypeaheadMenuPlugin({
     }
   }, [editor, triggerFn, onQueryChange, resolution, closeTypeahead, openTypeahead])
 
-  return resolution === null || editor === null ? null : (
+  return anchorElementRef.current === null || resolution === null || editor === null ? null : (
     <LexicalMenu
       anchorElementRef={anchorElementRef}
       close={closeTypeahead}

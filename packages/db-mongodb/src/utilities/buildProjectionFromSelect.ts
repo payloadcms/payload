@@ -104,34 +104,9 @@ const traverseFields = ({
     }
 
     switch (field.type) {
-      case 'collapsible':
-      case 'row':
-        traverseFields({
-          adapter,
-          databaseSchemaPath,
-          fields: field.fields,
-          projection,
-          select,
-          selectMode,
-          withinLocalizedField,
-        })
-        break
-
-      case 'tabs':
-        traverseFields({
-          adapter,
-          databaseSchemaPath,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-          projection,
-          select,
-          selectMode,
-          withinLocalizedField,
-        })
-        break
-
+      case 'array':
       case 'group':
-      case 'tab':
-      case 'array': {
+      case 'tab': {
         let fieldSelect: SelectType
 
         if (field.type === 'tab' && !tabHasName(field)) {
@@ -206,6 +181,30 @@ const traverseFields = ({
 
         break
       }
+      case 'collapsible':
+      case 'row':
+        traverseFields({
+          adapter,
+          databaseSchemaPath,
+          fields: field.fields,
+          projection,
+          select,
+          selectMode,
+          withinLocalizedField,
+        })
+        break
+
+      case 'tabs':
+        traverseFields({
+          adapter,
+          databaseSchemaPath,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          projection,
+          select,
+          selectMode,
+          withinLocalizedField,
+        })
+        break
 
       default:
         break

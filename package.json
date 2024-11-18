@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.127",
+  "version": "3.0.0-beta.134",
   "private": true,
   "type": "module",
   "scripts": {
@@ -59,6 +59,7 @@
     "dev:generate-types": "pnpm runts ./test/generateTypes.ts",
     "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres pnpm runts ./test/dev.ts",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/dev.ts --prod",
+    "dev:prod:memorydb": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/dev.ts --prod --start-memory-db",
     "dev:vercel-postgres": "cross-env PAYLOAD_DATABASE=vercel-postgres pnpm runts ./test/dev.ts",
     "devsafe": "node ./scripts/delete-recursively.js '**/.next' && pnpm dev",
     "docker:restart": "pnpm docker:stop --remove-orphans && pnpm docker:start",
@@ -66,7 +67,7 @@
     "docker:stop": "docker compose -f packages/plugin-cloud-storage/docker-compose.yml down",
     "force:build": "pnpm run build:core:force",
     "lint": "turbo run lint --concurrency 1 --continue",
-    "lint-staged": "node ./scripts/run-lint-staged.js",
+    "lint-staged": "lint-staged",
     "lint:fix": "turbo run lint:fix --concurrency 1 --continue",
     "obliterate-playwright-cache-macos": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
     "prepare": "husky",

@@ -6,7 +6,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -15,30 +15,28 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
 const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
       admin: {
         autoComplete,
         className,
         description,
         placeholder,
-        style,
-        width,
       } = {} as EmailFieldClientProps['field']['admin'],
       label,
       localized,
       required,
     } = {} as EmailFieldClientProps['field'],
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const { i18n } = useTranslation()
 
@@ -61,15 +59,14 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}

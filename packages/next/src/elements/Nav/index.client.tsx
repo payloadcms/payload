@@ -1,6 +1,7 @@
 'use client'
 
 import type { groupNavItems } from '@payloadcms/ui/shared'
+import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { NavGroup, useConfig, useNav, useTranslation } from '@payloadcms/ui'
@@ -13,7 +14,8 @@ const baseClass = 'nav'
 
 export const DefaultNavClient: React.FC<{
   groups: ReturnType<typeof groupNavItems>
-}> = ({ groups }) => {
+  navPreferences: NavPreferences
+}> = ({ groups, navPreferences }) => {
   const pathname = usePathname()
 
   const {
@@ -29,7 +31,7 @@ export const DefaultNavClient: React.FC<{
     <Fragment>
       {groups.map(({ entities, label }, key) => {
         return (
-          <NavGroup key={key} label={label}>
+          <NavGroup isOpen={navPreferences?.groups?.[label]?.open} key={key} label={label}>
             {entities.map(({ slug, type, label }, i) => {
               let href: string
               let id: string

@@ -36,7 +36,6 @@ export type SelectInputProps = {
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: string | string[]
-  readonly width?: React.CSSProperties['width']
 }
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
@@ -60,7 +59,6 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     showError,
     style,
     value,
-    width,
   } = props
 
   const { i18n } = useTranslation()
@@ -95,10 +93,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      style={style}
     >
       <RenderCustomComponent
         CustomComponent={Label}

@@ -1,17 +1,17 @@
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { headers as getHeaders } from 'next/headers.js'
 import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import config from '../../../payload.config'
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
-import { LoginForm } from './LoginForm'
 import classes from './index.module.scss'
+import { LoginForm } from './LoginForm'
 
 export default async function Login() {
   const headers = getHeaders()
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers })
 
   if (user) {

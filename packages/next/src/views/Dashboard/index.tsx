@@ -31,18 +31,15 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
     visibleEntities,
   } = initPageResult
 
-  const CustomDashboardComponent = config.admin.components?.views?.Dashboard
-
   const collections = config.collections.filter(
     (collection) =>
-      permissions?.collections?.[collection.slug]?.read?.permission &&
+      permissions?.collections?.[collection.slug]?.read &&
       visibleEntities.collections.includes(collection.slug),
   )
 
   const globals = config.globals.filter(
     (global) =>
-      permissions?.globals?.[global.slug]?.read?.permission &&
-      visibleEntities.globals.includes(global.slug),
+      permissions?.globals?.[global.slug]?.read && visibleEntities.globals.includes(global.slug),
   )
 
   // Query locked global documents only if there are globals in the config
@@ -116,7 +113,7 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
           Link,
           locale,
         }}
-        Component={CustomDashboardComponent}
+        Component={config.admin?.components?.views?.dashboard?.Component}
         Fallback={DefaultDashboard}
         importMap={payload.importMap}
         serverProps={{

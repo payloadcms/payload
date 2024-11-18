@@ -1,3 +1,5 @@
+import type { QueryOptions } from 'mongoose'
+
 import { buildVersionCollectionFields, type PayloadRequest, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -8,7 +10,16 @@ import { withSession } from './withSession.js'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  { id, collection, locale, req = {} as PayloadRequest, select, versionData, where },
+  {
+    id,
+    collection,
+    locale,
+    options: optionsArgs = {},
+    req = {} as PayloadRequest,
+    select,
+    versionData,
+    where,
+  },
 ) {
   const VersionModel = this.versions[collection]
   const whereToUse = where || { id: { equals: id } }
@@ -17,7 +28,8 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     this.payload.collections[collection].config,
   )
 
-  const options = {
+  const options: QueryOptions = {
+    ...optionsArgs,
     ...(await withSession(this, req)),
     lean: true,
     new: true,

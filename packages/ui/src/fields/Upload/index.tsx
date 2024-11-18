@@ -2,12 +2,13 @@
 
 import type { UploadFieldClientProps } from 'payload'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import './index.scss'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { UploadInput } from './Input.js'
 
 export { UploadInput } from './Input.js'
@@ -17,9 +18,9 @@ export const baseClass = 'upload'
 
 export function UploadComponent(props: UploadFieldClientProps) {
   const {
+    field,
     field: {
-      name,
-      admin: { allowCreate, className, description, isSortable, style, width } = {},
+      admin: { allowCreate, className, description, isSortable } = {},
       hasMany,
       label,
       localized,
@@ -27,11 +28,10 @@ export function UploadComponent(props: UploadFieldClientProps) {
       relationTo,
       required,
     },
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const { config } = useConfig()
 
@@ -54,6 +54,8 @@ export function UploadComponent(props: UploadFieldClientProps) {
     path,
     validate: memoizedValidate,
   })
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <UploadInput
@@ -79,9 +81,8 @@ export function UploadComponent(props: UploadFieldClientProps) {
       required={required}
       serverURL={config.serverURL}
       showError={showError}
-      style={style}
+      style={styles}
       value={value}
-      width={width}
     />
   )
 }

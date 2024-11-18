@@ -24,16 +24,6 @@ export const traverseFields = <T>(args: {
       const fieldName = fieldSchema.name
 
       switch (fieldSchema.type) {
-        case 'richText':
-          result[fieldName] = traverseRichText({
-            externallyUpdatedRelationship,
-            incomingData: incomingData[fieldName],
-            populationsByCollection,
-            result: result[fieldName],
-          })
-
-          break
-
         case 'array':
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((incomingRow, i) => {
@@ -94,8 +84,9 @@ export const traverseFields = <T>(args: {
 
           break
 
-        case 'tabs':
         case 'group':
+
+        case 'tabs':
           if (!result[fieldName]) {
             result[fieldName] = {}
           }
@@ -109,9 +100,9 @@ export const traverseFields = <T>(args: {
           })
 
           break
+        case 'relationship':
 
         case 'upload':
-        case 'relationship':
           // Handle `hasMany` relationships
           if (fieldSchema.hasMany && Array.isArray(incomingData[fieldName])) {
             if (!result[fieldName] || !incomingData[fieldName].length) {
@@ -270,6 +261,15 @@ export const traverseFields = <T>(args: {
               }
             }
           }
+
+          break
+        case 'richText':
+          result[fieldName] = traverseRichText({
+            externallyUpdatedRelationship,
+            incomingData: incomingData[fieldName],
+            populationsByCollection,
+            result: result[fieldName],
+          })
 
           break
 

@@ -103,6 +103,18 @@ export function parseParams({
                   Array.isArray(pathSegments) &&
                   pathSegments.length > 1
                 ) {
+                  if (adapter.name === 'postgres') {
+                    const constraint = adapter.createJSONQuery({
+                      column: rawColumn || table[columnName],
+                      operator,
+                      pathSegments,
+                      value: val,
+                    })
+
+                    constraints.push(sql.raw(constraint))
+                    break
+                  }
+
                   const segments = pathSegments.slice(1)
                   segments.unshift(table[columnName].name)
 
@@ -142,11 +154,7 @@ export function parseParams({
                   if (adapter.name === 'sqlite' && operator === 'equals' && !isNaN(val)) {
                     formattedValue = val
                   } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
-                    if (adapter.name === 'sqlite') {
-                      formattedValue = `(${val.map((v) => `${v}`).join(',')})`
-                    } else {
-                      formattedValue = `(${val.map((v) => `'${v}'`).join(', ')})`
-                    }
+                    formattedValue = `(${val.map((v) => `${v}`).join(',')})`
                   } else {
                     formattedValue = `'${operatorKeys[operator].wildcard}${val}${operatorKeys[operator].wildcard}'`
                   }
@@ -287,6 +295,13 @@ export function parseParams({
 
                 if (field.type === 'point' && adapter.name === 'postgres') {
                   switch (operator) {
+                    case 'intersects': {
+                      constraints.push(
+                        sql`ST_Intersects(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
+                      )
+                      break
+                    }
+
                     case 'near': {
                       const [lng, lat, maxDistance, minDistance] = queryValue as number[]
 
@@ -301,13 +316,6 @@ export function parseParams({
                     case 'within': {
                       constraints.push(
                         sql`ST_Within(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
-                      )
-                      break
-                    }
-
-                    case 'intersects': {
-                      constraints.push(
-                        sql`ST_Intersects(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
                       )
                       break
                     }

@@ -5,8 +5,11 @@ import type {
   GenericDescriptionProps,
   GenericErrorProps,
   GenericLabelProps,
+  HiddenFieldProps,
 } from 'payload'
 import type React from 'react'
+
+import type { ConfirmPasswordFieldProps } from './ConfirmPassword/index.js'
 
 import { RowLabel } from '../forms/RowLabel/index.js'
 import { ArrayField } from './Array/index.js'
@@ -41,7 +44,10 @@ import { UploadField } from './Upload/index.js'
 export * from './shared/index.js'
 
 export type FieldTypesComponents = {
-  [K in 'confirmPassword' | 'hidden' | 'password' | FieldTypes]: React.FC<ClientFieldBase>
+  [K in 'password' | FieldTypes]: React.FC<ClientFieldBase>
+} & {
+  confirmPassword: React.FC<ConfirmPasswordFieldProps>
+  hidden: React.FC<HiddenFieldProps>
 }
 
 export const fieldComponents: FieldTypesComponents = {

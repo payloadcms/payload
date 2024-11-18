@@ -15,7 +15,7 @@ There are four types of views within the Admin Panel:
 - [Global Views](#global-views)
 - [Document Views](#document-views)
 
-To swap in your own Custom Views, consult the list of available components. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-views) accordingly.
+To swap in your own Custom View, first consult the list of available components, determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-views) accordingly.
 
 ## Root Views
 
@@ -350,6 +350,8 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 }
 ```
 
+### Default Props
+
 Your Custom Views will be provided with the following props:
 
 | Prop                      | Description                                                                                                                            |
@@ -359,6 +361,7 @@ Your Custom Views will be provided with the following props:
 | **`importMap`**           | The import map object.                                                        |
 | **`params`**              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes).     |
 | **`searchParams`**        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).      |
+| **`doc`**                 | The document being edited. Only available in Document Views. [More details](#document-views).                                           |
 
 <Banner type="success">
   <strong>Reminder:</strong>

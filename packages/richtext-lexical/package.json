@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.0.0-beta.127",
+  "version": "3.0.0-beta.134",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -10,6 +10,13 @@
   },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "sideEffects": false,
   "type": "module",
   "exports": {
@@ -32,6 +39,16 @@
       "import": "./src/exports/server/migrate.ts",
       "types": "./src/exports/server/migrate.ts",
       "default": "./src/exports/server/migrate.ts"
+    },
+    "./ast/mdx": {
+      "import": "./src/exports/server/ast/mdx.ts",
+      "types": "./src/exports/server/ast/mdx.ts",
+      "default": "./src/exports/server/ast/mdx.ts"
+    },
+    "./shared": {
+      "import": "./src/exports/shared.ts",
+      "types": "./src/exports/shared.ts",
+      "default": "./src/exports/shared.ts"
     }
   },
   "main": "./src/index.ts",
@@ -55,23 +72,35 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys.ts"
   },
+  "lint-staged": {
+    "**/package.json": "sort-package-json",
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ]
+  },
   "dependencies": {
-    "@lexical/headless": "0.18.0",
-    "@lexical/link": "0.18.0",
-    "@lexical/list": "0.18.0",
-    "@lexical/mark": "0.18.0",
-    "@lexical/markdown": "0.18.0",
-    "@lexical/react": "0.18.0",
-    "@lexical/rich-text": "0.18.0",
-    "@lexical/selection": "0.18.0",
-    "@lexical/utils": "0.18.0",
+    "@lexical/headless": "0.20.0",
+    "@lexical/link": "0.20.0",
+    "@lexical/list": "0.20.0",
+    "@lexical/mark": "0.20.0",
+    "@lexical/markdown": "0.20.0",
+    "@lexical/react": "0.20.0",
+    "@lexical/rich-text": "0.20.0",
+    "@lexical/selection": "0.20.0",
+    "@lexical/utils": "0.20.0",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@types/uuid": "10.0.0",
+    "acorn": "8.12.1",
     "bson-objectid": "2.0.4",
     "dequal": "2.0.3",
     "escape-html": "1.0.3",
-    "lexical": "0.18.0",
+    "lexical": "0.20.0",
+    "mdast-util-from-markdown": "2.0.2",
+    "mdast-util-mdx-jsx": "3.1.3",
+    "micromark-extension-mdx-jsx": "3.0.1",
     "react-error-boundary": "4.0.13",
     "ts-essentials": "10.0.3",
     "uuid": "10.0.0"
@@ -82,7 +111,7 @@
     "@babel/preset-env": "^7.24.5",
     "@babel/preset-react": "^7.24.1",
     "@babel/preset-typescript": "^7.24.1",
-    "@lexical/eslint-plugin": "0.18.0",
+    "@lexical/eslint-plugin": "0.20.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
@@ -93,25 +122,25 @@
     "babel-plugin-transform-remove-imports": "^1.8.0",
     "esbuild": "0.23.1",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-7670337-20240918",
+    "eslint-plugin-react-compiler": "19.0.0-beta-a7bf2bd-20241110",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "1.15.0"
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0-beta.2",
     "@faceless-ui/scroll-info": "2.0.0-beta.0",
-    "@lexical/headless": "0.18.0",
-    "@lexical/link": "0.18.0",
-    "@lexical/list": "0.18.0",
-    "@lexical/mark": "0.18.0",
-    "@lexical/markdown": "0.18.0",
-    "@lexical/react": "0.18.0",
-    "@lexical/rich-text": "0.18.0",
-    "@lexical/selection": "0.18.0",
-    "@lexical/table": "0.18.0",
-    "@lexical/utils": "0.18.0",
+    "@lexical/headless": "0.20.0",
+    "@lexical/link": "0.20.0",
+    "@lexical/list": "0.20.0",
+    "@lexical/mark": "0.20.0",
+    "@lexical/markdown": "0.20.0",
+    "@lexical/react": "0.20.0",
+    "@lexical/rich-text": "0.20.0",
+    "@lexical/selection": "0.20.0",
+    "@lexical/table": "0.20.0",
+    "@lexical/utils": "0.20.0",
     "@payloadcms/next": "workspace:*",
-    "lexical": "0.18.0",
+    "lexical": "0.20.0",
     "payload": "workspace:*",
     "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
     "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
@@ -140,6 +169,16 @@
         "import": "./dist/exports/server/migrate.js",
         "types": "./dist/exports/server/migrate.d.ts",
         "default": "./dist/exports/server/migrate.js"
+      },
+      "./ast/mdx": {
+        "import": "./dist/exports/server/ast/mdx.js",
+        "types": "./dist/exports/server/ast/mdx.d.ts",
+        "default": "./dist/exports/server/ast/mdx.js"
+      },
+      "./shared": {
+        "import": "./dist/exports/shared.js",
+        "types": "./dist/exports/shared.d.ts",
+        "default": "./dist/exports/shared.js"
       }
     },
     "main": "./dist/index.js",

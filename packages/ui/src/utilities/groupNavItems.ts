@@ -1,8 +1,8 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
-  Permissions,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
+  SanitizedPermissions,
   StaticLabel,
 } from 'payload'
 
@@ -23,7 +23,7 @@ export type EntityToGroup =
       type: EntityType.global
     }
 
-export type Group = {
+export type NavGroupType = {
   entities: {
     label: StaticLabel
     slug: string
@@ -34,23 +34,20 @@ export type Group = {
 
 export function groupNavItems(
   entities: EntityToGroup[],
-  permissions: Permissions,
+  permissions: SanitizedPermissions,
   i18n: I18nClient,
-): Group[] {
+): NavGroupType[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {
-      if (
-        permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read
-          .permission
-      ) {
+      if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read) {
         const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
 
         if (entityToGroup.entity.admin.group) {
           const existingGroup = groups.find(
             (group) => getTranslation(group.label, i18n) === translatedGroup,
-          ) as Group
+          ) as NavGroupType
 
-          let matchedGroup: Group = existingGroup
+          let matchedGroup: NavGroupType = existingGroup
 
           if (!existingGroup) {
             matchedGroup = { entities: [], label: translatedGroup }
@@ -70,7 +67,7 @@ export function groupNavItems(
         } else {
           const defaultGroup = groups.find((group) => {
             return getTranslation(group.label, i18n) === i18n.t(`general:${entityToGroup.type}`)
-          }) as Group
+          }) as NavGroupType
           defaultGroup.entities.push({
             slug: entityToGroup.entity.slug,
             type: entityToGroup.type,

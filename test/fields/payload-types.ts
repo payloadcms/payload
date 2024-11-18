@@ -1183,6 +1183,13 @@ export interface IndexedField {
 export interface JsonField {
   id: string;
   json?: {
+    array?: {
+      object?: {
+        array?: number[];
+        text?: string;
+      };
+      text?: string;
+    }[];
     foo?: 'bar' | 'foobar';
     number?: 10 | 5;
     [k: string]: unknown;
@@ -3393,6 +3400,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

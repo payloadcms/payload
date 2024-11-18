@@ -126,8 +126,7 @@ export const renderDocument = async ({
       collectionConfig,
       globalConfig,
       isEditing,
-      payload: req.payload,
-      user,
+      req,
     }),
   ])
 
@@ -150,6 +149,7 @@ export const renderDocument = async ({
       data: doc,
       docPermissions,
       docPreferences,
+      fallbackLocale: false,
       globalSlug,
       locale: locale?.code,
       operation: (collectionSlug && id) || globalSlug ? 'update' : 'create',
@@ -159,7 +159,8 @@ export const renderDocument = async ({
     }),
   ])
 
-  const serverProps: ServerProps = {
+  const serverProps: ServerSideEditViewProps = {
+    doc,
     i18n,
     initPageResult,
     locale,
@@ -279,7 +280,7 @@ export const renderDocument = async ({
       data: initialData || {},
       depth: 0,
       draft: true,
-      fallbackLocale: null,
+      fallbackLocale: false,
       locale: locale?.code,
       req,
       user,

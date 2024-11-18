@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, Permissions, User } from 'payload'
+import type { ClientUser, SanitizedPermissions, User } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -23,11 +23,11 @@ export type UserWithToken<T = ClientUser> = {
 export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<null | User>
   logOut: () => Promise<boolean>
-  permissions?: Permissions
+  permissions?: SanitizedPermissions
   refreshCookie: (forceRefresh?: boolean) => void
   refreshCookieAsync: () => Promise<ClientUser>
   refreshPermissions: () => Promise<void>
-  setPermissions: (permissions: Permissions) => void
+  setPermissions: (permissions: SanitizedPermissions) => void
   setUser: (user: null | UserWithToken<T>) => void
   strategy?: string
   token?: string
@@ -41,9 +41,10 @@ const maxTimeoutTime = 2147483647
 
 type Props = {
   children: React.ReactNode
-  permissions?: Permissions
+  permissions?: SanitizedPermissions
   user?: ClientUser | null
 }
+
 export function AuthProvider({
   children,
   permissions: initialPermissions,
@@ -66,7 +67,7 @@ export function AuthProvider({
     serverURL,
   } = config
 
-  const [permissions, setPermissions] = useState<Permissions>(initialPermissions)
+  const [permissions, setPermissions] = useState<SanitizedPermissions>(initialPermissions)
 
   const { i18n } = useTranslation()
   const { closeAllModals, openModal } = useModal()
@@ -224,7 +225,7 @@ export function AuthProvider({
         })
 
         if (request.status === 200) {
-          const json: Permissions = await request.json()
+          const json: SanitizedPermissions = await request.json()
           setPermissions(json)
         } else {
           throw new Error(`Fetching permissions failed with status code ${request.status}`)

@@ -161,12 +161,12 @@ export type InitTFunction<
 }
 
 export type InitI18n =
+  | ((args: { config: I18nOptions; context: 'api'; language: AcceptedLanguages }) => Promise<I18n>)
   | ((args: {
       config: I18nOptions<ClientTranslationsObject>
       context: 'client'
       language: AcceptedLanguages
     }) => Promise<I18n<ClientTranslationsObject, ClientTranslationKeys>>)
-  | ((args: { config: I18nOptions; context: 'api'; language: AcceptedLanguages }) => Promise<I18n>)
 
 export type LanguagePreference = {
   language: AcceptedLanguages

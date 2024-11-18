@@ -35,7 +35,6 @@ import {
   updateVersion,
 } from '@payloadcms/drizzle'
 import {
-  convertPathToJSONTraversal,
   countDistinct,
   createDatabase,
   createExtensions,
@@ -51,11 +50,16 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
+import path from 'path'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -89,6 +93,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
       createExtensions,
+      createMigration(args) {
+        return createMigration.bind(this)({ ...args, dirname })
+      },
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
@@ -125,7 +132,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         args.transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
-      convertPathToJSONTraversal,
       count,
       countDistinct,
       countGlobalVersions,
@@ -134,7 +140,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       createGlobal,
       createGlobalVersion,
       createJSONQuery,
-      createMigration,
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,
