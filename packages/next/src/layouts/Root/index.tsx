@@ -52,7 +52,7 @@ export const RootLayout = async ({
     headers,
   })
 
-  const payload = await getPayload({ config })
+  const payload = await getPayload({ config, importMap })
 
   const { i18n, permissions, user } = await initReq(config)
 
