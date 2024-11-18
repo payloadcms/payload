@@ -8,5 +8,7 @@ export const mergeFieldStyles = (
     ? {
         '--field-width': field.admin.width,
       }
-    : {}),
+    : {
+        flex: '1 1 auto',
+      }),
 })

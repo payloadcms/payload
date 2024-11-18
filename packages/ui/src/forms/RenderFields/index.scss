@@ -22,9 +22,6 @@
     & > .field-type {
       margin-bottom: var(--spacing-field);
       position: relative;
-      --field-width: auto;
-      --field-flex-grow: 1;
-      flex: var(--field-flex-grow) 1 var(--field-width);
 
       &[type='hidden'] {
         margin-bottom: 0;

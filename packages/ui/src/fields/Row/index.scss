@@ -8,7 +8,7 @@
       row-gap: calc(var(--base) * 0.8);
 
       > * {
-        flex: var(--field-flex-grow) 1 var(--field-width);
+        flex: 0 1 var(--field-width);
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -19,7 +19,7 @@
         margin-inline: calc(var(--base) / -4); // add negative margin to counteract the gap.
 
         > * {
-          flex: var(--field-flex-grow) 1 calc(var(--field-width) - var(--base) * 0.5);
+          flex: 0 1 calc(var(--field-width) - var(--base) * 0.5);
           margin-inline: calc(var(--base) / 4);
         }
       }
