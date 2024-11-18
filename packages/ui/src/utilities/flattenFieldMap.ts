@@ -1,4 +1,6 @@
-import type { ClientField } from 'payload'
+import type { ClientField, Field } from 'payload'
+
+import { fieldIsPresentationalOnly } from 'payload/shared'
 
 /**
  * Flattens a collection's fields into a single array of fields, as long
@@ -7,16 +9,16 @@ import type { ClientField } from 'payload'
  * @param fields
  * @param keepPresentationalFields if true, will skip flattening fields that are presentational only
  */
-export const flattenFieldMap = (
-  fields: ClientField[],
+export const flattenFieldMap = <T extends ClientField | Field>(
+  fields: T[],
   keepPresentationalFields?: boolean,
-): ClientField[] => {
-  return fields.reduce((acc, field) => {
-    if ('name' in field || (keepPresentationalFields && field._isPresentational)) {
+): T[] => {
+  return fields?.reduce((acc, field) => {
+    if ('name' in field || (keepPresentationalFields && fieldIsPresentationalOnly(field))) {
       acc.push(field)
       return acc
     } else if ('fields' in field) {
-      acc.push(...flattenFieldMap(field.fields, keepPresentationalFields))
+      acc.push(...flattenFieldMap(field.fields as T[], keepPresentationalFields))
     } else if (field.type === 'tabs' && 'tabs' in field && Array.isArray(field.tabs)) {
       return [
         ...acc,
@@ -25,7 +27,7 @@ export const flattenFieldMap = (
             ...tabAcc,
             ...('name' in tab
               ? [{ ...tab }]
-              : flattenFieldMap(tab.fields, keepPresentationalFields)),
+              : flattenFieldMap(tab.fields as T[], keepPresentationalFields)),
           ]
         }, []),
       ]

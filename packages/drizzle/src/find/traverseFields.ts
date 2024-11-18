@@ -1,7 +1,8 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { Field, JoinQuery, SelectMode, SelectType } from 'payload'
+import type { Field, JoinQuery, SelectMode, SelectType, TabAsField } from 'payload'
 
 import { and, eq, sql } from 'drizzle-orm'
+import { combineQueries } from 'payload'
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -17,7 +18,7 @@ type TraverseFieldArgs = {
   currentArgs: Result
   currentTableName: string
   depth?: number
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
   locale?: string
@@ -77,7 +78,11 @@ export const traverseFields = ({
       }
     }
 
-    if (field.type === 'collapsible' || field.type === 'row') {
+    if (
+      field.type === 'collapsible' ||
+      field.type === 'row' ||
+      (field.type === 'tab' && !tabHasName(field))
+    ) {
       traverseFields({
         _locales,
         adapter,
@@ -100,43 +105,24 @@ export const traverseFields = ({
     }
 
     if (field.type === 'tabs') {
-      field.tabs.forEach((tab) => {
-        const tabPath = tabHasName(tab) ? `${path}${tab.name}_` : path
-        const tabTablePath = tabHasName(tab) ? `${tablePath}${toSnakeCase(tab.name)}_` : tablePath
-
-        const tabSelect = tabHasName(tab) ? select?.[tab.name] : select
-
-        if (tabSelect === false) {
-          return
-        }
-
-        let tabSelectAllOnCurrentLevel = selectAllOnCurrentLevel
-
-        if (tabHasName(tab) && select && !tabSelectAllOnCurrentLevel) {
-          tabSelectAllOnCurrentLevel =
-            select[tab.name] === true ||
-            (selectMode === 'exclude' && typeof select[tab.name] === 'undefined')
-        }
-
-        traverseFields({
-          _locales,
-          adapter,
-          currentArgs,
-          currentTableName,
-          depth,
-          fields: tab.fields,
-          joinQuery,
-          joins,
-          path: tabPath,
-          select: typeof tabSelect === 'object' ? tabSelect : undefined,
-          selectAllOnCurrentLevel: tabSelectAllOnCurrentLevel,
-          selectMode,
-          tablePath: tabTablePath,
-          topLevelArgs,
-          topLevelTableName,
-          versions,
-          withTabledFields,
-        })
+      traverseFields({
+        _locales,
+        adapter,
+        currentArgs,
+        currentTableName,
+        depth,
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        joinQuery,
+        joins,
+        path,
+        select,
+        selectAllOnCurrentLevel,
+        selectMode,
+        tablePath,
+        topLevelArgs,
+        topLevelTableName,
+        versions,
+        withTabledFields,
       })
 
       return
@@ -227,32 +213,6 @@ export const traverseFields = ({
             Object.keys(withArray.with._locales).length === 1
           ) {
             delete withArray.with._locales
-          }
-
-          break
-        }
-
-        case 'select': {
-          if (field.hasMany) {
-            if (select) {
-              if (
-                (selectMode === 'include' && !select[field.name]) ||
-                (selectMode === 'exclude' && select[field.name] === false)
-              ) {
-                break
-              }
-            }
-
-            const withSelect: Result = {
-              columns: {
-                id: false,
-                order: false,
-                parent: false,
-              },
-              orderBy: ({ order }, { asc }) => [asc(order)],
-            }
-
-            currentArgs.with[`${path}${field.name}`] = withSelect
           }
 
           break
@@ -369,10 +329,12 @@ export const traverseFields = ({
           break
         }
 
-        case 'group': {
-          const groupSelect = select?.[field.name]
+        case 'group':
 
-          if (groupSelect === false) {
+        case 'tab': {
+          const fieldSelect = select?.[field.name]
+
+          if (fieldSelect === false) {
             break
           }
 
@@ -386,11 +348,11 @@ export const traverseFields = ({
             joinQuery,
             joins,
             path: `${path}${field.name}_`,
-            select: typeof groupSelect === 'object' ? groupSelect : undefined,
+            select: typeof fieldSelect === 'object' ? fieldSelect : undefined,
             selectAllOnCurrentLevel:
               selectAllOnCurrentLevel ||
-              groupSelect === true ||
-              (selectMode === 'exclude' && typeof groupSelect === 'undefined'),
+              fieldSelect === true ||
+              (selectMode === 'exclude' && typeof fieldSelect === 'undefined'),
             selectMode,
             tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             topLevelArgs,
@@ -402,7 +364,6 @@ export const traverseFields = ({
 
           break
         }
-
         case 'join': {
           // when `joinsQuery` is false, do not join
           if (joinQuery === false) {
@@ -416,11 +377,17 @@ export const traverseFields = ({
             break
           }
 
+          const joinSchemaPath = `${path.replaceAll('_', '.')}${field.name}`
+
+          if (joinQuery[joinSchemaPath] === false) {
+            break
+          }
+
           const {
             limit: limitArg = field.defaultLimit ?? 10,
             sort = field.defaultSort,
             where,
-          } = joinQuery[`${path.replaceAll('_', '.')}${field.name}`] || {}
+          } = joinQuery[joinSchemaPath] || {}
           let limit = limitArg
 
           if (limit !== 0) {
@@ -583,6 +550,72 @@ export const traverseFields = ({
                 ) AS ${sql.raw(`${columnName}_sub`)}
               ), '[]'::json)
             `.as(columnName)
+          }
+
+          break
+        }
+
+        case 'point': {
+          if (adapter.name === 'sqlite') {
+            break
+          }
+
+          const args = field.localized ? _locales : currentArgs
+          if (!args.columns) {
+            args.columns = {}
+          }
+
+          if (!args.extras) {
+            args.extras = {}
+          }
+
+          const name = `${path}${field.name}`
+
+          // Drizzle handles that poorly. See https://github.com/drizzle-team/drizzle-orm/issues/2526
+          // Additionally, this way we format the column value straight in the database using ST_AsGeoJSON
+          args.columns[name] = false
+
+          let shouldSelect = false
+
+          if (select || selectAllOnCurrentLevel) {
+            if (
+              selectAllOnCurrentLevel ||
+              (selectMode === 'include' && select[field.name] === true) ||
+              (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
+            ) {
+              shouldSelect = true
+            }
+          } else {
+            shouldSelect = true
+          }
+
+          if (shouldSelect) {
+            args.extras[name] = sql.raw(`ST_AsGeoJSON(${toSnakeCase(name)})::jsonb`).as(name)
+          }
+          break
+        }
+
+        case 'select': {
+          if (field.hasMany) {
+            if (select) {
+              if (
+                (selectMode === 'include' && !select[field.name]) ||
+                (selectMode === 'exclude' && select[field.name] === false)
+              ) {
+                break
+              }
+            }
+
+            const withSelect: Result = {
+              columns: {
+                id: false,
+                order: false,
+                parent: false,
+              },
+              orderBy: ({ order }, { asc }) => [asc(order)],
+            }
+
+            currentArgs.with[`${path}${field.name}`] = withSelect
           }
 
           break

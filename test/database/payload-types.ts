@@ -19,10 +19,27 @@ export interface Config {
     'custom-schema': CustomSchema;
     places: Place;
     'fields-persistance': FieldsPersistance;
+    'custom-ids': CustomId;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    posts: PostsSelect<false> | PostsSelect<true>;
+    'default-values': DefaultValuesSelect<false> | DefaultValuesSelect<true>;
+    'relation-a': RelationASelect<false> | RelationASelect<true>;
+    'relation-b': RelationBSelect<false> | RelationBSelect<true>;
+    'pg-migrations': PgMigrationsSelect<false> | PgMigrationsSelect<true>;
+    'custom-schema': CustomSchemaSelect<false> | CustomSchemaSelect<true>;
+    places: PlacesSelect<false> | PlacesSelect<true>;
+    'fields-persistance': FieldsPersistanceSelect<false> | FieldsPersistanceSelect<true>;
+    'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -30,9 +47,16 @@ export interface Config {
   globals: {
     global: Global;
   };
+  globalsSelect: {
+    global: GlobalSelect<false> | GlobalSelect<true>;
+  };
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -83,6 +107,11 @@ export interface DefaultValue {
     defaultValue?: string | null;
   };
   select?: ('option0' | 'option1' | 'default') | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -234,6 +263,16 @@ export interface FieldsPersistance {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids".
+ */
+export interface CustomId {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -289,6 +328,10 @@ export interface PayloadLockedDocument {
         value: string | FieldsPersistance;
       } | null)
     | ({
+        relationTo: 'custom-ids';
+        value: string | CustomId;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -336,6 +379,217 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  hasTransaction?: T;
+  throwAfterChange?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "default-values_select".
+ */
+export interface DefaultValuesSelect<T extends boolean = true> {
+  title?: T;
+  defaultValue?: T;
+  array?:
+    | T
+    | {
+        defaultValue?: T;
+        id?: T;
+      };
+  group?:
+    | T
+    | {
+        defaultValue?: T;
+      };
+  select?: T;
+  point?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-a_select".
+ */
+export interface RelationASelect<T extends boolean = true> {
+  title?: T;
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-b_select".
+ */
+export interface RelationBSelect<T extends boolean = true> {
+  title?: T;
+  relationship?: T;
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pg-migrations_select".
+ */
+export interface PgMigrationsSelect<T extends boolean = true> {
+  relation1?: T;
+  myArray?:
+    | T
+    | {
+        relation2?: T;
+        mySubArray?:
+          | T
+          | {
+              relation3?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  myGroup?:
+    | T
+    | {
+        relation4?: T;
+      };
+  myBlocks?:
+    | T
+    | {
+        myBlock?:
+          | T
+          | {
+              relation5?: T;
+              relation6?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-schema_select".
+ */
+export interface CustomSchemaSelect<T extends boolean = true> {
+  text?: T;
+  localizedText?: T;
+  relationship?: T;
+  select?: T;
+  radio?: T;
+  array?:
+    | T
+    | {
+        text?: T;
+        localizedText?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              text?: T;
+              localizedText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "places_select".
+ */
+export interface PlacesSelect<T extends boolean = true> {
+  country?: T;
+  city?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-persistance_select".
+ */
+export interface FieldsPersistanceSelect<T extends boolean = true> {
+  text?: T;
+  textHooked?: T;
+  array?:
+    | T
+    | {
+        id?: T;
+      };
+  textWithinRow?: T;
+  textWithinCollapsible?: T;
+  textWithinTabs?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids_select".
+ */
+export interface CustomIdsSelect<T extends boolean = true> {
+  id?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global".
  */
 export interface Global {
@@ -343,6 +597,16 @@ export interface Global {
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global_select".
+ */
+export interface GlobalSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

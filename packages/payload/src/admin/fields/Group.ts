@@ -5,6 +5,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -17,7 +18,10 @@ import type {
 
 type GroupFieldClientWithoutType = MarkOptional<GroupFieldClient, 'type'>
 
-export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType>
+export type GroupFieldBaseClientProps = FieldPaths & Pick<ServerFieldBase, 'permissions'>
+
+export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType> &
+  GroupFieldBaseClientProps
 
 export type GroupFieldServerProps = ServerFieldBase<GroupField, GroupFieldClientWithoutType>
 
@@ -26,7 +30,10 @@ export type GroupFieldServerComponent = FieldServerComponent<
   GroupFieldClientWithoutType
 >
 
-export type GroupFieldClientComponent = FieldClientComponent<GroupFieldClientWithoutType>
+export type GroupFieldClientComponent = FieldClientComponent<
+  GroupFieldClientWithoutType,
+  GroupFieldBaseClientProps
+>
 
 export type GroupFieldLabelServerComponent = FieldLabelServerComponent<
   GroupField,

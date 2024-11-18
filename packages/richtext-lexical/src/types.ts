@@ -1,5 +1,13 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
-import type { RichTextAdapter, RichTextFieldClientProps, SanitizedConfig } from 'payload'
+import type {
+  ClientField,
+  DefaultCellComponentProps,
+  RichTextAdapter,
+  RichTextFieldClient,
+  RichTextFieldClientProps,
+  SanitizedConfig,
+  ServerFieldBase,
+} from 'payload'
 
 import type {
   BaseClientFeatureProps,
@@ -71,10 +79,30 @@ export type LexicalRichTextAdapterProvider =
     parentIsLocalized: boolean
   }) => Promise<LexicalRichTextAdapter>
 
+export type FeatureClientSchemaMap = {
+  [featureKey: string]: {
+    [key: string]: ClientField[]
+  }
+}
+
 export type LexicalRichTextFieldProps = {
   admin: LexicalFieldAdminProps
+  // clientFeatures is added through the rsc field
+  clientFeatures: {
+    [featureKey: string]: {
+      clientFeatureProps?: object
+      clientFeatureProvider?: FeatureProviderProviderClient<any, any>
+    }
+  }
+  featureClientSchemaMap: FeatureClientSchemaMap
   lexicalEditorConfig: LexicalEditorConfig
-} & RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
+} & Pick<ServerFieldBase, 'permissions'> &
+  RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
+
+export type LexicalRichTextCellProps = DefaultCellComponentProps<
+  RichTextFieldClient<SerializedEditorState, AdapterProps, object>,
+  SerializedEditorState
+>
 
 export type AdapterProps = {
   editorConfig: SanitizedServerEditorConfig

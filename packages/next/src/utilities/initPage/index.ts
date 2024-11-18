@@ -1,4 +1,5 @@
-import type { InitPageResult, Locale, PayloadRequest, VisibleEntities } from 'payload'
+import type { I18n } from '@payloadcms/translations'
+import type { InitPageResult, Locale, VisibleEntities } from 'payload'
 
 import { findLocaleFromCode } from '@payloadcms/ui/shared'
 import { headers as getHeaders } from 'next/headers.js'
@@ -12,6 +13,7 @@ import { getPayloadHMR } from '../getPayloadHMR.js'
 import { initReq } from '../initReq.js'
 import { getRouteInfo } from './handleAdminPage.js'
 import { handleAuthRedirect } from './handleAuthRedirect.js'
+import { isCustomAdminView } from './isCustomAdminView.js'
 import { isPublicAdminRoute } from './shared.js'
 
 export const initPage = async ({
@@ -42,17 +44,17 @@ export const initPage = async ({
   // we get above. Clone the req? We'll look into that eventually.
   const req = await createLocalReq(
     {
-      fallbackLocale: null,
+      fallbackLocale: false,
       req: {
         headers,
         host: headers.get('host'),
-        i18n,
+        i18n: i18n as I18n,
         query: qs.parse(queryString, {
           depth: 10,
           ignoreQueryPrefix: true,
         }),
         url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
-      } as PayloadRequest,
+      },
     },
     payload,
   )
@@ -133,7 +135,8 @@ export const initPage = async ({
 
   if (
     !permissions.canAccessAdmin &&
-    !isPublicAdminRoute({ adminRoute, config: payload.config, route })
+    !isPublicAdminRoute({ adminRoute, config: payload.config, route }) &&
+    !isCustomAdminView({ adminRoute, config: payload.config, route })
   ) {
     redirectTo = handleAuthRedirect({
       config: payload.config,
@@ -147,6 +150,7 @@ export const initPage = async ({
     adminRoute,
     config: payload.config,
     defaultIDType: payload.db.defaultIDType,
+    payload,
     route,
   })
 

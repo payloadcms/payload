@@ -1,9 +1,9 @@
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
-  RequestContext,
+  PopulateType,
   SelectType,
   Sort,
   Where,
@@ -23,11 +23,12 @@ export type Options<TSlug extends CollectionSlug> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   limit?: number
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
+  populate?: PopulateType
   req?: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -46,6 +47,7 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     limit,
     overrideAccess = true,
     page,
+    populate,
     select,
     showHiddenFields,
     sort,
@@ -66,6 +68,7 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     limit,
     overrideAccess,
     page,
+    populate,
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,

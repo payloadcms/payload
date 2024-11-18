@@ -1,9 +1,10 @@
-import type { Operator, Option } from 'payload'
+import type { Option, SelectFieldClient } from 'payload'
+
+import type { DefaultFilterProps } from '../types.js'
 
 export type Props = {
-  disabled?: boolean
-  onChange: (val: string) => void
-  operator: Operator
-  options: Option[]
-  value: string
-}
+  readonly field: SelectFieldClient
+  readonly onChange: (val: string) => void
+  readonly options: Option[]
+  readonly value: string
+} & DefaultFilterProps

@@ -19,8 +19,8 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { GlobalSlug, TypedGlobal, TypedGlobalSelect } from '../../index.js'
-import type { PayloadRequest, RequestContext, Where } from '../../types/index.js'
+import type { GlobalSlug, RequestContext, TypedGlobal, TypedGlobalSelect } from '../../index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
@@ -189,9 +189,10 @@ export type GlobalConfig = {
 }
 
 export interface SanitizedGlobalConfig
-  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'versions'> {
+  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
   endpoints: Endpoint[] | false
   fields: Field[]
+  slug: GlobalSlug
   versions: SanitizedGlobalVersions
 }
 

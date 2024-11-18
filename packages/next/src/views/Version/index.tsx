@@ -1,10 +1,10 @@
 import type {
-  CollectionPermission,
   Document,
   EditViewComponent,
-  GlobalPermission,
   OptionObject,
   PayloadServerReactComponent,
+  SanitizedCollectionPermission,
+  SanitizedGlobalPermission,
 } from 'payload'
 
 import { notFound } from 'next/navigation.js'
@@ -33,7 +33,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
 
   const { localization } = config
 
-  let docPermissions: CollectionPermission | GlobalPermission
+  let docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
   let slug: string
 
   let doc: Document

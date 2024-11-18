@@ -192,6 +192,10 @@
       display: none;
       margin: 0;
       padding-block: 0;
+
+      &__text {
+        display: none;
+      }
     }
 
     &__header__mobileDocActions {
@@ -245,7 +249,17 @@
 
       &__headerTopRow {
         border-top: 1px solid var(--theme-border-color);
-        padding-block: calc(var(--base) * 0.8);
+        padding-block: 0 calc(var(--base) * 0.8) 0;
+      }
+
+      &__header__text {
+        display: none;
+      }
+
+      &__header__actions {
+        flex-grow: 2;
+        display: flex;
+        justify-content: flex-end;
       }
 
       &__header__mobileDocActions {
@@ -268,7 +282,31 @@
 
       &__toggler {
         padding-right: 0;
-        display: block;
+        padding-left: 0;
+        padding-top: calc(var(--base) * 0.8);
+        padding-bottom: calc(var(--base) * 0.8);
+        display: flex;
+        justify-content: flex-end;
+        flex-grow: 1;
+
+        .btn__label {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        &__text {
+          display: flex;
+        }
+
+        svg {
+          max-width: 1.5rem;
+        }
+
+        .btn__content {
+          width: 100%;
+        }
       }
 
       .btn {

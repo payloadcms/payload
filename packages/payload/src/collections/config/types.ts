@@ -1,5 +1,5 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired, MarkOptional } from 'ts-essentials'
+import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
 import type {
   CustomPreviewButton,
@@ -35,16 +35,18 @@ import type { Field, JoinField, RelationshipField, UploadField } from '../../fie
 import type {
   CollectionSlug,
   JsonObject,
+  RequestContext,
   TypedAuthOperations,
   TypedCollection,
   TypedCollectionSelect,
+  TypedLocale,
 } from '../../index.js'
 import type {
   PayloadRequest,
-  RequestContext,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
+  Where,
 } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -71,6 +73,7 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
 export type HookOperationType =
   | 'autosave'
   | 'count'
+  | 'countVersions'
   | 'create'
   | 'delete'
   | 'forgotPassword'
@@ -252,7 +255,16 @@ export type AfterForgotPasswordHook = (args: {
   context: RequestContext
 }) => any
 
+export type BaseListFilter = (args: {
+  limit: number
+  locale?: TypedLocale
+  page: number
+  req: PayloadRequest
+  sort: string
+}) => null | Promise<null | Where> | Where
+
 export type CollectionAdminOptions = {
+  baseListFilter?: BaseListFilter
   /**
    * Custom admin components
    */
@@ -382,6 +394,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
    */
   dbName?: DBIdentifierName
+  defaultPopulate?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectType
+    : SelectFromCollectionSlug<TSlug>
   /**
    * Default field to sort by in collection list view
    */
@@ -492,9 +507,9 @@ export type SanitizedJoin = {
    */
   field: JoinField
   /**
-   * The schemaPath of the join field in dot notation
+   * The path of the join field in dot notation
    */
-  schemaPath: string
+  joinPath: string
   targetField: RelationshipField | UploadField
 }
 
@@ -505,11 +520,12 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
+    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
+  slug: CollectionSlug
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */

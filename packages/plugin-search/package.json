@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "3.0.0-beta.120",
+  "version": "3.0.0-beta.131",
   "description": "Search plugin for Payload",
   "keywords": [
     "payload",
@@ -18,6 +18,13 @@
   },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "type": "module",
   "exports": {
     ".": {

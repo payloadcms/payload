@@ -126,12 +126,13 @@ powerful Admin UI.
 | **`name`** \*          | To be used as the property name when retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                    |
 | **`collection`** \*    | The `slug`s having the relationship field.                                                                                                                                                     |
 | **`on`** \*            | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'.                                          |
+| **`where`** \*         | A `Where` query to hide related documents from appearing. Will be merged with any `where` specified in the request.                                                                            |
 | **`maxDepth`**         | Default is 1, Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](/docs/getting-started/concepts#field-level-max-depth). |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                        |
 | **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                          |
 | **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                             |
-| **`defaultLimit`**     | The number of documents to return. Set to 0 to return all related documents.                                                                |
-| **`defaultSort`**      | The field name used to specify the order the joined documents are returned.                                                                                                                                                            |
+| **`defaultLimit`**     | The number of documents to return. Set to 0 to return all related documents.                                                                                                                   |
+| **`defaultSort`**      | The field name used to specify the order the joined documents are returned.                                                                                                                    |
 | **`admin`**            | Admin-specific configuration. [More details](#admin-config-options).                                                                                                                           |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins).                                                                                                                                     |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema.                                                                                                                                   |
@@ -146,7 +147,7 @@ You can control the user experience of the join field using the `admin` config p
 | Option                 | Description                                                                            |
 |------------------------|----------------------------------------------------------------------------------------|
 | **`allowCreate`**      | Set to `false` to remove the controls for making new related documents from this field. |
-| **`components.Label`** | Override the default Label of the Field Component. [More details](#the-label-component).                                         |
+| **`components.Label`** | Override the default Label of the Field Component. [More details](../admin/fields#label) |
 
 ## Join Field Data
 
@@ -182,11 +183,11 @@ returning. This is useful for performance reasons when you don't need the relate
 
 The following query options are supported:
 
-| Property    | Description                                                  |
-|-------------|--------------------------------------------------------------|
-| **`limit`** | The maximum related documents to be returned, default is 10. |
-| **`where`** | An optional `Where` query to filter joined documents.        |
-| **`sort`**  | A string used to order related results                       |
+| Property    | Description                                                                                         |
+|-------------|-----------------------------------------------------------------------------------------------------|
+| **`limit`** | The maximum related documents to be returned, default is 10.                                        |
+| **`where`** | An optional `Where` query to filter joined documents. Will be merged with the field `where` object. |
+| **`sort`**  | A string used to order related results                                                              |
 
 These can be applied to the local API, GraphQL, and REST API.
 

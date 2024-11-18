@@ -1,8 +1,8 @@
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
-  RequestContext,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
@@ -28,12 +28,13 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   file?: File
   filePath?: string
   locale?: TypedLocale
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean
@@ -59,6 +60,7 @@ export default async function createLocal<
     filePath,
     overrideAccess = true,
     overwriteExistingFiles = false,
+    populate,
     select,
     showHiddenFields,
   } = options
@@ -82,6 +84,7 @@ export default async function createLocal<
     draft,
     overrideAccess,
     overwriteExistingFiles,
+    populate,
     req,
     select,
     showHiddenFields,

@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { Value } from '../../fields/Relationship/types.js'
-import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import type { Props } from './types.js'
 
 import { PlusIcon } from '../../icons/Plus/index.js'
@@ -48,7 +48,7 @@ export const AddNewRelation: React.FC<Props> = ({
     },
   )
 
-  const onSave: DocumentInfoContext['onSave'] = useCallback(
+  const onSave: DocumentDrawerContextType['onSave'] = useCallback(
     ({ doc, operation }) => {
       if (operation === 'create') {
         const newValue: Value = Array.isArray(relationTo)
@@ -96,11 +96,11 @@ export const AddNewRelation: React.FC<Props> = ({
   useEffect(() => {
     if (permissions) {
       if (relatedCollections.length === 1) {
-        setShow(permissions.collections[relatedCollections[0]?.slug]?.create?.permission)
+        setShow(permissions.collections[relatedCollections[0]?.slug]?.create)
       } else {
         setShow(
           relatedCollections.some(
-            (collection) => permissions.collections[collection?.slug]?.create?.permission,
+            (collection) => permissions.collections[collection?.slug]?.create,
           ),
         )
       }
@@ -186,7 +186,7 @@ export const AddNewRelation: React.FC<Props> = ({
               render={({ close: closePopup }) => (
                 <PopupList.ButtonGroup>
                   {relatedCollections.map((relatedCollection) => {
-                    if (permissions.collections[relatedCollection?.slug].create.permission) {
+                    if (permissions.collections[relatedCollection?.slug].create) {
                       return (
                         <PopupList.Button
                           className={`${baseClass}__relation-button--${relatedCollection?.slug}`}
@@ -207,10 +207,9 @@ export const AddNewRelation: React.FC<Props> = ({
               )}
               size="medium"
             />
-            {collectionConfig &&
-              permissions.collections[collectionConfig?.slug]?.create?.permission && (
-                <DocumentDrawer onSave={onSave} />
-              )}
+            {collectionConfig && permissions.collections[collectionConfig?.slug]?.create && (
+              <DocumentDrawer onSave={onSave} />
+            )}
           </Fragment>
         )}
       </div>

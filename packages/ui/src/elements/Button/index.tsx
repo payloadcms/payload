@@ -63,6 +63,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     Link,
     newTab,
     onClick,
+    onMouseDown,
     round,
     size = 'medium',
     SubMenuPopupContent,
@@ -114,13 +115,15 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     className: !SubMenuPopupContent ? [classes, styleClasses].join(' ') : classes,
     disabled,
     onClick: !disabled ? handleClick : undefined,
-    onMouseEnter: tooltip ? () => setShowTooltip(true) : undefined,
-    onMouseLeave: tooltip ? () => setShowTooltip(false) : undefined,
+    onMouseDown: !disabled ? onMouseDown : undefined,
+    onPointerEnter: tooltip ? () => setShowTooltip(true) : undefined,
+    onPointerLeave: tooltip ? () => setShowTooltip(false) : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
   }
 
   let buttonElement
+  let prefetch
 
   switch (el) {
     case 'anchor':
@@ -147,10 +150,12 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
 
       if (disabled) {
         LinkTag = 'div'
+      } else {
+        prefetch = false
       }
 
       buttonElement = (
-        <LinkTag {...buttonProps} href={to || url} to={to || url}>
+        <LinkTag {...buttonProps} href={to || url} prefetch={prefetch} to={to || url}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
@@ -180,11 +185,10 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
           className={disabled ? `${baseClass}--popup-disabled` : ''}
           horizontalAlign="right"
           noBackground
+          render={({ close }) => SubMenuPopupContent({ close: () => close() })}
           size="large"
           verticalAlign="bottom"
-        >
-          {SubMenuPopupContent}
-        </Popup>
+        />
       </div>
     )
   }

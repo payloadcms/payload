@@ -1,10 +1,17 @@
 /* eslint-disable no-restricted-exports */
-import type { CollectionSlug, JoinQuery, Payload, SelectType, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  JoinQuery,
+  Payload,
+  RequestContext,
+  SelectType,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   ApplyDisableErrors,
   Document,
   PayloadRequest,
-  RequestContext,
+  PopulateType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { SelectFromCollectionSlug } from '../../config/types.js'
@@ -27,12 +34,13 @@ export type Options<
   depth?: number
   disableErrors?: TDisableErrors
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   id: number | string
   includeLockStatus?: boolean
-  joins?: JoinQuery
+  joins?: JoinQuery<TSlug>
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean
@@ -57,6 +65,7 @@ export default async function findByIDLocal<
     includeLockStatus,
     joins,
     overrideAccess = true,
+    populate,
     select,
     showHiddenFields,
   } = options
@@ -79,6 +88,7 @@ export default async function findByIDLocal<
     includeLockStatus,
     joins,
     overrideAccess,
+    populate,
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,

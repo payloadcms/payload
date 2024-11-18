@@ -1,44 +1,29 @@
 'use client'
-import type { CellComponentProps, ClientField } from 'payload'
+
+import type { ClientField } from 'payload'
 
 import React from 'react'
 
-export * from './TableCellProvider/index.js'
-
-import { useTableColumns } from '../TableColumns/index.js'
 import './index.scss'
-import { RenderCell } from './RenderCell.js'
-import { TableCellProvider } from './TableCellProvider/index.js'
-
-export { TableCellProvider }
 
 const baseClass = 'table'
 
 export type Column = {
   readonly accessor: string
   readonly active: boolean
-  readonly cellProps?: Partial<CellComponentProps>
+  readonly CustomLabel?: React.ReactNode
+  readonly field: ClientField
   readonly Heading: React.ReactNode
+  readonly renderedCells: React.ReactNode[]
 }
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
-  readonly customCellContext?: Record<string, unknown>
   readonly data: Record<string, unknown>[]
-  readonly fields: ClientField[]
 }
 
-export const Table: React.FC<Props> = ({
-  appearance,
-  columns: columnsFromProps,
-  customCellContext,
-  data,
-}) => {
-  const { cellProps, columns: columnsFromContext } = useTableColumns()
-
-  const columns = columnsFromProps || columnsFromContext
-
+export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -66,22 +51,12 @@ export const Table: React.FC<Props> = ({
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
                 {activeColumns.map((col, colIndex) => {
-                  const isLink =
-                    (colIndex === 0 && col.accessor !== '_select') ||
-                    (colIndex === 1 && activeColumns[0]?.accessor === '_select')
+                  const { accessor } = col
 
                   return (
-                    <RenderCell
-                      cellProps={{
-                        link: isLink,
-                        ...cellProps?.[colIndex],
-                      }}
-                      col={col}
-                      colIndex={colIndex}
-                      customCellContext={customCellContext}
-                      key={colIndex}
-                      row={row}
-                    />
+                    <td className={`cell-${accessor}`} key={colIndex}>
+                      {col.renderedCells[rowIndex]}
+                    </td>
                   )
                 })}
               </tr>

@@ -3,6 +3,7 @@ import type {
   DocumentPermissions,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
 } from 'payload'
 
@@ -10,7 +11,7 @@ import {
   hasSavePermission as getHasSavePermission,
   isEditing as getIsEditing,
 } from '@payloadcms/ui/shared'
-import { docAccessOperation, docAccessOperationGlobal } from 'payload'
+import { docAccessOperation, docAccessOperationGlobal, sanitizePermissions } from 'payload'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
@@ -19,7 +20,7 @@ export const getDocumentPermissions = async (args: {
   id?: number | string
   req: PayloadRequest
 }): Promise<{
-  docPermissions: DocumentPermissions
+  docPermissions: SanitizedDocumentPermissions
   hasPublishPermission: boolean
   hasSavePermission: boolean
 }> => {
@@ -60,7 +61,7 @@ export const getDocumentPermissions = async (args: {
         }).then(({ update }) => update?.permission)
       }
     } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+      req.payload.logger.error(error)
     }
   }
 
@@ -87,13 +88,17 @@ export const getDocumentPermissions = async (args: {
         }).then(({ update }) => update?.permission)
       }
     } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+      req.payload.logger.error(error)
     }
   }
 
+  // TODO: do this in a better way. Only doing this bc this is how the fn was written (mutates the original object)
+  const sanitizedDocPermissions = { ...docPermissions } as any as SanitizedDocumentPermissions
+  sanitizePermissions(sanitizedDocPermissions)
+
   const hasSavePermission = getHasSavePermission({
     collectionSlug: collectionConfig?.slug,
-    docPermissions,
+    docPermissions: sanitizedDocPermissions,
     globalSlug: globalConfig?.slug,
     isEditing: getIsEditing({
       id,
@@ -103,7 +108,7 @@ export const getDocumentPermissions = async (args: {
   })
 
   return {
-    docPermissions,
+    docPermissions: sanitizedDocPermissions,
     hasPublishPermission,
     hasSavePermission,
   }

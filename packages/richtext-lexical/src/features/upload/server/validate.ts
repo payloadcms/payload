@@ -1,4 +1,4 @@
-import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
+import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 import { isValidID } from 'payload'
 
 import type { NodeValidation } from '../../typesServer.js'
@@ -42,15 +42,18 @@ export const uploadValidation = (
       return true
     }
 
-    const result = await buildStateFromSchema({
+    const result = await fieldSchemasToFormState({
       id,
       collectionSlug: node.relationTo,
       data: node?.fields ?? {},
-      fieldSchema: collection.fields,
+      fields: collection.fields,
+      fieldSchemaMap: undefined,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
+      permissions: {},
       preferences,
+      renderAllFields: false,
       req,
-      siblingData: node?.fields ?? {},
+      schemaPath: '',
     })
 
     let errorPaths: string[] = []

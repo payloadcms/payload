@@ -181,7 +181,12 @@ export const LexicalFields: CollectionConfig = {
 
             const yourEditorState: SerializedEditorState = siblingData.lexicalWithBlocks
             try {
-              headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+              headlessEditor.update(
+                () => {
+                  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+                },
+                { discrete: true },
+              )
             } catch (e) {
               /* empty */
             }

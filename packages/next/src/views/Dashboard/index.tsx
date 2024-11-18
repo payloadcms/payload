@@ -1,13 +1,9 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { AdminViewProps } from 'payload'
 
-import { HydrateAuthProvider } from '@payloadcms/ui'
-import {
-  EntityType,
-  getCreateMappedComponent,
-  groupNavItems,
-  RenderComponent,
-} from '@payloadcms/ui/shared'
+import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
@@ -31,58 +27,61 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
       payload,
       user,
     },
+    req,
     visibleEntities,
   } = initPageResult
-
-  const lockDurationDefault = 300 // Default 5 minutes in seconds
 
   const CustomDashboardComponent = config.admin.components?.views?.Dashboard
 
   const collections = config.collections.filter(
     (collection) =>
-      permissions?.collections?.[collection.slug]?.read?.permission &&
+      permissions?.collections?.[collection.slug]?.read &&
       visibleEntities.collections.includes(collection.slug),
   )
 
   const globals = config.globals.filter(
     (global) =>
-      permissions?.globals?.[global.slug]?.read?.permission &&
-      visibleEntities.globals.includes(global.slug),
+      permissions?.globals?.[global.slug]?.read && visibleEntities.globals.includes(global.slug),
   )
 
-  const globalConfigs = config.globals.map((global) => ({
-    slug: global.slug,
-    lockDuration:
-      global.lockDocuments === false
-        ? null // Set lockDuration to null if locking is disabled
-        : typeof global.lockDocuments === 'object'
+  // Query locked global documents only if there are globals in the config
+  let globalData = []
+
+  if (config.globals.length > 0) {
+    const lockedDocuments = await payload.find({
+      collection: 'payload-locked-documents',
+      depth: 1,
+      overrideAccess: false,
+      pagination: false,
+      req,
+      where: {
+        globalSlug: {
+          exists: true,
+        },
+      },
+    })
+
+    // Map over globals to include `lockDuration` and lock data for each global slug
+    globalData = config.globals.map((global) => {
+      const lockDurationDefault = 300
+      const lockDuration =
+        typeof global.lockDocuments === 'object'
           ? global.lockDocuments.duration
-          : lockDurationDefault,
-  }))
+          : lockDurationDefault
 
-  // Filter the slugs based on permissions and visibility
-  const filteredGlobalConfigs = globalConfigs.filter(
-    ({ slug, lockDuration }) =>
-      lockDuration !== null && // Ensure lockDuration is valid
-      permissions?.globals?.[slug]?.read?.permission &&
-      visibleEntities.globals.includes(slug),
-  )
-
-  const globalData = await Promise.all(
-    filteredGlobalConfigs.map(async ({ slug, lockDuration }) => {
-      const data = await payload.findGlobal({
-        slug,
-        depth: 0,
-        includeLockStatus: true,
-      })
+      const lockedDoc = lockedDocuments.docs.find((doc) => doc.globalSlug === global.slug)
 
       return {
-        slug,
-        data,
+        slug: global.slug,
+        data: {
+          _isLocked: !!lockedDoc,
+          _lastEditedAt: lockedDoc?.updatedAt ?? null,
+          _userEditing: lockedDoc?.user?.value ?? null,
+        },
         lockDuration,
       }
-    }),
-  )
+    })
+  }
 
   const navGroups = groupNavItems(
     [
@@ -107,39 +106,31 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
     i18n,
   )
 
-  const createMappedComponent = getCreateMappedComponent({
-    importMap: payload.importMap,
-    serverProps: {
-      globalData,
-      i18n,
-      Link,
-      locale,
-      navGroups,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-      visibleEntities,
-    },
-  })
-
-  const mappedDashboardComponent = createMappedComponent(
-    CustomDashboardComponent?.Component,
-    undefined,
-    DefaultDashboard,
-    'CustomDashboardComponent.Component',
-  )
-
   return (
     <Fragment>
       <HydrateAuthProvider permissions={permissions} />
-      <RenderComponent
+      <SetStepNav nav={[]} />
+      <RenderServerComponent
         clientProps={{
           Link,
           locale,
         }}
-        mappedComponent={mappedDashboardComponent}
+        Component={CustomDashboardComponent}
+        Fallback={DefaultDashboard}
+        importMap={payload.importMap}
+        serverProps={{
+          globalData,
+          i18n,
+          Link,
+          locale,
+          navGroups,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+          visibleEntities,
+        }}
       />
     </Fragment>
   )

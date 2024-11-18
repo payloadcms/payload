@@ -6,7 +6,7 @@ import {
   type SelectType,
   type TabAsField,
 } from 'payload'
-import { fieldAffectsData, getSelectMode } from 'payload/shared'
+import { fieldAffectsData, getSelectMode, tabHasName } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -104,36 +104,19 @@ const traverseFields = ({
     }
 
     switch (field.type) {
-      case 'collapsible':
-      case 'row':
-        traverseFields({
-          adapter,
-          databaseSchemaPath,
-          fields: field.fields,
-          projection,
-          select,
-          selectMode,
-          withinLocalizedField,
-        })
-        break
-
-      case 'tabs':
-        traverseFields({
-          adapter,
-          databaseSchemaPath,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-          projection,
-          select,
-          selectMode,
-          withinLocalizedField,
-        })
-        break
-
-      case 'group':
-      case 'tab':
       case 'array':
+      case 'group':
+      case 'tab': {
+        let fieldSelect: SelectType
+
+        if (field.type === 'tab' && !tabHasName(field)) {
+          fieldSelect = select
+        } else {
+          fieldSelect = select[field.name] as SelectType
+        }
+
         if (field.type === 'array' && selectMode === 'include') {
-          select[field.name]['id'] = true
+          fieldSelect['id'] = true
         }
 
         traverseFields({
@@ -141,12 +124,13 @@ const traverseFields = ({
           databaseSchemaPath: fieldDatabaseSchemaPath,
           fields: field.fields,
           projection,
-          select: select[field.name] as SelectType,
+          select: fieldSelect,
           selectMode,
           withinLocalizedField: fieldWithinLocalizedField,
         })
 
         break
+      }
 
       case 'blocks': {
         const blocksSelect = select[field.name] as SelectType
@@ -197,6 +181,30 @@ const traverseFields = ({
 
         break
       }
+      case 'collapsible':
+      case 'row':
+        traverseFields({
+          adapter,
+          databaseSchemaPath,
+          fields: field.fields,
+          projection,
+          select,
+          selectMode,
+          withinLocalizedField,
+        })
+        break
+
+      case 'tabs':
+        traverseFields({
+          adapter,
+          databaseSchemaPath,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          projection,
+          select,
+          selectMode,
+          withinLocalizedField,
+        })
+        break
 
       default:
         break

@@ -8,12 +8,14 @@ import { getTranslation } from '@payloadcms/translations'
 import {
   CloseMenuIcon,
   EditIcon,
+  ExternalLinkIcon,
   formatDrawerSlug,
   useConfig,
   useEditDepth,
-  useModal,
+  useLocale,
   useTranslation,
 } from '@payloadcms/ui'
+import { requests } from '@payloadcms/ui/shared'
 import {
   $getSelection,
   $isLineBreakNode,
@@ -40,16 +42,22 @@ import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
 
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
   const [editor] = useLexicalComposerContext()
+  // TO-DO: There are several states that should not be state, because they
+  // are derived from linkNode (linkUrl, linkLabel, stateData, isLink, isAutoLink...)
+  const [linkNode, setLinkNode] = useState<LinkNode>()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [linkUrl, setLinkUrl] = useState<null | string>(null)
   const [linkLabel, setLinkLabel] = useState<null | string>(null)
 
-  const { uuid } = useEditorConfigContext()
+  const {
+    fieldProps: { schemaPath },
+    uuid,
+  } = useEditorConfigContext()
 
   const { config } = useConfig()
 
-  const { i18n, t } = useTranslation()
+  const { i18n, t } = useTranslation<object, 'lexical:link:loadingWithEllipsis'>()
 
   const [stateData, setStateData] = useState<
     ({ id?: string; text: string } & LinkFields) | undefined
@@ -58,6 +66,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const editDepth = useEditDepth()
   const [isLink, setIsLink] = useState(false)
   const [selectedNodes, setSelectedNodes] = useState<LexicalNode[]>([])
+  const locale = useLocale()
 
   const [isAutoLink, setIsAutoLink] = useState(false)
 
@@ -86,7 +95,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     let selectedNodeDomRect: DOMRect | undefined
 
     if (!$isRangeSelection(selection) || !selection) {
-      setNotLink()
+      void setNotLink()
       return
     }
 
@@ -112,42 +121,74 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       setNotLink()
       return
     }
+    setLinkNode(focusLinkParent)
+
+    const fields = focusLinkParent.getFields()
 
     // Initial state:
     const data: { text: string } & LinkFields = {
-      ...focusLinkParent.getFields(),
+      ...fields,
       id: focusLinkParent.getID(),
       text: focusLinkParent.getTextContent(),
     }
 
-    if (focusLinkParent.getFields()?.linkType === 'custom') {
-      setLinkUrl(focusLinkParent.getFields()?.url ?? null)
+    if (fields?.linkType === 'custom') {
+      setLinkUrl(fields?.url ?? null)
       setLinkLabel(null)
     } else {
       // internal link
       setLinkUrl(
-        `${config.routes.admin === '/' ? '' : config.routes.admin}/collections/${focusLinkParent.getFields()?.doc?.relationTo}/${
-          focusLinkParent.getFields()?.doc?.value
+        `${config.routes.admin === '/' ? '' : config.routes.admin}/collections/${fields?.doc?.relationTo}/${
+          fields?.doc?.value
         }`,
       )
 
-      const relatedField = config.collections.find(
-        (coll) => coll.slug === focusLinkParent.getFields()?.doc?.relationTo,
-      )
+      const relatedField = config.collections.find((coll) => coll.slug === fields?.doc?.relationTo)
       if (!relatedField) {
         // Usually happens if the user removed all default fields. In this case, we let them specify the label or do not display the label at all.
         // label could be a virtual field the user added. This is useful if they want to use the link feature for things other than links.
-        setLinkLabel(
-          focusLinkParent.getFields()?.label ? String(focusLinkParent.getFields()?.label) : null,
-        )
-        setLinkUrl(
-          focusLinkParent.getFields()?.url ? String(focusLinkParent.getFields()?.url) : null,
-        )
+        setLinkLabel(fields?.label ? String(fields?.label) : null)
+        setLinkUrl(fields?.url ? String(fields?.url) : null)
       } else {
-        const label = t('fields:linkedTo', {
-          label: getTranslation(relatedField.labels.singular, i18n),
+        const id = typeof fields.doc?.value === 'object' ? fields.doc.value.id : fields.doc?.value
+        const collection = fields.doc?.relationTo
+        if (!id || !collection) {
+          throw new Error(`Focus link parent is missing doc.value or doc.relationTo`)
+        }
+
+        const loadingLabel = t('fields:linkedTo', {
+          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('lexical:link:loadingWithEllipsis', i18n)}`,
         }).replace(/<[^>]*>?/g, '')
-        setLinkLabel(label)
+        setLinkLabel(loadingLabel)
+
+        requests
+          .get(`${config.serverURL}${config.routes.api}/${collection}/${id}`, {
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+            params: {
+              depth: 0,
+              locale: locale?.code,
+            },
+          })
+          .then(async (res) => {
+            if (!res.ok) {
+              throw new Error(`HTTP error! Status: ${res.status}`)
+            }
+            const data = await res.json()
+            const useAsTitle = relatedField?.admin?.useAsTitle || 'id'
+            const title = data[useAsTitle]
+            const label = t('fields:linkedTo', {
+              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${title}`,
+            }).replace(/<[^>]*>?/g, '')
+            setLinkLabel(label)
+          })
+          .catch(() => {
+            const label = t('fields:linkedTo', {
+              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('general:untitled', i18n)} - ID: ${id}`,
+            }).replace(/<[^>]*>?/g, '')
+            setLinkLabel(label)
+          })
       }
     }
 
@@ -195,7 +236,18 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     }
 
     return true
-  }, [editor, setNotLink, config.collections, t, i18n, anchorElem])
+  }, [
+    editor,
+    setNotLink,
+    config.routes.admin,
+    config.routes.api,
+    config.collections,
+    config.serverURL,
+    t,
+    i18n,
+    locale?.code,
+    anchorElem,
+  ])
 
   useEffect(() => {
     return mergeRegister(
@@ -282,10 +334,14 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         <div className="link-input">
           {linkUrl && linkUrl.length > 0 ? (
             <a href={linkUrl} rel="noopener noreferrer" target="_blank">
+              {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}
               {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
             </a>
           ) : linkLabel != null && linkLabel.length > 0 ? (
-            <span className="link-input__label-pure">{linkLabel}</span>
+            <>
+              {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}
+              <span className="link-input__label-pure">{linkLabel}</span>
+            </>
           ) : null}
 
           {editor.isEditable() && (
@@ -366,6 +422,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
             text: newLinkPayload.text,
           })
         }}
+        schemaPath={schemaPath}
         schemaPathSuffix="fields"
       />
     </React.Fragment>

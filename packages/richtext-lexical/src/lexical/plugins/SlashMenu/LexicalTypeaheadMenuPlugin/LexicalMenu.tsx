@@ -20,6 +20,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { MenuTextMatch } from '../useMenuTriggerMatch.js'
 import type { SlashMenuGroupInternal, SlashMenuItem, SlashMenuItemInternal } from './types.js'
 
+import { CAN_USE_DOM } from '../../../utils/canUseDOM.js'
+
 export type MenuResolution = {
   getRect: () => DOMRect
   match?: MenuTextMatch
@@ -208,17 +210,12 @@ export function LexicalMenu({
   resolution,
   shouldSplitNodeWithQuery = false,
 }: {
-  anchorElementRef: RefObject<HTMLElement>
+  anchorElementRef: RefObject<HTMLElement | null>
   close: () => void
   editor: LexicalEditor
   groups: Array<SlashMenuGroupInternal>
   menuRenderFn: MenuRenderFn
-  onSelectItem: (
-    item: SlashMenuItem,
-    textNodeContainingQuery: null | TextNode,
-    closeMenu: () => void,
-    matchingString: string,
-  ) => void
+  onSelectItem: (item: SlashMenuItem, closeMenu: () => void, matchingString: string) => void
   resolution: MenuResolution
   shouldSplitNodeWithQuery?: boolean
 }): JSX.Element | null {
@@ -256,19 +253,20 @@ export function LexicalMenu({
 
   const selectItemAndCleanUp = useCallback(
     (selectedItem: SlashMenuItem) => {
-      editor.update(() => {
-        const textNodeContainingQuery =
-          resolution.match != null && shouldSplitNodeWithQuery
-            ? $splitNodeContainingQuery(resolution.match)
-            : null
+      editor.update(
+        () => {
+          const textNodeContainingQuery =
+            resolution.match != null && shouldSplitNodeWithQuery
+              ? $splitNodeContainingQuery(resolution.match)
+              : null
 
-        onSelectItem(
-          selectedItem,
-          textNodeContainingQuery,
-          close,
-          resolution.match ? resolution.match.matchingString : '',
-        )
-      })
+          if (textNodeContainingQuery) {
+            textNodeContainingQuery.remove()
+          }
+        },
+        { discrete: true },
+      )
+      onSelectItem(selectedItem, close, resolution.match ? resolution.match.matchingString : '')
     },
     [editor, shouldSplitNodeWithQuery, resolution.match, onSelectItem, close],
   )
@@ -436,10 +434,15 @@ export function useMenuAnchorRef(
   resolution: MenuResolution | null,
   setResolution: (r: MenuResolution | null) => void,
   className?: string,
-): RefObject<HTMLElement> {
+): RefObject<HTMLElement | null> {
   const [editor] = useLexicalComposerContext()
-  const anchorElementRef = useRef<HTMLElement>(document.createElement('div'))
+  const anchorElementRef = useRef<HTMLElement | null>(
+    CAN_USE_DOM ? document.createElement('div') : null,
+  )
   const positionMenu = useCallback(() => {
+    if (anchorElementRef.current === null || parent === undefined) {
+      return
+    }
     const rootElement = editor.getRootElement()
     const containerDiv = anchorElementRef.current
 

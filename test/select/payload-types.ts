@@ -15,16 +15,21 @@ export interface Config {
     'localized-posts': LocalizedPost;
     'versioned-posts': VersionedPost;
     'deep-posts': DeepPost;
+    pages: Page;
+    points: Point;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsSelect?: {
+  collectionsJoins: {};
+  collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'versioned-posts': VersionedPostsSelect<false> | VersionedPostsSelect<true>;
     'deep-posts': DeepPostsSelect<false> | DeepPostsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    points: PointsSelect<false> | PointsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -36,12 +41,16 @@ export interface Config {
   globals: {
     'global-post': GlobalPost;
   };
-  globalsSelect?: {
+  globalsSelect: {
     'global-post': GlobalPostSelect<false> | GlobalPostSelect<true>;
   };
   locale: 'en' | 'de';
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -99,6 +108,12 @@ export interface Post {
           }
       )[]
     | null;
+  tab?: {
+    text?: string | null;
+    number?: number | null;
+  };
+  unnamedTabText?: string | null;
+  unnamedTabNumber?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -241,6 +256,75 @@ export interface DeepPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  content?:
+    | {
+        title: string;
+        link: {
+          docPoly?: {
+            relationTo: 'pages';
+            value: string | Page;
+          } | null;
+          doc?: (string | null) | Page;
+          docMany?: (string | Page)[] | null;
+          docHasManyPoly?:
+            | {
+                relationTo: 'pages';
+                value: string | Page;
+              }[]
+            | null;
+          label: string;
+        };
+        richTextLexical?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        richTextSlate?:
+          | {
+              [k: string]: unknown;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'introduction';
+      }[]
+    | null;
+  slug: string;
+  additional?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "points".
+ */
+export interface Point {
+  id: string;
+  text?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -278,6 +362,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'deep-posts';
         value: string | DeepPost;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'points';
+        value: string | Point;
       } | null)
     | ({
         relationTo: 'users';
@@ -365,6 +457,14 @@ export interface PostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  tab?:
+    | T
+    | {
+        text?: T;
+        number?: T;
+      };
+  unnamedTabText?: T;
+  unnamedTabNumber?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -517,6 +617,48 @@ export interface DeepPostsSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  content?:
+    | T
+    | {
+        introduction?:
+          | T
+          | {
+              title?: T;
+              link?:
+                | T
+                | {
+                    docPoly?: T;
+                    doc?: T;
+                    docMany?: T;
+                    docHasManyPoly?: T;
+                    label?: T;
+                  };
+              richTextLexical?: T;
+              richTextSlate?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  slug?: T;
+  additional?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "points_select".
+ */
+export interface PointsSelect<T extends boolean = true> {
+  text?: T;
+  point?: T;
   updatedAt?: T;
   createdAt?: T;
 }

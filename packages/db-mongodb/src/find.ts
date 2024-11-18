@@ -58,7 +58,6 @@ export const find: Find = async function find(
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
     options,
@@ -118,7 +117,6 @@ export const find: Find = async function find(
     collection,
     collectionConfig,
     joins,
-    limit,
     locale,
     query,
   })

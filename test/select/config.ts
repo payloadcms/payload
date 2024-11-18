@@ -6,6 +6,8 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { DeepPostsCollection } from './collections/DeepPosts/index.js'
 import { LocalizedPostsCollection } from './collections/LocalizedPosts/index.js'
+import { Pages } from './collections/Pages/index.js'
+import { Points } from './collections/Points/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
 import { VersionedPostsCollection } from './collections/VersionedPosts/index.js'
 
@@ -19,6 +21,8 @@ export default buildConfigWithDefaults({
     LocalizedPostsCollection,
     VersionedPostsCollection,
     DeepPostsCollection,
+    Pages,
+    Points,
   ],
   globals: [
     {
