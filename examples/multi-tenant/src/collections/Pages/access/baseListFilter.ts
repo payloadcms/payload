@@ -11,15 +11,13 @@ export const baseListFilter: BaseListFilter = (args) => {
   const selectedTenant = cookies.get('payload-tenant')
   const tenantAccessIDs = getTenantAccessIDs(req.user)
 
-  if (selectedTenant) {
-    // if user is super admin or has access to the selected tenant
-    if (superAdmin || tenantAccessIDs.some((id) => id === selectedTenant)) {
-      // filter by selected tenant
-      return {
-        tenant: {
-          equals: selectedTenant,
-        },
-      }
+  // if user is super admin or has access to the selected tenant
+  if (selectedTenant && (superAdmin || tenantAccessIDs.some((id) => id === selectedTenant))) {
+    // set a base filter for the list view
+    return {
+      tenant: {
+        equals: selectedTenant,
+      },
     }
   }
 
