@@ -289,15 +289,10 @@ export const createClientField = ({
   } & ClientField
 
   if (incomingField.admin && 'description' in incomingField.admin) {
-    if (
-      typeof incomingField.admin?.description === 'string' ||
-      typeof incomingField.admin?.description === 'object'
-    ) {
+    if (typeof incomingField.admin?.description === 'function') {
+      delete (clientField as FieldWithDescription).admin.description
+    } else {
       ;(clientField as FieldWithDescription).admin.description = incomingField.admin.description
-    } else if (typeof incomingField.admin?.description === 'function') {
-      ;(clientField as FieldWithDescription).admin.description = incomingField.admin?.description({
-        t: i18n.t,
-      })
     }
   }
 

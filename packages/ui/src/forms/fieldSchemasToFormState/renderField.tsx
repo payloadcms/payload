@@ -203,20 +203,16 @@ export const renderField: RenderFieldMethod = ({
 
   if (fieldConfig.admin) {
     if ('description' in fieldConfig.admin) {
-      // @TODO move this to client, only render if it is a function
-      fieldState.customComponents.Description = (
-        <FieldDescription
-          description={
-            typeof fieldConfig.admin?.description === 'string' ||
-            typeof fieldConfig.admin?.description === 'object'
-              ? fieldConfig.admin.description
-              : typeof fieldConfig.admin?.description === 'function'
-                ? fieldConfig.admin?.description({ t: req.i18n.t })
-                : ''
-          }
-          path={path}
-        />
-      )
+      if (typeof fieldConfig.admin?.description === 'function') {
+        fieldState.customComponents.Description = (
+          <FieldDescription
+            description={fieldConfig.admin?.description({
+              t: req.i18n.t,
+            })}
+            path={path}
+          />
+        )
+      }
     }
 
     if (fieldConfig.admin?.components) {
