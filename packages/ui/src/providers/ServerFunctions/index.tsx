@@ -1,43 +1,15 @@
-import type {
-  BuildFormStateArgs,
-  BuildTableStateArgs,
-  Data,
-  DocumentSlots,
-  ServerFunctionClient,
-} from 'payload'
+import type { ServerFunctionClient } from 'payload'
 
 import React, { createContext, useCallback } from 'react'
 
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
-
-type GetFormStateClient = (
-  args: {
-    signal?: AbortSignal
-  } & Omit<BuildFormStateArgs, 'clientConfig' | 'req'>,
-) => ReturnType<typeof buildFormStateHandler>
-
-type GetTableStateClient = (
-  args: {
-    signal?: AbortSignal
-  } & Omit<BuildTableStateArgs, 'clientConfig' | 'req'>,
-) => ReturnType<typeof buildTableStateHandler>
-
-type RenderDocument = (args: {
-  collectionSlug: string
-  disableActions?: boolean
-  docID?: number | string
-  drawerSlug?: string
-  initialData?: Data
-  redirectAfterDelete?: boolean
-  redirectAfterDuplicate?: boolean
-  signal?: AbortSignal
-}) => Promise<{ docID: string; Document: React.ReactNode }>
-
-type GetDocumentSlots = (args: {
-  collectionSlug: string
-  signal?: AbortSignal
-}) => Promise<DocumentSlots>
+import type {
+  GetDocumentSlots,
+  GetFormStateClient,
+  GetTableStateClient,
+  RenderDocument,
+} from './types.js'
 
 type ServerFunctionsContextType = {
   getDocumentSlots: GetDocumentSlots

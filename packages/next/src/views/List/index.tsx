@@ -1,14 +1,14 @@
 import type {
+  DefaultListViewProps,
   ListComponentClientProps,
   ListComponentServerProps,
   ListPreferences,
-  ListViewClientProps,
 } from '@payloadcms/ui'
 import type { AdminViewProps, ListQuery, Where } from 'payload'
 
-import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
+import { HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, renderTable } from '@payloadcms/ui/rsc'
+import { DefaultListViewWithData, renderFilters } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
@@ -39,25 +39,17 @@ export const renderListView = async (
     drawerSlug,
     enableRowSelections,
     initPageResult,
-    params,
     query: queryFromArgs,
-    searchParams,
   } = args
 
   const {
     collectionConfig,
-    collectionConfig: {
-      slug: collectionSlug,
-      admin: { useAsTitle },
-      defaultSort,
-      fields,
-    },
+    collectionConfig: { slug: collectionSlug, fields },
     locale: fullLocale,
     permissions,
     req,
     req: {
       i18n,
-      locale,
       payload,
       payload: { config },
       query: queryFromReq,
@@ -150,36 +142,7 @@ export const renderListView = async (
       }
     }
 
-    const data = await payload.find({
-      collection: collectionSlug,
-      depth: 0,
-      draft: true,
-      fallbackLocale: false,
-      includeLockStatus: true,
-      limit,
-      locale,
-      overrideAccess: false,
-      page,
-      req,
-      sort,
-      user,
-      where: whereQuery || {},
-    })
-
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
-
-    const { columnState, Table } = renderTable({
-      collectionConfig: clientCollectionConfig,
-      columnPreferences: listPreferences?.columns,
-      customCellProps,
-      docs: data.docs,
-      drawerSlug,
-      enableRowSelections,
-      fields,
-      i18n: req.i18n,
-      payload,
-      useAsTitle,
-    })
 
     const renderedFilters = renderFilters(fields, req.payload.importMap)
 
@@ -198,64 +161,55 @@ export const renderListView = async (
     }
 
     const sharedServerProps: ListComponentServerProps = {
+      clientCollectionConfig,
       collectionConfig,
+      customCellProps,
+      fields,
       i18n,
       limit,
+      listPreferences,
       locale: fullLocale,
-      params,
+      page,
       payload,
-      permissions,
-      searchParams,
+      sort,
       user,
+      whereQuery,
     }
 
-    const listViewSlots = renderListViewSlots({
-      clientProps: sharedClientProps,
-      collectionConfig,
-      description: staticDescription,
-      payload,
-      serverProps: sharedServerProps,
-    })
-
-    const clientProps: ListViewClientProps = {
-      ...listViewSlots,
+    const clientProps: Omit<DefaultListViewProps, 'children' | 'columnState' | 'data' | 'Table'> = {
+      ...renderListViewSlots({
+        clientProps: sharedClientProps,
+        collectionConfig,
+        description: staticDescription,
+        payload,
+        serverProps: sharedServerProps,
+      }),
       ...sharedClientProps,
-      columnState,
+      defaultLimit: limit,
+      defaultSort: sort,
       disableBulkDelete,
       disableBulkEdit,
       enableRowSelections,
       listPreferences,
+      modifySearchParams: Boolean(drawerSlug),
+      preferenceKey,
       renderedFilters,
-      Table,
     }
-
-    const isInDrawer = Boolean(drawerSlug)
 
     return {
       List: (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
-          <ListQueryProvider
-            collectionSlug={collectionSlug}
-            data={data}
-            defaultLimit={limit}
-            defaultSort={sort}
-            modifySearchParams={!isInDrawer}
-            preferenceKey={preferenceKey}
-          >
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={collectionConfig?.admin?.components?.views?.list?.Component}
-              Fallback={DefaultListView}
-              importMap={payload.importMap}
-              serverProps={{
-                ...sharedServerProps,
-                data,
-                listPreferences,
-                listSearchableFields: collectionConfig.admin.listSearchableFields,
-              }}
-            />
-          </ListQueryProvider>
+          <RenderServerComponent
+            clientProps={clientProps}
+            Component={collectionConfig?.admin?.components?.views?.list?.Component}
+            Fallback={DefaultListViewWithData}
+            importMap={payload.importMap}
+            serverProps={{
+              ...sharedServerProps,
+              listPreferences,
+            }}
+          />
         </Fragment>
       ),
     }

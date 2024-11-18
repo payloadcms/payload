@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, Column } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
@@ -8,8 +8,9 @@ import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
 
-import type { Column } from '../../elements/Table/index.js'
-import type { ListPreferences } from './types.js'
+import type { ListQueryProps } from '../../providers/ListQuery/index.js'
+import type { GetTableStateClient } from '../../providers/ServerFunctions/types.js'
+import type { DefaultListViewProps, ListPreferences } from './types.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -32,7 +33,7 @@ import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { useListQuery } from '../../providers/ListQuery/index.js'
+import { ListQueryProvider, useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
@@ -58,6 +59,7 @@ export type ListViewClientProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections?: boolean
+  getTableState?: GetTableStateClient
   hasCreatePermission: boolean
   listPreferences?: ListPreferences
   newDocumentURL: string
@@ -65,7 +67,9 @@ export type ListViewClientProps = {
   renderedFilters?: Map<string, React.ReactNode>
 } & ListViewSlots
 
-export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
+const DefaultListViewWithContext: React.FC<
+  Omit<DefaultListViewProps, keyof Omit<ListQueryProps, 'collectionSlug' | 'preferenceKey'>>
+> = (props) => {
   const {
     AfterList,
     AfterListTable,
@@ -78,6 +82,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
+    getTableState,
     hasCreatePermission,
     listPreferences,
     newDocumentURL,
@@ -168,6 +173,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
         columnState={columnState}
         docs={docs}
         enableRowSelections={enableRowSelections}
+        getTableState={getTableState}
         listPreferences={listPreferences}
         preferenceKey={preferenceKey}
         setTable={setTable}
@@ -287,5 +293,28 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
         </div>
       </TableColumnsProvider>
     </Fragment>
+  )
+}
+
+export function DefaultListView({
+  data,
+  defaultLimit,
+  defaultSort,
+  modifySearchParams,
+  onQueryChange,
+  preferenceKey,
+  ...rest
+}: Omit<DefaultListViewProps, 'children'>) {
+  return (
+    <ListQueryProvider
+      data={data}
+      defaultLimit={defaultLimit}
+      defaultSort={defaultSort}
+      modifySearchParams={modifySearchParams}
+      onQueryChange={onQueryChange}
+      preferenceKey={preferenceKey}
+    >
+      <DefaultListViewWithContext {...rest} />
+    </ListQueryProvider>
   )
 }

@@ -110,7 +110,7 @@ export {
   RelationshipProvider,
   useListRelationships,
 } from '../../elements/Table/RelationshipProvider/index.js'
-export { type Column, Table } from '../../elements/Table/index.js'
+export { Table } from '../../elements/Table/index.js'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
@@ -270,6 +270,7 @@ export {
   type ListViewSlots,
 } from '../../views/List/index.js'
 export type {
+  DefaultListViewProps,
   ListComponentClientProps,
   ListComponentServerProps,
   ListPreferences,

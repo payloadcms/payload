@@ -1,19 +1,18 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
-  AdminViewProps,
+  ClientCollectionConfig,
+  Column,
+  ColumnPreferences,
+  Field,
   Locale,
   Payload,
   SanitizedCollectionConfig,
-  SanitizedPermissions,
   User,
+  Where,
 } from 'payload'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
-
-export type DefaultListViewProps = {
-  collectionSlug: SanitizedCollectionConfig['slug']
-  listSearchableFields: SanitizedCollectionConfig['admin']['listSearchableFields']
-}
+import type { ListQueryProps } from '../../providers/ListQuery/index.js'
+import type { GetTableStateClient } from '../../providers/ServerFunctions/types.js'
 
 export type ListIndexProps = {
   collection: SanitizedCollectionConfig
@@ -32,13 +31,43 @@ export type ListComponentClientProps = {
 }
 
 export type ListComponentServerProps = {
+  clientCollectionConfig: ClientCollectionConfig
   collectionConfig: SanitizedCollectionConfig
+  customCellProps?: Record<string, any>
+  fields: Field[]
   i18n: I18n
   limit: number
-  locale: Locale
-  params: AdminViewProps['params']
+  listPreferences?: ListPreferences
+  locale?: Locale
+  page?: number
   payload: Payload
-  permissions: SanitizedPermissions
-  searchParams: AdminViewProps['searchParams']
+  sort?: string
   user: User
+  whereQuery?: Where
 }
+
+export type ListViewSlots = {
+  AfterList?: React.ReactNode
+  AfterListTable?: React.ReactNode
+  BeforeList?: React.ReactNode
+  BeforeListTable?: React.ReactNode
+  Description?: React.ReactNode
+  Table: React.ReactNode
+}
+
+export type ListViewClientProps = {
+  beforeActions?: React.ReactNode[]
+  collectionSlug: string
+  columnState: Column[]
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
+  enableRowSelections?: boolean
+  getTableState?: GetTableStateClient
+  hasCreatePermission: boolean
+  listPreferences?: ListPreferences
+  newDocumentURL: string
+  preferenceKey?: string
+  renderedFilters?: Map<string, React.ReactNode>
+} & ListViewSlots
+
+export type DefaultListViewProps = ListQueryProps & ListViewClientProps & ListViewSlots

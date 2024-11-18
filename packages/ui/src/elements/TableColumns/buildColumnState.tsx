@@ -1,6 +1,8 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
+  Column,
+  ColumnPreferences,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
@@ -15,9 +17,7 @@ import { MissingEditorProp } from 'payload'
 import { deepCopyObjectSimple, fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
-import type { Column } from '../Table/index.js'
 
 import {
   RenderCustomComponent,

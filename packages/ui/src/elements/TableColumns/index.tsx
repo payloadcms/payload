@@ -1,11 +1,18 @@
 'use client'
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type {
+  ClientCollectionConfig,
+  Column,
+  ColumnPreferences,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import React, { createContext, useCallback, useContext } from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
+import type {
+  GetTableStateClient,
+  GetTableStateClientArgs,
+} from '../../providers/ServerFunctions/types.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
-import type { Column } from '../Table/index.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -29,12 +36,13 @@ export type ListPreferences = {
   columns: ColumnPreferences
 }
 
-type Props = {
+export type TableColumnsProviderProps = {
   readonly children: React.ReactNode
   readonly collectionSlug: string
   readonly columnState: Column[]
   readonly docs: any[]
   readonly enableRowSelections?: boolean
+  readonly getTableState?: GetTableStateClient
   readonly LinkedCellOverride?: React.ReactNode
   readonly listPreferences?: ListPreferences
   readonly preferenceKey: string
@@ -52,12 +60,13 @@ const sanitizeColumns = (columns: Column[]) => {
   }))
 }
 
-export const TableColumnsProvider: React.FC<Props> = ({
+export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   children,
   collectionSlug,
   columnState,
   docs,
   enableRowSelections,
+  getTableState: getTableStateFromProps,
   LinkedCellOverride,
   listPreferences,
   preferenceKey,
@@ -80,6 +89,43 @@ export const TableColumnsProvider: React.FC<Props> = ({
   const [tableColumns, setTableColumns] = React.useState(columnState)
   const tableStateControllerRef = React.useRef<AbortController>(null)
 
+  const rebuildTableAndState = useCallback(
+    async (updatedColumnState) => {
+      const controller = new AbortController()
+      tableStateControllerRef.current = controller
+      const args: GetTableStateClientArgs = {
+        collectionSlug,
+        columns: sanitizeColumns(updatedColumnState),
+        docs,
+        enableRowSelections,
+        renderRowTypes,
+        signal: controller.signal,
+        tableAppearance,
+      }
+      let result
+      if (typeof getTableStateFromProps === 'function') {
+        result = await getTableStateFromProps(args)
+      } else {
+        result = await getTableState(args)
+      }
+
+      if (result) {
+        setTableColumns(result.state)
+        setTable(result.Table)
+      }
+    },
+    [
+      collectionSlug,
+      docs,
+      enableRowSelections,
+      getTableStateFromProps,
+      renderRowTypes,
+      tableAppearance,
+      setTable,
+      getTableState,
+    ],
+  )
+
   const moveColumn = useCallback(
     async (args: { fromIndex: number; toIndex: number }) => {
       abortAndIgnore(tableStateControllerRef.current)
@@ -90,35 +136,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
       withMovedColumn.splice(toIndex, 0, columnToMove)
 
       setTableColumns(withMovedColumn)
-
-      const controller = new AbortController()
-      tableStateControllerRef.current = controller
-
-      const result = await getTableState({
-        collectionSlug,
-        columns: sanitizeColumns(withMovedColumn),
-        docs,
-        enableRowSelections,
-        renderRowTypes,
-        signal: controller.signal,
-        tableAppearance,
-      })
-
-      if (result) {
-        setTableColumns(result.state)
-        setTable(result.Table)
-      }
+      await rebuildTableAndState(withMovedColumn)
     },
-    [
-      tableColumns,
-      collectionSlug,
-      docs,
-      getTableState,
-      setTable,
-      enableRowSelections,
-      renderRowTypes,
-      tableAppearance,
-    ],
+    [rebuildTableAndState, tableColumns],
   )
 
   const toggleColumn = useCallback(
@@ -154,35 +174,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
       )
 
       setTableColumns(newColumnState)
-
-      const controller = new AbortController()
-      tableStateControllerRef.current = controller
-
-      const result = await getTableState({
-        collectionSlug,
-        columns: toggledColumns,
-        docs,
-        enableRowSelections,
-        renderRowTypes,
-        signal: controller.signal,
-        tableAppearance,
-      })
-
-      if (result) {
-        setTableColumns(result.state)
-        setTable(result.Table)
-      }
+      await rebuildTableAndState(newColumnState)
     },
-    [
-      tableColumns,
-      getTableState,
-      setTable,
-      collectionSlug,
-      docs,
-      enableRowSelections,
-      renderRowTypes,
-      tableAppearance,
-    ],
+    [rebuildTableAndState, tableColumns],
   )
 
   const setActiveColumns = React.useCallback(
@@ -205,28 +199,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
           return indexOfFirst > indexOfSecond ? 1 : -1
         })
 
-      const { state: columnState, Table } = await getTableState({
-        collectionSlug,
-        columns: activeColumns,
-        docs,
-        enableRowSelections,
-        renderRowTypes,
-        tableAppearance,
-      })
-
-      setTableColumns(columnState)
-      setTable(Table)
+      await rebuildTableAndState(activeColumns)
     },
-    [
-      tableColumns,
-      getTableState,
-      setTable,
-      collectionSlug,
-      docs,
-      enableRowSelections,
-      renderRowTypes,
-      tableAppearance,
-    ],
+    [rebuildTableAndState, tableColumns],
   )
 
   const resetColumnsState = React.useCallback(async () => {

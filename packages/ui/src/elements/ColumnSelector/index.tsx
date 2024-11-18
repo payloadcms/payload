@@ -1,9 +1,7 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { Column, SanitizedCollectionConfig } from 'payload'
 
 import React, { useId } from 'react'
-
-import type { Column } from '../Table/index.js'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'

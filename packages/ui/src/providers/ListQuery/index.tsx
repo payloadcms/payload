@@ -1,12 +1,10 @@
 'use client'
-import type { ListQuery, PaginatedDocs, Where } from 'payload'
+import type { Column, ListQuery, PaginatedDocs, Where } from 'payload'
 
 import { useRouter } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
-
-import type { Column } from '../../elements/Table/index.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { usePreferences } from '../Preferences/index.js'
@@ -24,7 +22,6 @@ type ContextHandlers = {
 
 export type ListQueryProps = {
   readonly children: React.ReactNode
-  readonly collectionSlug: string
   readonly data: PaginatedDocs
   readonly defaultLimit?: number
   readonly defaultSort?: string
@@ -47,7 +44,6 @@ export const useListQuery = (): ListQueryContext => useContext(Context)
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
-  collectionSlug,
   data,
   defaultLimit,
   defaultSort,

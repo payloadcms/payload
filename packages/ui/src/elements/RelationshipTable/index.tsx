@@ -1,6 +1,7 @@
 'use client'
 import type {
   ClientCollectionConfig,
+  Column,
   JoinFieldClient,
   ListQuery,
   PaginatedDocs,
@@ -15,7 +16,6 @@ const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
 import { getTranslation } from '@payloadcms/translations'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
-import type { Column } from '../Table/index.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { Pill } from '../../elements/Pill/index.js'
@@ -217,7 +217,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           {data.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
-                collectionSlug={relationTo}
                 data={data}
                 defaultLimit={collectionConfig?.admin?.pagination?.defaultLimit}
                 modifySearchParams={false}

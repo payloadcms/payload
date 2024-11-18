@@ -1,6 +1,8 @@
 import type {
   ClientCollectionConfig,
   CollectionConfig,
+  Column,
+  ColumnPreferences,
   Field,
   ImportMap,
   PaginatedDocs,
@@ -8,10 +10,6 @@ import type {
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import type { Column } from '../exports/client/index.js'
-import type { ColumnPreferences } from '../providers/ListQuery/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'

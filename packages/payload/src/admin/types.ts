@@ -3,7 +3,7 @@ import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { Block, Field, FieldTypes, Tab } from '../fields/config/types.js'
+import type { Block, ClientField, Field, FieldTypes, Tab } from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
 import type {
   BuildFormStateArgs,
@@ -17,6 +17,7 @@ import type {
 } from './forms/Form.js'
 
 export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
+export type { Column, ColumnPreferences } from './elements/Column.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
 export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'

@@ -3,6 +3,7 @@ import type {
   BuildTableStateArgs,
   ClientCollectionConfig,
   ClientConfig,
+  Column,
   ErrorResult,
   PaginatedDocs,
   SanitizedCollectionConfig,
@@ -12,7 +13,6 @@ import type {
 import { dequal } from 'dequal'
 import { createClientConfig, formatErrors } from 'payload'
 
-import type { Column } from '../elements/Table/index.js'
 import type { ListPreferences } from '../elements/TableColumns/index.js'
 
 import { renderFilters, renderTable } from './renderTable.js'
