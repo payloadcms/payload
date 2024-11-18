@@ -157,6 +157,15 @@ describe('recursivelySanitizePermissions', () => {
                   },
                 },
               },
+              create: {
+                permission: true,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: true,
+              },
             },
           },
           read: {
@@ -235,6 +244,15 @@ describe('recursivelySanitizePermissions', () => {
                     permission: false,
                   },
                 },
+              },
+              create: {
+                permission: true,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: true,
               },
             },
           },
@@ -346,6 +364,79 @@ describe('recursivelySanitizePermissions', () => {
           update: true,
         },
       },
+    })
+  })
+
+  it('should sanitize blocks with subfield named blocks', () => {
+    const permissions: CollectionPermission = {
+      fields: {
+        content: {
+          create: { permission: true },
+          blocks: {
+            test: {
+              fields: {
+                blocks: {
+                  create: { permission: true },
+                  fields: {
+                    arrayText: {
+                      create: { permission: true },
+                      read: { permission: true },
+                      update: { permission: true },
+                    },
+                    id: {
+                      create: { permission: true },
+                      read: { permission: true },
+                      update: { permission: true },
+                    },
+                  },
+                  read: { permission: true },
+                  update: { permission: true },
+                },
+                id: {
+                  create: { permission: true },
+                  read: { permission: true },
+                  update: { permission: true },
+                },
+                blockName: {
+                  create: { permission: true },
+                  read: { permission: true },
+                  update: { permission: true },
+                },
+              },
+              create: { permission: true },
+              read: { permission: true },
+              update: { permission: true },
+            },
+          },
+          read: { permission: true },
+          update: { permission: true },
+        },
+      },
+      create: {
+        permission: true,
+      },
+      read: {
+        permission: true,
+      },
+      update: {
+        permission: true,
+      },
+      delete: {
+        permission: false,
+      },
+      readVersions: {
+        permission: true,
+      },
+    }
+
+    recursivelySanitizePermissions(permissions)
+
+    expect(permissions).toStrictEqual({
+      fields: true,
+      create: true,
+      read: true,
+      update: true,
+      readVersions: true,
     })
   })
 

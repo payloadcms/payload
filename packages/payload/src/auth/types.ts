@@ -14,8 +14,17 @@ export type Permission = {
 export type FieldPermissions = {
   blocks?: {
     [blockSlug: string]: {
+      create: {
+        permission: boolean
+      }
       fields: {
         [fieldName: string]: FieldPermissions
+      }
+      read: {
+        permission: boolean
+      }
+      update: {
+        permission: boolean
       }
     }
   }
