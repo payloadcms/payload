@@ -425,7 +425,7 @@
         "types": "./dist/exports/server/migrate.d.ts",
         "default": "./dist/exports/server/migrate.js"
       },
-      "lexical": {
+      "./lexical": {
         "import": "./dist/lexical-proxy/lexical.js",
         "types": "./dist/lexical-proxy/lexical.d.ts",
         "default": "./dist/lexical-proxy/lexical.js"
