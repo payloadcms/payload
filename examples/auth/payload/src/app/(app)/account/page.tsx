@@ -1,7 +1,7 @@
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { headers as getHeaders } from 'next/headers.js'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 import React, { Fragment } from 'react'
 
 import config from '../../../payload.config'
@@ -14,7 +14,7 @@ import classes from './index.module.scss'
 
 export default async function Account() {
   const headers = getHeaders()
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
   const { permissions, user } = await payload.auth({ headers })
 
   if (!user) {

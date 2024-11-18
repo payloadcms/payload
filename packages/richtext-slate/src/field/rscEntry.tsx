@@ -141,6 +141,7 @@ export const RscEntrySlateField: React.FC<
             defaultIDType: payload.config.db.defaultIDType,
             fields: args.admin?.link?.fields as Field[],
             i18n,
+            importMap: payload.importMap,
           })
 
           componentMap.set(linkFieldsSchemaPath, clientFields)
@@ -172,6 +173,7 @@ export const RscEntrySlateField: React.FC<
                 defaultIDType: payload.config.db.defaultIDType,
                 fields: args?.admin?.upload?.collections[collection.slug]?.fields,
                 i18n,
+                importMap: payload.importMap,
               })
 
               componentMap.set(`${uploadFieldsSchemaPath}.${collection.slug}`, clientFields)

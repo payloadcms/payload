@@ -7,6 +7,7 @@ import type { ReactEditor } from 'slate-react'
 
 import { getTranslation } from '@payloadcms/translations'
 import { FieldLabel, useEditDepth, useField, useTranslation, withCondition } from '@payloadcms/ui'
+import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { isHotkey } from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { createEditor, Node, Element as SlateElement, Text, Transforms } from 'slate'
@@ -19,8 +20,8 @@ import type { LoadedSlateFieldProps } from './types.js'
 import { defaultRichTextValue } from '../data/defaultValue.js'
 import { richTextValidate } from '../data/validation.js'
 import { listTypes } from './elements/listTypes.js'
-import { hotkeys } from './hotkeys.js'
 import './index.scss'
+import { hotkeys } from './hotkeys.js'
 import { toggleLeaf } from './leaves/toggle.js'
 import { withEnterBreakOut } from './plugins/withEnterBreakOut.js'
 import { withHTML } from './plugins/withHTML.js'
@@ -42,9 +43,10 @@ declare module 'slate' {
 const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   const {
     elements,
+    field,
     field: {
       name,
-      admin: { className, placeholder, readOnly: readOnlyFromAdmin, style, width } = {},
+      admin: { className, placeholder, readOnly: readOnlyFromAdmin } = {},
       label,
       required,
     },
@@ -274,6 +276,8 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   //   }
   // }, [path, editor]);
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   const classes = [
     baseClass,
     'field-type',
@@ -300,13 +304,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   }
 
   return (
-    <div
-      className={classes}
-      style={{
-        ...style,
-        width,
-      }}
-    >
+    <div className={classes} style={styles}>
       {Label || <FieldLabel label={label} required={required} />}
       <div className={`${baseClass}__wrap`}>
         {Error}

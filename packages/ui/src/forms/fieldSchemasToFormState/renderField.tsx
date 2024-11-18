@@ -14,9 +14,19 @@ import { fieldAffectsData } from 'payload/shared'
 import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { FieldDescription } from '../../fields/FieldDescription/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- need this to reference already existing bundle. Otherwise, bundle size increases., payload/no-imports-from-exports-dir
+import { FieldDescription } from '../../exports/client/index.js'
+
+const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
+  'Cell',
+  'Description',
+  'Field',
+  'Filter',
+]
 
 export const renderField: RenderFieldMethod = ({
+  id,
+  collectionSlug,
   data,
   fieldConfig,
   fieldSchemaMap,
@@ -28,6 +38,7 @@ export const renderField: RenderFieldMethod = ({
   parentSchemaPath,
   path,
   permissions: incomingPermissions,
+  preferences,
   req,
   schemaPath,
   siblingData,
@@ -40,6 +51,7 @@ export const renderField: RenderFieldMethod = ({
     defaultIDType: req.payload.config.db.defaultIDType,
     field: fieldConfig,
     i18n: req.i18n,
+    importMap: req.payload.importMap,
   })
 
   const permissions =
@@ -65,6 +77,7 @@ export const renderField: RenderFieldMethod = ({
   }
 
   const serverProps: ServerComponentProps = {
+    id,
     clientField,
     data,
     field: fieldConfig,
@@ -72,9 +85,13 @@ export const renderField: RenderFieldMethod = ({
     permissions,
     // TODO: Should we pass explicit values? initialValue, value, valid
     // value and initialValue should be typed
+    collectionSlug,
     formState,
     i18n: req.i18n,
+    operation,
     payload: req.payload,
+    preferences,
+    req,
     siblingData,
     user: req.user,
   }
@@ -157,6 +174,28 @@ export const renderField: RenderFieldMethod = ({
       break
     }
 
+    case 'ui': {
+      if (fieldConfig?.admin?.components) {
+        // Render any extra, untyped components
+        for (const key in fieldConfig.admin.components) {
+          if (key in defaultUIFieldComponentKeys) {
+            continue
+          }
+          const Component = fieldConfig.admin.components[key]
+          fieldState.customComponents[key] = (
+            <RenderServerComponent
+              clientProps={clientProps}
+              Component={Component}
+              importMap={req.payload.importMap}
+              key={`field.admin.components.${key}`}
+              serverProps={serverProps}
+            />
+          )
+        }
+      }
+      break
+    }
+
     default: {
       break
     }
@@ -164,20 +203,16 @@ export const renderField: RenderFieldMethod = ({
 
   if (fieldConfig.admin) {
     if ('description' in fieldConfig.admin) {
-      // @TODO move this to client, only render if it is a function
-      fieldState.customComponents.Description = (
-        <FieldDescription
-          description={
-            typeof fieldConfig.admin?.description === 'string' ||
-            typeof fieldConfig.admin?.description === 'object'
-              ? fieldConfig.admin.description
-              : typeof fieldConfig.admin?.description === 'function'
-                ? fieldConfig.admin?.description({ t: req.i18n.t })
-                : ''
-          }
-          path={path}
-        />
-      )
+      if (typeof fieldConfig.admin?.description === 'function') {
+        fieldState.customComponents.Description = (
+          <FieldDescription
+            description={fieldConfig.admin?.description({
+              t: req.i18n.t,
+            })}
+            path={path}
+          />
+        )
+      }
     }
 
     if (fieldConfig.admin?.components) {

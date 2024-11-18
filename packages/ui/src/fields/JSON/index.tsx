@@ -1,7 +1,7 @@
 'use client'
 import type { JSONFieldClientComponent } from 'payload'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -10,16 +10,17 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'json-field'
 
 const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   const {
+    field,
     field: {
-      name,
-      admin: { className, description, editorOptions, maxHeight, style, width } = {},
+      admin: { className, description, editorOptions, maxHeight } = {},
       jsonSchema,
       label,
       localized,
@@ -105,6 +106,8 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     setHasLoadedValue(true)
   }, [initialValue, value, hasLoadedValue])
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -116,10 +119,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Label}

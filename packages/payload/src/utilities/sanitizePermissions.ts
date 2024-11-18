@@ -12,7 +12,7 @@ function areAllPermissionsTrue(data: PermissionObject): boolean {
     for (const key in data.blocks) {
       if (typeof data.blocks[key] === 'object') {
         // If any recursive call returns false, the whole function returns false
-        if (key === 'fields' && !areAllPermissionsTrue(data.blocks[key].fields)) {
+        if (key === 'fields' && !areAllPermissionsTrue(data.blocks[key])) {
           return false
         }
         if (data.blocks[key].fields && !areAllPermissionsTrue(data.blocks[key].fields)) {
