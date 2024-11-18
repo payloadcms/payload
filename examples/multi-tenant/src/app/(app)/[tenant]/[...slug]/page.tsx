@@ -9,7 +9,13 @@ import React from 'react'
 import { RenderPage } from '../../../components/RenderPage'
 
 // eslint-disable-next-line no-restricted-exports
-export default async function Page({ params }: { params: { slug?: string[]; tenant: string } }) {
+export default async function Page({
+  params: paramsPromise,
+}: {
+  params: Promise<{ slug?: string[]; tenant: string }>
+}) {
+  const params = await paramsPromise
+
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })

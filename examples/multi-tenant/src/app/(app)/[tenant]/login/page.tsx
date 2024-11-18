@@ -6,6 +6,9 @@ type RouteParams = {
   tenant: string
 }
 
-export default function Page({ params }: { params: RouteParams }) {
+// eslint-disable-next-line no-restricted-exports
+export default async function Page({ params: paramsPromise }: { params: Promise<RouteParams> }) {
+  const params = await paramsPromise
+
   return <Login tenantSlug={params.tenant} />
 }
