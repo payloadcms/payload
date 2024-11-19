@@ -518,6 +518,8 @@ export const Form: React.FC<FormProps> = (props) => {
         rowIndex,
         subFieldState,
       })
+
+      setModified(true)
     },
     [dispatchFields, getDataByPath],
   )
