@@ -14,6 +14,7 @@ export function isObject(item: unknown): boolean {
  * @param target
  * @param ...sources
  */
+// eslint-disable-next-line no-restricted-exports
 export default function deepMerge<T, R>(target: T, source: R): T {
   const output = { ...target }
   if (isObject(target) && isObject(source)) {

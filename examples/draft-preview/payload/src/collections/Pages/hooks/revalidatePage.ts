@@ -1,38 +1,29 @@
-import type { AfterChangeHook } from 'payload/dist/collections/config/types'
+import type { CollectionAfterChangeHook } from 'payload'
 
-// ensure that the home page is revalidated at '/' instead of '/home'
-export const formatAppURL = ({ doc }): string => {
-  const pathToUse = doc.slug === 'home' ? '' : doc.slug
-  const { pathname } = new URL(`${process.env.PAYLOAD_PUBLIC_SITE_URL}/${pathToUse}`)
-  return pathname
-}
+import { revalidatePath } from 'next/cache'
 
-// revalidate the page in the background, so the user doesn't have to wait
-// notice that the hook itself is not async and we are not awaiting `revalidate`
-// only revalidate existing docs that are published (not drafts)
-// send `revalidatePath`, `collection`, and `slug` to the frontend to use in its revalidate route
-// frameworks may have different ways of doing this, but the idea is the same
-export const revalidatePage: AfterChangeHook = ({ doc, req, operation }) => {
-  if (operation === 'update' && doc._status === 'published') {
-    const url = formatAppURL({ doc })
+import type { Page } from '../../../payload-types'
 
-    const revalidate = async (): Promise<void> => {
-      try {
-        const res = await fetch(
-          `${process.env.PAYLOAD_PUBLIC_SITE_URL}/api/revalidate?secret=${process.env.REVALIDATION_KEY}&collection=pages&slug=${doc?.slug}&path=${url}`,
-        )
+export const revalidatePage: CollectionAfterChangeHook<Page> = ({
+  doc,
+  previousDoc,
+  req: { payload },
+}) => {
+  if (doc._status === 'published') {
+    const path = doc.slug === 'home' ? '/' : `/${doc.slug}`
 
-        if (res.ok) {
-          req.payload.logger.info(`Revalidated path ${url}`)
-        } else {
-          req.payload.logger.error(`Error revalidating path ${url}`)
-        }
-      } catch (err: unknown) {
-        req.payload.logger.error(`Error hitting revalidate route for ${url}`)
-      }
-    }
+    payload.logger.info(`Revalidating page at path: ${path}`)
 
-    revalidate()
+    revalidatePath(path)
+  }
+
+  // If the page was previously published, we need to revalidate the old path
+  if (previousDoc?._status === 'published' && doc._status !== 'published') {
+    const oldPath = previousDoc.slug === 'home' ? '/' : `/${previousDoc.slug}`
+
+    payload.logger.info(`Revalidating old page at path: ${oldPath}`)
+
+    revalidatePath(oldPath)
   }
 
   return doc

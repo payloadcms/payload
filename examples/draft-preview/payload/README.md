@@ -5,14 +5,24 @@ The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/m
 - [Next.js App Router](../next-app)
 - [Next.js Pages Router](../next-pages)
 
-Follow the instructions in each respective README to get started. If you are setting up draft preview for another front-end, please consider contributing to this repo with your own example!
+Those applications run directly alongside this one. Follow the instructions in each respective README to get started. Follow the instructions in each respective README to get started. If you are setting up draft preview for another front-end, please consider contributing to this repo with your own example!
+
+To learn more about this, [check out how Payload can be used in its various headless capacities](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
 
 ## Quick Start
 
+To spin up this example locally, follow these steps:
+
 1. Clone this repo
-2. `cd` into this directory and run `yarn` or `npm install`
+2. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+
+   > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
+
 3. `cp .env.example .env` to copy the example environment variables
-4. `yarn dev` or `npm run dev` to start the server and seed the database
+
+   > Adjust `PAYLOAD_PUBLIC_SITE_URL` in the `.env` if your front-end is running on a separate domain or port.
+
+4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
 5. `open http://localhost:3000/admin` to access the admin panel
 6. Login with email `demo@payloadcms.com` and password `demo`
 

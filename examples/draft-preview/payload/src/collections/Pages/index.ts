@@ -1,35 +1,31 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import richText from '../../fields/richText'
+import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { loggedIn } from './access/loggedIn'
 import { publishedOrLoggedIn } from './access/publishedOrLoggedIn'
-import formatSlug from './hooks/formatSlug'
-import { formatAppURL, revalidatePage } from './hooks/revalidatePage'
+import { formatSlug } from './hooks/formatSlug'
+import { revalidatePage } from './hooks/revalidatePage'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
-  admin: {
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'updatedAt'],
-    preview: (doc) => {
-      return `${process.env.PAYLOAD_PUBLIC_SITE_URL}/api/preview?url=${encodeURIComponent(
-        formatAppURL({
-          doc,
-        }),
-      )}&collection=pages&slug=${doc.slug}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
-    },
-  },
-  versions: {
-    drafts: true,
-  },
   access: {
-    read: publishedOrLoggedIn,
     create: loggedIn,
-    update: loggedIn,
     delete: loggedIn,
+    read: publishedOrLoggedIn,
+    update: loggedIn,
   },
-  hooks: {
-    afterChange: [revalidatePage],
+  admin: {
+    defaultColumns: ['title', 'slug', 'updatedAt'],
+    preview: (data) => {
+      const path = generatePreviewPath({
+        slug: typeof data?.slug === 'string' ? data.slug : '',
+        collection: 'pages',
+      })
+
+      return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
+    },
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -39,16 +35,22 @@ export const Pages: CollectionConfig = {
     },
     {
       name: 'slug',
-      label: 'Slug',
       type: 'text',
-      index: true,
       admin: {
         position: 'sidebar',
       },
       hooks: {
         beforeValidate: [formatSlug('title')],
       },
+      index: true,
+      label: 'Slug',
     },
     richText(),
   ],
+  hooks: {
+    afterChange: [revalidatePage],
+  },
+  versions: {
+    drafts: true,
+  },
 }

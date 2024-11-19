@@ -1,6 +1,7 @@
+import type { RichTextElement, RichTextLeaf } from '@payloadcms/richtext-slate'
+import type { RichTextField } from 'payload'
+
 import { slateEditor } from '@payloadcms/richtext-slate'
-import type { RichTextElement, RichTextLeaf } from '@payloadcms/richtext-slate/dist/types'
-import type { RichTextField } from 'payload/types'
 
 import deepMerge from '../../utilities/deepMerge'
 import link from '../link'
@@ -16,7 +17,7 @@ type RichText = (
 ) => RichTextField
 
 const richText: RichText = (
-  overrides,
+  overrides = {},
   additions = {
     elements: [],
     leaves: [],
@@ -26,27 +27,28 @@ const richText: RichText = (
     {
       name: 'richText',
       type: 'richText',
-      required: true,
       editor: slateEditor({
         admin: {
+          elements: [...elements, ...(additions.elements || [])],
+          leaves: [...leaves, ...(additions.leaves || [])],
           upload: {
             collections: {
               media: {
                 fields: [
                   {
-                    type: 'richText',
                     name: 'caption',
-                    label: 'Caption',
+                    type: 'richText',
                     editor: slateEditor({
                       admin: {
                         elements: [...elements],
                         leaves: [...leaves],
                       },
                     }),
+                    label: 'Caption',
                   },
                   {
-                    type: 'radio',
                     name: 'alignment',
+                    type: 'radio',
                     label: 'Alignment',
                     options: [
                       {
@@ -73,7 +75,7 @@ const richText: RichText = (
                     disableLabel: true,
                     overrides: {
                       admin: {
-                        condition: (_, data) => Boolean(data?.enableLink),
+                        condition: (_: any, data: { enableLink: any }) => Boolean(data?.enableLink),
                       },
                     },
                   }),
@@ -81,10 +83,9 @@ const richText: RichText = (
               },
             },
           },
-          elements: [...elements, ...(additions.elements || [])],
-          leaves: [...leaves, ...(additions.leaves || [])],
         },
       }),
+      required: true,
     },
     overrides,
   )

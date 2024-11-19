@@ -1,4 +1,4 @@
-import type { GlobalConfig } from 'payload/types'
+import type { GlobalConfig } from 'payload'
 
 import link from '../fields/link'
 
@@ -11,12 +11,12 @@ export const MainMenu: GlobalConfig = {
     {
       name: 'navItems',
       type: 'array',
-      maxRows: 6,
       fields: [
         link({
           appearances: false,
         }),
       ],
+      maxRows: 6,
     },
   ],
 }

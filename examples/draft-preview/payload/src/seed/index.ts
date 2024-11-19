@@ -19,10 +19,10 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   await payload.update({
-    collection: 'pages',
     id: examplePageID,
-    draft: true,
+    collection: 'pages',
     data: examplePageDraft as any, // eslint-disable-line
+    draft: true,
   })
 
   const homepageJSON = JSON.parse(JSON.stringify(home).replace('{{DRAFT_PAGE_ID}}', examplePageID))
@@ -39,30 +39,30 @@ export const seed = async (payload: Payload): Promise<void> => {
         {
           link: {
             type: 'reference',
+            label: 'Home',
             reference: {
               relationTo: 'pages',
               value: homePageID,
             },
-            label: 'Home',
             url: '',
           },
         },
         {
           link: {
             type: 'reference',
+            label: 'Example Page',
             reference: {
               relationTo: 'pages',
               value: examplePageID,
             },
-            label: 'Example Page',
             url: '',
           },
         },
         {
           link: {
             type: 'custom',
-            reference: null,
             label: 'Dashboard',
+            reference: undefined,
             url: 'http://localhost:3000/admin',
           },
         },
