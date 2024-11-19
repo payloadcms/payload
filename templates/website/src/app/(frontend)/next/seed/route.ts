@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken'
 import { createLocalReq, getPayload } from 'payload'
 import { seed } from '@/endpoints/seed'
 import config from '@payload-config'
+import { headers } from 'next/headers'
 
 const payloadToken = 'payload-token'
 export const maxDuration = 60 // This function can run for a maximum of 60 seconds
@@ -16,15 +16,10 @@ export async function POST(
   },
 ): Promise<Response> {
   const payload = await getPayload({ config })
-  const token = req.cookies.get(payloadToken)?.value
+  const requestHeaders = await headers()
 
-  let user
-
-  try {
-    user = jwt.verify(token, payload.secret)
-  } catch (error) {
-    payload.logger.error('Error verifying token for live preview:', error)
-  }
+  // Authenticate by passing request headers
+  const { user } = await payload.auth({ headers: requestHeaders })
 
   if (!user) {
     return new Response('Action forbidden.', { status: 403 })
