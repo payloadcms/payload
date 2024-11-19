@@ -70,6 +70,26 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  array?:
+    | {
+        richText?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -202,6 +222,14 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  array?:
+    | T
+    | {
+        richText?: T;
+        ui?: T;
+        id?: T;
+      };
+  ui?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

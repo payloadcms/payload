@@ -7,20 +7,20 @@ const AddRowButton = () => {
 
   const handleClick = () => {
     addFieldRow({
-      path: 'array',
-      schemaPath: 'array',
+      path: 'externallyUpdatedArray',
+      schemaPath: 'externallyUpdatedArray',
       subFieldState: {
         text: {
-          initialValue: 'aaa',
+          initialValue: 'Hello, world!',
           valid: true,
-          value: 'aaa',
+          value: 'Hello, world!',
         },
       },
     })
   }
 
   return (
-    <button onClick={handleClick} type="button">
+    <button id="updateArrayExternally" onClick={handleClick} type="button">
       Add Row
     </button>
   )
