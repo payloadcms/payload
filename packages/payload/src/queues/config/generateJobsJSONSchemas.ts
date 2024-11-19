@@ -105,7 +105,7 @@ export function generateJobsJSONSchemas(
           required: ['input', 'output'],
         },
       },
-      required: jobsConfig.tasks.map((task) => task.slug),
+      required: [...jobsConfig.tasks.map((task) => task.slug), 'inline'],
     }
   }
 
@@ -161,7 +161,7 @@ export function generateJobsJSONSchemas(
             return [workflow.slug, toReturn]
           }),
         ),
-        required: jobsConfig.tasks.map((task) => task.slug),
+        required: jobsConfig.workflows.map((workflow) => workflow.slug),
       }
     }
   }

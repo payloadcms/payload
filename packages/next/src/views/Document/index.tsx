@@ -159,7 +159,8 @@ export const renderDocument = async ({
     }),
   ])
 
-  const serverProps: ServerProps = {
+  const serverProps: ServerSideEditViewProps = {
+    doc,
     i18n,
     initPageResult,
     locale,
@@ -344,27 +345,23 @@ export const renderDocument = async ({
         )}
         <HydrateAuthProvider permissions={permissions} />
         <EditDepthProvider>
-          {ErrorView ? (
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={ErrorView.ComponentConfig || ErrorView.Component}
-              importMap={importMap}
-              serverProps={serverProps}
-            />
-          ) : (
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={
-                RootViewOverride
+          {ErrorView
+            ? RenderServerComponent({
+                clientProps,
+                Component: ErrorView.ComponentConfig || ErrorView.Component,
+                importMap,
+                serverProps,
+              })
+            : RenderServerComponent({
+                clientProps,
+                Component: RootViewOverride
                   ? RootViewOverride
                   : CustomView?.ComponentConfig || CustomView?.Component
                     ? CustomView?.ComponentConfig || CustomView?.Component
-                    : DefaultView?.ComponentConfig || DefaultView?.Component
-              }
-              importMap={importMap}
-              serverProps={serverProps}
-            />
-          )}
+                    : DefaultView?.ComponentConfig || DefaultView?.Component,
+                importMap,
+                serverProps,
+              })}
         </EditDepthProvider>
       </DocumentInfoProvider>
     ),

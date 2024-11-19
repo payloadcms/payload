@@ -9,9 +9,8 @@ To spin up this example locally, follow these steps:
 1. Clone this repo
 2. `cp .env.example .env` to copy the example environment variables
 3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. `yarn dev` or `npm run dev` to start the server and seed the database
-5. open `http://localhost:3000/admin` to access the admin panel
-6. Create your first user
+4. open `http://localhost:3000/admin` to access the admin panel
+5. Create your first user
 
 ## How it works
 
