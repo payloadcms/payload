@@ -16,8 +16,8 @@ import type { PackageDetails } from './lib/getPackageDetails.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { getPackageRegistryVersions } from './lib/getPackageRegistryVersions.js'
 import { packagePublishList } from './lib/publishList.js'
+import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
-import { updateChangelog } from './utils/updateChangelog.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -124,17 +124,12 @@ async function main() {
 
   // Preview/Update changelog
   header(`${logPrefix}📝 Updating changelog...`)
-  const {
-    changelog: changelogContent,
-    releaseNotes,
-    releaseUrl,
-  } = await updateChangelog({
+  const { changelog: changelogContent, releaseUrl } = await generateReleaseNotes({
     bump,
     dryRun,
     toVersion: 'HEAD',
     fromVersion,
     openReleaseUrl: true,
-    writeChangelog: changelog,
   })
 
   console.log(chalk.green('\nChangelog Preview:\n'))
