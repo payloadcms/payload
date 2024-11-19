@@ -252,9 +252,26 @@ describe('database', () => {
 
     it('should run migrate:down', async () => {
       // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (!isMongoose(payload)) {
         return
       }
+
+      // migrate existing if there any
+      await payload.db.migrate()
+
+      await payload.db.createMigration({
+        forceAcceptWarning: true,
+        migrationName: 'migration_to_down',
+        payload,
+      })
+
+      // migrate current to test
+      await payload.db.migrate()
+
+      const { docs } = await payload.find({ collection: 'payload-migrations' })
+      expect(docs.some((doc) => doc.name.includes('migration_to_down'))).toBeTruthy()
+
       let error
       try {
         await payload.db.migrateDown()
@@ -267,7 +284,9 @@ describe('database', () => {
       })
 
       expect(error).toBeUndefined()
-      expect(migrations.docs).toHaveLength(0)
+      expect(migrations.docs.some((doc) => doc.name.includes('migration_to_down'))).toBeFalsy()
+
+      await payload.delete({ collection: 'payload-migrations', where: {} })
     })
 
     it('should run migrate:refresh', async () => {
@@ -557,7 +576,12 @@ describe('database', () => {
         })
 
         it('should commit multiple operations async', async () => {
-          const req = {
+          const req_1 = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          const req_2 = {
             payload,
             user,
           } as unknown as PayloadRequest
@@ -571,7 +595,7 @@ describe('database', () => {
               data: {
                 title,
               },
-              req,
+              req: req_1,
             })
             .then((res) => {
               first = res
@@ -583,7 +607,7 @@ describe('database', () => {
               data: {
                 title,
               },
-              req,
+              req: req_2,
             })
             .then((res) => {
               second = res
@@ -591,18 +615,16 @@ describe('database', () => {
 
           await Promise.all([firstReq, secondReq])
 
-          await commitTransaction(req)
-          expect(req.transactionID).toBeUndefined()
+          expect(req_1.transactionID).toBeUndefined()
+          expect(req_2.transactionID).toBeUndefined()
 
           const firstResult = await payload.findByID({
             id: first.id,
             collection,
-            req,
           })
           const secondResult = await payload.findByID({
             id: second.id,
             collection,
-            req,
           })
 
           expect(firstResult.id).toStrictEqual(first.id)
