@@ -114,7 +114,6 @@ export const seed = async ({
     collection: 'media',
     data: image2,
     file: image2Buffer,
-    req,
   })
   const image3Doc = await payload.create({
     collection: 'media',
