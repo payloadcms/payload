@@ -15,7 +15,6 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
     field: {
-      name,
       admin: { allowCreate },
       collection,
       label,

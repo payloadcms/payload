@@ -96,25 +96,6 @@ export const createClientField = ({
     clientField.label = incomingField.label({ t: i18n.t })
   }
 
-  if (!(clientField.admin instanceof Object)) {
-    clientField.admin = {} as AdminClient
-  }
-
-  if ('admin' in incomingField && 'width' in incomingField.admin) {
-    clientField.admin.style = {
-      ...clientField.admin.style,
-      '--field-width': clientField.admin.width,
-    }
-
-    delete clientField.admin.style.width // avoid needlessly adding this to the element's style attribute
-  } else {
-    if (!(clientField.admin.style instanceof Object)) {
-      clientField.admin.style = {}
-    }
-
-    clientField.admin.style.flex = '1 1 auto'
-  }
-
   switch (incomingField.type) {
     case 'array':
     case 'collapsible':

@@ -29,13 +29,13 @@ const execaOpts: execa.Options = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
 
 const {
-  bump = 'patch', // Semver release type
+  bump, // Semver release type: major, minor, patch, premajor, preminor, prepatch, prerelease
   changelog = false, // Whether to update the changelog. WARNING: This gets throttled on too many commits
   'dry-run': dryRun,
   'git-tag': gitTag = true, // Whether to run git tag and commit operations
   'git-commit': gitCommit = true, // Whether to run git commit operations
   versionOverride = undefined,
-  tag = 'latest',
+  tag, // Tag to publish to: latest, beta, canary
 } = args
 
 const logPrefix = dryRun ? chalk.bold.magenta('[dry-run] >') : ''
@@ -344,7 +344,9 @@ async function question(message: string): Promise<string> {
 
 function header(message: string, opts?: { enable?: boolean }) {
   const { enable } = opts ?? {}
-  if (!enable) return
+  if (!enable) {
+    return
+  }
 
   console.log(chalk.bold.green(`${message}\n`))
 }

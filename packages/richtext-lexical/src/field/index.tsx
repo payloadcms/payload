@@ -24,7 +24,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     featureClientImportMap,
     featureClientSchemaMap,
     field,
-    lexicalEditorConfig,
+    lexicalEditorConfig = defaultEditorLexicalConfig,
     schemaPath,
   } = props
 

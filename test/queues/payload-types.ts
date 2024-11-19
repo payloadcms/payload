@@ -38,27 +38,27 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: {
       UpdatePost: MyUpdatePostType;
       UpdatePostStep2: TaskUpdatePostStep2;
       CreateSimple: TaskCreateSimple;
       CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
       ExternalTask: TaskExternalTask;
-      inline?: {
+      inline: {
         input: unknown;
         output: unknown;
       };
     };
-    workflows?: {
-      updatePost?: MyUpdatePostWorkflowType;
-      updatePostJSONWorkflow?: WorkflowUpdatePostJSONWorkflow;
-      retriesTest?: WorkflowRetriesTest;
-      retriesRollbackTest?: WorkflowRetriesRollbackTest;
-      retriesWorkflowLevelTest?: WorkflowRetriesWorkflowLevelTest;
-      inlineTaskTest?: WorkflowInlineTaskTest;
-      externalWorkflow?: WorkflowExternalWorkflow;
-      retriesBackoffTest?: WorkflowRetriesBackoffTest;
+    workflows: {
+      updatePost: MyUpdatePostWorkflowType;
+      updatePostJSONWorkflow: WorkflowUpdatePostJSONWorkflow;
+      retriesTest: WorkflowRetriesTest;
+      retriesRollbackTest: WorkflowRetriesRollbackTest;
+      retriesWorkflowLevelTest: WorkflowRetriesWorkflowLevelTest;
+      inlineTaskTest: WorkflowInlineTaskTest;
+      externalWorkflow: WorkflowExternalWorkflow;
+      retriesBackoffTest: WorkflowRetriesBackoffTest;
     };
   };
 }
@@ -235,7 +235,7 @@ export interface PayloadJob {
         | 'ExternalTask'
       )
     | null;
-  queue?: 'default' | null;
+  queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
   updatedAt: string;
