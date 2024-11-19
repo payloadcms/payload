@@ -1298,12 +1298,7 @@ export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
-export {
-  configToJSONSchema,
-  entityToJSONSchema,
-  fieldsToJSONSchema,
-  withNullableJSONSchemaType,
-} from './utilities/configToJSONSchema.js'
+export { configToJSONSchema, entityToJSONSchema } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from './utilities/createLocalReq.js'
 export {
@@ -1322,6 +1317,7 @@ export {
   type CustomVersionParser,
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+export { fieldsToJSONSchema, withNullableJSONSchemaType } from './utilities/fieldsToJSONSchema.js'
 export {
   findUp,
   findUpSync,

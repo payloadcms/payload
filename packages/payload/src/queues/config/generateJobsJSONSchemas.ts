@@ -3,7 +3,7 @@ import type { JSONSchema4 } from 'json-schema'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { JobsConfig } from './types/index.js'
 
-import { fieldsToJSONSchema } from '../../utilities/configToJSONSchema.js'
+import { fieldsToJSONSchema } from '../../utilities/fieldsToJSONSchema.js'
 
 export function generateJobsJSONSchemas(
   config: SanitizedConfig,
