@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { ArrayField, BlocksField, Field } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { fieldAffectsData, fieldIsVirtual } from 'payload/shared'
@@ -8,8 +8,6 @@ import type { DrizzleAdapter } from '../../types.js'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
-import { transformArray } from './array.js'
-import { transformBlocks } from './blocks.js'
 import { transformNumbers } from './numbers.js'
 import { transformRelationship } from './relationships.js'
 import { transformSelects } from './selects.js'
@@ -615,5 +613,228 @@ export const traverseFields = ({
         }
       })
     }
+  })
+}
+
+type TransformArrayArgs = {
+  adapter: DrizzleAdapter
+  arrayTableName: string
+  baseTableName: string
+  blocks: {
+    [blockType: string]: BlockRowToInsert[]
+  }
+  blocksToDelete: Set<string>
+  data: unknown
+  field: ArrayField
+  locale?: string
+  numbers: Record<string, unknown>[]
+  path: string
+  relationships: Record<string, unknown>[]
+  relationshipsToDelete: RelationshipToDelete[]
+  selects: {
+    [tableName: string]: Record<string, unknown>[]
+  }
+  texts: Record<string, unknown>[]
+  /**
+   * Set to a locale code if this set of fields is traversed within a
+   * localized array or block field
+   */
+  withinArrayOrBlockLocale?: string
+}
+
+// Can't be in a separate file to avoid circular import between traverseFields and transformArray
+export const transformArray = ({
+  adapter,
+  arrayTableName,
+  baseTableName,
+  blocks,
+  blocksToDelete,
+  data,
+  field,
+  locale,
+  numbers,
+  path,
+  relationships,
+  relationshipsToDelete,
+  selects,
+  texts,
+  withinArrayOrBlockLocale,
+}: TransformArrayArgs) => {
+  const newRows: ArrayRowToInsert[] = []
+
+  const hasUUID = adapter.tables[arrayTableName]._uuid
+
+  if (isArrayOfRows(data)) {
+    data.forEach((arrayRow, i) => {
+      const newRow: ArrayRowToInsert = {
+        arrays: {},
+        locales: {},
+        row: {
+          _order: i + 1,
+        },
+      }
+
+      // If we have declared a _uuid field on arrays,
+      // that means the ID has to be unique,
+      // and our ids within arrays are not unique.
+      // So move the ID to a uuid field for storage
+      // and allow the database to generate a serial id automatically
+      if (hasUUID) {
+        newRow.row._uuid = arrayRow.id
+        delete arrayRow.id
+      }
+
+      if (locale) {
+        newRow.locales[locale] = {
+          _locale: locale,
+        }
+      }
+
+      if (field.localized) {
+        newRow.row._locale = locale
+      }
+
+      if (withinArrayOrBlockLocale) {
+        newRow.row._locale = withinArrayOrBlockLocale
+      }
+
+      traverseFields({
+        adapter,
+        arrays: newRow.arrays,
+        baseTableName,
+        blocks,
+        blocksToDelete,
+        columnPrefix: '',
+        data: arrayRow,
+        fieldPrefix: '',
+        fields: field.fields,
+        locales: newRow.locales,
+        numbers,
+        parentTableName: arrayTableName,
+        path: `${path || ''}${field.name}.${i}.`,
+        relationships,
+        relationshipsToDelete,
+        row: newRow.row,
+        selects,
+        texts,
+        withinArrayOrBlockLocale,
+      })
+
+      newRows.push(newRow)
+    })
+  }
+
+  return newRows
+}
+
+type TransformBlocksArgs = {
+  adapter: DrizzleAdapter
+  baseTableName: string
+  blocks: {
+    [blockType: string]: BlockRowToInsert[]
+  }
+  blocksToDelete: Set<string>
+  data: Record<string, unknown>[]
+  field: BlocksField
+  locale?: string
+  numbers: Record<string, unknown>[]
+  path: string
+  relationships: Record<string, unknown>[]
+  relationshipsToDelete: RelationshipToDelete[]
+  selects: {
+    [tableName: string]: Record<string, unknown>[]
+  }
+  texts: Record<string, unknown>[]
+  /**
+   * Set to a locale code if this set of fields is traversed within a
+   * localized array or block field
+   */
+  withinArrayOrBlockLocale?: string
+}
+
+// Can't be in a separate file to avoid circular import between traverseFields and transformBlocks
+export const transformBlocks = ({
+  adapter,
+  baseTableName,
+  blocks,
+  blocksToDelete,
+  data,
+  field,
+  locale,
+  numbers,
+  path,
+  relationships,
+  relationshipsToDelete,
+  selects,
+  texts,
+  withinArrayOrBlockLocale,
+}: TransformBlocksArgs) => {
+  data.forEach((blockRow, i) => {
+    if (typeof blockRow.blockType !== 'string') {
+      return
+    }
+    const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType)
+    if (!matchedBlock) {
+      return
+    }
+    const blockType = toSnakeCase(blockRow.blockType)
+
+    if (!blocks[blockType]) {
+      blocks[blockType] = []
+    }
+
+    const newRow: BlockRowToInsert = {
+      arrays: {},
+      locales: {},
+      row: {
+        _order: i + 1,
+        _path: `${path}${field.name}`,
+      },
+    }
+
+    if (field.localized && locale) {
+      newRow.row._locale = locale
+    }
+    if (withinArrayOrBlockLocale) {
+      newRow.row._locale = withinArrayOrBlockLocale
+    }
+
+    const blockTableName = adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`)
+
+    const hasUUID = adapter.tables[blockTableName]._uuid
+
+    // If we have declared a _uuid field on arrays,
+    // that means the ID has to be unique,
+    // and our ids within arrays are not unique.
+    // So move the ID to a uuid field for storage
+    // and allow the database to generate a serial id automatically
+    if (hasUUID) {
+      newRow.row._uuid = blockRow.id
+      delete blockRow.id
+    }
+
+    traverseFields({
+      adapter,
+      arrays: newRow.arrays,
+      baseTableName,
+      blocks,
+      blocksToDelete,
+      columnPrefix: '',
+      data: blockRow,
+      fieldPrefix: '',
+      fields: matchedBlock.fields,
+      locales: newRow.locales,
+      numbers,
+      parentTableName: blockTableName,
+      path: `${path || ''}${field.name}.${i}.`,
+      relationships,
+      relationshipsToDelete,
+      row: newRow.row,
+      selects,
+      texts,
+      withinArrayOrBlockLocale,
+    })
+
+    blocks[blockType].push(newRow)
   })
 }

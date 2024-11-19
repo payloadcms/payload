@@ -10,6 +10,8 @@
     "analyze-circular-dependencies-lexical-client": "madge packages/richtext-lexical/src/exports/client/index.ts --circular --warning",
     "analyze-circular-dependencies-mongodb": "madge packages/db-mongodb/src/index.ts --circular --warning",
     "analyze-circular-dependencies-postgres": "madge packages/db-postgres/src/index.ts --circular --warning",
+    "analyze-circular-dependencies-drizzle": "madge packages/drizzle/src/index.ts --circular --warning",
+    "analyze-circular-dependencies-drizzle-postgres": "madge packages/drizzle/src/exports/postgres.ts --circular --warning",
     "bf": "pnpm run build:force",
     "build": "pnpm run build:core",
     "build:all": "turbo build",
