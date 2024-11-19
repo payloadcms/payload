@@ -3,8 +3,6 @@ import type { Data, Field, TabAsField, User } from 'payload'
 import { getDefaultValue } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 
-import { iterateFields } from './iterateFields.js'
-
 type Args<T> = {
   data: T
   field: Field | TabAsField
@@ -167,4 +165,39 @@ export const defaultValuePromise = async <T>({
       break
     }
   }
+}
+
+type IterateFieldsArgs<T> = {
+  data: T
+  fields: (Field | TabAsField)[]
+  id?: number | string
+  locale: string | undefined
+  siblingData: Data
+  user: User
+}
+
+export const iterateFields = async <T>({
+  id,
+  data,
+  fields,
+  locale,
+  siblingData,
+  user,
+}: IterateFieldsArgs<T>): Promise<void> => {
+  const promises = []
+
+  fields.forEach((field) => {
+    promises.push(
+      defaultValuePromise({
+        id,
+        data,
+        field,
+        locale,
+        siblingData,
+        user,
+      }),
+    )
+  })
+
+  await Promise.all(promises)
 }

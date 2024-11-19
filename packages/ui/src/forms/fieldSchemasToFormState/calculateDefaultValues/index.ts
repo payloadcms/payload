@@ -1,6 +1,6 @@
 import type { Data, Field as FieldSchema, User } from 'payload'
 
-import { iterateFields } from './iterateFields.js'
+import { iterateFields } from './promise.js'
 
 type Args = {
   data: Data
