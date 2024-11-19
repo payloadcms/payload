@@ -26,6 +26,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from '@/fields/slug'
+import { getServerSideURL } from '@/utilities/getURL'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -44,7 +45,7 @@ export const Posts: CollectionConfig = {
           collection: 'posts',
         })
 
-        return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
+        return `${getServerSideURL()}${path}`
       },
     },
     preview: (data) => {
@@ -53,7 +54,7 @@ export const Posts: CollectionConfig = {
         collection: 'posts',
       })
 
-      return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
+      return `${getServerSideURL()}${path}`
     },
     useAsTitle: 'title',
   },
