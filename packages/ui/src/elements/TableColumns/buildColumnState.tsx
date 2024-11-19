@@ -151,9 +151,9 @@ export const buildColumnState = (args: Args): Column[] => {
         ? _field.admin.components.Label
         : undefined
 
-    const CustomLabel = CustomLabelToRender ? (
-      <RenderServerComponent Component={CustomLabelToRender} importMap={payload.importMap} />
-    ) : undefined
+    const CustomLabel = CustomLabelToRender
+      ? RenderServerComponent({ Component: CustomLabelToRender, importMap: payload.importMap })
+      : undefined
 
     const fieldAffectsDataSubFields =
       field &&
@@ -235,26 +235,25 @@ export const buildColumnState = (args: Args): Column[] => {
                 CellComponent.clientProps = deepCopyObjectSimple(CellComponent.clientProps)
               }
 
-              CustomCell = (
-                <RenderServerComponent
-                  clientProps={cellClientProps}
-                  Component={CellComponent}
-                  importMap={payload.importMap}
-                  serverProps={serverProps}
-                />
-              )
+              CustomCell = RenderServerComponent({
+                clientProps: cellClientProps,
+                Component: CellComponent,
+                importMap: payload.importMap,
+                serverProps,
+              })
             } else {
               CustomCell =
-                _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell ? (
-                  <RenderServerComponent
-                    clientProps={cellClientProps}
-                    Component={
-                      _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
-                    }
-                    importMap={payload.importMap}
-                    serverProps={serverProps}
-                  />
-                ) : undefined
+                _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
+                  ? RenderServerComponent({
+                      clientProps: cellClientProps,
+                      Component:
+                        _field?.admin &&
+                        'components' in _field.admin &&
+                        _field.admin.components?.Cell,
+                      importMap: payload.importMap,
+                      serverProps,
+                    })
+                  : undefined
             }
 
             return (
