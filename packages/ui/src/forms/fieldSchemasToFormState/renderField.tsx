@@ -2,7 +2,6 @@ import type {
   ClientComponentProps,
   ClientField,
   FieldPaths,
-  PayloadComponent,
   SanitizedFieldPermissions,
   ServerComponentProps,
 } from 'payload'
@@ -144,24 +143,9 @@ export const renderField: RenderFieldMethod = ({
         fieldConfig.admin.components = {}
       }
 
-      /**
-       * We have to deep copy all the props we send to the client (= FieldComponent.clientProps).
-       * That way, every editor's field / cell props we send to the client have their own object references.
-       *
-       * If we send the same object reference to the client twice (e.g. through some configurations where 2 or more fields
-       * reference the same editor object, like the root editor), the admin panel may hang indefinitely. This has been happening since
-       * a newer Next.js update that made it break when sending the same object reference to the client twice.
-       *
-       * We can use deepCopyObjectSimple as client props should be JSON-serializable.
-       */
-      const FieldComponent: PayloadComponent = fieldConfig.editor.FieldComponent
-      if (typeof FieldComponent === 'object' && FieldComponent.clientProps) {
-        // FieldComponent.clientProps = deepCopyObjectSimple(FieldComponent.clientProps)
-      }
-
       fieldState.customComponents.Field = RenderServerComponent({
         clientProps,
-        Component: FieldComponent,
+        Component: fieldConfig.editor.FieldComponent,
         importMap: req.payload.importMap,
         serverProps,
       })

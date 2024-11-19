@@ -6,7 +6,6 @@ import type {
   Field,
   PaginatedDocs,
   Payload,
-  PayloadComponent,
   SanitizedCollectionConfig,
   StaticLabel,
 } from 'payload'
@@ -220,24 +219,9 @@ export const buildColumnState = (args: Args): Column[] => {
                 _field.admin.components = {}
               }
 
-              /**
-               * We have to deep copy all the props we send to the client (= CellComponent.clientProps).
-               * That way, every editor's field / cell props we send to the client have their own object references.
-               *
-               * If we send the same object reference to the client twice (e.g. through some configurations where 2 or more fields
-               * reference the same editor object, like the root editor), the admin panel may hang indefinitely. This has been happening since
-               * a newer Next.js update that made it break when sending the same object reference to the client twice.
-               *
-               * We can use deepCopyObjectSimple as client props should be JSON-serializable.
-               */
-              const CellComponent: PayloadComponent = _field.editor.CellComponent
-              if (typeof CellComponent === 'object' && CellComponent.clientProps) {
-                CellComponent.clientProps = deepCopyObjectSimple(CellComponent.clientProps)
-              }
-
               CustomCell = RenderServerComponent({
                 clientProps: cellClientProps,
-                Component: CellComponent,
+                Component: _field.editor.CellComponent,
                 importMap: payload.importMap,
                 serverProps,
               })
