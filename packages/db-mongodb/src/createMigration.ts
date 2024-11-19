@@ -23,12 +23,13 @@ export const createMigration: CreateMigration = async function createMigration({
   file,
   migrationName,
   payload,
+  skipEmpty,
 }) {
   const filename = fileURLToPath(import.meta.url)
   const dirname = path.dirname(filename)
 
   const dir = payload.db.migrationDir
-  if (!fs.existsSync(dir)) {
+  if (!skipEmpty || !fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
   const predefinedMigration = await getPredefinedMigration({
