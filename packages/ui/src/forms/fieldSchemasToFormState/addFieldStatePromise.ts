@@ -470,7 +470,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           parentPassesCondition: passesCondition,
           parentPath: path,
           parentSchemaPath: schemaPath,
-          permissions: fieldPermissions ?? permissions?.[field.name]?.fields ?? {},
+          permissions: fieldPermissions?.fields ?? permissions?.[field.name]?.fields ?? {},
           preferences,
           previousFormState,
           renderAllFields,
@@ -664,7 +664,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         permissions: tabHasName(tab)
           ? typeof permissions === 'boolean'
             ? permissions
-            : permissions?.[tab.name] || {}
+            : permissions?.[tab.name]?.fields || {}
           : permissions,
         preferences,
         previousFormState,
