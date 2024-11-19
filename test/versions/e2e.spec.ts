@@ -317,6 +317,7 @@ describe('versions', () => {
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
       await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
+      await expect(page.locator('.render-field-diffs')).toBeVisible()
       await page.locator('.restore-version__button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
