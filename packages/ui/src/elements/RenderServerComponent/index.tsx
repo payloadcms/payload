@@ -5,10 +5,7 @@ import React from 'react'
 
 import { removeUndefined } from '../../utilities/removeUndefined.js'
 
-/**
- * Can be used to render both MappedComponents and React Components.
- */
-export const RenderServerComponent: React.FC<{
+type RenderServerComponentFn = (args: {
   readonly clientProps?: object
   readonly Component?:
     | PayloadComponent
@@ -17,18 +14,31 @@ export const RenderServerComponent: React.FC<{
     | React.ComponentType[]
   readonly Fallback?: React.ComponentType
   readonly importMap: ImportMap
+  readonly key?: string
   readonly serverProps?: object
-}> = ({ clientProps = {}, Component, Fallback, importMap, serverProps }) => {
+}) => React.ReactNode
+
+/**
+ * Can be used to render both MappedComponents and React Components.
+ */
+export const RenderServerComponent: RenderServerComponentFn = ({
+  clientProps = {},
+  Component,
+  Fallback,
+  importMap,
+  key,
+  serverProps,
+}) => {
   if (Array.isArray(Component)) {
-    return Component.map((c, index) => (
-      <RenderServerComponent
-        clientProps={clientProps}
-        Component={c}
-        importMap={importMap}
-        key={index}
-        serverProps={serverProps}
-      />
-    ))
+    return Component.map((c, index) =>
+      RenderServerComponent({
+        clientProps,
+        Component: c,
+        importMap,
+        key: index,
+        serverProps,
+      }),
+    )
   }
 
   if (typeof Component === 'function') {
@@ -40,7 +50,7 @@ export const RenderServerComponent: React.FC<{
       ...(isRSC ? serverProps : {}),
     })
 
-    return <Component {...sanitizedProps} />
+    return <Component key={key} {...sanitizedProps} />
   }
 
   if (typeof Component === 'string' || isPlainObject(Component)) {
@@ -63,16 +73,17 @@ export const RenderServerComponent: React.FC<{
         ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
       })
 
-      return <ResolvedComponent {...sanitizedProps} />
+      return <ResolvedComponent key={key} {...sanitizedProps} />
     }
   }
 
-  return Fallback ? (
-    <RenderServerComponent
-      clientProps={clientProps}
-      Component={Fallback}
-      importMap={importMap}
-      serverProps={serverProps}
-    />
-  ) : null
+  return Fallback
+    ? RenderServerComponent({
+        clientProps,
+        Component: Fallback,
+        importMap,
+        key,
+        serverProps,
+      })
+    : null
 }
