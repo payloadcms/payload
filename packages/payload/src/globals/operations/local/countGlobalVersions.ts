@@ -1,7 +1,7 @@
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, Where } from '../../../types/index.js'
 
-import { APIError } from '../../../errors/index.js'
+import { APIError } from '../../../errors/APIError.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { countGlobalVersionsOperation } from '../countGlobalVersions.js'
 

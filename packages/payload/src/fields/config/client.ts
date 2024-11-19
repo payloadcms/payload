@@ -14,17 +14,17 @@ import type {
   SelectFieldClient,
   TabsFieldClient,
 } from '../../fields/config/types.js'
+import type { ImportMap } from '../../index.js'
 import type { Payload } from '../../types/index.js'
 
 import { getFromImportMap } from '../../bin/generateImportMap/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { flattenTopLevelFields, type ImportMap } from '../../index.js'
+import { flattenTopLevelFields } from '../../utilities/flattenTopLevelFields.js'
 import { removeUndefined } from '../../utilities/removeUndefined.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
-
 export { ClientField }
 
 export type ServerOnlyFieldProperties =

@@ -3,7 +3,7 @@ import type { Payload } from '../index.js'
 import type { PathToQuery } from './queryValidation/types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
-import flattenFields from '../utilities/flattenTopLevelFields.js'
+import { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 
 export async function getLocalizedPaths({
   collectionSlug,
@@ -30,7 +30,7 @@ export async function getLocalizedPaths({
       collectionSlug,
       complete: false,
       field: undefined,
-      fields: flattenFields(fields, false),
+      fields: flattenTopLevelFields(fields, false),
       globalSlug,
       invalid: false,
       path: '',
@@ -151,7 +151,10 @@ export async function getLocalizedPaths({
 
           default: {
             if ('fields' in lastIncompletePath.field) {
-              lastIncompletePath.fields = flattenFields(lastIncompletePath.field.fields, false)
+              lastIncompletePath.fields = flattenTopLevelFields(
+                lastIncompletePath.field.fields,
+                false,
+              )
             }
 
             if (i + 1 === pathSegments.length) {

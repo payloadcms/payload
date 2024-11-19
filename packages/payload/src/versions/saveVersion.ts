@@ -3,7 +3,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
 import type { PayloadRequest, SelectType } from '../types/index.js'
 
-import { deepCopyObjectSimple } from '../index.js'
+import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'

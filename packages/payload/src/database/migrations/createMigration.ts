@@ -2,8 +2,8 @@ import fs from 'fs'
 
 import type { CreateMigration } from '../types.js'
 
-import { writeMigrationIndex } from '../../index.js'
 import { migrationTemplate } from './migrationTemplate.js'
+import { writeMigrationIndex } from './writeMigrationIndex.js'
 
 export const createMigration: CreateMigration = function createMigration({
   migrationName,
