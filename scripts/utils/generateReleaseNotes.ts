@@ -15,7 +15,6 @@ type Args = {
   bump?: 'major' | 'minor' | 'patch' | 'prerelease'
   dryRun?: boolean
   openReleaseUrl?: boolean
-  writeChangelog?: boolean
 }
 
 type ChangelogResult = {
@@ -33,8 +32,8 @@ type ChangelogResult = {
   releaseNotes: string
 }
 
-export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult> => {
-  const { toVersion = 'HEAD', dryRun, bump, openReleaseUrl, writeChangelog } = args
+export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogResult> => {
+  const { toVersion = 'HEAD', dryRun, bump, openReleaseUrl } = args
 
   const fromVersion =
     args.fromVersion || execSync('git describe --match "v*" --tags --abbrev=0').toString().trim()
@@ -109,14 +108,6 @@ export const updateChangelog = async (args: Args = {}): Promise<ChangelogResult>
   }
   if (stringifiedSections.breaking.length) {
     changelog += `### ⚠️ BREAKING CHANGES\n\n${stringifiedSections.breaking.join('\n')}\n\n`
-  }
-
-  if (writeChangelog) {
-    const changelogPath = 'CHANGELOG.md'
-    const existingChangelog = await fse.readFile(changelogPath, 'utf8')
-    const newChangelog = changelog + '\n\n' + existingChangelog
-    await fse.writeFile(changelogPath, newChangelog)
-    console.log(`Changelog updated at ${changelogPath}`)
   }
 
   // Add contributors after writing to file
@@ -234,10 +225,14 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
 // module import workaround for ejs
 if (import.meta.url === `file://${process.argv[1]}`) {
   // This module is being run directly
-  const { fromVersion, toVersion, bump, openReleaseUrl, writeChangelog } = minimist(
-    process.argv.slice(2),
-  )
-  updateChangelog({ bump, fromVersion, toVersion, dryRun: false, openReleaseUrl, writeChangelog })
+  const { fromVersion, toVersion, bump, openReleaseUrl } = minimist(process.argv.slice(2))
+  generateReleaseNotes({
+    bump,
+    fromVersion,
+    toVersion,
+    dryRun: false,
+    openReleaseUrl,
+  })
     .then(() => {
       console.log('Done')
     })

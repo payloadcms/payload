@@ -71,17 +71,18 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     hasPublishPermission,
     hasSavePermission,
     incrementVersionCount,
-    initialData: data,
     initialState,
     isEditing,
     isInitializing,
     lastUpdateTime,
     redirectAfterDelete,
     redirectAfterDuplicate,
+    savedDocumentData,
     setCurrentEditor,
     setDocumentIsLocked,
     unlockDocument,
     updateDocumentEditor,
+    updateSavedDocumentData,
   } = useDocumentInfo()
 
   const {
@@ -212,6 +213,10 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
       incrementVersionCount()
 
+      if (typeof updateSavedDocumentData === 'function') {
+        void updateSavedDocumentData(json?.doc || {})
+      }
+
       if (typeof onSaveFromContext === 'function') {
         void onSaveFromContext({
           ...json,
@@ -238,6 +243,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       await getDocPermissions(json)
     },
     [
+      updateSavedDocumentData,
       reportUpdate,
       id,
       entitySlug,
@@ -479,7 +485,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
               SaveButton,
               SaveDraftButton,
             }}
-            data={data}
+            data={savedDocumentData}
             disableActions={disableActions}
             disableCreate={disableCreate}
             hasPublishPermission={hasPublishPermission}
@@ -521,7 +527,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                       className={`${baseClass}__auth`}
                       collectionSlug={collectionConfig.slug}
                       disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                      email={data?.email}
+                      email={savedDocumentData?.email}
                       loginWithUsername={auth?.loginWithUsername}
                       operation={operation}
                       readOnly={!hasSavePermission}
@@ -529,7 +535,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                       setSchemaPathSegments={setSchemaPathSegments}
                       setValidateBeforeSubmit={setValidateBeforeSubmit}
                       useAPIKey={auth.useAPIKey}
-                      username={data?.username}
+                      username={savedDocumentData?.username}
                       verify={auth.verify}
                     />
                   )}
