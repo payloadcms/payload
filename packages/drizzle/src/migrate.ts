@@ -20,6 +20,10 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
     return
   }
 
+  if ('createExtensions' in this && typeof this.createExtensions === 'function') {
+    await this.createExtensions()
+  }
+
   let latestBatch = 0
   let migrationsInDB = []
 

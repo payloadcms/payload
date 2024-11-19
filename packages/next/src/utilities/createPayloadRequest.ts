@@ -1,12 +1,17 @@
 import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
-import { executeAuthStrategies, getDataLoader, parseCookies } from 'payload'
+import {
+  executeAuthStrategies,
+  getDataLoader,
+  getPayload,
+  parseCookies,
+  sanitizeFallbackLocale,
+} from 'payload'
 import * as qs from 'qs-esm'
 import { URL } from 'url'
 
 import { sanitizeLocales } from './addLocalesToRequest.js'
-import { getPayloadHMR } from './getPayloadHMR.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 
 type Args = {
@@ -23,9 +28,10 @@ export const createPayloadRequest = async ({
   request,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayload({ config: configPromise })
 
   const { config } = payload
+  const localization = config.localization
 
   const urlProperties = new URL(request.url)
   const { pathname, searchParams } = urlProperties
@@ -45,8 +51,10 @@ export const createPayloadRequest = async ({
     language,
   })
 
-  let locale
-  let fallbackLocale
+  const fallbackFromRequest =
+    searchParams.get('fallback-locale') || searchParams.get('fallbackLocale')
+  let locale = searchParams.get('locale')
+  let fallbackLocale = fallbackFromRequest
 
   const overrideHttpMethod = request.headers.get('X-HTTP-Method-Override')
   const queryToParse = overrideHttpMethod === 'GET' ? await request.text() : urlProperties.search
@@ -59,21 +67,24 @@ export const createPayloadRequest = async ({
       })
     : {}
 
-  if (config.localization) {
-    const locales = sanitizeLocales({
-      fallbackLocale: searchParams.get('fallback-locale'),
-      locale: searchParams.get('locale'),
-      localization: payload.config.localization,
+  if (localization) {
+    fallbackLocale = sanitizeFallbackLocale({
+      fallbackLocale,
+      locale,
+      localization,
     })
+
+    const locales = sanitizeLocales({
+      fallbackLocale,
+      locale,
+      localization,
+    })
+
     locale = locales.locale
-    fallbackLocale = locales.fallbackLocale
 
     // Override if query params are present, in order to respect HTTP method override
     if (query.locale) {
-      locale = query.locale
-    }
-    if (query?.['fallback-locale']) {
-      fallbackLocale = query['fallback-locale']
+      locale = query.locale as string
     }
   }
 

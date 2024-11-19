@@ -1,11 +1,17 @@
 'use client'
-import type { FormState } from 'payload'
-
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
+import { type FormState } from 'payload'
 
 import { mergeErrorPaths } from './mergeErrorPaths.js'
 
-const serverPropsToAccept = ['passesCondition', 'valid', 'errorMessage']
+const serverPropsToAccept = [
+  'passesCondition',
+  'valid',
+  'errorMessage',
+  'rows',
+  'customComponents',
+  'requiresRender',
+]
 
 /**
  * Merges certain properties from the server state into the client state. These do not include values,
@@ -54,13 +60,17 @@ export const mergeServerFormState = (
       }
 
       /**
-       * Handle the rest which is in serverPropsToAccept
+       * Handle adding all the remaining props that should be updated in the local form state from the server form state
        */
       serverPropsToAccept.forEach((prop) => {
-        if (incomingState[path]?.[prop] !== newFieldState[prop]) {
+        if (!dequal(incomingState[path]?.[prop], newFieldState[prop])) {
           changed = true
           if (!(prop in incomingState[path])) {
-            delete newFieldState[prop]
+            // Regarding excluding the customComponents prop from being deleted: the incoming state might not have been rendered, as rendering components for every form onchange is expensive.
+            // Thus, we simply re-use the initial render state
+            if (prop !== 'customComponents') {
+              delete newFieldState[prop]
+            }
           } else {
             newFieldState[prop] = incomingState[path][prop]
           }
@@ -70,6 +80,17 @@ export const mergeServerFormState = (
       // Conditions don't work if we don't memcopy the new state, as the object references would otherwise be the same
       newState[path] = { ...newFieldState }
     })
+
+    // Now loop over values that are part of incoming state but not part of existing state, and add them to the new state.
+    // This can happen if a new array row was added. In our local state, we simply add out stubbed `array` and `array.[index].id` entries to the local form state.
+    // However, all other array sub-fields are not added to the local state - those will be added by the server and may be incoming here.
+
+    for (const [path, newFieldState] of Object.entries(incomingState)) {
+      if (!existingState[path]) {
+        changed = true
+        newState[path] = newFieldState
+      }
+    }
   }
 
   return { changed, newState }

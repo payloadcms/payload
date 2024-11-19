@@ -2,15 +2,14 @@ import type { CreateMigration, MigrationTemplateArgs } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
-import { getPredefinedMigration } from 'payload'
+import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import { fileURLToPath } from 'url'
 
 const migrationTemplate = ({ downSQL, imports, upSQL }: MigrationTemplateArgs): string => `import {
-  MigrateUpArgs,
   MigrateDownArgs,
+  MigrateUpArgs,
 } from '@payloadcms/db-mongodb'
-${imports}
-
+${imports ?? ''}
 export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
 ${upSQL ?? `  // Migration code`}
 }
@@ -51,5 +50,8 @@ export const createMigration: CreateMigration = async function createMigration({
   const fileName = migrationName ? `${timestamp}_${formattedName}.ts` : `${timestamp}_migration.ts`
   const filePath = `${dir}/${fileName}`
   fs.writeFileSync(filePath, migrationFileContent)
+
+  writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
+
   payload.logger.info({ msg: `Migration created at ${filePath}` })
 }

@@ -5,7 +5,12 @@ import { reorderColumns } from 'helpers/e2e/reorderColumns.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, exactText, initPageConsoleErrorCatch } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -55,6 +60,14 @@ test.describe('Admin Panel', () => {
     await expect(joinField).toBeVisible()
     const columns = await joinField.locator('.relationship-table tbody tr').count()
     expect(columns).toBe(3)
+  })
+
+  test('should render the create page and create doc with the join field', async () => {
+    await page.goto(categoriesURL.create)
+    const nameField = page.locator('#field-name')
+    await expect(nameField).toBeVisible()
+    await nameField.fill('test category')
+    await saveDocAndAssert(page)
   })
 
   test('should render collection type in first column of relationship table', async () => {
@@ -184,36 +197,6 @@ test.describe('Admin Panel', () => {
     const joinField = page.locator('.field-type.join').first()
     await expect(joinField).toBeVisible()
     await expect(joinField.locator('.relationship-table tbody tr')).toBeHidden()
-  })
-
-  test('should update relationship table when new upload is created', async () => {
-    await navigateToDoc(page, uploadsURL)
-    const joinField = page.locator('.field-type.join').first()
-    await expect(joinField).toBeVisible()
-
-    const addButton = joinField.locator('.relationship-table__actions button.doc-drawer__toggler', {
-      hasText: exactText('Add new'),
-    })
-
-    await expect(addButton).toBeVisible()
-
-    await addButton.click()
-    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
-    await expect(drawer).toBeVisible()
-    const uploadField = drawer.locator('#field-upload')
-    await expect(uploadField).toBeVisible()
-    const uploadValue = uploadField.locator('.upload-relationship-details img')
-    await expect(uploadValue).toBeVisible()
-    const titleField = drawer.locator('#field-title')
-    await expect(titleField).toBeVisible()
-    await titleField.fill('Test post with upload')
-    await drawer.locator('button[id="action-save"]').click()
-    await expect(drawer).toBeHidden()
-    await expect(
-      joinField.locator('tbody tr td:nth-child(2)', {
-        hasText: exactText('Test post with upload'),
-      }),
-    ).toBeVisible()
   })
 
   test('should update relationship table when new upload is created', async () => {

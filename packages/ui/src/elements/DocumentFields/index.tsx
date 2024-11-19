@@ -1,9 +1,10 @@
 'use client'
-import type { ClientField, Description, DocumentPermissions } from 'payload'
+import type { ClientField, SanitizedDocumentPermissions } from 'payload'
 
 import { fieldIsSidebar } from 'payload/shared'
 import React from 'react'
 
+import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'
 import './index.scss'
@@ -13,29 +14,53 @@ const baseClass = 'document-fields'
 type Args = {
   readonly AfterFields?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
-  readonly description?: Description
-  readonly docPermissions: DocumentPermissions
+  readonly Description?: React.ReactNode
+  readonly docPermissions: SanitizedDocumentPermissions
   readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
-  readonly readOnly: boolean
-  readonly schemaPath: string
+  readonly readOnly?: boolean
+  readonly schemaPathSegments: string[]
 }
 
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,
-  description,
+  Description,
   docPermissions,
   fields,
   forceSidebarWrap,
-  readOnly,
-  schemaPath,
+  readOnly: readOnlyProp,
+  schemaPathSegments,
 }) => {
-  const mainFields = fields.filter((field) => !fieldIsSidebar(field))
+  const [{ hasSidebarFields, mainFields, sidebarFields }] = React.useState<{
+    hasSidebarFields: boolean
+    mainFields: ClientField[]
+    sidebarFields: ClientField[]
+  }>(() => {
+    return fields.reduce(
+      (acc, field) => {
+        if (fieldIsSidebar(field)) {
+          acc.sidebarFields.push(field)
+          acc.mainFields.push(null)
+          acc.hasSidebarFields = true
+        } else {
+          acc.mainFields.push(field)
+          acc.sidebarFields.push(null)
+        }
+        return acc
+      },
+      {
+        hasSidebarFields: false as boolean,
+        mainFields: [] as ClientField[],
+        sidebarFields: [] as ClientField[],
+      },
+    )
+  })
 
-  const sidebarFields = fields.filter((field) => fieldIsSidebar(field))
+  const formInitializing = useFormInitializing()
+  const formProcessing = useFormProcessing()
 
-  const hasSidebarFields = sidebarFields && sidebarFields.length > 0
+  const readOnly = readOnlyProp || formInitializing || formProcessing
 
   return (
     <div
@@ -49,42 +74,42 @@ export const DocumentFields: React.FC<Args> = ({
     >
       <div className={`${baseClass}__main`}>
         <Gutter className={`${baseClass}__edit`}>
-          <header className={`${baseClass}__header`}>
-            {description && (
-              <div className={`${baseClass}__sub-header`}>
-                {/* <ViewDescription description={description} /> */}
-              </div>
-            )}
-          </header>
+          {Description ? (
+            <header className={`${baseClass}__header`}>
+              <div className={`${baseClass}__sub-header`}>{Description}</div>
+            </header>
+          ) : null}
           {BeforeFields}
           <RenderFields
             className={`${baseClass}__fields`}
             fields={mainFields}
-            forceRender={10}
-            path=""
+            forceRender
+            parentIndexPath=""
+            parentPath=""
+            parentSchemaPath={schemaPathSegments.join('.')}
             permissions={docPermissions?.fields}
             readOnly={readOnly}
-            schemaPath={schemaPath}
           />
           {AfterFields}
         </Gutter>
       </div>
-      {hasSidebarFields && (
+      {hasSidebarFields ? (
         <div className={`${baseClass}__sidebar-wrap`}>
           <div className={`${baseClass}__sidebar`}>
             <div className={`${baseClass}__sidebar-fields`}>
               <RenderFields
                 fields={sidebarFields}
-                forceRender={10}
-                path=""
+                forceRender
+                parentIndexPath=""
+                parentPath=""
+                parentSchemaPath={schemaPathSegments.join('.')}
                 permissions={docPermissions?.fields}
                 readOnly={readOnly}
-                schemaPath={schemaPath}
               />
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

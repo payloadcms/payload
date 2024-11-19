@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "3.0.0-beta.110",
+  "version": "3.0.0",
   "description": "The officially supported Slate richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -10,6 +10,13 @@
   },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -17,11 +24,15 @@
       "types": "./src/index.tsx",
       "default": "./src/index.tsx"
     },
-    "./generateComponentMap": "./src/generateComponentMap.tsx",
     "./client": {
       "import": "./src/exports/client/index.ts",
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
+    },
+    "./rsc": {
+      "import": "./src/exports/server/rsc.ts",
+      "types": "./src/exports/server/rsc.ts",
+      "default": "./src/exports/server/rsc.ts"
     }
   },
   "main": "./src/index.tsx",
@@ -58,7 +69,7 @@
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-5dcb0097-20240918"
+    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -70,10 +81,10 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       },
-      "./generateComponentMap": {
-        "import": "./dist/generateComponentMap.js",
-        "types": "./dist/generateComponentMap.d.ts",
-        "default": "./dist/generateComponentMap.js"
+      "./rsc": {
+        "import": "./dist/exports/server/rsc.js",
+        "types": "./dist/exports/server/rsc.d.ts",
+        "default": "./dist/exports/server/rsc.js"
       },
       "./client": {
         "import": "./dist/exports/client/index.js",

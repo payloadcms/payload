@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { categoriesSlug, postsSlug } from '../shared.js'
+import { singularSlug } from './Singular.js'
 
 export const Categories: CollectionConfig = {
   slug: categoriesSlug,
@@ -47,7 +48,22 @@ export const Categories: CollectionConfig = {
       label: 'Related Posts',
       type: 'join',
       collection: postsSlug,
+      defaultSort: '-title',
+      defaultLimit: 5,
       on: 'category',
+      maxDepth: 1,
+    },
+    {
+      name: 'hasManyPosts',
+      type: 'join',
+      collection: postsSlug,
+      on: 'categories',
+    },
+    {
+      name: 'hasManyPostsLocalized',
+      type: 'join',
+      collection: postsSlug,
+      on: 'categoriesLocalized',
     },
     {
       name: 'group',
@@ -67,6 +83,21 @@ export const Categories: CollectionConfig = {
           on: 'group.camelCaseCategory',
         },
       ],
+    },
+    {
+      name: 'singulars',
+      type: 'join',
+      collection: singularSlug,
+      on: 'category',
+    },
+    {
+      name: 'filtered',
+      type: 'join',
+      collection: postsSlug,
+      on: 'category',
+      where: {
+        isFiltered: { not_equals: true },
+      },
     },
   ],
 }

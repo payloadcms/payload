@@ -25,7 +25,7 @@ caption="Admin Panel screenshot of an Upload field"
 To create an Upload Field, set the `type` to `upload` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyUploadField: Field = {
   // ...
@@ -46,8 +46,11 @@ export const MyUploadField: Field = {
 | Option                 | Description                                                                                                                                                                 |
 |------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
-| **`*relationTo`** \*   | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>        |
+| **`relationTo`** \*    | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>        |
 | **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More](#filtering-upload-options).                                                                   |
+| **`hasMany`**          | Boolean which, if set to true, allows this field to have many relations instead of only one.                                                                                |
+| **`minRows`**          | A number for the fewest allowed items during validation when a value is present. Used with hasMany.                                                                         |
+| **`maxRows`**          | A number for the most allowed items during validation when a value is present. Used with hasMany.                                                                           |
 | **`maxDepth`**         | Sets a number limit on iterations of related documents to populate when queried. [Depth](../queries/depth)                                                                  |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                     |
 | **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                |
@@ -73,7 +76,7 @@ _\* An asterisk denotes that a property is required._
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

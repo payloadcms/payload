@@ -1,0 +1,239 @@
+'use client'
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
+
+import type { Props } from './types.js'
+
+import { Button } from '../../../elements/Button/index.js'
+import { EmailAndUsernameFields } from '../../../elements/EmailAndUsername/index.js'
+import { CheckboxField } from '../../../fields/Checkbox/index.js'
+import { ConfirmPasswordField } from '../../../fields/ConfirmPassword/index.js'
+import { PasswordField } from '../../../fields/Password/index.js'
+import { useFormFields, useFormModified } from '../../../forms/Form/context.js'
+import { useAuth } from '../../../providers/Auth/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { APIKey } from './APIKey.js'
+import './index.scss'
+
+const baseClass = 'auth-fields'
+
+export const Auth: React.FC<Props> = (props) => {
+  const {
+    className,
+    collectionSlug,
+    disableLocalStrategy,
+    email,
+    loginWithUsername,
+    operation,
+    readOnly,
+    requirePassword,
+    setSchemaPathSegments,
+    setValidateBeforeSubmit,
+    useAPIKey,
+    username,
+    verify,
+  } = props
+
+  const { permissions } = useAuth()
+  const [changingPassword, setChangingPassword] = useState(requirePassword)
+  const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
+  const forceOpenChangePassword = useFormFields(([fields]) => (fields && fields?.password) || null)
+  const dispatchFields = useFormFields((reducer) => reducer[1])
+  const modified = useFormModified()
+  const { i18n, t } = useTranslation()
+  const { docPermissions, isInitializing } = useDocumentInfo()
+
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
+
+  const hasPermissionToUnlock: boolean = useMemo(() => {
+    const collection = permissions?.collections?.[collectionSlug]
+
+    if (collection) {
+      return Boolean('unlock' in collection ? collection.unlock : undefined)
+    }
+
+    return false
+  }, [permissions, collectionSlug])
+
+  const apiKeyPermissions =
+    docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
+
+  const apiKeyReadOnly =
+    readOnly ||
+    apiKeyPermissions === true ||
+    (apiKeyPermissions && typeof apiKeyPermissions === 'object' && !apiKeyPermissions?.update)
+
+  const enableAPIKeyReadOnly =
+    readOnly || (apiKeyPermissions !== true && !apiKeyPermissions?.update)
+
+  const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
+  const canReadEnableAPIKey = apiKeyPermissions === true || apiKeyPermissions?.read
+
+  const handleChangePassword = useCallback(
+    (showPasswordFields: boolean) => {
+      if (showPasswordFields) {
+        setValidateBeforeSubmit(true)
+        setSchemaPathSegments([`_${collectionSlug}`, 'auth'])
+        dispatchFields({
+          type: 'UPDATE',
+          errorMessage: t('validation:required'),
+          path: 'password',
+          valid: false,
+        })
+        dispatchFields({
+          type: 'UPDATE',
+          errorMessage: t('validation:required'),
+          path: 'confirm-password',
+          valid: false,
+        })
+      } else {
+        setValidateBeforeSubmit(false)
+        setSchemaPathSegments([collectionSlug])
+        dispatchFields({ type: 'REMOVE', path: 'password' })
+        dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
+      }
+
+      setChangingPassword(showPasswordFields)
+    },
+    [dispatchFields, t, collectionSlug, setSchemaPathSegments, setValidateBeforeSubmit],
+  )
+
+  const unlock = useCallback(async () => {
+    const url = `${serverURL}${api}/${collectionSlug}/unlock`
+    const response = await fetch(url, {
+      body:
+        loginWithUsername && username ? JSON.stringify({ username }) : JSON.stringify({ email }),
+      credentials: 'include',
+      headers: {
+        'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    })
+
+    if (response.status === 200) {
+      toast.success(t('authentication:successfullyUnlocked'))
+    } else {
+      toast.error(t('authentication:failedToUnlock'))
+    }
+  }, [i18n, serverURL, api, collectionSlug, email, username, t, loginWithUsername])
+
+  useEffect(() => {
+    if (!modified) {
+      setChangingPassword(false)
+    }
+  }, [modified])
+
+  if (disableLocalStrategy && !useAPIKey) {
+    return null
+  }
+
+  const disabled = readOnly || isInitializing
+
+  const showPasswordFields = changingPassword || forceOpenChangePassword
+
+  return (
+    <div className={[baseClass, className].filter(Boolean).join(' ')}>
+      {!disableLocalStrategy && (
+        <React.Fragment>
+          <EmailAndUsernameFields
+            loginWithUsername={loginWithUsername}
+            operation={operation}
+            permissions={docPermissions?.fields}
+            readOnly={readOnly}
+            t={t}
+          />
+          {(showPasswordFields || requirePassword) && (
+            <div className={`${baseClass}__changing-password`}>
+              <PasswordField
+                autoComplete="new-password"
+                field={{
+                  name: 'password',
+                  admin: {
+                    disabled,
+                  },
+                  label: t('authentication:newPassword'),
+                  required: true,
+                }}
+                indexPath=""
+                parentPath=""
+                parentSchemaPath=""
+                path="password"
+                schemaPath="password"
+              />
+              <ConfirmPasswordField disabled={readOnly} />
+            </div>
+          )}
+          <div className={`${baseClass}__controls`}>
+            {showPasswordFields && !requirePassword && (
+              <Button
+                buttonStyle="secondary"
+                disabled={disabled}
+                onClick={() => handleChangePassword(false)}
+                size="medium"
+              >
+                {t('general:cancel')}
+              </Button>
+            )}
+            {!showPasswordFields && !requirePassword && (
+              <Button
+                buttonStyle="secondary"
+                disabled={disabled}
+                id="change-password"
+                onClick={() => handleChangePassword(true)}
+                size="medium"
+              >
+                {t('authentication:changePassword')}
+              </Button>
+            )}
+            {operation === 'update' && hasPermissionToUnlock && (
+              <Button
+                buttonStyle="secondary"
+                disabled={disabled}
+                onClick={() => void unlock()}
+                size="medium"
+              >
+                {t('authentication:forceUnlock')}
+              </Button>
+            )}
+          </div>
+        </React.Fragment>
+      )}
+      {useAPIKey && (
+        <div className={`${baseClass}__api-key`}>
+          {canReadEnableAPIKey && (
+            <CheckboxField
+              field={{
+                name: 'enableAPIKey',
+                admin: { disabled, readOnly: enableAPIKeyReadOnly },
+                label: t('authentication:enableAPIKey'),
+              }}
+              path="enableAPIKey"
+              schemaPath={`${collectionSlug}.enableAPIKey`}
+            />
+          )}
+          {canReadApiKey && <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />}
+        </div>
+      )}
+      {verify && (
+        <CheckboxField
+          field={{
+            name: '_verified',
+            admin: { disabled, readOnly },
+            label: t('authentication:verified'),
+          }}
+          path="_verified"
+          schemaPath={`${collectionSlug}._verified`}
+        />
+      )}
+    </div>
+  )
+}

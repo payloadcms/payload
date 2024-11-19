@@ -1,33 +1,48 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "baseUrl": ".",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
     "allowJs": true,
-    "strict": false,
-    "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "jsx": "react",
-    "sourceMap": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
-      "node_modules/*": ["./node_modules/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@payload-config": [
+        "src/payload.config.ts"
+      ],
+      "@payload-types": [
+        "src/payload-types.ts"
+      ]
     },
+    "target": "ES2017"
   },
   "include": [
-    "src"
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/mocks/emptyObject.js"
   ],
   "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-  ],
-  "ts-node": {
-    "transpileOnly": true
-  }
+    "node_modules"
+  ]
 }

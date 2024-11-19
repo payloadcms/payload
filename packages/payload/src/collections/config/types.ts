@@ -1,5 +1,5 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired, MarkOptional } from 'ts-essentials'
+import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
 import type {
   CustomPreviewButton,
@@ -31,14 +31,23 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
-import type { Field, JoinField } from '../../fields/config/types.js'
+import type { Field, JoinField, RelationshipField, UploadField } from '../../fields/config/types.js'
 import type {
   CollectionSlug,
   JsonObject,
+  RequestContext,
   TypedAuthOperations,
   TypedCollection,
+  TypedCollectionSelect,
+  TypedLocale,
 } from '../../index.js'
-import type { PayloadRequest, RequestContext } from '../../types/index.js'
+import type {
+  PayloadRequest,
+  SelectType,
+  Sort,
+  TransformCollectionWithSelect,
+  Where,
+} from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
   IncomingCollectionVersions,
@@ -47,6 +56,9 @@ import type {
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+
+export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
+
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 
@@ -61,6 +73,7 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
 export type HookOperationType =
   | 'autosave'
   | 'count'
+  | 'countVersions'
   | 'create'
   | 'delete'
   | 'forgotPassword'
@@ -247,7 +260,16 @@ export type EnableFoldersOptions = {
   debug?: boolean
 }
 
+export type BaseListFilter = (args: {
+  limit: number
+  locale?: TypedLocale
+  page: number
+  req: PayloadRequest
+  sort: string
+}) => null | Promise<null | Where> | Where
+
 export type CollectionAdminOptions = {
+  baseListFilter?: BaseListFilter
   /**
    * Custom admin components
    */
@@ -381,10 +403,13 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
    */
   dbName?: DBIdentifierName
+  defaultPopulate?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectType
+    : SelectFromCollectionSlug<TSlug>
   /**
    * Default field to sort by in collection list view
    */
-  defaultSort?: string
+  defaultSort?: Sort
   /**
    * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
    */
@@ -491,9 +516,10 @@ export type SanitizedJoin = {
    */
   field: JoinField
   /**
-   * The schemaPath of the join field in dot notation
+   * The path of the join field in dot notation
    */
-  schemaPath: string
+  joinPath: string
+  targetField: RelationshipField | UploadField
 }
 
 export type SanitizedJoins = {
@@ -503,11 +529,11 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'admin' | 'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
+    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
-  admin: {
-    enableFolders?: EnableFoldersOptions
-  } & CollectionAdminOptions
+  // admin: {
+  //   enableFolders?: EnableFoldersOptions
+  // } & CollectionAdminOptions
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
@@ -515,6 +541,7 @@ export interface SanitizedCollectionConfig
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+  slug: CollectionSlug
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }
@@ -534,8 +561,8 @@ export type Collection = {
   }
 }
 
-export type BulkOperationResult<TSlug extends CollectionSlug> = {
-  docs: DataFromCollectionSlug<TSlug>[]
+export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+  docs: TransformCollectionWithSelect<TSlug, TSelect>[]
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
     message: string

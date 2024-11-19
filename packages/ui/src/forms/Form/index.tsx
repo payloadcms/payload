@@ -1,10 +1,10 @@
 'use client'
-import type { FormState, PayloadRequest } from 'payload'
-
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
+import { type FormState, type PayloadRequest } from 'payload'
 import {
+  deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   reduceFieldsToValues,
@@ -20,16 +20,17 @@ import type {
   SubmitOptions,
 } from './types.js'
 
-import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
+import { useIgnoredEffectDebounced } from '../../hooks/useIgnoredEffect.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
-import { getFormState } from '../../utilities/getFormState.js'
 import {
   FormContext,
   FormFieldsContext,
@@ -47,7 +48,7 @@ import { mergeServerFormState } from './mergeServerFormState.js'
 const baseClass = 'form'
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const {
     action,
@@ -79,11 +80,9 @@ export const Form: React.FC<FormProps> = (props) => {
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
 
+  const { getFormState } = useServerFunctions()
+
   const { config } = useConfig()
-  const {
-    routes: { api: apiRoute },
-    serverURL,
-  } = config
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
@@ -93,6 +92,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
+  const resetFormStateAbortControllerRef = useRef<AbortController>(null)
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
@@ -118,7 +118,7 @@ export const Form: React.FC<FormProps> = (props) => {
         if (field.passesCondition !== false) {
           let validationResult: boolean | string = validatedField.valid
 
-          if (typeof field.validate === 'function') {
+          if ('validate' in field && typeof field.validate === 'function') {
             let valueToValidate = field.value
 
             if (field?.rows && Array.isArray(field.rows)) {
@@ -227,12 +227,15 @@ export const Form: React.FC<FormProps> = (props) => {
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
+        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
+          contextRef.current.fields,
+        )
 
         await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: fields,
+            formState: serializableFields,
           })
 
           revalidatedFormState = result
@@ -262,12 +265,18 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const data = {
-          ...reduceFieldsToValues(fields, true),
-          ...overrides,
+        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
+          contextRef.current.fields,
+        )
+        const data = reduceFieldsToValues(serializableFields, true)
+
+        if (overrides) {
+          for (const [key, value] of Object.entries(overrides)) {
+            data[key] = value
+          }
         }
 
-        onSubmit(fields, data)
+        onSubmit(serializableFields, data)
       }
 
       if (!hasFormSubmitAction) {
@@ -347,7 +356,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
                 if (Array.isArray(err?.data?.errors)) {
                   err.data?.errors.forEach((dataError) => {
-                    if (dataError?.field) {
+                    if (dataError?.path) {
                       newFieldErrs.push(dataError)
                     } else {
                       newNonFieldErrs.push(dataError)
@@ -380,11 +389,10 @@ export const Form: React.FC<FormProps> = (props) => {
           errorToast(message)
         }
       } catch (err) {
-        console.error('Error submitting form', err)
+        console.error('Error submitting form', err) // eslint-disable-line no-console
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
-
         errorToast(err.message)
       }
     },
@@ -395,7 +403,6 @@ export const Form: React.FC<FormProps> = (props) => {
       disableValidationOnSubmit,
       disabled,
       dispatchFields,
-      fields,
       handleResponse,
       method,
       onSubmit,
@@ -418,6 +425,7 @@ export const Form: React.FC<FormProps> = (props) => {
     (path: string) => getSiblingDataFunc(contextRef.current.fields, path),
     [],
   )
+
   const getDataByPath = useCallback<GetDataByPath>(
     (path: string) => getDataByPathFunc(contextRef.current.fields, path),
     [],
@@ -451,24 +459,40 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
+      abortAndIgnore(resetFormStateAbortControllerRef.current)
+
+      const controller = new AbortController()
+      resetFormStateAbortControllerRef.current = controller
+
+      const docPreferences = await getDocPreferences()
+
       const { state: newState } = await getFormState({
-        apiRoute,
-        body: {
-          id,
-          collectionSlug,
-          data,
-          globalSlug,
-          operation,
-          schemaPath: collectionSlug || globalSlug,
-        },
-        serverURL,
+        id,
+        collectionSlug,
+        data,
+        docPermissions,
+        docPreferences,
+        globalSlug,
+        operation,
+        renderAllFields: true,
+        schemaPath: collectionSlug ? collectionSlug : globalSlug,
+        signal: controller.signal,
       })
 
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [apiRoute, collectionSlug, dispatchFields, globalSlug, id, operation, serverURL],
+    [
+      collectionSlug,
+      dispatchFields,
+      globalSlug,
+      id,
+      operation,
+      getFormState,
+      docPermissions,
+      getDocPreferences,
+    ],
   )
 
   const replaceState = useCallback(
@@ -480,36 +504,24 @@ export const Form: React.FC<FormProps> = (props) => {
     [dispatchFields],
   )
 
-  const getFieldStateBySchemaPath = useCallback(
-    async ({ data, schemaPath }) => {
-      const { state: fieldSchema } = await getFormState({
-        apiRoute,
-        body: {
-          collectionSlug,
-          data,
-          globalSlug,
-          schemaPath,
-        },
-        serverURL,
-      })
-      return fieldSchema
-    },
-    [apiRoute, collectionSlug, globalSlug, serverURL],
-  )
-
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    async ({ data, path, rowIndex, schemaPath }) => {
-      const subFieldState = await getFieldStateBySchemaPath({ data, schemaPath })
+    ({ blockType, path, rowIndex: rowIndexArg, subFieldState }) => {
+      const newRows: unknown[] = getDataByPath(path) || []
+      const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
 
+      // dispatch ADD_ROW that sets requiresRender: true and adds a blank row to local form state.
+      // This performs no form state request, as the debounced onChange effect will do that for us.
       dispatchFields({
         type: 'ADD_ROW',
-        blockType: data?.blockType,
+        blockType,
         path,
         rowIndex,
         subFieldState,
       })
+
+      setModified(true)
     },
-    [getFieldStateBySchemaPath, dispatchFields],
+    [dispatchFields, getDataByPath],
   )
 
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
@@ -520,19 +532,28 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
-    async ({ data, path, rowIndex, schemaPath }) => {
-      const subFieldState = await getFieldStateBySchemaPath({ data, schemaPath })
+    ({ blockType, path, rowIndex: rowIndexArg, subFieldState }) => {
+      const currentRows: unknown[] = getDataByPath(path)
+      const rowIndex = rowIndexArg === undefined ? currentRows.length : rowIndexArg
 
       dispatchFields({
         type: 'REPLACE_ROW',
-        blockType: data?.blockType,
+        blockType,
         path,
         rowIndex,
         subFieldState,
       })
+
+      setModified(true)
     },
-    [getFieldStateBySchemaPath, dispatchFields],
+    [dispatchFields, getDataByPath],
   )
+
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(resetFormStateAbortControllerRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     if (initializingFromProps !== undefined) {
@@ -601,16 +622,21 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  useDebouncedEffect(
+  useIgnoredEffectDebounced(
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
           let revalidatedFormState: FormState = contextRef.current.fields
 
           for (const onChangeFn of onChange) {
+            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
             revalidatedFormState = await onChangeFn({
-              formState: revalidatedFormState,
+              formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
             })
+          }
+
+          if (!revalidatedFormState) {
+            return
           }
 
           const { changed, newState } = mergeServerFormState(
@@ -632,10 +658,19 @@ export const Form: React.FC<FormProps> = (props) => {
         void executeOnChange()
       }
     },
-    150,
-    // Make sure we trigger this whenever modified changes (not just when `fields` changes), otherwise we will miss merging server form state for the first form update/onChange. Here's why:
-    // `fields` updates before `modified`, because setModified is in a setTimeout. So on the first change, modified is false, so we don't trigger the effect even though we should.
-    [contextRef.current.fields, dispatchFields, onChange, modified],
+    /*
+      Make sure we trigger this whenever modified changes (not just when `fields` changes),
+      otherwise we will miss merging server form state for the first form update/onChange.
+
+      Here's why:
+        `fields` updates before `modified`, because setModified is in a setTimeout.
+        So on the first change, modified is false, so we don't trigger the effect even though we should.
+    **/
+    [contextRef.current.fields, modified],
+    [dispatchFields, onChange],
+    {
+      delay: 250,
+    },
   )
 
   return (

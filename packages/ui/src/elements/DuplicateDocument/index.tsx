@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -26,7 +26,7 @@ const baseClass = 'duplicate'
 
 export type Props = {
   readonly id: string
-  readonly onDuplicate?: DocumentInfoContext['onDuplicate']
+  readonly onDuplicate?: DocumentDrawerContextType['onDuplicate']
   readonly redirectAfterDuplicate?: boolean
   readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
   readonly slug: string

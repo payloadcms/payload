@@ -1,5 +1,9 @@
 import type { SerializedRelationshipNode } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
+import type {
+  SerializedEditorState,
+  SerializedParagraphNode,
+  SerializedTextNode,
+} from '@payloadcms/richtext-lexical/lexical'
 
 import { lexicalLocalizedFieldsSlug } from '../../slugs.js'
 

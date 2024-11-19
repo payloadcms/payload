@@ -13,10 +13,13 @@ export async function createVersion<T extends TypeWithID>(
   {
     autosave,
     collectionSlug,
+    createdAt,
     parent,
     publishedLocale,
     req = {} as PayloadRequest,
+    select,
     snapshot,
+    updatedAt,
     versionData,
   }: CreateVersionArgs<T>,
 ) {
@@ -33,15 +36,13 @@ export async function createVersion<T extends TypeWithID>(
 
   const data: Record<string, unknown> = {
     autosave,
+    createdAt,
     latest: true,
     parent,
     publishedLocale,
     snapshot,
+    updatedAt,
     version,
-  }
-
-  if ('createdAt' in version) {
-    data.createdAt = version.createdAt
   }
 
   const result = await upsertRow<TypeWithVersion<T>>({
@@ -51,6 +52,7 @@ export async function createVersion<T extends TypeWithID>(
     fields: buildVersionCollectionFields(this.payload.config, collection),
     operation: 'create',
     req,
+    select,
     tableName,
   })
 

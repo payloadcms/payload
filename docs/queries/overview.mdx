@@ -37,21 +37,23 @@ _The exact query syntax will depend on the API you are using, but the concepts a
 
 The following operators are available for use in queries:
 
-| Operator             | Description                                                                                                                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equals`             | The value must be exactly equal.                                                                                                                                                  |
-| `not_equals`         | The query will return all documents where the value is not equal.                                                                                                                 |
-| `greater_than`       | For numeric or date-based fields.                                                                                                                                                 |
-| `greater_than_equal` | For numeric or date-based fields.                                                                                                                                                 |
-| `less_than`          | For numeric or date-based fields.                                                                                                                                                 |
-| `less_than_equal`    | For numeric or date-based fields.                                                                                                                                                 |
-| `like`               | Case-insensitive string must be present. If string of words, all words must be present, in any order.                                                                             |
-| `contains`           | Must contain the value entered, case-insensitive.                                                                                                                                 |
-| `in`                 | The value must be found within the provided comma-delimited list of values.                                                                                                       |
-| `not_in`             | The value must NOT be within the provided comma-delimited list of values.                                                                                                         |
-| `all`                | The value must contain all values provided in the comma-delimited list.                                                                                                           |
-| `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`).                                                                                         |
-| `near`               | For distance related to a [Point Field](../fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`. |
+| Operator             | Description                                                                                                                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equals`             | The value must be exactly equal.                                                                                                                                                    |
+| `not_equals`         | The query will return all documents where the value is not equal.                                                                                                                   |
+| `greater_than`       | For numeric or date-based fields.                                                                                                                                                   |
+| `greater_than_equal` | For numeric or date-based fields.                                                                                                                                                   |
+| `less_than`          | For numeric or date-based fields.                                                                                                                                                   |
+| `less_than_equal`    | For numeric or date-based fields.                                                                                                                                                   |
+| `like`               | Case-insensitive string must be present. If string of words, all words must be present, in any order.                                                                               |
+| `contains`           | Must contain the value entered, case-insensitive.                                                                                                                                   |
+| `in`                 | The value must be found within the provided comma-delimited list of values.                                                                                                         |
+| `not_in`             | The value must NOT be within the provided comma-delimited list of values.                                                                                                           |
+| `all`                | The value must contain all values provided in the comma-delimited list.                                                                                                             |
+| `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`).                                                                                           |
+| `near`               | For distance related to a [Point Field](../fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`.      |
+| `within`             | For [Point Fields](../fields/point) to filter documents based on whether points are inside of the given area defined in GeoJSON. [Example](../fields/point#querying-within)         |
+| `intersects`         | For [Point Fields](../fields/point) to filter documents based on whether points intersect with the given area  defined in GeoJSON. [Example](../fields/point#querying-intersects)   |
 
 <Banner type="success">
   <strong>Tip:</strong>
@@ -151,7 +153,7 @@ With the [REST API](../rest-api/overview), you can use the full power of Payload
 
 To understand the syntax, you need to understand that complex URL search strings are parsed into a JSON object. This one isn't too bad, but more complex queries get unavoidably more difficult to write.
 
-For this reason, we recommend to use the extremely helpful and ubiquitous [`qs`](https://www.npmjs.com/package/qs) package to parse your JSON / object-formatted queries into query strings:
+For this reason, we recommend to use the extremely helpful and ubiquitous [`qs-esm`](https://www.npmjs.com/package/qs-esm) package to parse your JSON / object-formatted queries into query strings:
 
 ```ts
 import { stringify } from 'qs-esm'

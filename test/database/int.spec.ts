@@ -4,15 +4,21 @@ import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
+import {
+  migrateRelationshipsV2_V3,
+  migrateVersionsV1_V2,
+} from '@payloadcms/db-mongodb/migration-utils'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
+import { Types } from 'mongoose'
 import path from 'path'
-import { commitTransaction, initTransaction, QueryError } from 'payload'
+import { commitTransaction, initTransaction, killTransaction, QueryError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -75,10 +81,59 @@ describe('database', () => {
 
       expect(updated.id).toStrictEqual(created.doc.id)
     })
+
+    it('should create with generated ID text from hook', async () => {
+      const doc = await payload.create({
+        collection: 'custom-ids',
+        data: {},
+      })
+
+      expect(doc.id).toBeDefined()
+    })
+
+    it('should not create duplicate versions with custom id type', async () => {
+      const doc = await payload.create({
+        collection: 'custom-ids',
+        data: {
+          title: 'hey',
+        },
+      })
+
+      await payload.update({
+        collection: 'custom-ids',
+        id: doc.id,
+        data: {},
+      })
+
+      await payload.update({
+        collection: 'custom-ids',
+        id: doc.id,
+        data: {},
+      })
+
+      const versionsQuery = await payload.db.findVersions({
+        collection: 'custom-ids',
+        req: {} as PayloadRequest,
+        where: {
+          'version.title': {
+            equals: 'hey',
+          },
+          latest: {
+            equals: true,
+          },
+        },
+      })
+
+      expect(versionsQuery.totalDocs).toStrictEqual(1)
+    })
+
+    it('should not accidentally treat nested id fields as custom id', () => {
+      expect(payload.collections['fake-custom-ids'].customIDType).toBeUndefined()
+    })
   })
 
   describe('timestamps', () => {
-    it('should have createdAt and updatedAt timetstamps to the millisecond', async () => {
+    it('should have createdAt and updatedAt timestamps to the millisecond', async () => {
       const result = await payload.create({
         collection: 'posts',
         data: {
@@ -125,8 +180,14 @@ describe('database', () => {
   })
 
   describe('migrations', () => {
+    let ranFreshTest = false
+
     beforeEach(async () => {
-      if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
+      if (
+        process.env.PAYLOAD_DROP_DATABASE === 'true' &&
+        'drizzle' in payload.db &&
+        !ranFreshTest
+      ) {
         const db = payload.db as unknown as PostgresAdapter
         await db.dropDatabase({ adapter: db })
       }
@@ -143,6 +204,12 @@ describe('database', () => {
       // read files names in migrationsDir
       const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
       expect(migrationFile).toContain('_test')
+    })
+
+    it('should create index.ts file in the migrations directory with file imports', () => {
+      const indexFile = path.join(payload.db.migrationDir, 'index.ts')
+      const indexFileContent = fs.readFileSync(indexFile, 'utf8')
+      expect(indexFileContent).toContain("_test from './")
     })
 
     it('should run migrate', async () => {
@@ -180,28 +247,155 @@ describe('database', () => {
       const migration = docs[0]
       expect(migration.name).toContain('_test')
       expect(migration.batch).toStrictEqual(1)
+      ranFreshTest = true
     })
 
-    // known issue: https://github.com/payloadcms/payload/issues/4597
-    it.skip('should run migrate:down', async () => {
+    it('should run migrate:down', async () => {
+      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+      if (!isMongoose(payload)) {
+        return
+      }
       let error
       try {
         await payload.db.migrateDown()
       } catch (e) {
         error = e
       }
+
+      const migrations = await payload.find({
+        collection: 'payload-migrations',
+      })
+
       expect(error).toBeUndefined()
+      expect(migrations.docs).toHaveLength(0)
     })
 
-    // known issue: https://github.com/payloadcms/payload/issues/4597
-    it.skip('should run migrate:refresh', async () => {
+    it('should run migrate:refresh', async () => {
+      // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (!isMongoose(payload)) {
+        return
+      }
       let error
       try {
         await payload.db.migrateRefresh()
       } catch (e) {
         error = e
       }
+
+      const migrations = await payload.find({
+        collection: 'payload-migrations',
+      })
+
       expect(error).toBeUndefined()
+      expect(migrations.docs).toHaveLength(1)
+    })
+  })
+
+  describe('predefined migrations', () => {
+    it('mongoose - should execute migrateVersionsV1_V2', async () => {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name !== 'mongoose') {
+        return
+      }
+
+      const req = { payload } as PayloadRequest
+
+      let hasErr = false
+
+      await initTransaction(req)
+      await migrateVersionsV1_V2({ req }).catch(async (err) => {
+        payload.logger.error(err)
+        hasErr = true
+        await killTransaction(req)
+      })
+      await commitTransaction(req)
+
+      expect(hasErr).toBeFalsy()
+    })
+
+    it('mongoose - should execute migrateRelationshipsV2_V3', async () => {
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name !== 'mongoose') {
+        return
+      }
+
+      const req = { payload } as PayloadRequest
+
+      let hasErr = false
+
+      const docs_before = Array.from({ length: 174 }, () => ({
+        relationship: new Types.ObjectId().toHexString(),
+        relationship_2: {
+          relationTo: 'default-values',
+          value: new Types.ObjectId().toHexString(),
+        },
+      }))
+
+      const inserted = await payload.db.collections['relationships-migration'].insertMany(
+        docs_before,
+        {
+          lean: true,
+        },
+      )
+
+      const versions_before = await payload.db.versions['relationships-migration'].insertMany(
+        docs_before.map((doc, i) => ({
+          version: doc,
+          parent: inserted[i]._id.toHexString(),
+        })),
+        {
+          lean: true,
+        },
+      )
+
+      expect(inserted.every((doc) => typeof doc.relationship === 'string')).toBeTruthy()
+
+      await initTransaction(req)
+      await migrateRelationshipsV2_V3({ req, batchSize: 66 }).catch(async (err) => {
+        await killTransaction(req)
+        payload.logger.error(err)
+        hasErr = true
+      })
+      await commitTransaction(req)
+
+      expect(hasErr).toBeFalsy()
+
+      const docs = await payload.db.collections['relationships-migration'].find(
+        {},
+        {},
+        { lean: true },
+      )
+
+      docs.forEach((doc, i) => {
+        expect(doc.relationship).toBeInstanceOf(Types.ObjectId)
+        expect(doc.relationship.toHexString()).toBe(docs_before[i].relationship)
+
+        expect(doc.relationship_2.value).toBeInstanceOf(Types.ObjectId)
+        expect(doc.relationship_2.value.toHexString()).toBe(docs_before[i].relationship_2.value)
+      })
+
+      const versions = await payload.db.versions['relationships-migration'].find(
+        {},
+        {},
+        { lean: true },
+      )
+
+      versions.forEach((doc, i) => {
+        expect(doc.parent).toBeInstanceOf(Types.ObjectId)
+        expect(doc.parent.toHexString()).toBe(versions_before[i].parent)
+
+        expect(doc.version.relationship).toBeInstanceOf(Types.ObjectId)
+        expect(doc.version.relationship.toHexString()).toBe(versions_before[i].version.relationship)
+
+        expect(doc.version.relationship_2.value).toBeInstanceOf(Types.ObjectId)
+        expect(doc.version.relationship_2.value.toHexString()).toBe(
+          versions_before[i].version.relationship_2.value,
+        )
+      })
+
+      await payload.db.collections['relationships-migration'].deleteMany({})
+      await payload.db.versions['relationships-migration'].deleteMany({})
     })
   })
 
@@ -458,6 +652,85 @@ describe('database', () => {
           ).rejects.toThrow('Not Found')
         })
       }
+
+      describe('disableTransaction', () => {
+        let disabledTransactionPost
+        beforeAll(async () => {
+          disabledTransactionPost = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            disableTransaction: true,
+          })
+        })
+        it('should not use transaction calling create() with disableTransaction', () => {
+          expect(disabledTransactionPost.hasTransaction).toBeFalsy()
+        })
+        it('should not use transaction calling update() with disableTransaction', async () => {
+          const result = await payload.update({
+            collection,
+            id: disabledTransactionPost.id,
+            data: {
+              title,
+            },
+            disableTransaction: true,
+          })
+
+          expect(result.hasTransaction).toBeFalsy()
+        })
+        it('should not use transaction calling delete() with disableTransaction', async () => {
+          const result = await payload.delete({
+            collection,
+            id: disabledTransactionPost.id,
+            data: {
+              title,
+            },
+            disableTransaction: true,
+          })
+
+          expect(result.hasTransaction).toBeFalsy()
+        })
+      })
+    })
+  })
+
+  describe('local API', () => {
+    it('should support `limit` arg in bulk updates', async () => {
+      for (let i = 0; i < 10; i++) {
+        await payload.create({
+          collection,
+          data: {
+            title: 'hello',
+          },
+        })
+      }
+
+      const updateResult = await payload.update({
+        collection,
+        data: {
+          title: 'world',
+        },
+        where: {
+          title: { equals: 'hello' },
+        },
+        limit: 5,
+      })
+
+      const findResult = await payload.find({
+        collection,
+        where: {
+          title: { exists: true },
+        },
+      })
+
+      const helloDocs = findResult.docs.filter((doc) => doc.title === 'hello')
+      const worldDocs = findResult.docs.filter((doc) => doc.title === 'world')
+
+      expect(updateResult.docs).toHaveLength(5)
+      expect(updateResult.docs[0].title).toStrictEqual('world')
+      expect(helloDocs).toHaveLength(5)
+      expect(worldDocs).toHaveLength(5)
     })
   })
 
@@ -478,6 +751,10 @@ describe('database', () => {
       expect(result.array[0].defaultValue).toStrictEqual('default value from database')
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
+      // eslint-disable-next-line jest/no-conditional-in-test
+      if (payload.db.name !== 'sqlite') {
+        expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
+      }
     })
   })
   describe('drizzle: schema hooks', () => {
@@ -731,6 +1008,21 @@ describe('database', () => {
 
       expect(resLocal.textHooked).toBe('hooked')
     })
+
+    it('should not save a nested field to tabs/row/collapsible with virtual: true to the db', async () => {
+      const res = await payload.create({
+        data: {
+          textWithinCollapsible: '1',
+          textWithinRow: '2',
+          textWithinTabs: '3',
+        },
+        collection: 'fields-persistance',
+      })
+
+      expect(res.textWithinCollapsible).toBeUndefined()
+      expect(res.textWithinRow).toBeUndefined()
+      expect(res.textWithinTabs).toBeUndefined()
+    })
   })
 
   it('should not allow to query by a field with `virtual: true`', async () => {
@@ -740,5 +1032,26 @@ describe('database', () => {
         where: { text: { equals: 'asd' } },
       }),
     ).rejects.toThrow(QueryError)
+  })
+
+  it('should not allow document creation with relationship data to an invalid document ID', async () => {
+    let invalidDoc
+
+    try {
+      invalidDoc = await payload.create({
+        collection: 'relation-b',
+        data: { title: 'invalid', relationship: 'not-real-id' },
+      })
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+
+    expect(invalidDoc).toBeUndefined()
+
+    const relationBDocs = await payload.find({
+      collection: 'relation-b',
+    })
+
+    expect(relationBDocs.docs).toHaveLength(0)
   })
 })

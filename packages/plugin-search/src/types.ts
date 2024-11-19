@@ -1,5 +1,6 @@
 import type {
   CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
   CollectionConfig,
   Field,
   Payload,
@@ -33,6 +34,7 @@ export type SearchPluginConfig = {
     [collection: string]: ((doc: any) => number | Promise<number>) | number
   }
   deleteDrafts?: boolean
+  localize?: boolean
   searchOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   syncDrafts?: boolean
 }
@@ -45,3 +47,9 @@ export type SyncWithSearch = (
     pluginConfig: SearchPluginConfig
   } & Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'>,
 ) => ReturnType<CollectionAfterChangeHook>
+
+export type DeleteFromSearch = (
+  Args: {
+    pluginConfig: SearchPluginConfig
+  } & Omit<Parameters<CollectionAfterDeleteHook>[0], 'collection'>,
+) => ReturnType<CollectionAfterDeleteHook>

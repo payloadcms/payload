@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { DocumentInfoContext } from '../../providers/DocumentInfo/index.js'
+import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -28,7 +28,7 @@ export type Props = {
   readonly buttonId?: string
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly id?: string
-  readonly onDelete?: DocumentInfoContext['onDelete']
+  readonly onDelete?: DocumentDrawerContextType['onDelete']
   readonly redirectAfterDelete?: boolean
   readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
   readonly title?: string

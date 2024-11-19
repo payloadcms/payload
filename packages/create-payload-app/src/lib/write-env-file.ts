@@ -1,19 +1,20 @@
 import fs from 'fs-extra'
 import path from 'path'
 
-import type { CliArgs, ProjectTemplate } from '../types.js'
+import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 
 import { debug, error } from '../utils/log.js'
 
 /** Parse and swap .env.example values and write .env */
 export async function writeEnvFile(args: {
   cliArgs: CliArgs
+  databaseType?: DbType
   databaseUri: string
   payloadSecret: string
   projectDir: string
   template?: ProjectTemplate
 }): Promise<void> {
-  const { cliArgs, databaseUri, payloadSecret, projectDir, template } = args
+  const { cliArgs, databaseType, databaseUri, payloadSecret, projectDir, template } = args
 
   if (cliArgs['--dry-run']) {
     debug(`DRY RUN: .env file created`)
@@ -41,7 +42,7 @@ export async function writeEnvFile(args: {
             }
 
             const split = line.split('=')
-            const key = split[0]
+            let key = split[0]
             let value = split[1]
 
             if (
@@ -50,6 +51,9 @@ export async function writeEnvFile(args: {
               key === 'DATABASE_URI' ||
               key === 'POSTGRES_URL'
             ) {
+              if (databaseType === 'vercel-postgres') {
+                key = 'POSTGRES_URL'
+              }
               value = databaseUri
             }
             if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {

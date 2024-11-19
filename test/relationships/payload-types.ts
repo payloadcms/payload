@@ -27,17 +27,48 @@ export interface Config {
     pages: Page;
     'rels-to-pages': RelsToPage;
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextId;
+    'object-writes': ObjectWrite;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    posts: PostsSelect<false> | PostsSelect<true>;
+    postsLocalized: PostsLocalizedSelect<false> | PostsLocalizedSelect<true>;
+    relation: RelationSelect<false> | RelationSelect<true>;
+    'strict-access': StrictAccessSelect<false> | StrictAccessSelect<true>;
+    chained: ChainedSelect<false> | ChainedSelect<true>;
+    'custom-id': CustomIdSelect<false> | CustomIdSelect<true>;
+    'custom-id-number': CustomIdNumberSelect<false> | CustomIdNumberSelect<true>;
+    screenings: ScreeningsSelect<false> | ScreeningsSelect<true>;
+    movies: MoviesSelect<false> | MoviesSelect<true>;
+    directors: DirectorsSelect<false> | DirectorsSelect<true>;
+    movieReviews: MovieReviewsSelect<false> | MovieReviewsSelect<true>;
+    'polymorphic-relationships': PolymorphicRelationshipsSelect<false> | PolymorphicRelationshipsSelect<true>;
+    tree: TreeSelect<false> | TreeSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    'rels-to-pages': RelsToPagesSelect<false> | RelsToPagesSelect<true>;
+    'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextIdsSelect<false> | RelsToPagesAndCustomTextIdsSelect<true>;
+    'object-writes': ObjectWritesSelect<false> | ObjectWritesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: string;
   };
   globals: {};
+  globalsSelect: {};
   locale: 'en' | 'de';
   user: User & {
     collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -68,6 +99,14 @@ export interface Post {
   description?: string | null;
   number?: number | null;
   relationField?: (string | null) | Relation;
+  blocks?:
+    | {
+        relationField?: (string | null) | Relation;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   defaultAccessRelation?: (string | null) | StrictAccess;
   chainedRelation?: (string | null) | Chained;
   maxDepthRelation?: (string | null) | Relation;
@@ -276,6 +315,114 @@ export interface RelsToPagesAndCustomTextId {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "object-writes".
+ */
+export interface ObjectWrite {
+  id: string;
+  one?: (string | null) | Movie;
+  many?: (string | Movie)[] | null;
+  onePoly?: {
+    relationTo: 'movies';
+    value: string | Movie;
+  } | null;
+  manyPoly?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'postsLocalized';
+        value: string | PostsLocalized;
+      } | null)
+    | ({
+        relationTo: 'relation';
+        value: string | Relation;
+      } | null)
+    | ({
+        relationTo: 'strict-access';
+        value: string | StrictAccess;
+      } | null)
+    | ({
+        relationTo: 'chained';
+        value: string | Chained;
+      } | null)
+    | ({
+        relationTo: 'custom-id';
+        value: string | CustomId;
+      } | null)
+    | ({
+        relationTo: 'custom-id-number';
+        value: number | CustomIdNumber;
+      } | null)
+    | ({
+        relationTo: 'screenings';
+        value: string | Screening;
+      } | null)
+    | ({
+        relationTo: 'movies';
+        value: string | Movie;
+      } | null)
+    | ({
+        relationTo: 'directors';
+        value: string | Director;
+      } | null)
+    | ({
+        relationTo: 'movieReviews';
+        value: string | MovieReview;
+      } | null)
+    | ({
+        relationTo: 'polymorphic-relationships';
+        value: string | PolymorphicRelationship;
+      } | null)
+    | ({
+        relationTo: 'tree';
+        value: string | Tree;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'rels-to-pages';
+        value: string | RelsToPage;
+      } | null)
+    | ({
+        relationTo: 'rels-to-pages-and-custom-text-ids';
+        value: string | RelsToPagesAndCustomTextId;
+      } | null)
+    | ({
+        relationTo: 'object-writes';
+        value: string | ObjectWrite;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -307,6 +454,246 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  number?: T;
+  relationField?: T;
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              relationField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  defaultAccessRelation?: T;
+  chainedRelation?: T;
+  maxDepthRelation?: T;
+  customIdRelation?: T;
+  customIdNumberRelation?: T;
+  filteredRelation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "postsLocalized_select".
+ */
+export interface PostsLocalizedSelect<T extends boolean = true> {
+  title?: T;
+  relationField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation_select".
+ */
+export interface RelationSelect<T extends boolean = true> {
+  name?: T;
+  disableRelation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "strict-access_select".
+ */
+export interface StrictAccessSelect<T extends boolean = true> {
+  name?: T;
+  disableRelation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chained_select".
+ */
+export interface ChainedSelect<T extends boolean = true> {
+  name?: T;
+  relation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id_select".
+ */
+export interface CustomIdSelect<T extends boolean = true> {
+  id?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-number_select".
+ */
+export interface CustomIdNumberSelect<T extends boolean = true> {
+  id?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "screenings_select".
+ */
+export interface ScreeningsSelect<T extends boolean = true> {
+  name?: T;
+  movie?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "movies_select".
+ */
+export interface MoviesSelect<T extends boolean = true> {
+  name?: T;
+  director?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "directors_select".
+ */
+export interface DirectorsSelect<T extends boolean = true> {
+  name?: T;
+  movies?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "movieReviews_select".
+ */
+export interface MovieReviewsSelect<T extends boolean = true> {
+  movieReviewer?: T;
+  likes?: T;
+  visibility?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "polymorphic-relationships_select".
+ */
+export interface PolymorphicRelationshipsSelect<T extends boolean = true> {
+  polymorphic?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tree_select".
+ */
+export interface TreeSelect<T extends boolean = true> {
+  text?: T;
+  parent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  menu?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rels-to-pages_select".
+ */
+export interface RelsToPagesSelect<T extends boolean = true> {
+  page?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rels-to-pages-and-custom-text-ids_select".
+ */
+export interface RelsToPagesAndCustomTextIdsSelect<T extends boolean = true> {
+  rel?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "object-writes_select".
+ */
+export interface ObjectWritesSelect<T extends boolean = true> {
+  one?: T;
+  many?: T;
+  onePoly?: T;
+  manyPoly?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

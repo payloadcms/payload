@@ -20,11 +20,22 @@ import { mutateRelatedFolderCollection } from '../folders/mutateRelatedCollectio
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
+import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
 import { defaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
+
+  // default logging level will be 'error' if not provided
+  sanitizedConfig.loggingLevels = {
+    Forbidden: 'info',
+    Locked: 'info',
+    MissingFile: 'info',
+    NotFound: 'info',
+    ValidationError: 'info',
+    ...(sanitizedConfig.loggingLevels || {}),
+  }
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
@@ -68,6 +79,16 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     graphQL: {
       ...defaults.graphQL,
       ...incomingConfig?.graphQL,
+    },
+    jobs: {
+      ...defaults.jobs,
+      ...incomingConfig?.jobs,
+      access: {
+        ...defaults.jobs.access,
+        ...incomingConfig?.jobs?.access,
+      },
+      tasks: incomingConfig?.jobs?.tasks || [],
+      workflows: incomingConfig?.jobs?.workflows || [],
     },
     routes: {
       ...defaults.routes,
@@ -123,6 +144,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         toString: () => locale.code,
       }))
     }
+
+    // Default fallback to true if not provided
+    config.localization.fallback = config.localization?.fallback ?? true
   }
 
   const i18nConfig: SanitizedConfig['i18n'] = {
@@ -149,6 +173,19 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   config.i18n = i18nConfig
+
+  // Need to add default jobs collection before locked documents collections
+  if (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs.tasks.length > 0) {
+    let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
+
+    if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
+      defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
+        defaultJobsCollection,
+      })
+    }
+
+    configWithDefaults.collections.push(defaultJobsCollection)
+  }
 
   configWithDefaults.collections.push(getLockedDocumentsCollection(config as unknown as Config))
   configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))

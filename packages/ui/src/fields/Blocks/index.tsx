@@ -11,7 +11,7 @@ import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
@@ -36,13 +36,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
-    descriptionProps,
-    errorProps,
-    field,
     field: {
       name,
-      _path: pathFromProps,
-      admin: { className, description, isSortable = true, readOnly: readOnlyFromAdmin } = {},
+      admin: { className, description, isSortable = true } = {},
       blocks,
       label,
       labels: labelsFromProps,
@@ -51,15 +47,14 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    forceRender = false,
-    labelProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path,
+    permissions,
+    readOnly,
+    schemaPath: schemaPathFromProps,
     validate,
   } = props
+  const schemaPath = schemaPathFromProps ?? name
 
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
-
-  const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
@@ -99,42 +94,33 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
 
-  const { path: pathFromContext } = useFieldProps()
-
   const {
+    customComponents: { Description, Error, Label } = {},
     errorPaths,
-    formInitializing,
-    formProcessing,
-    path,
-    permissions,
     rows = [],
-    schemaPath,
     showError,
     valid,
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromContext ?? pathFromProps ?? name,
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
-
   const addRow = useCallback(
-    async (rowIndex: number, blockType: string): Promise<void> => {
-      await addFieldRow({
-        data: { blockType },
+    (rowIndex: number, blockType: string) => {
+      addFieldRow({
+        blockType,
         path,
         rowIndex,
-        schemaPath: `${schemaPath}.${blockType}`,
+        schemaPath,
       })
-      setModified(true)
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified, schemaPath],
+    [addFieldRow, path, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -201,7 +187,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
-  const showRequired = disabled && rows.length === 0
+  const showRequired = readOnly && rows.length === 0
 
   return (
     <div
@@ -213,26 +199,23 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      id={`field-${path.replace(/\./g, '__')}`}
+      id={`field-${path?.replace(/\./g, '__')}`}
     >
       {showError && (
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
       )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
-              <FieldLabel
-                as="span"
-                field={field}
-                Label={field?.admin?.components?.Description}
-                unstyled
-                {...(labelProps || {})}
+              <RenderCustomComponent
+                CustomComponent={Label}
+                Fallback={
+                  <FieldLabel label={label} localized={localized} path={path} required={required} />
+                }
               />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
@@ -262,11 +245,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
         />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
@@ -278,36 +259,40 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         >
           {rows.map((row, i) => {
             const { blockType } = row
-            const blockToRender = blocks.find((block) => block.slug === blockType)
+            const blockConfig = blocks.find((block) => block.slug === blockType)
 
-            if (blockToRender) {
+            if (blockConfig) {
+              const rowPath = `${path}.${i}`
+
               const rowErrorCount = errorPaths.filter((errorPath) =>
-                errorPath.startsWith(`${path}.${i}.`),
+                errorPath.startsWith(rowPath + '.'),
               ).length
+
               return (
-                <DraggableSortableItem disabled={disabled || !isSortable} id={row.id} key={row.id}>
+                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
                       addRow={addRow}
-                      block={blockToRender}
+                      block={blockConfig}
                       blocks={blocks}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
-                      forceRender={forceRender}
+                      fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
-                      indexPath={indexPath}
                       isSortable={isSortable}
+                      Label={Label}
                       labels={labels}
                       moveRow={moveRow}
-                      path={path}
+                      parentPath={path}
+                      path={rowPath}
                       permissions={permissions}
-                      readOnly={disabled}
+                      readOnly={readOnly}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
                       rowIndex={i}
-                      schemaPath={schemaPath}
+                      schemaPath={schemaPath + blockConfig.slug}
                       setCollapse={setCollapse}
                     />
                   )}
@@ -338,11 +323,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!disabled && !hasMaxRows && (
+      {!hasMaxRows && (
         <Fragment>
           <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
             <Button
               buttonStyle="icon-label"
+              disabled={readOnly}
               el="span"
               icon="plus"
               iconPosition="left"

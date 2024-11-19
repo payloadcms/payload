@@ -41,10 +41,10 @@ export const sanitizeCollection = async (
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
+    joinPath: '',
     joins,
     parentIsLocalized: false,
     richTextSanitizationPromises,
-    schemaPath: '',
     validRelationships,
   })
 
@@ -71,6 +71,7 @@ export const sanitizeCollection = async (
           disableBulkEdit: true,
           hidden: true,
         },
+        index: true,
         label: ({ t }) => t('general:updatedAt'),
       })
     }
@@ -93,12 +94,15 @@ export const sanitizeCollection = async (
 
   if (sanitized.versions) {
     if (sanitized.versions === true) {
-      sanitized.versions = { drafts: false }
+      sanitized.versions = { drafts: false, maxPerDoc: 100 }
     }
 
     if (sanitized.timestamps === false) {
       throw new TimestampsRequired(collection)
     }
+
+    sanitized.versions.maxPerDoc =
+      typeof sanitized.versions.maxPerDoc === 'number' ? sanitized.versions.maxPerDoc : 100
 
     if (sanitized.versions.drafts) {
       if (sanitized.versions.drafts === true) {
@@ -130,9 +134,6 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeUploadFields(sanitized.fields, sanitized)
 
-    // disable duplicate for uploads by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate || true
-
     sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
@@ -162,7 +163,7 @@ export const sanitizeCollection = async (
     }
 
     // disable duplicate for auth enabled collections by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate || true
+    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
 
     if (!sanitized.auth.strategies) {
       sanitized.auth.strategies = []

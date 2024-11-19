@@ -21,6 +21,7 @@ export async function updateVersion<T extends TypeWithID>(
     collection,
     locale,
     req = {} as PayloadRequest,
+    select,
     versionData,
     where: whereArg,
   }: UpdateVersionArgs<T>,
@@ -50,6 +51,7 @@ export async function updateVersion<T extends TypeWithID>(
     fields,
     operation: 'update',
     req,
+    select,
     tableName,
     where,
   })

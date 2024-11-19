@@ -1,11 +1,10 @@
 import type { EditViewComponent, PaginatedDocs, PayloadServerReactComponent } from 'payload'
 
-import { Gutter, ListQueryProvider } from '@payloadcms/ui'
+import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import React from 'react'
 
-import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { buildVersionColumns } from './buildColumns.js'
 import { getLatestVersion } from './getLatestVersion.js'
 import { VersionsViewClient } from './index.client.js'
@@ -48,7 +47,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
   if (collectionSlug) {
     limitToUse = limitToUse || collectionConfig.admin.pagination.defaultLimit
     const whereQuery: {
-      and: Array<{ parent?: { equals: string }; snapshot?: { not_equals: boolean } }>
+      and: Array<{ parent?: { equals: number | string }; snapshot?: { not_equals: boolean } }>
     } = {
       and: [
         {
@@ -83,18 +82,20 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         latestDraftVersion = await getLatestVersion({
           slug: collectionSlug,
           type: 'collection',
+          parentID: id,
           payload,
           status: 'draft',
         })
         latestPublishedVersion = await getLatestVersion({
           slug: collectionSlug,
           type: 'collection',
+          parentID: id,
           payload,
           status: 'published',
         })
       }
     } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+      payload.logger.error(error)
     }
   }
 
@@ -137,7 +138,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
         })
       }
     } catch (error) {
-      console.error(error) // eslint-disable-line no-console
+      payload.logger.error(error)
     }
 
     if (!versionsData) {
@@ -163,6 +164,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
     collectionConfig,
     config,
     docID: id,
+    docs: versionsData?.docs,
     globalConfig,
     i18n,
     latestDraftVersion: latestDraftVersion?.id,
@@ -188,6 +190,7 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
       <main className={baseClass}>
         <Gutter className={`${baseClass}__wrap`}>
           <ListQueryProvider
+            collectionSlug={collectionSlug}
             data={versionsData}
             defaultLimit={limitToUse}
             defaultSort={sort as string}
