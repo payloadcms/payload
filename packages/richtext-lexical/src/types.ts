@@ -15,6 +15,7 @@ import type {
 } from './features/typesClient.js'
 import type { FeatureProviderServer } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
+import type { InitialLexicalFormState } from './utilities/buildInitialState.js'
 
 export type LexicalFieldAdminProps = {
   /**
@@ -95,7 +96,8 @@ export type LexicalRichTextFieldProps = {
     }
   }
   featureClientSchemaMap: FeatureClientSchemaMap
-  lexicalEditorConfig: LexicalEditorConfig
+  initialLexicalFormState: InitialLexicalFormState
+  lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
 } & Pick<ServerFieldBase, 'permissions'> &
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 

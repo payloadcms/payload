@@ -3,8 +3,8 @@ import Link from 'next/link'
 import React from 'react'
 
 import { Gutter } from '../Gutter'
-import { HeaderNav } from './Nav'
 import classes from './index.module.scss'
+import { HeaderNav } from './Nav'
 
 export function Header() {
   return (
@@ -14,12 +14,12 @@ export function Header() {
           <picture>
             <source
               media="(prefers-color-scheme: dark)"
-              srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
+              srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
             />
             <Image
               alt="Payload Logo"
               height={30}
-              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-dark.svg"
+              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-dark.svg"
               width={150}
             />
           </picture>

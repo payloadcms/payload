@@ -1,13 +1,12 @@
-import type { Block, BlocksField, Config, Field, FieldSchemaMap } from 'payload'
+import type { Block, BlocksField, Config, FieldSchemaMap } from 'payload'
 
 import { fieldsToJSONSchema, sanitizeFields } from 'payload'
-
-import type { BlocksFeatureClientProps } from '../client/index.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
+import { getBlockMarkdownTransformers } from './markdownTransformer.js'
 import { ServerBlockNode } from './nodes/BlocksNode.js'
 import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { blockValidationHOC } from './validate.js'
@@ -17,17 +16,8 @@ export type BlocksFeatureProps = {
   inlineBlocks?: Block[]
 }
 
-export const BlocksFeature = createServerFeature<
-  BlocksFeatureProps,
-  BlocksFeatureProps,
-  BlocksFeatureClientProps
->({
+export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatureProps>({
   feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
-    // Build clientProps
-    const clientProps: BlocksFeatureClientProps = {
-      clientBlockSlugs: [],
-      clientInlineBlockSlugs: [],
-    }
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
     const sanitized = await sanitizeFields({
@@ -52,12 +42,8 @@ export const BlocksFeature = createServerFeature<
     props.blocks = (sanitized[0] as BlocksField).blocks
     props.inlineBlocks = (sanitized[1] as BlocksField).blocks
 
-    clientProps.clientBlockSlugs = props.blocks.map((block) => block.slug)
-    clientProps.clientInlineBlockSlugs = props.inlineBlocks.map((block) => block.slug)
-
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
-      clientFeatureProps: clientProps,
       generatedTypes: {
         modifyOutputSchema: ({
           collectionIDFieldTypes,
@@ -105,8 +91,22 @@ export const BlocksFeature = createServerFeature<
 
         if (props?.blocks?.length) {
           for (const block of props.blocks) {
+            const blockFields = [...block.fields]
+
+            if (block?.admin?.components) {
+              blockFields.unshift({
+                name: `_components`,
+                type: 'ui',
+                admin: {
+                  components: {
+                    Block: block.admin?.components?.Block,
+                    BlockLabel: block.admin?.components?.Label,
+                  },
+                },
+              })
+            }
             schemaMap.set(`lexical_blocks.${block.slug}.fields`, {
-              fields: block.fields,
+              fields: blockFields,
             })
             schemaMap.set(`lexical_blocks.${block.slug}`, {
               name: `lexical_blocks_${block.slug}`,
@@ -119,8 +119,23 @@ export const BlocksFeature = createServerFeature<
         if (props?.inlineBlocks?.length) {
           // To generate block schemaMap which generates things like the componentMap for admin.Label
           for (const block of props.inlineBlocks) {
+            const blockFields = [...block.fields]
+
+            if (block?.admin?.components) {
+              blockFields.unshift({
+                name: `_components`,
+                type: 'ui',
+                admin: {
+                  components: {
+                    Block: block.admin?.components?.Block,
+                    BlockLabel: block.admin?.components?.Label,
+                  },
+                },
+              })
+            }
+
             schemaMap.set(`lexical_inline_blocks.${block.slug}.fields`, {
-              fields: block.fields,
+              fields: blockFields,
             })
 
             schemaMap.set(`lexical_inline_blocks.${block.slug}`, {
@@ -134,6 +149,11 @@ export const BlocksFeature = createServerFeature<
         return schemaMap
       },
       i18n,
+      markdownTransformers: getBlockMarkdownTransformers({
+        blocks: props.blocks,
+        inlineBlocks: props.inlineBlocks,
+      }),
+
       nodes: [
         createNode({
           // @ts-expect-error - TODO: fix this

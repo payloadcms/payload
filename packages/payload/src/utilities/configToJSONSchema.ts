@@ -314,16 +314,13 @@ export function fieldsToJSONSchema(
           }
           case 'code':
           case 'date':
-
           case 'email':
-
           case 'textarea': {
             fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
             break
           }
 
           case 'collapsible':
-
           case 'row': {
             const childSchema = fieldsToJSONSchema(
               collectionIDFieldTypes,
@@ -431,7 +428,6 @@ export function fieldsToJSONSchema(
           }
 
           case 'relationship':
-
           case 'upload': {
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
@@ -746,7 +742,6 @@ export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONS
         break
       }
       case 'collapsible':
-
       case 'row':
         schema.properties = {
           ...schema.properties,
@@ -1044,6 +1039,7 @@ export function configToJSONSchema(
       'globals',
       'auth',
       'db',
+      'jobs',
     ],
     title: 'Config',
   }
@@ -1057,7 +1053,7 @@ export function configToJSONSchema(
       type: 'object',
       additionalProperties: false,
       properties: jobsSchemas.properties,
-      required: ['tasks'],
+      required: ['tasks', 'workflows'],
     }
   }
 

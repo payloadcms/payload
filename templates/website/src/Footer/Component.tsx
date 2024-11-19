@@ -19,8 +19,8 @@ export async function Footer() {
           <picture>
             <img
               alt="Payload Logo"
-              className="max-w-[6rem] invert-0"
-              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
+              className="max-w-[6rem] invert-0 w-full"
+              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
             />
           </picture>
         </Link>

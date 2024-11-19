@@ -3,6 +3,8 @@
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from '@payloadcms/ui'
 
+import './index.scss'
+
 const SuccessMessage: React.FC = () => (
   <div>
     Database seeded! You can now{' '}
@@ -20,19 +22,53 @@ export const SeedButton: React.FC = () => {
   const handleClick = useCallback(
     async (e) => {
       e.preventDefault()
-      if (loading || seeded) return
+
+      if (seeded) {
+        toast.info('Database already seeded.')
+        return
+      }
+      if (loading) {
+        toast.info('Seeding already in progress.')
+        return
+      }
+      if (error) {
+        toast.error(`An error occurred, please refresh and try again.`)
+        return
+      }
 
       setLoading(true)
 
       try {
-        await fetch('/api/seed')
-        setSeeded(true)
-        toast.success(<SuccessMessage />, { duration: 5000 })
+        toast.promise(
+          new Promise((resolve, reject) => {
+            try {
+              fetch('/next/seed', { method: 'POST', credentials: 'include' })
+                .then((res) => {
+                  if (res.ok) {
+                    resolve(true)
+                    setSeeded(true)
+                  } else {
+                    reject('An error occurred while seeding.')
+                  }
+                })
+                .catch((error) => {
+                  reject(error)
+                })
+            } catch (error) {
+              reject(error)
+            }
+          }),
+          {
+            loading: 'Seeding with data....',
+            success: <SuccessMessage />,
+            error: 'An error occurred while seeding.',
+          },
+        )
       } catch (err) {
         setError(err)
       }
     },
-    [loading, seeded],
+    [loading, seeded, error],
   )
 
   let message = ''
@@ -42,9 +78,9 @@ export const SeedButton: React.FC = () => {
 
   return (
     <Fragment>
-      <a href="/api/seed" onClick={handleClick} rel="noopener noreferrer" target="_blank">
+      <button className="seedButton" onClick={handleClick}>
         Seed your database
-      </a>
+      </button>
       {message}
     </Fragment>
   )

@@ -83,6 +83,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
       finalSanitizedEditorConfig = deepCopyObject(defaultSanitizedServerEditorConfig)
 
+      delete finalSanitizedEditorConfig.lexical // We don't want to send the default lexical editor config to the client
+
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
       const rootEditor = config.editor
@@ -116,7 +118,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
       finalSanitizedEditorConfig = {
         features: sanitizeServerFeatures(resolvedFeatureMap),
-        lexical,
+        lexical: props.lexical,
         resolvedFeatureMap,
       }
     }
@@ -944,7 +946,7 @@ export type {
   SanitizedServerEditorConfig,
   ServerEditorConfig,
 } from './lexical/config/types.js'
-export { getEnabledNodes } from './lexical/nodes/index.js'
+export { getEnabledNodes, getEnabledNodesFromServerNodes } from './lexical/nodes/index.js'
 export type { AdapterProps }
 
 export type {
@@ -977,4 +979,13 @@ export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
 
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
+
+export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
+export {
+  extractFrontmatter,
+  frontmatterToObject,
+  objectToFrontmatter,
+  propsToJSXString,
+} from './utilities/jsx/jsx.js'
+export { $convertFromMarkdownString } from './utilities/jsx/lexicalMarkdownCopy.js'
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
