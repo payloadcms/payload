@@ -64,7 +64,7 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
-    "@types/to-snake-case": "1.0.0",
+    "@types/to-snake-case": "1.0.2",
     "payload": "workspace:*"
   },
   "peerDependencies": {
