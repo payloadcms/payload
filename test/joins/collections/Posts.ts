@@ -4,11 +4,6 @@ import { categoriesSlug, postsSlug, uploadsSlug } from '../shared.js'
 
 export const Posts: CollectionConfig = {
   slug: postsSlug,
-  versions: {
-    drafts: {
-      autosave: true,
-    },
-  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'updatedAt', 'createdAt'],
