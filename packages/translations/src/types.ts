@@ -1,6 +1,5 @@
 import type { Locale } from 'date-fns'
 
-import type { clientTranslationKeys } from './clientKeys.js'
 import type { enTranslations } from './languages/en.js'
 import type { acceptedLanguages } from './utilities/languages.js'
 
@@ -110,8 +109,7 @@ export type DefaultTranslationKeysUnSanitized = NestedKeysUnSanitized<DefaultTra
  */
 export type DefaultTranslationKeys = NestedKeysStripped<DefaultTranslationsObject>
 
-export type ClientTranslationKeys<TExtraProps = (typeof clientTranslationKeys)[number]> =
-  TExtraProps
+export type ClientTranslationKeys<TExtraProps = DefaultTranslationKeys> = TExtraProps
 
 // Use GenericTranslationsObject instead of reconstructing the object from the client keys. This is because reconstructing the object is
 // A) Expensive on performance.
