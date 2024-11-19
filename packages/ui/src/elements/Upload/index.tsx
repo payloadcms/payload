@@ -343,7 +343,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 <UploadActions
                   customActions={customActions}
                   enableAdjustments={showCrop || showFocalPoint}
-                  enablePreviewSizes={hasImageSizes && savedDocumentData.filename && !removedFile}
+                  enablePreviewSizes={hasImageSizes && savedDocumentData?.filename && !removedFile}
                   mimeType={value.type}
                 />
               </div>
