@@ -17,8 +17,6 @@ export async function POST(
 ): Promise<Response> {
   const payload = await getPayload({ config })
   const token = req.cookies.get(payloadToken)?.value
-  // Create a Payload request object to pass to the Local API for transactions
-  // At this point you should pass in a user, locale, and any other context you need for the Local API
 
   let user
 
@@ -28,12 +26,13 @@ export async function POST(
     payload.logger.error('Error verifying token for live preview:', error)
   }
 
-  // You can add additional checks here to see if the user is allowed to preview this page
   if (!user) {
     return new Response('Action forbidden.', { status: 403 })
   }
 
   try {
+    // Create a Payload request object to pass to the Local API for transactions
+    // At this point you should pass in a user, locale, and any other context you need for the Local API
     const payloadReq = await createLocalReq({ user }, payload)
 
     await seed({ payload, req: payloadReq })
