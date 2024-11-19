@@ -25,6 +25,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -42,9 +43,8 @@ import {
   selectTableRow,
   throttleTest,
 } from '../helpers.js'
-
-import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
@@ -64,7 +64,6 @@ import {
   localizedGlobalSlug,
   postCollectionSlug,
 } from './slugs.js'
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -399,10 +398,6 @@ describe('versions', () => {
 
     test('collection - should autosave', async () => {
       await page.goto(autosaveURL.create)
-      const pattern = new RegExp(`${autosaveURL.edit('')}`)
-      await page.waitForURL(pattern)
-      const match = page.url().match(/(?<=\/autosave-posts\/)(.*?)(?=\/|$)/)
-      const docID = match ? match[0] : null // Check if match exists
       await page.locator('#field-title').fill('autosave title')
       await waitForAutoSaveToRunAndComplete(page)
       await expect(page.locator('#field-title')).toHaveValue('autosave title')
