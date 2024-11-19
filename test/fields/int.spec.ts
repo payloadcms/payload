@@ -1,9 +1,8 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
-import { reload } from '@payloadcms/next/utilities'
 import path from 'path'
-import { type PaginatedDocs, type Payload, ValidationError } from 'payload'
+import { type PaginatedDocs, type Payload, reload, ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'

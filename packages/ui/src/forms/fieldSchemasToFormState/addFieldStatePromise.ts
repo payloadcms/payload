@@ -136,7 +136,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
   if (fieldAffectsData(field) && !(isHiddenField || disabledFromAdmin)) {
-    const fieldPermissions = permissions[field.name]
+    const fieldPermissions = permissions === true ? permissions : permissions?.[field.name]
 
     let hasPermission: boolean = fieldPermissions === true || fieldPermissions?.read
 
@@ -382,7 +382,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   parentPassesCondition: passesCondition,
                   parentPath,
                   parentSchemaPath: rowSchemaPath,
-                  permissions: permissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
+                  permissions:
+                    fieldPermissions === true
+                      ? fieldPermissions
+                      : permissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
                   preferences,
                   previousFormState,
                   renderAllFields: requiresRender,
@@ -467,7 +470,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           parentPassesCondition: passesCondition,
           parentPath: path,
           parentSchemaPath: schemaPath,
-          permissions: permissions?.[field.name]?.fields || {},
+          permissions: fieldPermissions ?? permissions?.[field.name]?.fields ?? {},
           preferences,
           previousFormState,
           renderAllFields,
@@ -658,7 +661,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         parentPassesCondition: passesCondition,
         parentPath: tabHasName(tab) ? tabPath : parentPath,
         parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
-        permissions: tabHasName(tab) ? permissions?.[tab.name]?.fields || {} : permissions,
+        permissions: tabHasName(tab)
+          ? typeof permissions === 'boolean'
+            ? permissions
+            : permissions?.[tab.name] || {}
+          : permissions,
         preferences,
         previousFormState,
         renderAllFields,
@@ -708,6 +715,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
 
     renderFieldFn({
+      id,
+      collectionSlug,
       data: fullData,
       fieldConfig: fieldConfig as Field,
       fieldSchemaMap,
@@ -719,6 +728,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentSchemaPath,
       path,
       permissions,
+      preferences,
       previousFieldState: previousFormState?.[path],
       req,
       schemaPath,

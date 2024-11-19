@@ -465,6 +465,11 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  externallyUpdatedArray?:
+    | {
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2084,6 +2089,13 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  externallyUpdatedArray?:
+    | T
+    | {
+        customField?: T;
+        id?: T;
+      };
+  ui?: T;
   updatedAt?: T;
   createdAt?: T;
 }

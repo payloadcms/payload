@@ -29,10 +29,10 @@ export const renderFilters = (
       if ('name' in field && field.admin?.components?.Filter) {
         acc.set(
           field.name,
-          <RenderServerComponent
-            Component={field.admin.components?.Filter}
-            importMap={importMap}
-          />,
+          RenderServerComponent({
+            Component: field.admin.components?.Filter,
+            importMap,
+          }),
         )
       }
 

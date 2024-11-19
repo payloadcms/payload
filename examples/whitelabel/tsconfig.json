@@ -27,7 +27,10 @@
         "./src/*"
       ],
       "@payload-config": [
-        "./src/payload.config.ts"
+        "src/payload.config.ts"
+      ],
+      "@payload-types": [
+        "src/payload-types.ts"
       ]
     },
     "target": "ES2017"
@@ -36,7 +39,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "src/mocks/emptyObject.js"
   ],
   "exclude": [
     "node_modules"

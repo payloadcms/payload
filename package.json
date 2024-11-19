@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.131",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -74,7 +74,7 @@
     "prepare-run-test-against-prod": "pnpm bf && rm -rf test/packed && rm -rf test/node_modules && rm -rf app && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && cd ..",
     "prepare-run-test-against-prod:ci": "rm -rf test/node_modules && rm -rf app && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && cd ..",
     "reinstall": "pnpm clean:all && pnpm install",
-    "release:alpha": "pnpm runts ./scripts/release.ts --bump prerelease --tag alpha",
+    "release": "pnpm runts ./scripts/release.ts --tag latest",
     "release:beta": "pnpm runts ./scripts/release.ts --bump prerelease --tag beta",
     "runts": "cross-env NODE_OPTIONS=--no-deprecation node --no-deprecation --import @swc-node/register/esm-register",
     "script:gen-templates": "pnpm runts ./scripts/generate-template-variations.ts",

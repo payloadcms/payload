@@ -54,9 +54,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -138,7 +138,7 @@ export interface Page {
  */
 export interface Media {
   id: string;
-  alt: string;
+  alt?: string | null;
   caption?: {
     root: {
       type: string;

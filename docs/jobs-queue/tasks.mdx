@@ -2,7 +2,7 @@
 title: Tasks
 label: Tasks
 order: 20
-desc: A Task is a distinct function declaration that can be run within Payload's Jobs Queue. 
+desc: A Task is a distinct function declaration that can be run within Payload's Jobs Queue.
 keywords: jobs queue, application framework, typescript, node, react, nextjs
 ---
 
@@ -10,7 +10,7 @@ keywords: jobs queue, application framework, typescript, node, react, nextjs
   A <strong>"Task"</strong> is a function definition that performs business logic and whose input and output are both strongly typed.
 </Banner>
 
-You can register Tasks on the Payload config, and then create [Jobs](/docs/beta/jobs-queue/jobs) or [Workflows](/docs/beta/jobs-queue/workflows) that use them. Think of Tasks like tidy, isolated "functions that do one specific thing".
+You can register Tasks on the Payload config, and then create [Jobs](/docs/jobs-queue/jobs) or [Workflows](/docs/jobs-queue/workflows) that use them. Think of Tasks like tidy, isolated "functions that do one specific thing".
 
 Payload Tasks can be configured to automatically retried if they fail, which makes them valuable for "durable" workflows like AI applications where LLMs can return non-deterministic results, and might need to be retried.
 

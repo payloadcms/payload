@@ -83,7 +83,7 @@ export const DefaultFilter: React.FC<Props> = ({
       return (
         <Text
           disabled={disabled}
-          field={internalField.field as TextFieldClient}
+          field={internalField?.field as TextFieldClient}
           onChange={onChange}
           operator={operator}
           value={value}

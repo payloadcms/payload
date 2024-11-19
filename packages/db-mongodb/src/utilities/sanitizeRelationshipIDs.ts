@@ -117,14 +117,26 @@ export const sanitizeRelationshipIDs = ({
   fields,
 }: Args): Record<string, unknown> => {
   const sanitize: TraverseFieldsCallback = ({ field, ref }) => {
+    if (!ref || typeof ref !== 'object') {
+      return
+    }
+
     if (field.type === 'relationship' || field.type === 'upload') {
+      if (!ref[field.name]) {
+        return
+      }
+
       // handle localized relationships
       if (config.localization && field.localized) {
         const locales = config.localization.locales
         const fieldRef = ref[field.name]
+        if (typeof fieldRef !== 'object') {
+          return
+        }
+
         for (const { code } of locales) {
-          if (ref[field.name]?.[code]) {
-            const value = ref[field.name][code]
+          const value = ref[field.name][code]
+          if (value) {
             sanitizeRelationship({ config, field, locale: code, ref: fieldRef, value })
           }
         }
