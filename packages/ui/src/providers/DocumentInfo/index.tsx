@@ -3,7 +3,6 @@ import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
   ClientUser,
-  Data,
   DocumentPreferences,
   SanitizedDocumentPermissions,
 } from 'payload'
@@ -85,7 +84,7 @@ const DocumentInfo: React.FC<
   const [documentTitle, setDocumentTitle] = useState(() =>
     formatDocTitle({
       collectionConfig,
-      data: { ...initialData, id },
+      data: { ...(initialData || {}), id },
       dateFormat,
       fallback: id?.toString(),
       globalConfig,
@@ -106,7 +105,7 @@ const DocumentInfo: React.FC<
   const [documentIsLocked, setDocumentIsLocked] = useState<boolean | undefined>(isLockedFromProps)
   const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(currentEditorFromProps)
   const [lastUpdateTime, setLastUpdateTime] = useState<number>(lastUpdateTimeFromProps)
-  const [savedDocumentData, setSavedDocumentData] = useState<Data>(initialData)
+  const [savedDocumentData, setSavedDocumentData] = useState(initialData)
 
   const isInitializing = initialState === undefined || initialData === undefined
 

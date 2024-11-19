@@ -226,7 +226,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError message={errorMessage} showError={showError} />
-      {savedDocumentData.filename && !removedFile && (
+      {savedDocumentData && savedDocumentData.filename && !removedFile && (
         <FileDetails
           collectionSlug={collectionSlug}
           customUploadActions={customActions}
@@ -238,7 +238,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
           uploadConfig={uploadConfig}
         />
       )}
-      {(!savedDocumentData.filename || removedFile) && (
+      {(!savedDocumentData?.filename || removedFile) && (
         <div className={`${baseClass}__upload`}>
           {!value && !showUrlInput && (
             <Dropzone onChange={handleFileSelection}>
@@ -360,13 +360,13 @@ export const Upload: React.FC<UploadProps> = (props) => {
           )}
         </div>
       )}
-      {(value || savedDocumentData.filename) && (
+      {(value || savedDocumentData?.filename) && (
         <EditDepthProvider>
           <Drawer Header={null} slug={editDrawerSlug}>
             <EditUpload
               fileName={value?.name || savedDocumentData?.filename}
               fileSrc={savedDocumentData?.url || fileSrc}
-              imageCacheTag={savedDocumentData.updatedAt}
+              imageCacheTag={savedDocumentData?.updatedAt}
               initialCrop={uploadEdits?.crop ?? undefined}
               initialFocalPoint={{
                 x: uploadEdits?.focalPoint?.x || savedDocumentData.focalX || 50,
