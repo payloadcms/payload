@@ -89,7 +89,6 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
       try {
         await adapter.createMigration({
           file,
-          forceAcceptWarning,
           migrationName: args[1],
           payload,
           skipEmpty,
