@@ -164,6 +164,7 @@ export type CreateMigration = (args: {
   /** dirname of the package, required in drizzle */
   dirname?: string
   file?: string
+  forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
   /**

@@ -29,7 +29,7 @@ export const createMigration: CreateMigration = async function createMigration({
   const dirname = path.dirname(filename)
 
   const dir = payload.db.migrationDir
-  if (!skipEmpty || !fs.existsSync(dir)) {
+  if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
   const predefinedMigration = await getPredefinedMigration({
@@ -50,7 +50,10 @@ export const createMigration: CreateMigration = async function createMigration({
   const formattedName = migrationName?.replace(/\W/g, '_')
   const fileName = migrationName ? `${timestamp}_${formattedName}.ts` : `${timestamp}_migration.ts`
   const filePath = `${dir}/${fileName}`
-  fs.writeFileSync(filePath, migrationFileContent)
+
+  if (!skipEmpty) {
+    fs.writeFileSync(filePath, migrationFileContent)
+  }
 
   writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
 

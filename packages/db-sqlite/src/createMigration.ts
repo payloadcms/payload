@@ -17,7 +17,7 @@ const require = createRequire(import.meta.url)
 
 export const createMigration: CreateMigration = async function createMigration(
   this: SQLiteAdapter,
-  { file, forceAcceptWarning, migrationName, payload, skipEmpty },
+  { file, migrationName, payload, skipEmpty },
 ) {
   const filename = fileURLToPath(import.meta.url)
   const dirname = path.dirname(filename)
@@ -79,7 +79,7 @@ export const createMigration: CreateMigration = async function createMigration(
         .join('\n')
     }
 
-    if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {
+    if (!upSQL?.length && !downSQL?.length) {
       if (skipEmpty) {
         process.exit(0)
       }
