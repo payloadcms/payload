@@ -16,8 +16,8 @@ export default buildConfig({
     // Add your own logo and icon here
     components: {
       graphics: {
-        Icon: '/graphics/Icon/index.js#Icon',
-        Logo: '/graphics/Logo/index.js#Logo',
+        Icon: '/graphics/Icon/index.tsx#Icon',
+        Logo: '/graphics/Logo/index.tsx#Logo',
       },
     },
     // Add your own meta data here
