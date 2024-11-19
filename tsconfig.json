@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/_community/config.ts"
+        "./test/fields/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
@@ -54,6 +54,42 @@
       "@payloadcms/ui/shared": [
         "./packages/ui/src/exports/shared/index.ts"
       ],
+      "@payloadcms/ui/forms/fieldSchemasToFormState": [
+        "./packages/ui/src/forms/fieldSchemasToFormState/index.tsx"
+      ],
+      "@payloadcms/ui/utilities/buildFieldSchemaMap/traverseFields": [
+        "./packages/ui/src/utilities/buildFieldSchemaMap/traverseFields.ts"
+      ],
+      "@payloadcms/translations/utilities": [
+        "./packages/translations/src/exports/utilities.ts"
+      ],
+      "@payloadcms/translations/languages/en": [
+        "./packages/translations/src/languages/en.ts"
+      ],
+      "@payloadcms/translations/languages/de": [
+        "./packages/translations/src/languages/de.ts"
+      ],
+      "@payloadcms/translations/languages/es": [
+        "./packages/translations/src/languages/es.ts"
+      ],
+      "payload": [
+        "./packages/payload/src/index.ts"
+      ],
+      "payload/shared": [
+        "./packages/payload/src/exports/shared.ts"
+      ],
+      "payload/i18n/en": [
+        "./packages/payload/src/exports/i18n/en.ts"
+      ],
+      "payload/i18n/de": [
+        "./packages/payload/src/exports/i18n/de.ts"
+      ],
+      "payload/i18n/es": [
+        "./packages/payload/src/exports/i18n/es.ts"
+      ],
+      "payload/node": [
+        "./packages/payload/src/exports/node.ts"
+      ],
       "@payloadcms/ui/scss": [
         "./packages/ui/src/scss.scss"
       ],
@@ -68,6 +104,15 @@
       ],
       "@payloadcms/richtext-lexical/rsc": [
         "./packages/richtext-lexical/src/exports/server/rsc.ts"
+      ],
+      "@payloadcms/richtext-lexical/migrate": [
+        "./packages/richtext-lexical/src/exports/server/migrate.ts"
+      ],
+      "@payloadcms/richtext-lexical/lexical/headless": [
+        "./packages/richtext-lexical/src/lexical-proxy/@lexical-headless.ts"
+      ],
+      "@payloadcms/richtext-lexical/lexical/markdown": [
+        "./packages/richtext-lexical/src/lexical-proxy/@lexical-markdown.ts"
       ],
       "@payloadcms/richtext-slate/rsc": [
         "./packages/richtext-slate/src/exports/server/rsc.ts"
