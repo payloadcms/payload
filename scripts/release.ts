@@ -189,7 +189,7 @@ async function main() {
   header(`🧑‍💻 Committing changes...`)
 
   // Commit all staged changes
-  runCmd(`git add CHANGELOG.md packages/**/package.json package.json`, execOpts)
+  runCmd(`git add packages/**/package.json package.json`, execOpts)
 
   // Wait 500ms to avoid .git/index.lock errors
   await new Promise((resolve) => setTimeout(resolve, 500))
