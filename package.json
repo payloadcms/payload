@@ -113,7 +113,7 @@
     "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@playwright/test": "1.48.1",
-    "@sentry/nextjs": "^8.33.1",
+    "@sentry/nextjs": "^8.39.0",
     "@sentry/node": "^8.33.1",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.4.0",
