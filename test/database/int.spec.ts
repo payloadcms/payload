@@ -13,7 +13,13 @@ import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
 import { Types } from 'mongoose'
 import path from 'path'
-import { commitTransaction, initTransaction, killTransaction, QueryError } from 'payload'
+import {
+  commitTransaction,
+  initTransaction,
+  isolateObjectProperty,
+  killTransaction,
+  QueryError,
+} from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
@@ -576,12 +582,7 @@ describe('database', () => {
         })
 
         it('should commit multiple operations async', async () => {
-          const req_1 = {
-            payload,
-            user,
-          } as unknown as PayloadRequest
-
-          const req_2 = {
+          const req = {
             payload,
             user,
           } as unknown as PayloadRequest
@@ -595,7 +596,7 @@ describe('database', () => {
               data: {
                 title,
               },
-              req: req_1,
+              req: isolateObjectProperty(req, 'transactionID'),
             })
             .then((res) => {
               first = res
@@ -607,7 +608,7 @@ describe('database', () => {
               data: {
                 title,
               },
-              req: req_2,
+              req: isolateObjectProperty(req, 'transactionID'),
             })
             .then((res) => {
               second = res
@@ -615,8 +616,7 @@ describe('database', () => {
 
           await Promise.all([firstReq, secondReq])
 
-          expect(req_1.transactionID).toBeUndefined()
-          expect(req_2.transactionID).toBeUndefined()
+          expect(req.transactionID).toBeUndefined()
 
           const firstResult = await payload.findByID({
             id: first.id,
