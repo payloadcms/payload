@@ -4,7 +4,7 @@ import { sanitizeFields, withNullableJSONSchemaType } from 'payload'
 
 import type { AdapterArguments } from './types.js'
 
-import { richTextRelationshipPromise } from './data/richTextRelationshipPromise.js'
+import { richTextRelationshipPromise } from './data/recurseNestedFields.js'
 import { richTextValidate } from './data/validation.js'
 import { elements as elementTypes } from './field/elements/index.js'
 import { transformExtraFields } from './field/elements/link/utilities.js'
