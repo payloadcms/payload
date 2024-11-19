@@ -1,6 +1,6 @@
 name: Functionality Bug
 description: '[REPRODUCTION REQUIRED] - Create a bug report'
-labels: ['status: needs-triage', 'v3', 'validate-reproduction']
+labels: ['status: needs-triage', 'validate-reproduction']
 body:
   - type: textarea
     attributes:
