@@ -15,25 +15,25 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "beta",
-    "@payloadcms/next": "beta",
-    "@payloadcms/richtext-lexical": "beta",
+    "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/next": "latest",
+    "@payloadcms/richtext-lexical": "latest",
     "cross-env": "^7.0.3",
     "graphql": "^16.9.0",
-    "next": "15.0.0",
-    "payload": "beta",
+    "next": "^15.0.0",
+    "payload": "latest",
     "react": "19.0.0-rc-65a56d0e-20241020",
     "react-dom": "19.0.0-rc-65a56d0e-20241020",
     "sharp": "0.32.6"
   },
   "devDependencies": {
-    "@payloadcms/graphql": "beta",
+    "@payloadcms/graphql": "latest",
     "@types/node": "^20.11.25",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
-    "eslint-config-next": "15.0.0",
+    "eslint-config-next": "^15.0.0",
     "tsx": "^4.16.2",
     "typescript": "5.5.2"
   },
