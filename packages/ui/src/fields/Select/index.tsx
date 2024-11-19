@@ -115,6 +115,7 @@ const SelectFieldComponent: SelectFieldClientComponent = (props) => {
       options={options}
       path={path}
       readOnly={readOnly}
+      required={required}
       showError={showError}
       style={style}
       value={value as string | string[]}

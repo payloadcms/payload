@@ -33,6 +33,7 @@ export type SelectInputProps = {
   readonly options?: OptionObject[]
   readonly path: string
   readonly readOnly?: boolean
+  readonly required?: boolean
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: string | string[]
@@ -57,6 +58,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     options,
     path,
     readOnly,
+    required,
     showError,
     style,
     value,
@@ -102,7 +104,9 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     >
       <RenderCustomComponent
         CustomComponent={Label}
-        Fallback={<FieldLabel label={label} localized={localized} path={path} required={false} />}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
