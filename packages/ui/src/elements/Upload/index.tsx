@@ -369,8 +369,8 @@ export const Upload: React.FC<UploadProps> = (props) => {
               imageCacheTag={savedDocumentData?.updatedAt}
               initialCrop={uploadEdits?.crop ?? undefined}
               initialFocalPoint={{
-                x: uploadEdits?.focalPoint?.x || savedDocumentData.focalX || 50,
-                y: uploadEdits?.focalPoint?.y || savedDocumentData.focalY || 50,
+                x: uploadEdits?.focalPoint?.x || savedDocumentData?.focalX || 50,
+                y: uploadEdits?.focalPoint?.y || savedDocumentData?.focalY || 50,
               }}
               onSave={onEditsSave}
               showCrop={showCrop}
@@ -384,7 +384,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
           className={`${baseClass}__previewDrawer`}
           hoverTitle
           slug={sizePreviewSlug}
-          title={t('upload:sizesFor', { label: savedDocumentData?.filename })}
+          title={t('upload:sizesFor', { label: savedDocumentData.filename })}
         >
           <PreviewSizes
             doc={savedDocumentData}
