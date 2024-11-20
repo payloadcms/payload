@@ -663,14 +663,14 @@ export default buildConfigWithDefaults({
         },
         blocks: [
           {
-            blockType: 'myBlock',
+            blockType: 'myBlock3',
             richText7: textToLexicalJSON({ text: 'Text6' }),
             blockName: 'My Block 1',
           },
         ],
         blocks3: [
           {
-            blockType: 'myBlock',
+            blockType: 'myBlock2',
             richText5: textToLexicalJSON({ text: 'Text7' }),
             blockName: 'My Block 2',
           },

@@ -484,7 +484,7 @@ export interface Regression1 {
         } | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'myBlock';
+        blockType: 'myBlock2';
       }[]
     | null;
   array?:
@@ -546,7 +546,7 @@ export interface Regression1 {
         } | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'myBlock';
+        blockType: 'myBlock3';
       }[]
     | null;
   updatedAt: string;
@@ -1005,7 +1005,7 @@ export interface Regression1Select<T extends boolean = true> {
   blocks3?:
     | T
     | {
-        myBlock?:
+        myBlock2?:
           | T
           | {
               richText5?: T;
@@ -1028,7 +1028,7 @@ export interface Regression1Select<T extends boolean = true> {
   blocks?:
     | T
     | {
-        myBlock?:
+        myBlock3?:
           | T
           | {
               richText7?: T;

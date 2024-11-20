@@ -66,7 +66,7 @@ export const Regression1: CollectionConfig = {
               type: 'blocks',
               blocks: [
                 {
-                  slug: 'myBlock',
+                  slug: 'myBlock2',
                   fields: [
                     {
                       name: 'richText5',
@@ -111,7 +111,7 @@ export const Regression1: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'myBlock',
+          slug: 'myBlock3',
           fields: [
             {
               name: 'richText7',
