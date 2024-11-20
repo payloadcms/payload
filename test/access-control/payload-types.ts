@@ -30,6 +30,8 @@ export interface Config {
     'hidden-access-count': HiddenAccessCount;
     disabled: Disabled;
     'rich-text': RichText;
+    regression1: Regression1;
+    regression2: Regression2;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -54,6 +56,8 @@ export interface Config {
     'hidden-access-count': HiddenAccessCountSelect<false> | HiddenAccessCountSelect<true>;
     disabled: DisabledSelect<false> | DisabledSelect<true>;
     'rich-text': RichTextSelect<false> | RichTextSelect<true>;
+    regression1: Regression1Select<false> | Regression1Select<true>;
+    regression2: Regression2Select<false> | Regression2Select<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -83,9 +87,9 @@ export interface Config {
     | (NonAdminUser & {
         collection: 'non-admin-user';
       });
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -385,6 +389,218 @@ export interface RichText {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regression1".
+ */
+export interface Regression1 {
+  id: string;
+  group1?: {
+    richText1?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    text?: string | null;
+  };
+  tab1?: {
+    richText2?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    blocks2?:
+      | {
+          richText3?: {
+            root: {
+              type: string;
+              children: {
+                type: string;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          } | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'myBlock';
+        }[]
+      | null;
+  };
+  richText4?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  blocks3?:
+    | {
+        richText5?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'myBlock';
+      }[]
+    | null;
+  array?:
+    | {
+        art?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithAccessFalse?:
+    | {
+        richText6?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        richText7?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'myBlock';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regression2".
+ */
+export interface Regression2 {
+  id: string;
+  group?: {
+    richText1?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    text?: string | null;
+  };
+  array?:
+    | {
+        richText2?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -461,6 +677,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rich-text';
         value: string | RichText;
+      } | null)
+    | ({
+        relationTo: 'regression1';
+        value: string | Regression1;
+      } | null)
+    | ({
+        relationTo: 'regression2';
+        value: string | Regression2;
       } | null);
   globalSlug?: string | null;
   user:
@@ -746,6 +970,91 @@ export interface RichTextSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regression1_select".
+ */
+export interface Regression1Select<T extends boolean = true> {
+  group1?:
+    | T
+    | {
+        richText1?: T;
+        text?: T;
+      };
+  tab1?:
+    | T
+    | {
+        richText2?: T;
+        blocks2?:
+          | T
+          | {
+              myBlock?:
+                | T
+                | {
+                    richText3?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
+  richText4?: T;
+  blocks3?:
+    | T
+    | {
+        myBlock?:
+          | T
+          | {
+              richText5?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  array?:
+    | T
+    | {
+        art?: T;
+        id?: T;
+      };
+  arrayWithAccessFalse?:
+    | T
+    | {
+        richText6?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        myBlock?:
+          | T
+          | {
+              richText7?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regression2_select".
+ */
+export interface Regression2Select<T extends boolean = true> {
+  group?:
+    | T
+    | {
+        richText1?: T;
+        text?: T;
+      };
+  array?:
+    | T
+    | {
+        richText2?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
