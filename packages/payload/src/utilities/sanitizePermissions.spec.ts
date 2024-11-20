@@ -370,7 +370,7 @@ describe('recursivelySanitizePermissions', () => {
     sanitizePermissions({
       canAccessAdmin: true,
       collections: {
-        test: permissions,
+        test: permissions as CollectionPermission,
       },
     })
     expect(permissions).toStrictEqual({
@@ -500,7 +500,7 @@ describe('recursivelySanitizePermissions', () => {
     sanitizePermissions({
       canAccessAdmin: true,
       collections: {
-        test: permissions,
+        test: permissions as CollectionPermission,
       },
     })
     expect(permissions).toStrictEqual({

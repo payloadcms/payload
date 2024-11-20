@@ -4,34 +4,29 @@ import type {
   FieldsPermissions,
   GlobalPermission,
   Permissions,
+  SanitizedBlocksPermissions,
   SanitizedCollectionPermission,
   SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
   SanitizedGlobalPermission,
   SanitizedPermissions,
 } from '../auth/types.js'
 
 function areAllFieldsPermissionsTrue(data: FieldsPermissions): boolean {
-  const randomNumber = Math.random()
-
-  console.log('Inside areAllFieldsPermissionsTrue for', data, randomNumber)
   let areAllFieldsTrue = true
   for (const key in data) {
-    console.log('Checking key', key)
     if (typeof data[key] === 'object') {
       // If any recursive call returns false, the whole function returns false
       if (!areAllPermissionsTrue(data[key])) {
         areAllFieldsTrue = false
       } else {
         ;(data[key] as unknown as SanitizedFieldPermissions) = true
-        console.log('Setting key to true', key)
       }
     } else if (data[key] !== true) {
       // If any value is not true, return false
       areAllFieldsTrue = false
     }
   }
-
-  console.log('End areAllFieldsPermissionsTrue', { areAllFieldsTrue }, randomNumber)
 
   // If all values are true or it's an empty object, return true
   return areAllFieldsTrue
@@ -43,9 +38,6 @@ function areAllFieldsPermissionsTrue(data: FieldsPermissions): boolean {
 function areAllPermissionsTrue(
   data: CollectionPermission | FieldPermissions | GlobalPermission,
 ): boolean {
-  const randomNumber = Math.random()
-  console.log('Inside areAllPermissionsTrue for', data, randomNumber)
-
   let blocksPermissions = true
   if ('blocks' in data && data.blocks) {
     for (const blockSlug in data.blocks) {
@@ -54,12 +46,11 @@ function areAllPermissionsTrue(
           if (key === 'fields') {
             // If any recursive call returns false, the whole function returns false
 
-            console.log('1 checking field permissions for', blockSlug)
             if (data.blocks[blockSlug].fields) {
               if (!areAllFieldsPermissionsTrue(data.blocks[blockSlug].fields)) {
                 blocksPermissions = false
               } else {
-                data.blocks[blockSlug].fields = true
+                ;(data.blocks[blockSlug].fields as unknown as SanitizedFieldsPermissions) = true
               }
             }
           } else {
@@ -88,12 +79,8 @@ function areAllPermissionsTrue(
                   continue
                 }
               } else {
-                console.error('Unexpected object in permissions1', key, data.blocks[blockSlug][key])
+                throw new Error('Unexpected object in block permissions')
               }
-
-              /*
-              handle permissions object done
-              */
             }
           }
         }
@@ -104,17 +91,16 @@ function areAllPermissionsTrue(
       }
     }
     if (blocksPermissions) {
-      data.blocks = true
+      ;(data.blocks as unknown as SanitizedBlocksPermissions) = true
     }
   }
 
   let fieldsPermissions = true
   if (data.fields) {
-    console.log('2 checking field permissions')
     if (!areAllFieldsPermissionsTrue(data.fields)) {
       fieldsPermissions = false
     } else {
-      data.fields = true
+      ;(data.fields as unknown as SanitizedFieldsPermissions) = true
     }
   }
 
@@ -142,7 +128,7 @@ function areAllPermissionsTrue(
           continue
         }
       } else {
-        console.error('Unexpected object in permissions', key, data[key])
+        throw new Error('Unexpected object in fields permissions')
       }
 
       /*
@@ -153,12 +139,6 @@ function areAllPermissionsTrue(
       otherPermissions = false
     }
   }
-
-  console.log('End areAllPermissionsTrue for', randomNumber, {
-    blocksPermissions,
-    fieldsPermissions,
-    otherPermissions,
-  })
 
   // If all values are true or it's an empty object, return true
   return fieldsPermissions && blocksPermissions && otherPermissions
@@ -199,7 +179,6 @@ export function recursivelySanitizeCollections(obj: Permissions['collections']):
   for (let i = 0; i < entries.length; i++) {
     const [collectionSlug, collectionPermission] = entries[i]
 
-    console.log('areAllPermissionsTrue for collection', collectionSlug)
     if (areAllPermissionsTrue(collectionPermission)) {
       ;(obj[collectionSlug] as unknown as SanitizedCollectionPermission) = true
       continue
@@ -216,7 +195,6 @@ export function recursivelySanitizeGlobals(obj: Permissions['globals']): void {
 
   for (let i = 0; i < entries.length; i++) {
     const [globalSlug, globalPermission] = entries[i]
-    console.log('areAllPermissionsTrue for global', globalSlug)
 
     if (areAllPermissionsTrue(globalPermission)) {
       ;(obj[globalSlug] as unknown as SanitizedGlobalPermission) = true

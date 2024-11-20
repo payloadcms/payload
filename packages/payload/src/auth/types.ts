@@ -15,15 +15,31 @@ export type FieldsPermissions = {
   [fieldName: string]: FieldPermissions
 }
 
-export type FieldPermissions = {
-  blocks?: {
-    [blockSlug: string]: {
-      create: Permission
-      fields: FieldsPermissions
-      read: Permission
-      update: Permission
+export type BlockPermissions = {
+  create: Permission
+  fields: FieldsPermissions
+  read: Permission
+  update: Permission
+}
+
+export type SanitizedBlockPermissions =
+  | {
+      fields: SanitizedFieldsPermissions
     }
-  }
+  | true
+
+export type BlocksPermissions = {
+  [blockSlug: string]: BlockPermissions
+}
+
+export type SanitizedBlocksPermissions =
+  | {
+      [blockSlug: string]: SanitizedBlockPermissions
+    }
+  | true
+
+export type FieldPermissions = {
+  blocks?: BlocksPermissions
   create: Permission
   fields?: FieldsPermissions
   read: Permission
@@ -32,13 +48,7 @@ export type FieldPermissions = {
 
 export type SanitizedFieldPermissions =
   | {
-      blocks?: {
-        [blockSlug: string]:
-          | {
-              fields: SanitizedFieldsPermissions
-            }
-          | true
-      }
+      blocks?: SanitizedBlocksPermissions
       create: true
       fields?: SanitizedFieldsPermissions
       read: true

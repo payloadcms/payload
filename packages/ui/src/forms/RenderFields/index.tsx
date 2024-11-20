@@ -3,7 +3,7 @@
 import { getFieldPaths } from 'payload/shared'
 import React from 'react'
 
-import type { Props } from './types.js'
+import type { RenderFieldsProps } from './types.js'
 
 import { RenderIfInViewport } from '../../elements/RenderIfInViewport/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
@@ -12,9 +12,9 @@ import { RenderField } from './RenderField.js'
 
 const baseClass = 'render-fields'
 
-export { Props }
+export { RenderFieldsProps as Props }
 
-export const RenderFields: React.FC<Props> = (props) => {
+export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
   const {
     className,
     fields,
@@ -26,8 +26,6 @@ export const RenderFields: React.FC<Props> = (props) => {
     permissions,
     readOnly: readOnlyFromParent,
   } = props
-
-  console.log('RenderFields', props)
 
   const operation = useOperation()
 
@@ -90,19 +88,6 @@ export const RenderFields: React.FC<Props> = (props) => {
 
           if ('name' in field && !hasOperationPermission) {
             isReadOnly = true
-          }
-
-          if (field.name === 'art') {
-            console.log('Checking field', {
-              field,
-              hasOperationPermission,
-              hasReadPermission,
-              isReadOnly,
-              parentName,
-              parentPath,
-              parentSchemaPath,
-              permissions,
-            })
           }
 
           const { indexPath, path, schemaPath } = getFieldPaths({
