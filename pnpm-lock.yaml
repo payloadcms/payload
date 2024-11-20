@@ -1056,6 +1056,9 @@ importers:
 
   packages/plugin-search:
     dependencies:
+      '@payloadcms/next':
+        specifier: workspace:*
+        version: link:../next
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui

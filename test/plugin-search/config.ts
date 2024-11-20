@@ -49,6 +49,10 @@ export default buildConfigWithDefaults({
         posts: ({ title }) => (title === 'Hello, world!' ? 30 : 20),
       },
       searchOverrides: {
+        access: {
+          // Used for int test
+          delete: ({ req: { user } }) => user.email === devUser.email,
+        },
         fields: ({ defaultFields }) => [
           ...defaultFields,
           {
