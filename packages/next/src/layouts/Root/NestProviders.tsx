@@ -11,20 +11,18 @@ type Args = {
 }
 
 export function NestProviders({ children, importMap, providers }: Args): React.ReactNode {
-  return (
-    <RenderServerComponent
-      clientProps={{
-        children:
-          providers.length > 1 ? (
-            <NestProviders importMap={importMap} providers={providers.slice(1)}>
-              {children}
-            </NestProviders>
-          ) : (
-            children
-          ),
-      }}
-      Component={providers[0]}
-      importMap={importMap}
-    />
-  )
+  return RenderServerComponent({
+    clientProps: {
+      children:
+        providers.length > 1 ? (
+          <NestProviders importMap={importMap} providers={providers.slice(1)}>
+            {children}
+          </NestProviders>
+        ) : (
+          children
+        ),
+    },
+    Component: providers[0],
+    importMap,
+  })
 }

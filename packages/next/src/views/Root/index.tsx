@@ -127,24 +127,22 @@ export const RootPage = async ({
     importMap,
   })
 
-  const RenderedView = (
-    <RenderServerComponent
-      clientProps={{ clientConfig }}
-      Component={DefaultView.payloadComponent}
-      Fallback={DefaultView.Component}
-      importMap={importMap}
-      serverProps={{
-        ...serverProps,
-        clientConfig,
-        i18n: initPageResult?.req.i18n,
-        importMap,
-        initPageResult,
-        params,
-        payload: initPageResult?.req.payload,
-        searchParams,
-      }}
-    />
-  )
+  const RenderedView = RenderServerComponent({
+    clientProps: { clientConfig },
+    Component: DefaultView.payloadComponent,
+    Fallback: DefaultView.Component,
+    importMap,
+    serverProps: {
+      ...serverProps,
+      clientConfig,
+      i18n: initPageResult?.req.i18n,
+      importMap,
+      initPageResult,
+      params,
+      payload: initPageResult?.req.payload,
+      searchParams,
+    },
+  })
 
   return (
     <Fragment>

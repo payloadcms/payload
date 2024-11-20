@@ -81,10 +81,12 @@ export const externalUsersLogin: Endpoint = {
         })
 
         if (loginAttempt?.token) {
-          const collection: Collection = req.payload.collections['users']
+          const collection: Collection = (req.payload.collections as { [key: string]: Collection })[
+            'users'
+          ]
           const cookie = generatePayloadCookie({
-            collectionConfig: collection.config,
-            payload: req.payload,
+            collectionAuthConfig: collection.config.auth,
+            cookiePrefix: req.payload.config.cookiePrefix,
             token: loginAttempt.token,
           })
 

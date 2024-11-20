@@ -9,6 +9,7 @@ import React from 'react'
 import type { Props as MediaProps } from '../types'
 
 import cssVariables from '@/cssVariables'
+import { getClientSideURL } from '@/utilities/getURL'
 
 const { breakpoints } = cssVariables
 
@@ -43,9 +44,9 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
 
     width = fullWidth!
     height = fullHeight!
-    alt = altFromResource
+    alt = altFromResource || ''
 
-    src = `${process.env.NEXT_PUBLIC_SERVER_URL}${url}`
+    src = `${getClientSideURL()}${url}`
   }
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes

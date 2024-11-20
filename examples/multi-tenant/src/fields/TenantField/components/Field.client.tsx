@@ -1,13 +1,13 @@
 'use client'
-import { RelationshipField, useField, useFieldProps } from '@payloadcms/ui'
+import { RelationshipField, useField } from '@payloadcms/ui'
 import React from 'react'
 
 type Props = {
   initialValue?: string
+  path: string
   readOnly: boolean
 }
-export function TenantFieldComponentClient({ initialValue, readOnly }: Props) {
-  const { path } = useFieldProps()
+export function TenantFieldComponentClient({ initialValue, path, readOnly }: Props) {
   const { formInitializing, setValue, value } = useField({ path })
   const hasSetInitialValue = React.useRef(false)
 
@@ -23,11 +23,11 @@ export function TenantFieldComponentClient({ initialValue, readOnly }: Props) {
       field={{
         name: path,
         type: 'relationship',
-        _path: path,
         label: 'Tenant',
         relationTo: 'tenants',
         required: true,
       }}
+      path={path}
       readOnly={readOnly}
     />
   )

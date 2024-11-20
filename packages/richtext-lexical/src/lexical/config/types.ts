@@ -14,12 +14,12 @@ import type { LexicalFieldAdminProps } from '../../types.js'
 
 export type ServerEditorConfig = {
   features: FeatureProviderServer<any, any, any>[]
-  lexical?: LexicalEditorConfig
+  lexical?: LexicalEditorConfig | undefined // If undefined, the default lexical editor config will be used. This can be undefined so that we do not send the default lexical editor config to the client.
 }
 
 export type SanitizedServerEditorConfig = {
   features: SanitizedServerFeatures
-  lexical: LexicalEditorConfig
+  lexical: LexicalEditorConfig | undefined // If undefined, the default lexical editor config will be used. This can be undefined so that we do not send the default lexical editor config to the client.
   resolvedFeatureMap: ResolvedServerFeatureMap
 }
 

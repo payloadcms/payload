@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-vercel-postgres",
-  "version": "3.0.0-beta.134",
+  "version": "3.0.1",
   "description": "Vercel Postgres adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {

@@ -83,6 +83,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
       finalSanitizedEditorConfig = deepCopyObject(defaultSanitizedServerEditorConfig)
 
+      delete finalSanitizedEditorConfig.lexical // We don't want to send the default lexical editor config to the client
+
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
       const rootEditor = config.editor
@@ -116,7 +118,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
       finalSanitizedEditorConfig = {
         features: sanitizeServerFeatures(resolvedFeatureMap),
-        lexical,
+        lexical: props.lexical,
         resolvedFeatureMap,
       }
     }
