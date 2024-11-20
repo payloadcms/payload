@@ -29,7 +29,7 @@ type TabType<TField> = TField extends ClientField ? ClientTab : Tab
  * @param fields
  * @param keepPresentationalFields if true, will skip flattening fields that are presentational only
  */
-function flattenFields<TField extends ClientField | Field>(
+export function flattenTopLevelFields<TField extends ClientField | Field>(
   fields: TField[],
   keepPresentationalFields?: boolean,
 ): FlattenedField<TField>[] {
@@ -39,7 +39,7 @@ function flattenFields<TField extends ClientField | Field>(
     }
 
     if (fieldHasSubFields(field)) {
-      return [...fieldsToUse, ...flattenFields(field.fields as TField[], keepPresentationalFields)]
+      return [...fieldsToUse, ...flattenTopLevelFields(field.fields as TField[], keepPresentationalFields)]
     }
 
     if (field.type === 'tabs' && 'tabs' in field) {
@@ -51,7 +51,7 @@ function flattenFields<TField extends ClientField | Field>(
           } else {
             return [
               ...tabFields,
-              ...flattenFields(tab.fields as TField[], keepPresentationalFields),
+              ...flattenTopLevelFields(tab.fields as TField[], keepPresentationalFields),
             ]
           }
         }, []),
@@ -61,5 +61,3 @@ function flattenFields<TField extends ClientField | Field>(
     return fieldsToUse
   }, [])
 }
-
-export default flattenFields

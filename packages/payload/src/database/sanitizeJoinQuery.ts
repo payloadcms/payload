@@ -4,7 +4,7 @@ import type { JoinQuery, PayloadRequest } from '../types/index.js'
 import executeAccess from '../auth/executeAccess.js'
 import { QueryError } from '../errors/QueryError.js'
 import { combineQueries } from './combineQueries.js'
-import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
+import { validateQueryPaths } from './queryValidation/validateSearchParams.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig

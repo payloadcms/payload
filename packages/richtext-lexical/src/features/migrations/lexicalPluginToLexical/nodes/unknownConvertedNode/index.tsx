@@ -5,10 +5,7 @@ import { addClassNamesToElement } from '@lexical/utils'
 import { DecoratorNode } from 'lexical'
 import * as React from 'react'
 
-export type UnknownConvertedNodeData = {
-  nodeData: unknown
-  nodeType: string
-}
+import type { UnknownConvertedNodeData } from './types.js'
 
 export type SerializedUnknownConvertedNode = Spread<
   {

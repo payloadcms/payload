@@ -15,10 +15,10 @@ import type {
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
+import { validateQueryPaths } from '../../database/queryValidation/validateSearchParams.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
-import { NotFound } from '../../errors/index.js'
+import { NotFound } from '../../errors/NotFound.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { validateQueryPaths } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'

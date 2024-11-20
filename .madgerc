@@ -1,0 +1,17 @@
+{
+  "detectiveOptions": {
+    "ts": {
+      "skipTypeImports": true
+    }
+  },
+  "dependencyFilter": false,
+  "includeNpm": true,
+  "tsConfig": "/Users/alessio/Documents/GitHub/payload20/tsconfig.json",
+  "fileExtensions": [
+    "ts",
+    "tsx",
+    "js",
+    "jsx"
+  ],
+  "baseDir": "/Users/alessio/Documents/GitHub/payload20"
+}

@@ -5,6 +5,7 @@ import type {
   CollapsibleField,
   DateField,
   EmailField,
+  FieldWithSubFields,
   GroupField,
   JSONField,
   NumberField,
@@ -21,11 +22,11 @@ import type {
 } from 'payload'
 
 import { GraphQLEnumType, GraphQLInputObjectType } from 'graphql'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
 import { formatName } from '../utilities/formatName.js'
-import { recursivelyBuildNestedPaths } from './recursivelyBuildNestedPaths.js'
 import { withOperators } from './withOperators.js'
 
 type Args = {
@@ -161,3 +162,82 @@ export const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => 
     }
   },
 })
+
+type RecursivelyBuildNestedPathsArgs = {
+  field: FieldWithSubFields | TabsField
+  nestedFieldName2: string
+  parentName: string
+}
+
+export const recursivelyBuildNestedPaths = ({
+  field,
+  nestedFieldName2,
+  parentName,
+}: RecursivelyBuildNestedPathsArgs) => {
+  const fieldName = fieldAffectsData(field) ? field.name : undefined
+  const nestedFieldName = fieldName || nestedFieldName2
+
+  if (field.type === 'tabs') {
+    // if the tab has a name, treat it as a group
+    // otherwise, treat it as a row
+    return field.tabs.reduce((tabSchema, tab: any) => {
+      tabSchema.push(
+        ...recursivelyBuildNestedPaths({
+          field: {
+            ...tab,
+            type: 'name' in tab ? 'group' : 'row',
+          },
+          nestedFieldName2: nestedFieldName,
+          parentName,
+        }),
+      )
+      return tabSchema
+    }, [])
+  }
+
+  const nestedPaths = field.fields.reduce((nestedFields, nestedField) => {
+    if (!fieldIsPresentationalOnly(nestedField)) {
+      if (!fieldAffectsData(nestedField)) {
+        return [
+          ...nestedFields,
+          ...recursivelyBuildNestedPaths({
+            field: nestedField,
+            nestedFieldName2: nestedFieldName,
+            parentName,
+          }),
+        ]
+      }
+
+      const nestedPathName = fieldAffectsData(nestedField)
+        ? `${nestedFieldName ? `${nestedFieldName}__` : ''}${nestedField.name}`
+        : undefined
+      const getFieldSchema = fieldToSchemaMap({
+        nestedFieldName,
+        parentName,
+      })[nestedField.type]
+
+      if (getFieldSchema) {
+        const fieldSchema = getFieldSchema({
+          ...nestedField,
+          name: nestedPathName,
+        })
+
+        if (Array.isArray(fieldSchema)) {
+          return [...nestedFields, ...fieldSchema]
+        }
+
+        return [
+          ...nestedFields,
+          {
+            type: fieldSchema,
+            key: nestedPathName,
+          },
+        ]
+      }
+    }
+
+    return nestedFields
+  }, [])
+
+  return nestedPaths
+}

@@ -1,9 +1,9 @@
 'use client'
 import React from 'react'
 
-import type { UnknownConvertedNodeData } from './index.js'
-
 import './index.scss'
+
+import type { UnknownConvertedNodeData } from './types.js'
 
 type Props = {
   data: UnknownConvertedNodeData

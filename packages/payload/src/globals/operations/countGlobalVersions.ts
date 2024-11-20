@@ -3,13 +3,10 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
-import {
-  buildVersionGlobalFields,
-  type GlobalSlug,
-  type SanitizedGlobalConfig,
-} from '../../index.js'
+import { validateQueryPaths } from '../../database/queryValidation/validateSearchParams.js'
+import { type GlobalSlug, type SanitizedGlobalConfig } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 
 export type Arguments = {
   disableErrors?: boolean

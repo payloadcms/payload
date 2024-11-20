@@ -11,8 +11,8 @@ import type {
 
 import type { RenderFieldMethod } from './types.js'
 
+import { iterateFields } from './addFieldStatePromise.js'
 import { calculateDefaultValues } from './calculateDefaultValues/index.js'
-import { iterateFields } from './iterateFields.js'
 
 type Args = {
   collectionSlug?: string

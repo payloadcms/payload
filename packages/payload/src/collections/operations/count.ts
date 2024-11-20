@@ -5,7 +5,7 @@ import type { Collection } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { validateQueryPaths } from '../../database/queryValidation/validateSearchParams.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildAfterOperation } from './utils.js'
 
