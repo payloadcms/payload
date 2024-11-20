@@ -53,7 +53,10 @@ export function getRouteInfo({
 
     // If the collection has an ID field, we need to determine the type of the ID field
     if (collectionConfig && payload) {
-      if (payload.collections?.[collectionSlug]) {
+      if (
+        payload.collections?.[collectionSlug] &&
+        payload.collections?.[collectionSlug].customIDType
+      ) {
         idType = payload.collections?.[collectionSlug].customIDType
       }
     }
