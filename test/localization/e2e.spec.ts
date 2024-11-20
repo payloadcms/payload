@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { englishLocale } from 'globals/config.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -18,6 +19,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { richTextSlug } from './collections/RichText/index.js'
 import {
   englishTitle,
   localizedPostsSlug,
@@ -49,13 +51,15 @@ const description = 'description'
 let page: Page
 let payload: PayloadTestSDK<Config>
 let serverURL: string
+let richTextURL: AdminUrlUtil
 
 describe('Localization', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
+    richTextURL = new AdminUrlUtil(serverURL, richTextSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
 
     const context = await browser.newContext()
@@ -295,6 +299,109 @@ describe('Localization', () => {
       await copyDrawerClose.click()
 
       await expect(page.locator('#field-title')).toHaveValue(title)
+    })
+
+    test('should copy rich text data to correct locale', async () => {
+      await page.goto(richTextURL.create)
+
+      const richTextField = page.locator('#field-richText')
+      const richTextContent = '<p>This is rich text in English</p>'
+      await richTextField.fill(richTextContent)
+      await saveDocAndAssert(page)
+
+      const docControls = page.locator('.doc-controls__popup')
+      await docControls.click()
+
+      const copyButton = page.locator('#copy-locale-data__button')
+      await expect(copyButton).toBeVisible()
+      await copyButton.click()
+
+      await expect(page.locator('.copy-locale-data__content')).toBeVisible()
+
+      const fromField = page.locator('#field-fromLocale')
+      await fromField.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      await options.locator('text=English').click()
+
+      const toField = page.locator('#field-toLocale')
+      await toField.click({ delay: 100 })
+      await options.locator('text=Spanish').click()
+
+      const copyDrawerClose = page.locator('.copy-locale-data__sub-header button')
+      await copyDrawerClose.click()
+
+      await expect(richTextField).toContainText(richTextContent)
+    })
+
+    test('should not overwrite existing data when overwrite is unchecked', async () => {
+      await page.goto(url.create)
+
+      await fillValues({ title: englishTitle, description })
+      await saveDocAndAssert(page)
+
+      await changeLocale(page, spanishLocale)
+      await fillValues({ title: spanishTitle, description: 'Spanish description' })
+      await saveDocAndAssert(page)
+
+      const docControls = page.locator('.doc-controls__popup')
+      await docControls.click()
+
+      const copyButton = page.locator('#copy-locale-data__button')
+      await expect(copyButton).toBeVisible()
+      await copyButton.click()
+
+      await expect(page.locator('.copy-locale-data__content')).toBeVisible()
+
+      const fromField = page.locator('#field-fromLocale')
+      await fromField.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      await options.locator('text=English').click()
+
+      const toField = page.locator('#field-toLocale')
+      await toField.click({ delay: 100 })
+      await options.locator('text=Spanish').click()
+
+      const overwriteCheckbox = page.locator('#field-overwriteExisting')
+      await expect(overwriteCheckbox).not.toBeChecked()
+
+      const copyDrawerClose = page.locator('.copy-locale-data__sub-header button')
+      await copyDrawerClose.click()
+
+      await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+      await expect(page.locator('#field-description')).toHaveValue('Spanish description')
+    })
+
+    test('should overwrite existing data when overwrite is checked', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, englishLocale)
+      await fillValues({ title: englishTitle, description })
+      await saveDocAndAssert(page)
+
+      await changeLocale(page, spanishLocale)
+      await fillValues({ title: spanishTitle })
+      await saveDocAndAssert(page)
+
+      const docControls = page.locator('.doc-controls__popup')
+      await docControls.click()
+      const copyButton = page.locator('#copy-locale-data__button')
+      await expect(copyButton).toBeVisible()
+      await copyButton.click()
+
+      const fromField = page.locator('#field-fromLocale')
+      await fromField.click()
+      await page.locator('.rs__option').locator('text=Spanish').click()
+
+      const toField = page.locator('#field-toLocale')
+      await toField.click()
+      await page.locator('.rs__option').locator('text=English').click()
+
+      const overwriteCheckbox = page.locator('#field-overwriteExisting')
+      await overwriteCheckbox.click()
+
+      const copyDrawerClose = page.locator('.copy-locale-data__sub-header button')
+      await copyDrawerClose.click()
+
+      await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
     })
 
     test('should throw error if unsaved data', async () => {

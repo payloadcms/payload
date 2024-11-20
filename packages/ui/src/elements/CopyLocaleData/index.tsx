@@ -58,7 +58,7 @@ export const CopyLocaleData: React.FC = () => {
       // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setFromLocale(code)
     }
-  }, [code, fromLocale])
+  }, [code])
 
   const copyLocaleData = useCallback(
     async ({ from, to }) => {
@@ -76,7 +76,7 @@ export const CopyLocaleData: React.FC = () => {
         const toLocaleReq = await fetch(action)
         const toLocaleData = await toLocaleReq.json()
         const mergedData = overwriteExisting
-          ? deepMergeWithCombinedArrays(toLocaleData, fromLocaleData)
+          ? fromLocaleData
           : deepMergeWithCombinedArrays(fromLocaleData, toLocaleData)
 
         data = mergedData
