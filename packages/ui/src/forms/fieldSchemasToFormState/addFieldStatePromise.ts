@@ -23,6 +23,7 @@ import {
 
 import type { RenderFieldMethod } from './types.js'
 
+import { removeUndefined } from '../../utilities/removeUndefined.js'
 import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
 import { iterateFields } from './iterateFields.js'
 
@@ -154,7 +155,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const validate = field.validate
 
-    const fieldState: FormFieldWithoutComponents = {
+    const fieldState = removeUndefined<FormFieldWithoutComponents>({
       errorPaths: [],
       fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
@@ -162,7 +163,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       passesCondition,
       valid: true,
       value: undefined,
-    }
+    })
 
     let validationResult: string | true = true
 
