@@ -71,16 +71,14 @@ export type CollectionPermission = {
   update: Permission
 }
 
-export type SanitizedCollectionPermission =
-  | {
-      create?: true
-      delete?: true
-      fields: SanitizedFieldsPermissions
-      read?: true
-      readVersions?: true
-      update?: true
-    }
-  | true
+export type SanitizedCollectionPermission = {
+  create?: true
+  delete?: true
+  fields: SanitizedFieldsPermissions
+  read?: true
+  readVersions?: true
+  update?: true
+}
 
 export type GlobalPermission = {
   fields: FieldsPermissions
@@ -89,14 +87,12 @@ export type GlobalPermission = {
   update: Permission
 }
 
-export type SanitizedGlobalPermission =
-  | {
-      fields: SanitizedFieldsPermissions
-      read?: true
-      readVersions?: true
-      update?: true
-    }
-  | true
+export type SanitizedGlobalPermission = {
+  fields: SanitizedFieldsPermissions
+  read?: true
+  readVersions?: true
+  update?: true
+}
 
 export type DocumentPermissions = CollectionPermission | GlobalPermission
 

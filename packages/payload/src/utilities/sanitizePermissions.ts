@@ -180,7 +180,6 @@ export function recursivelySanitizeCollections(obj: Permissions['collections']):
     const [collectionSlug, collectionPermission] = entries[i]
 
     if (areAllPermissionsTrue(collectionPermission)) {
-      ;(obj[collectionSlug] as unknown as SanitizedCollectionPermission) = true
       continue
     }
   }
@@ -197,7 +196,6 @@ export function recursivelySanitizeGlobals(obj: Permissions['globals']): void {
     const [globalSlug, globalPermission] = entries[i]
 
     if (areAllPermissionsTrue(globalPermission)) {
-      ;(obj[globalSlug] as unknown as SanitizedGlobalPermission) = true
       continue
     }
   }

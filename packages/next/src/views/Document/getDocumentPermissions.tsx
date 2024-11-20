@@ -57,7 +57,7 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
-        }).then((permissions) => (permissions === true ? permissions : permissions.update))
+        }).then((permissions) => permissions.update)
       }
     } catch (error) {
       req.payload.logger.error(error)
@@ -84,7 +84,7 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
-        }).then((permissions) => (permissions === true ? permissions : permissions.update))
+        }).then((permissions) => permissions.update)
       }
     } catch (error) {
       req.payload.logger.error(error)
