@@ -41,6 +41,7 @@ export interface Config {
     };
     'categories-versions': {
       relatedVersions: 'versions';
+      relatedVersionsMany: 'versions';
     };
     'localized-categories': {
       relatedPosts: 'localized-posts';
@@ -74,9 +75,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -197,6 +198,7 @@ export interface Version {
   id: string;
   category?: (string | null) | Category;
   categoryVersion?: (string | null) | CategoriesVersion;
+  categoryVersions?: (string | CategoriesVersion)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -208,6 +210,10 @@ export interface Version {
 export interface CategoriesVersion {
   id: string;
   relatedVersions?: {
+    docs?: (string | Version)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  relatedVersionsMany?: {
     docs?: (string | Version)[] | null;
     hasNextPage?: boolean | null;
   } | null;
@@ -442,6 +448,7 @@ export interface UploadsSelect<T extends boolean = true> {
 export interface VersionsSelect<T extends boolean = true> {
   category?: T;
   categoryVersion?: T;
+  categoryVersions?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -452,6 +459,7 @@ export interface VersionsSelect<T extends boolean = true> {
  */
 export interface CategoriesVersionsSelect<T extends boolean = true> {
   relatedVersions?: T;
+  relatedVersionsMany?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
