@@ -1,3 +1,10 @@
+/* eslint-disable regexp/no-obscure-range */
+/* eslint-disable regexp/no-empty-group */
+/* eslint-disable regexp/no-empty-capturing-group */
+/* eslint-disable regexp/optimal-quantifier-concatenation */
+/* eslint-disable regexp/no-misleading-capturing-group */
+/* eslint-disable regexp/no-contradiction-with-assertion */
+/* eslint-disable regexp/no-super-linear-backtracking */
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *

@@ -1,3 +1,4 @@
+/* eslint-disable regexp/no-unused-capturing-group */
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
