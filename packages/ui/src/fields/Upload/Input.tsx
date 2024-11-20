@@ -161,7 +161,8 @@ export function UploadInput(props: UploadInputProps) {
     }
 
     if (typeof activeRelationTo === 'string') {
-      if (permissions?.collections && permissions.collections?.[activeRelationTo]?.create) {
+      const collectionPermissions = permissions?.collections?.[activeRelationTo]
+      if (collectionPermissions === true ? collectionPermissions : collectionPermissions?.create) {
         return true
       }
     }

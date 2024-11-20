@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, SanitizedCollectionPermission } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
@@ -96,12 +96,17 @@ export const AddNewRelation: React.FC<Props> = ({
   useEffect(() => {
     if (permissions) {
       if (relatedCollections.length === 1) {
-        setShow(permissions.collections[relatedCollections[0]?.slug]?.create)
+        const collectionPermissions = permissions.collections[relatedCollections[0]?.slug]
+        setShow(collectionPermissions === true ? true : collectionPermissions.create)
       } else {
         setShow(
-          relatedCollections.some(
-            (collection) => permissions.collections[collection?.slug]?.create,
-          ),
+          relatedCollections.some((collection) => {
+            const collectionPermissions = permissions.collections[collection?.slug]
+
+            return collectionPermissions === true
+              ? collectionPermissions
+              : collectionPermissions.create
+          }),
         )
       }
     }
@@ -186,7 +191,12 @@ export const AddNewRelation: React.FC<Props> = ({
               render={({ close: closePopup }) => (
                 <PopupList.ButtonGroup>
                   {relatedCollections.map((relatedCollection) => {
-                    if (permissions.collections[relatedCollection?.slug].create) {
+                    const collectionPermissions = permissions.collections[relatedCollection?.slug]
+                    if (
+                      collectionPermissions === true
+                        ? collectionPermissions
+                        : collectionPermissions.create
+                    ) {
                       return (
                         <PopupList.Button
                           className={`${baseClass}__relation-button--${relatedCollection?.slug}`}
@@ -207,9 +217,14 @@ export const AddNewRelation: React.FC<Props> = ({
               )}
               size="medium"
             />
-            {collectionConfig && permissions.collections[collectionConfig?.slug]?.create && (
-              <DocumentDrawer onSave={onSave} />
-            )}
+            {collectionConfig &&
+              (permissions.collections[collectionConfig?.slug] === true ||
+                (
+                  permissions.collections[collectionConfig?.slug] as Extract<
+                    SanitizedCollectionPermission,
+                    object
+                  >
+                )?.create) && <DocumentDrawer onSave={onSave} />}
           </Fragment>
         )}
       </div>

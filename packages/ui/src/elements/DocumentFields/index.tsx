@@ -87,7 +87,7 @@ export const DocumentFields: React.FC<Args> = ({
             parentIndexPath=""
             parentPath=""
             parentSchemaPath={schemaPathSegments.join('.')}
-            permissions={docPermissions?.fields}
+            permissions={docPermissions === true ? docPermissions : docPermissions?.fields}
             readOnly={readOnly}
           />
           {AfterFields}
@@ -103,7 +103,7 @@ export const DocumentFields: React.FC<Args> = ({
                 parentIndexPath=""
                 parentPath=""
                 parentSchemaPath={schemaPathSegments.join('.')}
-                permissions={docPermissions?.fields}
+                permissions={docPermissions === true ? docPermissions : docPermissions?.fields}
                 readOnly={readOnly}
               />
             </div>

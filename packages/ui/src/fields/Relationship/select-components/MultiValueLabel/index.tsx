@@ -31,7 +31,10 @@ export const MultiValueLabel: React.FC<
   const { permissions } = useAuth()
   const [showTooltip, setShowTooltip] = useState(false)
   const { t } = useTranslation()
-  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
+  const collectionPermissions = permissions?.collections?.[relationTo]
+  const hasReadPermission = Boolean(
+    collectionPermissions === true ? collectionPermissions : collectionPermissions?.read,
+  )
 
   return (
     <div className={baseClass}>
