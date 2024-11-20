@@ -1,10 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { englishLocale } from 'globals/config.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -21,6 +19,7 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { richTextSlug } from './collections/RichText/index.js'
 import {
+  defaultLocale,
   englishTitle,
   localizedPostsSlug,
   spanishLocale,
@@ -42,7 +41,6 @@ const { beforeAll, describe } = test
 let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
 
-const defaultLocale = 'en'
 const title = 'english title'
 const spanishTitle = 'spanish title'
 const arabicTitle = 'arabic title'
@@ -373,7 +371,7 @@ describe('Localization', () => {
 
     test('should overwrite existing data when overwrite is checked', async () => {
       await page.goto(url.create)
-      await changeLocale(page, englishLocale)
+      await changeLocale(page, defaultLocale)
       await fillValues({ title: englishTitle, description })
       await saveDocAndAssert(page)
 
