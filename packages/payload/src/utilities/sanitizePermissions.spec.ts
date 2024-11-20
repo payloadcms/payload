@@ -507,6 +507,512 @@ describe('recursivelySanitizePermissions', () => {
       fields: true,
     })
   })
+
+  it('ensure complex permissions are sanitized correctly', () => {
+    // This tests a bug where the sanitizePermissions function would previously not correctly sanitize
+    const permissions: Partial<CollectionPermission> = {
+      fields: {
+        GR: {
+          create: {
+            permission: false,
+          },
+          fields: {
+            rt: {
+              create: {
+                permission: false,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: true,
+              },
+            },
+            aaa: {
+              create: {
+                permission: false,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: true,
+              },
+            },
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+        tab1: {
+          fields: {
+            rt2: {
+              create: {
+                permission: false,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: true,
+              },
+            },
+            blocks2: {
+              create: {
+                permission: false,
+              },
+              blocks: {
+                myBlock: {
+                  fields: {
+                    art: {
+                      create: {
+                        permission: false,
+                      },
+                      read: {
+                        permission: true,
+                      },
+                      update: {
+                        permission: true,
+                      },
+                    },
+                    id: {
+                      create: {
+                        permission: false,
+                      },
+                      read: {
+                        permission: true,
+                      },
+                      update: {
+                        permission: true,
+                      },
+                    },
+                    blockName: {
+                      create: {
+                        permission: false,
+                      },
+                      read: {
+                        permission: true,
+                      },
+                      update: {
+                        permission: true,
+                      },
+                    },
+                  },
+                  create: {
+                    permission: false,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: true,
+              },
+            },
+          },
+          create: {
+            permission: false,
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+        rt3: {
+          create: {
+            permission: false,
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+        blocks3: {
+          create: {
+            permission: false,
+          },
+          blocks: {
+            myBlock: {
+              fields: {
+                art: {
+                  create: {
+                    permission: false,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+                id: {
+                  create: {
+                    permission: false,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+                blockName: {
+                  create: {
+                    permission: false,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+              },
+              create: {
+                permission: false,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: true,
+              },
+            },
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+        array: {
+          create: {
+            permission: false,
+          },
+          fields: {
+            art: {
+              create: {
+                permission: false,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: true,
+              },
+            },
+            id: {
+              create: {
+                permission: false,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: true,
+              },
+            },
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+        arrayWithAccessFalse: {
+          create: {
+            permission: false,
+          },
+          fields: {
+            art: {
+              create: {
+                permission: false,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: false,
+              },
+            },
+            id: {
+              create: {
+                permission: false,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: false,
+              },
+            },
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: false,
+          },
+        },
+        blocks: {
+          create: {
+            permission: false,
+          },
+          blocks: {
+            myBlock: {
+              fields: {
+                art: {
+                  create: {
+                    permission: false,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+                id: {
+                  create: {
+                    permission: false,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+                blockName: {
+                  create: {
+                    permission: false,
+                  },
+                  read: {
+                    permission: true,
+                  },
+                  update: {
+                    permission: true,
+                  },
+                },
+              },
+              create: {
+                permission: false,
+              },
+              read: {
+                permission: true,
+              },
+              update: {
+                permission: true,
+              },
+            },
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+        updatedAt: {
+          create: {
+            permission: false,
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+        createdAt: {
+          create: {
+            permission: false,
+          },
+          read: {
+            permission: true,
+          },
+          update: {
+            permission: true,
+          },
+        },
+      },
+      create: {
+        permission: false,
+      },
+      read: {
+        permission: true,
+      },
+      update: {
+        permission: true,
+      },
+      delete: {
+        permission: true,
+      },
+    }
+
+    sanitizePermissions({
+      canAccessAdmin: true,
+      collections: {
+        test: permissions as CollectionPermission,
+      },
+    })
+    expect(permissions).toStrictEqual({
+      fields: {
+        GR: {
+          fields: {
+            rt: {
+              read: true,
+              update: true,
+            },
+            aaa: {
+              read: true,
+              update: true,
+            },
+          },
+          read: true,
+          update: true,
+        },
+        tab1: {
+          fields: {
+            rt2: {
+              read: true,
+              update: true,
+            },
+            blocks2: {
+              blocks: {
+                myBlock: {
+                  fields: {
+                    art: {
+                      read: true,
+                      update: true,
+                    },
+                    id: {
+                      read: true,
+                      update: true,
+                    },
+                    blockName: {
+                      read: true,
+                      update: true,
+                    },
+                  },
+                  read: true,
+                  update: true,
+                },
+              },
+              read: true,
+              update: true,
+            },
+          },
+          read: true,
+          update: true,
+        },
+        rt3: {
+          read: true,
+          update: true,
+        },
+        blocks3: {
+          blocks: {
+            myBlock: {
+              fields: {
+                art: {
+                  read: true,
+                  update: true,
+                },
+                id: {
+                  read: true,
+                  update: true,
+                },
+                blockName: {
+                  read: true,
+                  update: true,
+                },
+              },
+              read: true,
+              update: true,
+            },
+          },
+          read: true,
+          update: true,
+        },
+        array: {
+          fields: {
+            art: {
+              read: true,
+              update: true,
+            },
+            id: {
+              read: true,
+              update: true,
+            },
+          },
+          read: true,
+          update: true,
+        },
+        arrayWithAccessFalse: {
+          fields: {
+            art: {
+              read: true,
+            },
+            id: {
+              read: true,
+            },
+          },
+          read: true,
+        },
+        blocks: {
+          blocks: {
+            myBlock: {
+              fields: {
+                art: {
+                  read: true,
+                  update: true,
+                },
+                id: {
+                  read: true,
+                  update: true,
+                },
+                blockName: {
+                  read: true,
+                  update: true,
+                },
+              },
+              read: true,
+              update: true,
+            },
+          },
+          read: true,
+          update: true,
+        },
+        updatedAt: {
+          read: true,
+          update: true,
+        },
+        createdAt: {
+          read: true,
+          update: true,
+        },
+      },
+      read: true,
+      update: true,
+      delete: true,
+    })
+  })
 })
 
 describe('sanitizePermissions', () => {
