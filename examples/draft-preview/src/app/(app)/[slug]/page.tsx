@@ -1,7 +1,7 @@
 import configPromise from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import { getPayload } from 'payload'
 import React, { cache } from 'react'
 
 import type { Page as PageType } from '../../../payload-types'
@@ -11,7 +11,7 @@ import RichText from '../../../components/RichText'
 import classes from './index.module.scss'
 
 export async function generateStaticParams() {
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayload({ config: configPromise })
   const pages = await payload.find({
     collection: 'pages',
     draft: false,
@@ -62,7 +62,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = await draftMode()
 
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
     collection: 'pages',

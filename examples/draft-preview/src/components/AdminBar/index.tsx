@@ -41,7 +41,7 @@ export const AdminBar: React.FC<{
             logo: classes.logo,
             user: classes.user,
           }}
-          cmsURL={process.env.NEXT_PUBLIC_PAYLOAD_URL}
+          cmsURL={process.env.NEXT_PUBLIC_SERVER_URL}
           collection={collection}
           collectionLabels={{
             plural: collectionLabels[collection]?.plural || 'Pages',

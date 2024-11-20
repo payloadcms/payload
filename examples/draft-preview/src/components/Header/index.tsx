@@ -10,8 +10,21 @@ import classes from './index.module.scss'
 
 export async function Header() {
   const mainMenu: MainMenu = await fetch(
-    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/globals/main-menu`,
-  ).then((res) => res.json())
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/globals/main-menu`,
+  )
+    .then((res) => res.json())
+    .then((menu) => ({
+      ...menu,
+      navItems: menu.navItems.map((item) => ({
+        ...item,
+        link: {
+          ...item.link,
+          type: item.link.type ?? undefined,
+          newTab: item.link.newTab ?? false,
+          url: item.link.url ?? undefined,
+        },
+      })),
+    }))
 
   const { navItems } = mainMenu
 
@@ -37,7 +50,14 @@ export async function Header() {
         {hasNavItems && (
           <nav className={classes.nav}>
             {navItems.map(({ link }, i) => {
-              return <CMSLink key={i} {...link} />
+              const sanitizedLink = {
+                ...link,
+                type: link.type ?? undefined,
+                newTab: link.newTab ?? false,
+                url: link.url ?? undefined,
+              }
+
+              return <CMSLink key={i} {...sanitizedLink} />
             })}
           </nav>
         )}

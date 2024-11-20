@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: 'Create Next App',
 }
 
+// eslint-disable-next-line no-restricted-exports
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
 

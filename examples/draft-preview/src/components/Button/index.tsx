@@ -1,4 +1,4 @@
-import type { ElementType } from 'react';
+import type { ElementType } from 'react'
 
 import Link from 'next/link'
 import React from 'react'
@@ -12,7 +12,7 @@ export type Props = {
   el?: 'a' | 'button' | 'link'
   href?: string
   label?: string
-  newTab?: boolean
+  newTab?: boolean | null
   onClick?: () => void
   type?: 'button' | 'submit'
 }
@@ -46,7 +46,9 @@ export const Button: React.FC<Props> = ({
     </div>
   )
 
-  if (onClick || type === 'submit') {el = 'button'}
+  if (onClick || type === 'submit') {
+    el = 'button'
+  }
 
   if (el === 'link') {
     return (

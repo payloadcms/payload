@@ -38,6 +38,7 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "15.0.0",
+    "slate": "^0.82.0",
     "tsx": "^4.16.2",
     "typescript": "5.5.2"
   },
