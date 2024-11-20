@@ -467,7 +467,7 @@ describe('admin3', () => {
       await expect(page.locator('.collection-list__no-results')).toBeVisible()
     })
 
-    test('should bulk delete all with filters', async () => {
+    test('should bulk delete with filters and across pages', async () => {
       await deleteAllPosts()
       await Promise.all([createPost({ title: 'Post 1' }), createPost({ title: 'Post 2' })])
       await page.goto(postsUrl.list)
@@ -516,7 +516,7 @@ describe('admin3', () => {
       await expect(page.locator('.row-3 .cell-title')).toContainText(updatedPostTitle)
     })
 
-    test('should bulk update with filters', async () => {
+    test('should bulk update with filters and across pages', async () => {
       // First, delete all posts created by the seed
       await deleteAllPosts()
       const post1Title = 'Post 1'
@@ -526,6 +526,7 @@ describe('admin3', () => {
       await page.locator('#search-filter-input').fill('Post 1')
       await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
       await page.locator('input#select-all').check()
+      await page.locator('button.list-selection__button').click()
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
 
