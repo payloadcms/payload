@@ -488,13 +488,10 @@ describe('admin3', () => {
     test('should bulk update', async () => {
       // First, delete all posts created by the seed
       await deleteAllPosts()
-      await createPost()
-      await createPost()
-      await createPost()
-
-      const bulkTitle = 'Bulk update title'
+      const post1Title = 'Post'
+      const updatedPostTitle = `${post1Title} (Updated)`
+      await Promise.all([createPost({ title: post1Title }), createPost(), createPost()])
       await page.goto(postsUrl.list)
-
       await page.locator('input#select-all').check()
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
@@ -504,21 +501,51 @@ describe('admin3', () => {
       })
 
       await expect(titleOption).toBeVisible()
-
       await titleOption.click()
       const titleInput = page.locator('#field-title')
-
       await expect(titleInput).toBeVisible()
-
-      await titleInput.fill(bulkTitle)
-
+      await titleInput.fill(updatedPostTitle)
       await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Updated 3 Posts successfully.',
       )
-      await expect(page.locator('.row-1 .cell-title')).toContainText(bulkTitle)
-      await expect(page.locator('.row-2 .cell-title')).toContainText(bulkTitle)
-      await expect(page.locator('.row-3 .cell-title')).toContainText(bulkTitle)
+
+      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
+      await expect(page.locator('.row-2 .cell-title')).toContainText(updatedPostTitle)
+      await expect(page.locator('.row-3 .cell-title')).toContainText(updatedPostTitle)
+    })
+
+    test('should bulk update with filters', async () => {
+      // First, delete all posts created by the seed
+      await deleteAllPosts()
+      const post1Title = 'Post 1'
+      await Promise.all([createPost({ title: post1Title }), createPost({ title: 'Post 2' })])
+      const updatedPostTitle = `${post1Title} (Updated)`
+      await page.goto(postsUrl.list)
+      await page.locator('#search-filter-input').fill('Post 1')
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await page.locator('input#select-all').check()
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const titleOption = page.locator('.field-select .rs__option', {
+        hasText: exactText('Title'),
+      })
+
+      await expect(titleOption).toBeVisible()
+      await titleOption.click()
+      const titleInput = page.locator('#field-title')
+      await expect(titleInput).toBeVisible()
+      await titleInput.fill(updatedPostTitle)
+
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Updated 1 Post successfully.',
+      )
+
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
     })
 
     test('should save globals', async () => {

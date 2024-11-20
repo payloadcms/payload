@@ -59,7 +59,6 @@ export const DeleteMany: React.FC<Props> = (props) => {
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
       search: searchParams?.search as string,
-      where: {},
     })
 
     const queryString = getQueryParams(queryWithSearch)
