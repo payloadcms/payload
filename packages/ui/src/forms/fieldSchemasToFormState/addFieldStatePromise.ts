@@ -155,15 +155,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const validate = field.validate
 
-    const fieldState = removeUndefined<FormFieldWithoutComponents>({
-      errorPaths: [],
-      fieldSchema: includeSchema ? field : undefined,
-      initialValue: undefined,
+    const fieldState: FormFieldWithoutComponents = {
       isSidebar: fieldIsSidebar(field),
       passesCondition,
       valid: true,
-      value: undefined,
-    })
+    }
+
+    if (includeSchema) {
+      fieldState.fieldSchema = field
+    }
 
     let validationResult: string | true = true
 
@@ -197,6 +197,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     const addErrorPathToParent = (errorPath: string) => {
       if (typeof addErrorPathToParentArg === 'function') {
         addErrorPathToParentArg(errorPath)
+      }
+
+      if (!fieldState.errorPaths) {
+        fieldState.errorPaths = []
       }
 
       if (!fieldState.errorPaths.includes(errorPath)) {
@@ -593,11 +597,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (!filter || filter(args)) {
       state[path] = {
         disableFormData: true,
-        errorPaths: [],
-        initialValue: undefined,
         passesCondition,
         valid: true,
-        value: undefined,
       }
     }
 
@@ -700,13 +701,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (!filter || filter(args)) {
       state[path] = {
         disableFormData: true,
-        errorPaths: [],
-        fieldSchema: includeSchema ? field : undefined,
-        initialValue: undefined,
         isSidebar: fieldIsSidebar(field),
         passesCondition,
         valid: true,
-        value: undefined,
+      }
+
+      if (includeSchema) {
+        state[path].fieldSchema = field
       }
     }
   }
