@@ -452,25 +452,33 @@ describe('admin3', () => {
       expect(page.url()).toContain(postsUrl.list)
     })
 
-    test('should bulk delete', async () => {
-      async function selectAndDeleteAll() {
-        await page.goto(postsUrl.list)
-        await page.locator('input#select-all').check()
-        await page.locator('.delete-documents__toggle').click()
-        await page.locator('#confirm-delete').click()
-      }
-
-      // First, delete all posts created by the seed
+    test('should bulk delete (select all on page)', async () => {
       await deleteAllPosts()
-      await createPost()
-      await createPost()
-      await createPost()
-
+      await Promise.all([createPost(), createPost(), createPost()])
       await page.goto(postsUrl.list)
-      await selectAndDeleteAll()
+      await page.locator('input#select-all').check()
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete').click()
+
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Deleted 3 Posts successfully.',
       )
+
+      await expect(page.locator('.collection-list__no-results')).toBeVisible()
+    })
+
+    test('should bulk delete (select all across pages)', async () => {
+      await deleteAllPosts()
+      await Promise.all([createPost(), createPost(), createPost()])
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await page.locator('button.list-selection__button').click()
+      await page.locator('#confirm-delete').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+        'Deleted 3 Posts successfully.',
+      )
+
       await expect(page.locator('.collection-list__no-results')).toBeVisible()
     })
 
