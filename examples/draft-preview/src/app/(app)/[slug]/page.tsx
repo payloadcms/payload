@@ -1,17 +1,18 @@
-import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
-import React, { cache } from 'react'
+import React, { cache, Fragment } from 'react'
 
 import type { Page as PageType } from '../../../payload-types'
 
 import { Gutter } from '../../../components/Gutter'
 import RichText from '../../../components/RichText'
+import config from '../../../payload.config'
+import { home as homeStatic } from '../../../seed/home'
 import classes from './index.module.scss'
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config })
   const pages = await payload.find({
     collection: 'pages',
     draft: false,
@@ -27,16 +28,8 @@ export async function generateStaticParams() {
       return { slug }
     })
 
-  return params
+  return params || []
 }
-export const PageTemplate: React.FC<{ page: null | PageType | undefined }> = ({ page }) => (
-  <main className={classes.page}>
-    <Gutter>
-      <h1>{page?.title}</h1>
-      <RichText content={page?.richText} />
-    </Gutter>
-  </main>
-)
 
 type Args = {
   params: Promise<{
@@ -48,21 +41,37 @@ type Args = {
 export default async function Page({ params: paramsPromise }: Args) {
   const { slug = 'home' } = await paramsPromise
 
-  const page: null | PageType = await queryPageBySlug({
+  let page: null | PageType
+
+  page = await queryPageBySlug({
     slug,
   })
+
+  // Remove this code once your website is seeded
+  if (!page && slug === 'home') {
+    page = homeStatic
+  }
 
   if (page === null) {
     return notFound()
   }
 
-  return <PageTemplate page={page} />
+  return (
+    <Fragment>
+      <main className={classes.page}>
+        <Gutter>
+          <h1>{page?.title}</h1>
+          <RichText content={page?.richText} />
+        </Gutter>
+      </main>
+    </Fragment>
+  )
 }
 
 const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = await draftMode()
 
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config })
 
   const result = await payload.find({
     collection: 'pages',
