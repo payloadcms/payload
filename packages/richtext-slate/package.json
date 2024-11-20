@@ -62,7 +62,7 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/is-hotkey": "^0.1.10",
-    "@types/node": "22.5.4",
+    "@types/node": "22.9.1",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "payload": "workspace:*"

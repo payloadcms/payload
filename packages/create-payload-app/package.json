@@ -75,8 +75,8 @@
   "devDependencies": {
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
-    "@types/jest": "29.5.12",
-    "@types/node": "22.5.4"
+    "@types/jest": "29.5.14",
+    "@types/node": "22.9.1"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
