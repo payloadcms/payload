@@ -5,49 +5,50 @@ import type {
   GlobalPermission,
   Permissions,
   SanitizedBlocksPermissions,
-  SanitizedCollectionPermission,
   SanitizedFieldPermissions,
   SanitizedFieldsPermissions,
-  SanitizedGlobalPermission,
   SanitizedPermissions,
 } from '../auth/types.js'
 
-function areAllFieldsPermissionsTrue(data: FieldsPermissions): boolean {
-  let areAllFieldsTrue = true
+function checkAndSanitizeFieldsPermssions(data: FieldsPermissions): boolean {
+  let allFieldPermissionsTrue = true
   for (const key in data) {
     if (typeof data[key] === 'object') {
-      // If any recursive call returns false, the whole function returns false
-      if (!areAllPermissionsTrue(data[key])) {
-        areAllFieldsTrue = false
+      if (!checkAndSanitizePermissions(data[key])) {
+        allFieldPermissionsTrue = false
       } else {
         ;(data[key] as unknown as SanitizedFieldPermissions) = true
       }
     } else if (data[key] !== true) {
-      // If any value is not true, return false
-      areAllFieldsTrue = false
+      allFieldPermissionsTrue = false
     }
   }
 
   // If all values are true or it's an empty object, return true
-  return areAllFieldsTrue
+  return allFieldPermissionsTrue
 }
 
 /**
- * Check if all permissions in a FieldPermissions object are true on the condition that no nested blocks or fields are present.
+ * Check if all permissions in a FieldPermissions, CollectionPermission or GlobalPermission object are true.
+ * If nested fields or blocks are present, the function will recursively check those as well.
  */
-function areAllPermissionsTrue(
+function checkAndSanitizePermissions(
   data: CollectionPermission | FieldPermissions | GlobalPermission,
 ): boolean {
+  /**
+   * Check blocks permissions
+   */
   let blocksPermissions = true
   if ('blocks' in data && data.blocks) {
     for (const blockSlug in data.blocks) {
       if (typeof data.blocks[blockSlug] === 'object') {
         for (const key in data.blocks[blockSlug]) {
+          /**
+           * Check fields in nested blocks
+           */
           if (key === 'fields') {
-            // If any recursive call returns false, the whole function returns false
-
             if (data.blocks[blockSlug].fields) {
-              if (!areAllFieldsPermissionsTrue(data.blocks[blockSlug].fields)) {
+              if (!checkAndSanitizeFieldsPermssions(data.blocks[blockSlug].fields)) {
                 blocksPermissions = false
               } else {
                 ;(data.blocks[blockSlug].fields as unknown as SanitizedFieldsPermissions) = true
@@ -55,9 +56,9 @@ function areAllPermissionsTrue(
             }
           } else {
             if (typeof data.blocks[blockSlug][key] === 'object') {
-              /*
-              handle permissions object
-              */
+              /**
+               * Check Permissions in nested blocks
+               */
               if (isPermissionObject(data.blocks[blockSlug][key])) {
                 if (
                   data.blocks[blockSlug][key]['permission'] === true &&
@@ -95,24 +96,27 @@ function areAllPermissionsTrue(
     }
   }
 
+  /**
+   * Check nested Fields permissions
+   */
   let fieldsPermissions = true
   if (data.fields) {
-    if (!areAllFieldsPermissionsTrue(data.fields)) {
+    if (!checkAndSanitizeFieldsPermssions(data.fields)) {
       fieldsPermissions = false
     } else {
       ;(data.fields as unknown as SanitizedFieldsPermissions) = true
     }
   }
 
+  /**
+   * Check other Permissions objects (e.g. read, write)
+   */
   let otherPermissions = true
   for (const key in data) {
     if (key === 'fields' || key === 'blocks') {
       continue
     }
     if (typeof data[key] === 'object') {
-      /*
-      handle permissions object
-      */
       if (isPermissionObject(data[key])) {
         if (data[key]['permission'] === true && !('where' in data[key])) {
           // If the permission is true and there is no where clause, set the key to true
@@ -130,10 +134,6 @@ function areAllPermissionsTrue(
       } else {
         throw new Error('Unexpected object in fields permissions')
       }
-
-      /*
-      handle permissions object done
-      */
     } else if (data[key] !== true) {
       // If any value is not true, return false
       otherPermissions = false
@@ -174,14 +174,10 @@ export function recursivelySanitizeCollections(obj: Permissions['collections']):
     return
   }
 
-  const entries = Object.entries(obj)
+  const collectionPermissions = Object.values(obj)
 
-  for (let i = 0; i < entries.length; i++) {
-    const [collectionSlug, collectionPermission] = entries[i]
-
-    if (areAllPermissionsTrue(collectionPermission)) {
-      continue
-    }
+  for (const collectionPermission of collectionPermissions) {
+    checkAndSanitizePermissions(collectionPermission)
   }
 }
 
@@ -190,14 +186,10 @@ export function recursivelySanitizeGlobals(obj: Permissions['globals']): void {
     return
   }
 
-  const entries = Object.entries(obj)
+  const globalPermissions = Object.values(obj)
 
-  for (let i = 0; i < entries.length; i++) {
-    const [globalSlug, globalPermission] = entries[i]
-
-    if (areAllPermissionsTrue(globalPermission)) {
-      continue
-    }
+  for (const globalPermission of globalPermissions) {
+    checkAndSanitizePermissions(globalPermission)
   }
 }
 
