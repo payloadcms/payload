@@ -452,7 +452,7 @@ describe('admin3', () => {
       expect(page.url()).toContain(postsUrl.list)
     })
 
-    test('should bulk delete (select all on page)', async () => {
+    test('should bulk delete all on page', async () => {
       await deleteAllPosts()
       await Promise.all([createPost(), createPost(), createPost()])
       await page.goto(postsUrl.list)
@@ -467,16 +467,19 @@ describe('admin3', () => {
       await expect(page.locator('.collection-list__no-results')).toBeVisible()
     })
 
-    test('should bulk delete (select all across pages)', async () => {
+    test('should bulk delete all with filters', async () => {
       await deleteAllPosts()
-      await Promise.all([createPost(), createPost(), createPost()])
+      await Promise.all([createPost({ title: 'Post 1' }), createPost({ title: 'Post 2' })])
       await page.goto(postsUrl.list)
+      await page.locator('#search-filter-input').fill('Post 1')
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
       await page.locator('input#select-all').check()
       await page.locator('button.list-selection__button').click()
+      await page.locator('.delete-documents__toggle').click()
       await page.locator('#confirm-delete').click()
 
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-        'Deleted 3 Posts successfully.',
+        'Deleted 1 Post successfully.',
       )
 
       await expect(page.locator('.collection-list__no-results')).toBeVisible()
