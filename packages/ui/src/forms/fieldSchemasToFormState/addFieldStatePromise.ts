@@ -648,6 +648,22 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         parentSchemaPath,
       })
 
+      let childPermissions: SanitizedFieldsPermissions = undefined
+      if (tabHasName(tab)) {
+        if (parentPermissions === true) {
+          childPermissions = true
+        } else {
+          const tabPermissions = parentPermissions?.[tab.name]
+          if (tabPermissions === true) {
+            childPermissions = true
+          } else {
+            childPermissions = tabPermissions?.fields
+          }
+        }
+      } else {
+        childPermissions = parentPermissions
+      }
+
       return iterateFields({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
@@ -666,13 +682,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         parentPassesCondition: passesCondition,
         parentPath: tabHasName(tab) ? tabPath : parentPath,
         parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
-        permissions: tabHasName(tab)
-          ? typeof parentPermissions === 'boolean'
-            ? parentPermissions
-            : typeof parentPermissions?.[tab.name] === 'boolean'
-              ? parentPermissions[tab.name]
-              : parentPermissions?.[tab.name]?.fields
-          : parentPermissions,
+        permissions: childPermissions,
         preferences,
         previousFormState,
         renderAllFields,
