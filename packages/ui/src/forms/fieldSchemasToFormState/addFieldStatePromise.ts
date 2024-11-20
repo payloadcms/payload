@@ -16,14 +16,12 @@ import {
   deepCopyObjectSimple,
   fieldAffectsData,
   fieldHasSubFields,
-  fieldIsSidebar,
   getFieldPaths,
   tabHasName,
 } from 'payload/shared'
 
 import type { RenderFieldMethod } from './types.js'
 
-import { removeUndefined } from '../../utilities/removeUndefined.js'
 import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
 import { iterateFields } from './iterateFields.js'
 
@@ -156,7 +154,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     const validate = field.validate
 
     const fieldState: FormFieldWithoutComponents = {
-      isSidebar: fieldIsSidebar(field),
       passesCondition,
       valid: true,
     }
@@ -701,7 +698,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (!filter || filter(args)) {
       state[path] = {
         disableFormData: true,
-        isSidebar: fieldIsSidebar(field),
         passesCondition,
         valid: true,
       }
