@@ -32,7 +32,10 @@ export const SingleValue: React.FC<
   const [showTooltip, setShowTooltip] = useState(false)
   const { t } = useTranslation()
   const { permissions } = useAuth()
-  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
+  const collectionPermissions = permissions?.collections?.[relationTo]
+  const hasReadPermission = Boolean(
+    collectionPermissions === true ? collectionPermissions : collectionPermissions?.read,
+  )
 
   return (
     <SelectComponents.SingleValue {...props} className={baseClass}>
