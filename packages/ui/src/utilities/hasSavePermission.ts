@@ -20,18 +20,13 @@ export const hasSavePermission = (args: {
 
   if (collectionSlug) {
     return Boolean(
-      (isEditing && (docPermissions === true || docPermissions?.update)) ||
-        (!isEditing &&
-          (docPermissions === true ||
-            (docPermissions as Extract<SanitizedCollectionPermission, object>).create)),
+      (isEditing && docPermissions?.update) ||
+        (!isEditing && (docPermissions as SanitizedCollectionPermission)?.create),
     )
   }
 
   if (globalSlug) {
-    return Boolean(
-      docPermissions === true ||
-        (docPermissions as Extract<SanitizedGlobalPermission, object>)?.update,
-    )
+    return Boolean((docPermissions as SanitizedGlobalPermission)?.update)
   }
 
   return false
