@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "http-status": "1.6.2",
-    "mongoose": "8.8.1",
+    "mongoose": "8.8.2",
     "mongoose-aggregate-paginate-v2": "1.1.2",
     "mongoose-paginate-v2": "1.8.5",
     "prompts": "2.4.2",

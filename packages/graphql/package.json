@@ -52,7 +52,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "graphql-scalars": "1.22.2",
+    "graphql-scalars": "1.23.0",
     "pluralize": "8.0.0",
     "ts-essentials": "10.0.3",
     "tsx": "4.19.2"
@@ -60,7 +60,7 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pluralize": "^0.0.33",
-    "graphql-http": "^1.22.0",
+    "graphql-http": "^1.22.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {
