@@ -25,6 +25,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -43,6 +44,7 @@ import {
   throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
@@ -392,6 +394,42 @@ describe('versions', () => {
       const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
       await page.goto(versionsURL)
       expect(page.url()).toMatch(/\/versions$/)
+    })
+
+    test('collection - should autosave', async () => {
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const { id: postID } = await payload.create({
+        collection: postCollectionSlug,
+        data: {
+          title: 'post title',
+          description: 'post description',
+        },
+      })
+
+      await page.goto(postURL.edit(postID))
+
+      await trackNetworkRequests(
+        page,
+        `${serverURL}/admin/collections/${postCollectionSlug}/${postID}`,
+        async () => {
+          await page
+            .locator(
+              '#field-relationToAutosaves.field-type.relationship .relationship-add-new__add-button.doc-drawer__toggler',
+            )
+            .click()
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
+      await expect(drawer).toBeVisible()
+      await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
     test('global - should autosave', async () => {
