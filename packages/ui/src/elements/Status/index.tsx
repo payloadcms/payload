@@ -138,7 +138,7 @@ export const Status: React.FC = () => {
     ],
   )
 
-  const canUpdate = docPermissions === true ? docPermissions : docPermissions?.update
+  const canUpdate = docPermissions?.update
 
   if (statusToRender) {
     return (

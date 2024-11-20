@@ -210,8 +210,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   }, [isFormSubmitting])
 
   const canRemoveUpload =
-    docPermissions === true ||
-    (docPermissions?.update && 'delete' in docPermissions && docPermissions?.delete)
+    docPermissions?.update && 'delete' in docPermissions && docPermissions?.delete
 
   const hasImageSizes = uploadConfig?.imageSizes?.length > 0
   const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)

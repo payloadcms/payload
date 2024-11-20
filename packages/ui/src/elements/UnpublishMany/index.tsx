@@ -45,8 +45,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasPermission =
-    collectionPermissions === true ? collectionPermissions : collectionPermissions?.update
+  const hasPermission = collectionPermissions?.update
 
   const modalSlug = `unpublish-${slug}`
 
