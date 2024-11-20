@@ -154,8 +154,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     const validate = field.validate
 
     const fieldState: FormFieldWithoutComponents = {
-      passesCondition,
       valid: true,
+    }
+
+    if (passesCondition === false) {
+      fieldState.passesCondition = false
     }
 
     if (includeSchema) {

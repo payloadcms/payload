@@ -445,7 +445,6 @@ export type RenderedField = {
   Field: React.ReactNode
   indexPath?: string
   initialSchemaPath?: string
-  isSidebar: boolean
   path: string
   schemaPath: string
   type: FieldTypes
