@@ -75,6 +75,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
           }
         })
       }
+
       setSelected(rows)
     },
     [docs, selectAll, user?.id],
@@ -107,8 +108,10 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const getQueryParams = useCallback(
     (additionalWhereParams?: Where): string => {
       let where: Where
+
       if (selectAll === SelectAllStatus.AllAvailable) {
         const params = searchParams?.where as Where
+
         where = params || {
           id: { not_equals: '' },
         }
@@ -127,11 +130,13 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
           },
         }
       }
+
       if (additionalWhereParams) {
         where = {
           and: [{ ...additionalWhereParams }, where],
         }
       }
+
       return qs.stringify(
         {
           locale,

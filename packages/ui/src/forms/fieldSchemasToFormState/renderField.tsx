@@ -1,14 +1,7 @@
-import type {
-  ClientComponentProps,
-  ClientField,
-  FieldPaths,
-  SanitizedFieldPermissions,
-  ServerComponentProps,
-} from 'payload'
+import type { ClientComponentProps, ClientField, FieldPaths, ServerComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { createClientField, deepCopyObjectSimple, MissingEditorProp } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
 
 import type { RenderFieldMethod } from './types.js'
 
@@ -36,15 +29,12 @@ export const renderField: RenderFieldMethod = ({
   parentPath,
   parentSchemaPath,
   path,
-  permissions: incomingPermissions,
+  permissions,
   preferences,
   req,
   schemaPath,
   siblingData,
 }) => {
-  // TODO (ALESSIO): why are we passing the fieldConfig twice?
-  // and especially, why are we deepCopyObject -here- instead of inside the createClientField func,
-  // so no one screws this up in the future?
   const clientField = createClientField({
     clientField: deepCopyObjectSimple(fieldConfig) as ClientField,
     defaultIDType: req.payload.config.db.defaultIDType,
@@ -53,18 +43,11 @@ export const renderField: RenderFieldMethod = ({
     importMap: req.payload.importMap,
   })
 
-  const permissions =
-    incomingPermissions === true
-      ? true
-      : fieldAffectsData(fieldConfig)
-        ? incomingPermissions?.[fieldConfig.name]
-        : ({} as SanitizedFieldPermissions)
-
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},
     field: clientField,
     path,
-    readOnly: permissions !== true && !permissions?.[operation],
+    readOnly: typeof permissions === 'boolean' ? !permissions : !permissions?.[operation],
     schemaPath,
   }
 

@@ -1198,9 +1198,6 @@ importers:
       '@lexical/mark':
         specifier: 0.20.0
         version: 0.20.0
-      '@lexical/markdown':
-        specifier: 0.20.0
-        version: 0.20.0
       '@lexical/react':
         specifier: 0.20.0
         version: 0.20.0(react-dom@19.0.0-rc-65a56d0e-20241020(react@19.0.0-rc-65a56d0e-20241020))(react@19.0.0-rc-65a56d0e-20241020)(yjs@13.6.20)

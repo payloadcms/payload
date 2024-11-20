@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/versions/config.ts"
+        "./test/_community/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
