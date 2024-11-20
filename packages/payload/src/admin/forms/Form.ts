@@ -55,7 +55,7 @@ export type FieldState = {
   passesCondition?: boolean
   requiresRender?: boolean
   rows?: Row[]
-  valid: boolean
+  valid?: boolean
   validate?: Validate
   value?: unknown
 }

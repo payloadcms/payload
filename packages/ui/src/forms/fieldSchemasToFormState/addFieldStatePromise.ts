@@ -153,9 +153,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const validate = field.validate
 
-    const fieldState: FormFieldWithoutComponents = {
-      valid: true,
-    }
+    const fieldState: FormFieldWithoutComponents = {}
 
     if (passesCondition === false) {
       fieldState.passesCondition = false
@@ -213,8 +211,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldState.errorMessage = validationResult
       fieldState.valid = false
       addErrorPathToParent(path)
-    } else {
-      fieldState.valid = true
     }
 
     switch (field.type) {
@@ -227,13 +223,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             row.id = row?.id || new ObjectId().toHexString()
 
             if (!omitParents && (!filter || filter(args))) {
-              state[parentPath + '.id'] = {
-                fieldSchema: includeSchema
-                  ? field.fields.find((field) => 'name' in field && field.name === 'id')
-                  : undefined,
+              const idKey = parentPath + '.id'
+
+              state[idKey] = {
                 initialValue: row.id,
-                valid: true,
                 value: row.id,
+              }
+
+              if (includeSchema) {
+                state[idKey].fieldSchema = field.fields.find(
+                  (field) => 'name' in field && field.name === 'id',
+                )
               }
             }
 
@@ -336,37 +336,43 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               row.id = row?.id || new ObjectId().toHexString()
 
               if (!omitParents && (!filter || filter(args))) {
-                state[parentPath + '.id'] = {
-                  fieldSchema: includeSchema
-                    ? block.fields.find(
-                        (blockField) => 'name' in blockField && blockField.name === 'id',
-                      )
-                    : undefined,
+                const idKey = parentPath + '.id'
+
+                state[idKey] = {
                   initialValue: row.id,
-                  valid: true,
                   value: row.id,
                 }
 
-                state[parentPath + '.blockType'] = {
-                  fieldSchema: includeSchema
-                    ? block.fields.find(
-                        (blockField) => 'name' in blockField && blockField.name === 'blockType',
-                      )
-                    : undefined,
+                if (includeSchema) {
+                  state[idKey].fieldSchema = block.fields.find(
+                    (blockField) => 'name' in blockField && blockField.name === 'id',
+                  )
+                }
+
+                const fieldKey = parentPath + '.blockType'
+
+                state[fieldKey] = {
                   initialValue: row.blockType,
-                  valid: true,
                   value: row.blockType,
                 }
 
-                state[parentPath + '.blockName'] = {
-                  fieldSchema: includeSchema
-                    ? block.fields.find(
-                        (blockField) => 'name' in blockField && blockField.name === 'blockName',
-                      )
-                    : undefined,
+                if (includeSchema) {
+                  state[fieldKey].fieldSchema = block.fields.find(
+                    (blockField) => 'name' in blockField && blockField.name === 'blockType',
+                  )
+                }
+
+                const blockNameKey = parentPath + '.blockName'
+
+                state[blockNameKey] = {
                   initialValue: row.blockName,
-                  valid: true,
                   value: row.blockName,
+                }
+
+                if (includeSchema) {
+                  state[blockNameKey].fieldSchema = block.fields.find(
+                    (blockField) => 'name' in blockField && blockField.name === 'blockName',
+                  )
                 }
               }
 
@@ -598,7 +604,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state[path] = {
         disableFormData: true,
         passesCondition,
-        valid: true,
       }
     }
 
@@ -651,6 +656,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       })
 
       let childPermissions: SanitizedFieldsPermissions = undefined
+
       if (tabHasName(tab)) {
         if (parentPermissions === true) {
           childPermissions = true
@@ -701,8 +707,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (!filter || filter(args)) {
       state[path] = {
         disableFormData: true,
-        passesCondition,
-        valid: true,
+      }
+
+      if (passesCondition === false) {
+        state[path].passesCondition = false
       }
 
       if (includeSchema) {
