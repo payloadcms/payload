@@ -57,14 +57,18 @@ export const Auth: React.FC<Props> = (props) => {
     const collection = permissions?.collections?.[collectionSlug]
 
     if (collection) {
-      return Boolean('unlock' in collection ? collection.unlock : undefined)
+      return Boolean(
+        collection === true ? true : 'unlock' in collection ? collection.unlock : undefined,
+      )
     }
 
     return false
   }, [permissions, collectionSlug])
 
   const apiKeyPermissions =
-    docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
+    docPermissions === true || docPermissions?.fields === true
+      ? true
+      : docPermissions?.fields?.enableAPIKey
 
   const apiKeyReadOnly =
     readOnly ||
@@ -147,7 +151,7 @@ export const Auth: React.FC<Props> = (props) => {
           <EmailAndUsernameFields
             loginWithUsername={loginWithUsername}
             operation={operation}
-            permissions={docPermissions?.fields}
+            permissions={docPermissions === true ? true : docPermissions?.fields}
             readOnly={readOnly}
             t={t}
           />
