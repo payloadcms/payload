@@ -93,6 +93,7 @@ export const itTranslations: DefaultTranslationsObject = {
     incorrectCollection: 'Collezione non corretta',
     invalidFileType: 'Tipo di file non valido',
     invalidFileTypeValue: 'Tipo di file non valido: {{value}}',
+    invalidRequestArgs: 'Argomenti non validi nella richiesta: {{args}}',
     loadingDocument:
       'Si è verificato un problema durante il caricamento del documento con ID {{id}}.',
     localesNotSaved_one: 'Non è stato possibile salvare la seguente impostazione locale:',
@@ -113,6 +114,8 @@ export const itTranslations: DefaultTranslationsObject = {
     tokenInvalidOrExpired: 'Il token non è valido o è scaduto.',
     tokenNotProvided: 'Token non fornito.',
     unableToDeleteCount: 'Impossibile eliminare {{count}} su {{total}} {{label}}.',
+    unableToReindexCollection:
+      'Errore durante la reindicizzazione della collezione {{collection}}. Operazione annullata.',
     unableToUpdateCount: 'Impossibile aggiornare {{count}} su {{total}} {{label}}.',
     unauthorized: 'Non autorizzato, devi essere loggato per effettuare questa richiesta.',
     unknown: 'Si è verificato un errore sconosciuto.',
@@ -180,6 +183,7 @@ export const itTranslations: DefaultTranslationsObject = {
     addBelow: 'Aggiungi sotto',
     addFilter: 'Aggiungi Filtro',
     adminTheme: 'Tema Admin',
+    allCollections: 'Tutte le collezioni',
     and: 'E',
     anotherUser: 'Un altro utente',
     anotherUserTakenOver:
@@ -199,6 +203,9 @@ export const itTranslations: DefaultTranslationsObject = {
     confirm: 'Conferma',
     confirmDeletion: "Conferma l'eliminazione",
     confirmDuplication: 'Conferma la duplicazione',
+    confirmReindex: 'Conferma reindicizzazione',
+    confirmReindexDescription:
+      'Questo rimuoverà gli indici esistenti e reindicizzerà tutti i documenti nelle collezioni selezionate.',
     copied: 'Copiato',
     copy: 'Copia',
     create: 'Crea',
@@ -279,6 +286,7 @@ export const itTranslations: DefaultTranslationsObject = {
     payloadSettings: 'Impostazioni di Payload',
     perPage: 'Per Pagina: {{limit}}',
     previous: 'Precedente',
+    reindex: 'Reindicizza',
     remove: 'Rimuovi',
     reset: 'Ripristina',
     row: 'Riga',
@@ -301,6 +309,8 @@ export const itTranslations: DefaultTranslationsObject = {
     success: 'Successo',
     successfullyCreated: '{{label}} creato con successo.',
     successfullyDuplicated: '{{label}} duplicato con successo.',
+    successfullyReindexed:
+      'Reindicizzati con successo {{count}} di {{total}} documenti da {{collections}} collezioni.',
     takeOver: 'Prendi il controllo',
     thisLanguage: 'Italiano',
     titleDeleted: '{{label}} {{title}} eliminato con successo.',
