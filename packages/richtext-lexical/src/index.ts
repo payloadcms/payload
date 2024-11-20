@@ -55,7 +55,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               '@lexical/link',
               '@lexical/list',
               '@lexical/mark',
-              '@lexical/markdown',
               '@lexical/react',
               '@lexical/rich-text',
               '@lexical/selection',
