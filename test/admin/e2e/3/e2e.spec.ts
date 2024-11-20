@@ -482,7 +482,7 @@ describe('admin3', () => {
         'Deleted 1 Post successfully.',
       )
 
-      await expect(page.locator('.collection-list__no-results')).toBeVisible()
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
     })
 
     test('should bulk update', async () => {
