@@ -11,98 +11,82 @@ export type Permission = {
   where?: Where
 }
 
+export type FieldsPermissions = {
+  [fieldName: string]: FieldPermissions
+}
+
 export type FieldPermissions = {
   blocks?: {
     [blockSlug: string]: {
-      create: {
-        permission: boolean
-      }
-      fields: {
-        [fieldName: string]: FieldPermissions
-      }
-      read: {
-        permission: boolean
-      }
-      update: {
-        permission: boolean
-      }
+      create: Permission
+      fields: FieldsPermissions
+      read: Permission
+      update: Permission
     }
   }
-  create: {
-    permission: boolean
-  }
-  fields?: {
-    [fieldName: string]: FieldPermissions
-  }
-  read: {
-    permission: boolean
-  }
-  update: {
-    permission: boolean
-  }
+  create: Permission
+  fields?: FieldsPermissions
+  read: Permission
+  update: Permission
 }
 
 export type SanitizedFieldPermissions =
   | {
       blocks?: {
-        [blockSlug: string]: {
-          fields: {
-            [fieldName: string]: SanitizedFieldPermissions
-          }
-        }
+        [blockSlug: string]:
+          | {
+              fields: SanitizedFieldsPermissions
+            }
+          | true
       }
       create: true
-      fields?: {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
+      fields?: SanitizedFieldsPermissions
       read: true
       update: true
+    }
+  | true
+
+export type SanitizedFieldsPermissions =
+  | {
+      [fieldName: string]: SanitizedFieldPermissions
     }
   | true
 
 export type CollectionPermission = {
   create: Permission
   delete: Permission
-  fields: {
-    [fieldName: string]: FieldPermissions
-  }
+  fields: FieldsPermissions
   read: Permission
   readVersions?: Permission
   update: Permission
 }
 
-export type SanitizedCollectionPermission = {
-  create?: true
-  delete?: true
-  fields:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | true
-  read?: true
-  readVersions?: true
-  update?: true
-}
+export type SanitizedCollectionPermission =
+  | {
+      create?: true
+      delete?: true
+      fields: SanitizedFieldsPermissions
+      read?: true
+      readVersions?: true
+      update?: true
+    }
+  | true
 
 export type GlobalPermission = {
-  fields: {
-    [fieldName: string]: FieldPermissions
-  }
+  fields: FieldsPermissions
   read: Permission
   readVersions?: Permission
   update: Permission
 }
 
-export type SanitizedGlobalPermission = {
-  fields:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | true
-  read?: true
-  readVersions?: true
-  update?: true
-}
+export type SanitizedGlobalPermission =
+  | {
+      fields: SanitizedFieldsPermissions
+      read?: true
+      readVersions?: true
+      update?: true
+    }
+  | true
 
 export type DocumentPermissions = CollectionPermission | GlobalPermission
 
@@ -110,7 +94,7 @@ export type SanitizedDocumentPermissions = SanitizedCollectionPermission | Sanit
 
 export type Permissions = {
   canAccessAdmin: boolean
-  collections: {
+  collections?: {
     [collectionSlug: CollectionSlug]: CollectionPermission
   }
   globals?: {
@@ -121,26 +105,10 @@ export type Permissions = {
 export type SanitizedPermissions = {
   canAccessAdmin?: boolean
   collections?: {
-    [collectionSlug: string]: {
-      create?: true
-      delete?: true
-      fields: {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-      read?: true
-      readVersions?: true
-      update?: true
-    }
+    [collectionSlug: string]: SanitizedCollectionPermission
   }
   globals?: {
-    [globalSlug: string]: {
-      fields: {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-      read?: true
-      readVersions?: true
-      update?: true
-    }
+    [globalSlug: string]: SanitizedGlobalPermission
   }
 }
 

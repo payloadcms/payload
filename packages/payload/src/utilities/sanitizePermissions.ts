@@ -1,61 +1,167 @@
-import type { Permissions, SanitizedPermissions } from '../auth/types.js'
+import type {
+  CollectionPermission,
+  FieldPermissions,
+  FieldsPermissions,
+  GlobalPermission,
+  Permissions,
+  SanitizedCollectionPermission,
+  SanitizedFieldPermissions,
+  SanitizedGlobalPermission,
+  SanitizedPermissions,
+} from '../auth/types.js'
 
-type PermissionObject = {
-  [key: string]: any
+function areAllFieldsPermissionsTrue(data: FieldsPermissions): boolean {
+  const randomNumber = Math.random()
+
+  console.log('Inside areAllFieldsPermissionsTrue for', data, randomNumber)
+  let areAllFieldsTrue = true
+  for (const key in data) {
+    console.log('Checking key', key)
+    if (typeof data[key] === 'object') {
+      // If any recursive call returns false, the whole function returns false
+      if (!areAllPermissionsTrue(data[key])) {
+        areAllFieldsTrue = false
+      } else {
+        ;(data[key] as unknown as SanitizedFieldPermissions) = true
+        console.log('Setting key to true', key)
+      }
+    } else if (data[key] !== true) {
+      // If any value is not true, return false
+      areAllFieldsTrue = false
+    }
+  }
+
+  console.log('End areAllFieldsPermissionsTrue', { areAllFieldsTrue }, randomNumber)
+
+  // If all values are true or it's an empty object, return true
+  return areAllFieldsTrue
 }
 
 /**
  * Check if all permissions in a FieldPermissions object are true on the condition that no nested blocks or fields are present.
  */
-function areAllPermissionsTrue(data: PermissionObject): boolean {
-  if (data.blocks) {
-    for (const key in data.blocks) {
-      if (typeof data.blocks[key] === 'object') {
-        // If any recursive call returns false, the whole function returns false
-        if (key === 'fields' && !areAllPermissionsTrue(data.blocks[key])) {
-          return false
+function areAllPermissionsTrue(
+  data: CollectionPermission | FieldPermissions | GlobalPermission,
+): boolean {
+  const randomNumber = Math.random()
+  console.log('Inside areAllPermissionsTrue for', data, randomNumber)
+
+  let blocksPermissions = true
+  if ('blocks' in data && data.blocks) {
+    for (const blockSlug in data.blocks) {
+      if (typeof data.blocks[blockSlug] === 'object') {
+        for (const key in data.blocks[blockSlug]) {
+          if (key === 'fields') {
+            // If any recursive call returns false, the whole function returns false
+
+            console.log('1 checking field permissions for', blockSlug)
+            if (data.blocks[blockSlug].fields) {
+              if (!areAllFieldsPermissionsTrue(data.blocks[blockSlug].fields)) {
+                blocksPermissions = false
+              } else {
+                data.blocks[blockSlug].fields = true
+              }
+            }
+          } else {
+            if (typeof data.blocks[blockSlug][key] === 'object') {
+              /*
+              handle permissions object
+              */
+              if (isPermissionObject(data.blocks[blockSlug][key])) {
+                if (
+                  data.blocks[blockSlug][key]['permission'] === true &&
+                  !('where' in data.blocks[blockSlug][key])
+                ) {
+                  // If the permission is true and there is no where clause, set the key to true
+                  data.blocks[blockSlug][key] = true
+                  continue
+                } else if (
+                  data.blocks[blockSlug][key]['permission'] === true &&
+                  'where' in data.blocks[blockSlug][key]
+                ) {
+                  // otherwise do nothing so we can keep the where clause
+                  blocksPermissions = false
+                } else {
+                  blocksPermissions = false
+                  data.blocks[blockSlug][key] = false
+                  delete data.blocks[blockSlug][key]
+                  continue
+                }
+              } else {
+                console.error('Unexpected object in permissions1', key, data.blocks[blockSlug][key])
+              }
+
+              /*
+              handle permissions object done
+              */
+            }
+          }
         }
-        if (data.blocks[key].fields && !areAllPermissionsTrue(data.blocks[key].fields)) {
-          return false
-        }
-      } else if (data.blocks[key] !== true) {
+      } else if (data.blocks[blockSlug] !== true) {
         // If any value is not true, return false
-        return false
+        blocksPermissions = false
+        delete data.blocks[blockSlug]
       }
     }
-    // If all values are true or it's an empty object, return true
-    return true
+    if (blocksPermissions) {
+      data.blocks = true
+    }
   }
 
+  let fieldsPermissions = true
   if (data.fields) {
-    for (const key in data.fields) {
-      if (typeof data.fields[key] === 'object') {
-        // If any recursive call returns false, the whole function returns false
-        if (!areAllPermissionsTrue(data.fields[key])) {
-          return false
-        }
-      } else if (data.fields[key] !== true) {
-        // If any value is not true, return false
-        return false
-      }
+    console.log('2 checking field permissions')
+    if (!areAllFieldsPermissionsTrue(data.fields)) {
+      fieldsPermissions = false
+    } else {
+      data.fields = true
     }
-    // If all values are true or it's an empty object, return true
-    return true
   }
 
+  let otherPermissions = true
   for (const key in data) {
+    if (key === 'fields' || key === 'blocks') {
+      continue
+    }
     if (typeof data[key] === 'object') {
-      // If any recursive call returns false, the whole function returns false
-      if (!areAllPermissionsTrue(data[key])) {
-        return false
+      /*
+      handle permissions object
+      */
+      if (isPermissionObject(data[key])) {
+        if (data[key]['permission'] === true && !('where' in data[key])) {
+          // If the permission is true and there is no where clause, set the key to true
+          data[key] = true
+          continue
+        } else if (data[key]['permission'] === true && 'where' in data[key]) {
+          // otherwise do nothing so we can keep the where clause
+          otherPermissions = false
+        } else {
+          otherPermissions = false
+          data[key] = false
+          delete data[key]
+          continue
+        }
+      } else {
+        console.error('Unexpected object in permissions', key, data[key])
       }
+
+      /*
+      handle permissions object done
+      */
     } else if (data[key] !== true) {
       // If any value is not true, return false
-      return false
+      otherPermissions = false
     }
   }
+
+  console.log('End areAllPermissionsTrue for', randomNumber, {
+    blocksPermissions,
+    fieldsPermissions,
+    otherPermissions,
+  })
+
   // If all values are true or it's an empty object, return true
-  return true
+  return fieldsPermissions && blocksPermissions && otherPermissions
 }
 
 /**
@@ -83,10 +189,7 @@ function cleanEmptyObjects(obj: any): void {
   })
 }
 
-/**
- * Recursively resolve permissions in an object.
- */
-export function recursivelySanitizePermissions(obj: PermissionObject): void {
+export function recursivelySanitizeCollections(obj: Permissions['collections']): void {
   if (typeof obj !== 'object') {
     return
   }
@@ -94,72 +197,30 @@ export function recursivelySanitizePermissions(obj: PermissionObject): void {
   const entries = Object.entries(obj)
 
   for (let i = 0; i < entries.length; i++) {
-    const [key, value] = entries[i]
-    // Check if it's a 'fields' key
-    if (key === 'fields') {
-      // Check if fields is empty
-      if (Object.keys(obj[key]).length === 0) {
-        delete obj[key]
-        continue
-      }
-      // Otherwise set fields to true if all permissions are true
-      else if (areAllPermissionsTrue(value)) {
-        obj[key] = true
-        continue
-      }
-    } else if (key === 'blocks') {
-      // Check if fields is empty
-      if (Object.keys(obj[key]).length === 0) {
-        delete obj[key]
-        continue
-      }
-      // Otherwise set fields to true if all permissions are true
-      else if (areAllPermissionsTrue(value)) {
-        obj[key] = true
-        continue
-      }
+    const [collectionSlug, collectionPermission] = entries[i]
+
+    console.log('areAllPermissionsTrue for collection', collectionSlug)
+    if (areAllPermissionsTrue(collectionPermission)) {
+      ;(obj[collectionSlug] as unknown as SanitizedCollectionPermission) = true
+      continue
     }
+  }
+}
 
-    // Check if the whole object is a permission object
-    const isFullPermissionObject = Object.keys(value).every(
-      (subKey) =>
-        subKey !== 'blocks' &&
-        typeof value?.[subKey] === 'object' &&
-        'permission' in value[subKey] &&
-        !('where' in value[subKey]) &&
-        typeof value[subKey]['permission'] === 'boolean',
-    )
+export function recursivelySanitizeGlobals(obj: Permissions['globals']): void {
+  if (typeof obj !== 'object') {
+    return
+  }
 
-    if (isFullPermissionObject) {
-      if (areAllPermissionsTrue(value)) {
-        obj[key] = true
-        continue
-      } else {
-        for (const subKey in value) {
-          if (value[subKey]['permission'] === true && !('where' in value[subKey])) {
-            value[subKey] = true
-            continue
-          } else if (value[subKey]['permission'] === true && 'where' in value[subKey]) {
-            // do nothing
-          } else {
-            delete value[subKey]
-            continue
-          }
-        }
-      }
-    } else if (isPermissionObject(value)) {
-      if (value['permission'] === true && !('where' in value)) {
-        // If the permission is true and there is no where clause, set the key to true
-        obj[key] = true
-        continue
-      } else if (value['permission'] === true && 'where' in value) {
-        // otherwise do nothing so we can keep the where clause
-      } else {
-        delete obj[key]
-        continue
-      }
-    } else {
-      recursivelySanitizePermissions(value)
+  const entries = Object.entries(obj)
+
+  for (let i = 0; i < entries.length; i++) {
+    const [globalSlug, globalPermission] = entries[i]
+    console.log('areAllPermissionsTrue for global', globalSlug)
+
+    if (areAllPermissionsTrue(globalPermission)) {
+      ;(obj[globalSlug] as unknown as SanitizedGlobalPermission) = true
+      continue
     }
   }
 }
@@ -173,11 +234,11 @@ export function sanitizePermissions(data: Permissions): SanitizedPermissions {
   }
 
   if (data.collections) {
-    recursivelySanitizePermissions(data.collections)
+    recursivelySanitizeCollections(data.collections)
   }
 
   if (data.globals) {
-    recursivelySanitizePermissions(data.globals)
+    recursivelySanitizeGlobals(data.globals)
   }
 
   // Run clean up of empty objects at the end

@@ -148,7 +148,11 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
           parentPath={path}
           parentSchemaPath={schemaPath}
           permissions={
-            permissions === true ? permissions : permissions?.blocks?.[block.slug]?.fields
+            permissions === true
+              ? permissions
+              : permissions?.blocks?.[block.slug] === true
+                ? true
+                : permissions?.blocks?.[block.slug]?.fields
           }
           readOnly={readOnly}
         />

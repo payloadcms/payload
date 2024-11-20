@@ -8,10 +8,12 @@ import type {
   FormStateWithoutComponents,
   PayloadRequest,
   SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import {
+  deepCopyObjectSimple,
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsSidebar,
@@ -59,14 +61,9 @@ export type AddFieldStatePromiseArgs = {
   operation: 'create' | 'update'
   parentIndexPath: string
   parentPath: string
+  parentPermissions: SanitizedFieldsPermissions
   parentSchemaPath: string
   passesCondition: boolean
-  permissions:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | null
-    | SanitizedFieldPermissions
   preferences: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
@@ -109,9 +106,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     operation,
     parentIndexPath,
     parentPath,
+    parentPermissions,
     parentSchemaPath,
     passesCondition,
-    permissions,
     preferences,
     previousFormState,
     renderAllFields,
@@ -135,10 +132,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const isHiddenField = 'hidden' in field && field?.hidden
   const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
 
+  let fieldPermissions: SanitizedFieldPermissions = true
   if (fieldAffectsData(field) && !(isHiddenField || disabledFromAdmin)) {
-    const fieldPermissions = permissions === true ? permissions : permissions?.[field.name]
+    fieldPermissions =
+      parentPermissions === true
+        ? parentPermissions
+        : deepCopyObjectSimple(parentPermissions?.[field.name])
 
-    let hasPermission: boolean = fieldPermissions === true || fieldPermissions?.read
+    let hasPermission: boolean =
+      fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
       hasPermission = await field.access.read({ doc: fullData, req, siblingData: data })
@@ -385,7 +387,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   permissions:
                     fieldPermissions === true
                       ? fieldPermissions
-                      : permissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
+                      : parentPermissions?.[field.name]?.blocks?.[block.slug] === true
+                        ? true
+                        : parentPermissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
                   preferences,
                   previousFormState,
                   renderAllFields: requiresRender,
@@ -470,7 +474,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           parentPassesCondition: passesCondition,
           parentPath: path,
           parentSchemaPath: schemaPath,
-          permissions: fieldPermissions ?? permissions?.[field.name]?.fields ?? {},
+          permissions:
+            typeof fieldPermissions === 'boolean' ? fieldPermissions : fieldPermissions?.fields,
           preferences,
           previousFormState,
           renderAllFields,
@@ -614,7 +619,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentPassesCondition: passesCondition,
       parentPath,
       parentSchemaPath,
-      permissions,
+      permissions: parentPermissions, // TODO: Verify this is correct
       preferences,
       previousFormState,
       renderAllFields,
@@ -662,10 +667,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         parentPath: tabHasName(tab) ? tabPath : parentPath,
         parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
         permissions: tabHasName(tab)
-          ? typeof permissions === 'boolean'
-            ? permissions
-            : permissions?.[tab.name] || {}
-          : permissions,
+          ? typeof parentPermissions === 'boolean'
+            ? parentPermissions
+            : typeof parentPermissions?.[tab.name] === 'boolean'
+              ? parentPermissions[tab.name]
+              : parentPermissions?.[tab.name]?.fields
+          : parentPermissions,
         preferences,
         previousFormState,
         renderAllFields,
@@ -727,7 +734,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentPath,
       parentSchemaPath,
       path,
-      permissions,
+      permissions: fieldPermissions,
       preferences,
       previousFieldState: previousFormState?.[path],
       req,

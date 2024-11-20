@@ -27,6 +27,8 @@ export const RenderFields: React.FC<Props> = (props) => {
     readOnly: readOnlyFromParent,
   } = props
 
+  console.log('RenderFields', props)
+
   const operation = useOperation()
 
   if (fields && fields.length > 0) {
@@ -49,10 +51,15 @@ export const RenderFields: React.FC<Props> = (props) => {
             return null
           }
 
+          const parentName = parentPath?.includes('.')
+            ? parentPath.split('.')[parentPath.split('.').length - 1]
+            : parentPath
+
           // If the user cannot read the field, then filter it out
           // This is different from `admin.readOnly` which is executed based on `operation`
           const hasReadPermission =
             permissions === true ||
+            permissions?.[parentName] === true ||
             ('name' in field &&
               typeof permissions === 'object' &&
               permissions?.[field.name] &&
@@ -74,6 +81,7 @@ export const RenderFields: React.FC<Props> = (props) => {
           // If the user does not have access control to begin with, force it to be read-only
           const hasOperationPermission =
             permissions === true ||
+            permissions?.[parentName] === true ||
             ('name' in field &&
               typeof permissions === 'object' &&
               permissions?.[field.name] &&
@@ -82,6 +90,19 @@ export const RenderFields: React.FC<Props> = (props) => {
 
           if ('name' in field && !hasOperationPermission) {
             isReadOnly = true
+          }
+
+          if (field.name === 'art') {
+            console.log('Checking field', {
+              field,
+              hasOperationPermission,
+              hasReadPermission,
+              isReadOnly,
+              parentName,
+              parentPath,
+              parentSchemaPath,
+              permissions,
+            })
           }
 
           const { indexPath, path, schemaPath } = getFieldPaths({
@@ -102,7 +123,7 @@ export const RenderFields: React.FC<Props> = (props) => {
               parentSchemaPath={parentSchemaPath}
               path={path}
               permissions={
-                permissions === null || permissions === true
+                permissions === undefined || permissions === null || permissions === true
                   ? true
                   : 'name' in field
                     ? permissions?.[field.name]
