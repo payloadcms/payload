@@ -1,0 +1,57 @@
+{
+  "name": "payload-example-preview",
+  "version": "1.0.0",
+  "description": "Payload preview example.",
+  "license": "MIT",
+  "main": "dist/server.js",
+  "scripts": {
+    "_dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm seed && next dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:schema": "payload-graphql generate:schema",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "seed": "npm run payload migrate:fresh",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
+  },
+  "dependencies": {
+    "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/next": "latest",
+    "@payloadcms/richtext-slate": "latest",
+    "@payloadcms/ui": "latest",
+    "dotenv": "^8.2.0",
+    "escape-html": "^1.0.3",
+    "graphql": "^16.9.0",
+    "jsonwebtoken": "9.0.2",
+    "next": "15.0.0",
+    "payload": "latest",
+    "payload-admin-bar": "^1.0.6",
+    "react": "19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "19.0.0-rc-65a56d0e-20241020"
+  },
+  "devDependencies": {
+    "@payloadcms/graphql": "latest",
+    "@swc/core": "^1.6.13",
+    "@types/escape-html": "^1.0.2",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "15.0.0",
+    "tsx": "^4.16.2",
+    "typescript": "5.5.2"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "npm:types-react@19.0.0-rc.1",
+      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
+    }
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
+  }
+}
