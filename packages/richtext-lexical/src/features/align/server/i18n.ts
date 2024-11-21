@@ -25,6 +25,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Zarovnat vlevo',
     alignRightLabel: 'Zarovnat vpravo',
   },
+  da: {
+    alignCenterLabel: 'Centrer teksten',
+    alignJustifyLabel: 'Justér til begge sider',
+    alignLeftLabel: 'Justér til venstre',
+    alignRightLabel: 'Juster til højre',
+  },
   de: {
     alignCenterLabel: 'Zentrieren',
     alignJustifyLabel: 'Blocksatz',
