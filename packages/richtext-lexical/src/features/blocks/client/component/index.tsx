@@ -162,7 +162,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation<object, string>()
 
   const onChange = useCallback(
-    async ({ formState: prevFormState, submit }: { formState: FormState; submit: boolean }) => {
+    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
       abortAndIgnore(onChangeAbortControllerRef.current)
 
       const controller = new AbortController()

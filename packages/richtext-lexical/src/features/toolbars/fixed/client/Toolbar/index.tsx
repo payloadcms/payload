@@ -8,7 +8,7 @@ import { useMemo } from 'react'
 
 import type { EditorConfigContextType } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../../lexical/config/types.js'
-import type { PluginComponentWithAnchor } from '../../../../typesClient.js'
+import type { PluginComponent } from '../../../../typesClient.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../../types.js'
 import type { FixedToolbarFeatureProps } from '../../server/index.js'
 
@@ -58,7 +58,7 @@ function ToolbarGroupComponent({
   group: ToolbarGroup
   index: number
 }): React.ReactNode {
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
   const {
     fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
@@ -106,9 +106,8 @@ function ToolbarGroupComponent({
 
   return (
     <div className={`fixed-toolbar__group fixed-toolbar__group-${group.key}`} key={group.key}>
-      {group.type === 'dropdown' &&
-        group.items.length &&
-        (DropdownIcon ? (
+      {group.type === 'dropdown' && group.items.length ? (
+        DropdownIcon ? (
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
@@ -129,14 +128,15 @@ function ToolbarGroupComponent({
             maxActiveItems={1}
             onActiveChange={onActiveChange}
           />
-        ))}
-      {group.type === 'buttons' &&
-        group.items.length &&
-        group.items.map((item) => {
-          return (
-            <ButtonGroupItem anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
-          )
-        })}
+        )
+      ) : null}
+      {group.type === 'buttons' && group.items.length
+        ? group.items.map((item) => {
+            return (
+              <ButtonGroupItem anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
+            )
+          })
+        : null}
       {index < editorConfig.features.toolbarFixed?.groups.length - 1 && <div className="divider" />}
     </div>
   )
@@ -256,10 +256,7 @@ const getParentEditorWithFixedToolbar = (
   return false
 }
 
-export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeatureProps> = ({
-  anchorElem,
-  clientProps,
-}) => {
+export const FixedToolbarPlugin: PluginComponent<FixedToolbarFeatureProps> = ({ clientProps }) => {
   const [currentEditor] = useLexicalComposerContext()
   const editorConfigContext = useEditorConfigContext()
 
@@ -287,7 +284,7 @@ export const FixedToolbarPlugin: PluginComponentWithAnchor<FixedToolbarFeaturePr
 
   return (
     <FixedToolbar
-      anchorElem={anchorElem}
+      anchorElem={document.body}
       editor={editor}
       editorConfig={editorConfig}
       parentWithFixedToolbar={parentWithFixedToolbar}

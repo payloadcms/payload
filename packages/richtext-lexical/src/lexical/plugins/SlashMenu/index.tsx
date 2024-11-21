@@ -1,6 +1,4 @@
 'use client'
-import type { TextNode } from 'lexical'
-
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useTranslation } from '@payloadcms/ui'
 import { useCallback, useMemo, useState } from 'react'
@@ -37,7 +35,7 @@ function SlashMenuItem({
     fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
 
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
 
   let className = `${baseClass}__item ${baseClass}__item-${item.key}`
   if (isSelected) {
@@ -86,7 +84,7 @@ export function SlashMenuPlugin({
   const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
   const {
     fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
