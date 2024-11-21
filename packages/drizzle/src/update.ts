@@ -20,7 +20,7 @@ export const updateOne: UpdateOne = async function updateOne(
 
   const { joins, selectFields, where } = buildQuery({
     adapter: this,
-    fields: collection.flattenFields,
+    fields: collection.flattenedFields,
     locale,
     tableName,
     where: whereToUse,
@@ -45,7 +45,7 @@ export const updateOne: UpdateOne = async function updateOne(
     adapter: this,
     data,
     db,
-    fields: collection.flattenFields,
+    fields: collection.flattenedFields,
     joinQuery,
     operation: 'update',
     req,

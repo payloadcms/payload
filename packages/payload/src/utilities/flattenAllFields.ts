@@ -1,9 +1,9 @@
-import type { Field, FlattenField } from '../fields/config/types.js'
+import type { Field, FlattenedField } from '../fields/config/types.js'
 
 import { tabHasName } from '../fields/config/types.js'
 
-export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenField[] => {
-  const result: FlattenField[] = []
+export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedField[] => {
+  const result: FlattenedField[] = []
 
   for (const field of fields) {
     switch (field.type) {

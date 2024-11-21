@@ -1,4 +1,4 @@
-import type { Field, FlattenField } from '../fields/config/types.js'
+import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { Payload } from '../index.js'
 import type { PathToQuery } from './queryValidation/types.js'
 
@@ -12,7 +12,7 @@ export function getLocalizedPaths({
   payload,
 }: {
   collectionSlug?: string
-  fields: FlattenField[]
+  fields: FlattenedField[]
   globalSlug?: string
   incomingPath: string
   locale?: string
@@ -43,7 +43,7 @@ export function getLocalizedPaths({
       const { path } = lastIncompletePath
       let currentPath = path ? `${path}.${segment}` : segment
 
-      let fieldsToSearch: FlattenField[]
+      let fieldsToSearch: FlattenedField[]
 
       if (lastIncompletePath?.field && 'flattenFields' in lastIncompletePath.field) {
         fieldsToSearch = lastIncompletePath.field.flattenFields
@@ -136,7 +136,7 @@ export function getLocalizedPaths({
 
                 const remainingPaths = getLocalizedPaths({
                   collectionSlug: relatedCollection.slug,
-                  fields: relatedCollection.flattenFields,
+                  fields: relatedCollection.flattenedFields,
                   globalSlug,
                   incomingPath: nestedPathToQuery,
                   locale,

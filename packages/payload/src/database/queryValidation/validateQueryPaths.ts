@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { FlattenField } from '../../fields/config/types.js'
+import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
 import type { EntityPolicies } from './types.js'
@@ -13,7 +13,7 @@ type Args = {
   overrideAccess: boolean
   policies?: EntityPolicies
   req: PayloadRequest
-  versionFields?: FlattenField[]
+  versionFields?: FlattenedField[]
   where: Where
 } & (
   | {
@@ -52,7 +52,7 @@ export async function validateQueryPaths({
   versionFields,
   where,
 }: Args): Promise<void> {
-  const fields = versionFields || (globalConfig || collectionConfig).flattenFields
+  const fields = versionFields || (globalConfig || collectionConfig).flattenedFields
 
   if (typeof where === 'object') {
     const whereFields = flattenWhere(where)

@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { FlattenField, Operator, Where } from 'payload'
+import type { FlattenedField, Operator, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
@@ -15,7 +15,7 @@ import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  fields: FlattenField[]
+  fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale: string
   selectFields: Record<string, GenericColumn>

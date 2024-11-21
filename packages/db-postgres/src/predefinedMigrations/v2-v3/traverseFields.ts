@@ -1,5 +1,5 @@
 import type { TransactionPg } from '@payloadcms/drizzle/types'
-import type { FlattenField, Payload } from 'payload'
+import type { FlattenedField, Payload } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -12,7 +12,7 @@ type Args = {
   columnPrefix: string
   db: TransactionPg
   disableNotNull: boolean
-  fields: FlattenField[]
+  fields: FlattenedField[]
   globalSlug?: string
   isVersions: boolean
   newTableName: string

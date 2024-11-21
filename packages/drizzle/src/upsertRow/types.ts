@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { FlattenField, JoinQuery, PayloadRequest, SelectType } from 'payload'
+import type { FlattenedField, JoinQuery, PayloadRequest, SelectType } from 'payload'
 
 import type { DrizzleAdapter, DrizzleTransaction, GenericColumn } from '../types.js'
 
@@ -7,7 +7,7 @@ type BaseArgs = {
   adapter: DrizzleAdapter
   data: Record<string, unknown>
   db: DrizzleAdapter['drizzle'] | DrizzleTransaction
-  fields: FlattenField[]
+  fields: FlattenedField[]
   /**
    * When true, skips reading the data back from the database and returns the input data
    * @default false

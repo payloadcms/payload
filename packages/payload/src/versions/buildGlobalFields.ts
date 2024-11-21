@@ -1,5 +1,5 @@
 import type { SanitizedConfig } from '../config/types.js'
-import type { Field, FlattenField } from '../fields/config/types.js'
+import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 import { versionSnapshotField } from './baseFields.js'
@@ -8,14 +8,14 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
   config: SanitizedConfig,
   global: SanitizedGlobalConfig,
   flatten?: T,
-): true extends T ? FlattenField[] : Field[] => {
-  const fields: FlattenField[] = [
+): true extends T ? FlattenedField[] : Field[] => {
+  const fields: FlattenedField[] = [
     {
       name: 'version',
       type: 'group',
       fields: global.fields,
       ...(flatten && {
-        flattenFields: global.flattenFields,
+        flattenFields: global.flattenedFields,
       }),
     },
     {
@@ -76,5 +76,5 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
     }
   }
 
-  return fields as true extends T ? FlattenField[] : Field[]
+  return fields as true extends T ? FlattenedField[] : Field[]
 }

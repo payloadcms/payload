@@ -1,4 +1,4 @@
-import type { FlattenArrayField } from 'payload'
+import type { FlattenedArrayField } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
@@ -15,7 +15,7 @@ type Args = {
   }
   blocksToDelete: Set<string>
   data: unknown
-  field: FlattenArrayField
+  field: FlattenedArrayField
   locale?: string
   numbers: Record<string, unknown>[]
   path: string

@@ -1,4 +1,4 @@
-import type { FieldAffectingData, FlattenField, SelectMode, SelectType } from 'payload'
+import type { FieldAffectingData, FlattenedField, SelectMode, SelectType } from 'payload'
 
 import { deepCopyObjectSimple, fieldAffectsData, getSelectMode } from 'payload/shared'
 
@@ -41,7 +41,7 @@ const traverseFields = ({
 }: {
   adapter: MongooseAdapter
   databaseSchemaPath?: string
-  fields: FlattenField[]
+  fields: FlattenedField[]
   projection: Record<string, true>
   select: SelectType
   selectAllOnCurrentLevel?: boolean
@@ -182,7 +182,7 @@ export const buildProjectionFromSelect = ({
   select,
 }: {
   adapter: MongooseAdapter
-  fields: FlattenField[]
+  fields: FlattenedField[]
   select?: SelectType
 }): Record<string, true> | undefined => {
   if (!select) {

@@ -1,4 +1,4 @@
-import type { FlattenField, Payload, Where } from 'payload'
+import type { FlattenedField, Payload, Where } from 'payload'
 
 import { QueryError } from 'payload'
 
@@ -6,7 +6,7 @@ import { parseParams } from './parseParams.js'
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string
-  versionsFields?: FlattenField[]
+  versionsFields?: FlattenedField[]
 }
 
 export type BuildQueryArgs = {
@@ -34,11 +34,11 @@ export const getBuildQueryPlugin = ({
       if (!fields) {
         if (globalSlug) {
           const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug)
-          fields = globalConfig.flattenFields
+          fields = globalConfig.flattenedFields
         }
         if (collectionSlug) {
           const collectionConfig = payload.collections[collectionSlug].config
-          fields = collectionConfig.flattenFields
+          fields = collectionConfig.flattenedFields
         }
       }
       const errors = []

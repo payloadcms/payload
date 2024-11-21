@@ -1,11 +1,11 @@
 import type { PaginateOptions } from 'mongoose'
-import type { FlattenField, SanitizedConfig, Sort } from 'payload'
+import type { FlattenedField, SanitizedConfig, Sort } from 'payload'
 
 import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
 
 type Args = {
   config: SanitizedConfig
-  fields: FlattenField[]
+  fields: FlattenedField[]
   locale: string
   sort: Sort
   timestamps: boolean

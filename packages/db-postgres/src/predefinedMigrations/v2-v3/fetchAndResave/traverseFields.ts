@@ -1,8 +1,8 @@
-import type { FlattenField } from 'payload'
+import type { FlattenedField } from 'payload'
 
 type Args = {
   doc: Record<string, unknown>
-  fields: FlattenField[]
+  fields: FlattenedField[]
   locale?: string
   path: string
   rows: Record<string, unknown>[]

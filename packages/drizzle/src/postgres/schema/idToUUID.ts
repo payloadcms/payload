@@ -1,6 +1,6 @@
-import type { FlattenField } from 'payload'
+import type { FlattenedField } from 'payload'
 
-export const idToUUID = (fields: FlattenField[]): FlattenField[] =>
+export const idToUUID = (fields: FlattenedField[]): FlattenedField[] =>
   fields.map((field) => {
     if ('name' in field && field.name === 'id') {
       return {

@@ -22,7 +22,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: this.payload.config.globals.find((global) => global.slug === slug).flattenFields,
+      fields: this.payload.config.globals.find((global) => global.slug === slug).flattenedFields,
       select,
     }),
   }

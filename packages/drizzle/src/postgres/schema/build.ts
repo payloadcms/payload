@@ -5,7 +5,7 @@ import type {
   PgColumnBuilder,
   PgTableWithColumns,
 } from 'drizzle-orm/pg-core'
-import type { FlattenField } from 'payload'
+import type { FlattenedField } from 'payload'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -49,7 +49,7 @@ type Args = {
   disableNotNull: boolean
   disableRelsTableUnique?: boolean
   disableUnique: boolean
-  fields: FlattenField[]
+  fields: FlattenedField[]
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap
   rootTableIDColType?: string

@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { FlattenField } from '../../fields/config/types.js'
+import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
@@ -13,7 +13,7 @@ import { validateQueryPaths } from './validateQueryPaths.js'
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
   errors: { path: string }[]
-  fields: FlattenField[]
+  fields: FlattenedField[]
   globalConfig?: SanitizedGlobalConfig
   operator: string
   overrideAccess: boolean
@@ -21,7 +21,7 @@ type Args = {
   policies: EntityPolicies
   req: PayloadRequest
   val: unknown
-  versionFields?: FlattenField[]
+  versionFields?: FlattenedField[]
 }
 
 /**

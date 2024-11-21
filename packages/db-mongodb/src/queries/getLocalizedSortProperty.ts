@@ -1,10 +1,10 @@
-import type { FlattenField, SanitizedConfig } from 'payload'
+import type { FlattenedField, SanitizedConfig } from 'payload'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
-  fields: FlattenField[]
+  fields: FlattenedField[]
   locale: string
   result?: string
   segments: string[]
@@ -34,7 +34,7 @@ export const getLocalizedSortProperty = ({
   )
 
   if (matchedField && !fieldIsPresentationalOnly(matchedField)) {
-    let nextFields: FlattenField[]
+    let nextFields: FlattenedField[]
     const remainingSegments = [...segments]
     let localizedSegment = matchedField.name
 

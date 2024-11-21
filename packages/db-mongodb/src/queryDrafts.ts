@@ -41,7 +41,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
-      fields: collectionConfig.flattenFields,
+      fields: collectionConfig.flattenedFields,
       locale,
       sort: sortArg || collectionConfig.defaultSort,
       timestamps: true,

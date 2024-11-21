@@ -1,4 +1,4 @@
-import type { FlattenBlocksField } from 'payload'
+import type { FlattenedBlocksField } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -15,7 +15,7 @@ type Args = {
   }
   blocksToDelete: Set<string>
   data: Record<string, unknown>[]
-  field: FlattenBlocksField
+  field: FlattenedBlocksField
   locale?: string
   numbers: Record<string, unknown>[]
   path: string

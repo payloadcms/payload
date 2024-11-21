@@ -1,6 +1,6 @@
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder } from 'drizzle-orm/pg-core'
-import type { FlattenField } from 'payload'
+import type { FlattenedField } from 'payload'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -48,7 +48,7 @@ type Args = {
   disableRelsTableUnique?: boolean
   disableUnique?: boolean
   fieldPrefix?: string
-  fields: FlattenField[]
+  fields: FlattenedField[]
   forceLocalized?: boolean
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   localesColumns: Record<string, PgColumnBuilder>

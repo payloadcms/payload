@@ -1,4 +1,4 @@
-import type { FlattenField, Sort } from 'payload'
+import type { FlattenedField, Sort } from 'payload'
 
 import { asc, desc } from 'drizzle-orm'
 
@@ -9,7 +9,7 @@ import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  fields: FlattenField[]
+  fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale?: string
   selectFields: Record<string, GenericColumn>

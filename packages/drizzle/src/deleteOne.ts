@@ -29,7 +29,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const { joins, selectFields, where } = buildQuery({
     adapter: this,
-    fields: collection.flattenFields,
+    fields: collection.flattenedFields,
     locale: req.locale,
     tableName,
     where: whereArg,
@@ -53,7 +53,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     const findManyArgs = buildFindManyArgs({
       adapter: this,
       depth: 0,
-      fields: collection.flattenFields,
+      fields: collection.flattenedFields,
       joinQuery,
       select,
       tableName,
@@ -68,7 +68,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     adapter: this,
     config: this.payload.config,
     data: docToDelete,
-    fields: collection.flattenFields,
+    fields: collection.flattenedFields,
     joinQuery,
   })
 

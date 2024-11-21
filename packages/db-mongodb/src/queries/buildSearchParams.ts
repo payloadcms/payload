@@ -1,4 +1,4 @@
-import type { FlattenField, Operator, PathToQuery, Payload } from 'payload'
+import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
 import { getLocalizedPaths } from 'payload'
@@ -34,7 +34,7 @@ export async function buildSearchParam({
   val,
 }: {
   collectionSlug?: string
-  fields: FlattenField[]
+  fields: FlattenedField[]
   globalSlug?: string
   incomingPath: string
   locale?: string
@@ -68,7 +68,7 @@ export async function buildSearchParam({
       field: {
         name: 'id',
         type: idFieldType,
-      } as FlattenField,
+      } as FlattenedField,
       path: '_id',
     })
   } else {

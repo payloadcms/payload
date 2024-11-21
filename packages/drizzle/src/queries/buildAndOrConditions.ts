@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { FlattenField, Where } from 'payload'
+import type { FlattenedField, Where } from 'payload'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -17,7 +17,7 @@ export function buildAndOrConditions({
 }: {
   adapter: DrizzleAdapter
   collectionSlug?: string
-  fields: FlattenField[]
+  fields: FlattenedField[]
   globalSlug?: string
   joins: BuildQueryJoinAliases
   locale?: string

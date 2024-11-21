@@ -33,7 +33,7 @@ import type {
 import type { DBIdentifierName } from '../../database/types.js'
 import type {
   Field,
-  FlattenField,
+  FlattenedField,
   JoinField,
   RelationshipField,
   UploadField,
@@ -536,7 +536,7 @@ export interface SanitizedCollectionConfig
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
-  flattenFields: FlattenField[]
+  flattenedFields: FlattenedField[]
 
   /**
    * Object of collections to join 'Join Fields object keyed by collection

@@ -1,5 +1,5 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { FlattenField, JoinQuery, SelectMode, SelectType } from 'payload'
+import type { FlattenedField, JoinQuery, SelectMode, SelectType } from 'payload'
 
 import { and, eq, sql } from 'drizzle-orm'
 import { fieldIsVirtual } from 'payload/shared'
@@ -17,7 +17,7 @@ type TraverseFieldArgs = {
   currentArgs: Result
   currentTableName: string
   depth?: number
-  fields: FlattenField[]
+  fields: FlattenedField[]
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
   locale?: string
@@ -342,7 +342,7 @@ export const traverseFields = ({
           limit += 1
         }
 
-        const fields = adapter.payload.collections[field.collection].config.flattenFields
+        const fields = adapter.payload.collections[field.collection].config.flattenedFields
 
         const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
 

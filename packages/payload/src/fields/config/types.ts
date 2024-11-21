@@ -1330,35 +1330,35 @@ export type JoinFieldClient = {
 } & FieldBaseClient &
   Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
 
-export type FlattenBlock = {
-  flattenFields: FlattenField[]
+export type FlattenedBlock = {
+  flattenFields: FlattenedField[]
 } & Block
 
-export type FlattenBlocksField = {
-  blocks: FlattenBlock[]
+export type FlattenedBlocksField = {
+  blocks: FlattenedBlock[]
 } & BlocksField
 
-export type FlattenGroupField = {
-  flattenFields: FlattenField[]
+export type FlattenedGroupField = {
+  flattenFields: FlattenedField[]
 } & GroupField
 
-export type FlattenArrayField = {
-  flattenFields: FlattenField[]
+export type FlattenedArrayField = {
+  flattenFields: FlattenedField[]
 } & ArrayField
 
-export type FlattenTabAsField = {
-  flattenFields: FlattenField[]
+export type FlattenedTabAsField = {
+  flattenFields: FlattenedField[]
 } & MarkRequired<TabAsField, 'name'>
 
-export type FlattenField =
+export type FlattenedField =
   | CheckboxField
   | CodeField
   | DateField
   | EmailField
-  | FlattenArrayField
-  | FlattenBlocksField
-  | FlattenGroupField
-  | FlattenTabAsField
+  | FlattenedArrayField
+  | FlattenedBlocksField
+  | FlattenedGroupField
+  | FlattenedTabAsField
   | JoinField
   | JSONField
   | NumberField

@@ -1,6 +1,6 @@
 import type { SQL } from 'drizzle-orm'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
-import type { FlattenField, NumberField, TextField } from 'payload'
+import type { FlattenedField, NumberField, TextField } from 'payload'
 
 import { and, eq, like, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
@@ -29,7 +29,7 @@ type TableColumn = {
     rawColumn: SQL<unknown>
   }[]
   constraints: Constraint[]
-  field: FlattenField
+  field: FlattenedField
   getNotNullColumnByValue?: (val: unknown) => string
   pathSegments?: string[]
   rawColumn?: SQL
@@ -43,7 +43,7 @@ type Args = {
   columnPrefix?: string
   constraintPath?: string
   constraints?: Constraint[]
-  fields: FlattenField[]
+  fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale?: string
   pathSegments: string[]
@@ -577,7 +577,7 @@ export const getTableColumnFromPath = ({
             collectionPath: newCollectionPath,
             constraintPath: '',
             constraints,
-            fields: adapter.payload.collections[field.relationTo].config.flattenFields,
+            fields: adapter.payload.collections[field.relationTo].config.flattenedFields,
             joins,
             locale,
             pathSegments: pathSegments.slice(1),

@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { Field, FlattenField } from '../fields/config/types.js'
+import type { Field, FlattenedField } from '../fields/config/types.js'
 
 import { versionSnapshotField } from './baseFields.js'
 
@@ -8,8 +8,8 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
   config: SanitizedConfig,
   collection: SanitizedCollectionConfig,
   flatten?: T,
-): true extends T ? FlattenField[] : Field[] => {
-  const fields: FlattenField[] = [
+): true extends T ? FlattenedField[] : Field[] => {
+  const fields: FlattenedField[] = [
     {
       name: 'parent',
       type: 'relationship',
@@ -21,7 +21,7 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
       type: 'group',
       fields: collection.fields.filter((field) => !('name' in field) || field.name !== 'id'),
       ...(flatten && {
-        flattenFields: collection.flattenFields.filter((each) => each.name !== 'id'),
+        flattenFields: collection.flattenedFields.filter((each) => each.name !== 'id'),
       }),
     },
     {
@@ -82,5 +82,5 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
     }
   }
 
-  return fields as true extends T ? FlattenField[] : Field[]
+  return fields as true extends T ? FlattenedField[] : Field[]
 }

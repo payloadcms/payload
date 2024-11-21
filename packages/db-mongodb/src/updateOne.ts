@@ -32,7 +32,7 @@ export const updateOne: UpdateOne = async function updateOne(
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: this.payload.collections[collection].config.flattenFields,
+      fields: this.payload.collections[collection].config.flattenedFields,
       select,
     }),
   }

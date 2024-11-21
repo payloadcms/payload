@@ -1,10 +1,10 @@
-import type { FlattenBlock, FlattenField, Payload, RelationshipField } from 'payload'
+import type { FlattenedBlock, FlattenedField, Payload, RelationshipField } from 'payload'
 
 import { Types } from 'mongoose'
 import { createArrayFromCommaDelineated } from 'payload'
 
 type SanitizeQueryValueArgs = {
-  field: FlattenField
+  field: FlattenedField
   hasCustomID: boolean
   operator: string
   path: string
@@ -41,7 +41,7 @@ const getFieldFromSegments = ({
   field,
   segments,
 }: {
-  field: FlattenBlock | FlattenField
+  field: FlattenedBlock | FlattenedField
   segments: string[]
 }) => {
   if ('blocks' in field) {

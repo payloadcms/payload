@@ -18,7 +18,7 @@ import type {
   MetaConfig,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
-import type { Field, FlattenField } from '../../fields/config/types.js'
+import type { Field, FlattenedField } from '../../fields/config/types.js'
 import type { GlobalSlug, RequestContext, TypedGlobal, TypedGlobalSelect } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
@@ -198,7 +198,7 @@ export interface SanitizedGlobalConfig
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
-  flattenFields: FlattenField[]
+  flattenedFields: FlattenedField[]
   slug: GlobalSlug
   versions: SanitizedGlobalVersions
 }

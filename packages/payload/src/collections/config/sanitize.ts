@@ -202,7 +202,7 @@ export const sanitizeCollection = async (
 
   sanitizedConfig.joins = joins
 
-  sanitizedConfig.flattenFields = flattenAllFields({ fields: sanitizedConfig.fields })
+  sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
 
   return sanitizedConfig
 }

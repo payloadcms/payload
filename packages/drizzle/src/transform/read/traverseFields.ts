@@ -1,4 +1,4 @@
-import type { FlattenField, JoinQuery, SanitizedConfig } from 'payload'
+import type { FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
 
 import { fieldAffectsData, fieldIsVirtual } from 'payload/shared'
 
@@ -37,7 +37,7 @@ type TraverseFieldsArgs = {
   /**
    * An array of Payload fields to traverse
    */
-  fields: FlattenField[]
+  fields: FlattenedField[]
   /**
    *
    */

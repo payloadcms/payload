@@ -1,4 +1,4 @@
-import type { FlattenField } from 'payload'
+import type { FlattenedField } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { fieldIsVirtual } from 'payload/shared'
@@ -40,7 +40,7 @@ type Args = {
    * Ex: myGroup_myNamedTab_
    */
   fieldPrefix: string
-  fields: FlattenField[]
+  fields: FlattenedField[]
   forcedLocale?: string
   locales: {
     [locale: string]: Record<string, unknown>
