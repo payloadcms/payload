@@ -66,7 +66,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       })
     }
 
-    let features: FeatureProviderServer<any, any, any>[] = []
+    let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
@@ -124,12 +124,12 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
     const featureI18n = finalSanitizedEditorConfig.features.i18n
     for (const lang in i18n) {
-      if (!featureI18n[lang]) {
-        featureI18n[lang] = {
+      if (!featureI18n[lang as keyof typeof featureI18n]) {
+        featureI18n[lang as keyof typeof featureI18n] = {
           lexical: {},
         }
       }
-
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       featureI18n[lang].lexical.general = i18n[lang]
     }
 
@@ -207,6 +207,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             ) {
               return value
             }
+            // TO-DO: We should not use context, as it is intended for external use only
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const context: any = _context
             const nodeIDMap: {
               [key: string]: SerializedLexicalNode
@@ -439,6 +441,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               return value
             }
 
+            // TO-DO: We should not use context, as it is intended for external use only
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const context: any = _context
             const nodeIDMap: {
               [key: string]: SerializedLexicalNode

@@ -24,6 +24,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   const { docs } = await findMany({
     adapter: this,
     fields,
+    joins: false,
     limit: 0,
     locale,
     page: 1,

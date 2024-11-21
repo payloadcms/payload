@@ -101,7 +101,7 @@ export const seed = async ({
       'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post3.webp',
     ),
     fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
+      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.jpg',
     ),
   ])
 
@@ -317,7 +317,7 @@ export const seed = async ({
             type: 'custom',
             label: 'Source Code',
             newTab: true,
-            url: 'https://github.com/payloadcms/payload/tree/beta/templates/website',
+            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
           },
         },
         {

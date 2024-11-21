@@ -57,21 +57,15 @@ export const RootPage = async ({
 
   const searchParams = await searchParamsPromise
 
-  const {
-    DefaultView,
-    initPageOptions,
-    serverProps,
-    templateClassName,
-    templateType,
-    viewActions,
-  } = getViewFromConfig({
-    adminRoute,
-    config,
-    currentRoute,
-    importMap,
-    searchParams,
-    segments,
-  })
+  const { DefaultView, initPageOptions, serverProps, templateClassName, templateType } =
+    getViewFromConfig({
+      adminRoute,
+      config,
+      currentRoute,
+      importMap,
+      searchParams,
+      segments,
+    })
 
   const initPageResult = await initPage(initPageOptions)
 
@@ -159,7 +153,7 @@ export const RootPage = async ({
           permissions={initPageResult?.permissions}
           searchParams={searchParams}
           user={initPageResult?.req.user}
-          viewActions={viewActions}
+          viewActions={serverProps.viewActions}
           visibleEntities={{
             // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
             // which this caused as soon as initPageResult.visibleEntities is passed in
