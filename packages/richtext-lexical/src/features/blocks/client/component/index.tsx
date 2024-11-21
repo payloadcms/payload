@@ -162,7 +162,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation<object, string>()
 
   const onChange = useCallback(
-    async ({ formState: prevFormState, submit }) => {
+    async ({ formState: prevFormState, submit }: { formState: FormState; submit: boolean }) => {
       abortAndIgnore(onChangeAbortControllerRef.current)
 
       const controller = new AbortController()
@@ -246,7 +246,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
     })
   }, [editor, nodeKey])
 
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   const CustomLabel = initialState?.['_components']?.customComponents?.BlockLabel
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   const CustomBlock = initialState?.['_components']?.customComponents?.Block
 
   const blockDisplayName = clientBlock?.labels?.singular

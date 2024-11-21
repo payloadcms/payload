@@ -26,7 +26,14 @@ export type LexicalProviderProps = {
   value: SerializedEditorState
 }
 
-const NestProviders = ({ children, providers }) => {
+const NestProviders = ({
+  children,
+  providers,
+}: {
+  children: React.ReactNode
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  providers: any[]
+}) => {
   if (!providers?.length) {
     return children
   }

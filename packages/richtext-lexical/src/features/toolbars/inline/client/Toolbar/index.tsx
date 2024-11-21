@@ -209,7 +209,7 @@ function InlineToolbar({
     const isLinkEditorVisible =
       possibleLinkEditor !== null &&
       'style' in possibleLinkEditor &&
-      possibleLinkEditor?.style?.['opacity'] === '1'
+      possibleLinkEditor?.style?.['opacity' as keyof typeof possibleLinkEditor.style] === '1'
 
     const rootElement = editor.getRootElement()
     if (

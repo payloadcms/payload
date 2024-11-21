@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, Data } from 'payload'
+import type { ClientCollectionConfig, Data, FormState, JsonObject } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
@@ -183,7 +183,7 @@ const Component: React.FC<ElementProps> = (props) => {
   ).collections?.[relatedCollection.slug]?.hasExtraFields
 
   const onExtraFieldsDrawerSubmit = useCallback(
-    (_, data) => {
+    (_: FormState, data: JsonObject) => {
       // Update lexical node (with key nodeKey) with new data
       editor.update(() => {
         const uploadNode: null | UploadNode = $getNodeByKey(nodeKey)

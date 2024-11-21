@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { CollectionConfig, Field, GlobalConfig, Payload } from 'payload'
 
 import { migrateDocumentFieldsRecursively } from './migrateDocumentFieldsRecursively.js'
@@ -15,7 +16,7 @@ import { migrateDocumentFieldsRecursively } from './migrateDocumentFieldsRecursi
 export async function migrateSlateToLexical({ payload }: { payload: Payload }) {
   const collections = payload.config.collections
 
-  const errors = []
+  const errors: unknown[] = []
 
   const allLocales = payload.config.localization ? payload.config.localization.localeCodes : [null]
 
@@ -56,7 +57,7 @@ async function migrateGlobal({
   locale,
   payload,
 }: {
-  errors: any[]
+  errors: unknown[]
   global: GlobalConfig
   locale: null | string
   payload: Payload
@@ -105,7 +106,7 @@ async function migrateCollection({
 }: {
   collection: CollectionConfig
   cur: number
-  errors: any[]
+  errors: unknown[]
   locale: null | string
   max: number
   payload: Payload
