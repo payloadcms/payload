@@ -23,5 +23,5 @@ export const getClientSideURL = () => {
     return `${protocol}//${domain}${port ? `:${port}` : ''}`
   }
 
-  return ''
+  return process.env.NEXT_PUBLIC_SERVER_URL || ''
 }
