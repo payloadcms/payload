@@ -100,12 +100,17 @@ function ToolbarGroupComponent({
       }
       if (activeItems.length === 1) {
         setDropdownLabel(label)
+        setDropdownIcon(() => item.ChildComponent)
       } else {
         setDropdownLabel(
           i18n.t('lexical:general:toolbarItemsActive', { count: activeItems.length }),
         )
+        if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+          setDropdownIcon(() => group.ChildComponent!)
+        } else {
+          setDropdownIcon(undefined)
+        }
       }
-      setDropdownIcon(() => item.ChildComponent)
     },
     [group, i18n, featureClientSchemaMap, schemaPath],
   )
