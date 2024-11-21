@@ -5,7 +5,6 @@ import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { customIDSlug } from 'versions/slugs.js'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
@@ -21,6 +20,7 @@ import {
   arrayFieldsSlug,
   blockFieldsSlug,
   collapsibleFieldsSlug,
+  customIdSlug,
   tabsFields2Slug,
   tabsFieldsSlug,
 } from './slugs.js'
@@ -594,12 +594,12 @@ describe('fields', () => {
   describe('id', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, customIDSlug)
+      url = new AdminUrlUtil(serverURL, customIdSlug)
     })
 
     function createCustomIDDoc(id: string) {
       return payload.create({
-        collection: customIDSlug,
+        collection: customIdSlug,
         data: {
           id,
         },
