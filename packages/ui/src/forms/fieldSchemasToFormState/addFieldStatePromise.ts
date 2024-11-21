@@ -169,12 +169,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     } else {
       fieldState.valid = true
       fieldState.passesCondition = passesCondition
-
-      const isSidebar = fieldIsSidebar(field)
-
-      if (isSidebar) {
-        fieldState.isSidebar = true
-      }
+      fieldState.isSidebar = fieldIsSidebar(field)
     }
 
     if (includeSchema) {

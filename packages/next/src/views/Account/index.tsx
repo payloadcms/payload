@@ -82,6 +82,9 @@ export const Account: React.FC<AdminViewProps> = async ({
       data,
       docPermissions,
       docPreferences,
+      experimental: {
+        optimized: true,
+      },
       locale: locale?.code,
       operation: 'update',
       renderAllFields: true,

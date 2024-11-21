@@ -57,6 +57,9 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     data,
     docPermissions,
     docPreferences,
+    experimental: {
+      optimized: true,
+    },
     locale: locale?.code,
     operation: 'create',
     renderAllFields: true,

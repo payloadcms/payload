@@ -149,6 +149,9 @@ export const renderDocument = async ({
       data: doc,
       docPermissions,
       docPreferences,
+      experimental: {
+        optimized: true,
+      },
       fallbackLocale: false,
       globalSlug,
       locale: locale?.code,
