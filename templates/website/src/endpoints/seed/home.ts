@@ -504,7 +504,6 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
       blockType: 'mediaBlock',
       // @ts-ignore
       media: '{{IMAGE_2}}',
-      position: 'default',
     },
     {
       blockName: 'Archive Block',
