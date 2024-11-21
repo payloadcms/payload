@@ -100,12 +100,8 @@ export type SanitizedDocumentPermissions = SanitizedCollectionPermission | Sanit
 
 export type Permissions = {
   canAccessAdmin: boolean
-  collections?: {
-    [collectionSlug: CollectionSlug]: CollectionPermission
-  }
-  globals?: {
-    [globalSlug: GlobalSlug]: GlobalPermission
-  }
+  collections?: Record<CollectionSlug, CollectionPermission>
+  globals?: Record<GlobalSlug, GlobalPermission>
 }
 
 export type SanitizedPermissions = {
