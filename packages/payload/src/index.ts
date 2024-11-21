@@ -242,9 +242,7 @@ export class BasePayload {
 
   authStrategies: AuthStrategy[]
 
-  collections: {
-    [slug: CollectionSlug]: Collection
-  } = {}
+  collections: Record<CollectionSlug, Collection> = {}
 
   config: SanitizedConfig
   /**
