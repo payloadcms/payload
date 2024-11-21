@@ -200,6 +200,8 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
    * The original node with locales (not modified by any hooks).
    */
   originalNodeWithLocales?: T
+  previousNode: T
+
   skipValidation: boolean
 }
 

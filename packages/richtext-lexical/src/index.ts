@@ -448,6 +448,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               operation,
               originalDoc,
               path,
+              previousValue,
               req,
               schemaPath,
               siblingData,
@@ -486,7 +487,9 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             if (!originalNodeIDMap || !Object.keys(originalNodeIDMap).length || !value) {
               return value
             }
-
+            const previousNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
             const originalNodeWithLocalesIDMap: {
               [key: string]: SerializedLexicalNode
             } = {}
@@ -496,6 +499,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
             })
 
+            recurseNodeTree({
+              nodeIDMap: previousNodeIDMap,
+              nodes: (previousValue as SerializedEditorState)?.root?.children ?? [],
+            })
             if (field.name && siblingDocWithLocales?.[field.name]) {
               recurseNodeTree({
                 nodeIDMap: originalNodeWithLocalesIDMap,
@@ -532,6 +539,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
+                    previousNode: previousNodeIDMap[id],
                     req,
                     skipValidation: skipValidation!,
                   })
@@ -546,12 +554,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
-                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
                 const nodeSiblingDocWithLocales =
                   subFieldDataFn({
                     node: originalNodeWithLocalesIDMap[id],
                     req,
                   }) ?? {}
+                const nodePreviousSiblingDoc =
+                  subFieldDataFn({ node: previousNodeIDMap[id], req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeChangeTraverseFields({
@@ -570,7 +579,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     req,
                     schemaPath,
                     siblingData: nodeSiblingData,
-                    siblingDoc: nodeSiblingDoc,
+                    siblingDoc: nodePreviousSiblingDoc,
                     siblingDocWithLocales: nodeSiblingDocWithLocales ?? {},
                     skipValidation,
                   })
@@ -592,11 +601,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               [key: string]: SerializedLexicalNode
             } = {}
 
-            const previousValue = siblingData[field.name!]
+            const previousOriginalValue = siblingData[field.name!]
 
             recurseNodeTree({
               nodeIDMap: newOriginalNodeIDMap,
-              nodes: (previousValue as SerializedEditorState)?.root?.children ?? [],
+              nodes: (previousOriginalValue as SerializedEditorState)?.root?.children ?? [],
             })
 
             if (!context.internal) {
