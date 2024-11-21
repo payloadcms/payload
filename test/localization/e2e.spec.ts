@@ -348,9 +348,9 @@ describe('Localization', () => {
       await expect(page.locator('#field-title')).toHaveValue(title)
 
       await openCopyToLocaleDrawer(page)
-      await setToLocale(page, 'French')
+      await setToLocale(page, 'Hungarian')
       await runCopy(page)
-      await changeLocale(page, 'French')
+      await changeLocale(page, 'Hungarian')
       await expect(page.locator('#field-title')).toHaveValue(title)
     })
 
