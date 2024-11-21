@@ -305,10 +305,22 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should delete existing search indexes before reindexing', async () => {
+    await payload.delete({
+      collection: postsSlug,
+      where: {
+        _status: {
+          equals: 'published',
+        },
+      },
+    })
+
+    await wait(200)
+
     await payload.create({
       collection: postsSlug,
       data: {
         title: 'Test post title',
+        _status: 'published',
       },
     })
 
@@ -346,10 +358,22 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should reindex whole collections', async () => {
+    await payload.delete({
+      collection: pagesSlug,
+      where: {
+        _status: {
+          equals: 'published',
+        },
+      },
+    })
+
+    await wait(200)
+
     await payload.create({
       collection: pagesSlug,
       data: {
         title: 'Test page title',
+        _status: 'published',
       },
     })
 
