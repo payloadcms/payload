@@ -194,7 +194,19 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       hooks: {
         afterChange: [
           async (args) => {
-            const { collection, context: _context, global, operation, path, req, schemaPath } = args
+            const {
+              collection,
+              context: _context,
+              data,
+              global,
+              operation,
+              originalDoc,
+              path,
+              previousDoc,
+              previousValue,
+              req,
+              schemaPath,
+            } = args
             let { value } = args
             if (finalSanitizedEditorConfig?.features?.hooks?.afterChange?.length) {
               for (const hook of finalSanitizedEditorConfig.features.hooks.afterChange) {
@@ -214,6 +226,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               [key: string]: SerializedLexicalNode
             } = {}
 
+            const previousNodeIDMap: {
+              [key: string]: SerializedLexicalNode
+            } = {}
+
             /**
              * Get the originalNodeIDMap from the beforeValidate hook, which is always run before this hook.
              */
@@ -228,6 +244,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             recurseNodeTree({
               nodeIDMap,
               nodes: (value as SerializedEditorState)?.root?.children ?? [],
+            })
+
+            recurseNodeTree({
+              nodeIDMap: previousNodeIDMap,
+              nodes: (previousValue as SerializedEditorState)?.root?.children ?? [],
             })
 
             // eslint-disable-next-line prefer-const
@@ -254,6 +275,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     originalNode: originalNodeIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
+                    previousNode: previousNodeIDMap[id],
                     req,
                   })
                 }
@@ -265,25 +287,27 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req }) ?? {}
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
+                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                const nodePreviousSiblingDoc =
+                  subFieldDataFn({ node: previousNodeIDMap[id], req }) ?? {}
 
                 if (subFields?.length) {
                   await afterChangeTraverseFields({
                     collection,
                     context,
-                    data: originalData,
-                    doc: data,
+                    data: data ?? {},
+                    doc: originalDoc,
                     fields: subFields,
                     global,
                     operation,
                     path,
-                    previousDoc: data,
-                    previousSiblingDoc: { ...data },
+                    previousDoc,
+                    previousSiblingDoc: { ...nodePreviousSiblingDoc },
                     req,
                     schemaPath,
-                    siblingData: originalData || {},
-                    siblingDoc: { ...data },
+                    siblingData: nodeSiblingData || {},
+                    siblingDoc: { ...nodeSiblingDoc },
                   })
                 }
               }
@@ -308,6 +332,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               flattenLocales,
               global,
               locale,
+              originalDoc,
               overrideAccess,
               path,
               populate,
@@ -374,7 +399,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req }) ?? {}
+                const nodeSliblingData = subFieldDataFn({ node, req }) ?? {}
 
                 if (subFields?.length) {
                   afterReadTraverseFields({
@@ -382,7 +407,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     context,
                     currentDepth: currentDepth!,
                     depth: depth!,
-                    doc: data,
+                    doc: originalDoc,
                     draft: draft!,
                     fallbackLocale: fallbackLocale!,
                     fieldPromises: fieldPromises!,
@@ -398,7 +423,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     req,
                     schemaPath,
                     showHiddenFields: showHiddenFields!,
-                    siblingDoc: data,
+                    siblingDoc: nodeSliblingData,
                     triggerAccessControl,
                     triggerHooks,
                   })
@@ -414,11 +439,14 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             const {
               collection,
               context: _context,
+              data,
+              docWithLocales,
               errors,
               field,
               global,
               mergeLocaleActions,
               operation,
+              originalDoc,
               path,
               req,
               schemaPath,
@@ -517,9 +545,9 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req }) ?? {}
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
-                const originalDataWithLocales =
+                const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
+                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                const nodeSiblingDocWithLocales =
                   subFieldDataFn({
                     node: originalNodeWithLocalesIDMap[id],
                     req,
@@ -530,9 +558,9 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     id,
                     collection,
                     context,
-                    data,
-                    doc: originalData,
-                    docWithLocales: originalDataWithLocales ?? {},
+                    data: data ?? {},
+                    doc: originalDoc ?? {},
+                    docWithLocales: docWithLocales ?? {},
                     errors: errors!,
                     fields: subFields,
                     global,
@@ -541,9 +569,9 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     path,
                     req,
                     schemaPath,
-                    siblingData: data,
-                    siblingDoc: originalData,
-                    siblingDocWithLocales: originalDataWithLocales ?? {},
+                    siblingData: nodeSiblingData,
+                    siblingDoc: nodeSiblingDoc,
+                    siblingDocWithLocales: nodeSiblingDocWithLocales ?? {},
                     skipValidation,
                   })
                 }
@@ -590,8 +618,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             const {
               collection,
               context,
+              data,
               global,
               operation,
+              originalDoc,
               overrideAccess,
               path,
               previousValue,
@@ -711,8 +741,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
-                const data = subFieldDataFn({ node, req }) ?? {}
-                const originalData = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
+                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
@@ -720,7 +750,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     collection,
                     context,
                     data,
-                    doc: originalData,
+                    doc: originalDoc,
                     fields: subFields,
                     global,
                     operation,
@@ -728,8 +758,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     path,
                     req,
                     schemaPath,
-                    siblingData: data,
-                    siblingDoc: originalData,
+                    siblingData: nodeSiblingData,
+                    siblingDoc: nodeSiblingDoc,
                   })
                 }
               }
