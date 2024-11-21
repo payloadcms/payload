@@ -160,8 +160,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     const fieldState: FormFieldWithoutComponents = {}
 
     // @deprecated
-    // This is a legacy property that is no longer used.
-    // In the next major version, remove this entire block
+    // The `experimental.optimized` property is only used for backwards compatibility
+    // when optimized, properties are only added to fieldState if absolutely necessary
+    // In the next major version, this property will be removed and all associated code
     if (!experimental.optimized) {
       fieldState.valid = true
 
@@ -744,8 +745,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         disableFormData: true,
       }
 
-      if (passesCondition === false) {
-        state[path].passesCondition = false
+      // @deprecated
+      // The `experimental.optimized` property is only used for backwards compatibility
+      // when optimized, properties are only added to fieldState if absolutely necessary
+      // In the next major version, this property will be removed and all associated code
+      if (experimental.optimized) {
+        if (passesCondition === false) {
+          state[path].passesCondition = false
+        }
+      } else {
+        state[path].passesCondition = passesCondition
       }
 
       if (includeSchema) {
