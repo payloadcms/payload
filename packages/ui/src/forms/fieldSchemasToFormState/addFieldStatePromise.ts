@@ -159,22 +159,22 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const fieldState: FormFieldWithoutComponents = {}
 
-    // @deprecated
-    // The `experimental.optimized` property is only used for backwards compatibility
+    // @deprecated: the `experimental.optimized` property is used for backwards compatibility
     // when optimized, properties are only added to fieldState if absolutely necessary
     // In the next major version, this property will be removed and all associated code
-    if (!experimental?.optimized) {
+    if (experimental?.optimized) {
+      if (passesCondition === false) {
+        fieldState.passesCondition = false
+      }
+    } else {
       fieldState.valid = true
+      fieldState.passesCondition = passesCondition
 
       const isSidebar = fieldIsSidebar(field)
 
       if (isSidebar) {
         fieldState.isSidebar = true
       }
-    }
-
-    if (passesCondition === false) {
-      fieldState.passesCondition = false
     }
 
     if (includeSchema) {
@@ -210,7 +210,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       )
     } else {
       if (!experimental?.optimized) {
-        // @deprecated (see note above)
+        // @deprecated: this code block will be removed in the next major version (see note above)
+        // `valid` is only attached to the response if necessary
         fieldState.valid = true
       }
     }
@@ -254,7 +255,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               }
 
               if (!experimental?.optimized) {
-                // @deprecated (see note above)
+                // @deprecated: this code block will be removed in the next major version (see note above)
+                // `valid` is only attached to the response if necessary
                 state[idKey].valid = true
               }
 
@@ -381,7 +383,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }
 
                 if (!experimental?.optimized) {
-                  // @deprecated (see note above)
+                  // @deprecated: this code block will be removed in the next major version (see note above)
+                  // `valid` is only attached to the response if necessary
                   state[idKey].valid = true
                 }
 
@@ -399,7 +402,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }
 
                 if (!experimental?.optimized) {
-                  // @deprecated (see note above)
+                  // @deprecated: this code block will be removed in the next major version (see note above)
+                  // `valid` is only attached to the response if necessary
                   state[fieldKey].valid = true
                 }
 
@@ -417,7 +421,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }
 
                 if (!experimental?.optimized) {
-                  // @deprecated (see note above)
+                  // @deprecated: this code block will be removed in the next major version (see note above)
+                  // `valid` is only attached to the response if necessary
                   state[blockNameKey].valid = true
                 }
 
@@ -662,12 +667,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (!filter || filter(args)) {
       state[path] = {
         disableFormData: true,
-        passesCondition,
       }
 
-      if (!experimental?.optimized) {
-        // @deprecated (see note above)
+      if (experimental?.optimized) {
+        if (passesCondition === false) {
+          state[path].passesCondition = false
+        }
+      } else {
+        // @deprecated: this code block will be removed in the next major version (see note above)
+        // `passesCondition` and `valid` are only attached to the response if necessary
         state[path].passesCondition = passesCondition
+        state[path].valid = true
       }
     }
 
@@ -780,8 +790,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           state[path].passesCondition = false
         }
       } else {
-        // @deprecated (see note above)
+        // @deprecated: this code block will be removed in the next major version (see note above)
+        // `passesCondition` and `valid` are only attached to the response if necessary
         state[path].passesCondition = passesCondition
+        state[path].valid = true
       }
 
       if (includeSchema) {

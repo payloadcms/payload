@@ -76,7 +76,8 @@ export type BuildFormStateArgs = {
   docPreferences: DocumentPreferences
   experimental?: {
     /**
-     * If true, makes form state as small as possible, such as by removing the `isSidebar` property from the field state.
+     * If true, makes form state as small as possible by omitting unnecessary properties from the response
+     * Examples include the `isSidebar`, `passesCondition`, or `valid`, properties. See https://github.com/payloadcms/payload/pull/9388.
      * In the next major version, this will be the default behavior.
      * @default false
      **/
