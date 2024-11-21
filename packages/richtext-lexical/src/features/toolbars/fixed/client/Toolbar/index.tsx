@@ -102,9 +102,7 @@ function ToolbarGroupComponent({
         setDropdownLabel(label)
       } else {
         setDropdownLabel(
-          label?.length
-            ? i18n.t('lexical:general:toolbarItemsActive', { count: activeItems.length })
-            : '',
+          i18n.t('lexical:general:toolbarItemsActive', { count: activeItems.length }),
         )
       }
       setDropdownIcon(() => item.ChildComponent)
