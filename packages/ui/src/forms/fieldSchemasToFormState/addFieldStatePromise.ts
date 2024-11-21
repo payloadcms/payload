@@ -163,7 +163,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // The `experimental.optimized` property is only used for backwards compatibility
     // when optimized, properties are only added to fieldState if absolutely necessary
     // In the next major version, this property will be removed and all associated code
-    if (!experimental.optimized) {
+    if (!experimental?.optimized) {
       fieldState.valid = true
 
       const isSidebar = fieldIsSidebar(field)
@@ -749,7 +749,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       // The `experimental.optimized` property is only used for backwards compatibility
       // when optimized, properties are only added to fieldState if absolutely necessary
       // In the next major version, this property will be removed and all associated code
-      if (experimental.optimized) {
+      if (experimental?.optimized) {
         if (passesCondition === false) {
           state[path].passesCondition = false
         }
