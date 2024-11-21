@@ -34,13 +34,12 @@ export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlob
       await commitTransaction(req)
     }
     const sanitizedPermissions = sanitizePermissions({
-      canAccessAdmin: true,
       globals: {
         [globalConfig.slug]: result,
       },
     })
 
-    return sanitizedPermissions.globals[globalConfig.slug]
+    return sanitizedPermissions?.globals?.[globalConfig.slug]
   } catch (e: unknown) {
     await killTransaction(req)
     throw e
