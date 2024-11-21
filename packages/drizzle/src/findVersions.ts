@@ -34,6 +34,7 @@ export const findVersions: FindVersions = async function findVersions(
   return findMany({
     adapter: this,
     fields,
+    joins: false,
     limit,
     locale,
     page,
