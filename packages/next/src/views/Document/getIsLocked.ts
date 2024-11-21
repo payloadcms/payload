@@ -6,6 +6,8 @@ import type {
   Where,
 } from 'payload'
 
+import { sanitizeID } from '@payloadcms/ui/shared'
+
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
@@ -48,7 +50,7 @@ export const getIsLocked = async ({
     where.and = [
       {
         'document.value': {
-          equals: id,
+          equals: sanitizeID(id),
         },
       },
       {
