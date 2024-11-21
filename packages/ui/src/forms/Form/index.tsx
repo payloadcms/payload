@@ -227,6 +227,7 @@ export const Form: React.FC<FormProps> = (props) => {
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
+
         const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
           contextRef.current.fields,
         )
@@ -241,7 +242,9 @@ export const Form: React.FC<FormProps> = (props) => {
           revalidatedFormState = result
         }, Promise.resolve())
 
-        const isValid = Object.entries(revalidatedFormState).every(([, field]) => field.valid)
+        const isValid = Object.entries(revalidatedFormState).every(
+          ([, field]) => field.valid !== false,
+        )
 
         if (!isValid) {
           setProcessing(false)
@@ -268,6 +271,7 @@ export const Form: React.FC<FormProps> = (props) => {
         const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
           contextRef.current.fields,
         )
+
         const data = reduceFieldsToValues(serializableFields, true)
 
         if (overrides) {
