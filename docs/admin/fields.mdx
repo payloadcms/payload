@@ -66,7 +66,7 @@ A description can be configured in three ways:
   - As a function which returns a string. [More details](#description-functions).
   - As a React component. [More details](#description).
 
-To easily add a Custom Description to a field, use the `admin.description` property in your [Field Config](../fields/overview):
+To add a Custom Description to a field, use the `admin.description` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -95,7 +95,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 Custom Descriptions can also be defined as a function. Description Functions are executed on the server and can be used to format simple descriptions based on the user's current [Locale](../configuration/localization).
 
-To easily add a Description Function to a field, set the `admin.description` property to a _function_ in your [Field Config](../fields/overview):
+To add a Description Function to a field, set the `admin.description` property to a _function_ in your [Field Config](../fields/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -173,7 +173,7 @@ Within the [Admin Panel](./overview), fields are represented in three distinct p
 - [Cell](#cell) - The table cell component rendered in the List View.
 - [Filter](#filter) - The filter component rendered in the List View.
 
-To easily swap in Field Components with your own, use the `admin.components` property in your [Field Config](../fields/overview):
+To swap in Field Components with your own, use the `admin.components` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -211,7 +211,7 @@ The following options are available:
 
 The Field Component is the actual form field rendered in the Edit View. This is the input that user's will interact with when editing a document.
 
-To easily swap in your own Field Component, use the `admin.components.Field` property in your [Field Config](../fields/overview):
+To swap in your own Field Component, use the `admin.components.Field` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -312,7 +312,7 @@ import type {
 
 The Cell Component is rendered in the table of the List View. It represents the value of the field when displayed in a table cell.
 
-To easily swap in your own Cell Component, use the `admin.components.Cell` property in your [Field Config](../fields/overview):
+To swap in your own Cell Component, use the `admin.components.Cell` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { Field } from 'payload'
@@ -337,11 +337,35 @@ All Cell Components receive the same [Default Field Component Props](#field), pl
 
 For details on how to build Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
 
+### Filter
+
+The Filter Component is the actual input element rendered within the "Filter By" dropdown of the List View used to represent this field when building filters.
+
+To swap in your own Filter Component, use the `admin.components.Filter` property in your [Field Config](../fields/overview):
+
+```ts
+import type { Field } from 'payload'
+
+export const myField: Field = {
+  name: 'myField',
+  type: 'text',
+  admin: {
+    components: {
+      Filter: '/path/to/MyCustomFilterComponent', // highlight-line
+    },
+  },
+}
+```
+
+All Custom Filter Components receive the same [Default Field Component Props](#field).
+
+For details on how to build Custom Components themselves, see [Building Custom Components](./components#building-custom-components).
+
 ### Label
 
 The Label Component is rendered anywhere a field needs to be represented by a label. This is typically used in the Edit View, but can also be used in the List View and elsewhere.
 
-To easily swap in your own Label Component, use the `admin.components.Label` property in your [Field Config](../fields/overview):
+To swap in your own Label Component, use the `admin.components.Label` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { Field } from 'payload'
@@ -377,7 +401,7 @@ import type {
 
 Alternatively to the [Description Property](#the-description-property), you can also use a [Custom Component](./components) as the Field Description. This can be useful when you need to provide more complex feedback to the user, such as rendering dynamic field values or other interactive elements.
 
-To easily add a Description Component to a field, use the `admin.components.Description` property in your [Field Config](../fields/overview):
+To add a Description Component to a field, use the `admin.components.Description` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -419,7 +443,7 @@ import type {
 
 The Error Component is rendered when a field fails validation. It is typically displayed beneath the field input in a visually-compelling style.
 
-To easily swap in your own Error Component, use the `admin.components.Error` property in your [Field Config](../fields/overview):
+To swap in your own Error Component, use the `admin.components.Error` property in your [Field Config](../fields/overview):
 
 ```ts
 import type { Field } from 'payload'
