@@ -6,6 +6,8 @@ import type {
   TypedUser,
 } from 'payload'
 
+import { sanitizeID } from '@payloadcms/ui/shared'
+
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
   docPermissions: SanitizedDocumentPermissions
@@ -26,7 +28,7 @@ type Result = Promise<{
 // TODO: in the future, we can parallelize some of these queries
 // this will speed up the API by ~30-100ms or so
 export const getVersions = async ({
-  id,
+  id: idArg,
   collectionConfig,
   docPermissions,
   globalConfig,
@@ -34,6 +36,7 @@ export const getVersions = async ({
   payload,
   user,
 }: Args): Result => {
+  const id = sanitizeID(idArg)
   let publishedQuery
   let hasPublishedDoc = false
   let mostRecentVersionIsAutosaved = false
