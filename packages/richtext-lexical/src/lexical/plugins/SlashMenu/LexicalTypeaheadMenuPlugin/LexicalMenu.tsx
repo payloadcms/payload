@@ -147,12 +147,13 @@ function isTriggerVisibleInNearestScrollContainer(
 // Reposition the menu on scroll, window resize, and element resize.
 export function useDynamicPositioning(
   resolution: MenuResolution | null,
-  targetElement: HTMLElement | null,
+  targetElementRef: RefObject<HTMLElement | null>,
   onReposition: () => void,
   onVisibilityChange?: (isInView: boolean) => void,
 ) {
   const [editor] = useLexicalComposerContext()
   useEffect(() => {
+    const targetElement = targetElementRef.current
     if (targetElement != null && resolution != null) {
       const rootElement = editor.getRootElement()
       const rootScrollParent =
@@ -186,12 +187,12 @@ export function useDynamicPositioning(
       })
       resizeObserver.observe(targetElement)
       return () => {
-        resizeObserver.unobserve(targetElement)
+        resizeObserver.disconnect()
         window.removeEventListener('resize', onReposition)
         document.removeEventListener('scroll', handleScroll, true)
       }
     }
-  }, [targetElement, editor, onVisibilityChange, onReposition, resolution])
+  }, [editor, onVisibilityChange, onReposition, resolution, targetElementRef])
 }
 
 export const SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND: LexicalCommand<{
@@ -529,7 +530,7 @@ export function useMenuAnchorRef(
     [resolution, setResolution],
   )
 
-  useDynamicPositioning(resolution, anchorElementRef.current, positionMenu, onVisibilityChange)
+  useDynamicPositioning(resolution, anchorElementRef, positionMenu, onVisibilityChange)
 
   return anchorElementRef
 }
