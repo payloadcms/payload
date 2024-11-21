@@ -1,6 +1,4 @@
 'use client'
-import type { TextNode } from 'lexical'
-
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useTranslation } from '@payloadcms/ui'
 import { useCallback, useMemo, useState } from 'react'
@@ -26,18 +24,20 @@ function SlashMenuItem({
   item,
   onClick,
   onMouseEnter,
+  ref,
 }: {
   index: number
   isSelected: boolean
   item: SlashMenuItemInternal
   onClick: () => void
   onMouseEnter: () => void
+  ref?: React.Ref<HTMLButtonElement>
 }) {
   const {
     fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
 
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
 
   let className = `${baseClass}__item ${baseClass}__item-${item.key}`
   if (isSelected) {
@@ -64,9 +64,7 @@ function SlashMenuItem({
       key={item.key}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
-      ref={(element) => {
-        item.ref = { current: element }
-      }}
+      ref={ref}
       role="option"
       tabIndex={-1}
       type="button"
@@ -86,7 +84,7 @@ export function SlashMenuPlugin({
   const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
   const {
     fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
@@ -230,6 +228,9 @@ export function SlashMenuPlugin({
                           }}
                           onMouseEnter={() => {
                             setSelectedItemKey(item.key)
+                          }}
+                          ref={(el) => {
+                            ;(item as SlashMenuItemInternal).ref = { current: el }
                           }}
                         />
                       ))}
