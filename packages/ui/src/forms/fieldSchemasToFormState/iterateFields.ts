@@ -23,7 +23,7 @@ type Args = {
   anyParentLocalized?: boolean
   collectionSlug?: string
   data: Data
-  experimental: BuildFormStateArgs['experimental']
+  experimental?: BuildFormStateArgs['experimental']
   fields: FieldSchema[]
   fieldSchemaMap: FieldSchemaMap
   filter?: (args: AddFieldStatePromiseArgs) => boolean

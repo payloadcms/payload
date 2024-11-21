@@ -38,7 +38,7 @@ export type AddFieldStatePromiseArgs = {
   anyParentLocalized?: boolean
   collectionSlug?: string
   data: Data
-  experimental: BuildFormStateArgs['experimental']
+  experimental?: BuildFormStateArgs['experimental']
   field: Field
   fieldIndex: number
   fieldSchemaMap: FieldSchemaMap

@@ -18,7 +18,7 @@ import { iterateFields } from './iterateFields.js'
 type Args = {
   collectionSlug?: string
   data?: Data
-  experimental: BuildFormStateArgs['experimental']
+  experimental?: BuildFormStateArgs['experimental']
   fields: Field[] | undefined
   /**
    * The field schema map is required for field rendering.
