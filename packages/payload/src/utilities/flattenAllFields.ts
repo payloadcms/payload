@@ -9,7 +9,7 @@ export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedFiel
     switch (field.type) {
       case 'array':
       case 'group': {
-        result.push({ ...field, flattenFields: flattenAllFields({ fields: field.fields }) })
+        result.push({ ...field, flattenedFields: flattenAllFields({ fields: field.fields }) })
         break
       }
 
@@ -18,7 +18,7 @@ export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedFiel
         for (const block of field.blocks) {
           blocks.push({
             ...block,
-            flattenFields: flattenAllFields({ fields: block.fields }),
+            flattenedFields: flattenAllFields({ fields: block.fields }),
           })
         }
         result.push({
@@ -46,7 +46,7 @@ export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedFiel
             result.push({
               ...tab,
               type: 'tab',
-              flattenFields: flattenAllFields({ fields: tab.fields }),
+              flattenedFields: flattenAllFields({ fields: tab.fields }),
             })
           }
         }

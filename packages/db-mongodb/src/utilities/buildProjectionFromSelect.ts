@@ -110,7 +110,7 @@ const traverseFields = ({
         traverseFields({
           adapter,
           databaseSchemaPath: fieldDatabaseSchemaPath,
-          fields: field.flattenFields,
+          fields: field.flattenedFields,
           projection,
           select: fieldSelect,
           selectMode,
@@ -131,7 +131,7 @@ const traverseFields = ({
             traverseFields({
               adapter,
               databaseSchemaPath: fieldDatabaseSchemaPath,
-              fields: block.flattenFields,
+              fields: block.flattenedFields,
               projection,
               select: {},
               selectAllOnCurrentLevel: true,
@@ -159,7 +159,7 @@ const traverseFields = ({
           traverseFields({
             adapter,
             databaseSchemaPath: fieldDatabaseSchemaPath,
-            fields: block.flattenFields,
+            fields: block.flattenedFields,
             projection,
             select: blocksSelect[block.slug] as SelectType,
             selectMode: blockSelectMode,

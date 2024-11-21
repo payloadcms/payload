@@ -15,7 +15,7 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
       type: 'group',
       fields: global.fields,
       ...(flatten && {
-        flattenFields: global.flattenedFields,
+        flattenedFields: global.flattenedFields,
       }),
     },
     {

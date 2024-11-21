@@ -1331,7 +1331,7 @@ export type JoinFieldClient = {
   Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
 
 export type FlattenedBlock = {
-  flattenFields: FlattenedField[]
+  flattenedFields: FlattenedField[]
 } & Block
 
 export type FlattenedBlocksField = {
@@ -1339,15 +1339,15 @@ export type FlattenedBlocksField = {
 } & BlocksField
 
 export type FlattenedGroupField = {
-  flattenFields: FlattenedField[]
+  flattenedFields: FlattenedField[]
 } & GroupField
 
 export type FlattenedArrayField = {
-  flattenFields: FlattenedField[]
+  flattenedFields: FlattenedField[]
 } & ArrayField
 
 export type FlattenedTabAsField = {
-  flattenFields: FlattenedField[]
+  flattenedFields: FlattenedField[]
 } & MarkRequired<TabAsField, 'name'>
 
 export type FlattenedField =

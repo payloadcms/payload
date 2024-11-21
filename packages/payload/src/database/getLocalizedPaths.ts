@@ -46,7 +46,7 @@ export function getLocalizedPaths({
       let fieldsToSearch: FlattenedField[]
 
       if (lastIncompletePath?.field && 'flattenFields' in lastIncompletePath.field) {
-        fieldsToSearch = lastIncompletePath.field.flattenFields
+        fieldsToSearch = lastIncompletePath.field.flattenedFields
       } else {
         fieldsToSearch = lastIncompletePath.fields
       }

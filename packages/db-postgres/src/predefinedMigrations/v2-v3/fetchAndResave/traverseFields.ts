@@ -20,7 +20,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
               localeRows.forEach((row, i) => {
                 return traverseFields({
                   doc: row as Record<string, unknown>,
-                  fields: field.flattenFields,
+                  fields: field.flattenedFields,
                   locale,
                   path: `${path ? `${path}.` : ''}${field.name}.${i}`,
                   rows,
@@ -34,7 +34,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
           rowData.forEach((row, i) => {
             return traverseFields({
               doc: row as Record<string, unknown>,
-              fields: field.flattenFields,
+              fields: field.flattenedFields,
               path: `${path ? `${path}.` : ''}${field.name}.${i}`,
               rows,
             })
@@ -56,7 +56,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
                 if (matchedBlock) {
                   return traverseFields({
                     doc: row as Record<string, unknown>,
-                    fields: matchedBlock.flattenFields,
+                    fields: matchedBlock.flattenedFields,
                     locale,
                     path: `${path ? `${path}.` : ''}${field.name}.${i}`,
                     rows,
@@ -74,7 +74,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
             if (matchedBlock) {
               return traverseFields({
                 doc: row as Record<string, unknown>,
-                fields: matchedBlock.flattenFields,
+                fields: matchedBlock.flattenedFields,
                 path: `${path ? `${path}.` : ''}${field.name}.${i}`,
                 rows,
               })
@@ -95,7 +95,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
             Object.entries(newDoc).forEach(([locale, localeDoc]) => {
               return traverseFields({
                 doc: localeDoc,
-                fields: field.flattenFields,
+                fields: field.flattenedFields,
                 locale,
                 path: newPath,
                 rows,
@@ -104,7 +104,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
           } else {
             return traverseFields({
               doc: newDoc as Record<string, unknown>,
-              fields: field.flattenFields,
+              fields: field.flattenedFields,
               path: newPath,
               rows,
             })

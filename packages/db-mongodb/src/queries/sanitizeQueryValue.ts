@@ -55,7 +55,7 @@ const getFieldFromSegments = ({
 
   if ('fields' in field) {
     for (let i = 0; i < segments.length; i++) {
-      const foundField = field.flattenFields.find((each) => each.name === segments[i])
+      const foundField = field.flattenedFields.find((each) => each.name === segments[i])
 
       if (!foundField) {
         break

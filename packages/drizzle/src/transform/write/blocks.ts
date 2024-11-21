@@ -100,7 +100,7 @@ export const transformBlocks = ({
       columnPrefix: '',
       data: blockRow,
       fieldPrefix: '',
-      fields: matchedBlock.flattenFields,
+      fields: matchedBlock.flattenedFields,
       locales: newRow.locales,
       numbers,
       parentTableName: blockTableName,

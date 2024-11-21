@@ -2016,7 +2016,6 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
         anotherText?: T;
-        uiField?: T;
         localizedText?: T;
         subArray?:
           | T
@@ -2469,7 +2468,6 @@ export interface BlockFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  ui?: T;
   relationshipBlocks?:
     | T
     | {
@@ -3003,7 +3001,6 @@ export interface TabsFields2Select<T extends boolean = true> {
  */
 export interface TabsFieldsSelect<T extends boolean = true> {
   sidebarField?: T;
-  demoUIField?: T;
   array?:
     | T
     | {
@@ -3282,7 +3279,6 @@ export interface UploadsRestrictedSelect<T extends boolean = true> {
  */
 export interface UiFieldsSelect<T extends boolean = true> {
   text?: T;
-  uiCustomClient?: T;
   updatedAt?: T;
   createdAt?: T;
 }

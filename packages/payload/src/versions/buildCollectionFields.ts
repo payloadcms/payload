@@ -21,7 +21,7 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
       type: 'group',
       fields: collection.fields.filter((field) => !('name' in field) || field.name !== 'id'),
       ...(flatten && {
-        flattenFields: collection.flattenedFields.filter((each) => each.name !== 'id'),
+        flattenedFields: collection.flattenedFields.filter((each) => each.name !== 'id'),
       }),
     },
     {

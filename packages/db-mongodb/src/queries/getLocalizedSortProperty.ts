@@ -61,14 +61,14 @@ export const getLocalizedSortProperty = ({
       matchedField.type === 'group' ||
       matchedField.type === 'array'
     ) {
-      nextFields = matchedField.flattenFields
+      nextFields = matchedField.flattenedFields
     }
 
     if (matchedField.type === 'blocks') {
       nextFields = matchedField.blocks.reduce((flattenedBlockFields, block) => {
         return [
           ...flattenedBlockFields,
-          ...block.flattenFields.filter(
+          ...block.flattenedFields.filter(
             (blockField) =>
               (fieldAffectsData(blockField) &&
                 blockField.name !== 'blockType' &&
