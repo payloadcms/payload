@@ -269,38 +269,46 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               }),
             )
 
-            const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
+            if (!acc.rows) {
+              acc.rows = []
+            }
 
             acc.rows.push({
               id: row.id,
-              collapsed:
-                collapsedRowIDs === undefined
-                  ? field.admin.initCollapsed
-                  : collapsedRowIDs.includes(row.id),
             })
+
+            const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
+
+            const collapsed =
+              collapsedRowIDs === undefined
+                ? field.admin.initCollapsed
+                : collapsedRowIDs.includes(row.id)
+
+            if (collapsed) {
+              acc.rows[acc.rows.length - 1].collapsed = collapsed
+            }
 
             return acc
           },
           {
             promises: [],
-            rows: [],
+            rows: undefined,
           },
         )
 
         // Wait for all promises and update fields with the results
         await Promise.all(promises)
 
-        fieldState.rows = rows
+        if (rows) {
+          fieldState.rows = rows
+        }
 
         // Unset requiresRender
         // so it will be removed from form state
         fieldState.requiresRender = false
 
         // Add values to field state
-        if (data[field.name] === null) {
-          fieldState.value = null
-          fieldState.initialValue = null
-        } else {
+        if (data[field.name] !== null) {
           fieldState.value = forceFullValue ? arrayValue : arrayValue.length
           fieldState.initialValue = forceFullValue ? arrayValue : arrayValue.length
 
@@ -412,16 +420,21 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }),
               )
 
-              const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
-
               acc.rowMetadata.push({
                 id: row.id,
                 blockType: row.blockType,
-                collapsed:
-                  collapsedRowIDs === undefined
-                    ? field.admin.initCollapsed
-                    : collapsedRowIDs.includes(row.id),
               })
+
+              const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
+
+              const collapsed =
+                collapsedRowIDs === undefined
+                  ? field.admin.initCollapsed
+                  : collapsedRowIDs.includes(row.id)
+
+              if (collapsed) {
+                acc.rowMetadata[acc.rowMetadata.length - 1].collapsed = collapsed
+              }
             }
 
             return acc
