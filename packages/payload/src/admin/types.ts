@@ -445,6 +445,13 @@ export type RenderedField = {
   Field: React.ReactNode
   indexPath?: string
   initialSchemaPath?: string
+  /**
+   * @deprecated
+   * This is a legacy property that is no longer used.
+   * Please use `fieldIsSidebar(field)` from `payload` instead
+   * Or check `field.admin.position === 'sidebar'` directly.
+   **/
+  isSidebar?: boolean
   path: string
   schemaPath: string
   type: FieldTypes

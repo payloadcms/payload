@@ -208,6 +208,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           siblingData: data,
         } as any,
       )
+    } else {
+      if (!experimental?.optimized) {
+        // @deprecated (see note above)
+        fieldState.valid = true
+      }
     }
 
     const addErrorPathToParent = (errorPath: string) => {
@@ -246,6 +251,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               state[idKey] = {
                 initialValue: row.id,
                 value: row.id,
+              }
+
+              if (!experimental?.optimized) {
+                // @deprecated (see note above)
+                state[idKey].valid = true
               }
 
               if (includeSchema) {
@@ -370,6 +380,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.id,
                 }
 
+                if (!experimental?.optimized) {
+                  // @deprecated (see note above)
+                  state[idKey].valid = true
+                }
+
                 if (includeSchema) {
                   state[idKey].fieldSchema = block.fields.find(
                     (blockField) => 'name' in blockField && blockField.name === 'id',
@@ -383,6 +398,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.blockType,
                 }
 
+                if (!experimental?.optimized) {
+                  // @deprecated (see note above)
+                  state[fieldKey].valid = true
+                }
+
                 if (includeSchema) {
                   state[fieldKey].fieldSchema = block.fields.find(
                     (blockField) => 'name' in blockField && blockField.name === 'blockType',
@@ -394,6 +414,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 state[blockNameKey] = {
                   initialValue: row.blockName,
                   value: row.blockName,
+                }
+
+                if (!experimental?.optimized) {
+                  // @deprecated (see note above)
+                  state[blockNameKey].valid = true
                 }
 
                 if (includeSchema) {
@@ -639,6 +664,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         disableFormData: true,
         passesCondition,
       }
+
+      if (!experimental?.optimized) {
+        // @deprecated (see note above)
+        state[path].passesCondition = passesCondition
+      }
     }
 
     await iterateFields({
@@ -745,15 +775,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         disableFormData: true,
       }
 
-      // @deprecated
-      // The `experimental.optimized` property is only used for backwards compatibility
-      // when optimized, properties are only added to fieldState if absolutely necessary
-      // In the next major version, this property will be removed and all associated code
       if (experimental?.optimized) {
         if (passesCondition === false) {
           state[path].passesCondition = false
         }
       } else {
+        // @deprecated (see note above)
         state[path].passesCondition = passesCondition
       }
 
