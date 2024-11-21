@@ -1,4 +1,5 @@
 import type {
+  BuildFormStateArgs,
   Data,
   DocumentPreferences,
   Field as FieldSchema,
@@ -22,6 +23,7 @@ type Args = {
   anyParentLocalized?: boolean
   collectionSlug?: string
   data: Data
+  experimental: BuildFormStateArgs['experimental']
   fields: FieldSchema[]
   fieldSchemaMap: FieldSchemaMap
   filter?: (args: AddFieldStatePromiseArgs) => boolean
@@ -73,6 +75,7 @@ export const iterateFields = async ({
   anyParentLocalized = false,
   collectionSlug,
   data,
+  experimental,
   fields,
   fieldSchemaMap,
   filter,
@@ -114,6 +117,7 @@ export const iterateFields = async ({
         anyParentLocalized,
         collectionSlug,
         data,
+        experimental,
         field,
         fieldIndex,
         fieldSchemaMap,

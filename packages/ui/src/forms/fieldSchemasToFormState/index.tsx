@@ -1,4 +1,5 @@
 import type {
+  BuildFormStateArgs,
   Data,
   DocumentPreferences,
   Field,
@@ -17,6 +18,7 @@ import { iterateFields } from './iterateFields.js'
 type Args = {
   collectionSlug?: string
   data?: Data
+  experimental: BuildFormStateArgs['experimental']
   fields: Field[] | undefined
   /**
    * The field schema map is required for field rendering.
@@ -48,6 +50,7 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormState> =>
     id,
     collectionSlug,
     data = {},
+    experimental,
     fields,
     fieldSchemaMap,
     operation,
@@ -79,6 +82,7 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormState> =>
       addErrorPathToParent: null,
       collectionSlug,
       data: dataWithDefaultValues,
+      experimental,
       fields,
       fieldSchemaMap,
       fullData: dataWithDefaultValues,

@@ -84,7 +84,7 @@ export const ServerFunctionsProvider: React.FC<{
         if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'form-state',
-            args: { fallbackLocale: false, ...rest },
+            args: { experimental: { optimized: true }, fallbackLocale: false, ...rest },
           })) as ReturnType<typeof buildFormStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {

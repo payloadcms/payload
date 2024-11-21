@@ -1,4 +1,5 @@
 import type {
+  BuildFormStateArgs,
   Data,
   DocumentPreferences,
   Field,
@@ -16,6 +17,7 @@ import {
   deepCopyObjectSimple,
   fieldAffectsData,
   fieldHasSubFields,
+  fieldIsSidebar,
   getFieldPaths,
   tabHasName,
 } from 'payload/shared'
@@ -36,6 +38,7 @@ export type AddFieldStatePromiseArgs = {
   anyParentLocalized?: boolean
   collectionSlug?: string
   data: Data
+  experimental: BuildFormStateArgs['experimental']
   field: Field
   fieldIndex: number
   fieldSchemaMap: FieldSchemaMap
@@ -94,6 +97,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     anyParentLocalized = false,
     collectionSlug,
     data,
+    experimental,
     field,
     fieldIndex,
     fieldSchemaMap,
@@ -154,6 +158,19 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     const validate = field.validate
 
     const fieldState: FormFieldWithoutComponents = {}
+
+    // @deprecated
+    // This is a legacy property that is no longer used.
+    // In the next major version, remove this entire block
+    if (!experimental.optimized) {
+      fieldState.valid = true
+
+      const isSidebar = fieldIsSidebar(field)
+
+      if (isSidebar) {
+        fieldState.isSidebar = true
+      }
+    }
 
     if (passesCondition === false) {
       fieldState.passesCondition = false
@@ -244,6 +261,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 anyParentLocalized: field.localized || anyParentLocalized,
                 collectionSlug,
                 data: row,
+                experimental,
                 fields: field.fields,
                 fieldSchemaMap,
                 filter,
@@ -391,6 +409,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   anyParentLocalized: field.localized || anyParentLocalized,
                   collectionSlug,
                   data: row,
+                  experimental,
                   fields: block.fields,
                   fieldSchemaMap,
                   filter,
@@ -486,6 +505,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           anyParentLocalized: field.localized || anyParentLocalized,
           collectionSlug,
           data: data?.[field.name] || {},
+          experimental,
           fields: field.fields,
           fieldSchemaMap,
           filter,
@@ -627,6 +647,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       anyParentLocalized: field.localized || anyParentLocalized,
       collectionSlug,
       data,
+      experimental,
       fields: field.fields,
       fieldSchemaMap,
       filter,
@@ -691,6 +712,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         anyParentLocalized: tab.localized || anyParentLocalized,
         collectionSlug,
         data: isNamedTab ? data?.[tab.name] || {} : data,
+        experimental,
         fields: tab.fields,
         fieldSchemaMap,
         filter,

@@ -74,6 +74,14 @@ export type BuildFormStateArgs = {
   data?: Data
   docPermissions: SanitizedDocumentPermissions | undefined
   docPreferences: DocumentPreferences
+  experimental?: {
+    /**
+     * If true, makes form state as small as possible, such as by removing the `isSidebar` property from the field state.
+     * In the next major version, this will be the default behavior.
+     * @default false
+     **/
+    optimized: boolean
+  }
   fallbackLocale?: false | TypedLocale
   formState?: FormState
   id?: number | string
