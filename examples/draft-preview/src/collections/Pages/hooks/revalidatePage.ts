@@ -7,8 +7,13 @@ import type { Page } from '../../../payload-types'
 export const revalidatePage: CollectionAfterChangeHook<Page> = ({
   doc,
   previousDoc,
+  req,
   req: { payload },
 }) => {
+  if (req.context.skipRevalidate) {
+    return doc
+  }
+
   if (doc._status === 'published') {
     const path = doc.slug === 'home' ? '/' : `/${doc.slug}`
 

@@ -4,31 +4,15 @@ import React from 'react'
 
 import type { MainMenu } from '../../payload-types'
 
+import { getCachedGlobal } from '../../utilities/getGlobals'
 import { CMSLink } from '../CMSLink'
 import { Gutter } from '../Gutter'
 import classes from './index.module.scss'
 
 export async function Header() {
-  const mainMenu: MainMenu = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/globals/main-menu`,
-  )
-    .then((res) => res.json())
-    .then((menu) => ({
-      ...menu,
-      navItems: menu.navItems.map((item) => ({
-        ...item,
-        link: {
-          ...item.link,
-          type: item.link.type ?? undefined,
-          newTab: item.link.newTab ?? false,
-          url: item.link.url ?? undefined,
-        },
-      })),
-    }))
+  const header: MainMenu = await getCachedGlobal('main-menu', 1)()
 
-  const { navItems } = mainMenu
-
-  const hasNavItems = navItems && Array.isArray(navItems) && navItems.length > 0
+  const navItems = header?.navItems || []
 
   return (
     <header className={classes.header}>
@@ -47,20 +31,18 @@ export async function Header() {
             />
           </picture>
         </Link>
-        {hasNavItems && (
-          <nav className={classes.nav}>
-            {navItems.map(({ link }, i) => {
-              const sanitizedLink = {
-                ...link,
-                type: link.type ?? undefined,
-                newTab: link.newTab ?? false,
-                url: link.url ?? undefined,
-              }
+        <nav className={classes.nav}>
+          {navItems.map(({ link }, i) => {
+            const sanitizedLink = {
+              ...link,
+              type: link.type ?? undefined,
+              newTab: link.newTab ?? false,
+              url: link.url ?? undefined,
+            }
 
-              return <CMSLink key={i} {...sanitizedLink} />
-            })}
-          </nav>
-        )}
+            return <CMSLink key={i} {...sanitizedLink} />
+          })}
+        </nav>
       </Gutter>
     </header>
   )
