@@ -44,11 +44,14 @@ export const renderField: RenderFieldMethod = ({
   })
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
-    customComponents: fieldState?.customComponents || {},
     field: clientField,
     path,
     readOnly: typeof permissions === 'boolean' ? !permissions : !permissions?.[operation],
     schemaPath,
+  }
+
+  if (fieldState?.customComponents) {
+    clientProps.customComponents = fieldState.customComponents
   }
 
   // fields with subfields
@@ -78,15 +81,15 @@ export const renderField: RenderFieldMethod = ({
     user: req.user,
   }
 
-  if (!fieldState?.customComponents) {
-    fieldState.customComponents = {}
-  }
-
   switch (fieldConfig.type) {
     // TODO: handle block row labels as well in a similar fashion
     case 'array': {
       fieldState?.rows?.forEach((row, rowIndex) => {
         if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
+          if (!fieldState?.customComponents) {
+            fieldState.customComponents = {}
+          }
+
           if (!fieldState.customComponents.RowLabels) {
             fieldState.customComponents.RowLabels = []
           }
@@ -126,6 +129,10 @@ export const renderField: RenderFieldMethod = ({
         fieldConfig.admin.components = {}
       }
 
+      if (!fieldState?.customComponents) {
+        fieldState.customComponents = {}
+      }
+
       fieldState.customComponents.Field = RenderServerComponent({
         clientProps,
         Component: fieldConfig.editor.FieldComponent,
@@ -143,7 +150,13 @@ export const renderField: RenderFieldMethod = ({
           if (key in defaultUIFieldComponentKeys) {
             continue
           }
+
           const Component = fieldConfig.admin.components[key]
+
+          if (!fieldState?.customComponents) {
+            fieldState.customComponents = {}
+          }
+
           fieldState.customComponents[key] = RenderServerComponent({
             clientProps,
             Component,
@@ -164,6 +177,10 @@ export const renderField: RenderFieldMethod = ({
   if (fieldConfig.admin) {
     if ('description' in fieldConfig.admin) {
       if (typeof fieldConfig.admin?.description === 'function') {
+        if (!fieldState?.customComponents) {
+          fieldState.customComponents = {}
+        }
+
         fieldState.customComponents.Description = (
           <FieldDescription
             description={fieldConfig.admin?.description({
@@ -177,6 +194,10 @@ export const renderField: RenderFieldMethod = ({
 
     if (fieldConfig.admin?.components) {
       if ('afterInput' in fieldConfig.admin.components) {
+        if (!fieldState?.customComponents) {
+          fieldState.customComponents = {}
+        }
+
         fieldState.customComponents.AfterInput = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.afterInput,
@@ -187,6 +208,10 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('beforeInput' in fieldConfig.admin.components) {
+        if (!fieldState?.customComponents) {
+          fieldState.customComponents = {}
+        }
+
         fieldState.customComponents.BeforeInput = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.beforeInput,
@@ -197,6 +222,10 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('Description' in fieldConfig.admin.components) {
+        if (!fieldState?.customComponents) {
+          fieldState.customComponents = {}
+        }
+
         fieldState.customComponents.Description = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.Description,
@@ -207,6 +236,10 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('Error' in fieldConfig.admin.components) {
+        if (!fieldState?.customComponents) {
+          fieldState.customComponents = {}
+        }
+
         fieldState.customComponents.Error = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.Error,
@@ -217,6 +250,10 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('Label' in fieldConfig.admin.components) {
+        if (!fieldState?.customComponents) {
+          fieldState.customComponents = {}
+        }
+
         fieldState.customComponents.Label = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.Label,
@@ -227,6 +264,10 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('Field' in fieldConfig.admin.components) {
+        if (!fieldState?.customComponents) {
+          fieldState.customComponents = {}
+        }
+
         fieldState.customComponents.Field = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.Field,
