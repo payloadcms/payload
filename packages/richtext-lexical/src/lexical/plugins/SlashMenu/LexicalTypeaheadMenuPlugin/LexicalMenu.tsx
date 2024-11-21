@@ -207,7 +207,6 @@ export function LexicalMenu({
   // groups filtering is already handled in SlashMenu/index.tsx. Thus, groups always contains the matching items.
   groups,
   menuRenderFn,
-  onSelectItem,
   resolution,
   shouldSplitNodeWithQuery = false,
 }: {
@@ -216,7 +215,6 @@ export function LexicalMenu({
   editor: LexicalEditor
   groups: Array<SlashMenuGroupInternal>
   menuRenderFn: MenuRenderFn
-  onSelectItem: (item: SlashMenuItem, closeMenu: () => void, matchingString: string) => void
   resolution: MenuResolution
   shouldSplitNodeWithQuery?: boolean
 }): JSX.Element | null {
@@ -254,6 +252,8 @@ export function LexicalMenu({
 
   const selectItemAndCleanUp = useCallback(
     (selectedItem: SlashMenuItem) => {
+      close()
+
       editor.update(
         () => {
           const textNodeContainingQuery =
@@ -265,11 +265,17 @@ export function LexicalMenu({
             textNodeContainingQuery.remove()
           }
         },
-        { discrete: true },
+        {
+          onUpdate() {
+            selectedItem.onSelect({
+              editor,
+              queryString: resolution.match ? resolution.match.matchingString : '',
+            })
+          },
+        },
       )
-      onSelectItem(selectedItem, close, resolution.match ? resolution.match.matchingString : '')
     },
-    [editor, shouldSplitNodeWithQuery, resolution.match, onSelectItem, close],
+    [editor, shouldSplitNodeWithQuery, resolution.match, close],
   )
 
   useEffect(() => {
