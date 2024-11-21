@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Vodorovný pravítko',
   },
+  da: {
+    label: 'Horisontal Regel',
+  },
   de: {
     label: 'Trennlinie',
   },
