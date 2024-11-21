@@ -181,15 +181,6 @@ export function SlashMenuPlugin({
     schemaPath,
   ])
 
-  const onSelectItem = useCallback(
-    (selectedItem: SlashMenuItemType, closeMenu: () => void, matchingString: string) => {
-      closeMenu()
-
-      selectedItem.onSelect({ editor, queryString: matchingString })
-    },
-    [editor],
-  )
-
   return (
     <LexicalTypeaheadMenuPlugin
       anchorElem={anchorElem}
@@ -243,7 +234,6 @@ export function SlashMenuPlugin({
           : null
       }
       onQueryChange={setQueryString}
-      onSelectItem={onSelectItem}
       triggerFn={checkForTriggerMatch}
     />
   )
