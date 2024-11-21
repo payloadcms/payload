@@ -463,10 +463,8 @@ describe('admin1', () => {
   describe('custom providers', () => {
     test('should render custom providers', async () => {
       await page.goto(`${serverURL}/admin`)
-      await expect(page.locator('.custom-provider')).toHaveCount(2)
-      await expect(page.locator('.custom-provider').first()).toContainText(
-        'This is a custom provider.',
-      )
+      await expect(page.locator('.custom-provider')).toHaveCount(1)
+      await expect(page.locator('.custom-provider')).toContainText('This is a custom provider.')
     })
 
     test('should render custom provider server components with props', async () => {

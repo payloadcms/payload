@@ -63,7 +63,6 @@ export default buildConfigWithDefaults({
       providers: [
         '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
-        '/components/CustomProvider/index.js#CustomProvider',
       ],
       views: {
         // Dashboard: CustomDashboardView,
