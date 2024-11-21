@@ -34,9 +34,10 @@ export const renderDocumentSlots: (args: {
     globalConfig?.admin?.components?.elements?.PreviewButton
 
   if (isPreviewEnabled && CustomPreviewButton) {
-    components.PreviewButton = (
-      <RenderServerComponent Component={CustomPreviewButton} importMap={req.payload.importMap} />
-    )
+    components.PreviewButton = RenderServerComponent({
+      Component: CustomPreviewButton,
+      importMap: req.payload.importMap,
+    })
   }
 
   const descriptionFromConfig =
@@ -54,14 +55,12 @@ export const renderDocumentSlots: (args: {
   const hasDescription = CustomDescription || staticDescription
 
   if (hasDescription) {
-    components.Description = (
-      <RenderServerComponent
-        clientProps={{ description: staticDescription }}
-        Component={CustomDescription}
-        Fallback={ViewDescription}
-        importMap={req.payload.importMap}
-      />
-    )
+    components.Description = RenderServerComponent({
+      clientProps: { description: staticDescription },
+      Component: CustomDescription,
+      Fallback: ViewDescription,
+      importMap: req.payload.importMap,
+    })
   }
 
   if (hasSavePermission) {
@@ -71,12 +70,10 @@ export const renderDocumentSlots: (args: {
         globalConfig?.admin?.components?.elements?.PublishButton
 
       if (CustomPublishButton) {
-        components.PublishButton = (
-          <RenderServerComponent
-            Component={CustomPublishButton}
-            importMap={req.payload.importMap}
-          />
-        )
+        components.PublishButton = RenderServerComponent({
+          Component: CustomPublishButton,
+          importMap: req.payload.importMap,
+        })
       }
       const CustomSaveDraftButton =
         collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
@@ -87,12 +84,10 @@ export const renderDocumentSlots: (args: {
         (globalConfig?.versions?.drafts && !globalConfig?.versions?.drafts?.autosave)
 
       if ((draftsEnabled || unsavedDraftWithValidations) && CustomSaveDraftButton) {
-        components.SaveDraftButton = (
-          <RenderServerComponent
-            Component={CustomSaveDraftButton}
-            importMap={req.payload.importMap}
-          />
-        )
+        components.SaveDraftButton = RenderServerComponent({
+          Component: CustomSaveDraftButton,
+          importMap: req.payload.importMap,
+        })
       }
     } else {
       const CustomSaveButton =
@@ -100,9 +95,10 @@ export const renderDocumentSlots: (args: {
         globalConfig?.admin?.components?.elements?.SaveButton
 
       if (CustomSaveButton) {
-        components.SaveButton = (
-          <RenderServerComponent Component={CustomSaveButton} importMap={req.payload.importMap} />
-        )
+        components.SaveButton = RenderServerComponent({
+          Component: CustomSaveButton,
+          importMap: req.payload.importMap,
+        })
       }
     }
   }

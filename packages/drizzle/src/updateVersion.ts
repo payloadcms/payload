@@ -49,6 +49,7 @@ export async function updateVersion<T extends TypeWithID>(
     data: versionData,
     db,
     fields,
+    joinQuery: false,
     operation: 'update',
     req,
     select,

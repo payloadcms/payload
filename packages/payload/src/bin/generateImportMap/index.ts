@@ -183,6 +183,7 @@ export async function generateImportMap(
 
   await writeImportMap({
     componentMap: importMap,
+    config,
     fileName: 'importMap.js',
     force: options?.force,
     importMap: imports,
@@ -193,6 +194,7 @@ export async function generateImportMap(
 
 export async function writeImportMap({
   componentMap,
+  config,
   fileName,
   force,
   importMap,
@@ -200,6 +202,7 @@ export async function writeImportMap({
   rootDir,
 }: {
   componentMap: InternalImportMap
+  config: SanitizedConfig
   fileName: string
   force?: boolean
   importMap: Imports
@@ -207,13 +210,13 @@ export async function writeImportMap({
   rootDir: string
 }) {
   let importMapFolderPath = ''
-  if (fs.existsSync(path.resolve(rootDir, 'app/(payload)/admin/'))) {
-    importMapFolderPath = path.resolve(rootDir, 'app/(payload)/admin/')
-  } else if (fs.existsSync(path.resolve(rootDir, 'src/app/(payload)/admin/'))) {
-    importMapFolderPath = path.resolve(rootDir, 'src/app/(payload)/admin/')
+  if (fs.existsSync(path.resolve(rootDir, `app/(payload)${config.routes.admin}/`))) {
+    importMapFolderPath = path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)
+  } else if (fs.existsSync(path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`))) {
+    importMapFolderPath = path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)
   } else {
     throw new Error(
-      `Could not find the payload admin directory. Looked in ${path.resolve(rootDir, 'app/(payload)/admin/')} and ${path.resolve(rootDir, 'src/app/(payload)/admin/')}`,
+      `Could not find the payload admin directory. Looked in ${path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)} and ${path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)}`,
     )
   }
 

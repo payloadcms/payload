@@ -1,6 +1,7 @@
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
+import type { NonNever } from 'ts-essentials'
 
 import { spawn } from 'child_process'
 import crypto from 'crypto'
@@ -25,12 +26,6 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from './collections/config/types.js'
-
-import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
-export type { FieldState } from './admin/forms/Form.js'
-export type * from './admin/types.js'
-import type { NonNever } from 'ts-essentials'
-
 import type { Options as CountOptions } from './collections/operations/local/count.js'
 import type { Options as CreateOptions } from './collections/operations/local/create.js'
 import type {
@@ -72,6 +67,7 @@ import type { TypeWithVersion } from './versions/types.js'
 import { decrypt, encrypt } from './auth/crypto.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
+import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
@@ -81,6 +77,9 @@ import { getJobsLocalAPI } from './queues/localAPI.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
+
+export type { FieldState } from './admin/forms/Form.js'
+export type * from './admin/types.js'
 
 export interface GeneratedTypes {
   authUntyped: {
@@ -848,6 +847,10 @@ export const getPayload = async (
             }
           }
         }
+
+        cached.ws.onerror = (_) => {
+          // swallow any websocket connection error
+        }
       } catch (_) {
         // swallow e
       }
@@ -1105,6 +1108,7 @@ export type {
   ArrayFieldClient,
   BaseValidateOptions,
   Block,
+  BlockJSX,
   BlocksField,
   BlocksFieldClient,
   CheckboxField,
@@ -1344,7 +1348,6 @@ export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
-export { recursivelySanitizePermissions as sanitizePermissions } from './utilities/sanitizePermissions.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'

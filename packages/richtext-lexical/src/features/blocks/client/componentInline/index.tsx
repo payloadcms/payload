@@ -219,7 +219,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
    * HANDLE ONCHANGE
    */
   const onChange = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState }: { formState: FormState }) => {
       abortAndIgnore(onChangeAbortControllerRef.current)
 
       const controller = new AbortController()
@@ -258,7 +258,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
    * HANDLE FORM SUBMIT
    */
   const onFormSubmit = useCallback(
-    (formState) => {
+    (formState: FormState) => {
       const newData: any = reduceFieldsToValues(formState)
       newData.blockType = formData.blockType
       editor.update(() => {
@@ -270,8 +270,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     },
     [editor, nodeKey, formData],
   )
-
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   const CustomLabel = initialState?.['_components']?.customComponents?.BlockLabel
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   const CustomBlock = initialState?.['_components']?.customComponents?.Block
 
   const RemoveButton = useMemo(
@@ -314,7 +315,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const InlineBlockContainer = useMemo(
     () =>
-      ({ children }) => (
+      ({ children }: { children: React.ReactNode }) => (
         <div
           className={[
             baseClass,

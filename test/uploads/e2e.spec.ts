@@ -61,8 +61,6 @@ describe('uploads', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
-    await client.login()
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     animatedTypeMediaURL = new AdminUrlUtil(serverURL, animatedTypeMedia)
@@ -89,6 +87,12 @@ describe('uploads', () => {
       serverURL,
       snapshotKey: 'uploadsTest',
     })
+
+    if (client) {
+      await client.logout()
+    }
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
   })

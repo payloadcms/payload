@@ -9,7 +9,7 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
-import { createClientConfig, formatErrors } from 'payload'
+import { formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
@@ -58,24 +58,6 @@ export const getFieldSchemaMap = (args: {
   }
 
   return entityFieldMap
-}
-
-export const getClientConfig = (args: {
-  config: SanitizedConfig
-  i18n: I18nClient
-}): ClientConfig => {
-  const { config, i18n } = args
-
-  if (cachedClientConfig && process.env.NODE_ENV !== 'development') {
-    return cachedClientConfig
-  }
-
-  cachedClientConfig = createClientConfig({
-    config,
-    i18n,
-  })
-
-  return cachedClientConfig
 }
 
 type BuildFormStateSuccessResult = {

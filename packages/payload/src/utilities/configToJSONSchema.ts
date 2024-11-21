@@ -957,6 +957,7 @@ export function configToJSONSchema(
       'globals',
       'auth',
       'db',
+      'jobs',
     ],
     title: 'Config',
   }
@@ -970,7 +971,7 @@ export function configToJSONSchema(
       type: 'object',
       additionalProperties: false,
       properties: jobsSchemas.properties,
-      required: ['tasks'],
+      required: ['tasks', 'workflows'],
     }
   }
 

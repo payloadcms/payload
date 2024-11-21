@@ -1,7 +1,6 @@
 'use client'
-import type { LexicalEditor } from 'lexical'
-
 import { Button } from '@payloadcms/ui'
+import { $addUpdateTag, type LexicalEditor } from 'lexical'
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -74,9 +73,10 @@ export function DropDownItem({
       iconStyle="none"
       onClick={() => {
         if (enabled !== false) {
-          editor._updateTags = new Set(['toolbar', ...editor._updateTags]) // without setting the tags, our onSelect will not be able to trigger our onChange as focus onChanges are ignored.
-
           editor.focus(() => {
+            editor.update(() => {
+              $addUpdateTag('toolbar')
+            })
             // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
             item.onSelect?.({
               editor,

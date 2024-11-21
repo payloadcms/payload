@@ -4,6 +4,7 @@ import type {
   ClientCollectionConfig,
   ClientConfig,
   ErrorResult,
+  ImportMap,
   PaginatedDocs,
   SanitizedCollectionConfig,
   SanitizedConfig,
@@ -26,8 +27,9 @@ if (!cachedClientConfig) {
 export const getClientConfig = (args: {
   config: SanitizedConfig
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientConfig => {
-  const { config, i18n } = args
+  const { config, i18n, importMap } = args
 
   if (cachedClientConfig && process.env.NODE_ENV !== 'development') {
     return cachedClientConfig
@@ -36,6 +38,7 @@ export const getClientConfig = (args: {
   cachedClientConfig = createClientConfig({
     config,
     i18n,
+    importMap,
   })
 
   return cachedClientConfig
@@ -146,6 +149,7 @@ export const buildTableState = async (
   const clientConfig = getClientConfig({
     config,
     i18n,
+    importMap: payload.importMap,
   })
 
   let collectionConfig: SanitizedCollectionConfig

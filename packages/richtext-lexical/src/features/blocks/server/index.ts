@@ -2,12 +2,11 @@ import type { Block, BlocksField, Config, FieldSchemaMap, FlattenedBlocksField }
 
 import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
 
-import type { BlocksFeatureClientProps } from '../client/index.js'
-
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
+import { getBlockMarkdownTransformers } from './markdownTransformer.js'
 import { ServerBlockNode } from './nodes/BlocksNode.js'
 import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { blockValidationHOC } from './validate.js'
@@ -17,17 +16,8 @@ export type BlocksFeatureProps = {
   inlineBlocks?: Block[]
 }
 
-export const BlocksFeature = createServerFeature<
-  BlocksFeatureProps,
-  BlocksFeatureProps,
-  BlocksFeatureClientProps
->({
+export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatureProps>({
   feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
-    // Build clientProps
-    const clientProps: BlocksFeatureClientProps = {
-      clientBlockSlugs: [],
-      clientInlineBlockSlugs: [],
-    }
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
     const sanitized = await sanitizeFields({
@@ -52,12 +42,8 @@ export const BlocksFeature = createServerFeature<
     props.blocks = (sanitized[0] as BlocksField).blocks
     props.inlineBlocks = (sanitized[1] as BlocksField).blocks
 
-    clientProps.clientBlockSlugs = props.blocks.map((block) => block.slug)
-    clientProps.clientInlineBlockSlugs = props.inlineBlocks.map((block) => block.slug)
-
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
-      clientFeatureProps: clientProps,
       generatedTypes: {
         modifyOutputSchema: ({
           collectionIDFieldTypes,
@@ -169,6 +155,11 @@ export const BlocksFeature = createServerFeature<
         return schemaMap
       },
       i18n,
+      markdownTransformers: getBlockMarkdownTransformers({
+        blocks: props.blocks,
+        inlineBlocks: props.inlineBlocks,
+      }),
+
       nodes: [
         createNode({
           // @ts-expect-error - TODO: fix this

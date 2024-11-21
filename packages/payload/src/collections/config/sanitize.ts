@@ -36,7 +36,13 @@ export const sanitizeCollection = async (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = config.collections.map((c) => c.slug) || []
+  const validRelationships = config.collections.reduce(
+    (acc, c) => {
+      acc.push(c.slug)
+      return acc
+    },
+    [collection.slug],
+  )
   const joins: SanitizedJoins = {}
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,

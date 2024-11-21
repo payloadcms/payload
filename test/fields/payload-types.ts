@@ -121,9 +121,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -462,6 +462,11 @@ export interface ArrayField {
               id?: string | null;
             }[]
           | null;
+        id?: string | null;
+      }[]
+    | null;
+  externallyUpdatedArray?:
+    | {
         id?: string | null;
       }[]
     | null;
@@ -2083,6 +2088,13 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  externallyUpdatedArray?:
+    | T
+    | {
+        customField?: T;
+        id?: T;
+      };
+  ui?: T;
   updatedAt?: T;
   createdAt?: T;
 }

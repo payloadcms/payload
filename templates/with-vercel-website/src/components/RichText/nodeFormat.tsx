@@ -1,8 +1,11 @@
 // @ts-nocheck
 //This copy-and-pasted from lexical here: https://github.com/facebook/lexical/blob/c2ceee223f46543d12c574e62155e619f9a18a5d/packages/lexical/src/LexicalConstants.ts
 
-import type { ElementFormatType, TextFormatType } from 'lexical'
-import type { TextDetailType, TextModeType } from 'lexical/nodes/LexicalTextNode'
+import type { ElementFormatType, TextFormatType } from '@payloadcms/richtext-lexical/lexical'
+import type {
+  TextDetailType,
+  TextModeType,
+} from '@payloadcms/richtext-lexical/lexical/nodes/LexicalTextNode'
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.

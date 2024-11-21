@@ -33,7 +33,6 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     showError,
     style,
     value,
-    width,
   } = props
 
   const { i18n } = useTranslation()
@@ -49,10 +48,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={style}
     >
       <RenderCustomComponent
         CustomComponent={Label}
