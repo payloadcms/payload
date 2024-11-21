@@ -421,7 +421,7 @@ export interface LexicalInBlock {
         } | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'lexicalInBlock';
+        blockType: 'lexicalInBlock2';
       }[]
     | null;
   updatedAt: string;
@@ -2070,7 +2070,7 @@ export interface LexicalInBlockSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
-        lexicalInBlock?:
+        lexicalInBlock2?:
           | T
           | {
               lexical?: T;

@@ -8,7 +8,7 @@ export const LexicalInBlock: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'lexicalInBlock',
+          slug: 'lexicalInBlock2',
           fields: [
             {
               name: 'lexical',

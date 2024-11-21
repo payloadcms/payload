@@ -479,12 +479,12 @@ export const seed = async (_payload: Payload) => {
     data: {
       blocks: [
         {
-          blockType: 'lexicalInBlock',
+          blockType: 'lexicalInBlock2',
           blockName: '1',
           lexical: textToLexicalJSON({ text: '1' }),
         },
         {
-          blockType: 'lexicalInBlock',
+          blockType: 'lexicalInBlock2',
           blockName: '2',
           lexical: textToLexicalJSON({ text: '2' }),
         },
