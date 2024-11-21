@@ -316,7 +316,7 @@ describe('@payloadcms/plugin-search', () => {
 
     await wait(200)
 
-    await payload.create({
+    const createdPost = await payload.create({
       collection: postsSlug,
       data: {
         title: 'Test post title',
@@ -329,6 +329,11 @@ describe('@payloadcms/plugin-search', () => {
     const { docs } = await payload.find({
       collection: 'search',
       depth: 0,
+      where: {
+        'doc.value': {
+          equals: createdPost.id,
+        },
+      },
     })
 
     const searchIndexToBeDeleted = docs[0]
@@ -366,11 +371,26 @@ describe('@payloadcms/plugin-search', () => {
         },
       },
     })
+    await payload.delete({
+      collection: postsSlug,
+      where: {
+        _status: {
+          equals: 'published',
+        },
+      },
+    })
 
     await wait(200)
 
     await payload.create({
       collection: pagesSlug,
+      data: {
+        title: 'Test page title',
+        _status: 'published',
+      },
+    })
+    await payload.create({
+      collection: postsSlug,
       data: {
         title: 'Test page title',
         _status: 'published',
