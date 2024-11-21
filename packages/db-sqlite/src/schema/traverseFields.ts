@@ -1,7 +1,7 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
-import type { FlattenField } from 'payload'
+import type { FlattenedField } from 'payload'
 
 import {
   buildIndexName,
@@ -41,7 +41,7 @@ type Args = {
   disableRelsTableUnique?: boolean
   disableUnique?: boolean
   fieldPrefix?: string
-  fields: FlattenField[]
+  fields: FlattenedField[]
   forceLocalized?: boolean
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   locales: [string, ...string[]]
@@ -231,7 +231,7 @@ export const traverseFields = ({
           disableNotNull: disableNotNullFromHere,
           disableRelsTableUnique: true,
           disableUnique,
-          fields: disableUnique ? idToUUID(field.flattenFields) : field.flattenFields,
+          fields: disableUnique ? idToUUID(field.flattenedFields) : field.flattenedFields,
           rootRelationships: relationships,
           rootRelationsToBuild,
           rootTableIDColType,
@@ -371,7 +371,7 @@ export const traverseFields = ({
               disableNotNull: disableNotNullFromHere,
               disableRelsTableUnique: true,
               disableUnique,
-              fields: disableUnique ? idToUUID(block.flattenFields) : block.flattenFields,
+              fields: disableUnique ? idToUUID(block.flattenedFields) : block.flattenedFields,
               rootRelationships: relationships,
               rootRelationsToBuild,
               rootTableIDColType,
@@ -498,7 +498,7 @@ export const traverseFields = ({
           disableNotNull: disableNotNullFromHere,
           disableUnique,
           fieldPrefix: `${fieldName}.`,
-          fields: field.flattenFields,
+          fields: field.flattenedFields,
           forceLocalized: field.localized,
           indexes,
           locales,

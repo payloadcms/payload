@@ -1,5 +1,5 @@
 import type { TransactionPg } from '@payloadcms/drizzle/types'
-import type { FlattenField, Payload } from 'payload'
+import type { FlattenedField, Payload } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -12,7 +12,7 @@ type Args = {
   columnPrefix: string
   db: TransactionPg
   disableNotNull: boolean
-  fields: FlattenField[]
+  fields: FlattenedField[]
   globalSlug?: string
   isVersions: boolean
   newTableName: string
@@ -34,7 +34,7 @@ export const traverseFields = (args: Args) => {
         return traverseFields({
           ...args,
           columnPrefix: '',
-          fields: field.flattenFields,
+          fields: field.flattenedFields,
           newTableName,
           parentTableName: newTableName,
           path: `${args.path ? `${args.path}.` : ''}${field.name}.%`,
@@ -50,7 +50,7 @@ export const traverseFields = (args: Args) => {
           traverseFields({
             ...args,
             columnPrefix: '',
-            fields: block.flattenFields,
+            fields: block.flattenedFields,
             newTableName,
             parentTableName: newTableName,
             path: `${args.path ? `${args.path}.` : ''}${field.name}.%`,
@@ -69,7 +69,7 @@ export const traverseFields = (args: Args) => {
         return traverseFields({
           ...args,
           columnPrefix: `${args.columnPrefix}${toSnakeCase(field.name)}_`,
-          fields: field.flattenFields,
+          fields: field.flattenedFields,
           newTableName,
           path: `${args.path ? `${args.path}.` : ''}${field.name}`,
         })

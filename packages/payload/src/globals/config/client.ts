@@ -14,7 +14,7 @@ import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 
 export type ServerOnlyGlobalProperties = keyof Pick<
   SanitizedGlobalConfig,
-  'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'flattenFields' | 'hooks'
+  'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'flattenedFields' | 'hooks'
 >
 
 export type ServerOnlyGlobalAdminProperties = keyof Pick<SanitizedGlobalConfig['admin'], 'hidden'>
@@ -36,7 +36,7 @@ const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
   'access',
   'endpoints',
   'custom',
-  'flattenFields',
+  'flattenedFields',
   // `admin` is handled separately
 ]
 
