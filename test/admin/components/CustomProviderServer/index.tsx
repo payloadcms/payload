@@ -9,7 +9,7 @@ export const CustomProviderServer: React.FC<{ children: React.ReactNode } & Serv
   return (
     <Fragment>
       <div className="custom-provider-server" style={{ display: 'none' }}>
-        {`Custom server provider has payload: ${Boolean(payload)}`}
+        {`This is a custom provider with payload: ${Boolean(payload)}`}
       </div>
       {children}
     </Fragment>
