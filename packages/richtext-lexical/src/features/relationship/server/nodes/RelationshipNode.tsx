@@ -3,7 +3,9 @@ import type {
   DOMConversionMap,
   DOMConversionOutput,
   DOMExportOutput,
+  EditorConfig,
   ElementFormatType,
+  LexicalEditor,
   LexicalNode,
   NodeKey,
   Spread,
@@ -102,7 +104,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return false
   }
 
-  decorate(): JSX.Element | null {
+  decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element | null {
     return null
   }
 
