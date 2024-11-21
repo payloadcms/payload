@@ -24,12 +24,14 @@ function SlashMenuItem({
   item,
   onClick,
   onMouseEnter,
+  ref,
 }: {
   index: number
   isSelected: boolean
   item: SlashMenuItemInternal
   onClick: () => void
   onMouseEnter: () => void
+  ref?: React.Ref<HTMLButtonElement>
 }) {
   const {
     fieldProps: { featureClientSchemaMap, schemaPath },
@@ -62,9 +64,7 @@ function SlashMenuItem({
       key={item.key}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
-      ref={(element) => {
-        item.ref = { current: element }
-      }}
+      ref={ref}
       role="option"
       tabIndex={-1}
       type="button"
@@ -228,6 +228,9 @@ export function SlashMenuPlugin({
                           }}
                           onMouseEnter={() => {
                             setSelectedItemKey(item.key)
+                          }}
+                          ref={(el) => {
+                            ;(item as SlashMenuItemInternal).ref = { current: el }
                           }}
                         />
                       ))}

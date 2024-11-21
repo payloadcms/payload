@@ -196,14 +196,18 @@ function FixedToolbar({
       )
 
       if (overlapping) {
-        currentToolbarElem.className = 'fixed-toolbar fixed-toolbar--overlapping'
-        parentToolbarElem.className = 'fixed-toolbar fixed-toolbar--hide'
+        currentToolbarElem.classList.remove('fixed-toolbar')
+        currentToolbarElem.classList.add('fixed-toolbar', 'fixed-toolbar--overlapping')
+        parentToolbarElem.classList.remove('fixed-toolbar')
+        parentToolbarElem.classList.add('fixed-toolbar', 'fixed-toolbar--hide')
       } else {
         if (!currentToolbarElem.classList.contains('fixed-toolbar--overlapping')) {
           return
         }
-        currentToolbarElem.className = 'fixed-toolbar'
-        parentToolbarElem.className = 'fixed-toolbar'
+        currentToolbarElem.classList.remove('fixed-toolbar--overlapping')
+        currentToolbarElem.classList.add('fixed-toolbar')
+        parentToolbarElem.classList.remove('fixed-toolbar--hide')
+        parentToolbarElem.classList.add('fixed-toolbar')
       }
     },
     50,
