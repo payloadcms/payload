@@ -19,6 +19,7 @@ import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
 import { LexicalFields } from './collections/Lexical/index.js'
+import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
@@ -63,6 +64,8 @@ export const collectionSlugs: CollectionConfig[] = [
       },
     ],
   },
+  LexicalInBlock,
+
   ArrayFields,
   BlockFields,
   CheckboxFields,

@@ -1044,6 +1044,30 @@ describe('lexicalMain', () => {
     await expect(htmlOutput).toBeVisible()
   })
 
+  test('ensure lexical fields in blocks have correct value when moving blocks', async () => {
+    // Previously, we had the issue that the lexical field values did not update when moving blocks, as the MOVE_ROW form action did not request
+    // re-rendering of server components
+    await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+    await page.locator('.cell-id a').first().click()
+    await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+    await expect(page.locator('#blocks-row-0 .LexicalEditorTheme__paragraph')).toContainText('1')
+    await expect(page.locator('#blocks-row-0 .section-title__input')).toHaveValue('1') // block name
+    await expect(page.locator('#blocks-row-1 .LexicalEditorTheme__paragraph')).toContainText('2')
+    await expect(page.locator('#blocks-row-1 .section-title__input')).toHaveValue('2') // block name
+
+    // Move block 1 to the end
+    await page.locator('#blocks-row-0 .array-actions__button').click()
+    await expect(page.locator('#blocks-row-0 .popup__content')).toBeVisible()
+
+    await page.locator('#blocks-row-0 .popup__content').getByText('Move Down').click()
+
+    await expect(page.locator('#blocks-row-0 .LexicalEditorTheme__paragraph')).toContainText('2')
+    await expect(page.locator('#blocks-row-0 .section-title__input')).toHaveValue('2') // block name
+    await expect(page.locator('#blocks-row-1 .LexicalEditorTheme__paragraph')).toContainText('1')
+    await expect(page.locator('#blocks-row-1 .section-title__input')).toHaveValue('1') // block name
+  })
+
   describe('localization', () => {
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)
