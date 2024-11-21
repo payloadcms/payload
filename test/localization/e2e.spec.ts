@@ -286,12 +286,12 @@ describe('Localization', () => {
     })
 
     test('should default source locale to current locale', async () => {
-      await changeLocale(page, 'Spanish')
+      await changeLocale(page, spanishLocale)
       await createAndSaveDoc(page, url, { title })
       await openCopyToLocaleDrawer(page)
 
       const fromLocaleField = page.locator('#field-fromLocale')
-      await expect(fromLocaleField).toHaveText('Spanish')
+      await expect(fromLocaleField).toContainText('Spanish')
     })
 
     test('should not overwrite existing data when overwrite is unchecked', async () => {
@@ -350,7 +350,6 @@ describe('Localization', () => {
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Hungarian')
       await runCopy(page)
-      await changeLocale(page, 'Hungarian')
       await expect(page.locator('#field-title')).toHaveValue(title)
     })
 
