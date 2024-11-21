@@ -32,7 +32,7 @@ const config = buildConfig({
     components: {
       views: {
         customView: {
-          Component: '/path/to/MyCustomView.tsx#MyCustomView', // highlight-line
+          Component: '/path/to/MyCustomView#MyCustomView', // highlight-line
           path: '/my-custom-view',
         }
       },
@@ -113,7 +113,7 @@ const config = buildConfig({
         // highlight-start
         myCustomView: {
         // highlight-end
-          Component: '/path/to/MyCustomView.tsx#MyCustomViewComponent',
+          Component: '/path/to/MyCustomView#MyCustomViewComponent',
           path: '/my-custom-view',
         },
       },
@@ -155,7 +155,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
       views: {
         edit: {
           root: {
-            Component: '/path/to/MyCustomEditView.tsx', // highlight-line
+            Component: '/path/to/MyCustomEditView', // highlight-line
           }
           // other options include:
           // default
@@ -167,7 +167,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
           // See "Document Views" for more details
         },
         list: {
-          Component: '/path/to/MyCustomListView.tsx',
+          Component: '/path/to/MyCustomListView',
         }
       },
     },
@@ -210,7 +210,7 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
       views: {
         edit: {
           root: {
-            Component: '/path/to/MyCustomEditView.tsx', // highlight-line
+            Component: '/path/to/MyCustomEditView', // highlight-line
           }
           // other options include:
           // default
@@ -260,7 +260,7 @@ export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
       views: {
         edit: {
           api: {
-            Component: '/path/to/MyCustomAPIViewComponent.tsx', // highlight-line
+            Component: '/path/to/MyCustomAPIViewComponent', // highlight-line
           },
         },
       },
@@ -301,14 +301,14 @@ export const MyCollection: SanitizedCollectionConfig = {
       views: {
         edit: {
           myCustomTab: {
-            Component: '/path/to/MyCustomTab.tsx',
+            Component: '/path/to/MyCustomTab',
             path: '/my-custom-tab',
             tab: {
-              Component: '/path/to/MyCustomTabComponent.tsx' // highlight-line
+              Component: '/path/to/MyCustomTabComponent' // highlight-line
             }
           },
           anotherCustomTab: {
-            Component: '/path/to/AnotherCustomView.tsx',
+            Component: '/path/to/AnotherCustomView',
             path: '/another-custom-view',
             // highlight-start
             tab: {
@@ -342,7 +342,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
     components: {
       views: {
         edit: {
-          Component: '/path/to/MyCustomView.tsx' // highlight-line
+          Component: '/path/to/MyCustomView' // highlight-line
         }
       },
     },
