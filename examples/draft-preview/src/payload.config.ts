@@ -14,9 +14,6 @@ const dirname = path.dirname(filename)
 // eslint-disable-next-line no-restricted-exports
 export default buildConfig({
   admin: {
-    components: {
-      beforeLogin: ['/components/BeforeLogin/index.tsx#BeforeLogin'],
-    },
     importMap: {
       baseDir: path.resolve(dirname),
     },

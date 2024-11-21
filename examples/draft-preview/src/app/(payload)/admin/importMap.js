@@ -41,7 +41,6 @@ import { UnorderedListElement as UnorderedListElement_0b388c087d9de8c4f011dd323a
 import { UploadElementButton as UploadElementButton_0b388c087d9de8c4f011dd323a130cfb } from '@payloadcms/richtext-slate/client'
 import { UploadElement as UploadElement_0b388c087d9de8c4f011dd323a130cfb } from '@payloadcms/richtext-slate/client'
 import { WithUpload as WithUpload_0b388c087d9de8c4f011dd323a130cfb } from '@payloadcms/richtext-slate/client'
-import { BeforeLogin as BeforeLogin_ad65897babd4385371b27dd1d2bde09b } from 'src/components/BeforeLogin/index.tsx'
 
 export const importMap = {
   '@payloadcms/richtext-slate/rsc#RscEntrySlateCell':
@@ -119,5 +118,4 @@ export const importMap = {
     UploadElementButton_0b388c087d9de8c4f011dd323a130cfb,
   '@payloadcms/richtext-slate/client#UploadElement': UploadElement_0b388c087d9de8c4f011dd323a130cfb,
   '@payloadcms/richtext-slate/client#WithUpload': WithUpload_0b388c087d9de8c4f011dd323a130cfb,
-  '/components/BeforeLogin/index.tsx#BeforeLogin': BeforeLogin_ad65897babd4385371b27dd1d2bde09b,
 }
