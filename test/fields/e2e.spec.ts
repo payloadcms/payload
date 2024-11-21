@@ -1,9 +1,11 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
+import { customIDSlug } from 'versions/slugs.js'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
@@ -586,6 +588,33 @@ describe('fields', () => {
       await expect(async () => await expect(tab2).toHaveClass(/--active/)).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
+    })
+  })
+
+  describe('id', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, customIDSlug)
+    })
+
+    function createCustomIDDoc(id: string) {
+      return payload.create({
+        collection: customIDSlug,
+        data: {
+          id,
+        },
+      })
+    }
+
+    test('allow create of non standard ID', async () => {
+      await createCustomIDDoc('id 1')
+      await page.goto(url.list)
+
+      await navigateToDoc(page, url)
+
+      // Page should load and ID should be correct
+      await expect(page.locator('#field-id')).toHaveValue('id 1')
+      await expect(page.locator('.id-label')).toContainText('id 1')
     })
   })
 })

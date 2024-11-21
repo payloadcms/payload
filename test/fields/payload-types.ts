@@ -39,6 +39,7 @@ export interface Config {
     'code-fields': CodeField;
     'collapsible-fields': CollapsibleField;
     'conditional-logic': ConditionalLogic;
+    'custom-id': CustomId;
     'date-fields': DateField;
     'email-fields': EmailField;
     'radio-fields': RadioField;
@@ -80,6 +81,7 @@ export interface Config {
     'code-fields': CodeFieldsSelect<false> | CodeFieldsSelect<true>;
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
     'conditional-logic': ConditionalLogicSelect<false> | ConditionalLogicSelect<true>;
+    'custom-id': CustomIdSelect<false> | CustomIdSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
@@ -121,9 +123,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs: {
+  jobs?: {
     tasks: unknown;
-    workflows: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -945,6 +947,15 @@ export interface ConditionalLogic {
   group2?: {
     group2Field?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id".
+ */
+export interface CustomId {
+  id: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1797,6 +1808,10 @@ export interface PayloadLockedDocument {
         value: string | ConditionalLogic;
       } | null)
     | ({
+        relationTo: 'custom-id';
+        value: string | CustomId;
+      } | null)
+    | ({
         relationTo: 'date-fields';
         value: string | DateField;
       } | null)
@@ -2584,6 +2599,15 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
     | {
         group2Field?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id_select".
+ */
+export interface CustomIdSelect<T extends boolean = true> {
+  id?: T;
   updatedAt?: T;
   createdAt?: T;
 }
