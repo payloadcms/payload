@@ -411,6 +411,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   // RETRIEVE NEWLY UPDATED ROW
   // //////////////////////////////////
 
+  joinQuery = operation === 'create' ? false : joinQuery
+
   const findManyArgs = buildFindManyArgs({
     adapter,
     depth: 0,

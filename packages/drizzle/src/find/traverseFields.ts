@@ -330,7 +330,6 @@ export const traverseFields = ({
         }
 
         case 'group':
-
         case 'tab': {
           const fieldSelect = select?.[field.name]
 
@@ -364,6 +363,7 @@ export const traverseFields = ({
 
           break
         }
+
         case 'join': {
           // when `joinsQuery` is false, do not join
           if (joinQuery === false) {

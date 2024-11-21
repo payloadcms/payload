@@ -62,6 +62,7 @@ export function frontmatterToObject(frontmatter: string): Record<string, any> {
       const [key, ...valueParts] = line.split(':')
       const value = valueParts.join(':').trim()
 
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       result[key.trim()] = value
     }
   }

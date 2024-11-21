@@ -104,13 +104,16 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return false
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
+  decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element | null {
     return null
   }
 
   exportDOM(): DOMExportOutput {
     const element = document.createElement('div')
-    element.setAttribute('data-lexical-relationship-id', String(this.__data?.value))
+    element.setAttribute(
+      'data-lexical-relationship-id',
+      String(typeof this.__data?.value === 'object' ? this.__data?.value?.id : this.__data?.value),
+    )
     element.setAttribute('data-lexical-relationship-relationTo', this.__data?.relationTo)
 
     const text = document.createTextNode(this.getTextContent())
@@ -132,7 +135,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
   }
 
   getTextContent(): string {
-    return `${this.__data?.relationTo} relation to ${this.__data?.value}`
+    return `${this.__data?.relationTo} relation to ${typeof this.__data?.value === 'object' ? this.__data?.value?.id : this.__data?.value}`
   }
 
   setData(data: RelationshipData): void {
