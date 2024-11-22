@@ -1,0 +1,8 @@
+.rah-static {
+  height: 0;
+  overflow: hidden;
+
+  &--height-auto {
+    height: auto;
+  }
+}
