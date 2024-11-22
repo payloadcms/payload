@@ -98,6 +98,116 @@ describe('lexicalBlocks', () => {
     await client.login()
   })
 
+  test('ensure block with custom Block RSC can be created, updates data when saving edit fields drawer, and maintains cursor position', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').nth(2) // second
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+
+    const lastParagraph = richTextField.locator('p').last()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    await lastParagraph.click()
+    await page.keyboard.press('1')
+    await page.keyboard.press('2')
+    await page.keyboard.press('3')
+
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('/')
+    await page.keyboard.type('RSC')
+
+    // CreateBlock
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+
+    // Click 1. Button and ensure it's the RSC block creation button (it should be! Otherwise, sorting wouldn't work)
+    const rscBlockSelectButton = slashMenuPopover.locator('button').first()
+    await expect(rscBlockSelectButton).toBeVisible()
+    await expect(rscBlockSelectButton).toContainText('Block R S C')
+    await rscBlockSelectButton.click()
+    await expect(slashMenuPopover).toBeHidden()
+
+    const newRSCBlock = richTextField
+      .locator('.lexical-block:not(.lexical-block .lexical-block)')
+      .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+    await newRSCBlock.scrollIntoViewIfNeeded()
+    await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data:')
+
+    // Select paragraph with text "testtext"
+    await richTextField.locator('p').getByText('123').first().click()
+    await page.keyboard.press('Shift+ArrowLeft')
+    await page.keyboard.press('Shift+ArrowLeft')
+    await page.keyboard.press('Shift+ArrowLeft')
+
+    const editButton = newRSCBlock.locator('.lexical-block__editButton').first()
+    await editButton.click()
+
+    await wait(500)
+    const editDrawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
+    await expect(editDrawer).toBeVisible()
+    await wait(500)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    await editDrawer.locator('.rs__control .value-container').first().click()
+    await wait(500)
+    await expect(editDrawer.locator('.rs__option').nth(1)).toBeVisible()
+    await expect(editDrawer.locator('.rs__option').nth(1)).toContainText('value2')
+    await editDrawer.locator('.rs__option').nth(1).click()
+
+    // Click button with text Save changes
+    await editDrawer.locator('button').getByText('Save changes').click()
+    await expect(editDrawer).toBeHidden()
+
+    await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data: value2')
+
+    // press ctrl+B to bold the text previously selected (assuming it is still selected now, which it should be)
+    await page.keyboard.press('Meta+B')
+    // In case this is mac or windows
+    await page.keyboard.press('Control+B')
+
+    await wait(300)
+
+    // save document and assert
+    await saveDocAndAssert(page)
+    await wait(300)
+    await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data: value2')
+
+    // Check if the API result is correct
+
+    // TODO:
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const rscBlock: SerializedBlockNode = lexicalField.root.children[14] as SerializedBlockNode
+      const paragraphBlock: SerializedBlockNode = lexicalField.root
+        .children[12] as SerializedBlockNode
+
+      expect(rscBlock.fields.blockType).toBe('BlockRSC')
+      expect(rscBlock.fields.key).toBe('value2')
+      expect((paragraphBlock.children[0] as SerializedTextNode).text).toBe('12')
+      expect((paragraphBlock.children[0] as SerializedTextNode).format).toBe(1)
+      expect((paragraphBlock.children[1] as SerializedTextNode).text).toBe('3')
+      expect((paragraphBlock.children[1] as SerializedTextNode).format).toBe(0)
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
   describe('nested lexical editor in block', () => {
     test('should type and save typed text', async () => {
       await navigateToLexicalFields()
