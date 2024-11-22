@@ -69,7 +69,7 @@
     "http-status": "1.6.2",
     "jwt-decode": "4.0.0",
     "mongoose": "8.8.1",
-    "next": "15.0.0",
+    "next": "15.0.3",
     "payload": "workspace:*",
     "qs-esm": "7.0.2",
     "react": "19.0.0-rc-65a56d0e-20241020",

@@ -116,7 +116,7 @@
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/json-schema": "7.0.15",
-    "@types/minimist": "1.2.2",
+    "@types/minimist": "1.2.5",
     "@types/nodemailer": "6.4.14",
     "@types/pluralize": "0.0.33",
     "@types/react-datepicker": "6.2.0",
@@ -124,10 +124,10 @@
     "@types/ws": "^8.5.10",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "0.23.1",
+    "esbuild": "0.24.0",
     "graphql-http": "^1.22.0",
     "rimraf": "3.0.2",
-    "sharp": "0.32.6"
+    "sharp": "0.33.5"
   },
   "peerDependencies": {
     "graphql": "^16.8.1"
