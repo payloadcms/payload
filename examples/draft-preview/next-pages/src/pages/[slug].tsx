@@ -44,7 +44,9 @@ export const getStaticProps: GetStaticProps = async (context: GetStaticPropsCont
     }) || {}
 
   let { slug } = (params as IParams) || {}
-  if (!slug) {slug = 'home'}
+  if (!slug) {
+    slug = 'home'
+  }
 
   let doc = {}
   const notFound = false

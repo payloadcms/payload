@@ -14,6 +14,7 @@ type Args = {
   children: React.ReactNode
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 const serverFunction: ServerFunctionClient = async function (args) {
   'use server'
   return handleServerFunctions({

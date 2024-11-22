@@ -1,6 +1,6 @@
 'use client'
 
-import type { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar';
+import type { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
 
 import { PayloadAdminBar } from 'payload-admin-bar'
 import React, { useState } from 'react'

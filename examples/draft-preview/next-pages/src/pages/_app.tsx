@@ -1,4 +1,4 @@
-import type { AppContext, AppProps as NextAppProps } from 'next/app';
+import type { AppContext, AppProps as NextAppProps } from 'next/app'
 
 import App from 'next/app'
 import { useRouter } from 'next/router'
