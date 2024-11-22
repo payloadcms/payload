@@ -110,6 +110,16 @@ export default buildConfigWithDefaults({
               name: 'custom',
               type: 'text',
             },
+            {
+              name: 'payment',
+              type: 'group',
+              fields: [
+                {
+                  name: 'Amount',
+                  type: 'number',
+                },
+              ],
+            },
           ]
         },
       },

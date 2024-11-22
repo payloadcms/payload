@@ -109,9 +109,13 @@ export const generateSubmissionCollection = (
     },
   }
 
+  const hasCustomPaymentField = formConfig.formSubmissionOverrides
+    .fields({ defaultFields })
+    .some((field) => 'name' in field && field.name === 'payment')
+
   const paymentFieldConfig = formConfig?.fields?.payment
 
-  if (paymentFieldConfig) {
+  if (paymentFieldConfig && !hasCustomPaymentField) {
     newConfig.fields.push({
       name: 'payment',
       type: 'group',
