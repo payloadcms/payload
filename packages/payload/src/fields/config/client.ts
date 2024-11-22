@@ -112,7 +112,9 @@ export const createClientField = ({
           }
         }
         break
+      case 'blocks':
       case 'fields':
+      case 'tabs':
         // Skip - we handle sub-fields in the switch below
         break
       case 'label':
