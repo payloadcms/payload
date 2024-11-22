@@ -1,3 +1,4 @@
+import type { QueryOptions } from 'mongoose'
 import type { FindGlobal, PayloadRequest } from 'payload'
 
 import { combineQueries } from 'payload'
@@ -13,7 +14,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
   { slug, locale, req = {} as PayloadRequest, select, where },
 ) {
   const Model = this.globals
-  const options = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     lean: true,
     select: buildProjectionFromSelect({
@@ -27,6 +28,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     globalSlug: slug,
     locale,
     payload: this.payload,
+    session: options.session,
     where: combineQueries({ globalType: { equals: slug } }, where),
   })
 

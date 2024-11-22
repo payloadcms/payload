@@ -44,6 +44,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   const query = await VersionModel.buildQuery({
     locale,
     payload: this.payload,
+    session: options.session,
     where: whereToUse,
   })
 

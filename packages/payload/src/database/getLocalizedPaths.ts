@@ -5,7 +5,7 @@ import type { PathToQuery } from './queryValidation/types.js'
 import { fieldAffectsData } from '../fields/config/types.js'
 import flattenFields from '../utilities/flattenTopLevelFields.js'
 
-export async function getLocalizedPaths({
+export function getLocalizedPaths({
   collectionSlug,
   fields,
   globalSlug,
@@ -21,7 +21,7 @@ export async function getLocalizedPaths({
   locale?: string
   overrideAccess?: boolean
   payload: Payload
-}): Promise<PathToQuery[]> {
+}): PathToQuery[] {
   const pathSegments = incomingPath.split('.')
   const localizationConfig = payload.config.localization
 
@@ -131,7 +131,7 @@ export async function getLocalizedPaths({
               if (nestedPathToQuery) {
                 const relatedCollection = payload.collections[matchedField.relationTo].config
 
-                const remainingPaths = await getLocalizedPaths({
+                const remainingPaths = getLocalizedPaths({
                   collectionSlug: relatedCollection.slug,
                   fields: relatedCollection.fields,
                   globalSlug,

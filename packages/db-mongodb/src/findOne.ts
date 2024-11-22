@@ -1,9 +1,9 @@
-import type { MongooseQueryOptions, QueryOptions } from 'mongoose'
+import type { AggregateOptions, PipelineStage, QueryOptions } from 'mongoose'
 import type { Document, FindOne, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildAggregation } from './utilities/buildAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
@@ -14,16 +14,12 @@ export const findOne: FindOne = async function findOne(
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options: MongooseQueryOptions = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     lean: true,
   }
 
-  const query = await Model.buildQuery({
-    locale,
-    payload: this.payload,
-    where,
-  })
+  const pipeline: PipelineStage.Lookup[] = []
 
   const projection = buildProjectionFromSelect({
     adapter: this,
@@ -31,20 +27,30 @@ export const findOne: FindOne = async function findOne(
     select,
   })
 
-  const aggregate = await buildJoinAggregation({
+  const query = await Model.buildQuery({
+    locale,
+    payload: this.payload,
+    pipeline,
+    projection,
+    session: options.session,
+    where,
+  })
+
+  const aggregate = await buildAggregation({
     adapter: this,
     collection,
     collectionConfig,
     joins,
     limit: 1,
     locale,
+    pipeline,
     projection,
     query,
   })
 
   let doc
   if (aggregate) {
-    ;[doc] = await Model.aggregate(aggregate, options)
+    ;[doc] = await Model.aggregate(aggregate, options as AggregateOptions)
   } else {
     ;(options as Record<string, unknown>).projection = projection
     doc = await Model.findOne(query, {}, options)

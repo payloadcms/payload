@@ -1,4 +1,4 @@
-import type { PaginateOptions } from 'mongoose'
+import type { PaginateOptions, PipelineStage } from 'mongoose'
 import type { PayloadRequest, QueryDrafts } from 'payload'
 
 import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
@@ -6,7 +6,7 @@ import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators }
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildAggregation } from './utilities/buildAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
@@ -50,17 +50,22 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)
 
-  const versionQuery = await VersionModel.buildQuery({
-    locale,
-    payload: this.payload,
-    where: combinedWhere,
-  })
-
+  const pipeline: PipelineStage[] = []
   const projection = buildProjectionFromSelect({
     adapter: this,
     fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
     select,
   })
+
+  const versionQuery = await VersionModel.buildQuery({
+    locale,
+    payload: this.payload,
+    pipeline,
+    projection,
+    session: options.session,
+    where: combinedWhere,
+  })
+
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
@@ -109,12 +114,13 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   let result
 
-  const aggregate = await buildJoinAggregation({
+  const aggregate = await buildAggregation({
     adapter: this,
     collection,
     collectionConfig,
     joins,
     locale,
+    pipeline,
     projection,
     query: versionQuery,
     versions: true,

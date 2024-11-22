@@ -15,6 +15,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const query = await Model.buildQuery({
     payload: this.payload,
+    session: options.session,
     where,
   })
 

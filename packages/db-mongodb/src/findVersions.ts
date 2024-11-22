@@ -1,4 +1,9 @@
-import type { PaginateOptions } from 'mongoose'
+import type {
+  AggregatePaginateResult,
+  PaginateOptions,
+  PipelineStage,
+  QueryOptions,
+} from 'mongoose'
 import type { FindVersions, PayloadRequest } from 'payload'
 
 import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
@@ -27,7 +32,7 @@ export const findVersions: FindVersions = async function findVersions(
 ) {
   const Model = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     limit,
     skip,
@@ -51,9 +56,15 @@ export const findVersions: FindVersions = async function findVersions(
     })
   }
 
+  const pipeline: PipelineStage[] = []
+  const projection: Record<string, boolean> = {}
+
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    pipeline,
+    projection,
+    session: options.session,
     where,
   })
 
@@ -109,7 +120,24 @@ export const findVersions: FindVersions = async function findVersions(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  let result: AggregatePaginateResult<unknown>
+
+  if (pipeline.length) {
+    pipeline.push({ $sort: { createdAt: -1 } })
+
+    if (limit) {
+      pipeline.push({ $limit: limit })
+    }
+
+    if (Object.keys(projection).length > 0) {
+      pipeline.push({ $project: projection })
+    }
+
+    result = await Model.aggregatePaginate(Model.aggregate(pipeline), paginationOptions)
+  } else {
+    result = await Model.paginate(query, paginationOptions)
+  }
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
