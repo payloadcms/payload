@@ -12,14 +12,6 @@ export const Posts: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
-      defaultValue: 'This is a default value',
-    },
-    {
-      name: 'conditionalField',
-      type: 'text',
-      admin: {
-        condition: (_, siblingData) => siblingData.title === 'This is a default value',
-      },
     },
     {
       name: 'isFiltered',
