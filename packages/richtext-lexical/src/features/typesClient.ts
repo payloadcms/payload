@@ -204,6 +204,7 @@ export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<any, an
 export type SanitizedClientFeatures = {
   /** The keys of all enabled features */
   enabledFeatures: string[]
+  enabledFormats: Array<'bold' | 'italic' | 'strikethrough' | 'underline'>
   markdownTransformers: Transformer[]
 
   /**

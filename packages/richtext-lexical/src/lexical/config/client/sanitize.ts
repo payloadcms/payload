@@ -14,6 +14,7 @@ export const sanitizeClientFeatures = (
 ): SanitizedClientFeatures => {
   const sanitized: SanitizedClientFeatures = {
     enabledFeatures: [],
+    enabledFormats: [],
     markdownTransformers: [],
     nodes: [],
     plugins: [],

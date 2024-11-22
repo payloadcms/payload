@@ -39,6 +39,7 @@ let checkedDependencies = false
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   return async ({ config, isRoot, parentIsLocalized }) => {
+    // is this dependency check still necessary?
     if (
       process.env.NODE_ENV !== 'production' &&
       process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
