@@ -92,7 +92,7 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
                     format: 0,
                     mode: 'normal',
                     style: '',
-                    text: 'here',
+                    text: 'on our Github',
                     version: 1,
                   },
                 ],
@@ -504,7 +504,6 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
       blockType: 'mediaBlock',
       // @ts-ignore
       media: '{{IMAGE_2}}',
-      position: 'default',
     },
     {
       blockName: 'Archive Block',
