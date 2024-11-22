@@ -399,10 +399,12 @@ export function UploadInput(props: UploadInputProps) {
           }
         })
 
-        onChange(updatedDocsToPropogate.map((doc) => doc.value?.id))
+        if (updatedDocsToPropogate.length && hasMany) {
+          onChange(updatedDocsToPropogate.map((doc) => doc.value?.id))
+        }
       }
     },
-    [populateDocs, onChange],
+    [populateDocs, onChange, hasMany],
   )
 
   // only hasMany can reorder
