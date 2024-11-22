@@ -325,7 +325,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       )}
       {!hasMaxRows && (
         <Fragment>
-          <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
+          <DrawerToggler
+            className={`${baseClass}__drawer-toggler`}
+            disabled={readOnly}
+            slug={drawerSlug}
+          >
             <Button
               buttonStyle="icon-label"
               disabled={readOnly}
