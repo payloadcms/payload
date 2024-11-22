@@ -1,4 +1,4 @@
-import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
+import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
 import type { RichTextField, Validate } from 'payload'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
@@ -32,7 +32,7 @@ export const richTextValidateHOC = ({
           } else if (paragraphNode?.children?.length === 1) {
             const paragraphNodeChild = paragraphNode?.children[0]
             if (paragraphNodeChild.type === 'text') {
-              if (!paragraphNodeChild?.['text']?.length) {
+              if (!(paragraphNodeChild as SerializedTextNode | undefined)?.['text']?.length) {
                 hasOnlyEmptyParagraph = true
               }
             }

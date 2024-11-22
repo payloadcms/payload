@@ -1,3 +1,5 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type {
   CollectionPermission,
   FieldPermissions,
@@ -196,7 +198,9 @@ export function recursivelySanitizeGlobals(obj: Permissions['globals']): void {
 /**
  * Recursively remove empty objects and false values from an object.
  */
-export function sanitizePermissions(data: Permissions): SanitizedPermissions {
+export function sanitizePermissions(
+  data: MarkOptional<Permissions, 'canAccessAdmin'>,
+): SanitizedPermissions {
   if (data.canAccessAdmin === false) {
     delete data.canAccessAdmin
   }

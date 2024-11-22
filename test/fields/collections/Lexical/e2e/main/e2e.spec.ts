@@ -1016,6 +1016,125 @@ describe('lexicalMain', () => {
     })
   })
 
+  // https://github.com/payloadcms/payload/issues/5146
+  test('Preserve indent and text-align when converting Lexical <-> HTML', async () => {
+    await page.goto('http://localhost:3000/admin/collections/rich-text-fields?limit=10')
+    await page.getByLabel('Create new Rich Text Field').click()
+    await page.getByLabel('Title*').click()
+    await page.getByLabel('Title*').fill('Indent and Text-align')
+    await page.getByRole('paragraph').nth(1).click()
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    const htmlContent = `<p style='text-align: center;'>paragraph centered</p><h1 style='text-align: right;'>Heading right</h1><p>paragraph without indent</p><p style='padding-inline-start: 40px;'>paragraph indent 1</p><h2 style='padding-inline-start: 80px;'>heading indent 2</h2><blockquote style='padding-inline-start: 120px;'>quote indent 3</blockquote>`
+    await page.evaluate(
+      async ([htmlContent]) => {
+        const blob = new Blob([htmlContent], { type: 'text/html' })
+        const clipboardItem = new ClipboardItem({ 'text/html': blob })
+        await navigator.clipboard.write([clipboardItem])
+      },
+      [htmlContent],
+    )
+    // eslint-disable-next-line playwright/no-conditional-in-test
+    const pasteKey = process.platform === 'darwin' ? 'Meta' : 'Control'
+    await page.keyboard.press(`${pasteKey}+v`)
+    await page.locator('#field-richText').click()
+    await page.locator('#field-richText').fill('asd')
+    await page.getByRole('button', { name: 'Save' }).click()
+    await page.getByRole('link', { name: 'API' }).click()
+    const htmlOutput = page.getByText(htmlContent)
+    await expect(htmlOutput).toBeVisible()
+  })
+
+  test('ensure lexical fields in blocks have correct value when moving blocks', async () => {
+    // Previously, we had the issue that the lexical field values did not update when moving blocks, as the MOVE_ROW form action did not request
+    // re-rendering of server components
+    await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+    await page.locator('.cell-id a').first().click()
+    await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+    await expect(page.locator('#blocks-row-0 .LexicalEditorTheme__paragraph')).toContainText('1')
+    await expect(page.locator('#blocks-row-0 .section-title__input')).toHaveValue('1') // block name
+    await expect(page.locator('#blocks-row-1 .LexicalEditorTheme__paragraph')).toContainText('2')
+    await expect(page.locator('#blocks-row-1 .section-title__input')).toHaveValue('2') // block name
+
+    // Move block 1 to the end
+    await page.locator('#blocks-row-0 .array-actions__button').click()
+    await expect(page.locator('#blocks-row-0 .popup__content')).toBeVisible()
+
+    await page.locator('#blocks-row-0 .popup__content').getByText('Move Down').click()
+
+    await expect(page.locator('#blocks-row-0 .LexicalEditorTheme__paragraph')).toContainText('2')
+    await expect(page.locator('#blocks-row-0 .section-title__input')).toHaveValue('2') // block name
+    await expect(page.locator('#blocks-row-1 .LexicalEditorTheme__paragraph')).toContainText('1')
+    await expect(page.locator('#blocks-row-1 .section-title__input')).toHaveValue('1') // block name
+  })
+
+  test('ensure blocks can be created from plus button', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    // click contenteditable
+    await richTextField.locator('.ContentEditable__root').first().click()
+
+    const lastParagraph = richTextField.locator('p').first()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    /**
+     * Create new upload node
+     */
+    // type / to open the slash menu
+    await lastParagraph.click()
+    // hover over the last paragraph to make the plus button visible
+    await lastParagraph.hover()
+    await wait(600)
+    //await richTextField.locator('.add-block-menu').first().click()
+    const plusButton = richTextField.locator('.add-block-menu').first()
+
+    // hover over plusButton
+    await plusButton.hover()
+    await wait(100)
+    // click the plus button
+    await plusButton.click()
+
+    await expect(richTextField.locator('.slash-menu-popup')).toBeVisible()
+    // click button with text "Text"
+    await richTextField.locator('.slash-menu-popup button').getByText('My Block').click()
+
+    await expect(richTextField.locator('.lexical-block')).toHaveCount(1)
+    await richTextField.locator('#field-someTextRequired').first().fill('test')
+
+    await saveDocAndAssert(page)
+
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+
+      // @ts-expect-error no need to type this
+      await expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
   describe('localization', () => {
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)

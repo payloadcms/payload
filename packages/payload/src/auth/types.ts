@@ -100,12 +100,8 @@ export type SanitizedDocumentPermissions = SanitizedCollectionPermission | Sanit
 
 export type Permissions = {
   canAccessAdmin: boolean
-  collections?: {
-    [collectionSlug: CollectionSlug]: CollectionPermission
-  }
-  globals?: {
-    [globalSlug: GlobalSlug]: GlobalPermission
-  }
+  collections?: Record<CollectionSlug, CollectionPermission>
+  globals?: Record<GlobalSlug, GlobalPermission>
 }
 
 export type SanitizedPermissions = {
@@ -213,7 +209,7 @@ export interface IncomingAuthType {
   disableLocalStrategy?: true
   /**
    * Customize the way that the forgotPassword operation functions.
-   * @link https://payloadcms.com/docs/beta/authentication/email#forgot-password
+   * @link https://payloadcms.com/docs/authentication/email#forgot-password
    */
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
@@ -226,7 +222,7 @@ export interface IncomingAuthType {
   /**
    * Ability to allow users to login with username/password.
    *
-   * @link https://payloadcms.com/docs/beta/authentication/overview#login-with-username
+   * @link https://payloadcms.com/docs/authentication/overview#login-with-username
    */
   loginWithUsername?: boolean | LoginWithUsernameOptions
   /**
@@ -239,24 +235,24 @@ export interface IncomingAuthType {
   removeTokenFromResponses?: true
   /**
    * Advanced - an array of custom authentification strategies to extend this collection's authentication with.
-   * @link https://payloadcms.com/docs/beta/authentication/custom-strategies
+   * @link https://payloadcms.com/docs/authentication/custom-strategies
    */
   strategies?: AuthStrategy[]
   /**
    * Controls how many seconds the token will be valid for. Default is 2 hours.
    * @default 7200
-   * @link https://payloadcms.com/docs/beta/authentication/overview#config-options
+   * @link https://payloadcms.com/docs/authentication/overview#config-options
    */
   tokenExpiration?: number
   /**
    * Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection.
    * @default false
-   * @link https://payloadcms.com/docs/beta/authentication/api-keys
+   * @link https://payloadcms.com/docs/authentication/api-keys
    */
   useAPIKey?: boolean
   /**
    * Set to true or pass an object with verification options to require users to verify by email before they are allowed to log into your app.
-   * @link https://payloadcms.com/docs/beta/authentication/email#email-verification
+   * @link https://payloadcms.com/docs/authentication/email#email-verification
    */
   verify?:
     | {

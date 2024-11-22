@@ -73,8 +73,8 @@ export const RscEntryLexicalField: React.FC<
   }
 
   for (const key in props) {
-    if (!props[key]) {
-      delete props[key]
+    if (props[key as keyof LexicalRichTextFieldProps] === undefined) {
+      delete props[key as keyof LexicalRichTextFieldProps]
     }
   }
 
