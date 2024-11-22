@@ -305,25 +305,6 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should delete existing search indexes before reindexing', async () => {
-    await payload.delete({
-      collection: postsSlug,
-      where: {
-        _status: {
-          equals: 'published',
-        },
-      },
-    })
-    await payload.delete({
-      collection: pagesSlug,
-      where: {
-        _status: {
-          equals: 'published',
-        },
-      },
-    })
-
-    await wait(200)
-
     const createdPost = await payload.create({
       collection: postsSlug,
       data: {
@@ -348,7 +329,7 @@ describe('@payloadcms/plugin-search', () => {
 
     const endpointRes = await restClient.POST('/search/reindex', {
       body: JSON.stringify({
-        collections: [postsSlug],
+        collections: [postsSlug, pagesSlug],
       }),
       headers: {
         Authorization: `JWT ${token}`,
@@ -368,6 +349,8 @@ describe('@payloadcms/plugin-search', () => {
       },
     })
 
+    // Should have no docs with createdAt less than createdPost time
+    // after reindex since it deletes indexes and recreates them
     expect(results).toHaveLength(0)
   })
 
