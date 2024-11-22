@@ -212,7 +212,7 @@ describe('Collections - Live Preview', () => {
       collectionPopulationRequestHandler,
     })
 
-    expect(mergedData2.arrayOfRelationships).toEqual([])
+    expect(mergedData2.arrayOfRelationships).toEqual(undefined)
     expect(mergedData2._numberOfRequests).toEqual(0)
   })
 
