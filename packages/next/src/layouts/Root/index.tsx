@@ -86,7 +86,7 @@ export const RootLayout = async ({
 
   const navPrefs = await getNavPrefs({ payload, user })
 
-  const clientConfig = await getClientConfig({
+  const clientConfig = getClientConfig({
     config,
     i18n,
     importMap,

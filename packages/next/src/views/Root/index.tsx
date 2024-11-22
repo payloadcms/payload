@@ -115,7 +115,7 @@ export const RootPage = async ({
     redirect(adminRoute)
   }
 
-  const clientConfig = await getClientConfig({
+  const clientConfig = getClientConfig({
     config,
     i18n: initPageResult?.req.i18n,
     importMap,
