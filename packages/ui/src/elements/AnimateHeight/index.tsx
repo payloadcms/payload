@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import './index.scss'
+import { usePatchAnimateHeight } from './usePatchAnimateHeight.js'
 
 export const AnimateHeight: React.FC<{
   children: React.ReactNode
@@ -13,32 +14,32 @@ export const AnimateHeight: React.FC<{
 }> = ({ id, children, className, contentClassName, contentStyle, duration = 500, height }) => {
   const [open, setOpen] = React.useState(false)
 
-  // allow external control of height
   useEffect(() => {
     setOpen(Boolean(height))
   }, [height])
 
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  usePatchAnimateHeight({ containerRef, duration, open })
+
   return (
     <div
       aria-hidden={!open}
-      className={[
-        className,
-        'rah-static',
-        open && height === 'auto' ? 'rah-static--height-auto' : '',
-      ]
+      className={[className, 'rah-static', open && height === 'auto' && 'rah-static--height-auto']
         .filter(Boolean)
         .join(' ')}
       id={id}
       onClick={() => setOpen(!open)}
       onKeyDown={() => setOpen(!open)}
+      ref={containerRef}
       role="button"
       style={{
-        transition: `height ${duration}ms`,
+        transition: `height ${duration}ms ease`,
       }}
       tabIndex={0}
     >
       <div className={contentClassName} style={contentStyle}>
-        <div>{children}</div>
+        {children}
       </div>
     </div>
   )
