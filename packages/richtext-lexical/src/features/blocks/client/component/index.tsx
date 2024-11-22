@@ -92,6 +92,16 @@ export const BlockComponent: React.FC<Props> = (props) => {
       : false,
   )
 
+  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    initialState?.['_components']?.customComponents?.BlockLabel,
+  )
+
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    initialState?.['_components']?.customComponents?.Block,
+  )
+
   // Initial state for newly created blocks
   useEffect(() => {
     const abortController = new AbortController()
@@ -124,6 +134,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
         }
 
         setInitialState(state)
+        setCustomLabel(state._components?.customComponents?.BlockLabel)
+        setCustomBlock(state._components?.customComponents?.Block)
       }
     }
 
@@ -178,6 +190,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         formState: prevFormState,
         globalSlug,
         operation: 'update',
+        renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
       })
@@ -209,6 +222,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
       }, 0)
 
       if (submit) {
+        setCustomLabel(newFormState._components?.customComponents?.BlockLabel)
+        setCustomBlock(newFormState._components?.customComponents?.Block)
+
         let rowErrorCount = 0
         for (const formField of Object.values(newFormState)) {
           if (formField?.valid === false) {
@@ -245,11 +261,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
       $getNodeByKey(nodeKey)?.remove()
     })
   }, [editor, nodeKey])
-
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  const CustomLabel = initialState?.['_components']?.customComponents?.BlockLabel
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  const CustomBlock = initialState?.['_components']?.customComponents?.Block
 
   const blockDisplayName = clientBlock?.labels?.singular
     ? getTranslation(clientBlock.labels.singular, i18n)
@@ -461,6 +472,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       <Form
         beforeSubmit={[
           async ({ formState }) => {
+            // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
             return await onChange({ formState, submit: true })
           },
         ]}
@@ -468,7 +480,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         initialState={initialState}
         onChange={[onChange]}
         onSubmit={(formState) => {
-          // THis is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+          // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
           const newData: any = reduceFieldsToValues(formState)
           newData.blockType = formData.blockType
           editor.update(() => {

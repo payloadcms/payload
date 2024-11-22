@@ -86,6 +86,16 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     initialLexicalFormState?.[formData.id]?.formState,
   )
 
+  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    initialState?.['_components']?.customComponents?.BlockLabel,
+  )
+
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    initialState?.['_components']?.customComponents?.Block,
+  )
+
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-inlineBlocks-create-` + uuidFromContext,
     depth: editDepth,
@@ -194,6 +204,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
       if (state) {
         setInitialState(state)
+        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+        setCustomBlock(state['_components']?.customComponents?.Block)
       }
     }
 
@@ -219,7 +231,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
    * HANDLE ONCHANGE
    */
   const onChange = useCallback(
-    async ({ formState: prevFormState }: { formState: FormState }) => {
+    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
       abortAndIgnore(onChangeAbortControllerRef.current)
 
       const controller = new AbortController()
@@ -235,12 +247,18 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         formState: prevFormState,
         globalSlug,
         operation: 'update',
+        renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
       })
 
       if (!state) {
         return prevFormState
+      }
+
+      if (submit) {
+        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+        setCustomBlock(state['_components']?.customComponents?.Block)
       }
 
       return state
@@ -270,10 +288,6 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     },
     [editor, nodeKey, formData],
   )
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  const CustomLabel = initialState?.['_components']?.customComponents?.BlockLabel
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  const CustomBlock = initialState?.['_components']?.customComponents?.Block
 
   const RemoveButton = useMemo(
     () => () => (
@@ -342,7 +356,12 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   return (
     <Form
-      beforeSubmit={[onChange]}
+      beforeSubmit={[
+        async ({ formState }) => {
+          // This is only called when form is submitted from drawer
+          return await onChange({ formState, submit: true })
+        },
+      ]}
       disableValidationOnSubmit
       fields={clientBlock.fields}
       initialState={initialState || {}}
