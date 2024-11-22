@@ -103,22 +103,24 @@ export default buildConfigWithDefaults({
         },
       },
       formSubmissionOverrides: {
+        custom: {
+          overridePaymentFields: [
+            {
+              name: 'amount',
+              type: 'number',
+            },
+            {
+              name: 'status',
+              type: 'text',
+            },
+          ],
+        },
         fields: ({ defaultFields }) => {
           return [
             ...defaultFields,
             {
               name: 'custom',
               type: 'text',
-            },
-            {
-              name: 'payment',
-              type: 'group',
-              fields: [
-                {
-                  name: 'Amount',
-                  type: 'number',
-                },
-              ],
             },
           ]
         },

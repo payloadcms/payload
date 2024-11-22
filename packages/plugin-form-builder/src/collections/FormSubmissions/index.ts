@@ -109,64 +109,64 @@ export const generateSubmissionCollection = (
     },
   }
 
-  const hasCustomPaymentField = formConfig.formSubmissionOverrides
-    .fields({ defaultFields })
-    .some((field) => 'name' in field && field.name === 'payment')
-
   const paymentFieldConfig = formConfig?.fields?.payment
 
-  if (paymentFieldConfig && !hasCustomPaymentField) {
+  if (paymentFieldConfig) {
+    const defaultPaymentFields: Field[] = [
+      {
+        name: 'field',
+        type: 'text',
+        label: 'Field',
+      },
+      {
+        name: 'status',
+        type: 'text',
+        label: 'Status',
+      },
+      {
+        name: 'amount',
+        type: 'number',
+        admin: {
+          description: 'Amount in cents',
+        },
+      },
+      {
+        name: 'paymentProcessor',
+        type: 'text',
+      },
+      {
+        name: 'creditCard',
+        type: 'group',
+        fields: [
+          {
+            name: 'token',
+            type: 'text',
+            label: 'token',
+          },
+          {
+            name: 'brand',
+            type: 'text',
+            label: 'Brand',
+          },
+          {
+            name: 'number',
+            type: 'text',
+            label: 'Number',
+          },
+        ],
+        label: 'Credit Card',
+      },
+    ]
+
+    const customPaymentFields = formConfig?.formSubmissionOverrides?.custom?.overridePaymentFields
+
     newConfig.fields.push({
       name: 'payment',
       type: 'group',
       admin: {
         readOnly: true,
       },
-      fields: [
-        {
-          name: 'field',
-          type: 'text',
-          label: 'Field',
-        },
-        {
-          name: 'status',
-          type: 'text',
-          label: 'Status',
-        },
-        {
-          name: 'amount',
-          type: 'number',
-          admin: {
-            description: 'Amount in cents',
-          },
-        },
-        {
-          name: 'paymentProcessor',
-          type: 'text',
-        },
-        {
-          name: 'creditCard',
-          type: 'group',
-          fields: [
-            {
-              name: 'token',
-              type: 'text',
-              label: 'token',
-            },
-            {
-              name: 'brand',
-              type: 'text',
-              label: 'Brand',
-            },
-            {
-              name: 'number',
-              type: 'text',
-              label: 'Number',
-            },
-          ],
-          label: 'Credit Card',
-        },
-      ],
+      fields: customPaymentFields ?? defaultPaymentFields,
     })
   }
 
