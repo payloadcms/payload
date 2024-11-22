@@ -1126,7 +1126,10 @@ describe('lexicalMain', () => {
         })
       ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+
+      // @ts-expect-error no need to type this
+      await expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
