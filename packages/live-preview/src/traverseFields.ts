@@ -25,7 +25,11 @@ export const traverseFields = <T>(args: {
 
       switch (fieldSchema.type) {
         case 'array':
-          if (!incomingData[fieldName] && result?.[fieldName] !== undefined) {
+          if (
+            !incomingData[fieldName] &&
+            incomingData[fieldName] !== undefined &&
+            result?.[fieldName] !== undefined
+          ) {
             delete result[fieldName]
           }
 
