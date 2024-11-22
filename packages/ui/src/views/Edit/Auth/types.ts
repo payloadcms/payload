@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig, VerifyConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
 export type Props = {
   className?: string
@@ -13,5 +13,5 @@ export type Props = {
   setValidateBeforeSubmit: (validate: boolean) => void
   useAPIKey?: boolean
   username: string
-  verify?: boolean | VerifyConfig
+  verify?: boolean
 }

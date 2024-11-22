@@ -170,6 +170,5 @@ export const createClientConfig = ({
         clientConfig[key] = config[key]
     }
   }
-
   return clientConfig as ClientConfig
 }

@@ -4,12 +4,12 @@ import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL } from '@payloadcms/ui/shared'
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
-import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
 

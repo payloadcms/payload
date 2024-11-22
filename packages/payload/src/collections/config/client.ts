@@ -47,7 +47,10 @@ export type ClientCollectionConfig = {
     | 'preview'
     | ServerOnlyCollectionAdminProperties
   >
-  auth?: Omit<SanitizedCollectionConfig['auth'], 'forgotPassword' | 'strategies' | 'verify'>
+  auth?: { verify?: true } & Omit<
+    SanitizedCollectionConfig['auth'],
+    'forgotPassword' | 'strategies' | 'verify'
+  >
   fields: ClientField[]
   labels: {
     plural: StaticLabel
@@ -151,7 +154,7 @@ export const createClientCollectionConfig = ({
         if (!clientCollection.auth) {
           break
         }
-        clientCollection.auth = {} as SanitizedCollectionConfig['auth']
+        clientCollection.auth = {} as { verify?: true } & SanitizedCollectionConfig['auth']
         if (collection.auth.cookies) {
           clientCollection.auth.cookies = collection.auth.cookies
         }
@@ -180,8 +183,11 @@ export const createClientCollectionConfig = ({
         if (collection.auth.useAPIKey) {
           clientCollection.auth.useAPIKey = collection.auth.useAPIKey
         }
-        if (collection.auth.useAPIKey) {
+        if (collection.auth.tokenExpiration) {
           clientCollection.auth.tokenExpiration = collection.auth.tokenExpiration
+        }
+        if (collection.auth.verify) {
+          clientCollection.auth.verify = true
         }
         break
       case 'fields':

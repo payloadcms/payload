@@ -782,6 +782,8 @@ export const reload = async (
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
   }
+  global._payload_clientConfig = null
+  global._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
 }
 
 export const getPayload = async (

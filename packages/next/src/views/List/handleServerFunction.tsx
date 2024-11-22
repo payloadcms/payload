@@ -1,44 +1,11 @@
-import type { I18nClient } from '@payloadcms/translations'
 import type { ListPreferences } from '@payloadcms/ui'
-import type {
-  ClientConfig,
-  ImportMap,
-  ListQuery,
-  PayloadRequest,
-  SanitizedConfig,
-  VisibleEntities,
-} from 'payload'
+import type { ListQuery, PayloadRequest, VisibleEntities } from 'payload'
 
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
-import { createClientConfig, getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { getAccessResults, isEntityHidden, parseCookies } from 'payload'
 
 import { renderListView } from './index.js'
-
-let cachedClientConfig = global._payload_clientConfig
-
-if (!cachedClientConfig) {
-  cachedClientConfig = global._payload_clientConfig = null
-}
-
-export const getClientConfig = (args: {
-  config: SanitizedConfig
-  i18n: I18nClient
-  importMap: ImportMap
-}): ClientConfig => {
-  const { config, i18n, importMap } = args
-
-  if (cachedClientConfig && process.env.NODE_ENV !== 'development') {
-    return cachedClientConfig
-  }
-
-  cachedClientConfig = createClientConfig({
-    config,
-    i18n,
-    importMap,
-  })
-
-  return cachedClientConfig
-}
 
 type RenderListResult = {
   List: React.ReactNode

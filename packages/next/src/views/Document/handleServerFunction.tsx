@@ -1,45 +1,10 @@
-import type { I18nClient } from '@payloadcms/translations'
-import type {
-  ClientConfig,
-  Data,
-  DocumentPreferences,
-  FormState,
-  ImportMap,
-  PayloadRequest,
-  SanitizedConfig,
-  VisibleEntities,
-} from 'payload'
+import type { Data, DocumentPreferences, FormState, PayloadRequest, VisibleEntities } from 'payload'
 
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
-import { createClientConfig, getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { getAccessResults, isEntityHidden, parseCookies } from 'payload'
 
 import { renderDocument } from './index.js'
-
-let cachedClientConfig = global._payload_clientConfig
-
-if (!cachedClientConfig) {
-  cachedClientConfig = global._payload_clientConfig = null
-}
-
-export const getClientConfig = (args: {
-  config: SanitizedConfig
-  i18n: I18nClient
-  importMap: ImportMap
-}): ClientConfig => {
-  const { config, i18n, importMap } = args
-
-  if (cachedClientConfig && process.env.NODE_ENV !== 'development') {
-    return cachedClientConfig
-  }
-
-  cachedClientConfig = createClientConfig({
-    config,
-    i18n,
-    importMap,
-  })
-
-  return cachedClientConfig
-}
 
 type RenderDocumentResult = {
   data: any

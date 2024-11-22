@@ -3,12 +3,12 @@ import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { getPayload, parseCookies } from 'payload'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -54,7 +54,7 @@ export const RootLayout = async ({
 
   const payload = await getPayload({ config, importMap })
 
-  const { i18n, permissions, req, user } = await initReq(config)
+  const { i18n, permissions, user } = await initReq(config)
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
