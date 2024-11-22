@@ -38,10 +38,13 @@ export const HighImpactHero: React.FC<Page['hero']> = ({ links, media, richText 
       </div>
       <div className="min-h-[80vh] select-none">
         {media && typeof media === 'object' && (
-          <React.Fragment>
-            <Media fill imgClassName="-z-10 object-cover" resource={media} />
-            {/* <div className="absolute pointer-events-none left-0 bottom-0 w-full h-1/2 bg-gradient-to-t from-black to-transparent" /> */}
-          </React.Fragment>
+          <Media
+            fill
+            imgClassName="-z-10 object-cover"
+            priority={false}
+            loading="lazy"
+            resource={media}
+          />
         )}
       </div>
     </div>
