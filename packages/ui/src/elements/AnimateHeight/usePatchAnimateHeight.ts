@@ -9,7 +9,7 @@ export const usePatchAnimateHeight = ({
   duration: number
   open: boolean
 }) => {
-  const supportsInterpolateSize = useMemo(
+  const browserSupportsKeywordAnimation = useMemo(
     () => Boolean(CSS.supports('interpolate-size', 'allow-keywords')),
     [],
   )
@@ -17,7 +17,7 @@ export const usePatchAnimateHeight = ({
   const previousOpenState = useRef(open)
 
   useEffect(() => {
-    if (containerRef.current && !supportsInterpolateSize) {
+    if (containerRef.current && !browserSupportsKeywordAnimation) {
       const container = containerRef.current
 
       const getTotalHeight = (el: HTMLDivElement) => {
@@ -63,7 +63,7 @@ export const usePatchAnimateHeight = ({
         container.style.overflow = ''
       }
     }
-  }, [open, duration, containerRef, supportsInterpolateSize])
+  }, [open, duration, containerRef, browserSupportsKeywordAnimation])
 
   return null
 }
