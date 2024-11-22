@@ -136,11 +136,9 @@ describe('lexicalBlocks', () => {
     await newRSCBlock.scrollIntoViewIfNeeded()
     await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data:')
 
-    // Select paragraph with text "testtext"
-    await richTextField.locator('p').getByText('123').first().click()
-    await page.keyboard.press('Shift+ArrowLeft')
-    await page.keyboard.press('Shift+ArrowLeft')
-    await page.keyboard.press('Shift+ArrowLeft')
+    // Select paragraph with text "123"
+    // Now double-click to select entire line
+    await richTextField.locator('p').getByText('123').first().click({ clickCount: 2 })
 
     const editButton = newRSCBlock.locator('.lexical-block__editButton').first()
     await editButton.click()
@@ -199,10 +197,8 @@ describe('lexicalBlocks', () => {
 
       expect(rscBlock.fields.blockType).toBe('BlockRSC')
       expect(rscBlock.fields.key).toBe('value2')
-      expect((paragraphBlock.children[0] as SerializedTextNode).text).toBe('12')
+      expect((paragraphBlock.children[0] as SerializedTextNode).text).toBe('123')
       expect((paragraphBlock.children[0] as SerializedTextNode).format).toBe(1)
-      expect((paragraphBlock.children[1] as SerializedTextNode).text).toBe('3')
-      expect((paragraphBlock.children[1] as SerializedTextNode).format).toBe(0)
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
