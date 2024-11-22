@@ -88,7 +88,7 @@ export async function buildInitialState({
       initialState[id].formState = formStateResult
 
       if (node.type === 'block') {
-        const currentFieldPreferences = context.preferences?.fields[context.field.name]
+        const currentFieldPreferences = context.preferences?.fields?.[context.field.name]
         const collapsedArray = currentFieldPreferences?.collapsed
         if (collapsedArray && collapsedArray.includes(id)) {
           initialState[id].collapsed = true

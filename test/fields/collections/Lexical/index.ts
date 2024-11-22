@@ -135,6 +135,25 @@ const editorConfig: ServerEditorConfig = {
           ],
         },
         {
+          slug: 'BlockRSC',
+
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
           slug: 'myBlockWithBlockAndLabel',
           admin: {
             components: {

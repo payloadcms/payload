@@ -317,7 +317,7 @@ export const seed = async ({
             type: 'custom',
             label: 'Source Code',
             newTab: true,
-            url: 'https://github.com/payloadcms/payload/tree/beta/templates/website',
+            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
           },
         },
         {

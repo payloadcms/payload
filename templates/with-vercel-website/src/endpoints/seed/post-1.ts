@@ -240,7 +240,6 @@ export const post1: Partial<Post> = {
             blockName: '',
             blockType: 'mediaBlock',
             media: '{{IMAGE_2}}',
-            position: 'default',
           },
           format: '',
           version: 2,

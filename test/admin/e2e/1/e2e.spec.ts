@@ -460,6 +460,22 @@ describe('admin1', () => {
     })
   })
 
+  describe('custom providers', () => {
+    test('should render custom providers', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('.custom-provider')).toHaveCount(1)
+      await expect(page.locator('.custom-provider')).toContainText('This is a custom provider.')
+    })
+
+    test('should render custom provider server components with props', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('.custom-provider-server')).toHaveCount(1)
+      await expect(page.locator('.custom-provider-server')).toContainText(
+        'This is a custom provider with payload: true',
+      )
+    })
+  })
+
   describe('custom views', () => {
     test('root — should render custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${customViewPath}`)

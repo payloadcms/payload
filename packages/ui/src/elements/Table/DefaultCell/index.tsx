@@ -60,7 +60,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     wrapElementProps.href = collectionConfig?.slug
       ? formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
+          path: `/collections/${collectionConfig?.slug}/${encodeURIComponent(rowData.id)}`,
         })
       : ''
   }

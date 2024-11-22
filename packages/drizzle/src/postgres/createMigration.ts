@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url)
 
 export const createMigration: CreateMigration = async function createMigration(
   this: BasePostgresAdapter,
-  { dirname, file, forceAcceptWarning, migrationName, payload },
+  { dirname, file, forceAcceptWarning, migrationName, payload, skipEmpty },
 ) {
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
@@ -78,6 +78,10 @@ export const createMigration: CreateMigration = async function createMigration(
     }
 
     if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {
+      if (skipEmpty) {
+        process.exit(0)
+      }
+
       const { confirm: shouldCreateBlankMigration } = await prompts(
         {
           name: 'confirm',
