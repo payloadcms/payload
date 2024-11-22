@@ -1068,6 +1068,73 @@ describe('lexicalMain', () => {
     await expect(page.locator('#blocks-row-1 .section-title__input')).toHaveValue('1') // block name
   })
 
+  test('ensure blocks can be created from plus button', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    // click contenteditable
+    await richTextField.locator('.ContentEditable__root').first().click()
+
+    const lastParagraph = richTextField.locator('p').first()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    /**
+     * Create new upload node
+     */
+    // type / to open the slash menu
+    await lastParagraph.click()
+    // hover over the last paragraph to make the plus button visible
+    await lastParagraph.hover()
+    await wait(600)
+    //await richTextField.locator('.add-block-menu').first().click()
+    const plusButton = richTextField.locator('.add-block-menu').first()
+
+    // hover over plusButton
+    await plusButton.hover()
+    await wait(100)
+    // click the plus button
+    await plusButton.click()
+
+    await expect(richTextField.locator('.slash-menu-popup')).toBeVisible()
+    // click button with text "Text"
+    await richTextField.locator('.slash-menu-popup button').getByText('My Block').click()
+
+    await expect(richTextField.locator('.lexical-block')).toHaveCount(1)
+    await richTextField.locator('#field-someTextRequired').first().fill('test')
+
+    await saveDocAndAssert(page)
+
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+
+      // @ts-expect-error no need to type this
+      await expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
   describe('localization', () => {
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)
