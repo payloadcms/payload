@@ -259,7 +259,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     (changedCollapsed: boolean) => {
       void getDocPreferences().then((currentDocPreferences) => {
         const currentFieldPreferences =
-          currentDocPreferences?.fields[parentLexicalRichTextField.name]
+          currentDocPreferences?.fields?.[parentLexicalRichTextField.name]
 
         const collapsedArray = currentFieldPreferences?.collapsed
 
