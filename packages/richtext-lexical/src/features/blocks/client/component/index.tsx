@@ -67,7 +67,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     slug: `lexical-blocks-create-${uuidFromContext}-${formData.id}`,
     depth: editDepth,
   })
-  const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug)
 
   // Used for saving collapsed to preferences (and gettin' it from there again)
   // Remember, these preferences are scoped to the whole document, not just this form. This
@@ -291,10 +291,18 @@ export const BlockComponent: React.FC<Props> = (props) => {
         buttonStyle="icon-label"
         className={`${baseClass}__editButton`}
         disabled={readOnly}
-        el="div"
+        el="button"
         icon="edit"
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
           toggleDrawer()
+          return false
+        }}
+        onMouseDown={(e) => {
+          // Needed to preserve lexical selection for toggleDrawer lexical selection restore.
+          // I believe this is needed due to this button (usually) being inside of a collapsible.
+          e.preventDefault()
         }}
         round
         size="small"

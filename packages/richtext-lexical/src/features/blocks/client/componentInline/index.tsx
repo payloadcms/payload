@@ -300,7 +300,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         buttonStyle="icon-label"
         className={`${baseClass}__editButton`}
         disabled={readOnly}
-        el="div"
+        el="button"
         icon="edit"
         onClick={() => {
           toggleDrawer()
