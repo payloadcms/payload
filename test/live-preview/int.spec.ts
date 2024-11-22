@@ -169,6 +169,34 @@ describe('Collections - Live Preview', () => {
     expect(mergedData._numberOfRequests).toEqual(0)
   })
 
+  it('— arrays - can clear all rows', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      arrayOfRelationships: [
+        {
+          id: '123',
+          relationshipInArrayMonoHasOne: testPost.id,
+        },
+      ],
+    }
+
+    const mergedData = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        arrayOfRelationships: [],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+      collectionPopulationRequestHandler,
+    })
+
+    expect(mergedData.arrayOfRelationships).toEqual([])
+    expect(mergedData._numberOfRequests).toEqual(0)
+  })
+
   it('— uploads - adds and removes media', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
