@@ -30,7 +30,7 @@ export const traverseFields = <T>(args: {
             incomingData[fieldName] !== undefined &&
             result?.[fieldName] !== undefined
           ) {
-            delete result[fieldName]
+            result[fieldName] = []
           }
 
           if (Array.isArray(incomingData[fieldName])) {
