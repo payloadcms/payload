@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-react",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "The official React SDK for Payload Live Preview",
   "homepage": "https://payloadcms.com",
   "repository": {
