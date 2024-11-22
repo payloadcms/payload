@@ -313,6 +313,14 @@ describe('@payloadcms/plugin-search', () => {
         },
       },
     })
+    await payload.delete({
+      collection: pagesSlug,
+      where: {
+        _status: {
+          equals: 'published',
+        },
+      },
+    })
 
     await wait(200)
 
@@ -326,7 +334,7 @@ describe('@payloadcms/plugin-search', () => {
 
     await wait(200)
 
-    const { docs } = await payload.find({
+    const { docs: postsDocs } = await payload.find({
       collection: 'search',
       depth: 0,
       where: {
@@ -336,7 +344,7 @@ describe('@payloadcms/plugin-search', () => {
       },
     })
 
-    const searchIndexToBeDeleted = docs[0]
+    const postsIndexToBeDeleted = postsDocs[0]
 
     const endpointRes = await restClient.POST('/search/reindex', {
       body: JSON.stringify({
@@ -353,8 +361,9 @@ describe('@payloadcms/plugin-search', () => {
       collection: 'search',
       depth: 0,
       where: {
-        id: {
-          equals: searchIndexToBeDeleted.id,
+        // Use createdAt over id since db-sqlite does not autoincrement ids
+        createdAt: {
+          less_than_equal: postsIndexToBeDeleted.createdAt,
         },
       },
     })
