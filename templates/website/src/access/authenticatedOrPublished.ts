@@ -1,7 +1,10 @@
-import type { Access } from 'payload'
+import type { User } from '@/payload-types'
 
-export const authenticatedOrPublished: Access = ({ req: { user } }) => {
-  if (user) {
+import type { AccessArgs, AccessResult } from 'payload'
+import { authenticated } from './authenticated'
+
+export const authenticatedOrPublished = (args: AccessArgs<User>): AccessResult => {
+  if (authenticated(args)) {
     return true
   }
 
