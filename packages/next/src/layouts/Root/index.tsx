@@ -33,7 +33,7 @@ export const RootLayout = async ({
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
 }) => {
-  await checkDependencies()
+  checkDependencies()
 
   const config = await configPromise
 

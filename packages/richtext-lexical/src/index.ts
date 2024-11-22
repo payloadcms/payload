@@ -45,7 +45,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       !checkedDependencies
     ) {
       checkedDependencies = true
-      await checkDependencies({
+      void checkDependencies({
         dependencyGroups: [
           {
             name: 'lexical',
