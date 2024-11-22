@@ -243,6 +243,49 @@ formBuilder({
 })
 ```
 
+### `custom.overridePaymentFields`
+
+Override the default payment fields by sending an array of [Payload fields](https://payloadcms.com/docs/fields/overview) to the `custom.overridePaymentFields` property.
+
+<Banner type="info">
+  By default, the payment block includes basic fields for handling payments. You can override these fields to match your specific payment processing needs, such as adding custom fields for different payment providers or tracking additional payment metadata.
+</Banner>
+
+```ts
+// payload.config.ts
+formBuilder({
+  // ...
+  formSubmissionOverrides: {
+    custom: {
+      overridePaymentFields: [
+        {
+          name: 'amount',
+          type: 'number',
+        },
+        {
+          name: 'status',
+          type: 'select',
+          options: [
+            {
+              label: 'Pending',
+              value: 'pending',
+            },
+            {
+              label: 'Paid',
+              value: 'paid',
+            },
+            {
+              label: 'Failed',
+              value: 'failed',
+            },
+          ],
+        },
+      ],
+    },
+  },
+})
+```
+
 ## Fields
 
 Each field represents a form input. To override default settings pass either a boolean value or a partial [Payload Block](https://payloadcms.com/docs/fields/blocks) _keyed to the block's slug_. See [Field Overrides](#field-overrides) for more details on how to do this.

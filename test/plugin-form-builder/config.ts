@@ -111,7 +111,21 @@ export default buildConfigWithDefaults({
             },
             {
               name: 'status',
-              type: 'text',
+              type: 'select',
+              options: [
+                {
+                  label: 'Pending',
+                  value: 'pending',
+                },
+                {
+                  label: 'Paid',
+                  value: 'paid',
+                },
+                {
+                  label: 'Failed',
+                  value: 'failed',
+                },
+              ],
             },
           ],
         },
