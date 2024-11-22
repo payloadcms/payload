@@ -1,12 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 
-import {
-  type ClientField,
-  createClientFields,
-  deepCopyObjectSimple,
-  type FieldSchemaMap,
-  type Payload,
-} from 'payload'
+import { createClientFields, type FieldSchemaMap, type Payload } from 'payload'
 import { getFromImportMap } from 'payload/shared'
 
 import type { FeatureProviderProviderClient } from '../features/typesClient.js'
@@ -104,9 +98,6 @@ export function initLexicalFeatures(args: Args): {
         const state = featureSchemaMap[key]
 
         const clientFields = createClientFields({
-          clientFields: ('fields' in state
-            ? deepCopyObjectSimple(state.fields)
-            : [deepCopyObjectSimple(state)]) as ClientField[],
           defaultIDType: args.payload.config.db.defaultIDType,
           disableAddingID: true,
           fields: 'fields' in state ? state.fields : [state],

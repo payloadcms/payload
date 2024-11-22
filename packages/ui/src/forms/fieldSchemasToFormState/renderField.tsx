@@ -1,7 +1,7 @@
-import type { ClientComponentProps, ClientField, FieldPaths, ServerComponentProps } from 'payload'
+import type { ClientComponentProps, FieldPaths, ServerComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { createClientField, deepCopyObjectSimple, MissingEditorProp } from 'payload'
+import { createClientField, MissingEditorProp } from 'payload'
 
 import type { RenderFieldMethod } from './types.js'
 
@@ -36,7 +36,6 @@ export const renderField: RenderFieldMethod = ({
   siblingData,
 }) => {
   const clientField = createClientField({
-    clientField: deepCopyObjectSimple(fieldConfig) as ClientField,
     defaultIDType: req.payload.config.db.defaultIDType,
     field: fieldConfig,
     i18n: req.i18n,
