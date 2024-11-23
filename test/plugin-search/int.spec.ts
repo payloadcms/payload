@@ -30,6 +30,36 @@ describe('@payloadcms/plugin-search', () => {
       .then((res) => res.json())
 
     token = data.token
+
+    await payload.delete({
+      collection: 'search',
+      depth: 0,
+      where: {
+        id: {
+          exists: true,
+        },
+      },
+    })
+    await Promise.all([
+      payload.delete({
+        collection: postsSlug,
+        depth: 0,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      }),
+      payload.delete({
+        collection: pagesSlug,
+        depth: 0,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      }),
+    ])
   })
 
   afterAll(async () => {
@@ -305,28 +335,6 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should delete existing search indexes before reindexing', async () => {
-    await payload.delete({
-      collection: pagesSlug,
-      where: {
-        _status: {
-          equals: 'published',
-        },
-      },
-    })
-
-    await wait(200)
-
-    await payload.delete({
-      collection: postsSlug,
-      where: {
-        _status: {
-          equals: 'published',
-        },
-      },
-    })
-
-    await wait(200)
-
     const createdPost = await payload.create({
       collection: postsSlug,
       data: {
@@ -377,25 +385,6 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should reindex whole collections', async () => {
-    await payload.delete({
-      collection: pagesSlug,
-      where: {
-        _status: {
-          equals: 'published',
-        },
-      },
-    })
-    await payload.delete({
-      collection: postsSlug,
-      where: {
-        _status: {
-          equals: 'published',
-        },
-      },
-    })
-
-    await wait(200)
-
     await payload.create({
       collection: pagesSlug,
       data: {
