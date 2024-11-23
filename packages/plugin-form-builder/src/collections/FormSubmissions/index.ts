@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { FormBuilderPluginConfig, PaymentFields } from '../../types.js'
+import type { FormBuilderPluginConfig } from '../../types.js'
 
 import { createCharge } from './hooks/createCharge.js'
 import { sendEmail } from './hooks/sendEmail.js'
