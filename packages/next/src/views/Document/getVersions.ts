@@ -73,7 +73,12 @@ export const getVersions = async ({
       publishedQuery = await payload.find({
         collection: collectionConfig.slug,
         depth: 0,
+        limit: 1,
         locale: locale || undefined,
+        pagination: false,
+        select: {
+          updatedAt: true,
+        },
         user,
         where: {
           and: [
@@ -109,6 +114,9 @@ export const getVersions = async ({
           collection: collectionConfig.slug,
           depth: 0,
           limit: 1,
+          select: {
+            autosave: true,
+          },
           user,
           where: {
             and: [
