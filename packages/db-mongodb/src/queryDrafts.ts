@@ -144,5 +144,5 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     return sanitizeInternalFields(doc)
   })
 
-  return docs
+  return result
 }
