@@ -11,23 +11,31 @@ export const AnimateHeight: React.FC<{
   id?: string
 }> = ({ id, children, className, duration = 300, height }) => {
   const [open, setOpen] = React.useState(false)
-  const displaytimer = useRef<null | number>(null)
-  const [display, setDisplay] = React.useState<CSSStyleDeclaration['display']>('none')
+  const displayTimer = useRef<null | number>(null)
+  const [display, setDisplay] = React.useState<CSSStyleDeclaration['display']>(() =>
+    open ? '' : 'none',
+  )
 
   useEffect(() => {
-    setOpen(Boolean(height))
-  }, [height])
+    const newIsOpen = Boolean(height)
 
-  useEffect(() => {
-    if (open) {
+    if (newIsOpen) {
       setDisplay('')
-      clearTimeout(displaytimer.current)
+      clearTimeout(displayTimer.current)
     } else {
-      displaytimer.current = window.setTimeout(() => {
+      displayTimer.current = window.setTimeout(() => {
         setDisplay('none')
       }, duration)
     }
-  }, [open, duration])
+
+    setOpen(newIsOpen)
+
+    return () => {
+      if (displayTimer.current) {
+        clearTimeout(displayTimer.current)
+      }
+    }
+  }, [height, duration])
 
   const containerRef = useRef<HTMLDivElement>(null)
 
