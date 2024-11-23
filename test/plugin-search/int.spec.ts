@@ -30,7 +30,9 @@ describe('@payloadcms/plugin-search', () => {
       .then((res) => res.json())
 
     token = data.token
+  })
 
+  beforeEach(async () => {
     await payload.delete({
       collection: 'search',
       depth: 0,
