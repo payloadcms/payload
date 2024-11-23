@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
-import type { FormBuilderPluginConfig } from '../../types.js'
+import type { FormBuilderPluginConfig, PaymentFields } from '../../types.js'
 
 import { createCharge } from './hooks/createCharge.js'
 import { sendEmail } from './hooks/sendEmail.js'
@@ -81,8 +81,81 @@ export const generateSubmissionCollection = (
     },
   ]
 
+  const defaultPaymentFields: Field[] = [
+    {
+      name: 'field',
+      type: 'text',
+      label: 'Field',
+    },
+    {
+      name: 'status',
+      type: 'text',
+      label: 'Status',
+    },
+    {
+      name: 'amount',
+      type: 'number',
+      admin: {
+        description: 'Amount in cents',
+      },
+    },
+    {
+      name: 'paymentProcessor',
+      type: 'text',
+    },
+    {
+      name: 'creditCard',
+      type: 'group',
+      fields: [
+        {
+          name: 'token',
+          type: 'text',
+          label: 'token',
+        },
+        {
+          name: 'brand',
+          type: 'text',
+          label: 'Brand',
+        },
+        {
+          name: 'number',
+          type: 'text',
+          label: 'Number',
+        },
+      ],
+      label: 'Credit Card',
+    },
+  ]
+  const defaultPaymentGroupField: Field = {
+    name: 'payment',
+    type: 'group',
+    admin: {
+      readOnly: true,
+    },
+    fields: defaultPaymentFields,
+  }
+
+  const resolvePaymentFields = () => {
+    if (!formConfig.formSubmissionOverrides.paymentFields) {
+      return [defaultPaymentGroupField]
+    }
+
+    const results = formConfig.formSubmissionOverrides.paymentFields({ defaultPaymentFields })
+
+    if (typeof results === 'boolean') {
+      return results ? [defaultPaymentGroupField] : []
+    }
+
+    return results
+  }
+
+  const resolvedPaymentFields = resolvePaymentFields()
+
+  // Remove the function from overrides
+  const { paymentFields: _, ...submissionOverrides } = formConfig?.formSubmissionOverrides || {}
+
   const newConfig: CollectionConfig = {
-    ...(formConfig?.formSubmissionOverrides || {}),
+    ...submissionOverrides,
     slug: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
     access: {
       create: () => true,
@@ -94,11 +167,10 @@ export const generateSubmissionCollection = (
       ...(formConfig?.formSubmissionOverrides?.admin || {}),
       enableRichTextRelationship: false,
     },
-    fields:
-      formConfig?.formSubmissionOverrides?.fields &&
-      typeof formConfig?.formSubmissionOverrides?.fields === 'function'
-        ? formConfig.formSubmissionOverrides.fields({ defaultFields })
-        : defaultFields,
+    fields: [
+      ...(formConfig?.formSubmissionOverrides?.fields?.({ defaultFields }) || defaultFields),
+      ...resolvedPaymentFields,
+    ],
     hooks: {
       ...(formConfig?.formSubmissionOverrides?.hooks || {}),
       beforeChange: [
@@ -107,67 +179,6 @@ export const generateSubmissionCollection = (
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],
     },
-  }
-
-  const paymentFieldConfig = formConfig?.fields?.payment
-
-  if (paymentFieldConfig) {
-    const defaultPaymentFields: Field[] = [
-      {
-        name: 'field',
-        type: 'text',
-        label: 'Field',
-      },
-      {
-        name: 'status',
-        type: 'text',
-        label: 'Status',
-      },
-      {
-        name: 'amount',
-        type: 'number',
-        admin: {
-          description: 'Amount in cents',
-        },
-      },
-      {
-        name: 'paymentProcessor',
-        type: 'text',
-      },
-      {
-        name: 'creditCard',
-        type: 'group',
-        fields: [
-          {
-            name: 'token',
-            type: 'text',
-            label: 'token',
-          },
-          {
-            name: 'brand',
-            type: 'text',
-            label: 'Brand',
-          },
-          {
-            name: 'number',
-            type: 'text',
-            label: 'Number',
-          },
-        ],
-        label: 'Credit Card',
-      },
-    ]
-
-    const customPaymentFields = formConfig?.formSubmissionOverrides?.custom?.overridePaymentFields
-
-    newConfig.fields.push({
-      name: 'payment',
-      type: 'group',
-      admin: {
-        readOnly: true,
-      },
-      fields: customPaymentFields ?? defaultPaymentFields,
-    })
   }
 
   return newConfig

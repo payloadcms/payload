@@ -50,6 +50,14 @@ export type BeforeEmail<T extends TypeWithID = any> = (
 ) => FormattedEmail[] | Promise<FormattedEmail[]>
 export type HandlePayment = (data: any) => void
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
+export type PaymentFields = (args: {
+  /**
+   * Default payment fields without a group wrapper.
+   * Use these fields to create your own group structure,
+   * or return true to use the default grouped fields instead.
+   */
+  defaultPaymentFields: Field[]
+}) => boolean | Field[]
 
 export type FormBuilderPluginConfig = {
   beforeEmail?: BeforeEmail
@@ -60,7 +68,10 @@ export type FormBuilderPluginConfig = {
   defaultToEmail?: string
   fields?: FieldsConfig
   formOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
-  formSubmissionOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  formSubmissionOverrides?: {
+    fields?: FieldsOverride
+    paymentFields?: PaymentFields
+  } & Partial<Omit<CollectionConfig, 'fields'>>
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
 }

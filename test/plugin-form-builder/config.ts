@@ -103,38 +103,27 @@ export default buildConfigWithDefaults({
         },
       },
       formSubmissionOverrides: {
-        custom: {
-          overridePaymentFields: [
-            {
-              name: 'amount',
-              type: 'number',
-            },
-            {
-              name: 'status',
-              type: 'select',
-              options: [
-                {
-                  label: 'Pending',
-                  value: 'pending',
-                },
-                {
-                  label: 'Paid',
-                  value: 'paid',
-                },
-                {
-                  label: 'Failed',
-                  value: 'failed',
-                },
-              ],
-            },
-          ],
-        },
         fields: ({ defaultFields }) => {
           return [
             ...defaultFields,
             {
               name: 'custom',
               type: 'text',
+            },
+          ]
+        },
+        paymentFields: ({ defaultPaymentFields }) => {
+          return [
+            {
+              name: 'payment',
+              type: 'group',
+              fields: [
+                ...defaultPaymentFields,
+                {
+                  name: 'checkoutSession',
+                  type: 'text',
+                },
+              ],
             },
           ]
         },
