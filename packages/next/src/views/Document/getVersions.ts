@@ -45,7 +45,7 @@ export const getVersions = async ({
   user,
 }: Args): Result => {
   const id = sanitizeID(idArg)
-  let publishedQuery
+  let publishedDoc
   let hasPublishedDoc = false
   let mostRecentVersionIsAutosaved = false
   let unpublishedVersionCount = 0
@@ -80,45 +80,47 @@ export const getVersions = async ({
     if (versionsConfig?.drafts) {
       // Find out if a published document exists
       if (doc?._status === 'published') {
-        publishedQuery = doc
+        publishedDoc = doc
       } else {
-        publishedQuery = await payload.find({
-          collection: collectionConfig.slug,
-          depth: 0,
-          limit: 1,
-          locale: locale || undefined,
-          pagination: false,
-          select: {
-            updatedAt: true,
-          },
-          user,
-          where: {
-            and: [
-              {
-                or: [
-                  {
-                    _status: {
-                      equals: 'published',
+        publishedDoc = (
+          await payload.find({
+            collection: collectionConfig.slug,
+            depth: 0,
+            limit: 1,
+            locale: locale || undefined,
+            pagination: false,
+            select: {
+              updatedAt: true,
+            },
+            user,
+            where: {
+              and: [
+                {
+                  or: [
+                    {
+                      _status: {
+                        equals: 'published',
+                      },
                     },
-                  },
-                  {
-                    _status: {
-                      exists: false,
+                    {
+                      _status: {
+                        exists: false,
+                      },
                     },
-                  },
-                ],
-              },
-              {
-                id: {
-                  equals: id,
+                  ],
                 },
-              },
-            ],
-          },
-        })
+                {
+                  id: {
+                    equals: id,
+                  },
+                },
+              ],
+            },
+          })
+        )?.docs?.[0]
       }
 
-      if (publishedQuery.docs?.[0]) {
+      if (publishedDoc) {
         hasPublishedDoc = true
       }
 
@@ -151,7 +153,7 @@ export const getVersions = async ({
         }
       }
 
-      if (publishedQuery.docs?.[0]?.updatedAt) {
+      if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countVersions({
           collection: collectionConfig.slug,
           user,
@@ -169,7 +171,7 @@ export const getVersions = async ({
               },
               {
                 updatedAt: {
-                  greater_than: publishedQuery.docs[0].updatedAt,
+                  greater_than: publishedDoc.updatedAt,
                 },
               },
             ],
@@ -198,9 +200,9 @@ export const getVersions = async ({
     // Find out if a published document exists
     if (versionsConfig?.drafts) {
       if (doc?._status === 'published') {
-        publishedQuery = doc
+        publishedDoc = doc
       } else {
-        publishedQuery = await payload.findGlobal({
+        publishedDoc = await payload.findGlobal({
           slug: globalConfig.slug,
           depth: 0,
           locale,
@@ -211,7 +213,7 @@ export const getVersions = async ({
         })
       }
 
-      if (publishedQuery?._status === 'published') {
+      if (publishedDoc?._status === 'published') {
         hasPublishedDoc = true
       }
 
@@ -234,7 +236,7 @@ export const getVersions = async ({
         }
       }
 
-      if (publishedQuery?.updatedAt) {
+      if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
           depth: 0,
           global: globalConfig.slug,
@@ -248,7 +250,7 @@ export const getVersions = async ({
               },
               {
                 updatedAt: {
-                  greater_than: publishedQuery.updatedAt,
+                  greater_than: publishedDoc.updatedAt,
                 },
               },
             ],
