@@ -90,6 +90,10 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       ...paginatedDocs,
       docs: await Promise.all(
         paginatedDocs.docs.map(async (data) => {
+          if (!data.version) {
+            // Fallback if not selected
+            ;(data as any).version = {}
+          }
           return {
             ...data,
             version: await afterRead<T>({
