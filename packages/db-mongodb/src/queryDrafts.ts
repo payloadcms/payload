@@ -132,16 +132,17 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const docs = JSON.parse(JSON.stringify(result.docs))
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc = {
-        _id: doc.parent,
-        id: doc.parent,
-        ...doc.version,
-      }
+  result.docs = docs.map((doc) => {
+    doc = doc.version
+    if (!doc._id) {
+      doc._id = doc.parent
+    }
+    if (!doc.id) {
+      doc.id = doc.parent
+    }
 
-      return sanitizeInternalFields(doc)
-    }),
-  }
+    return sanitizeInternalFields(doc)
+  })
+
+  return docs
 }

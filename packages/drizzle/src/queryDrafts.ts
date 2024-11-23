@@ -46,15 +46,14 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     where: combinedWhere,
   })
 
-  return {
-    ...result,
-    docs: result.docs.map((doc) => {
-      doc = {
-        id: doc.parent,
-        ...doc.version,
-      }
+  result.docs = result.docs.map((doc) => {
+    doc = doc.version
+    if (!doc.id) {
+      doc.id = doc.parent
+    }
 
-      return doc
-    }),
-  }
+    return doc
+  })
+
+  return result
 }

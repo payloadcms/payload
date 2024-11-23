@@ -112,11 +112,10 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   const result = await Model.paginate(query, paginationOptions)
   const docs = JSON.parse(JSON.stringify(result.docs))
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  result.docs = docs.map((doc) => {
+    doc.id = doc._id
+    return sanitizeInternalFields(doc)
+  })
+
+  return result
 }
