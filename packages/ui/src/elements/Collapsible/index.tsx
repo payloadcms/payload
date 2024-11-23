@@ -111,7 +111,7 @@ export const Collapsible: React.FC<Props> = ({
             </div>
           </div>
         </div>
-        <AnimateHeight duration={200} height={isCollapsed ? 0 : 'auto'}>
+        <AnimateHeight height={isCollapsed ? 0 : 'auto'}>
           <div className={`${baseClass}__content`}>{children}</div>
         </AnimateHeight>
       </CollapsibleProvider>

@@ -6,12 +6,10 @@ import { usePatchAnimateHeight } from './usePatchAnimateHeight.js'
 export const AnimateHeight: React.FC<{
   children: React.ReactNode
   className?: string
-  contentClassName?: string
-  contentStyle?: React.CSSProperties
   duration?: number
   height?: 'auto' | number
   id?: string
-}> = ({ id, children, className, contentClassName, contentStyle, duration = 500, height }) => {
+}> = ({ id, children, className, duration = 300, height }) => {
   const [open, setOpen] = React.useState(false)
 
   useEffect(() => {
@@ -20,7 +18,11 @@ export const AnimateHeight: React.FC<{
 
   const containerRef = useRef<HTMLDivElement>(null)
 
-  usePatchAnimateHeight({ containerRef, duration, open })
+  const { browserSupportsKeywordAnimation } = usePatchAnimateHeight({
+    containerRef,
+    duration,
+    open,
+  })
 
   return (
     <div
@@ -31,12 +33,15 @@ export const AnimateHeight: React.FC<{
       id={id}
       ref={containerRef}
       style={{
-        transition: `height ${duration}ms ease`,
+        transition: [
+          `height ${duration}ms ease`,
+          browserSupportsKeywordAnimation && `max-height ${duration}ms ease`,
+        ]
+          .filter(Boolean)
+          .join(','),
       }}
     >
-      <div className={contentClassName} style={contentStyle}>
-        {children}
-      </div>
+      <div>{children}</div>
     </div>
   )
 }

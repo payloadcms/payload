@@ -8,7 +8,7 @@ export const usePatchAnimateHeight = ({
   containerRef: React.RefObject<HTMLDivElement>
   duration: number
   open: boolean
-}) => {
+}): { browserSupportsKeywordAnimation: boolean } => {
   const browserSupportsKeywordAnimation = useMemo(
     () => Boolean(CSS.supports('interpolate-size', 'allow-keywords')),
     [],
@@ -65,5 +65,5 @@ export const usePatchAnimateHeight = ({
     }
   }, [open, duration, containerRef, browserSupportsKeywordAnimation])
 
-  return null
+  return { browserSupportsKeywordAnimation }
 }

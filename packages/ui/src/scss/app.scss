@@ -6,7 +6,6 @@
 
 @layer payload-default {
   :root {
-    interpolate-size: allow-keywords;
     --base-px: 20;
     --base-body-size: 13;
     --base: calc((var(--base-px) / var(--base-body-size)) * 1rem);

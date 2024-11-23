@@ -122,7 +122,7 @@ export function FileSidebar() {
       </div>
 
       <div className={`${baseClass}__animateWrapper`}>
-        <AnimateHeight duration={200} height={!breakpoints.m || showFiles ? 'auto' : 0}>
+        <AnimateHeight height={!breakpoints.m || showFiles ? 'auto' : 0}>
           <div className={`${baseClass}__filesContainer`}>
             {isInitializing && forms.length === 0 && initialFiles.length > 0
               ? Array.from(initialFiles).map((file, index) => (
