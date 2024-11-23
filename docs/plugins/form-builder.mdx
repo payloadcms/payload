@@ -213,45 +213,6 @@ formBuilder({
 })
 ```
 
-### `paymentFields`
-
-The `paymentFields` property allows you to customize or disable the default payment-related fields that are automatically included in the form submission collection when a payment field is added to your form. Pass a function that can:
-
-- Return `false` to disable payment fields entirely
-- Return `true` to use the default payment fields (with a group field wrapper)
-- Accept `defaultPaymentFields` as a parameter and return custom payment fields
-
-<Banner type="info">
-  The `defaultPaymentFields` are returned as individual fields without a group field wrapper. This gives
-  you the flexibility to use these fields within your own custom field structure while still
-  maintaining easy access to the default payment fields.
-</Banner>
-
-```ts
-// payload.config.ts
-formBuilder({
-  // ...
-  formSubmissionOverrides: {
-    // ...
-    paymentFields: ({ defaultPaymentFields }) => {
-      return [
-        {
-          name: 'payment',
-          type: 'group',
-          fields: [
-            ...defaultPaymentFields,
-            {
-              name: 'checkoutSession',
-              type: 'text',
-            },
-          ],
-        },
-      ]
-    },
-  },
-})
-```
-
 ### `handlePayment`
 
 The `handlePayment` property is a [beforeChange](<[beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)>) hook that is called upon form submission. You can integrate into any third-party payment processing API here to accept payment based on form input. You can use the `getPaymentTotal` function to calculate the total cost after all conditions have been applied. This is only applicable if the form has enabled the `payment` field.
