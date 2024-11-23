@@ -1,10 +1,4 @@
-import type {
-  AdminViewProps,
-  Data,
-  PayloadComponent,
-  ServerProps,
-  ServerSideEditViewProps,
-} from 'payload'
+import type { AdminViewProps, Data, PayloadComponent, ServerSideEditViewProps } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -137,6 +131,7 @@ export const renderDocument = async ({
     getVersions({
       id: idFromArgs,
       collectionConfig,
+      doc,
       docPermissions,
       globalConfig,
       locale: locale?.code,
