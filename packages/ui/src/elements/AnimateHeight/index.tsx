@@ -29,14 +29,10 @@ export const AnimateHeight: React.FC<{
         .filter(Boolean)
         .join(' ')}
       id={id}
-      onClick={() => setOpen(!open)}
-      onKeyDown={() => setOpen(!open)}
       ref={containerRef}
-      role="button"
       style={{
         transition: `height ${duration}ms ease`,
       }}
-      tabIndex={0}
     >
       <div className={contentClassName} style={contentStyle}>
         {children}
