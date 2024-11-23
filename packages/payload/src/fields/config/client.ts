@@ -259,23 +259,29 @@ export const createClientField = ({
       const field = clientField as unknown as TabsFieldClient
 
       if (incomingField.tabs?.length) {
+        field.tabs = []
+
         for (let i = 0; i < incomingField.tabs.length; i++) {
           const tab = incomingField.tabs[i]
-          const clientTab = field.tabs[i]
+          const clientTab = {} as unknown as TabsFieldClient['tabs'][0]
 
-          serverOnlyFieldProperties.forEach((key) => {
-            if (key in clientTab) {
-              delete clientTab[key]
+          for (const key in tab) {
+            if (serverOnlyFieldProperties.includes(key as any)) {
+              continue
             }
-          })
-
-          clientTab.fields = createClientFields({
-            defaultIDType,
-            disableAddingID: true,
-            fields: tab.fields,
-            i18n,
-            importMap,
-          })
+            if (key === 'fields') {
+              clientTab.fields = createClientFields({
+                defaultIDType,
+                disableAddingID: true,
+                fields: tab.fields,
+                i18n,
+                importMap,
+              })
+            } else {
+              clientTab[key] = tab[key]
+            }
+          }
+          field.tabs[i] = clientTab
         }
       }
 
