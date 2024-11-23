@@ -1,5 +1,5 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
-import type { ClientConfig, ClientFieldSchemaMap } from 'payload'
+import type { ClientConfig, ClientFieldSchemaMap, FieldSchemaMap, Payload } from 'payload'
 
 import { cache } from 'react'
 
@@ -17,8 +17,10 @@ export const getClientSchemaMap = cache(
     config: ClientConfig
     globalSlug?: string
     i18n: I18nClient
+    payload: Payload
+    schemaMap: FieldSchemaMap
   }): ClientFieldSchemaMap => {
-    const { collectionSlug, config, globalSlug, i18n } = args
+    const { collectionSlug, config, globalSlug, i18n, payload, schemaMap } = args
 
     if (!cachedClientSchemaMap || global._payload_doNotCacheClientSchemaMap) {
       cachedClientSchemaMap = new Map()
@@ -37,6 +39,8 @@ export const getClientSchemaMap = cache(
       config,
       globalSlug,
       i18n: i18n as I18n,
+      payload,
+      schemaMap,
     })
 
     cachedClientSchemaMap.set(collectionSlug || globalSlug, entityClientFieldMap)

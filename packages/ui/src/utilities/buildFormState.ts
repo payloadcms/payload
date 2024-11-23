@@ -129,6 +129,8 @@ export const buildFormState = async (
     config: getClientConfig({ config, i18n, importMap: req.payload.importMap }),
     globalSlug,
     i18n,
+    payload,
+    schemaMap,
   })
 
   const id = collectionSlug ? idFromArgs : undefined

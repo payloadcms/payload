@@ -29,7 +29,9 @@ export const RscEntryLexicalField: React.FC<
   const field: RichTextFieldType = args.field as RichTextFieldType
   const path = args.path ?? (args.clientField as RichTextFieldClient).name
   const schemaPath = args.schemaPath ?? path
+
   const { clientFeatures, featureClientSchemaMap } = initLexicalFeatures({
+    clientFieldSchemaMap: args.clientFieldSchemaMap,
     fieldSchemaMap: args.fieldSchemaMap,
     i18n: args.i18n,
     path,
@@ -61,7 +63,7 @@ export const RscEntryLexicalField: React.FC<
   const props: LexicalRichTextFieldProps = {
     admin: args.admin,
     clientFeatures,
-    featureClientSchemaMap,
+    featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
     forceRender: args.forceRender,
     initialLexicalFormState,

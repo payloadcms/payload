@@ -1,5 +1,11 @@
 import type { I18n } from '@payloadcms/translations'
-import type { ClientConfig, ClientField, ClientFieldSchemaMap } from 'payload'
+import type {
+  ClientConfig,
+  ClientField,
+  ClientFieldSchemaMap,
+  FieldSchemaMap,
+  Payload,
+} from 'payload'
 
 import { traverseFields } from './traverseFields.js'
 /**
@@ -10,11 +16,13 @@ export const buildClientFieldSchemaMap = (args: {
   config: ClientConfig
   globalSlug?: string
   i18n: I18n
+  payload: Payload
+  schemaMap: FieldSchemaMap
 }): { clientFieldSchemaMap: ClientFieldSchemaMap } => {
   console.log('Creating client schemaMap')
-  const { collectionSlug, config, globalSlug, i18n } = args
+  const { collectionSlug, config, globalSlug, i18n, payload, schemaMap } = args
 
-  const schemaMap: ClientFieldSchemaMap = new Map()
+  const clientSchemaMap: ClientFieldSchemaMap = new Map()
 
   if (collectionSlug) {
     const matchedCollection = config.collections.find(
@@ -39,21 +47,23 @@ export const buildClientFieldSchemaMap = (args: {
           },
         ]
 
-        schemaMap.set(`_${matchedCollection.slug}.auth`, {
+        clientSchemaMap.set(`_${matchedCollection.slug}.auth`, {
           fields: [...baseAuthFields, ...matchedCollection.fields],
         })
       }
 
-      schemaMap.set(collectionSlug, {
+      clientSchemaMap.set(collectionSlug, {
         fields: matchedCollection.fields,
       })
 
       traverseFields({
+        clientSchemaMap,
         config,
         fields: matchedCollection.fields,
         i18n,
         parentIndexPath: '',
         parentSchemaPath: collectionSlug,
+        payload,
         schemaMap,
       })
     }
@@ -61,20 +71,22 @@ export const buildClientFieldSchemaMap = (args: {
     const matchedGlobal = config.globals.find((global) => global.slug === globalSlug)
 
     if (matchedGlobal) {
-      schemaMap.set(globalSlug, {
+      clientSchemaMap.set(globalSlug, {
         fields: matchedGlobal.fields,
       })
 
       traverseFields({
+        clientSchemaMap,
         config,
         fields: matchedGlobal.fields,
         i18n,
         parentIndexPath: '',
         parentSchemaPath: globalSlug,
+        payload,
         schemaMap,
       })
     }
   }
 
-  return { clientFieldSchemaMap: schemaMap }
+  return { clientFieldSchemaMap: clientSchemaMap }
 }
