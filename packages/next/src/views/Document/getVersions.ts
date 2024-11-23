@@ -34,6 +34,7 @@ type Result = Promise<{
 
 // TODO: in the future, we can parallelize some of these queries
 // this will speed up the API by ~30-100ms or so
+// Note from the future: I have attempted parallelizing these queries, but it made this function almost 2x slower.
 export const getVersions = async ({
   id: idArg,
   collectionConfig,
