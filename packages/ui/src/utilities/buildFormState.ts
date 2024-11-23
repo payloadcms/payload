@@ -1,64 +1,14 @@
-import type { I18n, I18nClient } from '@payloadcms/translations'
-import type {
-  BuildFormStateArgs,
-  ClientConfig,
-  ClientUser,
-  ErrorResult,
-  FieldSchemaMap,
-  FormState,
-  SanitizedConfig,
-} from 'payload'
+import type { BuildFormStateArgs, ClientConfig, ClientUser, ErrorResult, FormState } from 'payload'
 
 import { formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
-import { buildFieldSchemaMap } from './buildFieldSchemaMap/index.js'
+import { getClientConfig } from './getClientConfig.js'
+import { getClientSchemaMap } from './getClientSchemaMap.js'
+import { getSchemaMap } from './getSchemaMap.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
-
-let cachedFieldMap = global._payload_fieldMap
-let cachedClientConfig = global._payload_clientConfig
-
-if (!cachedFieldMap) {
-  cachedFieldMap = global._payload_fieldMap = null
-}
-
-if (!cachedClientConfig) {
-  cachedClientConfig = global._payload_clientConfig = null
-}
-
-export const getFieldSchemaMap = (args: {
-  collectionSlug?: string
-  config: SanitizedConfig
-  globalSlug?: string
-  i18n: I18nClient
-}): FieldSchemaMap => {
-  const { collectionSlug, config, globalSlug, i18n } = args
-
-  if (process.env.NODE_ENV !== 'development') {
-    if (!cachedFieldMap) {
-      cachedFieldMap = new Map()
-    }
-    const cachedEntityFieldMap = cachedFieldMap.get(collectionSlug || globalSlug)
-    if (cachedEntityFieldMap) {
-      return cachedEntityFieldMap
-    }
-  }
-
-  const { fieldSchemaMap: entityFieldMap } = buildFieldSchemaMap({
-    collectionSlug,
-    config,
-    globalSlug,
-    i18n: i18n as I18n,
-  })
-
-  if (process.env.NODE_ENV !== 'development') {
-    cachedFieldMap.set(collectionSlug || globalSlug, entityFieldMap)
-  }
-
-  return entityFieldMap
-}
 
 type BuildFormStateSuccessResult = {
   clientConfig?: ClientConfig
@@ -167,15 +117,22 @@ export const buildFormState = async (
     throw new Error('Either collectionSlug or globalSlug must be provided')
   }
 
-  const fieldSchemaMap = getFieldSchemaMap({
+  const schemaMap = getSchemaMap({
     collectionSlug,
     config,
     globalSlug,
     i18n,
   })
 
+  const clientSchemaMap = getClientSchemaMap({
+    collectionSlug,
+    config: getClientConfig({ config, i18n, importMap: req.payload.importMap }),
+    globalSlug,
+    i18n,
+  })
+
   const id = collectionSlug ? idFromArgs : undefined
-  const fieldOrEntityConfig = fieldSchemaMap.get(schemaPath)
+  const fieldOrEntityConfig = schemaMap.get(schemaPath)
 
   if (!fieldOrEntityConfig) {
     throw new Error(`Could not find "${schemaPath}" in the fieldSchemaMap`)
@@ -216,10 +173,11 @@ export const buildFormState = async (
 
   const formStateResult = await fieldSchemasToFormState({
     id,
+    clientFieldSchemaMap: clientSchemaMap,
     collectionSlug,
     data,
     fields,
-    fieldSchemaMap,
+    fieldSchemaMap: schemaMap,
     operation,
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },

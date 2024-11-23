@@ -1,4 +1,4 @@
-import type { ClientComponentProps, FieldPaths, ServerComponentProps } from 'payload'
+import type { ClientComponentProps, ClientField, FieldPaths, ServerComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { createClientField, MissingEditorProp } from 'payload'
@@ -18,6 +18,7 @@ const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Fil
 
 export const renderField: RenderFieldMethod = ({
   id,
+  clientFieldSchemaMap,
   collectionSlug,
   data,
   fieldConfig,
@@ -35,12 +36,14 @@ export const renderField: RenderFieldMethod = ({
   schemaPath,
   siblingData,
 }) => {
-  const clientField = createClientField({
-    defaultIDType: req.payload.config.db.defaultIDType,
-    field: fieldConfig,
-    i18n: req.i18n,
-    importMap: req.payload.importMap,
-  })
+  const clientField = clientFieldSchemaMap
+    ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
+    : createClientField({
+        defaultIDType: req.payload.config.db.defaultIDType,
+        field: fieldConfig,
+        i18n: req.i18n,
+        importMap: req.payload.importMap,
+      })
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},
@@ -60,6 +63,7 @@ export const renderField: RenderFieldMethod = ({
   const serverProps: ServerComponentProps = {
     id,
     clientField,
+    clientFieldSchemaMap,
     data,
     field: fieldConfig,
     fieldSchemaMap,

@@ -43,6 +43,7 @@ export const RscEntryLexicalField: React.FC<
     initialLexicalFormState = await buildInitialState({
       context: {
         id: args.id,
+        clientFieldSchemaMap: args.clientFieldSchemaMap,
         collectionSlug: args.collectionSlug,
         field,
         fieldSchemaMap: args.fieldSchemaMap,
