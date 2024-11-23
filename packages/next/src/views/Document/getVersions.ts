@@ -167,6 +167,7 @@ export const getVersions = async ({
 
     ;({ totalDocs: versionCount } = await payload.countVersions({
       collection: collectionConfig.slug,
+      depth: 0,
       user,
       where: {
         and: [
@@ -186,6 +187,9 @@ export const getVersions = async ({
         slug: globalConfig.slug,
         depth: 0,
         locale,
+        select: {
+          updatedAt: true,
+        },
         user,
       })
 
