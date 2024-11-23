@@ -122,9 +122,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     state,
   } = args
 
-  if (!args.clientFieldSchemaMap) {
+  if (!args.clientFieldSchemaMap && args.renderFieldFn) {
     console.warn(
-      'clientFieldSchemaMap is not passed to fieldSchemasToFormState - this will reduce performance',
+      'clientFieldSchemaMap is not passed to addFieldStatePromise - this will reduce performance',
     )
   }
 

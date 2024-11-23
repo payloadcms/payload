@@ -52,7 +52,7 @@ type Args = {
 }
 
 export const fieldSchemasToFormState = async (args: Args): Promise<FormState> => {
-  if (!args.clientFieldSchemaMap) {
+  if (!args.clientFieldSchemaMap && args.renderFieldFn) {
     console.warn(
       'clientFieldSchemaMap is not passed to fieldSchemasToFormState - this will reduce performance',
     )
