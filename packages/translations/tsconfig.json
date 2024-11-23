@@ -7,7 +7,11 @@
     "allowJs": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": false
   },
