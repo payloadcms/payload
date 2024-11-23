@@ -151,7 +151,7 @@ export const createClientCollectionConfig = ({
         }
         break
       case 'auth':
-        if (!clientCollection.auth) {
+        if (!collection.auth) {
           break
         }
         clientCollection.auth = {} as { verify?: true } & SanitizedCollectionConfig['auth']
