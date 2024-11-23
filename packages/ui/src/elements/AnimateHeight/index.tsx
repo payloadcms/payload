@@ -10,29 +10,56 @@ export const AnimateHeight: React.FC<{
   height?: 'auto' | number
   id?: string
 }> = ({ id, children, className, duration = 300, height }) => {
-  const [open, setOpen] = React.useState(false)
-  const displayTimer = useRef<null | number>(null)
-  const [display, setDisplay] = React.useState<CSSStyleDeclaration['display']>(() =>
-    open ? '' : 'none',
+  const [open, setOpen] = React.useState(() => Boolean(height))
+  const prevIsOpen = useRef(open)
+
+  const [childrenDisplay, setChildrenDisplay] = React.useState<CSSStyleDeclaration['display']>(
+    () => (open ? '' : 'none'),
   )
 
-  useEffect(() => {
-    const newIsOpen = Boolean(height)
+  const [parentOverflow, setParentOverflow] = React.useState<CSSStyleDeclaration['overflow']>(() =>
+    open ? '' : 'hidden',
+  )
 
-    if (newIsOpen) {
-      setDisplay('')
-      clearTimeout(displayTimer.current)
-    } else {
-      displayTimer.current = window.setTimeout(() => {
-        setDisplay('none')
+  const [isAnimating, setIsAnimating] = React.useState(false)
+
+  useEffect(() => {
+    let displayTimer: number
+    let overflowTimer: number
+
+    const newIsOpen = Boolean(height)
+    const hasChanged = prevIsOpen.current !== newIsOpen
+    prevIsOpen.current = newIsOpen
+
+    if (hasChanged) {
+      setIsAnimating(true)
+      setParentOverflow('hidden')
+
+      if (newIsOpen) {
+        setChildrenDisplay('')
+      } else {
+        // `display: none` once closed
+        displayTimer = window.setTimeout(() => {
+          setChildrenDisplay('none')
+        }, duration)
+      }
+
+      setOpen(newIsOpen)
+
+      // reset overflow once open
+      overflowTimer = window.setTimeout(() => {
+        setParentOverflow('')
+        setIsAnimating(false)
       }, duration)
     }
 
-    setOpen(newIsOpen)
-
     return () => {
-      if (displayTimer.current) {
-        clearTimeout(displayTimer.current)
+      if (displayTimer) {
+        clearTimeout(displayTimer)
+      }
+
+      if (overflowTimer) {
+        clearTimeout(overflowTimer)
       }
     }
   }, [height, duration])
@@ -48,26 +75,23 @@ export const AnimateHeight: React.FC<{
   return (
     <div
       aria-hidden={!open}
-      className={[className, 'rah-static', open && height === 'auto' && 'rah-static--height-auto']
+      className={[
+        className,
+        'rah-static',
+        open && height === 'auto' && 'rah-static--height-auto',
+        isAnimating && `rah-animating--${open ? 'down' : 'up'}`,
+        isAnimating && height === 'auto' && `rah-animating--to-height-auto`,
+      ]
         .filter(Boolean)
         .join(' ')}
       id={id}
       ref={containerRef}
       style={{
+        overflow: parentOverflow,
         transition: `height ${duration}ms ease`,
       }}
     >
-      <div
-        style={{
-          ...(display
-            ? {
-                display,
-              }
-            : {}),
-        }}
-      >
-        {children}
-      </div>
+      <div {...(childrenDisplay ? { style: { display: childrenDisplay } } : {})}>{children}</div>
     </div>
   )
 }

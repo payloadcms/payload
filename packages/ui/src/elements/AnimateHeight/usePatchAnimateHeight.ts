@@ -33,7 +33,6 @@ export const usePatchAnimateHeight = ({
         // Set initial state
         if (previousOpenState.current !== open) {
           container.style.height = open ? '0px' : `${maxContentHeight}px`
-          container.style.overflow = 'hidden'
         }
 
         // Trigger reflow
@@ -45,8 +44,7 @@ export const usePatchAnimateHeight = ({
 
         const transitionEndHandler = () => {
           container.style.transition = ''
-          container.style.height = open ? 'auto' : '0px'
-          container.style.overflow = open ? '' : 'hidden'
+          container.style.height = !open ? '0px' : 'auto'
           container.removeEventListener('transitionend', transitionEndHandler)
         }
 
@@ -60,7 +58,6 @@ export const usePatchAnimateHeight = ({
       return () => {
         container.style.transition = ''
         container.style.height = ''
-        container.style.overflow = ''
       }
     }
   }, [open, duration, containerRef, browserSupportsKeywordAnimation])
