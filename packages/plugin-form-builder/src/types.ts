@@ -60,9 +60,7 @@ export type FormBuilderPluginConfig = {
   defaultToEmail?: string
   fields?: FieldsConfig
   formOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
-  formSubmissionOverrides?: {
-    fields?: FieldsOverride
-  } & Partial<Omit<CollectionConfig, 'fields'>>
+  formSubmissionOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
 }

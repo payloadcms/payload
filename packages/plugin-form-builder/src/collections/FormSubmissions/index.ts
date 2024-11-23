@@ -84,7 +84,7 @@ export const generateSubmissionCollection = (
   ]
 
   const newConfig: CollectionConfig = {
-    ...formConfig?.formSubmissionOverrides,
+    ...(formConfig?.formSubmissionOverrides || {}),
     slug: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
     access: {
       create: () => true,
@@ -96,9 +96,11 @@ export const generateSubmissionCollection = (
       ...(formConfig?.formSubmissionOverrides?.admin || {}),
       enableRichTextRelationship: false,
     },
-    fields: [
-      ...(formConfig?.formSubmissionOverrides?.fields?.({ defaultFields }) || defaultFields),
-    ],
+    fields:
+      formConfig?.formSubmissionOverrides?.fields &&
+      typeof formConfig?.formSubmissionOverrides?.fields === 'function'
+        ? formConfig.formSubmissionOverrides.fields({ defaultFields })
+        : defaultFields,
     hooks: {
       ...(formConfig?.formSubmissionOverrides?.hooks || {}),
       beforeChange: [
