@@ -10,7 +10,7 @@ export const usePatchAnimateHeight = ({
   open: boolean
 }): { browserSupportsKeywordAnimation: boolean } => {
   const browserSupportsKeywordAnimation = useMemo(
-    () => Boolean(CSS.supports('interpolate-size', 'allow-keywords')),
+    () => (CSS.supports ? Boolean(CSS.supports('interpolate-size', 'allow-keywords')) : false),
     [],
   )
 

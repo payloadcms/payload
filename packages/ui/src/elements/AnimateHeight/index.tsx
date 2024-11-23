@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 
-import './index.scss'
 import { usePatchAnimateHeight } from './usePatchAnimateHeight.js'
+import './index.scss'
 
 export const AnimateHeight: React.FC<{
   children: React.ReactNode
@@ -11,14 +11,27 @@ export const AnimateHeight: React.FC<{
   id?: string
 }> = ({ id, children, className, duration = 300, height }) => {
   const [open, setOpen] = React.useState(false)
+  const displaytimer = useRef<null | number>(null)
+  const [display, setDisplay] = React.useState<CSSStyleDeclaration['display']>('none')
 
   useEffect(() => {
     setOpen(Boolean(height))
   }, [height])
 
+  useEffect(() => {
+    if (open) {
+      setDisplay('')
+      clearTimeout(displaytimer.current)
+    } else {
+      displaytimer.current = window.setTimeout(() => {
+        setDisplay('none')
+      }, duration)
+    }
+  }, [open, duration])
+
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const { browserSupportsKeywordAnimation } = usePatchAnimateHeight({
+  usePatchAnimateHeight({
     containerRef,
     duration,
     open,
@@ -33,15 +46,20 @@ export const AnimateHeight: React.FC<{
       id={id}
       ref={containerRef}
       style={{
-        transition: [
-          `height ${duration}ms ease`,
-          browserSupportsKeywordAnimation && `max-height ${duration}ms ease`,
-        ]
-          .filter(Boolean)
-          .join(','),
+        transition: `height ${duration}ms ease`,
       }}
     >
-      <div>{children}</div>
+      <div
+        style={{
+          ...(display
+            ? {
+                display,
+              }
+            : {}),
+        }}
+      >
+        {children}
+      </div>
     </div>
   )
 }
