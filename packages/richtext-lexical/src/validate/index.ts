@@ -34,9 +34,9 @@ export function hasText(
   }
 
   if (!hasChildren || hasOnlyEmptyParagraph) {
-    return true
-  } else {
     return false
+  } else {
+    return true
   }
 }
 
