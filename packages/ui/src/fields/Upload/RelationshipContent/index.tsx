@@ -50,17 +50,14 @@ export function RelationshipContent(props: Props) {
     y,
   } = props
 
-  const [DocumentDrawer, _, { closeDrawer, openDrawer }] = useDocumentDrawer({
+  const [DocumentDrawer, _, { openDrawer }] = useDocumentDrawer({
     id: src ? id : undefined,
     collectionSlug,
   })
 
   const onSave = React.useCallback(
-    async ({ doc }: { doc: TypeWithID }) => {
-      closeDrawer()
-      return reloadDoc(doc.id, collectionSlug)
-    },
-    [reloadDoc, closeDrawer, collectionSlug],
+    async ({ doc }: { doc: TypeWithID }) => reloadDoc(doc.id, collectionSlug),
+    [reloadDoc, collectionSlug],
   )
 
   function generateMetaText(mimeType: string, size: number): string {
