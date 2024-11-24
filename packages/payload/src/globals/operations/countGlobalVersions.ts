@@ -14,6 +14,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 export type Arguments = {
   disableErrors?: boolean
   global: SanitizedGlobalConfig
+  locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequest
   where?: Where
@@ -26,6 +27,7 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
     const {
       disableErrors,
       global,
+      locale,
       overrideAccess,
       req: { payload },
       req,
@@ -63,6 +65,7 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
 
     const result = await payload.db.countGlobalVersions({
       global: global.slug,
+      locale,
       req,
       where: fullWhere,
     })
