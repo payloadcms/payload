@@ -63,9 +63,11 @@ export type FormBuilderPluginConfig = {
   formSubmissionOverrides?: {
     custom?: {
       /**
-       * Defaults to true to use the default payment fields
+       * If true, use the default payment fields
+       * If false, disables default payment fields
+       * If an array of fields, use the provided fields as new default payment fields
        */
-      defaultPaymentFields?: boolean
+      defaultPaymentFields?: boolean | Field[]
     }
     fields?: FieldsOverride
   } & Partial<Omit<CollectionConfig, 'fields'>>

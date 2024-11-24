@@ -104,15 +104,7 @@ export default buildConfigWithDefaults({
       },
       formSubmissionOverrides: {
         custom: {
-          defaultPaymentFields: false,
-        },
-        fields: ({ defaultFields }) => {
-          return [
-            ...defaultFields,
-            {
-              name: 'custom',
-              type: 'text',
-            },
+          defaultPaymentFields: [
             {
               name: 'payment',
               type: 'group',
@@ -122,6 +114,15 @@ export default buildConfigWithDefaults({
                   type: 'number',
                 },
               ],
+            },
+          ],
+        },
+        fields: ({ defaultFields }) => {
+          return [
+            ...defaultFields,
+            {
+              name: 'custom',
+              type: 'text',
             },
           ]
         },

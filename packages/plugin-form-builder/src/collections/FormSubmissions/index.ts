@@ -110,10 +110,10 @@ export const generateSubmissionCollection = (
   }
 
   const paymentFieldConfig = formConfig?.fields?.payment
-  const useDefaultPaymentFields =
+  const defaultPaymentFields =
     formConfig?.formSubmissionOverrides?.custom?.defaultPaymentFields ?? true
 
-  if (paymentFieldConfig && useDefaultPaymentFields) {
+  if (paymentFieldConfig && typeof defaultPaymentFields === 'boolean' && defaultPaymentFields) {
     newConfig.fields.push({
       name: 'payment',
       type: 'group',
@@ -167,6 +167,8 @@ export const generateSubmissionCollection = (
       ],
     })
   }
-
+  if (paymentFieldConfig && Array.isArray(defaultPaymentFields)) {
+    newConfig.fields.push(...defaultPaymentFields)
+  }
   return newConfig
 }
