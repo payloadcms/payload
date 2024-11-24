@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-gcs",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "Payload storage adapter for Google Cloud Storage",
   "homepage": "https://payloadcms.com",
   "repository": {

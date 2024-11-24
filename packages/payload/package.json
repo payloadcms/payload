@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",

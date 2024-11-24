@@ -1,4 +1,4 @@
-import { type PayloadHandler, commitTransaction, initTransaction } from 'payload'
+import { type PayloadHandler } from 'payload'
 
 import { seed as seedScript } from '@/endpoints/seed'
 

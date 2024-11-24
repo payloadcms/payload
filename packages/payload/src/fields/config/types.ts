@@ -863,7 +863,7 @@ type UploadAdminClient = AdminClient & Pick<UploadAdmin, 'allowCreate' | 'isSort
 
 export type PolymorphicUploadField = {
   admin?: {
-    sortOptions?: { [collectionSlug: CollectionSlug]: string }
+    sortOptions?: Partial<Record<CollectionSlug, string>>
   } & UploadAdmin
   relationTo: CollectionSlug[]
 } & SharedUploadProperties
@@ -1044,7 +1044,7 @@ type RelationshipAdminClient = AdminClient &
 
 export type PolymorphicRelationshipField = {
   admin?: {
-    sortOptions?: { [collectionSlug: CollectionSlug]: string }
+    sortOptions?: Partial<Record<CollectionSlug, string>>
   } & RelationshipAdmin
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties

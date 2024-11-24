@@ -25,6 +25,14 @@ export const traverseFields = <T>(args: {
 
       switch (fieldSchema.type) {
         case 'array':
+          if (
+            !incomingData[fieldName] &&
+            incomingData[fieldName] !== undefined &&
+            result?.[fieldName] !== undefined
+          ) {
+            result[fieldName] = []
+          }
+
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((incomingRow, i) => {
               if (!result[fieldName]) {
@@ -85,7 +93,7 @@ export const traverseFields = <T>(args: {
           break
 
         case 'group':
-
+        // falls through
         case 'tabs':
           if (!result[fieldName]) {
             result[fieldName] = {}
@@ -100,8 +108,9 @@ export const traverseFields = <T>(args: {
           })
 
           break
-        case 'relationship':
 
+        case 'relationship':
+        // falls through
         case 'upload':
           // Handle `hasMany` relationships
           if (fieldSchema.hasMany && Array.isArray(incomingData[fieldName])) {

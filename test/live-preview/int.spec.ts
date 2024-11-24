@@ -169,6 +169,53 @@ describe('Collections - Live Preview', () => {
     expect(mergedData._numberOfRequests).toEqual(0)
   })
 
+  it('— arrays - can clear all rows', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      arrayOfRelationships: [
+        {
+          id: '123',
+          relationshipInArrayMonoHasOne: testPost.id,
+        },
+      ],
+    }
+
+    const mergedData = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        arrayOfRelationships: [],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+      collectionPopulationRequestHandler,
+    })
+
+    expect(mergedData.arrayOfRelationships).toEqual([])
+    expect(mergedData._numberOfRequests).toEqual(0)
+
+    // do the same but with arrayOfRelationships: 0
+
+    const mergedData2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        // @ts-expect-error eslint-disable-next-line
+        arrayOfRelationships: 0, // this is how form state represents an empty array
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+      collectionPopulationRequestHandler,
+    })
+
+    expect(mergedData2.arrayOfRelationships).toEqual([])
+    expect(mergedData2._numberOfRequests).toEqual(0)
+  })
+
   it('— uploads - adds and removes media', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',

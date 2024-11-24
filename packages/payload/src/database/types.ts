@@ -164,12 +164,13 @@ export type CreateMigration = (args: {
   /** dirname of the package, required in drizzle */
   dirname?: string
   file?: string
-  /**
-   * Skips the prompt asking to create empty migrations
-   */
   forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
+  /**
+   * Skips the prompt asking to create empty migrations
+   */
+  skipEmpty?: boolean
 }) => Promise<void> | void
 
 export type Transaction = (
