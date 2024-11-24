@@ -6,7 +6,7 @@ import type { BeforeEmail } from '@payloadcms/plugin-form-builder/types'
 import type { Block } from 'payload'
 
 //import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
-import { formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
+import { fields, formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import type { FormSubmission } from './payload-types.js'
@@ -103,20 +103,18 @@ export default buildConfigWithDefaults({
         },
       },
       formSubmissionOverrides: {
-        custom: {
-          defaultPaymentFields: [
-            {
-              name: 'payment',
-              type: 'group',
-              fields: [
-                {
-                  name: 'Amount',
-                  type: 'number',
-                },
-              ],
-            },
-          ],
-        },
+        paymentFields: [
+          {
+            name: 'payment',
+            type: 'group',
+            fields: [
+              {
+                name: 'stripeCheckoutSession',
+                type: 'text',
+              },
+            ],
+          },
+        ],
         fields: ({ defaultFields }) => {
           return [
             ...defaultFields,

@@ -2,6 +2,7 @@ import type { CollectionConfig, Field } from 'payload'
 
 import type { FormBuilderPluginConfig } from '../../types.js'
 
+import { defaultPaymentFields } from './fields/defaultPaymentFields.js'
 import { createCharge } from './hooks/createCharge.js'
 import { sendEmail } from './hooks/sendEmail.js'
 
@@ -108,67 +109,16 @@ export const generateSubmissionCollection = (
       ],
     },
   }
-
   const paymentFieldConfig = formConfig?.fields?.payment
-  const defaultPaymentFields =
-    formConfig?.formSubmissionOverrides?.custom?.defaultPaymentFields ?? true
+  const paymentFields = formConfig?.formSubmissionOverrides?.paymentFields ?? true
 
-  if (paymentFieldConfig && typeof defaultPaymentFields === 'boolean' && defaultPaymentFields) {
-    newConfig.fields.push({
-      name: 'payment',
-      type: 'group',
-      admin: {
-        readOnly: true,
-      },
-      fields: [
-        {
-          name: 'field',
-          type: 'text',
-          label: 'Field',
-        },
-        {
-          name: 'status',
-          type: 'text',
-          label: 'Status',
-        },
-        {
-          name: 'amount',
-          type: 'number',
-          admin: {
-            description: 'Amount in cents',
-          },
-        },
-        {
-          name: 'paymentProcessor',
-          type: 'text',
-        },
-        {
-          name: 'creditCard',
-          type: 'group',
-          fields: [
-            {
-              name: 'token',
-              type: 'text',
-              label: 'token',
-            },
-            {
-              name: 'brand',
-              type: 'text',
-              label: 'Brand',
-            },
-            {
-              name: 'number',
-              type: 'text',
-              label: 'Number',
-            },
-          ],
-          label: 'Credit Card',
-        },
-      ],
-    })
-  }
-  if (paymentFieldConfig && Array.isArray(defaultPaymentFields)) {
-    newConfig.fields.push(...defaultPaymentFields)
+  if (paymentFieldConfig) {
+    if (Array.isArray(paymentFields)) {
+      newConfig.fields.push(...paymentFields)
+    }
+    if (typeof paymentFields === 'boolean' && paymentFields) {
+      newConfig.fields.push(defaultPaymentFields)
+    }
   }
   return newConfig
 }

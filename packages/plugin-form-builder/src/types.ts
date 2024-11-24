@@ -61,15 +61,16 @@ export type FormBuilderPluginConfig = {
   fields?: FieldsConfig
   formOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   formSubmissionOverrides?: {
-    custom?: {
-      /**
-       * If true, use the default payment fields
-       * If false, disables default payment fields
-       * If an array of fields, use the provided fields as new default payment fields
-       */
-      defaultPaymentFields?: boolean | Field[]
-    }
     fields?: FieldsOverride
+    /**
+     * Controls the payment-related fields that appear in form submissions.
+     * - true: enables default payment fields
+     * - false: disables default payment fields
+     * - Field[]: overrides the default payment fields with your custom payment fields
+     *
+     * _Note: These fields only appear when the form includes a payment field_
+     */
+    paymentFields?: boolean | Field[]
   } & Partial<Omit<CollectionConfig, 'fields'>>
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
