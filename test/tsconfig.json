@@ -4,7 +4,7 @@
     "rootDir": ".",
     "declaration": true,
     "declarationMap": true,
-    "target": "esnext",
+    "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "allowJs": true,
@@ -12,7 +12,11 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
