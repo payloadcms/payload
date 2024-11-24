@@ -9,7 +9,7 @@ import type {
 
 import type { SerializedQuoteNode } from './features/blockquote/server/index.js'
 import type { SerializedInlineBlockNode } from './features/blocks/client/nodes/InlineBlocksNode.js'
-import type { SerializedBlockNode } from './features/blocks/server/nodes/BlockNode.jsx'
+import type { SerializedBlockNode } from './features/blocks/server/nodes/BlockNode.js'
 import type {
   SerializedTableCellNode,
   SerializedTableNode,

@@ -4,11 +4,12 @@ import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToForm
 
 import type { NodeValidation } from '../../typesServer.js'
 import type { SerializedInlineBlockNode } from '../client/nodes/InlineBlocksNode.js'
-import type { BlockFields, SerializedBlockNode } from './nodes/BlockNode.jsx'
+import type { SerializedWrapperBlockNode } from '../WrapperBlockNode.js'
+import type { BlockFields, SerializedBlockNode } from './nodes/BlockNode.js'
 
 export const blockValidationHOC = (
   blocks: Block[],
-): NodeValidation<SerializedBlockNode | SerializedInlineBlockNode> => {
+): NodeValidation<SerializedBlockNode | SerializedInlineBlockNode | SerializedWrapperBlockNode> => {
   return async ({ node, validation }) => {
     const blockFieldData = node.fields ?? ({} as BlockFields)
 

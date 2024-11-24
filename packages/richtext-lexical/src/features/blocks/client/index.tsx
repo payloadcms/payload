@@ -134,10 +134,7 @@ export const BlocksFeatureClient = createClientFeature(
         },
         clientWrapperBlocks?.length
           ? {
-              Component: withMergedProps<
-                AdditionalWrapperBlocksPluginArgs,
-                AdditionalWrapperBlocksPluginArgs
-              >({
+              Component: withMergedProps<any, any>({
                 Component: WrapperBlocksPlugin,
                 sanitizeServerOnlyProps: false,
                 toMergeIntoProps: {

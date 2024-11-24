@@ -18,7 +18,7 @@ import { deepCopyObjectSimple } from 'payload/shared'
 
 type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */
-  blockName: string
+  blockName?: string
   blockType: string
 } & TBlockFields
 
