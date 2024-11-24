@@ -1,4 +1,4 @@
-<a href="https://payloadcms.com"><img width="100%" src="https://github.com/payloadcms/payload/blob/main/packages/payload/src/assets/images/github-banner-nextjs-native.jpg" alt="Payload headless CMS Admin panel built with React" /></a>
+<a href="https://payloadcms.com"><img width="100%" src="https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/github-banner-new-logo.jpg" alt="Payload headless CMS Admin panel built with React" /></a>
 <br />
 <br />
 
@@ -84,7 +84,7 @@ We're constantly adding more templates to our [Templates Directory](https://gith
 
 Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
 
-Migrating from v1 to v2? Check out the [2.0 Release Notes](https://github.com/payloadcms/payload/releases/tag/v2.0.0) on how to do it.
+Migrating from v2 to v3? Check out the [3.0 Migration Guide](https://github.com/payloadcms/payload/blob/main/docs/migration-guide/overview.mdx) on how to do it.
 
 ## 🙋 Contributing
 

@@ -54,9 +54,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -138,7 +138,7 @@ export interface Page {
  */
 export interface Media {
   id: string;
-  alt: string;
+  alt?: string | null;
   caption?: {
     root: {
       type: string;
@@ -303,7 +303,6 @@ export interface ContentBlock {
  * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
-  position?: ('default' | 'fullscreen') | null;
   media: string | Media;
   id?: string | null;
   blockName?: string | null;
@@ -846,7 +845,6 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?:
           | T
           | {
-              position?: T;
               media?: T;
               id?: T;
               blockName?: T;

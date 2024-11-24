@@ -37,6 +37,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Bloky',
   },
+  da: {
+    inlineBlocks: {
+      create: 'Opret {{label}}',
+      edit: 'Rediger {{label}}',
+      label: 'Indlejrede blokke',
+      remove: 'Fjern {{label}}',
+    },
+    label: 'Blokke',
+  },
   de: {
     inlineBlocks: {
       create: 'Erstelle {{label}}',

@@ -33,12 +33,14 @@ export interface Config {
     'lexical-localized-fields': LexicalLocalizedField;
     lexicalObjectReferenceBug: LexicalObjectReferenceBug;
     users: User;
+    LexicalInBlock: LexicalInBlock;
     'array-fields': ArrayField;
     'block-fields': BlockField;
     'checkbox-fields': CheckboxField;
     'code-fields': CodeField;
     'collapsible-fields': CollapsibleField;
     'conditional-logic': ConditionalLogic;
+    'custom-id': CustomId;
     'date-fields': DateField;
     'email-fields': EmailField;
     'radio-fields': RadioField;
@@ -74,12 +76,14 @@ export interface Config {
     'lexical-localized-fields': LexicalLocalizedFieldsSelect<false> | LexicalLocalizedFieldsSelect<true>;
     lexicalObjectReferenceBug: LexicalObjectReferenceBugSelect<false> | LexicalObjectReferenceBugSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    LexicalInBlock: LexicalInBlockSelect<false> | LexicalInBlockSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'block-fields': BlockFieldsSelect<false> | BlockFieldsSelect<true>;
     'checkbox-fields': CheckboxFieldsSelect<false> | CheckboxFieldsSelect<true>;
     'code-fields': CodeFieldsSelect<false> | CodeFieldsSelect<true>;
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
     'conditional-logic': ConditionalLogicSelect<false> | ConditionalLogicSelect<true>;
+    'custom-id': CustomIdSelect<false> | CustomIdSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
@@ -121,9 +125,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -394,6 +398,37 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalInBlock".
+ */
+export interface LexicalInBlock {
+  id: string;
+  blocks?:
+    | {
+        lexical?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'lexicalInBlock2';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "array-fields".
  */
 export interface ArrayField {
@@ -462,6 +497,11 @@ export interface ArrayField {
               id?: string | null;
             }[]
           | null;
+        id?: string | null;
+      }[]
+    | null;
+  externallyUpdatedArray?:
+    | {
         id?: string | null;
       }[]
     | null;
@@ -940,6 +980,15 @@ export interface ConditionalLogic {
   group2?: {
     group2Field?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id".
+ */
+export interface CustomId {
+  id: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1768,6 +1817,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'LexicalInBlock';
+        value: string | LexicalInBlock;
+      } | null)
+    | ({
         relationTo: 'array-fields';
         value: string | ArrayField;
       } | null)
@@ -1790,6 +1843,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditional-logic';
         value: string | ConditionalLogic;
+      } | null)
+    | ({
+        relationTo: 'custom-id';
+        value: string | CustomId;
       } | null)
     | ({
         relationTo: 'date-fields';
@@ -2007,6 +2064,25 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalInBlock_select".
+ */
+export interface LexicalInBlockSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        lexicalInBlock2?:
+          | T
+          | {
+              lexical?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "array-fields_select".
  */
 export interface ArrayFieldsSelect<T extends boolean = true> {
@@ -2084,6 +2160,13 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  externallyUpdatedArray?:
+    | T
+    | {
+        customField?: T;
+        id?: T;
+      };
+  ui?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2572,6 +2655,15 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
     | {
         group2Field?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id_select".
+ */
+export interface CustomIdSelect<T extends boolean = true> {
+  id?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3400,6 +3492,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

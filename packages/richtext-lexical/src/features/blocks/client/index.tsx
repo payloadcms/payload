@@ -1,5 +1,6 @@
 'use client'
 
+import type { I18nClient } from '@payloadcms/translations'
 import type { Klass, LexicalNode } from 'lexical'
 import type { BlocksFieldClient, ClientBlock } from 'payload'
 
@@ -174,7 +175,7 @@ export const BlocksFeatureClient = createClientFeature(
                   } as SlashMenuItem
                 }),
                 key: 'blocks',
-                label: ({ i18n }) => {
+                label: ({ i18n }: { i18n: I18nClient<object, 'lexical:blocks:label'> }) => {
                   return i18n.t('lexical:blocks:label')
                 },
               }
@@ -202,7 +203,11 @@ export const BlocksFeatureClient = createClientFeature(
                   } as SlashMenuItem
                 }),
                 key: 'inlineBlocks',
-                label: ({ i18n }) => {
+                label: ({
+                  i18n,
+                }: {
+                  i18n: I18nClient<object, 'lexical:blocks:inlineBlocks:label'>
+                }) => {
                   return i18n.t('lexical:blocks:inlineBlocks:label')
                 },
               }

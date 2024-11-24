@@ -1,1 +1,1 @@
-export * from '@lexical/markdown'
+export * from '../packages/@lexical/markdown/index.js'

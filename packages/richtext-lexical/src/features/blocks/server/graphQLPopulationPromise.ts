@@ -9,7 +9,9 @@ import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/re
 export const blockPopulationPromiseHOC = (
   blocks: Block[],
 ): PopulationPromise<SerializedBlockNode | SerializedInlineBlockNode> => {
-  const blockPopulationPromise: PopulationPromise<SerializedBlockNode> = ({
+  const blockPopulationPromise: PopulationPromise<
+    SerializedBlockNode | SerializedInlineBlockNode
+  > = ({
     context,
     currentDepth,
     depth,

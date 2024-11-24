@@ -1,18 +1,18 @@
-import type {
-  MultilineElementTransformer,
-  TextMatchTransformer,
-  Transformer,
-} from '@lexical/markdown'
 import type { ElementNode, SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import type { Block } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { $convertToMarkdownString } from '@lexical/markdown'
 import { $parseSerializedNode } from 'lexical'
 
 import type { NodeWithHooks } from '../../typesServer.js'
 
 import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
+import {
+  $convertToMarkdownString,
+  type MultilineElementTransformer,
+  type TextMatchTransformer,
+  type Transformer,
+} from '../../../packages/@lexical/markdown/index.js'
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
 import { $convertFromMarkdownString } from '../../../utilities/jsx/lexicalMarkdownCopy.js'

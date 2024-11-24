@@ -116,13 +116,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         schemaPath,
       })
 
-      setModified(true)
-
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, schemaPath, setModified],
+    [addFieldRow, path, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -327,7 +325,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       )}
       {!hasMaxRows && (
         <Fragment>
-          <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
+          <DrawerToggler
+            className={`${baseClass}__drawer-toggler`}
+            disabled={readOnly}
+            slug={drawerSlug}
+          >
             <Button
               buttonStyle="icon-label"
               disabled={readOnly}

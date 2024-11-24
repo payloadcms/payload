@@ -114,8 +114,3 @@ jobs:
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: v2
-      - name: Tag with main branch with v3
-        if: github.event.pull_request.base.ref == 'main'
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: v3

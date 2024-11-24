@@ -32,7 +32,7 @@ type RenderDocument = (args: {
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   signal?: AbortSignal
-}) => Promise<{ docID: string; Document: React.ReactNode }>
+}) => Promise<{ data: Data; Document: React.ReactNode }>
 
 type GetDocumentSlots = (args: {
   collectionSlug: string
@@ -129,16 +129,12 @@ export const ServerFunctionsProvider: React.FC<{
       const { signal: remoteSignal, ...rest } = args || {}
 
       try {
-        if (!remoteSignal?.aborted) {
-          const result = (await serverFunction({
-            name: 'render-document',
-            args: { fallbackLocale: false, ...rest },
-          })) as { docID: string; Document: React.ReactNode }
+        const result = (await serverFunction({
+          name: 'render-document',
+          args: { fallbackLocale: false, ...rest },
+        })) as { data: Data; Document: React.ReactNode }
 
-          if (!remoteSignal?.aborted) {
-            return result
-          }
-        }
+        return result
       } catch (_err) {
         console.error(_err) // eslint-disable-line no-console
       }

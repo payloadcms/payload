@@ -4,6 +4,6 @@ import type { SelectFieldLabelClientComponent } from 'payload'
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomSelectFieldLabelClient: SelectFieldLabelClientComponent = ({ field, label }) => {
-  return <FieldLabel field={field} label={label} />
+export const CustomSelectFieldLabelClient: SelectFieldLabelClientComponent = (props) => {
+  return <FieldLabel label={props?.label} path={props?.path} />
 }

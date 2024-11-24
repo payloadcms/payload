@@ -6,6 +6,7 @@ import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 
 export const getGenerateImportMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateImportMap'] =>
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   ({ addToImportMap, baseDir, config, importMap, imports }) => {
     addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell')
     addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalField')

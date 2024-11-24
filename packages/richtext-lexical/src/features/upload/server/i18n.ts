@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Nahrát',
   },
+  da: {
+    label: 'Upload',
+  },
   de: {
     label: 'Datei',
   },

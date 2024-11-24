@@ -40,7 +40,7 @@
     "graphql": "^16.8.2",
     "jsonwebtoken": "9.0.2",
     "lucide-react": "^0.378.0",
-    "next": "15.0.0",
+    "next": "^15",
     "payload": "latest",
     "payload-admin-bar": "^1.0.6",
     "prism-react-renderer": "^2.3.1",
@@ -67,7 +67,7 @@
     "postcss": "^8.4.38",
     "prettier": "^3.0.3",
     "tailwindcss": "^3.4.3",
-    "typescript": "5.6.3"
+    "typescript": "5.7.2"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

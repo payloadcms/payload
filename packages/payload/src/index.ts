@@ -242,9 +242,7 @@ export class BasePayload {
 
   authStrategies: AuthStrategy[]
 
-  collections: {
-    [slug: CollectionSlug]: Collection
-  } = {}
+  collections: Record<CollectionSlug, Collection> = {}
 
   config: SanitizedConfig
   /**
@@ -1341,7 +1339,6 @@ export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
-export { recursivelySanitizePermissions as sanitizePermissions } from './utilities/sanitizePermissions.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'

@@ -11,7 +11,7 @@ import { renderField } from '@payloadcms/ui/forms/renderField'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
-import type { LexicalFieldAdminProps } from '../types.js'
+import type { LexicalFieldAdminProps, LexicalRichTextFieldProps } from '../types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { RichTextField } from '../exports/client/index.js'
@@ -57,21 +57,27 @@ export const RscEntryLexicalField: React.FC<
     })
   }
 
-  return (
-    <RichTextField
-      admin={args.admin}
-      clientFeatures={clientFeatures}
-      featureClientImportMap={featureClientImportMap}
-      featureClientSchemaMap={featureClientSchemaMap}
-      field={args.clientField as RichTextFieldClient}
-      forceRender={args.forceRender}
-      initialLexicalFormState={initialLexicalFormState}
-      lexicalEditorConfig={args.sanitizedEditorConfig.lexical}
-      path={path}
-      permissions={args.permissions}
-      readOnly={args.readOnly}
-      renderedBlocks={args.renderedBlocks}
-      schemaPath={schemaPath}
-    />
-  )
+  const props: LexicalRichTextFieldProps = {
+    admin: args.admin,
+    clientFeatures,
+    featureClientImportMap,
+    featureClientSchemaMap,
+    field: args.clientField as RichTextFieldClient,
+    forceRender: args.forceRender,
+    initialLexicalFormState,
+    lexicalEditorConfig: args.sanitizedEditorConfig.lexical,
+    path,
+    permissions: args.permissions,
+    readOnly: args.readOnly,
+    renderedBlocks: args.renderedBlocks,
+    schemaPath,
+  }
+
+  for (const key in props) {
+    if (props[key as keyof LexicalRichTextFieldProps] === undefined) {
+      delete props[key as keyof LexicalRichTextFieldProps]
+    }
+  }
+
+  return <RichTextField {...props} />
 }

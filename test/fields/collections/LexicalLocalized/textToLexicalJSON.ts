@@ -13,7 +13,7 @@ export function textToLexicalJSON({
 }: {
   lexicalLocalizedRelID?: number | string
   text: string
-}) {
+}): any {
   const editorJSON: SerializedEditorState = {
     root: {
       type: 'root',
@@ -39,6 +39,7 @@ export function textToLexicalJSON({
           indent: 0,
           textFormat: 0,
           type: 'paragraph',
+          textStyle: '',
           version: 1,
         } as SerializedParagraphNode,
       ],
