@@ -69,7 +69,7 @@ We're constantly adding more templates to our [Templates Directory](https://gith
 - [Auth out of the box](https://payloadcms.com/docs/authentication/overview)
 - [Versions and drafts](https://payloadcms.com/docs/versions/overview)
 - [Localization](https://payloadcms.com/docs/configuration/localization)
-- [Block-based kayout builder](https://payloadcms.com/docs/fields/blocks)
+- [Block-based layout builder](https://payloadcms.com/docs/fields/blocks)
 - [Customizable React admin](https://payloadcms.com/docs/admin/overview)
 - [Lexical rich text editor](https://payloadcms.com/docs/fields/rich-text)
 - [Conditional field logic](https://payloadcms.com/docs/fields/overview#conditional-logic)
