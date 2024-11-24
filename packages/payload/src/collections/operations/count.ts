@@ -1,5 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, TypedLocale } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
@@ -7,11 +7,14 @@ import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
   collection: Collection
   disableErrors?: boolean
+  draft?: boolean
+  locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequest
   where?: Where
@@ -43,6 +46,8 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     const {
       collection: { config: collectionConfig },
       disableErrors,
+      draft = false,
+      locale,
       overrideAccess,
       req: { payload },
       req,
@@ -68,7 +73,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
 
     let result: { totalDocs: number }
 
-    const fullWhere = combineQueries(where, accessResult)
+    let fullWhere = combineQueries(where, accessResult)
 
     await validateQueryPaths({
       collectionConfig,
@@ -77,11 +82,24 @@ export const countOperation = async <TSlug extends CollectionSlug>(
       where,
     })
 
-    result = await payload.db.count({
-      collection: collectionConfig.slug,
-      req,
-      where: fullWhere,
-    })
+    if (draft) {
+      fullWhere = appendVersionToQueryKey(fullWhere)
+      fullWhere = combineQueries(fullWhere, { latest: { equals: true } })
+
+      result = await payload.db.countVersions({
+        collection: collectionConfig.slug,
+        locale,
+        req,
+        where: fullWhere,
+      })
+    } else {
+      result = await payload.db.count({
+        collection: collectionConfig.slug,
+        locale,
+        req,
+        where: fullWhere,
+      })
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

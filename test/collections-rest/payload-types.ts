@@ -17,6 +17,7 @@ export interface Config {
     dummy: Dummy;
     'custom-id': CustomId;
     'custom-id-number': CustomIdNumber;
+    drafts: Draft;
     'error-on-hooks': ErrorOnHook;
     endpoints: Endpoint;
     users: User;
@@ -32,6 +33,7 @@ export interface Config {
     dummy: DummySelect<false> | DummySelect<true>;
     'custom-id': CustomIdSelect<false> | CustomIdSelect<true>;
     'custom-id-number': CustomIdNumberSelect<false> | CustomIdNumberSelect<true>;
+    drafts: DraftsSelect<false> | DraftsSelect<true>;
     'error-on-hooks': ErrorOnHooksSelect<false> | ErrorOnHooksSelect<true>;
     endpoints: EndpointsSelect<false> | EndpointsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -48,9 +50,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -172,6 +174,16 @@ export interface CustomIdNumber {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "drafts".
+ */
+export interface Draft {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "error-on-hooks".
  */
 export interface ErrorOnHook {
@@ -238,6 +250,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-id-number';
         value: number | CustomIdNumber;
+      } | null)
+    | ({
+        relationTo: 'drafts';
+        value: string | Draft;
       } | null)
     | ({
         relationTo: 'error-on-hooks';
@@ -367,6 +383,15 @@ export interface CustomIdSelect<T extends boolean = true> {
  */
 export interface CustomIdNumberSelect<T extends boolean = true> {
   id?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "drafts_select".
+ */
+export interface DraftsSelect<T extends boolean = true> {
   name?: T;
   updatedAt?: T;
   createdAt?: T;

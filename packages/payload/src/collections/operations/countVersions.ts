@@ -1,17 +1,19 @@
 import type { AccessResult } from '../../config/types.js'
+import type { CollectionSlug, TypedLocale } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
-import { buildVersionCollectionFields, type CollectionSlug } from '../../index.js'
+import { buildVersionCollectionFields } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
   collection: Collection
   disableErrors?: boolean
+  locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequest
   where?: Where
@@ -43,6 +45,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
     const {
       collection: { config: collectionConfig },
       disableErrors,
+      locale,
       overrideAccess,
       req: { payload },
       req,
@@ -85,6 +88,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
     result = await payload.db.countVersions({
       collection: collectionConfig.slug,
+      locale,
       req,
       where: fullWhere,
     })
