@@ -103,15 +103,25 @@ export default buildConfigWithDefaults({
         },
       },
       formSubmissionOverrides: {
+        custom: {
+          defaultPaymentFields: false,
+        },
         fields: ({ defaultFields }) => {
-          // const paymentFields = defaultFields.filter(
-          //   (field) => 'name' in field && field.name === 'payment',
-          // )
           return [
             ...defaultFields,
             {
               name: 'custom',
               type: 'text',
+            },
+            {
+              name: 'payment',
+              type: 'group',
+              fields: [
+                {
+                  name: 'Amount',
+                  type: 'number',
+                },
+              ],
             },
           ]
         },
