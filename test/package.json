@@ -78,7 +78,7 @@
     "slate": "0.91.4",
     "tempy": "^1.0.1",
     "ts-essentials": "10.0.3",
-    "typescript": "5.6.3",
+    "typescript": "5.7.2",
     "uuid": "10.0.0"
   },
   "overrides": {

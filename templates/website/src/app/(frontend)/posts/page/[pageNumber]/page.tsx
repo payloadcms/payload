@@ -54,7 +54,7 @@ export default async function Page({ params: paramsPromise }: Args) {
       <CollectionArchive posts={posts.docs} />
 
       <div className="container">
-        {posts.totalPages > 1 && posts.page && (
+        {posts?.page && posts?.totalPages > 1 && (
           <Pagination page={posts.page} totalPages={posts.totalPages} />
         )}
       </div>
@@ -81,8 +81,10 @@ export async function generateStaticParams() {
 
   const pages: { pageNumber: string }[] = []
 
-  for (let i = 1; i <= posts.totalPages; i++) {
-    pages.push({ pageNumber: String(i) })
+  if (posts.totalPages) {
+    for (let i = 1; i <= posts.totalPages; i++) {
+      pages.push({ pageNumber: String(i) })
+    }
   }
 
   return pages

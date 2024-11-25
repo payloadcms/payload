@@ -151,6 +151,7 @@ describe('Queues', () => {
   })
 
   it('ensure job retrying works', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'retriesTest',
       queue: 'default',
@@ -183,9 +184,11 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(3)
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure workflow-level retries are respected', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'retriesWorkflowLevelTest',
       input: {
@@ -217,6 +220,8 @@ describe('Queues', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(2)
+
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   /*
@@ -256,6 +261,7 @@ describe('Queues', () => {
   })*/
 
   it('ensure backoff strategy of task is respected', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'retriesBackoffTest',
       input: {
@@ -338,6 +344,8 @@ describe('Queues', () => {
     expect(durations[1]).toBeGreaterThan(600)
     expect(durations[2]).toBeGreaterThan(1200)
     expect(durations[3]).toBeGreaterThan(2400)
+
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can create new inline jobs', async () => {
@@ -357,6 +365,43 @@ describe('Queues', () => {
 
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0].title).toBe('hello!')
+  })
+
+  it('should respect deleteJobOnComplete true default configuration', async () => {
+    const { id } = await payload.jobs.queue({
+      workflow: 'inlineTaskTest',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(before.id).toBe(id)
+
+    await payload.jobs.run()
+
+    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(after).toBeNull()
+  })
+
+  it('should respect deleteJobOnComplete false configuration', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const { id } = await payload.jobs.queue({
+      workflow: 'inlineTaskTest',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(before.id).toBe(id)
+
+    await payload.jobs.run()
+
+    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    expect(after.id).toBe(id)
+
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('can queue single tasks', async () => {
@@ -513,6 +558,7 @@ describe('Queues', () => {
   })
 
   it('can queue single tasks 500 times', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
     for (let i = 0; i < 500; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
@@ -534,6 +580,7 @@ describe('Queues', () => {
     expect(allSimples.totalDocs).toBe(500) // Default limit: 10
     expect(allSimples.docs[0].title).toBe('from single task')
     expect(allSimples.docs[490].title).toBe('from single task')
+    payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure default jobs run limit of 10 works', async () => {
