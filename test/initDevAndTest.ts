@@ -45,13 +45,13 @@ export async function initDevAndTest(
   console.log('Generating import map for config:', testDir)
 
   const configUrl = pathToFileURL(path.resolve(testDir, 'config.ts')).href
-  const config: ConfigImport = (await import(configUrl)).default
+  const configImport: ConfigImport = (await import(configUrl)).default
+
+  const config = await getConfig(configImport)
 
   process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
 
-  await generateImportMap(await getConfig(config), { log: true, force: true })
-
-  console.log('Done')
+  await generateImportMap(config, { log: true, force: true })
 }
 
 if (runImmediately === 'true') {

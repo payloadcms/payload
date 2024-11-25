@@ -792,13 +792,24 @@ export const reload = async (
 
 export const getConfig = async (configImport: ConfigImport): Promise<SanitizedConfig> => {
   if (global._payload_config) {
-    return await global._payload_config
+    let config = await global._payload_config
+    if (typeof config === 'function') {
+      config = await config()
+    }
+    return await config
   }
   if (typeof configImport === 'function') {
-    global._payload_config = await configImport()
+    global._payload_config = configImport()
+    await global._payload_config
     return global._payload_config
   } else {
-    global._payload_config = await configImport
+    global._payload_config = configImport
+    global._payload_config = await global._payload_config
+
+    if (typeof global._payload_config === 'function') {
+      global._payload_config = global._payload_config()
+      global._payload_config = await global._payload_config
+    }
     return global._payload_config
   }
 }
