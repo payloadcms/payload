@@ -1,13 +1,25 @@
-import type { Endpoint } from '../config/types.js'
+import type { Endpoint, SanitizedConfig } from '../config/types.js'
 
 import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
 
+const configHasJobs = (config: SanitizedConfig): boolean => {
+  if (!config.jobs) {
+    return false
+  }
+
+  if (config.jobs.tasks.length > 0) {
+    return true
+  }
+  if (Array.isArray(config.jobs.workflows) && config.jobs.workflows.length > 0) {
+    return true
+  }
+
+  return false
+}
+
 export const runJobsEndpoint: Endpoint = {
   handler: async (req) => {
-    if (
-      !Array.isArray(req.payload.config.jobs.workflows) ||
-      !(req.payload.config.jobs?.workflows?.length > 0)
-    ) {
+    if (!configHasJobs(req.payload.config)) {
       return Response.json(
         {
           message: 'No jobs to run.',

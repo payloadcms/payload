@@ -21,7 +21,7 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
 
   const db = this.sessions[await req?.transactionID]?.db || this.drizzle
 
-  const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
+  const fields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
   const { joins, where } = buildQuery({
     adapter: this,

@@ -8,10 +8,12 @@ import type { Post } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 
+export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
+
 export const Card: React.FC<{
   alignItems?: 'center'
   className?: string
-  doc?: Post
+  doc?: CardPostData
   relationTo?: 'posts'
   showCategories?: boolean
   title?: string
