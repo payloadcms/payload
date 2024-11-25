@@ -1,4 +1,4 @@
-name: release-canary-${{ github.ref_name }}-${{ github.sha }}
+name: release-canary
 
 on:
   workflow_dispatch:
@@ -11,6 +11,7 @@ env:
 
 jobs:
   release:
+    name: release-canary-${{ github.ref_name }}-${{ github.sha }}
     permissions:
       id-token: write
     runs-on: ubuntu-latest
