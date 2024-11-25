@@ -51,10 +51,10 @@ Depending on how you run this example, you need different environment variables:
   ```ts
   DATABASE_URI=mongodb://127.0.0.1/payload-draft-preview-example
   PAYLOAD_SECRET=YOUR_SECRET_HERE
-  PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3000
+  NEXT_PUBLIC_SERVER_URL=http://localhost:3000
   PAYLOAD_PUBLIC_SITE_URL=http://localhost:3001
-  PAYLOAD_PUBLIC_DRAFT_SECRET=EXAMPLE_DRAFT_SECRET
   REVALIDATION_KEY=EXAMPLE_REVALIDATION_KEY
+  PAYLOAD_PUBLIC_DRAFT_SECRET=EXAMPLE_DRAFT_SECRET
   ```
 
 ### Collections

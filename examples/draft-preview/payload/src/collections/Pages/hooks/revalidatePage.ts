@@ -17,11 +17,8 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
   previousDoc,
   req,
 }) => {
-  const isRevalidateRouteEnabled =
-    process.env.PAYLOAD_PUBLIC_SITE_URL && process.env.REVALIDATION_KEY
-
-  if (isRevalidateRouteEnabled) {
-    // Logic for external revalidation
+  if (process.env.PAYLOAD_PUBLIC_SITE_URL && process.env.REVALIDATION_KEY) {
+    // Revalidate externally if payload is configured separately from the next app
     if (operation === 'update' && doc._status === 'published') {
       const url = formatAppURL({ doc })
 
@@ -44,7 +41,7 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
       void revalidate()
     }
   } else {
-    // Logic for local revalidation
+    // Revalidate internally with next/cache if your payload app is installed within /app folder
     if (req.context.skipRevalidate) {
       return doc
     }
