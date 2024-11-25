@@ -19,7 +19,7 @@ export const countVersions: CountVersions = async function countVersions(
 
   const db = this.sessions[await req?.transactionID]?.db || this.drizzle
 
-  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
   const { joins, where } = buildQuery({
     adapter: this,
