@@ -1150,6 +1150,12 @@ export type {
   FieldWithSubFieldsClient,
   FilterOptions,
   FilterOptionsProps,
+  FlattenedArrayField,
+  FlattenedBlock,
+  FlattenedBlocksField,
+  FlattenedField,
+  FlattenedGroupField,
+  FlattenedTabAsField,
   GroupField,
   GroupFieldClient,
   HookName,
@@ -1332,6 +1338,7 @@ export {
   pathExistsAndIsAccessible,
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
+export { flattenAllFields } from './utilities/flattenAllFields.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'

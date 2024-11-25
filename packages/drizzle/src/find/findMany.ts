@@ -1,4 +1,4 @@
-import type { Field, FindArgs, PayloadRequest, TypeWithID } from 'payload'
+import type { FindArgs, FlattenedField, PayloadRequest, TypeWithID } from 'payload'
 
 import { inArray } from 'drizzle-orm'
 
@@ -12,7 +12,7 @@ import { buildFindManyArgs } from './buildFindManyArgs.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  fields: Field[]
+  fields: FlattenedField[]
   tableName: string
   versions?: boolean
 } & Omit<FindArgs, 'collection'>

@@ -82,9 +82,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -280,8 +280,8 @@ export interface Geo {
  * via the `definition` "customIdTab".
  */
 export interface CustomIdTab {
-  id: string | null;
   title?: string | null;
+  id: string;
   description?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -292,8 +292,8 @@ export interface CustomIdTab {
  * via the `definition` "customIdRow".
  */
 export interface CustomIdRow {
-  id: string | null;
   title?: string | null;
+  id: string;
   description?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -463,7 +463,6 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   richText?: T;
-  demoUIField?: T;
   group?:
     | T
     | {

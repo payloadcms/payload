@@ -1,6 +1,6 @@
-import type { Block, BlocksField, Config, FieldSchemaMap } from 'payload'
+import type { Block, BlocksField, Config, FieldSchemaMap, FlattenedBlocksField } from 'payload'
 
-import { fieldsToJSONSchema, sanitizeFields } from 'payload'
+import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
@@ -56,20 +56,26 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
             return currentSchema
           }
 
-          const fields: BlocksField[] = []
+          const fields: FlattenedBlocksField[] = []
 
           if (props?.blocks?.length) {
             fields.push({
               name: field?.name + '_lexical_blocks',
               type: 'blocks',
-              blocks: props.blocks,
+              blocks: props.blocks.map((block) => ({
+                ...block,
+                flattenedFields: flattenAllFields({ fields: block.fields }),
+              })),
             })
           }
           if (props?.inlineBlocks?.length) {
             fields.push({
               name: field?.name + '_lexical_inline_blocks',
               type: 'blocks',
-              blocks: props.inlineBlocks,
+              blocks: props.inlineBlocks.map((block) => ({
+                ...block,
+                flattenedFields: flattenAllFields({ fields: block.fields }),
+              })),
             })
           }
 

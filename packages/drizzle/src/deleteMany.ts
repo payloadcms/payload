@@ -18,7 +18,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
 
   const result = await findMany({
     adapter: this,
-    fields: collectionConfig.fields,
+    fields: collectionConfig.flattenedFields,
     joins: false,
     limit: 0,
     locale: req.locale,

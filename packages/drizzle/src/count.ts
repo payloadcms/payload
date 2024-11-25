@@ -18,7 +18,7 @@ export const count: Count = async function count(
 
   const { joins, where } = buildQuery({
     adapter: this,
-    fields: collectionConfig.fields,
+    fields: collectionConfig.flattenedFields,
     locale,
     tableName,
     where: whereArg,
