@@ -79,7 +79,7 @@ export const createClientField = ({
   const disabledFromAdmin =
     incomingField?.admin && 'disabled' in incomingField.admin && incomingField.admin.disabled
 
-  if (fieldAffectsData(clientField) && (isHidden || disabledFromAdmin)) {
+  if (fieldAffectsData(incomingField) && (isHidden || disabledFromAdmin)) {
     return null
   }
 
@@ -308,7 +308,7 @@ export const createClientFields = ({
   i18n: I18nClient
   importMap: ImportMap
 }): ClientField[] => {
-  const clientFields: ClientField[] = new Array(fields.length)
+  const clientFields: ClientField[] = []
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
@@ -321,7 +321,7 @@ export const createClientFields = ({
     })
 
     if (clientField) {
-      clientFields[i] = clientField
+      clientFields.push(clientField)
     }
   }
 
