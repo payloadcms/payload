@@ -1,4 +1,4 @@
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 import deepMerge from '../utilities/deepMerge'
 
@@ -20,7 +20,7 @@ export const appearanceOptions = {
 export type LinkAppearances = 'default' | 'primary' | 'secondary'
 
 type LinkType = (options?: {
-  appearances?: LinkAppearances[] | false
+  appearances?: false | LinkAppearances[]
   disableLabel?: boolean
   overrides?: Record<string, unknown>
 }) => Field
@@ -95,8 +95,12 @@ const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = 
   ]
 
   if (!disableLabel) {
-    linkTypes[0].admin.width = '50%'
-    linkTypes[1].admin.width = '50%'
+    if (linkTypes[0].admin) {
+      linkTypes[0].admin.width = '50%'
+    }
+    if (linkTypes[1].admin) {
+      linkTypes[1].admin.width = '50%'
+    }
 
     linkResult.fields.push({
       type: 'row',

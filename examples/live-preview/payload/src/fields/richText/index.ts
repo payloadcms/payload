@@ -1,5 +1,5 @@
-import type { RichTextElement, RichTextLeaf } from '@payloadcms/richtext-slate/dist/types'
-import type { RichTextField } from 'payload/types'
+import type { RichTextElement, RichTextLeaf } from '@payloadcms/richtext-slate'
+import type { RichTextField } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
@@ -17,7 +17,7 @@ type RichText = (
 ) => RichTextField
 
 const richText: RichText = (
-  overrides,
+  overrides = {},
   additions = {
     elements: [],
     leaves: [],
@@ -75,7 +75,7 @@ const richText: RichText = (
                     disableLabel: true,
                     overrides: {
                       admin: {
-                        condition: (_, data) => Boolean(data?.enableLink),
+                        condition: (_: any, data: { enableLink: any }) => Boolean(data?.enableLink),
                       },
                     },
                   }),

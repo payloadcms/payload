@@ -1,8 +1,8 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import richText from '../../fields/richText'
 import { loggedIn } from './access/loggedIn'
-import formatSlug from './hooks/formatSlug'
+import { formatSlug } from './hooks/formatSlug'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
