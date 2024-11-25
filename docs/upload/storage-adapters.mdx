@@ -19,13 +19,13 @@ Payload offers additional storage adapters to handle file uploads. These adapter
 ## Vercel Blob Storage
 [`@payloadcms/storage-vercel-blob`](https://www.npmjs.com/package/@payloadcms/storage-vercel-blob)
 
-### Installation
+### Installation#vercel-blob-installation
 
 ```sh
 pnpm add @payloadcms/storage-vercel-blob
 ```
 
-### Usage
+### Usage#vercel-blob-usage
 
 - Configure the `collections` object to specify which collections should use the Vercel Blob adapter. The slug _must_ match one of your existing collection slugs.
 - Ensure you have `BLOB_READ_WRITE_TOKEN` set in your Vercel environment variables. This is usually set by Vercel automatically after adding blob storage to your project.
@@ -55,7 +55,7 @@ export default buildConfig({
 })
 ```
 
-### Configuration Options
+### Configuration Options#vercel-blob-configuration
 
 | Option               | Description                                                          | Default                       |
 | -------------------- | -------------------------------------------------------------------- | ----------------------------- |
@@ -68,13 +68,13 @@ export default buildConfig({
 ## S3 Storage
 [`@payloadcms/storage-s3`](https://www.npmjs.com/package/@payloadcms/storage-s3)
 
-### Installation
+### Installation#s3-installation
 
 ```sh
 pnpm add @payloadcms/storage-s3
 ```
 
-### Usage
+### Usage#s3-usage
 
 - Configure the `collections` object to specify which collections should use the S3 Storage adapter. The slug _must_ match one of your existing collection slugs.
 - The `config` object can be any [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object (from [`@aws-sdk/client-s3`](https://github.com/aws/aws-sdk-js-v3)). _This is highly dependent on your AWS setup_. Check the AWS documentation for more information.
@@ -109,20 +109,20 @@ export default buildConfig({
 })
 ```
 
-#### Configuration Options
+### Configuration Options#s3-configuration
 
 See the the [AWS SDK Package](https://github.com/aws/aws-sdk-js-v3) and [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object for guidance on AWS S3 configuration.
 
 ## Azure Blob Storage
 [`@payloadcms/storage-azure`](https://www.npmjs.com/package/@payloadcms/storage-azure)
 
-### Installation
+### Installation#azure-installation
 
 ```sh
 pnpm add @payloadcms/storage-azure
 ```
 
-### Usage
+### Usage#azure-usage
 
 - Configure the `collections` object to specify which collections should use the Azure Blob adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
@@ -151,7 +151,7 @@ export default buildConfig({
 })
 ```
 
-### Configuration Options
+### Configuration Options#azure-configuration
 
 | Option                 | Description                                                              | Default |
 | ---------------------- | ------------------------------------------------------------------------ | ------- |
@@ -165,13 +165,13 @@ export default buildConfig({
 ## Google Cloud Storage
 [`@payloadcms/storage-gcs`](https://www.npmjs.com/package/@payloadcms/storage-gcs)
 
-### Installation
+### Installation#gcs-installation
 
 ```sh
 pnpm add @payloadcms/storage-gcs
 ```
 
-### Usage
+### Usage#gcs-usage
 
 - Configure the `collections` object to specify which collections should use the Google Cloud Storage adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
@@ -201,7 +201,7 @@ export default buildConfig({
 })
 ```
 
-### Configuration Options
+### Configuration Options#gcs-configuration
 
 | Option        | Description                                                                                         | Default   |
 | ------------- | --------------------------------------------------------------------------------------------------- | --------- |
@@ -215,13 +215,13 @@ export default buildConfig({
 ## Uploadthing Storage
 [`@payloadcms/storage-uploadthing`](https://www.npmjs.com/package/@payloadcms/storage-uploadthing)
 
-### Installation
+### Installation#uploadthing-installation
 
 ```sh
 pnpm add @payloadcms/storage-uploadthing
 ```
 
-### Usage
+### Usage#uploadthing-usage
 
 - Configure the `collections` object to specify which collections should use uploadthing. The slug _must_ match one of your existing collection slugs and be an `upload` type.
 - Get a token from Uploadthing and set it as `token` in the `options` object.
@@ -244,7 +244,7 @@ export default buildConfig({
 })
 ```
 
-### Configuration Options
+### Configuration Options#uploadthing-configuration
 
 | Option           | Description                                     | Default       |
 | ---------------- | ----------------------------------------------- | ------------- |
@@ -259,11 +259,11 @@ export default buildConfig({
 
 If you need to create a custom storage adapter, you can use the [`@payloadcms/plugin-cloud-storage`](https://www.npmjs.com/package/@payloadcms/plugin-cloud-storage) package. This package is used internally by the storage adapters mentioned above.
 
-### Installation
+### Installation#custom-installation
 
 `pnpm add @payloadcms/plugin-cloud-storage`
 
-### Usage
+### Usage#custom-usage
 
 Reference any of the existing storage adapters for guidance on how this should be structured. Create an adapter following the `GeneratedAdapter` interface. Then, pass the adapter to the `cloudStorage` plugin.
 
