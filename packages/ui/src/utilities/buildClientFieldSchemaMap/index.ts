@@ -5,9 +5,24 @@ import type {
   ClientFieldSchemaMap,
   FieldSchemaMap,
   Payload,
+  TextFieldClient,
 } from 'payload'
 
 import { traverseFields } from './traverseFields.js'
+
+const baseAuthFields: ClientField[] = [
+  {
+    name: 'password',
+    type: 'text',
+    required: true,
+  },
+  {
+    name: 'confirm-password',
+    type: 'text',
+    required: true,
+  },
+]
+
 /**
  * Flattens the config fields into a map of field schemas
  */
@@ -31,20 +46,8 @@ export const buildClientFieldSchemaMap = (args: {
     if (matchedCollection) {
       if (matchedCollection.auth && !matchedCollection.auth.disableLocalStrategy) {
         // register schema with auth schemaPath
-        const baseAuthFields: ClientField[] = [
-          {
-            name: 'password',
-            type: 'text',
-            label: i18n.t('general:password'),
-            required: true,
-          },
-          {
-            name: 'confirm-password',
-            type: 'text',
-            label: i18n.t('authentication:confirmPassword'),
-            required: true,
-          },
-        ]
+        ;(baseAuthFields[0] as TextFieldClient).label = i18n.t('general:password')
+        ;(baseAuthFields[1] as TextFieldClient).label = i18n.t('authentication:confirmPassword')
 
         clientSchemaMap.set(`_${matchedCollection.slug}.auth`, {
           fields: [...baseAuthFields, ...matchedCollection.fields],
