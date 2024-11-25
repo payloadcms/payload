@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, CollectionConfig, SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -30,7 +30,7 @@ export type Props = {
   readonly id?: string
   readonly onDelete?: DocumentDrawerContextType['onDelete']
   readonly redirectAfterDelete?: boolean
-  readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
+  readonly singularLabel: CollectionConfig['labels']['singular']
   readonly title?: string
   readonly useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }

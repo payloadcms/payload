@@ -2,6 +2,7 @@ import type {
   DefaultTranslationsObject,
   I18nClient,
   I18nOptions,
+  SupportedLanguages,
   TFunction,
 } from '@payloadcms/translations'
 import type { BusboyConfig } from 'busboy'
@@ -495,7 +496,7 @@ export type LocalizationConfig = Prettify<
 
 export type LabelFunction = ({ t }: { t: TFunction }) => string
 
-export type StaticLabel = Record<string, string> | string
+export type StaticLabel = Partial<Record<keyof SupportedLanguages, string>> | string
 
 export type SharpDependency = (
   input?:
