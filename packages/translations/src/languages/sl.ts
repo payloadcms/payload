@@ -63,7 +63,6 @@ export const slTranslations: DefaultTranslationsObject = {
     stayLoggedIn: 'Ostani prijavljen',
     successfullyRegisteredFirstUser: 'Uspešno registriran prvi uporabnik.',
     successfullyUnlocked: 'Uspešno odklenjeno',
-    testtest: 'testtest',
     tokenRefreshSuccessful: 'Osvežitev žetona uspešna.',
     unableToVerify: 'Ni mogoče preveriti',
     username: 'Uporabniško ime',
