@@ -194,7 +194,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
             active: activeColumnAccessors.includes(col.accessor),
           }
         })
-        .toSorted((first, second) => {
+        .sort((first, second) => {
           const indexOfFirst = activeColumnAccessors.indexOf(first.accessor)
           const indexOfSecond = activeColumnAccessors.indexOf(second.accessor)
 
@@ -204,7 +204,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
           return indexOfFirst > indexOfSecond ? 1 : -1
         })
-
       const { state: columnState, Table } = await getTableState({
         collectionSlug,
         columns: activeColumns,
