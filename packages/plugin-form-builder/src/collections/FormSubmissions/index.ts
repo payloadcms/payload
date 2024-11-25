@@ -12,6 +12,8 @@ export const generateSubmissionCollection = (
 ): CollectionConfig => {
   const formSlug = formConfig?.formOverrides?.slug || 'forms'
 
+  const enablePaymentFields = Boolean(formConfig?.fields?.payment)
+
   const defaultFields: Field[] = [
     {
       name: 'form',
@@ -80,6 +82,7 @@ export const generateSubmissionCollection = (
         },
       ],
     },
+    ...(enablePaymentFields ? [defaultPaymentFields] : []),
   ]
 
   const newConfig: CollectionConfig = {
@@ -108,17 +111,6 @@ export const generateSubmissionCollection = (
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],
     },
-  }
-  const paymentFieldConfig = formConfig?.fields?.payment
-  const paymentFields = formConfig?.formSubmissionOverrides?.paymentFields ?? true
-
-  if (paymentFieldConfig) {
-    if (Array.isArray(paymentFields)) {
-      newConfig.fields.push(...paymentFields)
-    }
-    if (typeof paymentFields === 'boolean' && paymentFields) {
-      newConfig.fields.push(defaultPaymentFields)
-    }
   }
   return newConfig
 }

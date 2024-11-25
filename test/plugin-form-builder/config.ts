@@ -3,7 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { BeforeEmail } from '@payloadcms/plugin-form-builder/types'
-import type { Block } from 'payload'
+import type { Block, Field } from 'payload'
 
 //import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
@@ -103,21 +103,26 @@ export default buildConfigWithDefaults({
         },
       },
       formSubmissionOverrides: {
-        paymentFields: [
-          {
-            name: 'payment',
-            type: 'group',
-            fields: [
-              {
-                name: 'stripeCheckoutSession',
-                type: 'text',
-              },
-            ],
-          },
-        ],
         fields: ({ defaultFields }) => {
+          const modifiedFields: Field[] = defaultFields.map((field) => {
+            if ('name' in field && field.type === 'group' && field.name === 'payment') {
+              return {
+                ...field,
+                fields: [
+                  ...field.fields, // comment this out to override payments group entirely
+                  {
+                    name: 'stripeCheckoutSession',
+                    type: 'text',
+                  },
+                ],
+              }
+            }
+
+            return field
+          })
+
           return [
-            ...defaultFields,
+            ...modifiedFields,
             {
               name: 'custom',
               type: 'text',
