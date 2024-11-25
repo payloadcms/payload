@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-exports */
 import auth from '../../../auth/operations/local/index.js'
+import { update as updatePreference } from '../../../preferences/operations/update.js'
 import count from './count.js'
 import countVersions from './countVersions.js'
 import create from './create.js'
@@ -25,4 +26,5 @@ export default {
   findVersions,
   restoreVersion,
   update,
+  updatePreference,
 }

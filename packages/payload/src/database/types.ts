@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { CollectionSlug, GlobalSlug } from '../index.js'
+import type { CollectionSlug, GlobalSlug, PreferenceUpdateRequest } from '../index.js'
 import type {
   Document,
   JoinQuery,
@@ -144,6 +144,8 @@ export interface BaseDatabaseAdapter {
   updateGlobalVersion: UpdateGlobalVersion
 
   updateOne: UpdateOne
+
+  updatePreference: UpdatePreference
 
   updateVersion: UpdateVersion
 
@@ -413,6 +415,8 @@ export type UpdateVersionArgs<T = TypeWithID> = {
 export type UpdateVersion = <T extends TypeWithID = TypeWithID>(
   args: UpdateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
+
+export type UpdatePreference = (args: PreferenceUpdateRequest) => Promise<TypeWithID>
 
 export type CreateArgs = {
   collection: CollectionSlug

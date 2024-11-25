@@ -1,9 +1,12 @@
+import type { TypedCollection } from '../../index.js'
 import type { Where } from '../../types/index.js'
 import type { PreferenceUpdateRequest } from '../types.js'
 
 import { UnauthorizedError } from '../../errors/UnathorizedError.js'
 
-export async function update(args: PreferenceUpdateRequest) {
+export async function update(
+  args: PreferenceUpdateRequest,
+): Promise<TypedCollection['_preference']> {
   const {
     key,
     req: { payload },
