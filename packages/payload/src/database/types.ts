@@ -1,5 +1,10 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { CollectionSlug, GlobalSlug, PreferenceUpdateRequest } from '../index.js'
+import type {
+  CollectionSlug,
+  GlobalSlug,
+  PreferenceUpdateRequest,
+  TypedCollection,
+} from '../index.js'
 import type {
   Document,
   JoinQuery,
@@ -416,7 +421,9 @@ export type UpdateVersion = <T extends TypeWithID = TypeWithID>(
   args: UpdateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
-export type UpdatePreference = (args: PreferenceUpdateRequest) => Promise<TypeWithID>
+export type UpdatePreference = (
+  args: PreferenceUpdateRequest,
+) => Promise<TypedCollection['_preference']>
 
 export type CreateArgs = {
   collection: CollectionSlug
