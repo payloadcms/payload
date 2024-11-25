@@ -37,7 +37,7 @@ export const init: Init = function init(this: MongooseAdapter) {
       versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
         getBuildQueryPlugin({
           collectionSlug: collection.slug,
-          versionsFields: versionCollectionFields,
+          versionsFields: buildVersionCollectionFields(this.payload.config, collection, true),
         }),
       )
 
@@ -84,9 +84,11 @@ export const init: Init = function init(this: MongooseAdapter) {
         },
       })
 
-      versionSchema
-        .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
-        .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }))
+      versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
+        getBuildQueryPlugin({
+          versionsFields: buildVersionGlobalFields(this.payload.config, global, true),
+        }),
+      )
 
       this.versions[global.slug] = mongoose.model(
         versionModelName,

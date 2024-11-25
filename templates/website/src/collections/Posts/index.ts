@@ -28,7 +28,7 @@ import {
 import { slugField } from '@/fields/slug'
 import { getServerSideURL } from '@/utilities/getURL'
 
-export const Posts: CollectionConfig = {
+export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
     create: authenticated,
@@ -38,6 +38,7 @@ export const Posts: CollectionConfig = {
   },
   // This config controls what's populated by default when a post is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
+  // Type safe if the collection slug generic is passed to `CollectionConfig` - `CollectionConfig<'posts'>
   defaultPopulate: {
     title: true,
     slug: true,

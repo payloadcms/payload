@@ -102,8 +102,8 @@ level and stores the following fields.
 
 | Field   | Description                                                                                                                                                                                                                                                                                  |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `label` | The label of the breadcrumb. This field is automatically set to either the `collection.admin.useAsTitle` (if defined) or is set to the `ID` of the document. You can also dynamically define the `label` by passing a function to the options property of [`generateLabel`](#generateLabel). |
-| `url`   | The URL of the breadcrumb. By default, this field is undefined. You can manually define this field by passing a property called function to the plugin options property of [`generateURL`](#generateURL).                                                                                    |
+| `label` | The label of the breadcrumb. This field is automatically set to either the `collection.admin.useAsTitle` (if defined) or is set to the `ID` of the document. You can also dynamically define the `label` by passing a function to the options property of [`generateLabel`](#generatelabel). |
+| `url`   | The URL of the breadcrumb. By default, this field is undefined. You can manually define this field by passing a property called function to the plugin options property of [`generateURL`](#generateurl).                                                                                    |
 
 ### Options
 
@@ -226,7 +226,7 @@ const examplePageConfig: CollectionConfig = {
 
 This plugin supports localization by default. If the `localization` property is set in your Payload Config,
 the `breadcrumbs` field is automatically localized. For more details on how localization works in Payload, see
-the [Localization](https://payloadcms.com/docs/localization/overview) docs.
+the [Localization](https://payloadcms.com/docs/configuration/localization) docs.
 
 ## TypeScript
 

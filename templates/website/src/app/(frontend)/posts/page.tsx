@@ -19,6 +19,12 @@ export default async function Page() {
     depth: 1,
     limit: 12,
     overrideAccess: false,
+    select: {
+      title: true,
+      slug: true,
+      categories: true,
+      meta: true,
+    },
   })
 
   return (

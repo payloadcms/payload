@@ -1,11 +1,8 @@
-import type { Field } from '../fields/config/types.js'
+import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { Payload } from '../index.js'
 import type { PathToQuery } from './queryValidation/types.js'
 
-import { fieldAffectsData } from '../fields/config/types.js'
-import flattenFields from '../utilities/flattenTopLevelFields.js'
-
-export async function getLocalizedPaths({
+export function getLocalizedPaths({
   collectionSlug,
   fields,
   globalSlug,
@@ -15,13 +12,13 @@ export async function getLocalizedPaths({
   payload,
 }: {
   collectionSlug?: string
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   incomingPath: string
   locale?: string
   overrideAccess?: boolean
   payload: Payload
-}): Promise<PathToQuery[]> {
+}): PathToQuery[] {
   const pathSegments = incomingPath.split('.')
   const localizationConfig = payload.config.localization
 
@@ -30,7 +27,7 @@ export async function getLocalizedPaths({
       collectionSlug,
       complete: false,
       field: undefined,
-      fields: flattenFields(fields, false),
+      fields,
       globalSlug,
       invalid: false,
       path: '',
@@ -46,9 +43,15 @@ export async function getLocalizedPaths({
       const { path } = lastIncompletePath
       let currentPath = path ? `${path}.${segment}` : segment
 
-      const matchedField = lastIncompletePath.fields.find(
-        (field) => fieldAffectsData(field) && field.name === segment,
-      )
+      let fieldsToSearch: FlattenedField[]
+
+      if (lastIncompletePath?.field && 'flattenedFields' in lastIncompletePath.field) {
+        fieldsToSearch = lastIncompletePath.field.flattenedFields
+      } else {
+        fieldsToSearch = lastIncompletePath.fields
+      }
+
+      const matchedField = fieldsToSearch.find((field) => field.name === segment)
       lastIncompletePath.field = matchedField
 
       if (currentPath === 'globalType' && globalSlug) {
@@ -131,9 +134,9 @@ export async function getLocalizedPaths({
               if (nestedPathToQuery) {
                 const relatedCollection = payload.collections[matchedField.relationTo].config
 
-                const remainingPaths = await getLocalizedPaths({
+                const remainingPaths = getLocalizedPaths({
                   collectionSlug: relatedCollection.slug,
-                  fields: relatedCollection.fields,
+                  fields: relatedCollection.flattenedFields,
                   globalSlug,
                   incomingPath: nestedPathToQuery,
                   locale,
@@ -150,10 +153,6 @@ export async function getLocalizedPaths({
           }
 
           default: {
-            if ('fields' in lastIncompletePath.field) {
-              lastIncompletePath.fields = flattenFields(lastIncompletePath.field.fields, false)
-            }
-
             if (i + 1 === pathSegments.length) {
               lastIncompletePath.complete = true
             }
