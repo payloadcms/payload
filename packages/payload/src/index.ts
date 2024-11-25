@@ -555,7 +555,7 @@ export class BasePayload {
       !checkedDependencies
     ) {
       checkedDependencies = true
-      checkPayloadDependencies()
+      void checkPayloadDependencies()
     }
 
     this.importMap = options.importMap
