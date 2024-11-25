@@ -93,9 +93,13 @@ const DatePicker: React.FC<Props> = (props) => {
 
   React.useEffect(() => {
     if (i18n.dateFNS) {
-      const datepickerLocale = getFormattedLocale(i18n.language)
-      registerLocale(datepickerLocale, i18n.dateFNS)
-      setDefaultLocale(datepickerLocale)
+      try {
+        const datepickerLocale = getFormattedLocale(i18n.language)
+        registerLocale(datepickerLocale, i18n.dateFNS)
+        setDefaultLocale(datepickerLocale)
+      } catch (e) {
+        console.warn(`Could not find DatePicker locale for ${i18n.language}`)
+      }
     }
   }, [i18n.language, i18n.dateFNS])
 
