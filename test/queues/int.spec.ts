@@ -378,6 +378,32 @@ describe('Queues', () => {
     expect(allSimples.docs[0].title).toBe('from single task')
   })
 
+  it('can queue and run via the endpoint single tasks without workflows', async () => {
+    const workflowsRef = payload.config.jobs.workflows
+    delete payload.config.jobs.workflows
+    await payload.jobs.queue({
+      task: 'CreateSimple',
+      input: {
+        message: 'from single task',
+      },
+    })
+
+    await restClient.GET('/payload-jobs/run', {
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task')
+    payload.config.jobs.workflows = workflowsRef
+  })
+
   /*
   // Task rollbacks are not supported in the current version of Payload. This test will be re-enabled when task rollbacks are supported once we figure out the transaction issues
   it('transaction test against payload-jobs collection', async () => {
