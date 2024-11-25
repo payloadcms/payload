@@ -19,7 +19,6 @@ export const buildClientFieldSchemaMap = (args: {
   payload: Payload
   schemaMap: FieldSchemaMap
 }): { clientFieldSchemaMap: ClientFieldSchemaMap } => {
-  console.log('Creating client schemaMap')
   const { collectionSlug, config, globalSlug, i18n, payload, schemaMap } = args
 
   const clientSchemaMap: ClientFieldSchemaMap = new Map()
