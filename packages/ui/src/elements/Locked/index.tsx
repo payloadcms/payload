@@ -11,10 +11,10 @@ import './index.scss'
 
 const baseClass = 'locked'
 
-export const Locked: React.FC<{ className?: string; user: ClientUser | number | string }> = ({
-  className,
-  user,
-}) => {
+export const Locked: React.FC<{
+  className?: string
+  user: ClientUser
+}> = ({ className, user }) => {
   const [hovered, setHovered] = useState(false)
   const { t } = useTranslation()
 

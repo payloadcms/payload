@@ -1,8 +1,6 @@
 import type { PipelineStage } from 'mongoose'
 import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig, Where } from 'payload'
 
-import { combineQueries } from 'payload'
-
 import type { MongooseAdapter } from '../index.js'
 
 import { buildSortParam } from '../queries/buildSortParam.js'
@@ -60,11 +58,11 @@ export const buildJoinAggregation = async ({
     for (const join of joinConfig[slug]) {
       const joinModel = adapter.collections[join.field.collection]
 
-      if (projection && !projection[join.schemaPath]) {
+      if (projection && !projection[join.joinPath]) {
         continue
       }
 
-      if (joins?.[join.schemaPath] === false) {
+      if (joins?.[join.joinPath] === false) {
         continue
       }
 
@@ -72,11 +70,11 @@ export const buildJoinAggregation = async ({
         limit: limitJoin = join.field.defaultLimit ?? 10,
         sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
         where: whereJoin,
-      } = joins?.[join.schemaPath] || {}
+      } = joins?.[join.joinPath] || {}
 
       const sort = buildSortParam({
         config: adapter.payload.config,
-        fields: adapter.payload.collections[slug].config.fields,
+        fields: adapter.payload.collections[slug].config.flattenedFields,
         locale,
         sort: sortJoin,
         timestamps: true,
@@ -105,7 +103,7 @@ export const buildJoinAggregation = async ({
 
       if (adapter.payload.config.localization && locale === 'all') {
         adapter.payload.config.localization.localeCodes.forEach((code) => {
-          const as = `${versions ? `version.${join.schemaPath}` : join.schemaPath}${code}`
+          const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${code}`
 
           aggregate.push(
             {
@@ -146,7 +144,7 @@ export const buildJoinAggregation = async ({
       } else {
         const localeSuffix =
           join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
-        const as = `${versions ? `version.${join.schemaPath}` : join.schemaPath}${localeSuffix}`
+        const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${localeSuffix}`
 
         aggregate.push(
           {

@@ -1,32 +1,57 @@
-import type { AdminViewProps, ClientCollectionConfig, Where } from 'payload'
-
-import {
-  HydrateAuthProvider,
-  ListInfoProvider,
-  ListQueryProvider,
-  TableColumnsProvider,
+import type {
+  ListComponentClientProps,
+  ListComponentServerProps,
+  ListPreferences,
+  ListViewClientProps,
 } from '@payloadcms/ui'
-import { formatAdminURL, getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
-import { createClientCollectionConfig } from '@payloadcms/ui/utilities/createClientConfig'
+import type { AdminViewProps, ListQuery, Where } from 'payload'
+
+import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { renderFilters, renderTable } from '@payloadcms/ui/rsc'
+import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { deepCopyObjectSimple, mergeListSearchAndWhere } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import type { ListPreferences } from './Default/types.js'
-
-import { DefaultEditView } from '../Edit/Default/index.js'
-import { DefaultListView } from './Default/index.js'
+import { renderListViewSlots } from './renderListViewSlots.js'
 
 export { generateListMetadata } from './meta.js'
 
-export const ListView: React.FC<AdminViewProps> = async ({
-  initPageResult,
-  params,
-  searchParams,
-}) => {
+type ListViewArgs = {
+  customCellProps?: Record<string, any>
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
+  enableRowSelections: boolean
+  query: ListQuery
+} & AdminViewProps
+
+export const renderListView = async (
+  args: ListViewArgs,
+): Promise<{
+  List: React.ReactNode
+}> => {
+  const {
+    clientConfig,
+    customCellProps,
+    disableBulkDelete,
+    disableBulkEdit,
+    drawerSlug,
+    enableRowSelections,
+    initPageResult,
+    params,
+    query: queryFromArgs,
+    searchParams,
+  } = args
+
   const {
     collectionConfig,
+    collectionConfig: {
+      slug: collectionSlug,
+      admin: { useAsTitle },
+      defaultSort,
+      fields,
+    },
     locale: fullLocale,
     permissions,
     req,
@@ -35,17 +60,17 @@ export const ListView: React.FC<AdminViewProps> = async ({
       locale,
       payload,
       payload: { config },
-      query,
+      query: queryFromReq,
       user,
     },
     visibleEntities,
   } = initPageResult
 
-  const collectionSlug = collectionConfig?.slug
-
-  if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
-    notFound()
+  if (!permissions?.collections?.[collectionSlug]?.read) {
+    throw new Error('not-found')
   }
+
+  const query = queryFromArgs || queryFromReq
 
   let listPreferences: ListPreferences
   const preferenceKey = `${collectionSlug}-list`
@@ -79,7 +104,7 @@ export const ListView: React.FC<AdminViewProps> = async ({
         },
       })
       ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
-  } catch (error) {} // eslint-disable-line no-empty
+  } catch (_err) {} // eslint-disable-line no-empty
 
   const {
     routes: { admin: adminRoute },
@@ -87,20 +112,21 @@ export const ListView: React.FC<AdminViewProps> = async ({
 
   if (collectionConfig) {
     if (!visibleEntities.collections.includes(collectionSlug)) {
-      return notFound()
+      throw new Error('not-found')
     }
 
     const page = isNumber(query?.page) ? Number(query.page) : 0
-    const whereQuery = mergeListSearchAndWhere({
+
+    let whereQuery = mergeListSearchAndWhere({
       collectionConfig,
-      query: {
-        search: typeof query?.search === 'string' ? query.search : undefined,
-        where: (query?.where as Where) || undefined,
-      },
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      where: (query?.where as Where) || undefined,
     })
+
     const limit = isNumber(query?.limit)
       ? Number(query.limit)
       : listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+
     const sort =
       query?.sort && typeof query.sort === 'string'
         ? query.sort
@@ -109,11 +135,26 @@ export const ListView: React.FC<AdminViewProps> = async ({
             ? collectionConfig.defaultSort
             : undefined)
 
+    if (typeof collectionConfig.admin?.baseListFilter === 'function') {
+      const baseListFilter = await collectionConfig.admin.baseListFilter({
+        limit,
+        page,
+        req,
+        sort,
+      })
+
+      if (baseListFilter) {
+        whereQuery = {
+          and: [whereQuery, baseListFilter].filter(Boolean),
+        }
+      }
+    }
+
     const data = await payload.find({
       collection: collectionSlug,
       depth: 0,
       draft: true,
-      fallbackLocale: null,
+      fallbackLocale: false,
       includeLockStatus: true,
       limit,
       locale,
@@ -125,89 +166,113 @@ export const ListView: React.FC<AdminViewProps> = async ({
       where: whereQuery || {},
     })
 
-    const createMappedComponent = getCreateMappedComponent({
-      importMap: payload.importMap,
-      serverProps: {
-        collectionConfig,
-        collectionSlug,
-        data,
-        hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
-        i18n,
-        limit,
-        listPreferences,
-        listSearchableFields: collectionConfig.admin.listSearchableFields,
-        locale: fullLocale,
-        newDocumentURL: formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionSlug}/create`,
-        }),
-        params,
-        payload,
-        permissions,
-        searchParams,
-        user,
-      },
-    })
+    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
-    const ListComponent = createMappedComponent(
-      collectionConfig?.admin?.components?.views?.list?.Component,
-      undefined,
-      DefaultListView,
-      'collectionConfig?.admin?.components?.views?.list?.Component',
-    )
-
-    let clientCollectionConfig = deepCopyObjectSimple(
-      collectionConfig,
-    ) as unknown as ClientCollectionConfig
-    clientCollectionConfig = createClientCollectionConfig({
-      clientCollection: clientCollectionConfig,
-      collection: collectionConfig,
-      createMappedComponent,
-      DefaultEditView,
-      DefaultListView,
-      i18n,
-      importMap: payload.importMap,
+    const { columnState, Table } = renderTable({
+      collectionConfig: clientCollectionConfig,
+      columnPreferences: listPreferences?.columns,
+      customCellProps,
+      docs: data.docs,
+      drawerSlug,
+      enableRowSelections,
+      fields,
+      i18n: req.i18n,
       payload,
+      useAsTitle,
     })
 
-    return (
-      <Fragment>
-        <HydrateAuthProvider permissions={permissions} />
-        <ListInfoProvider
-          collectionConfig={clientCollectionConfig}
-          collectionSlug={collectionSlug}
-          hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
-          newDocumentURL={formatAdminURL({
-            adminRoute,
-            path: `/collections/${collectionSlug}/create`,
-          })}
-        >
+    const renderedFilters = renderFilters(fields, req.payload.importMap)
+
+    const staticDescription =
+      typeof collectionConfig.admin.description === 'function'
+        ? collectionConfig.admin.description({ t: i18n.t })
+        : collectionConfig.admin.description
+
+    const sharedClientProps: ListComponentClientProps = {
+      collectionSlug,
+      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create,
+      newDocumentURL: formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}/create`,
+      }),
+    }
+
+    const sharedServerProps: ListComponentServerProps = {
+      collectionConfig,
+      i18n,
+      limit,
+      locale: fullLocale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    }
+
+    const listViewSlots = renderListViewSlots({
+      clientProps: sharedClientProps,
+      collectionConfig,
+      description: staticDescription,
+      payload,
+      serverProps: sharedServerProps,
+    })
+
+    const clientProps: ListViewClientProps = {
+      ...listViewSlots,
+      ...sharedClientProps,
+      columnState,
+      disableBulkDelete,
+      disableBulkEdit,
+      enableRowSelections,
+      listPreferences,
+      renderedFilters,
+      Table,
+    }
+
+    const isInDrawer = Boolean(drawerSlug)
+
+    return {
+      List: (
+        <Fragment>
+          <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
+            collectionSlug={collectionSlug}
             data={data}
-            defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
+            defaultLimit={limit}
             defaultSort={sort}
-            modifySearchParams
+            modifySearchParams={!isInDrawer}
             preferenceKey={preferenceKey}
           >
-            <TableColumnsProvider
-              collectionSlug={collectionSlug}
-              enableRowSelections
-              listPreferences={listPreferences}
-              preferenceKey={preferenceKey}
-            >
-              <RenderComponent
-                clientProps={{
-                  collectionSlug,
-                  listSearchableFields: collectionConfig?.admin?.listSearchableFields,
-                }}
-                mappedComponent={ListComponent}
-              />
-            </TableColumnsProvider>
+            {RenderServerComponent({
+              clientProps,
+              Component: collectionConfig?.admin?.components?.views?.list?.Component,
+              Fallback: DefaultListView,
+              importMap: payload.importMap,
+              serverProps: {
+                ...sharedServerProps,
+                data,
+                listPreferences,
+                listSearchableFields: collectionConfig.admin.listSearchableFields,
+              },
+            })}
           </ListQueryProvider>
-        </ListInfoProvider>
-      </Fragment>
-    )
+        </Fragment>
+      ),
+    }
   }
 
-  return notFound()
+  throw new Error('not-found')
+}
+
+export const ListView: React.FC<ListViewArgs> = async (args) => {
+  try {
+    const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
+    return RenderedList
+  } catch (error) {
+    if (error.message === 'not-found') {
+      notFound()
+    } else {
+      console.error(error) // eslint-disable-line no-console
+    }
+  }
 }

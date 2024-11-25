@@ -18,7 +18,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT } from '../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -38,7 +38,7 @@ let serverURL: string
 
 describe('locked documents', () => {
   beforeAll(async ({ browser }, testInfo) => {
-    testInfo.setTimeout(TEST_TIMEOUT)
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
     globalUrl = new AdminUrlUtil(serverURL, 'menu')

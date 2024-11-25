@@ -19,6 +19,7 @@ import type {
 type PointFieldClientWithoutType = MarkOptional<PointFieldClient, 'type'>
 
 type PointFieldBaseClientProps = {
+  readonly path: string
   readonly validate?: PointFieldValidation
 }
 

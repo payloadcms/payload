@@ -1,6 +1,6 @@
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { headers as getHeaders } from 'next/headers.js'
 import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import config from '../../../payload.config'
@@ -10,7 +10,7 @@ import { RecoverPasswordForm } from './RecoverPasswordForm'
 
 export default async function RecoverPassword() {
   const headers = getHeaders()
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers })
 
   if (user) {

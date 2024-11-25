@@ -18,19 +18,6 @@ type Action = AddLoadedDocuments | RequestDocuments
 
 export function reducer(state: Documents, action: Action): Documents {
   switch (action.type) {
-    case 'REQUEST': {
-      const newState = { ...state }
-
-      action.docs.forEach(({ relationTo, value }) => {
-        if (typeof newState[relationTo] !== 'object') {
-          newState[relationTo] = {}
-        }
-        newState[relationTo][value] = null
-      })
-
-      return newState
-    }
-
     case 'ADD_LOADED': {
       const newState = { ...state }
       if (typeof newState[action.relationTo] !== 'object') {
@@ -47,6 +34,19 @@ export function reducer(state: Documents, action: Action): Documents {
 
       unreturnedIDs.forEach((id) => {
         newState[action.relationTo][id] = false
+      })
+
+      return newState
+    }
+
+    case 'REQUEST': {
+      const newState = { ...state }
+
+      action.docs.forEach(({ relationTo, value }) => {
+        if (typeof newState[relationTo] !== 'object') {
+          newState[relationTo] = {}
+        }
+        newState[relationTo][value] = null
       })
 
       return newState

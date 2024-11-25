@@ -40,6 +40,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const contextRef = useRef({} as SelectionContext)
 
   const { code: locale } = useLocale()
+
   const [selected, setSelected] = useState<SelectionContext['selected']>(() => {
     const rows = new Map()
     docs.forEach(({ id }) => {
@@ -74,6 +75,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
           }
         })
       }
+
       setSelected(rows)
     },
     [docs, selectAll, user?.id],
@@ -106,8 +108,10 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const getQueryParams = useCallback(
     (additionalWhereParams?: Where): string => {
       let where: Where
+
       if (selectAll === SelectAllStatus.AllAvailable) {
         const params = searchParams?.where as Where
+
         where = params || {
           id: { not_equals: '' },
         }
@@ -126,11 +130,13 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
           },
         }
       }
+
       if (additionalWhereParams) {
         where = {
           and: [{ ...additionalWhereParams }, where],
         }
       }
+
       return qs.stringify(
         {
           locale,

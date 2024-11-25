@@ -1,13 +1,9 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { AdminViewProps } from 'payload'
 
-import { HydrateAuthProvider } from '@payloadcms/ui'
-import {
-  EntityType,
-  getCreateMappedComponent,
-  groupNavItems,
-  RenderComponent,
-} from '@payloadcms/ui/shared'
+import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
@@ -35,18 +31,15 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
     visibleEntities,
   } = initPageResult
 
-  const CustomDashboardComponent = config.admin.components?.views?.Dashboard
-
   const collections = config.collections.filter(
     (collection) =>
-      permissions?.collections?.[collection.slug]?.read?.permission &&
+      permissions?.collections?.[collection.slug]?.read &&
       visibleEntities.collections.includes(collection.slug),
   )
 
   const globals = config.globals.filter(
     (global) =>
-      permissions?.globals?.[global.slug]?.read?.permission &&
-      visibleEntities.globals.includes(global.slug),
+      permissions?.globals?.[global.slug]?.read && visibleEntities.globals.includes(global.slug),
   )
 
   // Query locked global documents only if there are globals in the config
@@ -111,40 +104,32 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
     i18n,
   )
 
-  const createMappedComponent = getCreateMappedComponent({
-    importMap: payload.importMap,
-    serverProps: {
-      globalData,
-      i18n,
-      Link,
-      locale,
-      navGroups,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-      visibleEntities,
-    },
-  })
-
-  const mappedDashboardComponent = createMappedComponent(
-    CustomDashboardComponent?.Component,
-    undefined,
-    DefaultDashboard,
-    'CustomDashboardComponent.Component',
-  )
-
   return (
     <Fragment>
       <HydrateAuthProvider permissions={permissions} />
-      <RenderComponent
-        clientProps={{
+      <SetStepNav nav={[]} />
+      {RenderServerComponent({
+        clientProps: {
           Link,
           locale,
-        }}
-        mappedComponent={mappedDashboardComponent}
-      />
+        },
+        Component: config.admin?.components?.views?.dashboard?.Component,
+        Fallback: DefaultDashboard,
+        importMap: payload.importMap,
+        serverProps: {
+          globalData,
+          i18n,
+          Link,
+          locale,
+          navGroups,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+          visibleEntities,
+        },
+      })}
     </Fragment>
   )
 }

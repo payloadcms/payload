@@ -1,7 +1,6 @@
 import type { TransactionPg } from '@payloadcms/drizzle/types'
-import type { Field, Payload } from 'payload'
+import type { FlattenedField, Payload } from 'payload'
 
-import { tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { VercelPostgresAdapter } from '../../types.js'
@@ -13,7 +12,7 @@ type Args = {
   columnPrefix: string
   db: TransactionPg
   disableNotNull: boolean
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   isVersions: boolean
   newTableName: string
@@ -27,30 +26,6 @@ type Args = {
 export const traverseFields = (args: Args) => {
   args.fields.forEach((field) => {
     switch (field.type) {
-      case 'group': {
-        let newTableName = `${args.newTableName}_${toSnakeCase(field.name)}`
-
-        if (field.localized && args.payload.config.localization) {
-          newTableName += args.adapter.localesSuffix
-        }
-
-        return traverseFields({
-          ...args,
-          columnPrefix: `${args.columnPrefix}${toSnakeCase(field.name)}_`,
-          fields: field.fields,
-          newTableName,
-          path: `${args.path ? `${args.path}.` : ''}${field.name}`,
-        })
-      }
-
-      case 'row':
-      case 'collapsible': {
-        return traverseFields({
-          ...args,
-          fields: field.fields,
-        })
-      }
-
       case 'array': {
         const newTableName = args.adapter.tableNameMap.get(
           `${args.newTableName}_${toSnakeCase(field.name)}`,
@@ -59,7 +34,7 @@ export const traverseFields = (args: Args) => {
         return traverseFields({
           ...args,
           columnPrefix: '',
-          fields: field.fields,
+          fields: field.flattenedFields,
           newTableName,
           parentTableName: newTableName,
           path: `${args.path ? `${args.path}.` : ''}${field.name}.%`,
@@ -75,7 +50,7 @@ export const traverseFields = (args: Args) => {
           traverseFields({
             ...args,
             columnPrefix: '',
-            fields: block.fields,
+            fields: block.flattenedFields,
             newTableName,
             parentTableName: newTableName,
             path: `${args.path ? `${args.path}.` : ''}${field.name}.%`,
@@ -83,22 +58,20 @@ export const traverseFields = (args: Args) => {
         })
       }
 
-      case 'tabs': {
-        return field.tabs.forEach((tab) => {
-          if (tabHasName(tab)) {
-            args.columnPrefix = `${args.columnPrefix}_${toSnakeCase(tab.name)}_`
-            args.path = `${args.path ? `${args.path}.` : ''}${tab.name}`
-            args.newTableName = `${args.newTableName}_${toSnakeCase(tab.name)}`
+      case 'group':
+      case 'tab': {
+        let newTableName = `${args.newTableName}_${toSnakeCase(field.name)}`
 
-            if (tab.localized && args.payload.config.localization) {
-              args.newTableName += args.adapter.localesSuffix
-            }
-          }
+        if (field.localized && args.payload.config.localization) {
+          newTableName += args.adapter.localesSuffix
+        }
 
-          traverseFields({
-            ...args,
-            fields: tab.fields,
-          })
+        return traverseFields({
+          ...args,
+          columnPrefix: `${args.columnPrefix}${toSnakeCase(field.name)}_`,
+          fields: field.flattenedFields,
+          newTableName,
+          path: `${args.path ? `${args.path}.` : ''}${field.name}`,
         })
       }
 

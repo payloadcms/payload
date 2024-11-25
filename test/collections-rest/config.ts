@@ -273,8 +273,8 @@ export default buildConfigWithDefaults({
   ],
   endpoints: [
     {
-      handler: async ({ req }) => {
-        await req.payload.sendEmail({
+      handler: async ({ payload }) => {
+        await payload.sendEmail({
           from: 'dev@payloadcms.com',
           html: 'This is a test email.',
           subject: 'Test Email',

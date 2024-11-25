@@ -19,35 +19,46 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsJoins: {};
+  collectionsSelect: {
+    posts: PostsSelect<false> | PostsSelect<true>;
+    simple: SimpleSelect<false> | SimpleSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
   db: {
     defaultIDType: string;
   };
   globals: {};
+  globalsSelect: {};
   locale: null;
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: {
       UpdatePost: MyUpdatePostType;
       UpdatePostStep2: TaskUpdatePostStep2;
       CreateSimple: TaskCreateSimple;
       CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
       ExternalTask: TaskExternalTask;
-      inline?: {
+      inline: {
         input: unknown;
         output: unknown;
       };
     };
-    workflows?: {
-      updatePost?: MyUpdatePostWorkflowType;
-      updatePostJSONWorkflow?: WorkflowUpdatePostJSONWorkflow;
-      retriesTest?: WorkflowRetriesTest;
-      retriesRollbackTest?: WorkflowRetriesRollbackTest;
-      retriesWorkflowLevelTest?: WorkflowRetriesWorkflowLevelTest;
-      inlineTaskTest?: WorkflowInlineTaskTest;
-      externalWorkflow?: WorkflowExternalWorkflow;
-      retriesBackoffTest?: WorkflowRetriesBackoffTest;
+    workflows: {
+      updatePost: MyUpdatePostWorkflowType;
+      updatePostJSONWorkflow: WorkflowUpdatePostJSONWorkflow;
+      retriesTest: WorkflowRetriesTest;
+      retriesRollbackTest: WorkflowRetriesRollbackTest;
+      retriesWorkflowLevelTest: WorkflowRetriesWorkflowLevelTest;
+      inlineTaskTest: WorkflowInlineTaskTest;
+      externalWorkflow: WorkflowExternalWorkflow;
+      retriesBackoffTest: WorkflowRetriesBackoffTest;
     };
   };
 }
@@ -224,7 +235,7 @@ export interface PayloadJob {
         | 'ExternalTask'
       )
     | null;
-  queue?: 'default' | null;
+  queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
   updatedAt: string;
@@ -294,6 +305,106 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  jobStep1Ran?: T;
+  jobStep2Ran?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple_select".
+ */
+export interface SimpleSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  workflowSlug?: T;
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

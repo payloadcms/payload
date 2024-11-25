@@ -1,4 +1,3 @@
-'use client'
 import type { EditorThemeClasses } from 'lexical'
 
 export const LexicalEditorTheme: EditorThemeClasses = {

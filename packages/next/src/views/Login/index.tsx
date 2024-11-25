@@ -1,6 +1,6 @@
 import type { AdminViewProps } from 'payload'
 
-import { getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -27,23 +27,6 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
     collections,
     routes: { admin },
   } = config
-
-  const createMappedComponent = getCreateMappedComponent({
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
-  const mappedBeforeLogins = createMappedComponent(beforeLogin, undefined, undefined, 'beforeLogin')
-
-  const mappedAfterLogins = createMappedComponent(afterLogin, undefined, undefined, 'afterLogin')
 
   if (user) {
     redirect((searchParams.redirect as string) || admin)
@@ -82,7 +65,20 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           user={user}
         />
       </div>
-      <RenderComponent mappedComponent={mappedBeforeLogins} />
+      {RenderServerComponent({
+        Component: beforeLogin,
+        importMap: payload.importMap,
+        serverProps: {
+          i18n,
+          locale,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+        },
+      })}
+
       {!collectionConfig?.auth?.disableLocalStrategy && (
         <LoginForm
           prefillEmail={prefillEmail}
@@ -91,7 +87,19 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           searchParams={searchParams}
         />
       )}
-      <RenderComponent mappedComponent={mappedAfterLogins} />
+      {RenderServerComponent({
+        Component: afterLogin,
+        importMap: payload.importMap,
+        serverProps: {
+          i18n,
+          locale,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+        },
+      })}
     </Fragment>
   )
 }

@@ -1,13 +1,15 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { ImportMap, MappedComponent, SanitizedConfig } from 'payload'
+import type { ImportMap, SanitizedConfig } from 'payload'
 
-import { formatAdminURL, getCreateMappedComponent, RenderComponent } from '@payloadcms/ui/shared'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
+import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
 
@@ -55,30 +57,32 @@ export const RootPage = async ({
 
   const searchParams = await searchParamsPromise
 
-  const { DefaultView, initPageOptions, templateClassName, templateType } = getViewFromConfig({
-    adminRoute,
-    config,
-    currentRoute,
-    importMap,
-    searchParams,
-    segments,
-  })
-
-  let dbHasUser = false
+  const { DefaultView, initPageOptions, serverProps, templateClassName, templateType } =
+    getViewFromConfig({
+      adminRoute,
+      config,
+      currentRoute,
+      importMap,
+      searchParams,
+      segments,
+    })
 
   const initPageResult = await initPage(initPageOptions)
 
-  dbHasUser = await initPageResult?.req.payload.db
-    .findOne({
-      collection: userSlug,
-      req: initPageResult?.req,
-    })
-    ?.then((doc) => !!doc)
+  const dbHasUser =
+    initPageResult.req.user ||
+    (await initPageResult?.req.payload.db
+      .findOne({
+        collection: userSlug,
+        req: initPageResult?.req,
+      })
+      ?.then((doc) => !!doc))
 
   if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
     if (initPageResult?.req?.user) {
       notFound()
     }
+
     if (dbHasUser) {
       redirect(adminRoute)
     }
@@ -111,9 +115,20 @@ export const RootPage = async ({
     redirect(adminRoute)
   }
 
-  const createMappedView = getCreateMappedComponent({
+  const clientConfig = await getClientConfig({
+    config,
+    i18n: initPageResult?.req.i18n,
+    importMap,
+  })
+
+  const RenderedView = RenderServerComponent({
+    clientProps: { clientConfig },
+    Component: DefaultView.payloadComponent,
+    Fallback: DefaultView.Component,
     importMap,
     serverProps: {
+      ...serverProps,
+      clientConfig,
       i18n: initPageResult?.req.i18n,
       importMap,
       initPageResult,
@@ -122,15 +137,6 @@ export const RootPage = async ({
       searchParams,
     },
   })
-
-  const MappedView: MappedComponent = createMappedView(
-    DefaultView.payloadComponent,
-    undefined,
-    DefaultView.Component,
-    'createMappedView',
-  )
-
-  const RenderedView = <RenderComponent mappedComponent={MappedView} />
 
   return (
     <Fragment>
@@ -147,6 +153,7 @@ export const RootPage = async ({
           permissions={initPageResult?.permissions}
           searchParams={searchParams}
           user={initPageResult?.req.user}
+          viewActions={serverProps.viewActions}
           visibleEntities={{
             // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
             // which this caused as soon as initPageResult.visibleEntities is passed in

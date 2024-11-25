@@ -8,13 +8,13 @@ import { traverseFields } from '../../utilities/traverseFields.js'
 export const sanitizeJoinField = ({
   config,
   field,
+  joinPath,
   joins,
-  schemaPath,
 }: {
   config: Config
   field: JoinField
+  joinPath?: string
   joins?: SanitizedJoins
-  schemaPath?: string
 }) => {
   // the `joins` arg is not passed for globals or when recursing on fields that do not allow a join field
   if (typeof joins === 'undefined') {
@@ -25,7 +25,7 @@ export const sanitizeJoinField = ({
   }
   const join: SanitizedJoin = {
     field,
-    schemaPath: `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`,
+    joinPath: `${joinPath ? joinPath + '.' : ''}${field.name}`,
     targetField: undefined,
   }
   const joinCollection = config.collections.find(

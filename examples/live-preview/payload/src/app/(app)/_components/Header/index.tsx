@@ -1,6 +1,6 @@
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import config from '../../../../payload.config'
@@ -9,7 +9,7 @@ import { Gutter } from '../Gutter'
 import classes from './index.module.scss'
 
 export const Header = async () => {
-  const payload = await getPayloadHMR({ config })
+  const payload = await getPayload({ config })
 
   const mainMenu = await payload.findGlobal({
     slug: 'main-menu',

@@ -4,7 +4,7 @@
     "rootDir": ".",
     "declaration": true,
     "declarationMap": true,
-    "target": "esnext",
+    "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "allowJs": true,
@@ -12,7 +12,11 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
@@ -27,7 +31,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@payload-config": ["./_community/config.ts"]
+      "@payload-config": ["./fields/config.ts"]
     }
   },
   "exclude": [
@@ -38,6 +42,6 @@
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],
-  "include": ["./**/*.ts", "./**/*.tsx", ".next/types/**/*.ts", "setup.js"],
+  "include": ["./**/*.ts", "./**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts", "setup.js"],
   "references": []
 }

@@ -20,6 +20,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { MenuTextMatch } from '../useMenuTriggerMatch.js'
 import type { SlashMenuGroupInternal, SlashMenuItem, SlashMenuItemInternal } from './types.js'
 
+import { CAN_USE_DOM } from '../../../utils/canUseDOM.js'
+
 export type MenuResolution = {
   getRect: () => DOMRect
   match?: MenuTextMatch
@@ -145,12 +147,13 @@ function isTriggerVisibleInNearestScrollContainer(
 // Reposition the menu on scroll, window resize, and element resize.
 export function useDynamicPositioning(
   resolution: MenuResolution | null,
-  targetElement: HTMLElement | null,
+  targetElementRef: RefObject<HTMLElement | null>,
   onReposition: () => void,
   onVisibilityChange?: (isInView: boolean) => void,
 ) {
   const [editor] = useLexicalComposerContext()
   useEffect(() => {
+    const targetElement = targetElementRef.current
     if (targetElement != null && resolution != null) {
       const rootElement = editor.getRootElement()
       const rootScrollParent =
@@ -184,12 +187,12 @@ export function useDynamicPositioning(
       })
       resizeObserver.observe(targetElement)
       return () => {
-        resizeObserver.unobserve(targetElement)
+        resizeObserver.disconnect()
         window.removeEventListener('resize', onReposition)
         document.removeEventListener('scroll', handleScroll, true)
       }
     }
-  }, [targetElement, editor, onVisibilityChange, onReposition, resolution])
+  }, [editor, onVisibilityChange, onReposition, resolution, targetElementRef])
 }
 
 export const SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND: LexicalCommand<{
@@ -204,21 +207,14 @@ export function LexicalMenu({
   // groups filtering is already handled in SlashMenu/index.tsx. Thus, groups always contains the matching items.
   groups,
   menuRenderFn,
-  onSelectItem,
   resolution,
   shouldSplitNodeWithQuery = false,
 }: {
-  anchorElementRef: RefObject<HTMLElement>
+  anchorElementRef: RefObject<HTMLElement | null>
   close: () => void
   editor: LexicalEditor
   groups: Array<SlashMenuGroupInternal>
   menuRenderFn: MenuRenderFn
-  onSelectItem: (
-    item: SlashMenuItem,
-    textNodeContainingQuery: null | TextNode,
-    closeMenu: () => void,
-    matchingString: string,
-  ) => void
   resolution: MenuResolution
   shouldSplitNodeWithQuery?: boolean
 }): JSX.Element | null {
@@ -256,21 +252,27 @@ export function LexicalMenu({
 
   const selectItemAndCleanUp = useCallback(
     (selectedItem: SlashMenuItem) => {
+      close()
+
       editor.update(() => {
         const textNodeContainingQuery =
           resolution.match != null && shouldSplitNodeWithQuery
             ? $splitNodeContainingQuery(resolution.match)
             : null
 
-        onSelectItem(
-          selectedItem,
-          textNodeContainingQuery,
-          close,
-          resolution.match ? resolution.match.matchingString : '',
-        )
+        if (textNodeContainingQuery) {
+          textNodeContainingQuery.remove()
+        }
       })
+
+      setTimeout(() => {
+        selectedItem.onSelect({
+          editor,
+          queryString: resolution.match ? resolution.match.matchingString : '',
+        })
+      }, 0)
     },
-    [editor, shouldSplitNodeWithQuery, resolution.match, onSelectItem, close],
+    [editor, shouldSplitNodeWithQuery, resolution.match, close],
   )
 
   useEffect(() => {
@@ -436,10 +438,15 @@ export function useMenuAnchorRef(
   resolution: MenuResolution | null,
   setResolution: (r: MenuResolution | null) => void,
   className?: string,
-): RefObject<HTMLElement> {
+): RefObject<HTMLElement | null> {
   const [editor] = useLexicalComposerContext()
-  const anchorElementRef = useRef<HTMLElement>(document.createElement('div'))
+  const anchorElementRef = useRef<HTMLElement | null>(
+    CAN_USE_DOM ? document.createElement('div') : null,
+  )
   const positionMenu = useCallback(() => {
+    if (anchorElementRef.current === null || parent === undefined) {
+      return
+    }
     const rootElement = editor.getRootElement()
     const containerDiv = anchorElementRef.current
 
@@ -526,7 +533,7 @@ export function useMenuAnchorRef(
     [resolution, setResolution],
   )
 
-  useDynamicPositioning(resolution, anchorElementRef.current, positionMenu, onVisibilityChange)
+  useDynamicPositioning(resolution, anchorElementRef, positionMenu, onVisibilityChange)
 
   return anchorElementRef
 }

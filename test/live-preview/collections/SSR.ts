@@ -5,7 +5,7 @@ import { CallToAction } from '../blocks/CallToAction/index.js'
 import { Content } from '../blocks/Content/index.js'
 import { MediaBlock } from '../blocks/MediaBlock/index.js'
 import { hero } from '../fields/hero.js'
-import { ssrPagesSlug, tenantsSlug } from '../shared.js'
+import { mediaSlug, ssrPagesSlug, tenantsSlug } from '../shared.js'
 
 export const SSR: CollectionConfig = {
   slug: ssrPagesSlug,
@@ -79,7 +79,7 @@ export const SSR: CollectionConfig = {
         {
           name: 'image',
           type: 'upload',
-          relationTo: 'media',
+          relationTo: mediaSlug,
         },
       ],
     },

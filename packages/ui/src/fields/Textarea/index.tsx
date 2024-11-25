@@ -2,59 +2,45 @@
 import type { TextareaFieldClientComponent, TextareaFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { isFieldRTL } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { isFieldRTL } from '../shared/index.js'
 import { TextareaInput } from './Input.js'
 
 export { TextareaInput, TextAreaInputProps }
 
 const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
     field,
     field: {
-      name,
-      _path: pathFromProps,
-      admin: {
-        className,
-        description,
-        placeholder,
-        readOnly: readOnlyFromAdmin,
-        rows,
-        rtl,
-        style,
-        width,
-      } = {},
+      admin: { className, description, placeholder, rows, rtl } = {},
       label,
       localized,
       maxLength,
       minLength,
       required,
     },
-    labelProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path,
+    readOnly,
     validate,
   } = props
 
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
-
   const { i18n } = useTranslation()
-  const locale = useLocale()
 
   const {
     config: { localization },
   } = useConfig()
+
+  const locale = useLocale()
 
   const isRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -72,42 +58,41 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
     [validate, required, maxLength, minLength],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<string>({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField<string>({
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <TextareaInput
-      afterInput={field?.admin?.components?.afterInput}
-      beforeInput={field?.admin?.components?.beforeInput}
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
       className={className}
-      Description={field?.admin?.components?.Description}
+      Description={Description}
       description={description}
-      descriptionProps={descriptionProps}
-      Error={field?.admin?.components?.Error}
-      errorProps={errorProps}
-      field={field}
+      Error={Error}
+      Label={Label}
       label={label}
-      Label={field?.admin?.components?.Label}
-      labelProps={labelProps}
+      localized={localized}
       onChange={(e) => {
         setValue(e.target.value)
       }}
       path={path}
       placeholder={getTranslation(placeholder, i18n)}
-      readOnly={disabled}
+      readOnly={readOnly}
       required={required}
       rows={rows}
       rtl={isRTL}
       showError={showError}
-      style={style}
+      style={styles}
       value={value}
-      width={width}
     />
   )
 }

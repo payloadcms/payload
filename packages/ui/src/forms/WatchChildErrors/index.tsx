@@ -9,7 +9,7 @@ import { getFieldStateFromPaths } from './getFieldStateFromPaths.js'
 
 type TrackSubSchemaErrorCountProps = {
   fields?: ClientField[]
-  path: string
+  path: (number | string)[]
   setErrorCount: (count: number) => void
 }
 

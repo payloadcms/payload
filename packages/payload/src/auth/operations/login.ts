@@ -94,7 +94,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     if (!canLoginWithEmail && !sanitizedUsername) {
       throw new ValidationError({
         collection: collectionConfig.slug,
-        errors: [{ field: 'username', message: req.i18n.t('validation:required') }],
+        errors: [{ message: req.i18n.t('validation:required'), path: 'username' }],
       })
     }
 
@@ -102,7 +102,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     if (!canLoginWithUsername && !sanitizedEmail) {
       throw new ValidationError({
         collection: collectionConfig.slug,
-        errors: [{ field: 'email', message: req.i18n.t('validation:required') }],
+        errors: [{ message: req.i18n.t('validation:required'), path: 'email' }],
       })
     }
 
@@ -111,8 +111,8 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new ValidationError({
         collection: collectionConfig.slug,
         errors: [
-          { field: 'email', message: req.i18n.t('validation:required') },
-          { field: 'username', message: req.i18n.t('validation:required') },
+          { message: req.i18n.t('validation:required'), path: 'email' },
+          { message: req.i18n.t('validation:required'), path: 'username' },
         ],
       })
     }
@@ -121,7 +121,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     if (typeof password !== 'string' || password.trim() === '') {
       throw new ValidationError({
         collection: collectionConfig.slug,
-        errors: [{ field: 'password', message: req.i18n.t('validation:required') }],
+        errors: [{ message: req.i18n.t('validation:required'), path: 'password' }],
       })
     }
 

@@ -6,7 +6,9 @@ import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
 export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, value }) => {
   // if value is unchanged, skip validation
-  if (originalDoc.slug === value) {return value}
+  if (originalDoc.slug === value) {
+    return value
+  }
 
   const incomingTenantID = typeof data?.tenant === 'object' ? data.tenant.id : data?.tenant
   const currentTenantID =
@@ -44,8 +46,8 @@ export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, valu
       throw new ValidationError({
         errors: [
           {
-            field: 'slug',
             message: `The "${attemptedTenantChange.name}" tenant already has a page with the slug "${value}". Slugs must be unique per tenant.`,
+            path: 'slug',
           },
         ],
       })
@@ -54,8 +56,8 @@ export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, valu
     throw new ValidationError({
       errors: [
         {
-          field: 'slug',
           message: `A page with the slug ${value} already exists. Slug must be unique per tenant.`,
+          path: 'slug',
         },
       ],
     })

@@ -54,7 +54,9 @@ const Component: React.FC<Props> = (props) => {
 
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey!)
-  const { field } = useEditorConfigContext()
+  const {
+    fieldProps: { readOnly },
+  } = useEditorConfigContext()
   const {
     config: {
       collections,
@@ -85,18 +87,15 @@ const Component: React.FC<Props> = (props) => {
     })
   }, [editor, nodeKey])
 
-  const updateRelationship = React.useCallback(
-    ({ doc }) => {
-      setParams({
-        ...initialParams,
-        cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
-      })
+  const updateRelationship = React.useCallback(() => {
+    setParams({
+      ...initialParams,
+      cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
+    })
 
-      closeDocumentDrawer()
-      dispatchCacheBust()
-    },
-    [cacheBust, setParams, closeDocumentDrawer],
-  )
+    closeDocumentDrawer()
+    dispatchCacheBust()
+  }, [cacheBust, setParams, closeDocumentDrawer])
 
   const $onDelete = useCallback(
     (payload: KeyboardEvent) => {
@@ -158,7 +157,9 @@ const Component: React.FC<Props> = (props) => {
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
           {t('fields:labelRelationship', {
-            label: getTranslation(relatedCollection.labels.singular, i18n),
+            label: relatedCollection.labels?.singular
+              ? getTranslation(relatedCollection.labels?.singular, i18n)
+              : relatedCollection.slug,
           })}
         </p>
         <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
@@ -172,7 +173,7 @@ const Component: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__swapButton`}
-            disabled={field?.admin?.readOnly}
+            disabled={readOnly}
             el="button"
             icon="swap"
             onClick={() => {
@@ -188,7 +189,7 @@ const Component: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__removeButton`}
-            disabled={field?.admin?.readOnly}
+            disabled={readOnly}
             icon="x"
             onClick={(e) => {
               e.preventDefault()

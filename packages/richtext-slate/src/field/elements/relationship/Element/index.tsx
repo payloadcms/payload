@@ -1,7 +1,5 @@
 'use client'
 
-import type { FormFieldBase, MappedComponent } from 'payload'
-
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -27,12 +25,7 @@ const initialParams = {
   depth: 0,
 }
 
-type Props = {
-  name: string
-  richTextComponentMap: Map<string, MappedComponent>
-} & FormFieldBase
-
-const RelationshipElementComponent: React.FC<Props> = () => {
+const RelationshipElementComponent: React.FC = () => {
   const {
     attributes,
     children,
@@ -194,7 +187,7 @@ const RelationshipElementComponent: React.FC<Props> = () => {
   )
 }
 
-export const RelationshipElement = (props: Props): React.ReactNode => {
+export const RelationshipElement = (props: any): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props}>
       <RelationshipElementComponent {...props} />

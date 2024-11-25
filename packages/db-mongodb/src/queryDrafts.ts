@@ -41,7 +41,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
-      fields: collectionConfig.fields,
+      fields: collectionConfig.flattenedFields,
       locale,
       sort: sortArg || collectionConfig.defaultSort,
       timestamps: true,
@@ -58,14 +58,13 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const projection = buildProjectionFromSelect({
     adapter: this,
-    fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
     select,
   })
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
     options,

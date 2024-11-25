@@ -3,6 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomIdRow } from './collections/CustomIdRow.js'
 import { CustomIdTab } from './collections/CustomIdTab.js'
@@ -37,7 +38,6 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-import { settingsGlobalSlug } from './slugs.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -52,12 +52,16 @@ export default buildConfigWithDefaults({
       ],
       afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
+      graphics: {
+        Logo: '/components/graphics/Logo.js#Logo',
+        Icon: '/components/graphics/Icon.js#Icon',
+      },
       header: ['/components/CustomHeader/index.js#CustomHeader'],
       logout: {
         Button: '/components/Logout/index.js#Logout',
       },
       providers: [
-        '/components/CustomProvider/index.js#CustomProvider',
+        '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
       ],
       views: {
@@ -151,6 +155,7 @@ export default buildConfigWithDefaults({
     CustomIdTab,
     CustomIdRow,
     DisableDuplicate,
+    BaseListFilter,
   ],
   globals: [
     GlobalHidden,

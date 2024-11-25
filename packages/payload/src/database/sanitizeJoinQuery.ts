@@ -36,8 +36,8 @@ export const sanitizeJoinQuery = async ({
   const promises: Promise<void>[] = []
 
   for (const collectionSlug in collectionConfig.joins) {
-    for (const { field, schemaPath } of collectionConfig.joins[collectionSlug]) {
-      if (joinsQuery[schemaPath] === false) {
+    for (const { field, joinPath } of collectionConfig.joins[collectionSlug]) {
+      if (joinsQuery[joinPath] === false) {
         continue
       }
 
@@ -48,15 +48,15 @@ export const sanitizeJoinQuery = async ({
         : true
 
       if (accessResult === false) {
-        joinsQuery[schemaPath] = false
+        joinsQuery[joinPath] = false
         continue
       }
 
-      if (!joinsQuery[schemaPath]) {
-        joinsQuery[schemaPath] = {}
+      if (!joinsQuery[joinPath]) {
+        joinsQuery[joinPath] = {}
       }
 
-      const joinQuery = joinsQuery[schemaPath]
+      const joinQuery = joinsQuery[joinPath]
 
       if (!joinQuery.where) {
         joinQuery.where = {}

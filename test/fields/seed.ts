@@ -63,21 +63,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
-  if (_payload.db.name === 'mongoose') {
-    await Promise.all(
-      _payload.config.collections.map(async (coll) => {
-        await new Promise((resolve, reject) => {
-          _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
-            if (err) {
-              reject(err)
-            }
-            resolve(true)
-          })
-        })
-      }),
-    )
-  }
-
   const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
   const pngPath = path.resolve(dirname, './uploads/payload.png')
 
@@ -382,7 +367,7 @@ export const seed = async (_payload: Payload) => {
     collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical en',
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }) as any,
+      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'English text in block',
@@ -396,7 +381,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: lexicalRelationshipFieldsSlug,
     data: {
-      richText: textToLexicalJSON({ text: 'English text' }) as any,
+      richText: textToLexicalJSON({ text: 'English text' }),
     },
     depth: 0,
     overrideAccess: true,
@@ -407,7 +392,7 @@ export const seed = async (_payload: Payload) => {
     id: lexicalLocalizedDoc1.id,
     data: {
       title: 'Localized Lexical es',
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }) as any,
+      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'Spanish text in block',
@@ -423,10 +408,7 @@ export const seed = async (_payload: Payload) => {
     collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical en 2',
-      lexicalSimple: textToLexicalJSON({
-        text: 'English text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
-      }),
+
       lexicalBlocksLocalized: textToLexicalJSON({
         text: 'English text 2',
         lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
@@ -446,10 +428,7 @@ export const seed = async (_payload: Payload) => {
     id: lexicalLocalizedDoc2.id,
     data: {
       title: 'Localized Lexical es 2',
-      lexicalSimple: textToLexicalJSON({
-        text: 'Spanish text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
-      }),
+
       lexicalBlocksLocalized: textToLexicalJSON({
         text: 'Spanish text 2',
         lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
@@ -492,6 +471,24 @@ export const seed = async (_payload: Payload) => {
     collection: uiSlug,
     data: {
       text: 'text',
+    },
+  })
+
+  await _payload.create({
+    collection: 'LexicalInBlock',
+    data: {
+      blocks: [
+        {
+          blockType: 'lexicalInBlock2',
+          blockName: '1',
+          lexical: textToLexicalJSON({ text: '1' }),
+        },
+        {
+          blockType: 'lexicalInBlock2',
+          blockName: '2',
+          lexical: textToLexicalJSON({ text: '2' }),
+        },
+      ],
     },
   })
 }

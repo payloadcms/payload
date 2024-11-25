@@ -5,12 +5,15 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
+import { fieldAffectsData } from 'payload/shared'
+
 import { getRouteWithoutAdmin, isAdminRoute } from './shared.js'
 
 type Args = {
   adminRoute: string
   config: SanitizedConfig
   defaultIDType: Payload['db']['defaultIDType']
+  payload?: Payload
   route: string
 }
 
@@ -22,7 +25,13 @@ type RouteInfo = {
   globalSlug?: string
 }
 
-export function getRouteInfo({ adminRoute, config, defaultIDType, route }: Args): RouteInfo {
+export function getRouteInfo({
+  adminRoute,
+  config,
+  defaultIDType,
+  payload,
+  route,
+}: Args): RouteInfo {
   if (isAdminRoute({ adminRoute, config, route })) {
     const routeWithoutAdmin = getRouteWithoutAdmin({ adminRoute, route })
     const routeSegments = routeWithoutAdmin.split('/').filter(Boolean)
@@ -30,15 +39,9 @@ export function getRouteInfo({ adminRoute, config, defaultIDType, route }: Args)
     const collectionSlug = entityType === 'collections' ? entitySlug : undefined
     const globalSlug = entityType === 'globals' ? entitySlug : undefined
 
-    const docID =
-      collectionSlug && createOrID !== 'create'
-        ? defaultIDType === 'number'
-          ? Number(createOrID)
-          : createOrID
-        : undefined
-
     let collectionConfig: SanitizedCollectionConfig | undefined
     let globalConfig: SanitizedGlobalConfig | undefined
+    let idType = defaultIDType
 
     if (collectionSlug) {
       collectionConfig = config.collections.find((collection) => collection.slug === collectionSlug)
@@ -47,6 +50,20 @@ export function getRouteInfo({ adminRoute, config, defaultIDType, route }: Args)
     if (globalSlug) {
       globalConfig = config.globals.find((global) => global.slug === globalSlug)
     }
+
+    // If the collection is using a custom ID, we need to determine it's type
+    if (collectionConfig && payload) {
+      if (payload.collections?.[collectionSlug]?.customIDType) {
+        idType = payload.collections?.[collectionSlug].customIDType
+      }
+    }
+
+    const docID =
+      collectionSlug && createOrID !== 'create'
+        ? idType === 'number'
+          ? Number(createOrID)
+          : createOrID
+        : undefined
 
     return {
       collectionConfig,

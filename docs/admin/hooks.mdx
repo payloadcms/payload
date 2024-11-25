@@ -21,10 +21,11 @@ To do so, import the `useField` hook as follows:
 
 ```tsx
 'use client'
+import type { TextFieldClientComponent } from 'payload'
 import { useField } from '@payloadcms/ui'
 
-const CustomTextField: React.FC = () => {
-  const { value, setValue, path } = useField() // highlight-line
+export const CustomTextField: TextFieldClientComponent = ({ path }) => {
+  const { value, setValue } = useField({ path }) // highlight-line
 
   return (
     <div>
@@ -44,7 +45,7 @@ The `useField` hook accepts the following arguments:
 
 | Property          | Description                                                                                                                                                                                                                   |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `path`            | If you do not provide a `path` or a `name`, this hook will look for one using the [`useFieldProps`](#usefieldprops) hook.                                                                                                                         |
+| `path`            | If you do not provide a `path`, `name` will be used instead. This is the path to the field in the form data.                                                                                                                  |
 | `validate`        | A validation function executed client-side _before_ submitting the form to the server. Different than [Field-level Validation](../fields/overview#validation) which runs strictly on the server. |
 | `disableFormData` | If `true`, the field will not be included in the form data when the form is submitted.                                                                                                                                         |
 | `hasRows` | If `true`, the field will be treated as a field with rows. This is useful for fields like `array` and `blocks`.                                                                                                                                         |
@@ -71,32 +72,6 @@ type FieldType<T> = {
   value: T
 }
 ```
-
-## useFieldProps
-
-[Custom Field Components](./fields#the-field-component) can be rendered on the server. When using a server component as a custom field component, you can access dynamic props from within any client component rendered by your custom server component. This is done using the `useFieldProps` hook. This is important because some fields can be dynamic, such as when nested in an [`array`](../fields/array) or [`blocks`](../fields/block) field. For example, items can be added, re-ordered, or deleted on-the-fly.
-
-You can use the `useFieldProps` hooks to access dynamic props like `path`:
-
-```tsx
-'use client'
-import { useFieldProps } from '@payloadcms/ui'
-
-const CustomTextField: React.FC = () => {
-  const { path } = useFieldProps() // highlight-line
-
-  return (
-    <div>
-      {path}
-    </div>
-  )
-}
-```
-
-<Banner type="success">
-  <strong>Tip:</strong>
-  The [`useField`](#usefield) hook calls the `useFieldProps` hook internally, so you don't need to use both in the same component unless explicitly needed.
-</Banner>
 
 ## useFormFields
 
@@ -810,7 +785,7 @@ const Greeting: React.FC = () => {
 
 ## useConfig
 
-Used to easily retrieve the Payload [Client Config](./components#accessing-the-payload-config).
+Used to retrieve the Payload [Client Config](./components#accessing-the-payload-config).
 
 ```tsx
 'use client'
@@ -896,27 +871,6 @@ const MyComponent: React.FC = () => {
     <button type="button" onClick={resetColumns}>
       Reset columns
     </button>
-  )
-}
-```
-
-## useTableCell
-
-Similar to [`useFieldProps`](#usefieldprops), all [Custom Cell Components](./fields#the-cell-component) are rendered on the server, and as such, only have access to static props at render time. But, some props need to be dynamic, such as the field value itself.
-
-For this reason, dynamic props like `cellData` are managed in their own React context, which can be accessed using the `useTableCell` hook.
-
-```tsx
-'use client'
-import { useTableCell } from '@payloadcms/ui'
-
-const MyComponent: React.FC = () => {
-  const { cellData } = useTableCell() // highlight-line
-
-  return (
-    <div>
-      {cellData}
-    </div>
   )
 }
 ```

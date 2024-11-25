@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const slTranslations = {
+export const slTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Račun',
     accountOfCurrentUser: 'Račun trenutnega uporabnika',

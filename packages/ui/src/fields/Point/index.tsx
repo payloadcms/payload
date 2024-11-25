@@ -2,47 +2,34 @@
 import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'point'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
-
 export const PointFieldComponent: PointFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
     field,
     field: {
-      name,
-      _path: pathFromProps,
-      admin: {
-        className,
-        description,
-        placeholder,
-        readOnly: readOnlyFromAdmin,
-        step,
-        style,
-        width,
-      } = {},
+      admin: { className, description, placeholder, step } = {},
       label,
+      localized,
       required,
     },
-    labelProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path,
+    readOnly,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n, t } = useTranslation()
 
@@ -55,16 +42,13 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-  const readOnly = readOnlyFromProps || readOnlyFromContext
-
   const {
-    path,
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     setValue,
     showError,
     value = [null, null],
   } = useField<[number, number]>({
-    path: pathFromContext ?? pathFromProps ?? name,
+    path,
     validate: memoizedValidate,
   })
 
@@ -85,11 +69,10 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
     const fieldLabel = label ? getTranslation(label, i18n) : ''
 
-    return {
-      ...labelProps,
-      label: `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`,
-    }
+    return `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`
   }
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -102,25 +85,28 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <ul className={`${baseClass}__wrap`}>
         <li>
-          <FieldLabel
-            field={field}
-            Label={field?.admin?.components?.Label}
-            {...getCoordinateFieldLabel('longitude')}
+          <RenderCustomComponent
+            CustomComponent={Label}
+            Fallback={
+              <FieldLabel
+                label={getCoordinateFieldLabel('longitude')}
+                localized={localized}
+                path={path}
+                required={required}
+              />
+            }
           />
           <div className="input-wrapper">
-            <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+            {BeforeInput}
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
-              id={`field-longitude-${path.replace(/\./g, '__')}`}
+              id={`field-longitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.longitude`}
               onChange={(e) => handleChange(e, 0)}
               placeholder={getTranslation(placeholder, i18n)}
@@ -128,28 +114,32 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
               type="number"
               value={value && typeof value[0] === 'number' ? value[0] : ''}
             />
-            <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
+            {AfterInput}
           </div>
         </li>
         <li>
-          <FieldLabel
-            field={field}
-            Label={field?.admin?.components?.Label}
-            {...getCoordinateFieldLabel('latitude')}
+          <RenderCustomComponent
+            CustomComponent={Label}
+            Fallback={
+              <FieldLabel
+                label={getCoordinateFieldLabel('latitude')}
+                localized={localized}
+                path={path}
+                required={required}
+              />
+            }
           />
           <div className="input-wrapper">
-            <FieldError
-              CustomError={field?.admin?.components?.Error}
-              field={field}
-              path={path}
-              {...(errorProps || {})}
+            <RenderCustomComponent
+              CustomComponent={Error}
+              Fallback={<FieldError path={path} showError={showError} />}
             />
-            <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+            {BeforeInput}
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
               disabled={readOnly}
-              id={`field-latitude-${path.replace(/\./g, '__')}`}
+              id={`field-latitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.latitude`}
               onChange={(e) => handleChange(e, 1)}
               placeholder={getTranslation(placeholder, i18n)}
@@ -157,15 +147,13 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
               type="number"
               value={value && typeof value[1] === 'number' ? value[1] : ''}
             />
-            <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
+            {AfterInput}
           </div>
         </li>
       </ul>
-      <FieldDescription
-        Description={field?.admin?.components?.Description}
-        description={description}
-        field={field}
-        {...(descriptionProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
       />
     </div>
   )

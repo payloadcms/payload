@@ -130,6 +130,9 @@ export const runJobs = async ({
   if (jobsQuery?.docs?.length) {
     req.payload.logger.info(`Running ${jobsQuery.docs.length} jobs.`)
   }
+  const jobsToDelete: (number | string)[] | undefined = req.payload.config.jobs.deleteJobOnComplete
+    ? []
+    : undefined
 
   const jobPromises = jobsQuery.docs.map(async (job) => {
     if (!job.workflowSlug && !job.taskSlug) {
@@ -191,6 +194,11 @@ export const runJobs = async ({
         workflowConfig,
         workflowHandler,
       })
+
+      if (result.status !== 'error' && jobsToDelete) {
+        jobsToDelete.push(job.id)
+      }
+
       return { id: job.id, result }
     } else {
       const result = await runJSONJob({
@@ -200,11 +208,32 @@ export const runJobs = async ({
         workflowConfig,
         workflowHandler,
       })
+
+      if (result.status !== 'error' && jobsToDelete) {
+        jobsToDelete.push(job.id)
+      }
+
       return { id: job.id, result }
     }
   })
 
   const resultsArray = await Promise.all(jobPromises)
+
+  if (jobsToDelete && jobsToDelete.length > 0) {
+    try {
+      await req.payload.delete({
+        collection: 'payload-jobs',
+        req,
+        where: { id: { in: jobsToDelete } },
+      })
+    } catch (err) {
+      req.payload.logger.error({
+        err,
+        msg: `failed to delete jobs ${jobsToDelete.join(', ')} on complete`,
+      })
+    }
+  }
+
   const resultsObject: RunJobsResult['jobStatus'] = resultsArray.reduce((acc, cur) => {
     if (cur !== null) {
       // Check if there's a valid result to include

@@ -2,7 +2,7 @@
 
 import type { Data, TextFieldClientComponent } from 'payload'
 
-import { TextField, useFieldProps, useLocale, useWatchForm } from '@payloadcms/ui'
+import { TextField, useLocale, useWatchForm } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 type FieldWithID = {
@@ -11,13 +11,11 @@ type FieldWithID = {
 }
 
 export const DynamicPriceSelector: TextFieldClientComponent = (props) => {
-  const { field } = props
+  const { field, path } = props
 
   const { fields, getData, getDataByPath } = useWatchForm()
 
   const locale = useLocale()
-
-  const { path } = useFieldProps()
 
   const [isNumberField, setIsNumberField] = useState<boolean>()
   const [valueType, setValueType] = useState<'static' | 'valueOfField'>()

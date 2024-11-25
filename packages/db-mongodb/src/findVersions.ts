@@ -44,7 +44,7 @@ export const findVersions: FindVersions = async function findVersions(
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
-      fields: collectionConfig.fields,
+      fields: collectionConfig.flattenedFields,
       locale,
       sort: sortArg || '-updatedAt',
       timestamps: true,
@@ -60,7 +60,6 @@ export const findVersions: FindVersions = async function findVersions(
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
     limit,
@@ -69,7 +68,7 @@ export const findVersions: FindVersions = async function findVersions(
     pagination,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
+      fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
       select,
     }),
     sort,

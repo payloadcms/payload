@@ -1,14 +1,14 @@
 import type { ClientTranslationsObject } from '@payloadcms/translations'
 
-import type { Permissions } from '../../auth/index.js'
+import type { SanitizedPermissions } from '../../auth/index.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { ClientConfig } from '../../config/client.js'
-import type { Locale, MetaConfig, PayloadComponent } from '../../config/types.js'
+import type { Locale, MetaConfig, PayloadComponent, ServerProps } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
-import type { MappedComponent } from '../types.js'
+import type { Data, DocumentSlots, PayloadServerAction } from '../types.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -20,16 +20,16 @@ export type AdminViewConfig = {
   strict?: boolean
 }
 
-export type MappedView = {
-  actions?: MappedComponent[]
-  Component: MappedComponent
-}
-
 export type AdminViewProps = {
   readonly clientConfig: ClientConfig
+  readonly disableActions?: boolean
+  readonly drawerSlug?: string
   readonly importMap: ImportMap
+  readonly initialData?: Data
   readonly initPageResult: InitPageResult
   readonly params?: { [key: string]: string | string[] | undefined }
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
   readonly searchParams: { [key: string]: string | string[] | undefined }
 }
 
@@ -52,7 +52,7 @@ export type InitPageResult = {
   globalConfig?: SanitizedGlobalConfig
   languageOptions: LanguageOptions
   locale?: Locale
-  permissions: Permissions
+  permissions: SanitizedPermissions
   redirectTo?: string
   req: PayloadRequest
   translations: ClientTranslationsObject
@@ -60,8 +60,10 @@ export type InitPageResult = {
 }
 
 export type ServerSideEditViewProps = {
+  readonly doc: Data
   readonly initPageResult: InitPageResult
-  readonly params: { [key: string]: string | string[] | undefined }
   readonly routeSegments: string[]
-  readonly searchParams: { [key: string]: string | string[] | undefined }
-}
+} & ClientSideEditViewProps &
+  ServerProps
+
+export type ClientSideEditViewProps = {} & DocumentSlots

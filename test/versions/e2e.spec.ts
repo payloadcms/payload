@@ -25,6 +25,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -43,8 +44,10 @@ import {
   throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { titleToDelete } from './shared.js'
 import {
@@ -71,26 +74,6 @@ let payload: PayloadTestSDK<Config>
 let global: AdminUrlUtil
 let id: string
 
-const waitForAutoSaveToComplete = async (page: Page) => {
-  await expect(async () => {
-    await expect(
-      page.locator('.autosave:has-text("Last saved less than a minute ago")'),
-    ).toBeVisible()
-  }).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-}
-
-const waitForAutoSaveToRunAndComplete = async (page: Page) => {
-  await expect(async () => {
-    await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
-  }).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await waitForAutoSaveToComplete(page)
-}
-
 let context: BrowserContext
 
 describe('versions', () => {
@@ -113,9 +96,15 @@ describe('versions', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
+    /* await throttleTest({
+      page,
+      context,
+      delay: 'Slow 4G',
+    }) */
     await reInitializeDB({
       serverURL,
       snapshotKey: 'versionsTest',
@@ -330,6 +319,7 @@ describe('versions', () => {
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
       await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
+      await expect(page.locator('.render-field-diffs')).toBeVisible()
       await page.locator('.restore-version__button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
@@ -406,6 +396,42 @@ describe('versions', () => {
       expect(page.url()).toMatch(/\/versions$/)
     })
 
+    test('collection - should autosave', async () => {
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const { id: postID } = await payload.create({
+        collection: postCollectionSlug,
+        data: {
+          title: 'post title',
+          description: 'post description',
+        },
+      })
+
+      await page.goto(postURL.edit(postID))
+
+      await trackNetworkRequests(
+        page,
+        `${serverURL}/admin/collections/${postCollectionSlug}/${postID}`,
+        async () => {
+          await page
+            .locator(
+              '#field-relationToAutosaves.field-type.relationship .relationship-add-new__add-button.doc-drawer__toggler',
+            )
+            .click()
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
+      await expect(drawer).toBeVisible()
+      await expect(drawer.locator('.id-label')).toBeVisible()
+    })
+
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       await page.goto(url.global(autoSaveGlobalSlug))
@@ -425,7 +451,6 @@ describe('versions', () => {
       const spanishTitle = 'spanish title'
       const newDescription = 'new description'
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page)
       const titleField = page.locator('#field-title')
       await expect(titleField).toBeEnabled()
       await titleField.fill(englishTitle)
@@ -489,22 +514,18 @@ describe('versions', () => {
 
     test('collection — autosave should only update the current document', async () => {
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('first post description')
       await saveDocAndAssert(page)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('second post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('second post description')
       await saveDocAndAssert(page)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
       await waitForAutoSaveToRunAndComplete(page)

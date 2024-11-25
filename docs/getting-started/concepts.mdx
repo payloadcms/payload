@@ -34,7 +34,7 @@ Hooks allow you to execute your own side effects during specific events of the D
 
 ## Authentication
 
-Payload provides a secure, portable way to manage user accounts out of the box. Payload Authentication is designed to be used in both the Admin Panel, all well as your own external applications. [More details](../authentication/overview).
+Payload provides a secure, portable way to manage user accounts out of the box. Payload Authentication is designed to be used in both the Admin Panel, as well as your own external applications. [More details](../authentication/overview).
 
 ## Access Control
 
@@ -68,15 +68,10 @@ Here's a quick example of a React Server Component fetching data using the Local
 ```tsx
 import React from 'react'
 import config from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { getPayload } from 'payload'
 
 const MyServerComponent: React.FC = () => {
-  // If you're working in Next.js, and you want HMR,
-  // you should get Payload via the `getPayloadHMR` function.
-  const payload = await getPayloadHMR({ config })
-
-  // If you are writing a standalone script and do not need HMR,
-  // you can get Payload via import { getPayload } from 'payload' instead.
+  const payload = await getPayload({ config })
 
   // The `findResult` here will be fully typed as `PaginatedDocs<Page>`,
   // where you will have the `docs` that are returned as well as
@@ -156,7 +151,7 @@ Whereas Payload itself is responsible for direct database access, and control ov
 
 `@payloadcms/graphql`
 
-All of Payload's GraphQL functionality is abstracted into a separate package. Payload, its Admin UI, and REST API have absolutely no overlap with GraphQL, and you will incur no performance overhead from GraphQL if you are not using it. However, it's installed within in the `@payloadcms/next` package so you don't have to install it manually. You do, however, need to have GraphQL installed separately in your `package.json` if you are using GraphQL.
+All of Payload's GraphQL functionality is abstracted into a separate package. Payload, its Admin UI, and REST API have absolutely no overlap with GraphQL, and you will incur no performance overhead from GraphQL if you are not using it. However, it's installed within the `@payloadcms/next` package so you don't have to install it manually. You do, however, need to have GraphQL installed separately in your `package.json` if you are using GraphQL.
 
 `@payloadcms/ui`
 
