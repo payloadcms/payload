@@ -414,6 +414,7 @@ export const arTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'نشر سابقا',
     problemRestoringVersion: 'حدث خطأ في استعادة هذه النّسخة',
     publish: 'نشر',
+    publishAllLocales: 'نشر جميع المواقع',
     publishChanges: 'نشر التّغييرات',
     published: 'تمّ النّشر',
     publishIn: 'نشر في {{locale}}',

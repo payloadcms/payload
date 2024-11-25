@@ -419,6 +419,7 @@ export const csTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Dříve publikováno',
     problemRestoringVersion: 'Při obnovování této verze došlo k problému',
     publish: 'Publikovat',
+    publishAllLocales: 'Publikujte všechny lokalizace',
     publishChanges: 'Publikovat změny',
     published: 'Publikováno',
     publishIn: 'Publikovat v {{locale}}',

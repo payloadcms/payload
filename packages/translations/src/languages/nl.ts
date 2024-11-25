@@ -424,6 +424,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Eerder gepubliceerd',
     problemRestoringVersion: 'Er was een probleem bij het herstellen van deze versie',
     publish: 'Publiceren',
+    publishAllLocales: 'Publiceer alle taalinstellingen',
     publishChanges: 'Publiceer wijzigingen',
     published: 'Gepubliceerd',
     publishIn: 'Publiceer in {{locale}}',

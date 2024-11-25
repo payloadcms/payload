@@ -421,6 +421,7 @@ export const azTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Daha əvvəl nəşr olunmuş',
     problemRestoringVersion: 'Bu versiyanın bərpasında problem yaşandı',
     publish: 'Dərc et',
+    publishAllLocales: 'Bütün lokalizasiyaları dərc edin',
     publishChanges: 'Dəyişiklikləri dərc et',
     published: 'Dərc edilmiş',
     publishIn: '{{locale}} dili ilə nəşr edin',

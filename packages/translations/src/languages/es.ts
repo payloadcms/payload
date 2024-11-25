@@ -425,6 +425,7 @@ export const esTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Publicado Anteriormente',
     problemRestoringVersion: 'Ocurrió un problema al restaurar esta versión',
     publish: 'Publicar',
+    publishAllLocales: 'Publicar todas las configuraciones regionales',
     publishChanges: 'Publicar cambios',
     published: 'Publicado',
     publishIn: 'Publicar en {{locale}}',

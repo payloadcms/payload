@@ -419,6 +419,7 @@ export const slTranslations = {
     previouslyPublished: 'Predhodno objavljeno',
     problemRestoringVersion: 'Pri obnavljanju te različice je prišlo do težave',
     publish: 'Objavi',
+    publishAllLocales: 'Objavi vse jezike',
     publishChanges: 'Objavi spremembe',
     published: 'Objavljeno',
     publishIn: 'Objavi v {{locale}}',

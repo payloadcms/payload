@@ -421,6 +421,7 @@ export const plTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Wcześniej opublikowane',
     problemRestoringVersion: 'Wystąpił problem podczas przywracania tej wersji',
     publish: 'Publikuj',
+    publishAllLocales: 'Opublikuj wszystkie lokalizacje',
     publishChanges: 'Opublikuj zmiany',
     published: 'Opublikowano',
     publishIn: 'Opublikuj w {{locale}}',

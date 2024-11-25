@@ -138,7 +138,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   const secondaryPublish = publishAll ? () => publishSpecificLocale(activeLocale.code) : publish
   const secondaryLabel = publishAll
     ? t('version:publishIn', { locale: activeLocaleLabel })
-    : 'Publish all locales'
+    : t('version:publishAllLocales')
 
   // TODO: add publish all locales translation key
 

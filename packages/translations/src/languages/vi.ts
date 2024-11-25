@@ -415,6 +415,7 @@ export const viTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Đã xuất bản trước đây',
     problemRestoringVersion: 'Đã xảy ra vấn đề khi khôi phục phiên bản này',
     publish: 'Công bố',
+    publishAllLocales: 'Xuất bản tất cả địa phương',
     publishChanges: 'Xuất bản tài liệu',
     published: 'Đã xuất bản',
     publishIn: 'Xuất bản trong {{locale}}',

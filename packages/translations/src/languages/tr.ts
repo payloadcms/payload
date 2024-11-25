@@ -422,6 +422,7 @@ export const trTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Daha Önce Yayınlanmış',
     problemRestoringVersion: 'Bu sürüme geri döndürürken bir hatayla karşılaşıldı.',
     publish: 'Yayınla',
+    publishAllLocales: 'Tüm yerel ayarları yayınla',
     publishChanges: 'Değişiklikleri yayınla',
     published: 'Yayınlandı',
     publishIn: '{{locale}} dilinde yayınlayın.',

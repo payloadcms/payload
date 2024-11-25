@@ -405,6 +405,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     previouslyPublished: '先前发布过的',
     problemRestoringVersion: '恢复这个版本时发生了问题',
     publish: '发布',
+    publishAllLocales: '发布所有地区设置',
     publishChanges: '发布修改',
     published: '已发布',
     publishIn: '在{{locale}}发布',

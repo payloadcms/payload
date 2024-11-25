@@ -415,6 +415,7 @@ export const koTranslations: DefaultTranslationsObject = {
     previouslyPublished: '이전에 발표된',
     problemRestoringVersion: '이 버전을 복원하는 중 문제가 발생했습니다.',
     publish: '게시',
+    publishAllLocales: '모든 로케일을 게시하십시오',
     publishChanges: '변경 사항 게시',
     published: '게시됨',
     publishIn: '{{locale}}에서 게시하십시오.',

@@ -427,6 +427,7 @@ export const myTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'တိုင်းရင်းသားထုတ်ဝေခဲ့',
     problemRestoringVersion: 'ဤဗားရှင်းကို ပြန်လည်ရယူရာတွင် ပြဿနာရှိနေသည်။',
     publish: 'ထုတ်ဝေသည်။',
+    publishAllLocales: 'နိုင်ငံတကာစာလုံးအားလုံးကို ထုတ်ဝေပါ',
     publishChanges: 'အပြောင်းအလဲများကို တင်ခဲ့သည်။',
     published: 'တင်ပြီးပြီ။',
     publishIn: 'Terbitkan di {{locale}}',

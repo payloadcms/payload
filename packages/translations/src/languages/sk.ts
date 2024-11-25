@@ -421,6 +421,7 @@ export const skTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Predtým publikované',
     problemRestoringVersion: 'Pri obnovovaní tejto verzie došlo k problému',
     publish: 'Publikovať',
+    publishAllLocales: 'Publikujte všetky lokality',
     publishChanges: 'Publikovať zmeny',
     published: 'Publikované',
     publishIn: 'Publikujte v {{locale}}',

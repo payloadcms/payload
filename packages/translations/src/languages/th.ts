@@ -412,6 +412,7 @@ export const thTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'เผยแพร่ก่อนหน้านี้',
     problemRestoringVersion: 'เกิดปัญหาระหว่างการกู้คืนเวอร์ชันนี้',
     publish: 'เผยแพร่',
+    publishAllLocales: 'เผยแพร่ทุกสถานที่',
     publishChanges: 'เผยแพร่การแก้ไข',
     published: 'เผยแพร่แล้ว',
     publishIn: 'เผยแพร่ใน {{locale}}',

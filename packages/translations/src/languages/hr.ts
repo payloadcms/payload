@@ -418,6 +418,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Prethodno objavljeno',
     problemRestoringVersion: 'Nastao je problem pri vraćanju ove verzije',
     publish: 'Objaviti',
+    publishAllLocales: 'Objavi sve lokalne postavke',
     publishChanges: 'Objavi promjene',
     published: 'Objavljeno',
     publishIn: 'Objavi na {{locale}}',

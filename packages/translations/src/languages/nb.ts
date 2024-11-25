@@ -421,6 +421,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Tidligere Publisert',
     problemRestoringVersion: 'Det oppstod et problem med gjenoppretting av denne versjonen',
     publish: 'Publisere',
+    publishAllLocales: 'Publiser alle lokaliteter',
     publishChanges: 'Publiser endringer',
     published: 'Publisert',
     publishIn: 'Publiser i {{locale}}',

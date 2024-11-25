@@ -419,6 +419,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     previouslyPublished: '以前に公開された',
     problemRestoringVersion: 'このバージョンの復元に問題がありました。',
     publish: '公開する',
+    publishAllLocales: 'すべてのロケールを公開する',
     publishChanges: '変更内容を公開',
     published: '公開済み',
     publishIn: '{{locale}}で公開する',

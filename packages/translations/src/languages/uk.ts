@@ -420,6 +420,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Раніше опубліковано',
     problemRestoringVersion: 'Виникла проблема з відновленням цієї версії',
     publish: 'Опублікувати',
+    publishAllLocales: 'Опублікуйте всі локалі',
     publishChanges: 'Опублікувати зміни',
     published: 'Опубліковано',
     publishIn: 'Опублікувати в {{locale}}',
