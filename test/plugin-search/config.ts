@@ -3,6 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { searchPlugin } from '@payloadcms/plugin-search'
+import { randomUUID } from 'node:crypto'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -55,6 +56,19 @@ export default buildConfigWithDefaults({
         },
         fields: ({ defaultFields }) => [
           ...defaultFields,
+          {
+            name: 'id',
+            type: 'text',
+            hooks: {
+              beforeChange: [
+                ({ operation }) => {
+                  if (operation === 'create') {
+                    return randomUUID()
+                  }
+                },
+              ],
+            },
+          },
           {
             name: 'excerpt',
             type: 'textarea',

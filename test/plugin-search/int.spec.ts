@@ -337,35 +337,32 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should delete existing search indexes before reindexing', async () => {
-    const createdPost = await payload.create({
+    await payload.create({
       collection: postsSlug,
       data: {
-        title: 'Test post title',
+        title: 'post_1',
         _status: 'published',
       },
     })
 
     await wait(200)
 
-    const { docs: postsDocs } = await payload.find({
-      collection: 'search',
-      depth: 0,
-      where: {
-        'doc.value': {
-          equals: createdPost.id,
-        },
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post_2',
+        _status: 'published',
       },
     })
 
-    const postsIndexToBeDeleted = postsDocs[0]
+    const { docs } = await payload.find({ collection: 'search' })
+
+    await wait(200)
 
     const endpointRes = await restClient.POST('/search/reindex', {
       body: JSON.stringify({
         collections: [postsSlug, pagesSlug],
       }),
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
     })
 
     expect(endpointRes.status).toBe(200)
@@ -374,14 +371,13 @@ describe('@payloadcms/plugin-search', () => {
       collection: 'search',
       depth: 0,
       where: {
-        // Use createdAt over id since db-sqlite does not autoincrement ids
-        createdAt: {
-          less_than_equal: postsIndexToBeDeleted.createdAt,
+        id: {
+          in: docs.map((doc) => doc.id),
         },
       },
     })
 
-    // Should have no docs with createdAt less than createdPost time
+    // Should have no docs with these ID
     // after reindex since it deletes indexes and recreates them
     expect(results).toHaveLength(0)
   })
