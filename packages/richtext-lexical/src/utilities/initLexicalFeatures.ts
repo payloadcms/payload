@@ -22,8 +22,6 @@ export function initLexicalFeatures(args: Args): {
 } {
   const clientFeatures: LexicalRichTextFieldProps['clientFeatures'] = {}
 
-  //&const value = deepCopyObjectSimple(args.fieldState.value)
-
   // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
   const resolvedFeatureMapArray = Array.from(
     args.sanitizedEditorConfig.resolvedFeatureMap.entries(),
