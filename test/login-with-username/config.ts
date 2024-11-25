@@ -6,7 +6,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const LoginWithUsernameConfig = buildConfigWithDefaults({
+export const LoginWithUsernameConfig = buildConfigWithDefaults(() => ({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
@@ -33,6 +33,6 @@ export const LoginWithUsernameConfig = buildConfigWithDefaults({
       fields: [],
     },
   ],
-})
+}))
 
 export default LoginWithUsernameConfig

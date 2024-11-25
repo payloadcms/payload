@@ -11,7 +11,7 @@ import { devUser } from '../credentials.js'
 import { Posts } from './collections/Posts.js'
 import { Users } from './collections/Users.js'
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     components: {
       beforeDashboard: ['/TestErrors.js#TestErrors'],
@@ -52,4 +52,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

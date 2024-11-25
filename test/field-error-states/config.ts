@@ -13,7 +13,7 @@ import { ValidateDraftsOn } from './collections/ValidateDraftsOn/index.js'
 import { ValidateDraftsOnAndAutosave } from './collections/ValidateDraftsOnAutosave/index.js'
 import { GlobalValidateDraftsOn } from './globals/ValidateDraftsOn/index.js'
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -41,4 +41,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

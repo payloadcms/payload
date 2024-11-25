@@ -6,7 +6,7 @@ import path from 'path'
 import type { BinScript } from '../config/types.js'
 
 import { findConfig } from '../config/find.js'
-import { getPayload } from '../index.js'
+import { getConfig, getPayload } from '../index.js'
 import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
@@ -51,11 +51,12 @@ export const bin = async () => {
   }
 
   const configPath = findConfig()
-  const configPromise = await import(pathToFileURL(configPath).toString())
-  let config = await configPromise
-  if (config.default) {
-    config = await config.default
+  let configImport = await import(pathToFileURL(configPath).toString())
+  if (configImport.default) {
+    configImport = configImport.default
   }
+
+  const config = await getConfig(configImport)
 
   const userBinScript = Array.isArray(config.bin)
     ? config.bin.find(({ key }) => key === script)

@@ -1,13 +1,15 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type {
-  AdminViewComponent,
-  ImportMap,
-  PayloadServerReactComponent,
-  SanitizedConfig,
-} from 'payload'
 
 import { formatAdminURL } from '@payloadcms/ui/shared'
+import {
+  type AdminViewComponent,
+  type ConfigImport,
+  getConfig,
+  type ImportMap,
+  type PayloadServerReactComponent,
+  type SanitizedConfig,
+} from 'payload'
 import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
@@ -16,12 +18,12 @@ import { initPage } from '../../utilities/initPage/index.js'
 import { NotFoundClient } from './index.client.js'
 
 export const generatePageMetadata = async ({
-  config: configPromise,
+  config: configImport,
 }: {
-  config: Promise<SanitizedConfig> | SanitizedConfig
+  config: ConfigImport
   params?: { [key: string]: string | string[] }
 }): Promise<Metadata> => {
-  const config = await configPromise
+  const config = await getConfig(configImport)
 
   const i18n = await getNextRequestI18n({
     config,
@@ -39,12 +41,12 @@ export type GenerateViewMetadata = (args: {
 }) => Promise<Metadata>
 
 export const NotFoundPage = async ({
-  config: configPromise,
+  config: configImport,
   importMap,
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }: {
-  config: Promise<SanitizedConfig>
+  config: ConfigImport
   importMap: ImportMap
   params: Promise<{
     segments: string[]
@@ -53,7 +55,8 @@ export const NotFoundPage = async ({
     [key: string]: string | string[]
   }>
 }) => {
-  const config = await configPromise
+  const config = await getConfig(configImport)
+
   const { routes: { admin: adminRoute } = {} } = config
 
   const searchParams = await searchParamsPromise

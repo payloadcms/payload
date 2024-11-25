@@ -99,7 +99,7 @@ export const collectionSlugs: CollectionConfig[] = [
   UIFields,
 ]
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   collections: collectionSlugs,
   globals: [TabsWithRichText],
   custom: {
@@ -136,4 +136,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

@@ -1,11 +1,11 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
+import { type ConfigImport, getConfig, type ImportMap, type SanitizedConfig } from 'payload'
 import React, { Fragment } from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
@@ -23,12 +23,12 @@ export type GenerateViewMetadata = (args: {
 }) => Promise<Metadata>
 
 export const RootPage = async ({
-  config: configPromise,
+  config: configImport,
   importMap,
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }: {
-  readonly config: Promise<SanitizedConfig>
+  readonly config: ConfigImport
   readonly importMap: ImportMap
   readonly params: Promise<{
     segments: string[]
@@ -37,7 +37,7 @@ export const RootPage = async ({
     [key: string]: string | string[]
   }>
 }) => {
-  const config = await configPromise
+  const config = await getConfig(configImport)
 
   const {
     admin: {

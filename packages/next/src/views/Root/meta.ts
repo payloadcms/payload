@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload'
+
+import { type ConfigImport, getConfig } from 'payload'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAccountMetadata } from '../Account/index.js'
@@ -26,7 +27,7 @@ const oneSegmentMeta = {
 }
 
 type Args = {
-  config: Promise<SanitizedConfig>
+  config: ConfigImport
   params: Promise<{
     [key: string]: string | string[]
   }>
@@ -36,10 +37,10 @@ type Args = {
 }
 
 export const generatePageMetadata = async ({
-  config: configPromise,
+  config: configImport,
   params: paramsPromise,
 }: Args) => {
-  const config = await configPromise
+  const config = await getConfig(configImport)
 
   const params = await paramsPromise
   const segments = Array.isArray(params.segments) ? params.segments : []

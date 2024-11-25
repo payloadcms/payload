@@ -10,7 +10,7 @@ import { PostsCollection } from './collections/Posts/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   collections: [PostsCollection, DraftsCollection, DefaultSortCollection, LocalizedCollection],
   admin: {
     importMap: {
@@ -34,4 +34,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

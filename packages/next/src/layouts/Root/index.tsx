@@ -1,11 +1,11 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type { ConfigImport, ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { getPayload, parseCookies } from 'payload'
+import { getConfig, getPayload, parseCookies } from 'payload'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
@@ -24,18 +24,18 @@ export const metadata = {
 
 export const RootLayout = async ({
   children,
-  config: configPromise,
+  config: configImport,
   importMap,
   serverFunction,
 }: {
   readonly children: React.ReactNode
-  readonly config: Promise<SanitizedConfig>
+  readonly config: ConfigImport
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
 }) => {
-  checkDependencies()
+  void checkDependencies()
 
-  const config = await configPromise
+  const config = await getConfig(configImport)
 
   const headers = await getHeaders()
   const cookies = parseCookies(headers)

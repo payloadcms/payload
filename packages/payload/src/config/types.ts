@@ -1090,6 +1090,10 @@ export type Config = {
   upload?: FetchAPIFileUploadOptions
 }
 
+export type GetSanitizedConfig = () => Promise<SanitizedConfig>
+
+export type ConfigImport = GetSanitizedConfig | Promise<SanitizedConfig> | SanitizedConfig
+
 export type SanitizedConfig = {
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */

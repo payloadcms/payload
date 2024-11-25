@@ -17,7 +17,7 @@ import Relations from './collections/Relations/index.js'
 import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
-export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
+export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -68,6 +68,6 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))
 
 export default HooksConfig

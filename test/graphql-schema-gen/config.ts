@@ -5,7 +5,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -159,4 +159,4 @@ export default buildConfigWithDefaults({
       ],
     },
   ],
-})
+}))
