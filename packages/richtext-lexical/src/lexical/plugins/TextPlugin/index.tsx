@@ -10,6 +10,9 @@ export function TextPlugin({ features }: { features: SanitizedClientFeatures }) 
 
   useEffect(() => {
     const disabledFormats = getDisabledFormats(features.enabledFormats as TextFormatType[])
+    if (disabledFormats.length === 0) {
+      return
+    }
     return editor.registerNodeTransform(TextNode, (textNode) => {
       disabledFormats.forEach((disabledFormat) => {
         if (textNode.hasFormat(disabledFormat)) {
