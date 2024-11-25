@@ -1,9 +1,7 @@
-name: release-canary
+name: release-canary-${{ github.ref_name }}-${{ github.sha }}
 
 on:
   workflow_dispatch:
-    branches:
-      - main
 
 env:
   NODE_VERSION: 22.6.0
