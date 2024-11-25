@@ -130,7 +130,9 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     )
 
   const activeLocaleLabel =
-    typeof activeLocale.label === 'string' ? activeLocale.label : activeLocale.label[code]
+    typeof activeLocale.label === 'string'
+      ? activeLocale.label
+      : (activeLocale.label?.[code] ?? undefined)
 
   const defaultPublish = publishAll ? publish : () => publishSpecificLocale(activeLocale.code)
   const defaultLabel = publishAll ? label : t('version:publishIn', { locale: activeLocaleLabel })
@@ -161,7 +163,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       }
       type="button"
     >
-      {defaultLabel}
+      {localization ? defaultLabel : label}
     </FormSubmit>
   )
 }
