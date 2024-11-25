@@ -19,8 +19,16 @@ export default buildConfig({
     },
   },
   collections: [Pages, Users],
-  cors: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean),
-  csrf: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean),
+  cors: [
+    process.env.NEXT_PUBLIC_SERVER_URL || '',
+    process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
+    process.env.PAYLOAD_PUBLIC_SITE_URL || '',
+  ].filter(Boolean),
+  csrf: [
+    process.env.NEXT_PUBLIC_SERVER_URL || '',
+    process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
+    process.env.PAYLOAD_PUBLIC_SITE_URL || '',
+  ].filter(Boolean),
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),

@@ -1,12 +1,13 @@
-import { revalidatePath, revalidateTag } from 'next/cache'
 import type { NextRequest } from 'next/server'
+
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { NextResponse } from 'next/server'
 
 // this endpoint will revalidate a page by tag or path
 // this is to achieve on-demand revalidation of pages that use this data
 // send either `collection` and `slug` or `revalidatePath` as query params
 /* eslint-disable @typescript-eslint/require-await */
-export async function GET(request: NextRequest): Promise<unknown> {
+export async function GET(request: NextRequest): Promise<Response> {
   const collection = request.nextUrl.searchParams.get('collection')
   const slug = request.nextUrl.searchParams.get('slug')
   const path = request.nextUrl.searchParams.get('path')

@@ -2,15 +2,17 @@ import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
 import type { Page as PageType } from '../../payload-types'
+
 import { fetchPage } from '../_api/fetchPage'
 import { fetchPages } from '../_api/fetchPages'
 import { Gutter } from '../_components/Gutter'
 import RichText from '../_components/RichText'
-
 import classes from './index.module.scss'
 
 interface PageParams {
-  params: { slug: string }
+  params: Promise<{
+    slug?: string
+  }>
 }
 
 export const PageTemplate: React.FC<{ page: null | PageType | undefined }> = ({ page }) => (
@@ -23,7 +25,7 @@ export const PageTemplate: React.FC<{ page: null | PageType | undefined }> = ({ 
 )
 
 export default async function Page({ params }: PageParams) {
-  const { slug = 'home' } = params
+  const { slug = 'home' } = await params
 
   const { isEnabled: isDraftMode } = await draftMode()
 

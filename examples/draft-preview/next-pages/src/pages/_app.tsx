@@ -1,12 +1,13 @@
-import React, { useCallback } from 'react'
-import { CookiesProvider } from 'react-cookie'
 import type { AppContext, AppProps as NextAppProps } from 'next/app'
+
 import App from 'next/app'
 import { useRouter } from 'next/router'
+import React, { useCallback } from 'react'
+import { CookiesProvider } from 'react-cookie'
 
-import { Header } from '../components/Header'
 import type { MainMenu } from '../payload-types'
 
+import { Header } from '../components/Header'
 import './app.scss'
 
 export interface IGlobals {
@@ -45,6 +46,7 @@ const PayloadApp = (
       }
     }
     exit().catch((error) => {
+      // eslint-disable-next-line no-console
       console.error('Failed to exit preview:', error)
     })
   }, [router])

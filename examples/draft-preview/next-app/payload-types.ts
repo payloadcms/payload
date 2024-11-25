@@ -263,8 +263,3 @@ export interface MainMenuSelect<T extends boolean = true> {
 export interface Auth {
   [k: string]: unknown;
 }
-
-
-declare module 'payload' {
-  export interface GeneratedTypes extends Config {}
-}

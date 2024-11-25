@@ -30,6 +30,33 @@ That's it! Changes made in `./src` will be reflected in your app. See the [Devel
 
 Draft preview works by sending the user to your front-end with a `secret` along with their http-only cookies. Your front-end catches the request, verifies the authenticity, then enters into it's own preview mode. Once in preview mode, your front-end can begin securely requesting draft documents from Payload. See [Preview Mode](#preview-mode) for more details.
 
+### Environment Variables
+
+Depending on how you run this example, you need different environment variables:
+
+- #### Running Payload and the Front-End Together
+
+  When the Payload server and front-end run on the same domain and port:
+
+  ```ts
+  DATABASE_URI=mongodb://127.0.0.1/payload-draft-preview-example
+  PAYLOAD_SECRET=YOUR_SECRET_HERE
+  NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+  ```
+
+- #### Running Payload and the Front-End Separately
+
+  When running Payload on one domain (e.g., `localhost:3000`) and the front-end on another (e.g., `localhost:3001`):
+
+  ```ts
+  DATABASE_URI=mongodb://127.0.0.1/payload-draft-preview-example
+  PAYLOAD_SECRET=YOUR_SECRET_HERE
+  PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3000
+  PAYLOAD_PUBLIC_SITE_URL=http://localhost:3001
+  PAYLOAD_PUBLIC_DRAFT_SECRET=EXAMPLE_DRAFT_SECRET
+  REVALIDATION_KEY=EXAMPLE_REVALIDATION_KEY
+  ```
+
 ### Collections
 
 See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend any of this functionality.
