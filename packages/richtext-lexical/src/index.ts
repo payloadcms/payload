@@ -55,19 +55,18 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               '@lexical/link',
               '@lexical/list',
               '@lexical/mark',
-              '@lexical/markdown',
               '@lexical/react',
               '@lexical/rich-text',
               '@lexical/selection',
               '@lexical/utils',
             ],
-            targetVersion: '0.18.0',
+            targetVersion: '0.20.0',
           },
         ],
       })
     }
 
-    let features: FeatureProviderServer<any, any, any>[] = []
+    let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
@@ -82,6 +81,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }
 
       finalSanitizedEditorConfig = deepCopyObject(defaultSanitizedServerEditorConfig)
+
+      delete finalSanitizedEditorConfig.lexical // We don't want to send the default lexical editor config to the client
 
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
@@ -116,43 +117,37 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
       finalSanitizedEditorConfig = {
         features: sanitizeServerFeatures(resolvedFeatureMap),
-        lexical,
+        lexical: props.lexical,
         resolvedFeatureMap,
       }
     }
 
     const featureI18n = finalSanitizedEditorConfig.features.i18n
     for (const lang in i18n) {
-      if (!featureI18n[lang]) {
-        featureI18n[lang] = {
+      if (!featureI18n[lang as keyof typeof featureI18n]) {
+        featureI18n[lang as keyof typeof featureI18n] = {
           lexical: {},
         }
       }
-
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       featureI18n[lang].lexical.general = i18n[lang]
     }
 
     return {
       CellComponent: {
-        clientProps: {
+        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
+        serverProps: {
           admin: props?.admin,
-          lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
+          sanitizedEditorConfig: finalSanitizedEditorConfig,
         },
-        path: '@payloadcms/richtext-lexical/client#RichTextCell',
       },
       editorConfig: finalSanitizedEditorConfig,
       features,
       FieldComponent: {
-        clientProps: {
-          admin: props?.admin,
-          lexicalEditorConfig: finalSanitizedEditorConfig.lexical,
-        },
-        path: '@payloadcms/richtext-lexical/client#RichTextField',
-      },
-      generateComponentMap: {
-        path: '@payloadcms/richtext-lexical/generateComponentMap#getGenerateComponentMap',
+        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
         serverProps: {
-          resolvedFeatureMap,
+          admin: props?.admin,
+          sanitizedEditorConfig: finalSanitizedEditorConfig,
         },
       },
       generateImportMap: getGenerateImportMap({
@@ -212,6 +207,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             ) {
               return value
             }
+            // TO-DO: We should not use context, as it is intended for external use only
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const context: any = _context
             const nodeIDMap: {
               [key: string]: SerializedLexicalNode
@@ -313,6 +310,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               locale,
               overrideAccess,
               path,
+              populate,
               populationPromises,
               req,
               schemaPath,
@@ -360,6 +358,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     overrideAccess: overrideAccess!,
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
+                    populateArg: populate,
                     populationPromises: populationPromises!,
                     req,
                     showHiddenFields: showHiddenFields!,
@@ -394,6 +393,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     locale: locale!,
                     overrideAccess: overrideAccess!,
                     path,
+                    populate,
                     populationPromises: populationPromises!,
                     req,
                     schemaPath,
@@ -441,6 +441,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               return value
             }
 
+            // TO-DO: We should not use context, as it is intended for external use only
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const context: any = _context
             const nodeIDMap: {
               [key: string]: SerializedLexicalNode
@@ -947,7 +949,7 @@ export type {
   SanitizedServerEditorConfig,
   ServerEditorConfig,
 } from './lexical/config/types.js'
-export { getEnabledNodes } from './lexical/nodes/index.js'
+export { getEnabledNodes, getEnabledNodesFromServerNodes } from './lexical/nodes/index.js'
 export type { AdapterProps }
 
 export type {
@@ -980,4 +982,13 @@ export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 export { createServerFeature } from './utilities/createServerFeature.js'
 
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
+
+export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
+export {
+  extractFrontmatter,
+  frontmatterToObject,
+  objectToFrontmatter,
+  propsToJSXString,
+} from './utilities/jsx/jsx.js'
+export { $convertFromMarkdownString } from './utilities/jsx/lexicalMarkdownCopy.js'
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'

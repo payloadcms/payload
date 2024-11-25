@@ -64,6 +64,8 @@ export const connect: Connect = async function connect(
     process.exit(1)
   }
 
+  await this.createExtensions()
+
   // Only push schema if not in production
   if (
     process.env.NODE_ENV !== 'production' &&

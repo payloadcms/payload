@@ -16,17 +16,20 @@ export interface Config {
     'versioned-posts': VersionedPost;
     'deep-posts': DeepPost;
     pages: Page;
+    points: Point;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'versioned-posts': VersionedPostsSelect<false> | VersionedPostsSelect<true>;
     'deep-posts': DeepPostsSelect<false> | DeepPostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    points: PointsSelect<false> | PointsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -297,10 +300,26 @@ export interface Page {
           | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'cta';
+        blockType: 'introduction';
       }[]
     | null;
   slug: string;
+  additional?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "points".
+ */
+export interface Point {
+  id: string;
+  text?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -347,6 +366,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'points';
+        value: string | Point;
       } | null)
     | ({
         relationTo: 'users';
@@ -605,7 +628,7 @@ export interface PagesSelect<T extends boolean = true> {
   content?:
     | T
     | {
-        cta?:
+        introduction?:
           | T
           | {
               title?: T;
@@ -625,6 +648,17 @@ export interface PagesSelect<T extends boolean = true> {
             };
       };
   slug?: T;
+  additional?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "points_select".
+ */
+export interface PointsSelect<T extends boolean = true> {
+  text?: T;
+  point?: T;
   updatedAt?: T;
   createdAt?: T;
 }

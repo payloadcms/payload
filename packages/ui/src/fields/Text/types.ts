@@ -1,7 +1,6 @@
-import type { MappedComponent, StaticDescription, StaticLabel, TextFieldClient } from 'payload'
+import type { StaticDescription, StaticLabel } from 'payload'
 import type { ChangeEvent } from 'react'
 import type React from 'react'
-import type { MarkOptional } from 'ts-essentials'
 
 import type { Option, ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 
@@ -16,19 +15,16 @@ export type SharedTextFieldProps =
     }
 
 export type TextInputProps = {
-  readonly afterInput?: MappedComponent[]
-  readonly beforeInput?: MappedComponent[]
+  readonly AfterInput?: React.ReactNode
+  readonly BeforeInput?: React.ReactNode
   readonly className?: string
-  readonly Description?: MappedComponent
+  readonly Description?: React.ReactNode
   readonly description?: StaticDescription
-  readonly descriptionProps?: Record<string, unknown>
-  readonly Error?: MappedComponent
-  readonly errorProps?: Record<string, unknown>
-  readonly field?: MarkOptional<TextFieldClient, 'type'>
+  readonly Error?: React.ReactNode
   readonly inputRef?: React.RefObject<HTMLInputElement>
-  readonly Label?: MappedComponent
+  readonly Label?: React.ReactNode
   readonly label?: StaticLabel
-  readonly labelProps?: Record<string, unknown>
+  readonly localized?: boolean
   readonly maxRows?: number
   readonly minRows?: number
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
@@ -41,5 +37,4 @@ export type TextInputProps = {
   readonly style?: React.CSSProperties
   readonly value?: string
   readonly valueToRender?: Option[]
-  readonly width?: React.CSSProperties['width']
 } & SharedTextFieldProps

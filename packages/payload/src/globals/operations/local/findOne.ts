@@ -2,6 +2,7 @@ import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../
 import type {
   Document,
   PayloadRequest,
+  PopulateType,
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
@@ -15,10 +16,11 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   includeLockStatus?: boolean
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean
@@ -39,6 +41,7 @@ export default async function findOneLocal<
     draft = false,
     includeLockStatus,
     overrideAccess = true,
+    populate,
     select,
     showHiddenFields,
   } = options
@@ -56,6 +59,7 @@ export default async function findOneLocal<
     globalConfig,
     includeLockStatus,
     overrideAccess,
+    populate,
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,

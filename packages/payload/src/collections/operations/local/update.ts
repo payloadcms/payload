@@ -1,10 +1,10 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
-  RequestContext,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
   Where,
@@ -33,13 +33,14 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   depth?: number
   disableTransaction?: boolean
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   file?: File
   filePath?: string
   locale?: TypedLocale
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
   publishSpecificLocale?: string
   req?: PayloadRequest
   select?: TSelect
@@ -112,6 +113,7 @@ async function updateLocal<
     overrideAccess = true,
     overrideLock,
     overwriteExistingFiles = false,
+    populate,
     publishSpecificLocale,
     select,
     showHiddenFields,
@@ -142,6 +144,7 @@ async function updateLocal<
     overrideLock,
     overwriteExistingFiles,
     payload,
+    populate,
     publishSpecificLocale,
     req,
     select,

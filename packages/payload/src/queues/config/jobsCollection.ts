@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
+import type { Field } from '../../fields/config/types.js'
 
 import { runJobsEndpoint } from '../restEndpointRun.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
@@ -12,14 +13,8 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
 
-  const queueNames: Set<string> = new Set(['default'])
-
-  config.jobs.workflows.forEach((workflow) => {
+  config.jobs?.workflows.forEach((workflow) => {
     workflowSlugs.add(workflow.slug)
-
-    if (workflow.queue) {
-      queueNames.add(workflow.queue)
-    }
   })
 
   config.jobs.tasks.forEach((task) => {
@@ -141,16 +136,20 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
           },
         ],
       },
-      {
-        name: 'workflowSlug',
-        type: 'select',
-        admin: {
-          position: 'sidebar',
-        },
-        index: true,
-        options: [...workflowSlugs],
-        required: false,
-      },
+      // only include the workflowSlugs field if workflows exist
+      ...((workflowSlugs.size > 0
+        ? [
+            {
+              name: 'workflowSlug',
+              type: 'select',
+              admin: {
+                position: 'sidebar',
+              },
+              index: true,
+              options: [...workflowSlugs],
+            },
+          ]
+        : []) as Field[]),
       {
         name: 'taskSlug',
         type: 'select',
@@ -163,13 +162,12 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
       },
       {
         name: 'queue',
-        type: 'select',
+        type: 'text',
         admin: {
           position: 'sidebar',
         },
         defaultValue: 'default',
         index: true,
-        options: [...queueNames],
       },
       {
         name: 'waitUntil',

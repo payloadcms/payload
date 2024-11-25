@@ -1,8 +1,8 @@
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
-  RequestContext,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
   Where,
@@ -22,10 +22,11 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   context?: RequestContext
   depth?: number
   disableTransaction?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   locale?: TypedLocale
   overrideAccess?: boolean
   overrideLock?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean
@@ -88,6 +89,7 @@ async function deleteLocal<
     disableTransaction,
     overrideAccess = true,
     overrideLock,
+    populate,
     select,
     showHiddenFields,
     where,
@@ -108,6 +110,7 @@ async function deleteLocal<
     disableTransaction,
     overrideAccess,
     overrideLock,
+    populate,
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,

@@ -41,5 +41,5 @@ export type JobsConfig = {
   /**
    * Define all the workflows here. Workflows orchestrate the flow of multiple tasks.
    */
-  workflows: WorkflowConfig<any>[]
+  workflows?: WorkflowConfig<any>[]
 }

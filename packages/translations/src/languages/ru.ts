@@ -264,7 +264,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     none: 'Никто',
     noOptions: 'Нет вариантов',
     noResults:
-      'Не найдено ни одной {{label}}. Либо {{label}} еще не существует, либо ни одна из них не соответствует фильтрам, которые вы указали выше.',
+      'Ничего не найдено. Возможно, {{label}} еще не существует или не соответствует указанным фильтрам.',
     notFound: 'Не найдено',
     nothingFound: 'Ничего не найдено',
     noValue: 'Нет значения',
@@ -313,6 +313,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Успешно Обновлено.',
     updating: 'Обновление',
     uploading: 'Загрузка',
+    uploadingBulk: 'Загрузка {{current}} из {{total}}',
     user: 'пользователь',
     username: 'Имя пользователя',
     users: 'пользователи',

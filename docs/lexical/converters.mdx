@@ -200,7 +200,7 @@ Lexical provides a seamless way to perform conversions between various other for
 A headless editor can perform such conversions outside of the main editor instance. Follow this method to initiate a headless editor:
 
 ```ts
-import { createHeadlessEditor } from '@lexical/headless' // <= make sure this package is installed
+import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
 import { getEnabledNodes, sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
 
 const yourEditorConfig // <= your editor config here
@@ -237,7 +237,7 @@ If you have access to the sanitized collection config, you can get access to the
 
 ```ts
 import type { CollectionConfig, RichTextField } from 'payload'
-import { createHeadlessEditor } from '@lexical/headless'
+import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
 import type { LexicalRichTextAdapter, SanitizedServerEditorConfig } from '@payloadcms/richtext-lexical'
 import {
   getEnabledNodes,
@@ -292,8 +292,8 @@ export const MyCollection: CollectionConfig = {
 Once you have your headless editor instance, you can use it to convert HTML to Lexical:
 
 ```ts
-import { $generateNodesFromDOM } from '@lexical/html'
-import { $getRoot, $getSelection } from 'lexical'
+import { $generateNodesFromDOM } from '@payloadcms/richtext-lexical/lexical/html'
+import { $getRoot, $getSelection } from '@payloadcms/richtext-lexical/lexical'
 import { JSDOM } from 'jsdom'
 
 headlessEditor.update(
@@ -334,8 +334,7 @@ This has been taken from the [lexical serialization & deserialization docs](http
 Convert markdown content to the Lexical editor format with the following:
 
 ```ts
-import { $convertFromMarkdownString } from '@lexical/markdown'
-import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
+import { sanitizeServerEditorConfig, $convertFromMarkdownString } from '@payloadcms/richtext-lexical'
 
 const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & Payload Config here
 const markdown = `# Hello World`
@@ -361,16 +360,21 @@ Export content from the Lexical editor into Markdown format using these steps:
 Here's the code for it:
 
 ```ts
-import { $convertToMarkdownString } from '@lexical/markdown'
+import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
 import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from 'lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & Payload Config here
 const yourEditorState: SerializedEditorState // <= your current editor state here
 
 // Import editor state into your headless editor
 try {
-  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
+  headlessEditor.update(
+    () => {
+      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+    },
+    { discrete: true },  // This should commit the editor state immediately
+  )
 } catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
 }
@@ -382,8 +386,6 @@ headlessEditor.getEditorState().read(() => {
 })
 ```
 
-The `.setEditorState()` function immediately updates your editor state. Thus, there's no need for the `discrete: true` flag when reading the state afterward.
-
 ## Lexical => Plain Text
 
 Export content from the Lexical editor into plain text using these steps:
@@ -394,15 +396,20 @@ Export content from the Lexical editor into plain text using these steps:
 Here's the code for it:
 
 ```ts
-import type { SerializedEditorState } from 'lexical'
-import { $getRoot } from 'lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import { $getRoot } from '@payloadcms/richtext-lexical/lexical'
 
 const yourEditorState: SerializedEditorState // <= your current editor state here
 
 // Import editor state into your headless editor
 try {
-  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
-} catch (e) {
+    headlessEditor.update(
+    () => {
+      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+    },
+    { discrete: true },  // This should commit the editor state immediately
+  )
+  } catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
 }
 

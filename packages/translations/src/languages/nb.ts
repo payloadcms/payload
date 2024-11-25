@@ -310,6 +310,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Oppdatert.',
     updating: 'Oppdatering',
     uploading: 'Opplasting',
+    uploadingBulk: 'Laster opp {{current}} av {{total}}',
     user: 'Bruker',
     username: 'Brukernavn',
     users: 'Brukere',

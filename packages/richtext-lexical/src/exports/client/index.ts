@@ -3,7 +3,6 @@
 
 export { slashMenuBasicGroupWithItems } from '../../features/shared/slashMenu/basicGroup.js'
 
-export { RichTextCell } from '../../cell/index.js'
 export { AlignFeatureClient } from '../../features/align/client/index.js'
 export { BlockquoteFeatureClient } from '../../features/blockquote/client/index.js'
 export { BlocksFeatureClient } from '../../features/blocks/client/index.js'
@@ -129,3 +128,14 @@ export {
 } from '../../features/blocks/client/nodes/InlineBlocksNode.js'
 
 export { FieldsDrawer } from '../../utilities/fieldsDrawer/Drawer.js'
+export { useLexicalDocumentDrawer } from '../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
+export { useLexicalDrawer } from '../../utilities/fieldsDrawer/useLexicalDrawer.js'
+export { useLexicalListDrawer } from '../../utilities/fieldsDrawer/useLexicalListDrawer.js'
+
+export { InlineBlockEditButton } from '../../features/blocks/client/componentInline/components/InlineBlockEditButton.js'
+export { InlineBlockRemoveButton } from '../../features/blocks/client/componentInline/components/InlineBlockRemoveButton.js'
+export { InlineBlockLabel } from '../../features/blocks/client/componentInline/components/InlineBlockLabel.js'
+export { InlineBlockContainer } from '../../features/blocks/client/componentInline/components/InlineBlockContainer.js'
+export { BlockCollapsible } from '../../features/blocks/client/component/components/BlockCollapsible.js'
+export { BlockEditButton } from '../../features/blocks/client/component/components/BlockEditButton.js'
+export { BlockRemoveButton } from '../../features/blocks/client/component/components/BlockRemoveButton.js'

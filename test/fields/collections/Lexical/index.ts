@@ -1,9 +1,7 @@
 import type { ServerEditorConfig } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from 'lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { CollectionConfig } from 'payload'
 
-import { createHeadlessEditor } from '@lexical/headless'
-import { $convertToMarkdownString } from '@lexical/markdown'
 import {
   BlocksFeature,
   defaultEditorFeatures,
@@ -17,6 +15,8 @@ import {
   TreeViewFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
+import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
+import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
 
 import { lexicalFieldsSlug } from '../../slugs.js'
 import {
@@ -82,13 +82,156 @@ const editorConfig: ServerEditorConfig = {
         ConditionalLayoutBlock,
         TabBlock,
         CodeBlock,
+        {
+          slug: 'myBlock',
+          admin: {
+            components: {},
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myBlockWithLabel',
+          admin: {
+            components: {
+              Label: '/collections/Lexical/blockComponents/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myBlockWithBlock',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponent.js#BlockComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'BlockRSC',
+
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myBlockWithBlockAndLabel',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponent.js#BlockComponent',
+              Label: '/collections/Lexical/blockComponents/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
       ],
       inlineBlocks: [
         {
           slug: 'myInlineBlock',
           admin: {
+            components: {},
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myInlineBlockWithLabel',
+          admin: {
             components: {
-              Label: '/collections/Lexical/LabelComponent.js#LabelComponent',
+              Label: '/collections/Lexical/inlineBlockComponents/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myInlineBlockWithBlock',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/inlineBlockComponents/BlockComponent.js#BlockComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myInlineBlockWithBlockAndLabel',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/inlineBlockComponents/BlockComponent.js#BlockComponent',
+              Label: '/collections/Lexical/inlineBlockComponents/LabelComponent.js#LabelComponent',
             },
           },
           fields: [
@@ -181,7 +324,12 @@ export const LexicalFields: CollectionConfig = {
 
             const yourEditorState: SerializedEditorState = siblingData.lexicalWithBlocks
             try {
-              headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+              headlessEditor.update(
+                () => {
+                  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+                },
+                { discrete: true },
+              )
             } catch (e) {
               /* empty */
             }

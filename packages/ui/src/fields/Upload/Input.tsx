@@ -2,13 +2,9 @@
 
 import type {
   ClientCollectionConfig,
-  FieldDescriptionClientProps,
-  FieldErrorClientProps,
   FieldLabelClientProps,
   FilterOptionsResult,
   JsonObject,
-  MappedComponent,
-  PaginatedDocs,
   StaticDescription,
   StaticLabel,
   UploadFieldClient,
@@ -22,19 +18,21 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
+import type { PopulateDocs, ReloadDoc } from './types.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { Dropzone } from '../../elements/Dropzone/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
 import { UploadComponentHasOne } from './HasOne/index.js'
@@ -45,25 +43,26 @@ export const baseClass = 'upload'
 type PopulatedDocs = { relationTo: string; value: JsonObject }[]
 
 export type UploadInputProps = {
+  readonly AfterInput?: React.ReactNode
+  readonly allowCreate?: boolean
   /**
    * Controls the visibility of the "Create new collection" button
    */
   readonly api?: string
+  readonly BeforeInput?: React.ReactNode
   readonly className?: string
   readonly collection?: ClientCollectionConfig
   readonly customUploadActions?: React.ReactNode[]
-  readonly Description?: MappedComponent
+  readonly Description?: React.ReactNode
   readonly description?: StaticDescription
-  readonly descriptionProps?: FieldDescriptionClientProps<MarkOptional<UploadFieldClient, 'type'>>
-  readonly Error?: MappedComponent
-  readonly errorProps?: FieldErrorClientProps<MarkOptional<UploadFieldClient, 'type'>>
-  readonly field?: MarkOptional<UploadFieldClient, 'type'>
+  readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
   readonly isSortable?: boolean
-  readonly Label?: MappedComponent
+  readonly Label?: React.ReactNode
   readonly label?: StaticLabel
   readonly labelProps?: FieldLabelClientProps<MarkOptional<UploadFieldClient, 'type'>>
+  readonly localized?: boolean
   readonly maxRows?: number
   readonly onChange?: (e) => void
   readonly path: string
@@ -74,25 +73,24 @@ export type UploadInputProps = {
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: (number | string)[] | (number | string)
-  readonly width?: React.CSSProperties['width']
 }
 
 export function UploadInput(props: UploadInputProps) {
   const {
+    AfterInput,
+    allowCreate,
     api,
+    BeforeInput,
     className,
     Description,
     description,
-    descriptionProps,
     Error,
-    errorProps,
-    field,
     filterOptions: filterOptionsFromProps,
     hasMany,
     isSortable,
     Label,
     label,
-    labelProps,
+    localized,
     maxRows,
     onChange: onChangeFromProps,
     path,
@@ -103,9 +101,7 @@ export function UploadInput(props: UploadInputProps) {
     showError,
     style,
     value,
-    width,
   } = props
-  const allowCreate = field?.admin?.allowCreate !== false
 
   const [populatedDocs, setPopulatedDocs] = React.useState<
     {
@@ -113,6 +109,7 @@ export function UploadInput(props: UploadInputProps) {
       value: JsonObject
     }[]
   >()
+
   const [activeRelationTo, setActiveRelationTo] = React.useState<string>(
     Array.isArray(relationTo) ? relationTo[0] : relationTo,
   )
@@ -144,6 +141,7 @@ export function UploadInput(props: UploadInputProps) {
       collectionSlugs: typeof relationTo === 'string' ? [relationTo] : relationTo,
       filterOptions,
     })
+
   const [
     CreateDocDrawer,
     ,
@@ -158,20 +156,18 @@ export function UploadInput(props: UploadInputProps) {
   const loadedValueDocsRef = React.useRef<boolean>(false)
 
   const canCreate = useMemo(() => {
-    if (readOnly || !allowCreate) {
+    if (!allowCreate) {
       return false
     }
 
     if (typeof activeRelationTo === 'string') {
       if (permissions?.collections && permissions.collections?.[activeRelationTo]?.create) {
-        if (permissions.collections[activeRelationTo].create?.permission === true) {
-          return true
-        }
+        return true
       }
     }
 
     return false
-  }, [activeRelationTo, permissions, readOnly, allowCreate])
+  }, [activeRelationTo, permissions, allowCreate])
 
   const onChange = React.useCallback(
     (newValue) => {
@@ -182,11 +178,8 @@ export function UploadInput(props: UploadInputProps) {
     [onChangeFromProps],
   )
 
-  const populateDocs = React.useCallback(
-    async (
-      ids: (number | string)[],
-      relatedCollectionSlug: string,
-    ): Promise<null | PaginatedDocs> => {
+  const populateDocs = React.useCallback<PopulateDocs>(
+    async (ids, relatedCollectionSlug) => {
       const query: {
         [key: string]: unknown
         where: Where
@@ -372,6 +365,29 @@ export function UploadInput(props: UploadInputProps) {
     [closeListDrawer, hasMany, populateDocs, onChange, value, activeRelationTo],
   )
 
+  const reloadDoc = React.useCallback<ReloadDoc>(
+    async (docID, collectionSlug) => {
+      const { docs } = await populateDocs([docID], collectionSlug)
+
+      if (docs[0]) {
+        setPopulatedDocs((currentDocs) => {
+          const existingDocIndex = currentDocs?.findIndex((doc) => {
+            return doc.value.id === docs[0].id && doc.relationTo === collectionSlug
+          })
+          if (existingDocIndex > -1) {
+            const updatedDocs = [...currentDocs]
+            updatedDocs[existingDocIndex] = {
+              relationTo: collectionSlug,
+              value: docs[0],
+            }
+            return updatedDocs
+          }
+        })
+      }
+    },
+    [populateDocs],
+  )
+
   // only hasMany can reorder
   const onReorder = React.useCallback(
     (newValue) => {
@@ -413,12 +429,9 @@ export function UploadInput(props: UploadInputProps) {
   }, [populateDocs, activeRelationTo, value])
 
   const showDropzone =
-    !readOnly &&
-    (!value ||
-      (hasMany &&
-        Array.isArray(value) &&
-        (typeof maxRows !== 'number' || value.length < maxRows)) ||
-      (!hasMany && populatedDocs?.[0] && typeof populatedDocs[0].value === 'undefined'))
+    !value ||
+    (hasMany && Array.isArray(value) && (typeof maxRows !== 'number' || value.length < maxRows)) ||
+    (!hasMany && populatedDocs?.[0] && typeof populatedDocs[0].value === 'undefined')
 
   return (
     <div
@@ -431,28 +444,22 @@ export function UploadInput(props: UploadInputProps) {
       ]
         .filter(Boolean)
         .join(' ')}
-      id={`field-${path.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      id={`field-${path?.replace(/\./g, '__')}`}
+      style={style}
     >
-      <FieldLabel
-        Label={Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
-        field={field as UploadFieldClient}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${baseClass}__wrap`}>
-        <FieldError
-          CustomError={Error}
-          path={path}
-          {...(errorProps || {})}
-          field={field as UploadFieldClient}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
       </div>
-
+      {BeforeInput}
       <div className={`${baseClass}__dropzoneAndUpload`}>
         {hasMany && Array.isArray(value) && value.length > 0 ? (
           <>
@@ -463,6 +470,7 @@ export function UploadInput(props: UploadInputProps) {
                 onRemove={onRemove}
                 onReorder={onReorder}
                 readonly={readOnly}
+                reloadDoc={reloadDoc}
                 serverURL={serverURL}
               />
             ) : (
@@ -474,7 +482,6 @@ export function UploadInput(props: UploadInputProps) {
             )}
           </>
         ) : null}
-
         {!hasMany && value ? (
           <>
             {populatedDocs && populatedDocs?.length > 0 && populatedDocs[0].value ? (
@@ -482,6 +489,7 @@ export function UploadInput(props: UploadInputProps) {
                 fileDoc={populatedDocs[0]}
                 onRemove={onRemove}
                 readonly={readOnly}
+                reloadDoc={reloadDoc}
                 serverURL={serverURL}
               />
             ) : populatedDocs && value && !populatedDocs?.[0]?.value ? (
@@ -493,7 +501,6 @@ export function UploadInput(props: UploadInputProps) {
             )}
           </>
         ) : null}
-
         {showDropzone ? (
           <Dropzone
             disabled={readOnly || !canCreate}
@@ -535,7 +542,6 @@ export function UploadInput(props: UploadInputProps) {
                 >
                   {t('fields:chooseFromExisting')}
                 </Button>
-
                 <CreateDocDrawer onSave={onDocCreate} />
                 <ListDrawer
                   allowCreate={canCreate}
@@ -545,7 +551,7 @@ export function UploadInput(props: UploadInputProps) {
                 />
               </div>
 
-              {canCreate && (
+              {canCreate && !readOnly && (
                 <p className={`${baseClass}__dragAndDropText`}>
                   {t('general:or')} {t('upload:dragAndDrop')}
                 </p>
@@ -564,11 +570,10 @@ export function UploadInput(props: UploadInputProps) {
           </>
         )}
       </div>
-      <FieldDescription
-        Description={Description}
-        description={description}
-        {...(descriptionProps || {})}
-        field={field as UploadFieldClient}
+      {AfterInput}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
       />
     </div>
   )

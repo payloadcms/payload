@@ -5,6 +5,7 @@ export {
   getCookieExpiration,
   parseCookies,
 } from '../auth/cookies.js'
+export { getFromImportMap } from '../bin/generateImportMap/getFromImportMap.js'
 export { parsePayloadComponent } from '../bin/generateImportMap/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 
@@ -28,6 +29,9 @@ export {
   tabHasName,
   valueIsValueWithRelation,
 } from '../fields/config/types.js'
+
+export { getFieldPaths } from '../fields/getFieldPaths.js'
+
 export * from '../fields/validations.js'
 
 export { validOperators } from '../types/constants.js'
@@ -40,6 +44,7 @@ export {
   deepCopyObject,
   deepCopyObjectComplex,
   deepCopyObjectSimple,
+  deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
 export {
   deepMerge,
@@ -52,12 +57,13 @@ export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getSelectMode } from '../utilities/getSelectMode.js'
-
 export { getSiblingData } from '../utilities/getSiblingData.js'
 
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export { isNumber } from '../utilities/isNumber.js'
+
+export { isPlainObject } from '../utilities/isPlainObject.js'
 
 export {
   isReactClientComponent,

@@ -17,8 +17,8 @@ const traverseFields = ({
 }: TraverseFieldsArgs) => {
   fields.forEach((field) => {
     switch (field.type) {
-      case 'row':
-      case 'collapsible': {
+      case 'collapsible':
+      case 'row': {
         traverseFields({
           data,
           fields: field.fields,
@@ -44,14 +44,6 @@ const traverseFields = ({
           data: groupData,
           fields: field.fields,
           result: groupResult,
-        })
-        break
-      }
-      case 'tabs': {
-        traverseFields({
-          data,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-          result,
         })
         break
       }
@@ -82,6 +74,14 @@ const traverseFields = ({
             result,
           })
         }
+        break
+      }
+      case 'tabs': {
+        traverseFields({
+          data,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          result,
+        })
         break
       }
       default:

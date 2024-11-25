@@ -1,5 +1,5 @@
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext, SelectType } from '../../../types/index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
@@ -16,10 +16,11 @@ export type Options<TSlug extends CollectionSlug> = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   id: string
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
@@ -36,6 +37,7 @@ export default async function findVersionByIDLocal<TSlug extends CollectionSlug>
     depth,
     disableErrors = false,
     overrideAccess = true,
+    populate,
     select,
     showHiddenFields,
   } = options
@@ -56,6 +58,7 @@ export default async function findVersionByIDLocal<TSlug extends CollectionSlug>
     depth,
     disableErrors,
     overrideAccess,
+    populate,
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,

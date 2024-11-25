@@ -85,7 +85,7 @@ export const daTranslations: DefaultTranslationsObject = {
     deletingFile: 'Der opstod en fejl under sletning af filen.',
     deletingTitle:
       'Der opstod en fejl under sletningen {{title}}. Tjek din forbindelse eller prøv igen.',
-    emailOrPasswordIncorrect: 'Email eller brugernavn er forkert.',
+    emailOrPasswordIncorrect: 'Email eller adgangskode er forkert.',
     followingFieldsInvalid_one: 'Feltet er ugyldigt:',
     followingFieldsInvalid_other: 'Felterne er ugyldige:',
     incorrectCollection: 'Forkert samling',
@@ -308,6 +308,7 @@ export const daTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Opdateret.',
     updating: 'Opdaterer',
     uploading: 'Uploader',
+    uploadingBulk: 'Uploader {{current}} af {{total}}',
     user: 'Bruger',
     username: 'Brugernavn',
     users: 'Brugere',

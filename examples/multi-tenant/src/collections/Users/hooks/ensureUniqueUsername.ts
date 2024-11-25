@@ -6,7 +6,9 @@ import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
 export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, value }) => {
   // if value is unchanged, skip validation
-  if (originalDoc.username === value) {return value}
+  if (originalDoc.username === value) {
+    return value
+  }
 
   const incomingTenantID = typeof data?.tenant === 'object' ? data.tenant.id : data?.tenant
   const currentTenantID =
@@ -44,8 +46,8 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
       throw new ValidationError({
         errors: [
           {
-            field: 'username',
             message: `The "${attemptedTenantChange.name}" tenant already has a user with the username "${value}". Usernames must be unique per tenant.`,
+            path: 'username',
           },
         ],
       })
@@ -54,8 +56,8 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
     throw new ValidationError({
       errors: [
         {
-          field: 'username',
           message: `A user with the username ${value} already exists. Usernames must be unique per tenant.`,
+          path: 'username',
         },
       ],
     })

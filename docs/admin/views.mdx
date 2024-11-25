@@ -15,13 +15,13 @@ There are four types of views within the Admin Panel:
 - [Global Views](#global-views)
 - [Document Views](#document-views)
 
-To swap in your own Custom Views, consult the list of available components. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-views) accordingly.
+To swap in your own Custom View, first consult the list of available components, determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-views) accordingly.
 
 ## Root Views
 
 Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views.
 
-To easily swap Root Views with your own, or to [create entirely new ones](#adding-new-root-views), use the `admin.components.views` property of your root [Payload Config](../configuration/overview):
+To swap Root Views with your own, or to [create entirely new ones](#adding-new-root-views), use the `admin.components.views` property of your root [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -143,7 +143,7 @@ The above example shows how to add a new [Root View](#root-views), but the patte
 
 Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views.
 
-To easily swap out Collection Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Collection Config](../collections/overview):
+To swap out Collection Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Collection Config](../collections/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -198,7 +198,7 @@ The following options are available:
 
 Global Views are views that are scoped under the `/globals` route, such as the Document Edit View.
 
-To easily swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property in your [Global Config](../globals/overview):
+To swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property in your [Global Config](../globals/overview):
 
 ```ts
 import type { SanitizedGlobalConfig } from 'payload'
@@ -248,7 +248,7 @@ The following options are available:
 
 Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View or the API View. All Document Views keep their overall structure across navigation changes, such as their title and tabs, and replace only the content below.
 
-To easily swap out Document Views with your own, or to [create entirely new ones](#adding-new-document-views), use the `admin.components.views.Edit[key]` property in your [Collection Config](../collections/overview) or [Global Config](../globals/overview):
+To swap out Document Views with your own, or to [create entirely new ones](#adding-new-document-views), use the `admin.components.views.Edit[key]` property in your [Collection Config](../collections/overview) or [Global Config](../globals/overview):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -350,6 +350,8 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 }
 ```
 
+### Default Props
+
 Your Custom Views will be provided with the following props:
 
 | Prop                      | Description                                                                                                                            |
@@ -359,6 +361,7 @@ Your Custom Views will be provided with the following props:
 | **`importMap`**           | The import map object.                                                        |
 | **`params`**              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes).     |
 | **`searchParams`**        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).      |
+| **`doc`**                 | The document being edited. Only available in Document Views. [More details](#document-views).                                           |
 
 <Banner type="success">
   <strong>Reminder:</strong>

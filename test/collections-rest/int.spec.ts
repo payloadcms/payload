@@ -13,7 +13,9 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   customIdNumberSlug,
   customIdSlug,
+  endpointsSlug,
   errorOnHookSlug,
+  methods,
   pointSlug,
   relationSlug,
   slug,
@@ -28,19 +30,6 @@ let payload: Payload
 describe('collections-rest', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-
-    // Wait for indexes to be created,
-    // as we need them to query by point
-    if (payload.db.name === 'mongoose') {
-      await new Promise((resolve, reject) => {
-        payload.db.collections[pointSlug].ensureIndexes(function (err) {
-          if (err) {
-            reject(err)
-          }
-          resolve(true)
-        })
-      })
-    }
   })
 
   afterAll(async () => {
@@ -1101,185 +1090,222 @@ describe('collections-rest', () => {
         })
       })
 
-      if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
-        describe('near', () => {
-          const point = [10, 20]
-          const [lat, lng] = point
-          it('should return a document near a point', async () => {
-            const near = `${lat + 0.01}, ${lng + 0.01}, 10000`
-            const response = await restClient.GET(`/${pointSlug}`, {
-              query: {
-                where: {
-                  point: {
-                    near,
-                  },
+      describe('near', () => {
+        const point = [10, 20]
+        const [lat, lng] = point
+        it('should return a document near a point', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+
+          const near = `${lat + 0.01}, ${lng + 0.01}, 10000`
+          const response = await restClient.GET(`/${pointSlug}`, {
+            query: {
+              where: {
+                point: {
+                  near,
                 },
               },
-            })
-            const result = await response.json()
-
-            expect(response.status).toEqual(200)
-            expect(result.docs).toHaveLength(1)
+            },
           })
+          const result = await response.json()
 
-          it('should not return a point far away', async () => {
-            const near = `${lng + 1}, ${lat - 1}, 5000`
-            const response = await restClient.GET(`/${pointSlug}`, {
-              query: {
-                where: {
-                  point: {
-                    near,
-                  },
+          expect(response.status).toEqual(200)
+          expect(result.docs).toHaveLength(1)
+
+          const responseCount = await restClient.GET(`/${pointSlug}/count`, {
+            query: {
+              where: {
+                point: {
+                  near,
                 },
               },
-            })
-            const result = await response.json()
-
-            expect(response.status).toEqual(200)
-            expect(result.docs).toHaveLength(0)
+            },
           })
+          const resultCount = await responseCount.json()
 
-          it('should sort find results by nearest distance', async () => {
-            // creating twice as many records as we are querying to get a random sample
-            const promises = []
-            for (let i = 0; i < 11; i++) {
-              // setTimeout used to randomize the creation timestamp
-              setTimeout(() => {
-                promises.push(
-                  payload.create({
-                    collection: pointSlug,
-                    data: {
-                      // only randomize longitude to make distance comparison easy
-                      point: [Math.random(), 0],
-                    },
-                  }),
-                )
-              }, Math.random())
-            }
-            await Promise.all(promises)
-
-            const { docs } = await restClient
-              .GET(`/${pointSlug}`, {
-                query: {
-                  limit: 5,
-                  where: {
-                    point: {
-                      // querying large enough range to include all docs
-                      near: '0, 0, 100000, 0',
-                    },
-                  },
-                },
-              })
-              .then((res) => res.json())
-
-            let previous = 0
-            docs.forEach(({ point: coordinates }) => {
-              // the next document point should always be greater than the one before
-              expect(previous).toBeLessThanOrEqual(coordinates[0])
-              ;[previous] = coordinates
-            })
-          })
+          expect(responseCount.status).toEqual(200)
+          expect(resultCount.totalDocs).toBe(1)
         })
 
-        describe('within', () => {
-          type Point = [number, number]
-          const polygon: Point[] = [
-            [9.0, 19.0], // bottom-left
-            [9.0, 21.0], // top-left
-            [11.0, 21.0], // top-right
-            [11.0, 19.0], // bottom-right
-            [9.0, 19.0], // back to starting point to close the polygon
-          ]
-          it('should return a document with the point inside the polygon', async () => {
-            // There should be 1 total points document populated by default with the point [10, 20]
-            const response = await restClient.GET(`/${pointSlug}`, {
-              query: {
-                where: {
-                  point: {
-                    within: {
-                      type: 'Polygon',
-                      coordinates: [polygon],
-                    },
-                  },
+        it('should not return a point far away', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+
+          const near = `${lng + 1}, ${lat + 1}, 5000`
+          const response = await restClient.GET(`/${pointSlug}`, {
+            query: {
+              where: {
+                point: {
+                  near,
                 },
               },
-            })
-            const result = await response.json()
-
-            expect(response.status).toEqual(200)
-            expect(result.docs).toHaveLength(1)
+            },
           })
+          const result = await response.json()
 
-          it('should not return a document with the point outside a smaller polygon', async () => {
-            const response = await restClient.GET(`/${pointSlug}`, {
-              query: {
-                where: {
-                  point: {
-                    within: {
-                      type: 'Polygon',
-                      coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
-                    },
-                  },
-                },
-              },
-            })
-            const result = await response.json()
-
-            expect(response.status).toEqual(200)
-            expect(result.docs).toHaveLength(0)
-          })
+          expect(response.status).toEqual(200)
+          expect(result.docs).toHaveLength(0)
         })
 
-        describe('intersects', () => {
-          type Point = [number, number]
-          const polygon: Point[] = [
-            [9.0, 19.0], // bottom-left
-            [9.0, 21.0], // top-left
-            [11.0, 21.0], // top-right
-            [11.0, 19.0], // bottom-right
-            [9.0, 19.0], // back to starting point to close the polygon
-          ]
+        it('should sort find results by nearest distance', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
 
-          it('should return a document with the point intersecting the polygon', async () => {
-            // There should be 1 total points document populated by default with the point [10, 20]
-            const response = await restClient.GET(`/${pointSlug}`, {
+          // creating twice as many records as we are querying to get a random sample
+          const promises = []
+          for (let i = 0; i < 11; i++) {
+            // setTimeout used to randomize the creation timestamp
+            setTimeout(() => {
+              promises.push(
+                payload.create({
+                  collection: pointSlug,
+                  data: {
+                    // only randomize longitude to make distance comparison easy
+                    point: [Math.random(), 0],
+                  },
+                }),
+              )
+            }, Math.random())
+          }
+          await Promise.all(promises)
+
+          const { docs } = await restClient
+            .GET(`/${pointSlug}`, {
               query: {
+                limit: 5,
+                sort: 'point',
                 where: {
                   point: {
-                    intersects: {
-                      type: 'Polygon',
-                      coordinates: [polygon],
-                    },
+                    // querying large enough range to include all docs
+                    near: '0, 0, 100000, 0',
                   },
                 },
               },
             })
-            const result = await response.json()
+            .then((res) => res.json())
 
-            expect(response.status).toEqual(200)
-            expect(result.docs).toHaveLength(1)
-          })
-
-          it('should not return a document with the point not intersecting a smaller polygon', async () => {
-            const response = await restClient.GET(`/${pointSlug}`, {
-              query: {
-                where: {
-                  point: {
-                    intersects: {
-                      type: 'Polygon',
-                      coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
-                    },
-                  },
-                },
-              },
-            })
-            const result = await response.json()
-
-            expect(response.status).toEqual(200)
-            expect(result.docs).toHaveLength(0)
+          let previous = 0
+          docs.forEach(({ point: coordinates }) => {
+            // the next document point should always be greater than the one before
+            expect(previous).toBeLessThanOrEqual(coordinates[0])
+            ;[previous] = coordinates
           })
         })
-      }
+      })
+
+      describe('within', () => {
+        type Point = [number, number]
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ]
+        it('should return a document with the point inside the polygon', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+          // There should be 1 total points document populated by default with the point [10, 20]
+          const response = await restClient.GET(`/${pointSlug}`, {
+            query: {
+              where: {
+                point: {
+                  within: {
+                    type: 'Polygon',
+                    coordinates: [polygon],
+                  },
+                },
+              },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toEqual(200)
+          expect(result.docs).toHaveLength(1)
+        })
+
+        it('should not return a document with the point outside a smaller polygon', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+          const response = await restClient.GET(`/${pointSlug}`, {
+            query: {
+              where: {
+                point: {
+                  within: {
+                    type: 'Polygon',
+                    coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+                  },
+                },
+              },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toEqual(200)
+          expect(result.docs).toHaveLength(0)
+        })
+      })
+
+      describe('intersects', () => {
+        type Point = [number, number]
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ]
+
+        it('should return a document with the point intersecting the polygon', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+          // There should be 1 total points document populated by default with the point [10, 20]
+          const response = await restClient.GET(`/${pointSlug}`, {
+            query: {
+              where: {
+                point: {
+                  intersects: {
+                    type: 'Polygon',
+                    coordinates: [polygon],
+                  },
+                },
+              },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toEqual(200)
+          expect(result.docs).toHaveLength(1)
+        })
+
+        it('should not return a document with the point not intersecting a smaller polygon', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+          const response = await restClient.GET(`/${pointSlug}`, {
+            query: {
+              where: {
+                point: {
+                  intersects: {
+                    type: 'Polygon',
+                    coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+                  },
+                },
+              },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toEqual(200)
+          expect(result.docs).toHaveLength(0)
+        })
+      })
 
       it('or', async () => {
         const post1 = await createPost({ title: 'post1' })
@@ -1644,6 +1670,25 @@ describe('collections-rest', () => {
       await expect(
         payload.findByID({ collection: 'posts', id, disableErrors: true }),
       ).resolves.toBeNull()
+    })
+  })
+
+  describe('Custom endpoints', () => {
+    it('should execute custom root endpoints', async () => {
+      for (const method of methods) {
+        const response = await restClient[method.toUpperCase()](`/${method}-test`, {})
+        await expect(response.text()).resolves.toBe(`${method} response`)
+      }
+    })
+
+    it('should execute custom collection endpoints', async () => {
+      for (const method of methods) {
+        const response = await restClient[method.toUpperCase()](
+          `/${endpointsSlug}/${method}-test`,
+          {},
+        )
+        await expect(response.text()).resolves.toBe(`${method} response`)
+      }
     })
   })
 })

@@ -1,7 +1,17 @@
 import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
 import type { ClientSession, Connection, ConnectOptions, QueryOptions } from 'mongoose'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload, UpdateOneArgs } from 'payload'
+import type {
+  BaseDatabaseAdapter,
+  DatabaseAdapterObj,
+  Payload,
+  TypeWithID,
+  TypeWithVersion,
+  UpdateGlobalArgs,
+  UpdateGlobalVersionArgs,
+  UpdateOneArgs,
+  UpdateVersionArgs,
+} from 'payload'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
@@ -12,6 +22,8 @@ import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } fro
 
 import { connect } from './connect.js'
 import { count } from './count.js'
+import { countGlobalVersions } from './countGlobalVersions.js'
+import { countVersions } from './countVersions.js'
 import { create } from './create.js'
 import { createGlobal } from './createGlobal.js'
 import { createGlobalVersion } from './createGlobalVersion.js'
@@ -72,8 +84,14 @@ export interface Args {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   } & ConnectOptions
+
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
+  /**
+   * Set to `true` to ensure that indexes are ready before completing connection.
+   * NOTE: not recommended for production. This can slow down the initialization of Payload.
+   */
+  ensureIndexes?: boolean
   migrationDir?: string
   /**
    * typed as any to avoid dependency
@@ -94,6 +112,7 @@ export type MongooseAdapter = {
     [slug: string]: CollectionModel
   }
   connection: Connection
+  ensureIndexes: boolean
   globals: GlobalModel
   mongoMemoryServer: MongoMemoryReplSet
   prodMigrations?: {
@@ -116,6 +135,7 @@ declare module 'payload' {
       [slug: string]: CollectionModel
     }
     connection: Connection
+    ensureIndexes: boolean
     globals: GlobalModel
     mongoMemoryServer: MongoMemoryReplSet
     prodMigrations?: {
@@ -125,7 +145,16 @@ declare module 'payload' {
     }[]
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
+    updateGlobal: <T extends Record<string, unknown>>(
+      args: { options?: QueryOptions } & UpdateGlobalArgs<T>,
+    ) => Promise<T>
+    updateGlobalVersion: <T extends TypeWithID = TypeWithID>(
+      args: { options?: QueryOptions } & UpdateGlobalVersionArgs<T>,
+    ) => Promise<TypeWithVersion<T>>
     updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
+    updateVersion: <T extends TypeWithID = TypeWithID>(
+      args: { options?: QueryOptions } & UpdateVersionArgs<T>,
+    ) => Promise<TypeWithVersion<T>>
     versions: {
       [slug: string]: CollectionModel
     }
@@ -136,6 +165,7 @@ export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
   disableIndexHints = false,
+  ensureIndexes,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
@@ -154,8 +184,8 @@ export function mongooseAdapter({
       collections: {},
       connection: undefined,
       connectOptions: connectOptions || {},
-      count,
       disableIndexHints,
+      ensureIndexes,
       globals: undefined,
       mongoMemoryServer,
       sessions: {},
@@ -166,6 +196,9 @@ export function mongooseAdapter({
       beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
+      count,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,

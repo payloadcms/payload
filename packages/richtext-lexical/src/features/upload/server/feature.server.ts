@@ -2,6 +2,7 @@ import type {
   CollectionSlug,
   Config,
   Field,
+  FieldSchemaMap,
   FileData,
   FileSize,
   Payload,
@@ -85,11 +86,13 @@ export const UploadFeature = createServerFeature<
           return null
         }
 
-        const schemaMap = new Map<string, Field[]>()
+        const schemaMap: FieldSchemaMap = new Map()
 
         for (const collection in props.collections) {
           if (props.collections[collection].fields?.length) {
-            schemaMap.set(collection, props.collections[collection].fields)
+            schemaMap.set(collection, {
+              fields: props.collections[collection].fields,
+            })
           }
         }
 
@@ -232,6 +235,7 @@ export const UploadFeature = createServerFeature<
                 draft,
                 node,
                 overrideAccess,
+                populateArg,
                 populationPromises,
                 req,
                 showHiddenFields,
@@ -261,7 +265,8 @@ export const UploadFeature = createServerFeature<
                     key: 'value',
                     overrideAccess,
                     req,
-                    select: collection.config.defaultPopulate,
+                    select:
+                      populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate,
                     showHiddenFields,
                   }),
                 )

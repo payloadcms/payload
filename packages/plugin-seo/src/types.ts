@@ -8,15 +8,15 @@ export type PartialDocumentInfoContext = Pick<
   | 'collectionSlug'
   | 'docPermissions'
   | 'globalSlug'
+  | 'hasPublishedDoc'
   | 'hasPublishPermission'
   | 'hasSavePermission'
   | 'id'
   | 'initialData'
   | 'initialState'
   | 'preferencesKey'
-  | 'publishedDoc'
   | 'title'
-  | 'versionsCount'
+  | 'versionCount'
 >
 
 export type GenerateTitle<T = any> = (
@@ -67,7 +67,7 @@ export type SEOPluginConfig = {
   /**
    * Override the default fields inserted by the SEO plugin via a function that receives the default fields and returns the new fields
    *
-   * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/beta/plugins/seo#direct-use-of-fields
+   * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/plugins/seo#direct-use-of-fields
    */
   fields?: FieldsOverride
   generateDescription?: GenerateDescription
@@ -85,7 +85,7 @@ export type SEOPluginConfig = {
   /**
    * Group fields into tabs, your content will be automatically put into a general tab and the SEO fields into an SEO tab
    *
-   * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/beta/plugins/seo#direct-use-of-fields
+   * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/plugins/seo#direct-use-of-fields
    */
   tabbedUI?: boolean
   /**

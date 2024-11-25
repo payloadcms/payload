@@ -46,6 +46,11 @@ const networkConditions = {
     latency: 1000,
     upload: ((3 * 1000 * 1000) / 8) * 0.8,
   },
+  'Fast 4G': {
+    download: ((20 * 1000 * 1000) / 8) * 0.8,
+    latency: 1000,
+    upload: ((10 * 1000 * 1000) / 8) * 0.8,
+  },
 }
 
 /**
@@ -58,9 +63,11 @@ export async function ensureCompilationIsDone({
   customRoutes,
   page,
   serverURL,
+  noAutoLogin,
 }: {
   customAdminRoutes?: Config['admin']['routes']
   customRoutes?: Config['routes']
+  noAutoLogin?: boolean
   page: Page
   serverURL: string
 }): Promise<void> {
@@ -70,9 +77,37 @@ export async function ensureCompilationIsDone({
 
   const adminURL = `${serverURL}${adminRoute}`
 
-  await page.goto(adminURL)
-  await page.waitForURL(adminURL)
+  const maxAttempts = 50
+  let attempt = 1
 
+  while (attempt <= maxAttempts) {
+    try {
+      console.log(`Checking if compilation is done (attempt ${attempt}/${maxAttempts})...`)
+
+      await page.goto(adminURL)
+      await page.waitForURL(
+        noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL,
+      )
+
+      console.log('Successfully compiled')
+      return
+    } catch (error) {
+      console.error(`Compilation not done yet`)
+
+      if (attempt === maxAttempts) {
+        console.error('Max retry attempts reached. Giving up.')
+        throw error
+      }
+
+      console.log('Retrying in 3 seconds...')
+      await wait(3000)
+      attempt++
+    }
+  }
+
+  if (noAutoLogin) {
+    return
+  }
   await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
     timeout: POLL_TOPASS_TIMEOUT,
   })
@@ -89,7 +124,7 @@ export async function throttleTest({
   page,
 }: {
   context: BrowserContext
-  delay: 'Fast 3G' | 'Slow 3G' | 'Slow 4G'
+  delay: keyof typeof networkConditions
   page: Page
 }) {
   const cdpSession = await context.newCDPSession(page)
@@ -174,7 +209,12 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   } else {
     await page.keyboard.down('Control')
   }
-  await page.keyboard.down('s')
+  await page.keyboard.press('s')
+  if (isMac) {
+    await page.keyboard.up('Meta')
+  } else {
+    await page.keyboard.up('Control')
+  }
   await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 }
 
@@ -311,7 +351,10 @@ export function initPageConsoleErrorCatch(page: Page) {
       !msg.text().includes('Failed to fetch RSC payload for') &&
       !msg.text().includes('Error: NEXT_NOT_FOUND') &&
       !msg.text().includes('Error: NEXT_REDIRECT') &&
-      !msg.text().includes('Error getting document data')
+      !msg.text().includes('Error getting document data') &&
+      !msg.text().includes('Failed trying to load default language strings') &&
+      !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
+      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') // This is a weird error that happens in the console
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.

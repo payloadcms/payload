@@ -32,13 +32,13 @@ type InitNextArgs = {
 } & Pick<CliArgs, '--debug'>
 
 type InitNextResult =
+  | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
   | {
       isSrcDir: boolean
       nextAppDir: string
       payloadConfigPath: string
       success: true
     }
-  | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
 
 export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   const { dbType: dbType, packageManager, projectDir } = args
@@ -227,9 +227,9 @@ async function installDeps(projectDir: string, packageManager: PackageManager, d
     '@payloadcms/next',
     '@payloadcms/richtext-lexical',
     '@payloadcms/payload-cloud',
-  ].map((pkg) => `${pkg}@beta`)
+  ].map((pkg) => `${pkg}@latest`)
 
-  packagesToInstall.push(`@payloadcms/db-${dbType}@beta`)
+  packagesToInstall.push(`@payloadcms/db-${dbType}@latest`)
 
   // Match graphql version of @payloadcms/next
   packagesToInstall.push('graphql@^16.8.1')

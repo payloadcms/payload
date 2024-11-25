@@ -309,6 +309,7 @@ export const faTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'با موفقیت به‌روز شد.',
     updating: 'در حال به‌روزرسانی',
     uploading: 'در حال بارگذاری',
+    uploadingBulk: 'بارگذاری {{current}} از {{total}}',
     user: 'کاربر',
     username: 'نام کاربری',
     users: 'کاربران',

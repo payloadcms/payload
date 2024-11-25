@@ -86,6 +86,7 @@ export const ForgotPasswordForm: React.FC = () => {
             label: t('authentication:username'),
             required: true,
           }}
+          path="username"
           validate={(value) =>
             text(value, {
               name: 'username',
@@ -105,12 +106,15 @@ export const ForgotPasswordForm: React.FC = () => {
         />
       ) : (
         <EmailField
-          autoComplete="email"
           field={{
             name: 'email',
+            admin: {
+              autoComplete: 'email',
+            },
             label: t('general:email'),
             required: true,
           }}
+          path="email"
           validate={(value) =>
             email(value, {
               name: 'email',

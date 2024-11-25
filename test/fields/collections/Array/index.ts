@@ -28,6 +28,15 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
         },
         {
+          name: 'uiField',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: './collections/Array/LabelComponent.js#ArrayRowLabel',
+            },
+          },
+        },
+        {
           name: 'localizedText',
           type: 'text',
           localized: true,
@@ -173,6 +182,30 @@ const ArrayFields: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'externallyUpdatedArray',
+      type: 'array',
+      fields: [
+        {
+          name: 'customField',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '/collections/Array/CustomField.js#CustomField',
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'ui',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Array/AddRowButton.js',
+        },
+      },
     },
   ],
   slug: arrayFieldsSlug,

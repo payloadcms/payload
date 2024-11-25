@@ -14,7 +14,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { TablePlugin as LexicalReactTablePlugin } from '@lexical/react/LexicalTablePlugin'
 import { INSERT_TABLE_COMMAND, TableNode } from '@lexical/table'
 import { mergeRegister } from '@lexical/utils'
-import { formatDrawerSlug, useEditDepth, useModal } from '@payloadcms/ui'
+import { formatDrawerSlug, useEditDepth } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
@@ -85,13 +85,16 @@ export const TablePlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
   const cellContext = useContext(CellContext)
   const editDepth = useEditDepth()
-  const { uuid } = useEditorConfigContext()
+  const {
+    fieldProps: { schemaPath },
+    uuid,
+  } = useEditorConfigContext()
 
   const drawerSlug = formatDrawerSlug({
     slug: 'lexical-table-create-' + uuid,
     depth: editDepth,
   })
-  const { toggleDrawer } = useLexicalDrawer(drawerSlug)
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
 
   useEffect(() => {
     if (!editor.hasNodes([TableNode])) {
@@ -137,6 +140,7 @@ export const TablePlugin: PluginComponent = () => {
             rows: String(data.rows),
           })
         }}
+        schemaPath={schemaPath}
         schemaPathSuffix="fields"
       />
       <LexicalReactTablePlugin hasCellBackgroundColor={false} hasCellMerge />

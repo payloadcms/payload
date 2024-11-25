@@ -310,6 +310,7 @@ export const plTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Aktualizacja zakończona sukcesem.',
     updating: 'Aktualizacja',
     uploading: 'Przesyłanie',
+    uploadingBulk: 'Przesyłanie {{current}} z {{total}}',
     user: 'użytkownik',
     username: 'Nazwa użytkownika',
     users: 'użytkownicy',

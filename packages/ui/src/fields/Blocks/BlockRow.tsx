@@ -1,17 +1,24 @@
 'use client'
-import type { ClientBlock, FieldPermissions, Labels, Row } from 'payload'
+import type {
+  ClientBlock,
+  ClientField,
+  Labels,
+  Row,
+  SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
+import type { RenderFieldsProps } from '../../forms/RenderFields/types.js'
 
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
@@ -24,14 +31,15 @@ type BlocksFieldProps = {
   blocks: ClientBlock[]
   duplicateRow: (rowIndex: number) => void
   errorCount: number
-  forceRender?: boolean
+  fields: ClientField[]
   hasMaxRows?: boolean
-  indexPath: string
   isSortable?: boolean
+  Label?: React.ReactNode
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
+  parentPath: string
   path: string
-  permissions: FieldPermissions
+  permissions: SanitizedFieldPermissions
   readOnly: boolean
   removeRow: (rowIndex: number) => void
   row: Row
@@ -48,13 +56,15 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   blocks,
   duplicateRow,
   errorCount,
-  forceRender,
+  fields,
   hasMaxRows,
   isSortable,
+  Label,
   labels,
   listeners,
   moveRow,
-  path: parentPath,
+  parentPath,
+  path,
   permissions,
   readOnly,
   removeRow,
@@ -66,7 +76,6 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   setNodeRef,
   transform,
 }) => {
-  const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
@@ -79,9 +88,22 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
     .filter(Boolean)
     .join(' ')
 
+  let blockPermissions: RenderFieldsProps['permissions'] = undefined
+
+  if (permissions === true) {
+    blockPermissions = true
+  } else {
+    const permissionsBlockSpecific = permissions?.blocks?.[block.slug]
+    if (permissionsBlockSpecific === true) {
+      blockPermissions = true
+    } else {
+      blockPermissions = permissionsBlockSpecific?.fields
+    }
+  }
+
   return (
     <div
-      id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
+      id={`${parentPath?.split('.').join('-')}-row-${rowIndex}`}
       key={`${parentPath}-row-${rowIndex}`}
       ref={setNodeRef}
       style={{
@@ -119,12 +141,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             : undefined
         }
         header={
-          block?.admin?.components?.Label ? (
-            <RenderComponent
-              clientProps={{ blockKind: 'block', formData: row }}
-              mappedComponent={block.admin.components.Label}
-            />
-          ) : (
+          Label || (
             <div className={`${baseClass}__block-header`}>
               <span className={`${baseClass}__block-number`}>
                 {String(rowIndex + 1).padStart(2, '0')}
@@ -146,13 +163,13 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fields={block.fields}
-          forceRender={forceRender}
+          fields={fields}
           margins="small"
-          path={path}
-          permissions={permissions?.blocks?.[block.slug]?.fields}
+          parentIndexPath=""
+          parentPath={path}
+          parentSchemaPath={schemaPath}
+          permissions={blockPermissions}
           readOnly={readOnly}
-          schemaPath={`${schemaPath}.${block.slug}`}
         />
       </Collapsible>
     </div>

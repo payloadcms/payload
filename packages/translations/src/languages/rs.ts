@@ -309,6 +309,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Успешно ажурирано.',
     updating: 'Ажурирање',
     uploading: 'Пренос',
+    uploadingBulk: 'Отпремање {{current}} од {{total}}',
     user: 'Корисник',
     username: 'Korisničko ime',
     users: 'Корисници',

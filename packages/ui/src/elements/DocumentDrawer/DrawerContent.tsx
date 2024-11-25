@@ -1,22 +1,17 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { XIcon } from '../../icons/X/index.js'
+import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
-import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useLocale } from '../../providers/Locale/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
-import { Gutter } from '../Gutter/index.js'
-import { IDLabel } from '../IDLabel/index.js'
-import { RenderTitle } from '../RenderTitle/index.js'
-import { baseClass } from './index.js'
+import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   id: existingDocID,
@@ -33,44 +28,78 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   redirectAfterDelete,
   redirectAfterDuplicate,
 }) => {
-  const { config } = useConfig()
-
   const {
-    routes: { api: apiRoute },
-    serverURL,
-  } = config
+    config: { collections },
+  } = useConfig()
 
-  const { closeModal, modalState, toggleModal } = useModal()
-  const locale = useLocale()
+  const [collectionConfig] = useState(() =>
+    collections.find((collection) => collection.slug === collectionSlug),
+  )
+
+  const documentViewAbortControllerRef = React.useRef<AbortController>(null)
+
+  const { closeModal } = useModal()
   const { t } = useTranslation()
-  const [docID, setDocID] = useState(existingDocID)
-  const [isOpen, setIsOpen] = useState(false)
-  const [collectionConfig] = useRelatedCollections(collectionSlug)
 
-  const Edit = collectionConfig.admin.components.views.edit.default.Component
+  const { renderDocument } = useServerFunctions()
 
-  const isEditing = Boolean(docID)
-  const apiURL = docID
-    ? `${serverURL}${apiRoute}/${collectionSlug}/${docID}${locale?.code ? `?locale=${locale.code}` : ''}`
-    : null
+  const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
+  const [isLoading, setIsLoading] = useState(true)
+  const hasRenderedDocument = useRef(false)
 
-  useEffect(() => {
-    setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
-  }, [modalState, drawerSlug])
+  const getDocumentView = useCallback(
+    (docID?: number | string) => {
+      abortAndIgnore(documentViewAbortControllerRef.current)
 
-  const onLoadError = React.useCallback(
-    (data) => {
-      if (isOpen) {
-        closeModal(drawerSlug)
-        toast.error(data.errors?.[0].message || t('error:unspecific'))
+      const controller = new AbortController()
+      documentViewAbortControllerRef.current = controller
+
+      const fetchDocumentView = async () => {
+        setIsLoading(true)
+
+        try {
+          const result = await renderDocument({
+            collectionSlug,
+            disableActions,
+            docID,
+            drawerSlug,
+            initialData,
+            redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
+            redirectAfterDuplicate:
+              redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
+            signal: controller.signal,
+          })
+
+          if (result?.Document) {
+            setDocumentView(result.Document)
+            setIsLoading(false)
+          }
+        } catch (error) {
+          toast.error(error?.message || t('error:unspecific'))
+          closeModal(drawerSlug)
+          // toast.error(data?.errors?.[0].message || t('error:unspecific'))
+        }
       }
+
+      void fetchDocumentView()
     },
-    [closeModal, drawerSlug, isOpen, t],
+    [
+      collectionSlug,
+      disableActions,
+      drawerSlug,
+      initialData,
+      redirectAfterDelete,
+      redirectAfterDuplicate,
+      renderDocument,
+      closeModal,
+      t,
+    ],
   )
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      setDocID(args.doc.id)
+      getDocumentView(args.doc.id)
+
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
           ...args,
@@ -78,12 +107,12 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         })
       }
     },
-    [onSaveFromProps, collectionConfig],
+    [onSaveFromProps, collectionConfig, getDocumentView],
   )
 
-  const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
+  const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
     (args) => {
-      setDocID(args.doc.id)
+      getDocumentView(args.doc.id)
 
       if (typeof onDuplicateFromProps === 'function') {
         void onDuplicateFromProps({
@@ -92,7 +121,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
         })
       }
     },
-    [onDuplicateFromProps, collectionConfig],
+    [onDuplicateFromProps, collectionConfig, getDocumentView],
   )
 
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
@@ -106,57 +135,40 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
       closeModal(drawerSlug)
     },
-    [onDeleteFromProps, collectionConfig, closeModal, drawerSlug],
+    [onDeleteFromProps, closeModal, drawerSlug, collectionConfig],
   )
+
+  const clearDoc = useCallback(() => {
+    getDocumentView()
+  }, [getDocumentView])
+
+  useEffect(() => {
+    if (!DocumentView && !hasRenderedDocument.current) {
+      getDocumentView(existingDocID)
+      hasRenderedDocument.current = true
+    }
+  }, [DocumentView, getDocumentView, existingDocID])
+
+  // Cleanup any pending requests when the component unmounts
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(documentViewAbortControllerRef.current)
+    }
+  }, [])
+
+  if (isLoading) {
+    return <LoadingOverlay />
+  }
 
   return (
-    <DocumentInfoProvider
-      AfterFields={AfterFields}
-      apiURL={apiURL}
-      BeforeDocument={
-        <Gutter className={`${baseClass}__header`}>
-          <div className={`${baseClass}__header-content`}>
-            <h2 className={`${baseClass}__header-text`}>
-              {Header || <RenderTitle element="span" />}
-            </h2>
-            {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
-            i.e. changing to a `div` element will fix the animation issue but will break accessibility
-          */}
-            <button
-              aria-label={t('general:close')}
-              className={`${baseClass}__header-close`}
-              onClick={() => toggleModal(drawerSlug)}
-              type="button"
-            >
-              <XIcon />
-            </button>
-          </div>
-          <DocumentTitle />
-        </Gutter>
-      }
-      collectionSlug={collectionConfig.slug}
-      disableActions={disableActions}
-      disableLeaveWithoutSaving
-      id={docID}
-      initialData={initialData}
-      initialState={initialState}
-      isEditing={isEditing}
+    <DocumentDrawerContextProvider
+      clearDoc={clearDoc}
+      drawerSlug={drawerSlug}
       onDelete={onDelete}
-      onDrawerCreate={() => {
-        setDocID(null)
-      }}
       onDuplicate={onDuplicate}
-      onLoadError={onLoadError}
       onSave={onSave}
-      redirectAfterDelete={redirectAfterDelete !== undefined ? redirectAfterDelete : false}
-      redirectAfterDuplicate={redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false}
     >
-      <RenderComponent mappedComponent={Edit} />
-    </DocumentInfoProvider>
+      {DocumentView}
+    </DocumentDrawerContextProvider>
   )
-}
-
-const DocumentTitle: React.FC = () => {
-  const { id, title } = useDocumentInfo()
-  return id && id !== title ? <IDLabel id={id.toString()} /> : null
 }

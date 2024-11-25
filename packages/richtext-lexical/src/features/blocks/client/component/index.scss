@@ -87,6 +87,13 @@
       }
     }
 
+    &__editButton.btn {
+      margin: 0;
+      &:hover {
+        background-color: var(--theme-elevation-200);
+      }
+    }
+
     &__block-header {
       pointer-events: none;
     }
@@ -96,7 +103,7 @@
     }
 
     &__block-header,
-    &__block-header > div {
+    &__block-header > div:first-child {
       display: flex;
       max-width: 100%;
       width: 100%;
@@ -108,6 +115,11 @@
       & > * {
         pointer-events: all;
       }
+    }
+
+    &__block-header > div:nth-child(2) {
+      display: flex;
+      justify-content: flex-end;
     }
 
     &__block-number {

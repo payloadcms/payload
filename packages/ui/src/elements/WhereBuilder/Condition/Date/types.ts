@@ -1,10 +1,8 @@
-import type { Props as DateType } from '../../../../elements/DatePicker/types.js'
+import type { DateFieldClient } from 'payload'
+
+import type { DefaultFilterProps } from '../types.js'
 
 export type Props = {
-  admin?: {
-    date?: DateType
-  }
-  disabled?: boolean
-  onChange: () => void
-  value: Date
-}
+  readonly field: DateFieldClient
+  readonly value: Date | string
+} & DefaultFilterProps

@@ -20,7 +20,8 @@ type CodeFieldClientWithoutType = MarkOptional<CodeFieldClient, 'type'>
 
 type CodeFieldBaseClientProps = {
   readonly autoComplete?: string
-  readonly valiCode?: CodeFieldValidation
+  readonly path: string
+  readonly validate?: CodeFieldValidation
 }
 
 export type CodeFieldClientProps = ClientFieldBase<CodeFieldClientWithoutType> &

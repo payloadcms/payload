@@ -9,6 +9,7 @@ import type {
   GlobalPost,
   LocalizedPost,
   Page,
+  Point,
   Post,
   VersionedPost,
 } from './payload-types.js'
@@ -40,14 +41,21 @@ describe('Select', () => {
     let post: Post
     let postId: number | string
 
+    let point: Point
+    let pointId: number | string
+
     beforeEach(async () => {
       post = await createPost()
       postId = post.id
+
+      point = await createPoint()
+      pointId = point.id
     })
 
     // Clean up to safely mutate in each test
     afterEach(async () => {
       await payload.delete({ id: postId, collection: 'posts' })
+      await payload.delete({ id: pointId, collection: 'points' })
     })
 
     describe('Include mode', () => {
@@ -307,6 +315,23 @@ describe('Select', () => {
           ),
         })
       })
+
+      it('should select a point field', async () => {
+        if (payload.db.name === 'sqlite') {
+          return
+        }
+
+        const res = await payload.findByID({
+          collection: 'points',
+          id: pointId,
+          select: { point: true },
+        })
+
+        expect(res).toStrictEqual({
+          id: pointId,
+          point: point.point,
+        })
+      })
     })
 
     describe('Exclude mode', () => {
@@ -485,6 +510,23 @@ describe('Select', () => {
             return block
           }),
         })
+      })
+
+      it('should exclude a point field', async () => {
+        if (payload.db.name === 'sqlite') {
+          return
+        }
+        const res = await payload.findByID({
+          collection: 'points',
+          id: pointId,
+          select: { point: false },
+        })
+
+        const copy = { ...point }
+
+        delete copy['point']
+
+        expect(res).toStrictEqual(copy)
       })
     })
   })
@@ -1612,24 +1654,26 @@ describe('Select', () => {
     })
   })
 
-  describe('defaultPopulate', () => {
+  describe('populate / defaultPopulate', () => {
     let homePage: Page
     let aboutPage: Page
     let expectedHomePage: { id: number | string; slug: string }
+    let expectedHomePageOverride: { additional: string; id: number | string }
     beforeAll(async () => {
       homePage = await payload.create({
         depth: 0,
         collection: 'pages',
-        data: { content: [], slug: 'home' },
+        data: { content: [], slug: 'home', additional: 'additional-data' },
       })
       expectedHomePage = { id: homePage.id, slug: homePage.slug }
+      expectedHomePageOverride = { id: homePage.id, additional: homePage.additional }
       aboutPage = await payload.create({
         depth: 0,
         collection: 'pages',
         data: {
           content: [
             {
-              blockType: 'cta',
+              blockType: 'introduction',
               richTextSlate: [
                 {
                   type: 'relationship',
@@ -1744,6 +1788,170 @@ describe('Select', () => {
       ])
       expect(richTextLexicalRel.value).toMatchObject(expectedHomePage)
       expect(richTextSlateRel.value).toMatchObject(expectedHomePage)
+    })
+
+    it('graphQL - should retrieve fields against defaultPopulate', async () => {
+      const query = `query {
+        Pages {
+          docs { 
+            id,
+            content {
+              ... on Introduction {
+                link {
+                  doc {
+                    id,
+                    additional,
+                    slug, 
+                  }
+                },
+                richTextLexical(depth: 1)
+                richTextSlate(depth: 1)
+              }
+            }
+          }
+        }
+      }`
+
+      const {
+        data: {
+          Pages: {
+            docs: [
+              {
+                content: [
+                  {
+                    link,
+                    richTextSlate: [richTextSlateRel],
+                    richTextLexical: {
+                      root: {
+                        children: [richTextLexicalRel],
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+
+      expect(link.doc).toMatchObject({
+        id: homePage.id,
+        additional: homePage.additional,
+        slug: homePage.slug,
+      })
+      expect(richTextLexicalRel.value).toMatchObject(homePage)
+      expect(richTextSlateRel.value).toMatchObject(homePage)
+    })
+
+    it('local API - should populate and override defaultSelect select shape from the populate arg', async () => {
+      const result = await payload.findByID({
+        populate: {
+          pages: {
+            additional: true,
+          },
+        },
+        collection: 'pages',
+        depth: 1,
+        id: aboutPage.id,
+      })
+
+      const {
+        docs: [resultFind],
+      } = await payload.find({
+        collection: 'pages',
+        depth: 1,
+        populate: {
+          pages: {
+            additional: true,
+          },
+        },
+        where: {
+          id: {
+            equals: aboutPage.id,
+          },
+        },
+      })
+
+      expect(resultFind).toStrictEqual(result)
+
+      const {
+        content: [
+          {
+            link: { doc, docHasManyPoly, docMany, docPoly },
+            richTextSlate: [richTextSlateRel],
+            richTextLexical: {
+              root: {
+                children: [richTextLexicalRel],
+              },
+            },
+          },
+        ],
+      } = result
+
+      expect(doc).toStrictEqual(expectedHomePageOverride)
+      expect(docMany).toStrictEqual([expectedHomePageOverride])
+      expect(docPoly).toStrictEqual({
+        relationTo: 'pages',
+        value: expectedHomePageOverride,
+      })
+      expect(docHasManyPoly).toStrictEqual([
+        {
+          relationTo: 'pages',
+          value: expectedHomePageOverride,
+        },
+      ])
+
+      expect(richTextLexicalRel.value).toStrictEqual(expectedHomePageOverride)
+      expect(richTextSlateRel.value).toStrictEqual(expectedHomePageOverride)
+    })
+
+    it('rEST API - should populate and override defaultSelect select shape from the populate arg', async () => {
+      const result = await restClient
+        .GET(`/pages/${aboutPage.id}`, {
+          query: {
+            populate: {
+              pages: {
+                additional: true,
+              },
+            },
+            depth: 1,
+          },
+        })
+        .then((res) => res.json())
+
+      const {
+        content: [
+          {
+            link: { doc, docHasManyPoly, docMany, docPoly },
+            richTextSlate: [richTextSlateRel],
+            richTextLexical: {
+              root: {
+                children: [richTextLexicalRel],
+              },
+            },
+          },
+        ],
+      } = result
+
+      expect(doc).toMatchObject(expectedHomePageOverride)
+      expect(docMany).toMatchObject([expectedHomePageOverride])
+      expect(docPoly).toMatchObject({
+        relationTo: 'pages',
+        value: expectedHomePageOverride,
+      })
+      expect(docHasManyPoly).toMatchObject([
+        {
+          relationTo: 'pages',
+          value: expectedHomePageOverride,
+        },
+      ])
+
+      expect(richTextLexicalRel.value).toMatchObject(expectedHomePageOverride)
+      expect(richTextSlateRel.value).toMatchObject(expectedHomePageOverride)
     })
   })
 })
@@ -1865,4 +2073,8 @@ function createVersionedPost() {
       blocks: [{ blockType: 'test', text: 'hela' }],
     },
   })
+}
+
+function createPoint() {
+  return payload.create({ collection: 'points', data: { text: 'some', point: [10, 20] } })
 }

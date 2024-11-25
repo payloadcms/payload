@@ -14,10 +14,6 @@ export const sanitizeClientFeatures = (
 ): SanitizedClientFeatures => {
   const sanitized: SanitizedClientFeatures = {
     enabledFeatures: [],
-    hooks: {
-      load: [],
-      save: [],
-    },
     markdownTransformers: [],
     nodes: [],
     plugins: [],
@@ -39,27 +35,21 @@ export const sanitizeClientFeatures = (
   }
 
   features.forEach((feature) => {
-    if (feature.hooks) {
-      if (feature.hooks?.load?.length) {
-        sanitized.hooks.load = sanitized.hooks.load.concat(feature.hooks.load)
-      }
-      if (feature.hooks?.save?.length) {
-        sanitized.hooks.save = sanitized.hooks.save.concat(feature.hooks.save)
-      }
-    }
-
     if (feature.providers?.length) {
       sanitized.providers = sanitized.providers.concat(feature.providers)
     }
 
     if (feature.nodes?.length) {
-      sanitized.nodes = sanitized.nodes.concat(feature.nodes)
+      // Important: do not use concat
+      for (const node of feature.nodes) {
+        sanitized.nodes.push(node)
+      }
     }
     if (feature.plugins?.length) {
       feature.plugins.forEach((plugin, i) => {
         sanitized.plugins?.push({
           clientProps: feature.sanitizedClientFeatureProps,
-          Component: plugin.Component,
+          Component: plugin.Component as any, // Appeases strict: true
           key: feature.key + i,
           position: plugin.position,
         })
@@ -146,9 +136,19 @@ export const sanitizeClientFeatures = (
     }
 
     if (feature.markdownTransformers?.length) {
-      sanitized.markdownTransformers = sanitized.markdownTransformers.concat(
-        feature.markdownTransformers,
-      )
+      // Important: do not use concat
+      for (const transformer of feature.markdownTransformers) {
+        if (typeof transformer === 'function') {
+          sanitized.markdownTransformers.push(
+            transformer({
+              allNodes: sanitized.nodes,
+              allTransformers: sanitized.markdownTransformers,
+            }),
+          )
+        } else {
+          sanitized.markdownTransformers.push(transformer)
+        }
+      }
     }
     sanitized.enabledFeatures.push(feature.key)
   })

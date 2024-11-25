@@ -20,6 +20,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { apiKeysSlug, slug } from './shared.js'
 
@@ -87,9 +88,6 @@ describe('auth', () => {
   let serverURL: string
   let apiURL: string
 
-  // Allows for testing create-first-user
-  process.env.SKIP_ON_INIT = 'true'
-
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
@@ -100,23 +98,33 @@ describe('auth', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
+    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+
+    // Undo onInit seeding, as we need to test this without having a user created, or testing create-first-user
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'auth',
+      deleteOnly: true,
+    })
+
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+
     await createFirstUser({ page, serverURL })
 
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
-
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
     await ensureCompilationIsDone({ page, serverURL })
   })
 

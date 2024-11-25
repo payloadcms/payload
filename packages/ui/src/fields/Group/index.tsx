@@ -3,58 +3,51 @@
 import type { GroupFieldClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import {
-  useFormInitializing,
-  useFormProcessing,
-  useFormSubmitted,
-} from '../../forms/Form/context.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { useRow } from '../Row/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
-import { useTabs } from '../Tabs/provider.js'
 import './index.scss'
+import { useTabs } from '../Tabs/provider.js'
 import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
 export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
-    descriptionProps,
     field,
-    field: {
-      admin: { className, description, hideGutter, readOnly: readOnlyFromAdmin, style, width } = {},
-      fields,
-      label,
-    },
-    readOnly: readOnlyFromTopLevelProps,
+    field: { name, admin: { className, description, hideGutter } = {}, fields, label },
+    path,
+    permissions,
+    readOnly,
+    schemaPath: schemaPathFromProps,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
+  const schemaPath = schemaPathFromProps ?? name
 
-  const { path, permissions, readOnly: readOnlyFromContext, schemaPath } = useFieldProps()
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
-  const { errorPaths } = useField({ path })
-  const formInitializing = useFormInitializing()
-  const formProcessing = useFormProcessing()
+  const { customComponents: { Description, Label } = {}, errorPaths } = useField({ path })
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
@@ -73,31 +66,29 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__header`}>
-            {(field?.admin?.components?.Label ||
-              field?.admin?.components?.Description ||
-              label) && (
+            {Boolean(Label || Description || label) && (
               <header>
-                {field?.admin?.components?.Label !== undefined ? (
-                  <RenderComponent
-                    clientProps={{ label }}
-                    mappedComponent={field?.admin?.components?.Label}
-                  />
-                ) : label ? (
-                  <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>
-                ) : null}
-                <FieldDescription
-                  Description={field?.admin?.components?.Description}
-                  description={description}
-                  field={field}
-                  {...(descriptionProps || {})}
+                <RenderCustomComponent
+                  CustomComponent={Label}
+                  Fallback={
+                    <h3 className={`${baseClass}__title`}>
+                      <FieldLabel
+                        label={getTranslation(label, i18n)}
+                        localized={false}
+                        path={path}
+                        required={false}
+                      />
+                    </h3>
+                  }
+                />
+                <RenderCustomComponent
+                  CustomComponent={Description}
+                  Fallback={<FieldDescription description={description} path={path} />}
                 />
               </header>
             )}
@@ -106,10 +97,11 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           <RenderFields
             fields={fields}
             margins="small"
-            path={path}
-            permissions={permissions?.fields}
-            readOnly={disabled}
-            schemaPath={schemaPath}
+            parentIndexPath=""
+            parentPath={path}
+            parentSchemaPath={schemaPath}
+            permissions={permissions === true ? permissions : permissions?.fields}
+            readOnly={readOnly}
           />
         </div>
       </GroupProvider>

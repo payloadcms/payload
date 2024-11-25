@@ -9,12 +9,12 @@ keywords: uploads, images, media, storage, adapters, s3, vercel, google cloud, a
 Payload offers additional storage adapters to handle file uploads. These adapters allow you to store files in different locations, such as Amazon S3, Vercel Blob Storage, Google Cloud Storage, and more.
 
 | Service              | Package                                                                                                           |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Vercel Blob          | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/beta/packages/storage-vercel-blob) |
-| AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/beta/packages/storage-s3)                   |
-| Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/beta/packages/storage-azure)             |
-| Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/beta/packages/storage-gcs)                 |
-
+| -------------------- |-------------------------------------------------------------------------------------------------------------------|
+| Vercel Blob          | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob) |
+| AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/main/packages/storage-s3)                   |
+| Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)             |
+| Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)                 |
+| Uploadthing          | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/main/packages/uploadthing)         |
 
 ## Vercel Blob Storage
 [`@payloadcms/storage-vercel-blob`](https://www.npmjs.com/package/@payloadcms/storage-vercel-blob)
@@ -22,7 +22,7 @@ Payload offers additional storage adapters to handle file uploads. These adapter
 ### Installation
 
 ```sh
-pnpm add @payloadcms/storage-vercel-blob@beta
+pnpm add @payloadcms/storage-vercel-blob
 ```
 
 ### Usage
@@ -43,8 +43,8 @@ export default buildConfig({
       enabled: true, // Optional, defaults to true
       // Specify which collections should use Vercel Blob
       collections: {
-        [Media.slug]: true,
-        [MediaWithPrefix.slug]: {
+        media: true,
+        'media-with-prefix': {
           prefix: 'my-prefix',
         },
       },
@@ -71,7 +71,7 @@ export default buildConfig({
 ### Installation
 
 ```sh
-pnpm add @payloadcms/storage-s3@beta
+pnpm add @payloadcms/storage-s3
 ```
 
 ### Usage
@@ -90,8 +90,8 @@ export default buildConfig({
   plugins: [
     s3Storage({
       collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
+        media: true,
+        'media-with-prefix': {
           prefix,
         },
       },
@@ -119,7 +119,7 @@ See the the [AWS SDK Package](https://github.com/aws/aws-sdk-js-v3) and [`S3Clie
 ### Installation
 
 ```sh
-pnpm add @payloadcms/storage-azure@beta
+pnpm add @payloadcms/storage-azure
 ```
 
 ### Usage
@@ -137,8 +137,8 @@ export default buildConfig({
   plugins: [
     azureStorage({
       collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
+        media: true,
+        'media-with-prefix': {
           prefix,
         },
       },
@@ -168,7 +168,7 @@ export default buildConfig({
 ### Installation
 
 ```sh
-pnpm add @payloadcms/storage-gcs@beta
+pnpm add @payloadcms/storage-gcs
 ```
 
 ### Usage
@@ -186,8 +186,8 @@ export default buildConfig({
   plugins: [
     gcsStorage({
       collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
+        media: true,
+        'media-with-prefix': {
           prefix,
         },
       },
@@ -218,13 +218,13 @@ export default buildConfig({
 ### Installation
 
 ```sh
-pnpm add @payloadcms/storage-uploadthing@beta
+pnpm add @payloadcms/storage-uploadthing
 ```
 
 ### Usage
 
 - Configure the `collections` object to specify which collections should use uploadthing. The slug _must_ match one of your existing collection slugs and be an `upload` type.
-- Get an API key from Uploadthing and set it as `apiKey` in the `options` object.
+- Get a token from Uploadthing and set it as `token` in the `options` object.
 - `acl` is optional and defaults to `public-read`.
 
 ```ts
@@ -233,10 +233,10 @@ export default buildConfig({
   plugins: [
     uploadthingStorage({
       collections: {
-        [mediaSlug]: true,
+        media: true,
       },
       options: {
-        apiKey: process.env.UPLOADTHING_SECRET,
+        token: process.env.UPLOADTHING_TOKEN,
         acl: 'public-read',
       },
     }),
@@ -248,7 +248,7 @@ export default buildConfig({
 
 | Option           | Description                                     | Default       |
 | ---------------- | ----------------------------------------------- | ------------- |
-| `apiKey`         | API key from Uploadthing. Required.             |               |
+| `token`          | Token from Uploadthing. Required.               |               |
 | `acl`            | Access control list for files that are uploaded | `public-read` |
 | `logLevel`       | Log level for Uploadthing                       | `info`        |
 | `fetch`          | Custom fetch function                           | `fetch`       |
@@ -261,7 +261,7 @@ If you need to create a custom storage adapter, you can use the [`@payloadcms/pl
 
 ### Installation
 
-`pnpm add @payloadcms/plugin-cloud-storage@beta`
+`pnpm add @payloadcms/plugin-cloud-storage`
 
 ### Usage
 

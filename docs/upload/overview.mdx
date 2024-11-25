@@ -140,6 +140,23 @@ export default buildConfig({
 })
 ```
 
+### Custom filename via hooks
+
+You can customize the filename before it's uploaded to the server by using a `beforeOperation` hook.
+
+```ts
+beforeOperation: [
+  ({ req, operation }) => {
+    if ((operation === 'create' || operation === 'update') && req.file) {
+      req.file.name = 'test.jpg'
+    }
+  },
+],
+```
+
+The `req.file` object will have additional information about the file, such as mimeType and extension, and you also have full access to the file data itself.
+The filename from here will also be threaded to image sizes if they're enabled.
+
 ## Image Sizes
 
 If you specify an array of `imageSizes` to your `upload` config, Payload will automatically crop and resize your uploads to fit each of the sizes specified by your config.

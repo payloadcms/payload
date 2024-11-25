@@ -64,12 +64,23 @@ export function addPayloadComponentToImportMap({
   // then path needs to be /test/fields/components/Field.tsx NOT /users/username/project/test/fields/components/Field.tsx
   // so we need to append baseDir to componentPath
 
-  imports[importIdentifier] = {
-    path:
-      componentPath.startsWith('.') || componentPath.startsWith('/')
-        ? path.posix.join(baseDir.replace(/\\/g, '/'), componentPath.slice(1))
-        : componentPath,
-    specifier: exportName,
+  if (componentPath.startsWith('.') || componentPath.startsWith('/')) {
+    const normalizedBaseDir = baseDir.replace(/\\/g, '/')
+
+    const finalPath = normalizedBaseDir.startsWith('/../')
+      ? `${normalizedBaseDir}${componentPath.slice(1)}`
+      : path.posix.join(normalizedBaseDir, componentPath.slice(1))
+
+    imports[importIdentifier] = {
+      path:
+        componentPath.startsWith('.') || componentPath.startsWith('/') ? finalPath : componentPath,
+      specifier: exportName,
+    }
+  } else {
+    imports[importIdentifier] = {
+      path: componentPath,
+      specifier: exportName,
+    }
   }
   importMap[componentPath + '#' + exportName] = importIdentifier
 }
@@ -109,7 +120,29 @@ export async function generateImportMap(
   // rootDir: /
   // componentsBaseDir = /
 
-  const componentsBaseDir = path.relative(rootDir, config.admin.importMap.baseDir)
+  // E.g.:
+  // config.admin.importMap.baseDir = /test/fields/
+  // rootDir: /test/fields/prod
+  // componentsBaseDir = ../
+
+  // Check if rootDir is a subdirectory of baseDir
+  const baseDir = config.admin.importMap.baseDir
+  const isSubdirectory = path.relative(baseDir, rootDir).startsWith('..')
+
+  let componentsBaseDir
+
+  if (isSubdirectory) {
+    // Get the relative path from rootDir to baseDir
+    componentsBaseDir = path.relative(rootDir, baseDir)
+  } else {
+    // If rootDir is not a subdirectory, just return baseDir relative to rootDir
+    componentsBaseDir = `/${path.relative(rootDir, baseDir)}`
+  }
+
+  // Ensure result has a trailing slash
+  if (!componentsBaseDir.endsWith('/')) {
+    componentsBaseDir += '/'
+  }
 
   const addToImportMap: AddToImportMap = (payloadComponent) => {
     if (!payloadComponent) {
@@ -150,6 +183,7 @@ export async function generateImportMap(
 
   await writeImportMap({
     componentMap: importMap,
+    config,
     fileName: 'importMap.js',
     force: options?.force,
     importMap: imports,
@@ -160,6 +194,7 @@ export async function generateImportMap(
 
 export async function writeImportMap({
   componentMap,
+  config,
   fileName,
   force,
   importMap,
@@ -167,6 +202,7 @@ export async function writeImportMap({
   rootDir,
 }: {
   componentMap: InternalImportMap
+  config: SanitizedConfig
   fileName: string
   force?: boolean
   importMap: Imports
@@ -174,13 +210,13 @@ export async function writeImportMap({
   rootDir: string
 }) {
   let importMapFolderPath = ''
-  if (fs.existsSync(path.resolve(rootDir, 'app/(payload)/admin/'))) {
-    importMapFolderPath = path.resolve(rootDir, 'app/(payload)/admin/')
-  } else if (fs.existsSync(path.resolve(rootDir, 'src/app/(payload)/admin/'))) {
-    importMapFolderPath = path.resolve(rootDir, 'src/app/(payload)/admin/')
+  if (fs.existsSync(path.resolve(rootDir, `app/(payload)${config.routes.admin}/`))) {
+    importMapFolderPath = path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)
+  } else if (fs.existsSync(path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`))) {
+    importMapFolderPath = path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)
   } else {
     throw new Error(
-      `Could not find the payload admin directory. Looked in ${path.resolve(rootDir, 'app/(payload)/admin/')} and ${path.resolve(rootDir, 'src/app/(payload)/admin/')}`,
+      `Could not find the payload admin directory. Looked in ${path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)} and ${path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)}`,
     )
   }
 

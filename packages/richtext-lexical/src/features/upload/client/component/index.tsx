@@ -1,6 +1,5 @@
 'use client'
-import type { BaseSelection } from 'lexical'
-import type { ClientCollectionConfig, Data } from 'payload'
+import type { ClientCollectionConfig, Data, FormState, JsonObject } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
@@ -76,7 +75,10 @@ const Component: React.FC<ElementProps> = (props) => {
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
-  const { editorConfig, field } = useEditorConfigContext()
+  const {
+    editorConfig,
+    fieldProps: { readOnly, schemaPath },
+  } = useEditorConfigContext()
 
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
@@ -181,7 +183,7 @@ const Component: React.FC<ElementProps> = (props) => {
   ).collections?.[relatedCollection.slug]?.hasExtraFields
 
   const onExtraFieldsDrawerSubmit = useCallback(
-    (_, data) => {
+    (_: FormState, data: JsonObject) => {
       // Update lexical node (with key nodeKey) with new data
       editor.update(() => {
         const uploadNode: null | UploadNode = $getNodeByKey(nodeKey)
@@ -228,7 +230,7 @@ const Component: React.FC<ElementProps> = (props) => {
                   <Button
                     buttonStyle="icon-label"
                     className={`${baseClass}__upload-drawer-toggler`}
-                    disabled={field?.admin?.readOnly}
+                    disabled={readOnly}
                     el="button"
                     icon="edit"
                     onClick={() => {
@@ -242,7 +244,7 @@ const Component: React.FC<ElementProps> = (props) => {
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__swap-drawer-toggler`}
-                  disabled={field?.admin?.readOnly}
+                  disabled={readOnly}
                   el="button"
                   icon="swap"
                   onClick={() => {
@@ -256,7 +258,7 @@ const Component: React.FC<ElementProps> = (props) => {
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__removeButton`}
-                  disabled={field?.admin?.readOnly}
+                  disabled={readOnly}
                   icon="x"
                   onClick={(e) => {
                     e.preventDefault()
@@ -285,6 +287,7 @@ const Component: React.FC<ElementProps> = (props) => {
           })}
           featureKey="upload"
           handleDrawerSubmit={onExtraFieldsDrawerSubmit}
+          schemaPath={schemaPath}
           schemaPathSuffix={relatedCollection.slug}
         />
       ) : null}

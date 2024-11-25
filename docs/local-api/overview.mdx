@@ -43,27 +43,6 @@ const afterChangeHook: CollectionAfterChangeHook = async ({ req: { payload } }) 
 
 If you want to import Payload in places where you don't have the option to access it from function arguments or `req`, you can import it and initialize it.
 
-There are two places to import Payload:
-
-**Option 1 - using HMR, within Next.js**
-
-```ts
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import config from '@payload-config'
-
-const payload = await getPayloadHMR({ config })
-```
-
-You should import Payload using the first option (`getPayloadHMR`) if you are using Payload inside of Next.js (like route handlers, server components, and similar.)
-
-This way, in Next.js development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload Config, your usage of Payload will always be in sync with your changes. In production, `getPayloadHMR` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
-
-If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js.
-
-**Option 2 - outside of Next.js**
-
-If you are using Payload outside of Next.js, for example in standalone scripts or in other frameworks, you can import Payload with no HMR functionality. Instead of using `getPayloadHMR`, you can use `getPayload`.
-
 ```ts
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -71,7 +50,11 @@ import config from '@payload-config'
 const payload = await getPayload({ config })
 ```
 
-Both options function in exactly the same way outside of one having HMR support and the other not. For more information about using Payload outside of Next.js, [click here](./outside-nextjs).
+If you're working in Next.js' development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload Config, your usage of Payload will always be in sync with your changes. In production, `getPayload` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
+
+If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js.
+
+For more information about using Payload outside of Next.js, [click here](./outside-nextjs).
 
 ## Local options available
 
@@ -84,6 +67,7 @@ You can specify more options within the Local API vs. REST or GraphQL due to the
 | `depth`              | [Control auto-population](../queries/depth) of nested relationship and upload fields.                                                                                                                                                                                                                                                                                 |
 | `locale`             | Specify [locale](/docs/configuration/localization) for any returned documents.                                                                                                                                                                                                                                                                                        |
 | `select`             | Specify [select](../queries/select) to control which fields to include to the result.                                                                                                                                                                                                                                                                                 |
+| `populate`           | Specify [populate](../queries/select#populate) to control which fields to include to the result from populated documents.                                                                                                                                                                                                                                             |
 | `fallbackLocale`     | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents.                                                                                                                                                                                                                                                                      |
 | `overrideAccess`     | Skip access control. By default, this property is set to true within all Local API operations.                                                                                                                                                                                                                                                                        |
 | `overrideLock`       | By default, document locks are ignored (`true`). Set to `false` to enforce locks and prevent operations when a document is locked by another user. [More details](../admin/locked-documents).                                                                                                                                                                         |
@@ -95,6 +79,17 @@ You can specify more options within the Local API vs. REST or GraphQL due to the
 | `disableTransaction` | When set to `true`, a [database transactions](../database/transactions) will not be initialized.                                                                                                                                                                                                                                                                      |
 
 _There are more options available on an operation by operation basis outlined below._
+
+## Transactions
+
+When your database uses transactions you need to thread req through to all local operations. Postgres uses transactions and MongoDB uses transactions when you are using replica sets. Passing req without transactions is still recommended.
+
+```js
+const post = await payload.find({
+  collection: 'posts',
+  req, // passing req is recommended
+})
+```
 
 <Banner type="warning">
   <strong>Note:</strong>

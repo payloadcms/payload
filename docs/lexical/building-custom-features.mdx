@@ -83,7 +83,7 @@ The Server Feature, just like the Client Feature, allows you to add markdown tra
 
 ```ts
 import { createServerFeature } from '@payloadcms/richtext-lexical';
-import type { ElementTransformer } from '@lexical/markdown'
+import type { ElementTransformer } from '@payloadcms/richtext-lexical/lexical/markdown'
 import {
   $createMyNode,
   $isMyNode,
@@ -299,9 +299,9 @@ import type {
   EditorConfig,
   LexicalNode,
   SerializedLexicalNode,
-} from 'lexical'
+} from '@payloadcms/richtext-lexical/lexical'
 
-import { $applyNodeReplacement, DecoratorNode } from 'lexical'
+import { $applyNodeReplacement, DecoratorNode } from '@payloadcms/richtext-lexical/lexical'
 
 // SerializedLexicalNode is the default lexical node.
 // By setting your SerializedMyNode type to SerializedLexicalNode,
@@ -448,17 +448,17 @@ Example plugin.tsx:
 'use client'
 import type {
   LexicalCommand,
-} from 'lexical'
+} from '@payloadcms/richtext-lexical/lexical'
 
 import {
   createCommand,
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_EDITOR
-} from 'lexical'
+} from '@payloadcms/richtext-lexical/lexical'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { $insertNodeToNearestRoot } from '@lexical/utils'
+import { useLexicalComposerContext } from '@payloadcms/richtext-lexical/lexical/react/LexicalComposerContext.js'
+import { $insertNodeToNearestRoot } from '@payloadcms/richtext-lexical/lexical/utils'
 import { useEffect } from 'react'
 
 import type { PluginComponent } from '@payloadcms/richtext-lexical' // type imports can be imported from @payloadcms/richtext-lexical - even on the client
@@ -589,7 +589,7 @@ import { createClientFeature, toolbarAddDropdownGroupWithItems } from '@payloadc
 import { IconComponent } from './icon';
 import { $isHorizontalRuleNode } from './nodes/MyNode';
 import { INSERT_MYNODE_COMMAND } from './plugin';
-import { $isNodeSelection } from 'lexical'
+import { $isNodeSelection } from '@payloadcms/richtext-lexical/lexical'
 
 export const MyClientFeature = createClientFeature({
    toolbarFixed: {
@@ -711,7 +711,7 @@ The Client Feature, just like the Server Feature, allows you to add markdown tra
 
 ```ts
 import { createClientFeature } from '@payloadcms/richtext-lexical/client';
-import type { ElementTransformer } from '@lexical/markdown'
+import type { ElementTransformer } from '@payloadcms/richtext-lexical/lexical/markdown'
 import {
   $createMyNode,
   $isMyNode,
@@ -836,4 +836,4 @@ The reason the client feature does not have the same props available as the serv
 
 ## More information
 
-Have a look at the [features we've already built](https://github.com/payloadcms/payload/tree/beta/packages/richtext-lexical/src/features) - understanding how they work will help you understand how to create your own. There is no difference between the features included by default and the ones you create yourself - since those features are all isolated from the "core", you have access to the same APIs, whether the feature is part of Payload or not!
+Have a look at the [features we've already built](https://github.com/payloadcms/payload/tree/main/packages/richtext-lexical/src/features) - understanding how they work will help you understand how to create your own. There is no difference between the features included by default and the ones you create yourself - since those features are all isolated from the "core", you have access to the same APIs, whether the feature is part of Payload or not!

@@ -309,6 +309,7 @@ export const koTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: '성공적으로 업데이트되었습니다.',
     updating: '업데이트 중',
     uploading: '업로드 중',
+    uploadingBulk: '{{current}} / {{total}} 업로드 중',
     user: '사용자',
     username: '사용자 이름',
     users: '사용자',

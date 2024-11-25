@@ -1,13 +1,13 @@
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
-import type { Payload } from '../../../index.js'
+import type { Payload, RequestContext } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
-  RequestContext,
+  PopulateType,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
-import type { DataFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
+import type { SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -22,10 +22,11 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   depth?: number
   disableTransaction?: boolean
   draft?: boolean
-  fallbackLocale?: TypedLocale
+  fallbackLocale?: false | TypedLocale
   id: number | string
   locale?: TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   select?: TSelect
   showHiddenFields?: boolean
@@ -46,6 +47,7 @@ export async function duplicate<
     disableTransaction,
     draft,
     overrideAccess = true,
+    populate,
     select,
     showHiddenFields,
   } = options
@@ -73,6 +75,7 @@ export async function duplicate<
     disableTransaction,
     draft,
     overrideAccess,
+    populate,
     req,
     select,
     showHiddenFields,

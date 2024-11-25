@@ -3,6 +3,7 @@ import type { BaseSelection, LexicalEditor } from 'lexical'
 import type React from 'react'
 
 import type { EditorConfigContextType } from '../../lexical/config/client/EditorConfigProvider.js'
+import type { FeatureClientSchemaMap } from '../../types.js'
 
 export type ToolbarGroup = ToolbarButtonsGroup | ToolbarDropdownGroup
 
@@ -31,6 +32,15 @@ export type ToolbarDropdownGroup = {
    * Each toolbar group needs to have a unique key. Groups with the same keys will have their items merged together.
    */
   key: string
+  /**
+   * The maximum number of active items that can be selected at once.
+   * Increasing this will hurt performance, as more nodes need to be checked for their active state.
+   *
+   * E.g. if this is 1, we can stop checking nodes once we find an active node.
+   *
+   * @default 1
+   */
+  maxActiveItems?: number
   /**
    * Determines where the toolbar group will be.
    */
@@ -96,8 +106,9 @@ export type ToolbarGroupItem = {
   /** The label will be displayed in your toolbar item, if it's within a dropdown group. In order to make use of i18n, this can be a function. */
   label?:
     | ((args: {
+        featureClientSchemaMap: FeatureClientSchemaMap
         i18n: I18nClient<{}, string>
-        richTextComponentMap?: Map<string, React.ReactNode>
+        schemaPath: string
       }) => string)
     | string
   /** Each toolbar item needs to have a unique key. */

@@ -17,9 +17,9 @@ inputs:
   reproduction-link-section:
     description: 'A regular expression string with "(.*)" matching a valid URL in the issue body. The result is trimmed. Example: "### Link to reproduction(.*)### To reproduce"'
     default: '### Link to reproduction(.*)### To reproduce'
-  tag-only:
-    description: Log and tag only. Do not perform closing or commenting actions.
-    default: false
+  actions-to-perform:
+    description: 'Comma-separated list of actions to perform on the issue. Example: "tag,comment,close"'
+    default: 'tag,comment,close'
 
 runs:
   using: 'composite'
@@ -37,4 +37,4 @@ runs:
         'INPUT_REPRODUCTION_INVALID_LABEL': ${{inputs.reproduction-invalid-label}}
         'INPUT_REPRODUCTION_ISSUE_LABELS': ${{inputs.reproduction-issue-labels}}
         'INPUT_REPRODUCTION_LINK_SECTION': ${{inputs.reproduction-link-section}}
-        'INPUT_TAG_ONLY': ${{inputs.tag-only}}
+        'INPUT_ACTIONS_TO_PERFORM': ${{inputs.actions-to-perform}}

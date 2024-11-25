@@ -310,6 +310,7 @@ export const svTranslations: DefaultTranslationsObject = {
     updatedSuccessfully: 'Uppdaterades framgångsrikt.',
     updating: 'Uppdatering',
     uploading: 'Uppladdning',
+    uploadingBulk: 'Laddar upp {{current}} av {{total}}',
     user: 'Användare',
     username: 'Användarnamn',
     users: 'Användare',

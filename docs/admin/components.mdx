@@ -6,9 +6,9 @@ desc: Fully customize your Admin Panel by swapping in your own React components.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Payload [Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow for both easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components through your [Payload Config](../configuration/overview).
+The Payload [Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow for easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components through your [Payload Config](../configuration/overview).
 
-All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api/overview) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default. This enables the use of the [Local API](../local-api/overview) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -18,51 +18,45 @@ All Custom Components in Payload are [React Server Components](https://react.dev
 There are four main types of Custom Components in Payload:
 
 - [Root Components](#root-components)
-- [Collection Components](./collections#components)
-- [Global Components](./globals#components)
-- [Field Components](./fields)
+- [Collection Components](./collections#custom-components)
+- [Global Components](./globals#custom-components)
+- [Field Components](./fields#custom-components)
 
-To swap in your own Custom Component, consult the list of available components. Determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
+To swap in your own Custom Component, first consult the list of available components, determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
 
+## Defining Custom Components
 
-## Defining Custom Components in the Payload Config
+As Payload compiles the Admin Panel, it checks your config for Custom Components. When detected, Payload either replaces its own default component with yours, or if none exists by default, renders yours outright. While are many places where Custom Components are supported in Payload, each is defined in the same way using [Component Paths](#component-paths).
 
-In the Payload Config, you can define custom React Components to enhance the admin interface. However, these components should not be imported directly into the server-only Payload Config to avoid including client-side code. Instead, you specify the path to the component. Here’s how you can do it:
+To add a Custom Component, point to its file path in your Payload Config:
 
-
-src/components/Logout.tsx
-```tsx
-'use client'
-import React from 'react'
-
-export const MyComponent = () => {
-  return (
-    <button>Click me!</button>
-  )
-}
-```
-
-payload.config.ts:
 ```ts
 import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...
-  admin: { // highlight-line
+  admin: {
     components: {
       logout: {
-        Button: '/src/components/Logout#MyComponent'
+        Button: '/src/components/Logout#MyComponent' // highlight-line
       }
     }
   },
 })
 ```
 
-In the path `/src/components/Logout#MyComponent`, `/src/components/Logout` is the file path, and `MyComponent` is the named export. If the component is the default export, the export name can be omitted. Path and export name are separated by a `#`.
+<Banner type="success">
+  <strong>Note:</strong>
+  All Custom Components can be either Server Components or Client Components, depending on the presence of the `use client` directive at the top of the file.
+</Banner>
 
-### Configuring the Base Directory
+### Component Paths
 
-Component paths, by default, are relative to your working directory - this is usually where your Next.js config lies. To simplify component paths, you have the option to configure the *base directory* using the `admin.baseDir.baseDir` property:
+In order to ensure the Payload Config is fully Node.js compatible and as lightweight as possible, components are not directly imported into your config. Instead, they are identified by their file path for the Admin Panel to resolve on its own.
+
+Component Paths, by default, are relative to your project's base directory. This is either your current working directory, or the directory specified in `config.admin.baseDir`. To simplify Component Paths, you can also configure the base directory using the `admin.importMap.baseDir` property.
+
+Components using named exports are identified either by appending `#` followed by the export name, or using the `exportName` property. If the component is the default export, this can be omitted.
 
 ```ts
 import { buildConfig } from 'payload'
@@ -73,137 +67,72 @@ const dirname = path.dirname(filename)
 
 const config = buildConfig({
   // ...
-  admin: { // highlight-line
-     importMap: {
-      baseDir: path.resolve(dirname, 'src'),
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname, 'src'), // highlight-line
     },
     components: {
       logout: {
-        Button: '/components/Logout#MyComponent'
+        Button: '/components/Logout#MyComponent' // highlight-line
       }
     }
   },
 })
 ```
 
-In this example, we set the base directory to the `src` directory - thus we can omit the `/src/` part of our component path string.
+In this example, we set the base directory to the `src` directory, and omit the `/src/` part of our component path string.
 
-### Passing Props
+### Config Options
 
-Each React Component in the Payload Config is typed as `PayloadComponent`. This usually is a string, but can also be an object containing the following properties:
+While Custom Components are usually defined as a string, you can also pass in an object with additional options:
 
-| Property      | Description                                                                                                                   |
-|---------------|-------------------------------------------------------------------------------------------------------------------------------|
-| `clientProps` | Props to be passed to the React Component if it's a Client Component                                                          |
-| `exportName`  | Instead of declaring named exports using `#` in the component path, you can also omit them from `path` and pass them in here. |
-| `path`        | Path to the React Component. Named exports can be appended to the end of the path, separated by a `#`                         |
-| `serverProps` | Props to be passed to the React Component if it's a Server Component                                                          |
-
-To pass in props from the config, you can use the `clientProps` and/or `serverProps` properties. This alleviates the need to use an HOC (Higher-Order-Component) to declare a React Component with props passed in.
-
-Here is an example:
-
-src/components/Logout.tsx
-```tsx
-'use client'
-import React from 'react'
-
-export const MyComponent = ({ text }: { text: string }) => {
-  return (
-    <button>Click me! {text}</button>
-  )
-}
-```
-
-payload.config.ts:
 ```ts
 import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...
-  admin: { // highlight-line
+  admin: {
     components: {
       logout: {
+        // highlight-start
         Button: {
           path: '/src/components/Logout',
-          clientProps: {
-            text: 'Some Text.'
-          },
-          exportName: 'MyComponent'
+          exportName: 'MyComponent',
         }
+        // highlight-end
       }
     }
   },
 })
 ```
 
-### Import Maps
+The following options are available:
 
-It's essential to understand how `PayloadComponent` paths function behind the scenes. Directly importing React Components into your Payload Config using import statements can introduce client-only modules like CSS into your server-only config. This could error when attempting to load the Payload Config in server-only environments and unnecessarily increase the size of the Payload Config, which should remain streamlined and efficient for server use.
+| Property      | Description                                                                                                                   |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------|
+| **`clientProps`** | Props to be passed to the Custom Components if it's a Client Component. [More details](#custom-props).                         |
+| **`exportName`**  | Instead of declaring named exports using `#` in the component path, you can also omit them from `path` and pass them in here. |
+| **`path`**        | File path to the Custom Component. Named exports can be appended to the end of the path, separated by a `#`.                         |
+| **`serverProps`** | Props to be passed to the Custom Component if it's a Server Component. [More details](#custom-props).                         |
 
-Instead, we utilize component paths to reference React Components. This method enhances the Payload Config with actual React Component imports on the client side, without affecting server-side usage. A script is deployed to scan the Payload Config, collecting all component paths and creating an `importMap.js`. This file, located in app/(payload)/admin/importMap.js, must be statically imported by your Next.js root page and layout. The script imports all the React Components from the specified paths into a Map, associating them with their respective paths (the ones you defined).
+For more details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
 
-When constructing the `ClientConfig`, Payload uses the component paths as keys to fetch the corresponding React Component imports from the Import Map. It then substitutes the `PayloadComponent` with a `MappedComponent`. A `MappedComponent` includes the React Component and additional metadata, such as whether it's a server or a client component and which props it should receive. These components are then rendered through the `<RenderComponent />` component within the Payload Admin Panel.
+### Import Map
 
-Import maps are regenerated whenever you modify any element related to component paths. This regeneration occurs at startup and whenever Hot Module Replacement (HMR) runs. If the import maps fail to regenerate during HMR, you can restart your application and execute the `payload generate:importmap` command to manually create a new import map. If you encounter any errors running this command, see the [Troubleshooting](../local-api/outside-nextjs#troubleshooting) section.
+In order for Payload to make use of [Component Paths](#component-paths), an "Import Map" is automatically generated at `app/(payload)/admin/importMap.js`. This file contains every Custom Component in your config, keyed to their respective paths. When Payload needs to lookup a component, it uses this file to find the correct import.
 
-### Component paths in external packages
+The Import Map is automatically regenerated at startup and whenever Hot Module Replacement (HMR) runs, or you can run `payload generate:importmap` to manually regenerate it.
 
-Component paths are resolved relative to your project's base directory, which is either your current working directory or the directory specified in `config.admin.baseDir`. When using custom components from external packages, you can't use relative paths. Instead, use an import path that's accessible as if you were writing an import statement in your project's base directory.
+#### Custom Imports
 
-For example, to export a field with a custom component from an external package named `my-external-package`:
+If needed, custom items can be appended onto the Import Map. This is mostly only relevant for plugin authors who need to add a custom import that is not referenced in a known location.
 
-```ts
-import type { Field } from 'payload'
-export const MyCustomField: Field = {
-  type: 'text',
-  name: 'MyField',
-  admin: {
-    components: {
-      Field: 'my-external-package/client#MyFieldComponent'
-    }
-  }
-}
-```
-
-Despite `MyFieldComponent` living in `src/components/MyFieldComponent.tsx` in `my-external-package`, this will not be accessible from the consuming project. Instead, we recommend exporting all custom components from one file in the external package. For example, you can define a `src/client.ts file in `my-external-package`:
+To add a custom import to the Import Map, use the `admin.dependencies` property in your [Payload Config](../getting-started/overview):
 
 ```ts
-'use client'
-export { MyFieldComponent } from './components/MyFieldComponent'
-```
+import { buildConfig } from 'payload'
 
-Then, update the package.json of `my-external-package:
-
-```json
-{
-...
-  "exports": {
-    "./client": {
-        "import": "./dist/client.js",
-        "types": "./dist/client.d.ts",
-        "default": "./dist/client.js"
-    }
-  }
-}
-```
-
-This setup allows you to specify the component path as `my-external-package/client#MyFieldComponent` as seen above. The import map will generate:
-
-```ts
-import { MyFieldComponent } from 'my-external-package/client'
-```
-
-which is a valid way to access MyFieldComponent that can be resolved by the consuming project.
-
-### Custom Components from unknown locations
-
-By default, any component paths from known locations are added to the import map. However, if you need to add any components from unknown locations to the import map, you can do so by adding them to the `admin.dependencies` array in your Payload Config. This is mostly only relevant for plugin authors and not for regular Payload users.
-
-Example:
-
-```ts
-export default {
+export default buildConfig({
   // ...
   admin: {
     // ...
@@ -220,116 +149,11 @@ export default {
 }
 ```
 
-This way, `TestComponent` is added to the import map, no matter if it's referenced in a known location or not. On the client, you can then use the component like this:
-
-```tsx
-'use client'
-
-import { RenderComponent, useConfig } from '@payloadcms/ui'
-import React from 'react'
-
-export const CustomView = () => {
-  const { config } = useConfig()
-  return (
-    <div>
-      <RenderComponent mappedComponent={config.admin.dependencies?.myTestComponent} />
-    </div>
-  )
-}
-```
-
-## Root Components
-
-Root Components are those that effect the [Admin Panel](./overview) generally, such as the logo or the main nav.
-
-To override Root Components, use the `admin.components` property in your [Payload Config](../getting-started/overview):
-
-```ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  // ...
-  admin: {
-    // highlight-start
-    components: {
-      // ...
-    },
-    // highlight-end
-  },
-})
-```
-
-_For details on how to build Custom Components, see [Building Custom Components](#building-custom-components)._
-
-The following options are available:
-
-| Path                  | Description                                                                                                                                                                                                         |
-|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                                 |
-| **`beforeNavLinks`**  | An array of Custom Components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
-| **`afterNavLinks`**   | An array of Custom Components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
-| **`beforeDashboard`** | An array of Custom Components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                       |
-| **`afterDashboard`**  | An array of Custom Components to inject into the built-in Dashboard, _after_ the default dashboard contents.                                                                                                        |
-| **`beforeLogin`**     | An array of Custom Components to inject into the built-in Login, _before_ the default login form.                                                                                                                   |
-| **`afterLogin`**      | An array of Custom Components to inject into the built-in Login, _after_ the default login form.                                                                                                                    |
-| **`logout.Button`**   | The button displayed in the sidebar that logs the user out.                                                                                                                                                         |
-| **`graphics.Icon`**   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                                  |
-| **`graphics.Logo`**   | The full logo used in contexts like the `Login` view.                                                                                                                                                               |
-| **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire Admin Panel. [More details](#custom-providers).                                       |
-| **`actions`**         | An array of Custom Components to be rendered _within_ the header of the Admin Panel, providing additional interactivity and functionality.                                                                  |
-| **`header`**          | An array of Custom Components to be injected above the Payload header.                                                   |
-| **`views`**           | Override or create new views within the Admin Panel. [More details](./views).                                                                                                                                 |
-
-<Banner type="success">
-  <strong>Note:</strong>
-  You can also use set [Collection Components](./collections#components) and [Global Components](./globals#components) in their respective configs.
-</Banner>
-
-### Custom Providers
-
-As you add more and more Custom Components to your [Admin Panel](./overview), you may find it helpful to add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context)(s). Payload allows you to inject your own context providers in your app so you can export your own custom hooks, etc.
-
-To add a Custom Provider, use the `admin.components.providers` property in your [Payload Config](../getting-started/overview):
-
-```ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  // ...
-  admin: {
-    components: {
-      providers: ['/path/to/MyProvider'], // highlight-line
-    },
-  },
-})
-```
-
-Then build your Custom Provider as follows:
-
-```tsx
-'use client'
-import React, { createContext, useContext } from 'react'
-
-const MyCustomContext = React.createContext(myCustomValue)
-
-export const MyProvider: React.FC = ({ children }) => {
-  return (
-    <MyCustomContext.Provider value={myCustomValue}>
-      {children}
-    </MyCustomContext.Provider>
-  )
-}
-
-export const useMyCustomContext = () => useContext(MyCustomContext)
-```
-
-<Banner type="warning">
-  <strong>Reminder:</strong> Custom Providers are by definition Client Components. This means they must include the `use client` directive at the top of their files and cannot use server-only code.
-</Banner>
-
 ## Building Custom Components
 
-All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api/overview) directly on the front-end, among other things.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default. This enables the use of the [Local API](../local-api/overview) directly on the front-end, among other things.
+
+### Default Props
 
 To make building Custom Components as easy as possible, Payload automatically provides common props, such as the [`payload`](../local-api/overview) class and the [`i18n`](../configuration/i18n) object. This means that when building Custom Components within the Admin Panel, you do not have to get these yourself.
 
@@ -359,11 +183,45 @@ Each Custom Component receives the following props by default:
 | `payload`                 | The [Payload](../local-api/overview) class.                                                           |
 | `i18n`                    | The [i18n](../configuration/i18n) object.                                                                           |
 
-Custom Components also receive various other props that are specific to the context in which the Custom Component is being rendered. For example, [Custom Views](./views) receive the `user` prop. For a full list of available props, consult the documentation related to the specific component you are working with.
-
-<Banner type="success">
-  See [Root Components](#root-components), [Collection Components](#collection-components), [Global Components](#global-components), or [Field Components](#custom-field-components) for a complete list of all available components.
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  All Custom Components also receive various other props that are specific component being rendered. See [Root Components](#root-components), [Collection Components](./collections#custom-components), [Global Components](./globals#custom-components), or [Field Components](./fields#custom-components) for a complete list of all default props per component.
 </Banner>
+
+### Custom Props
+
+To pass in custom props from the config, you can use either the `clientProps` or `serverProps` properties depending on whether your prop is [serializable](https://react.dev/reference/rsc/use-client#serializable-types), and whether your component is a Server or Client Component.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: { // highlight-line
+    components: {
+      logout: {
+        Button: {
+          path: '/src/components/Logout#MyComponent',
+          clientProps: {
+            myCustomProp: 'Hello, World!' // highlight-line
+          },
+        }
+      }
+    }
+  },
+})
+```
+
+```tsx
+'use client'
+import React from 'react'
+
+export const MyComponent = ({ myCustomProp }: { myCustomProp: string }) => {
+  return (
+    <button>{myCustomProp}</button>
+  )
+}
+```
 
 ### Client Components
 
@@ -414,6 +272,7 @@ But, the Payload Config is [non-serializable](https://react.dev/reference/rsc/us
 For this reason, Payload creates a Client Config and passes it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](./hooks#useconfig) hook:
 
 ```tsx
+'use client'
 import React from 'react'
 import { useConfig } from '@payloadcms/ui'
 
@@ -432,14 +291,13 @@ export const MyClientComponent: React.FC = () => {
   See [Using Hooks](#using-hooks) for more details.
 </Banner>
 
-All [Field Components](./fields) automatically receive their respective Field Config through a common [`field`](./fields#the-field-prop) prop:
+All [Field Components](./fields) automatically receive their respective Field Config through props.
 
 ```tsx
-'use client'
 import React from 'react'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldServerComponent } from 'payload'
 
-export const MyClientFieldComponent: TextFieldClientComponent = ({ field: { name } }) => {
+export const MyClientFieldComponent: TextFieldServerComponent = ({ field: { name } }) => {
   return (
     <p>
       {`This field's name is ${name}`}
@@ -447,28 +305,6 @@ export const MyClientFieldComponent: TextFieldClientComponent = ({ field: { name
   )
 }
 ```
-
-### Using Hooks
-
-To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](./hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts:
-
-```tsx
-'use client'
-import React from 'react'
-import { useDocumentInfo } from '@payloadcms/ui'
-
-export const MyClientComponent: React.FC = () => {
-  const { slug } = useDocumentInfo() // highlight-line
-
-  return (
-    <p>{`Entity slug: ${slug}`}</p>
-  )
-}
-```
-
-<Banner type="success">
-  See the [Hooks](./hooks) documentation for a full list of available hooks.
-</Banner>
 
 ### Getting the Current Language
 
@@ -492,6 +328,7 @@ export default async function MyServerComponent({ i18n }) {
 The best way to do this within a Client Component is to import the `useTranslation` hook from `@payloadcms/ui`:
 
 ```tsx
+'use client'
 import React from 'react'
 import { useTranslation } from '@payloadcms/ui'
 
@@ -535,6 +372,7 @@ export default async function MyServerComponent({ payload, locale }) {
 The best way to do this within a Client Component is to import the `useLocale` hook from `@payloadcms/ui`:
 
 ```tsx
+'use client'
 import React from 'react'
 import { useLocale } from '@payloadcms/ui'
 
@@ -556,7 +394,29 @@ const Greeting: React.FC = () => {
   See the [Hooks](./hooks) documentation for a full list of available hooks.
 </Banner>
 
-### Styling Custom Components
+### Using Hooks
+
+To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](./hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts. To do this, you can one of the many hooks available depending on your needs.
+
+```tsx
+'use client'
+import React from 'react'
+import { useDocumentInfo } from '@payloadcms/ui'
+
+export const MyClientComponent: React.FC = () => {
+  const { slug } = useDocumentInfo() // highlight-line
+
+  return (
+    <p>{`Entity slug: ${slug}`}</p>
+  )
+}
+```
+
+<Banner type="success">
+  See the [Hooks](./hooks) documentation for a full list of available hooks.
+</Banner>
+
+### Adding Styles
 
 Payload has a robust [CSS Library](./customizing-css) that you can use to style your Custom Components similarly to Payload's built-in styling. This will ensure that your Custom Components match the existing design system, and so that they automatically adapt to any theme changes that might occur.
 
@@ -592,10 +452,99 @@ Payload also exports its [SCSS](https://sass-lang.com) library for reuse which i
     background-color: var(--theme-elevation-900);
   }
 }
-
 ```
 
 <Banner type="success">
   <strong>Note:</strong>
   You can also drill into Payload's own component styles, or easily apply global, app-wide CSS. More on that [here](./customizing-css).
+</Banner>
+
+
+## Root Components
+
+Root Components are those that effect the [Admin Panel](./overview) generally, such as the logo or the main nav.
+
+To override Root Components, use the `admin.components` property in your [Payload Config](../getting-started/overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+_For details on how to build Custom Components, see [Building Custom Components](#building-custom-components)._
+
+The following options are available:
+
+| Path                  | Description                                                                                                                                                                                                         |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                                 |
+| **`beforeNavLinks`**  | An array of Custom Components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
+| **`afterNavLinks`**   | An array of Custom Components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
+| **`beforeDashboard`** | An array of Custom Components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                       |
+| **`afterDashboard`**  | An array of Custom Components to inject into the built-in Dashboard, _after_ the default dashboard contents.                                                                                                        |
+| **`beforeLogin`**     | An array of Custom Components to inject into the built-in Login, _before_ the default login form.                                                                                                                   |
+| **`afterLogin`**      | An array of Custom Components to inject into the built-in Login, _after_ the default login form.                                                                                                                    |
+| **`logout.Button`**   | The button displayed in the sidebar that logs the user out.                                                                                                                                                         |
+| **`graphics.Icon`**   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                                  |
+| **`graphics.Logo`**   | The full logo used in contexts like the `Login` view.                                                                                                                                                               |
+| **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire Admin Panel. [More details](#custom-providers).                                       |
+| **`actions`**         | An array of Custom Components to be rendered _within_ the header of the Admin Panel, providing additional interactivity and functionality.                                                                  |
+| **`header`**          | An array of Custom Components to be injected above the Payload header.                                                   |
+| **`views`**           | Override or create new views within the Admin Panel. [More details](./views).                                                                                                                                 |
+
+<Banner type="success">
+  <strong>Note:</strong>
+  You can also use set [Collection Components](./collections#custom-components) and [Global Components](./globals#custom-components) in their respective configs.
+</Banner>
+
+### Custom Providers
+
+As you add more and more Custom Components to your [Admin Panel](./overview), you may find it helpful to add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context)(s). Payload allows you to inject your own context providers in your app so you can export your own custom hooks, etc.
+
+To add a Custom Provider, use the `admin.components.providers` property in your [Payload Config](../getting-started/overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    components: {
+      providers: ['/path/to/MyProvider'], // highlight-line
+    },
+  },
+})
+```
+
+Then build your Custom Provider as follows:
+
+```tsx
+'use client'
+import React, { createContext, useContext } from 'react'
+
+const MyCustomContext = React.createContext(myCustomValue)
+
+export const MyProvider: React.FC = ({ children }) => {
+  return (
+    <MyCustomContext.Provider value={myCustomValue}>
+      {children}
+    </MyCustomContext.Provider>
+  )
+}
+
+export const useMyCustomContext = () => useContext(MyCustomContext)
+```
+
+<Banner type="warning">
+  <strong>Reminder:</strong>React Context exists only within Client Components. This means they must include the `use client` directive at the top of their files and cannot contain server-only code. To use a Server Component here, simply _wrap_ your Client Component with it.
 </Banner>
