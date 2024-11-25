@@ -521,6 +521,25 @@ describe('Fields', () => {
       expect(updatedDoc.selectHasMany).toEqual(['one', 'two'])
     })
 
+    it('should clear select hasMany field', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id,
+        collection: 'select-fields',
+        data: {
+          selectHasMany: [],
+        },
+      })
+
+      expect(updatedDoc.selectHasMany).toHaveLength(0)
+    })
+
     it('should query hasMany in', async () => {
       const hit = await payload.create({
         collection: 'select-fields',
