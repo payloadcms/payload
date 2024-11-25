@@ -378,35 +378,27 @@ describe('admin1', () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
       await openNav(page)
-
       const navGroup = page.locator('#nav-group-One .nav-group__toggle')
-      const link = page.locator('#nav-group-one-collection-ones')
-
       await expect(navGroup).toContainText('One')
-      await expect(link).toBeVisible()
-
+      const button = page.locator('#nav-group-one-collection-ones')
+      await expect(button).toBeVisible()
       await navGroup.click()
-      await expect(link).toBeHidden()
-
+      await expect(button).toBeHidden()
       await navGroup.click()
-      await expect(link).toBeVisible()
+      await expect(button).toBeVisible()
     })
 
     test('nav — should collapse and expand globals groups', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-
       const navGroup = page.locator('#nav-group-Group .nav-group__toggle')
-      const link = page.locator('#nav-global-group-globals-one')
-
       await expect(navGroup).toContainText('Group')
-      await expect(link).toBeVisible()
-
+      const button = page.locator('#nav-global-group-globals-one')
+      await expect(button).toBeVisible()
       await navGroup.click()
-      await expect(link).toBeHidden()
-
+      await expect(button).toBeHidden()
       await navGroup.click()
-      await expect(link).toBeVisible()
+      await expect(button).toBeVisible()
     })
 
     test('nav — should save group collapse preferences', async () => {
