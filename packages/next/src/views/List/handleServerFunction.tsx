@@ -123,31 +123,12 @@ export const renderListHandler = async (args: {
   const preferencesKey = `${collectionSlug}-list`
 
   const preferences = await payload
-    .find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      where: {
-        and: [
-          {
-            key: {
-              equals: preferencesKey,
-            },
-          },
-          {
-            'user.relationTo': {
-              equals: user.collection,
-            },
-          },
-          {
-            'user.value': {
-              equals: user.id,
-            },
-          },
-        ],
-      },
+    .findPreferenceByKey({
+      key: preferencesKey,
+      req,
+      user,
     })
-    .then((res) => res.docs[0]?.value as ListPreferences)
+    .then((res) => res?.value as ListPreferences)
 
   const visibleEntities: VisibleEntities = {
     collections: payload.config.collections

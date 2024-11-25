@@ -63,6 +63,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       id: user.id,
       collectionSlug: collectionConfig.slug,
       payload,
+      req,
       user,
     })
 

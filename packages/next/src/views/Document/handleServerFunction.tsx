@@ -124,31 +124,12 @@ export const renderDocumentHandler = async (args: {
     const preferencesKey = `${collectionSlug}-edit-${docID}`
 
     preferences = await payload
-      .find({
-        collection: 'payload-preferences',
-        depth: 0,
-        limit: 1,
-        where: {
-          and: [
-            {
-              key: {
-                equals: preferencesKey,
-              },
-            },
-            {
-              'user.relationTo': {
-                equals: user.collection,
-              },
-            },
-            {
-              'user.value': {
-                equals: user.id,
-              },
-            },
-          ],
-        },
+      .findPreferenceByKey({
+        key: preferencesKey,
+        req,
+        user,
       })
-      .then((res) => res.docs[0]?.value as DocumentPreferences)
+      .then((res) => res?.value as DocumentPreferences)
   }
 
   const visibleEntities: VisibleEntities = {

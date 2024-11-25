@@ -41,6 +41,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
   const docPreferences = await getDocPreferences({
     collectionSlug: collectionConfig.slug,
     payload: req.payload,
+    req,
     user: req.user,
   })
 

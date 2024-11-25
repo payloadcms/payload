@@ -84,33 +84,13 @@ export const initPage = async ({
     if (!localeCode) {
       try {
         localeCode = await payload
-          .find({
-            collection: 'payload-preferences',
-            depth: 0,
-            limit: 1,
+          .findPreferenceByKey({
+            key: 'locale',
+            req,
             user,
-            where: {
-              and: [
-                {
-                  'user.relationTo': {
-                    equals: payload.config.admin.user,
-                  },
-                },
-                {
-                  'user.value': {
-                    equals: user.id,
-                  },
-                },
-                {
-                  key: {
-                    equals: 'locale',
-                  },
-                },
-              ],
-            },
           })
-          ?.then((res) => res.docs?.[0]?.value as string)
-      } catch (error) {} // eslint-disable-line no-empty
+          ?.then((res) => res?.value as string)
+      } catch (_err) {} // eslint-disable-line no-empty
     }
 
     locale = findLocaleFromCode(localization, localeCode)

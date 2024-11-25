@@ -77,33 +77,12 @@ export const renderListView = async (
 
   try {
     listPreferences = (await payload
-      .find({
-        collection: 'payload-preferences',
-        depth: 0,
-        limit: 1,
+      .findPreferenceByKey({
+        key: preferenceKey,
         req,
         user,
-        where: {
-          and: [
-            {
-              key: {
-                equals: preferenceKey,
-              },
-            },
-            {
-              'user.relationTo': {
-                equals: user.collection,
-              },
-            },
-            {
-              'user.value': {
-                equals: user?.id,
-              },
-            },
-          ],
-        },
       })
-      ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
+      ?.then((res) => res?.value)) as ListPreferences
   } catch (_err) {} // eslint-disable-line no-empty
 
   const {

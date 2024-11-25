@@ -1,4 +1,4 @@
-import type { DocumentPreferences, Payload, TypedUser } from 'payload'
+import type { DocumentPreferences, Payload, PayloadRequest, TypedUser } from 'payload'
 
 import { sanitizeID } from '@payloadcms/ui/shared'
 
@@ -7,6 +7,7 @@ type Args = {
   globalSlug?: string
   id?: number | string
   payload: Payload
+  req: PayloadRequest
   user: TypedUser
 }
 
@@ -15,6 +16,7 @@ export const getDocPreferences = async ({
   collectionSlug,
   globalSlug,
   payload,
+  req,
   user,
 }: Args): Promise<DocumentPreferences> => {
   let preferencesKey
@@ -28,33 +30,14 @@ export const getDocPreferences = async ({
   }
 
   if (preferencesKey) {
-    const preferencesResult = (await payload.find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      where: {
-        and: [
-          {
-            key: {
-              equals: preferencesKey,
-            },
-          },
-          {
-            'user.relationTo': {
-              equals: user.collection,
-            },
-          },
-          {
-            'user.value': {
-              equals: sanitizeID(user.id),
-            },
-          },
-        ],
-      },
-    })) as unknown as { docs: { value: DocumentPreferences }[] }
+    const preferencesResult = (await payload.findPreferenceByKey({
+      key: preferencesKey,
+      req,
+      user,
+    })) as unknown as { value: DocumentPreferences }
 
-    if (preferencesResult?.docs?.[0]?.value) {
-      return preferencesResult.docs[0].value
+    if (preferencesResult?.value) {
+      return preferencesResult.value
     }
   }
 

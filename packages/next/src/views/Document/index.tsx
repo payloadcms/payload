@@ -108,6 +108,7 @@ export const renderDocument = async ({
       collectionSlug,
       globalSlug,
       payload,
+      req,
       user,
     }),
 

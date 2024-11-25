@@ -1,4 +1,4 @@
-import type { CustomComponent, ServerProps, VisibleEntities } from 'payload'
+import type { CustomComponent, PayloadRequest, ServerProps, VisibleEntities } from 'payload'
 
 import {
   ActionsProvider,
@@ -20,6 +20,7 @@ const baseClass = 'template-default'
 export type DefaultTemplateProps = {
   children?: React.ReactNode
   className?: string
+  req?: PayloadRequest
   viewActions?: CustomComponent[]
   visibleEntities: VisibleEntities
 } & ServerProps
@@ -32,6 +33,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   params,
   payload,
   permissions,
+  req,
   searchParams,
   user,
   viewActions,
@@ -85,6 +87,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       params,
       payload,
       permissions,
+      req,
       searchParams,
       user,
       visibleEntities,

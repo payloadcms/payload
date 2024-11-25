@@ -78,6 +78,7 @@ export const NotFoundPage = async ({
       params={params}
       payload={initPageResult.req.payload}
       permissions={initPageResult.permissions}
+      req={initPageResult.req}
       searchParams={searchParams}
       user={initPageResult.req.user}
       visibleEntities={initPageResult.visibleEntities}
