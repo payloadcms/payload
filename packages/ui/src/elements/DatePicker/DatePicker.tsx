@@ -2,7 +2,7 @@
 import type { ReactDatePickerProps } from 'react-datepicker'
 
 import React from 'react'
-import ReactDatePickerDefaultImport, { registerLocale } from 'react-datepicker'
+import ReactDatePickerDefaultImport, { registerLocale, setDefaultLocale } from 'react-datepicker'
 const ReactDatePicker = (ReactDatePickerDefaultImport.default ||
   ReactDatePickerDefaultImport) as unknown as typeof ReactDatePickerDefaultImport.default
 
@@ -34,8 +34,6 @@ const DatePicker: React.FC<Props> = (props) => {
     timeIntervals = 30,
     value,
   } = props
-
-  const [datepickerLocale, setDatepickerLocale] = React.useState<string>(undefined)
 
   // Use the user's AdminUI language preference for the locale
   const { i18n } = useTranslation()
@@ -94,17 +92,12 @@ const DatePicker: React.FC<Props> = (props) => {
     .join(' ')
 
   React.useEffect(() => {
-    // register the locale for the datepicker
-    const localeToRegister = getFormattedLocale(i18n.language)
-    if (localeToRegister !== datepickerLocale) {
-      try {
-        registerLocale(localeToRegister, i18n.dateFNS)
-        setDatepickerLocale(localeToRegister)
-      } catch (e) {
-        console.warn(`Could not find DatePicker locale for ${i18n.language}`)
-      }
+    if (i18n.dateFNS) {
+      const datepickerLocale = getFormattedLocale(i18n.language)
+      registerLocale(datepickerLocale, i18n.dateFNS)
+      setDefaultLocale(datepickerLocale)
     }
-  }, [datepickerLocale, i18n.dateFNS, i18n.language])
+  }, [i18n.language, i18n.dateFNS])
 
   return (
     <div className={classes}>
@@ -124,7 +117,6 @@ const DatePicker: React.FC<Props> = (props) => {
         <ReactDatePicker
           {...dateTimePickerProps}
           dropdownMode="select"
-          locale={datepickerLocale}
           showMonthDropdown
           showYearDropdown
         />
