@@ -1,13 +1,12 @@
-import type { AppContext, AppProps as NextAppProps } from 'next/app'
-
-import App from 'next/app'
-import { useRouter } from 'next/router'
 import React, { useCallback } from 'react'
 import { CookiesProvider } from 'react-cookie'
-
-import type { MainMenu } from '../payload-types'
+import type { AppContext, AppProps as NextAppProps } from 'next/app'
+import App from 'next/app'
+import { useRouter } from 'next/router'
 
 import { Header } from '../components/Header'
+import type { MainMenu } from '../payload-types'
+
 import './app.scss'
 
 export interface IGlobals {

@@ -1,6 +1,5 @@
-import type { NextRequest } from 'next/server'
-
 import { revalidatePath, revalidateTag } from 'next/cache'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 // this endpoint will revalidate a page by tag or path
