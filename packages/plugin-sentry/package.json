@@ -53,8 +53,8 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@sentry/nextjs": "^8.33.1",
-    "@sentry/types": "^8.33.1"
+    "@sentry/nextjs": "^8.40.0",
+    "@sentry/types": "^8.40.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
