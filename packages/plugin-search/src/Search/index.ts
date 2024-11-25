@@ -64,16 +64,20 @@ export const generateSearchCollection = (
     },
     admin: {
       components: {
-        beforeListTable: [
-          {
-            path: '@payloadcms/plugin-search/client#ReindexButton',
-            serverProps: {
-              collectionLabels,
-              searchCollections,
-              searchSlug,
-            },
+        views: {
+          list: {
+            actions: [
+              {
+                path: '@payloadcms/plugin-search/client#ReindexButton',
+                serverProps: {
+                  collectionLabels,
+                  searchCollections,
+                  searchSlug,
+                },
+              },
+            ],
           },
-        ],
+        },
       },
       defaultColumns: ['title'],
       description:
