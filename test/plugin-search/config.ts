@@ -56,6 +56,9 @@ export default buildConfigWithDefaults({
         },
         fields: ({ defaultFields }) => [
           ...defaultFields,
+          // This is necessary to test whether search docs were deleted or not with SQLite
+          // Because IDs in SQLite, apparently, aren't unique if we count deleted rows without AUTOINCREMENT option
+          // Thus we have a custom UUID field.
           {
             name: 'id',
             type: 'text',
