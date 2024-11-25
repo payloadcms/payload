@@ -40,6 +40,10 @@ export const sanitizeClientFeatures = (
       sanitized.providers = sanitized.providers.concat(feature.providers)
     }
 
+    if (feature.enableFormats?.length) {
+      sanitized.enabledFormats.push(...feature.enableFormats)
+    }
+
     if (feature.nodes?.length) {
       // Important: do not use concat
       for (const node of feature.nodes) {
