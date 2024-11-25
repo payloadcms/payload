@@ -56,7 +56,7 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
       baseExtraConfig,
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
-      fields: collection.fields,
+      fields: collection.flattenedFields,
       tableName,
       timestamps: collection.timestamps,
       versions: false,
@@ -66,7 +66,7 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
       const versionsTableName = this.tableNameMap.get(
         `_${toSnakeCase(collection.slug)}${this.versionsSuffix}`,
       )
-      const versionFields = buildVersionCollectionFields(this.payload.config, collection)
+      const versionFields = buildVersionCollectionFields(this.payload.config, collection, true)
 
       buildTable({
         adapter: this,
@@ -87,7 +87,7 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
       adapter: this,
       disableNotNull: !!global?.versions?.drafts,
       disableUnique: false,
-      fields: global.fields,
+      fields: global.flattenedFields,
       tableName,
       timestamps: false,
       versions: false,
@@ -100,7 +100,7 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
         versions: true,
         versionsCustomName: true,
       })
-      const versionFields = buildVersionGlobalFields(this.payload.config, global)
+      const versionFields = buildVersionGlobalFields(this.payload.config, global, true)
 
       buildTable({
         adapter: this,

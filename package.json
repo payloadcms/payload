@@ -102,6 +102,7 @@
       "eslint --cache --fix"
     ],
     "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --no-frozen-lockfile --ignore-workspace; pnpm run lint --fix\"",
+    "templates/**/pnpm-lock.yaml": "pnpm runts scripts/remove-template-lock-files.ts",
     "tsconfig.json": "node scripts/reset-tsconfig.js"
   },
   "devDependencies": {

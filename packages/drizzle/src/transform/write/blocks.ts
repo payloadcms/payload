@@ -1,4 +1,4 @@
-import type { BlocksField } from 'payload'
+import type { FlattenedBlocksField } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -15,7 +15,7 @@ type Args = {
   }
   blocksToDelete: Set<string>
   data: Record<string, unknown>[]
-  field: BlocksField
+  field: FlattenedBlocksField
   locale?: string
   numbers: Record<string, unknown>[]
   path: string
@@ -100,7 +100,7 @@ export const transformBlocks = ({
       columnPrefix: '',
       data: blockRow,
       fieldPrefix: '',
-      fields: matchedBlock.fields,
+      fields: matchedBlock.flattenedFields,
       locales: newRow.locales,
       numbers,
       parentTableName: blockTableName,

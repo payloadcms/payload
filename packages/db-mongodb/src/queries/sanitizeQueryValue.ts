@@ -1,10 +1,10 @@
-import type { Block, Field, Payload, RelationshipField, TabAsField } from 'payload'
+import type { FlattenedBlock, FlattenedField, Payload, RelationshipField } from 'payload'
 
 import { Types } from 'mongoose'
-import { createArrayFromCommaDelineated, flattenTopLevelFields } from 'payload'
+import { createArrayFromCommaDelineated } from 'payload'
 
 type SanitizeQueryValueArgs = {
-  field: Field | TabAsField
+  field: FlattenedField
   hasCustomID: boolean
   operator: string
   path: string
@@ -41,7 +41,7 @@ const getFieldFromSegments = ({
   field,
   segments,
 }: {
-  field: Block | Field | TabAsField
+  field: FlattenedBlock | FlattenedField
   segments: string[]
 }) => {
   if ('blocks' in field) {
@@ -55,9 +55,7 @@ const getFieldFromSegments = ({
 
   if ('fields' in field) {
     for (let i = 0; i < segments.length; i++) {
-      const foundField = flattenTopLevelFields(field.fields).find(
-        (each) => each.name === segments[i],
-      )
+      const foundField = field.flattenedFields.find((each) => each.name === segments[i])
 
       if (!foundField) {
         break
