@@ -35,16 +35,10 @@ const DatePicker: React.FC<Props> = (props) => {
     value,
   } = props
 
+  const [datepickerLocale, setDatepickerLocale] = React.useState<string>(undefined)
+
   // Use the user's AdminUI language preference for the locale
   const { i18n } = useTranslation()
-
-  const datepickerLocale = getFormattedLocale(i18n.language)
-
-  try {
-    registerLocale(datepickerLocale, i18n.dateFNS)
-  } catch (e) {
-    console.warn(`Could not find DatePicker locale for ${i18n.language}`)
-  }
 
   let dateFormat = customDisplayFormat
 
@@ -98,6 +92,19 @@ const DatePicker: React.FC<Props> = (props) => {
   const classes = [baseClass, `${baseClass}__appearance--${pickerAppearance}`]
     .filter(Boolean)
     .join(' ')
+
+  React.useEffect(() => {
+    // register the locale for the datepicker
+    const localeToRegister = getFormattedLocale(i18n.language)
+    if (localeToRegister !== datepickerLocale) {
+      try {
+        registerLocale(localeToRegister, i18n.dateFNS)
+        setDatepickerLocale(localeToRegister)
+      } catch (e) {
+        console.warn(`Could not find DatePicker locale for ${i18n.language}`)
+      }
+    }
+  }, [datepickerLocale, i18n.dateFNS, i18n.language])
 
   return (
     <div className={classes}>
