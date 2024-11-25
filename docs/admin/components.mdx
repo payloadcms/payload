@@ -8,7 +8,7 @@ keywords: admin, components, custom, documentation, Content Management System, c
 
 The Payload [Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow for easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components through your [Payload Config](../configuration/overview).
 
-All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api/overview) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default. This enables the use of the [Local API](../local-api/overview) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
 
 <Banner type="success">
   <strong>Note:</strong>
@@ -151,7 +151,7 @@ export default buildConfig({
 
 ## Building Custom Components
 
-All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, with the exception of [Custom Providers](#custom-providers). This enables the use of the [Local API](../local-api/overview) directly on the front-end, among other things.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default. This enables the use of the [Local API](../local-api/overview) directly on the front-end, among other things.
 
 ### Default Props
 
@@ -185,7 +185,7 @@ Each Custom Component receives the following props by default:
 
 <Banner type="warning">
   <strong>Reminder:</strong>
-  All Custom Components also receive various other props that are specific component being rendered. See [Root Components](#root-components), [Collection Components](#collection-components), [Global Components](#global-components), or [Field Components](#custom-field-components) for a complete list of all default props per component.
+  All Custom Components also receive various other props that are specific component being rendered. See [Root Components](#root-components), [Collection Components](./collections#custom-components), [Global Components](./globals#custom-components), or [Field Components](./fields#custom-components) for a complete list of all default props per component.
 </Banner>
 
 ### Custom Props
@@ -546,5 +546,5 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
 ```
 
 <Banner type="warning">
-  <strong>Reminder:</strong> Custom Providers are by definition Client Components. This means they must include the `use client` directive at the top of their files and cannot use server-only code.
+  <strong>Reminder:</strong>React Context exists only within Client Components. This means they must include the `use client` directive at the top of their files and cannot contain server-only code. To use a Server Component here, simply _wrap_ your Client Component with it.
 </Banner>

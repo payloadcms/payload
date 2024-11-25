@@ -23,12 +23,7 @@ export type RenderFieldArgs = {
   parentPath: string
   parentSchemaPath: string
   path: string
-  permissions:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | null
-    | SanitizedFieldPermissions
+  permissions: SanitizedFieldPermissions
   preferences: DocumentPreferences
   previousFieldState: FieldState
   req: PayloadRequest

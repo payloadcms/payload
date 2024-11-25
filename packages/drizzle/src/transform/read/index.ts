@@ -1,4 +1,4 @@
-import type { Field, JoinQuery, SanitizedConfig, TypeWithID } from 'payload'
+import type { FlattenedField, JoinQuery, SanitizedConfig, TypeWithID } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 
@@ -11,7 +11,7 @@ type TransformArgs = {
   config: SanitizedConfig
   data: Record<string, unknown>
   fallbackLocale?: false | string
-  fields: Field[]
+  fields: FlattenedField[]
   joinQuery?: JoinQuery
   locale?: string
 }

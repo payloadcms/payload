@@ -65,10 +65,10 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           user={user}
         />
       </div>
-      <RenderServerComponent
-        Component={beforeLogin}
-        importMap={payload.importMap}
-        serverProps={{
+      {RenderServerComponent({
+        Component: beforeLogin,
+        importMap: payload.importMap,
+        serverProps: {
           i18n,
           locale,
           params,
@@ -76,8 +76,9 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           permissions,
           searchParams,
           user,
-        }}
-      />
+        },
+      })}
+
       {!collectionConfig?.auth?.disableLocalStrategy && (
         <LoginForm
           prefillEmail={prefillEmail}
@@ -86,10 +87,10 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           searchParams={searchParams}
         />
       )}
-      <RenderServerComponent
-        Component={afterLogin}
-        importMap={payload.importMap}
-        serverProps={{
+      {RenderServerComponent({
+        Component: afterLogin,
+        importMap: payload.importMap,
+        serverProps: {
           i18n,
           locale,
           params,
@@ -97,8 +98,8 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           permissions,
           searchParams,
           user,
-        }}
-      />
+        },
+      })}
     </Fragment>
   )
 }

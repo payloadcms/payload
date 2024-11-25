@@ -432,8 +432,11 @@ export function buildObjectType({
             const createPopulationPromise = async (relatedDoc, i) => {
               let id = relatedDoc
               let collectionSlug = field.relationTo
+              const isValidGraphQLCollection = isRelatedToManyCollections
+                ? graphQLCollections.some((collection) => collectionSlug.includes(collection.slug))
+                : graphQLCollections.some((collection) => collectionSlug === collection.slug)
 
-              if (graphQLCollections.some((collection) => collection.slug === collectionSlug)) {
+              if (isValidGraphQLCollection) {
                 if (isRelatedToManyCollections) {
                   collectionSlug = relatedDoc.relationTo
                   id = relatedDoc.value

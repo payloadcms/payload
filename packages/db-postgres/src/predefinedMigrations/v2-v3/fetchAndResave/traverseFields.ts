@@ -1,10 +1,8 @@
-import type { Field } from 'payload'
-
-import { tabHasName } from 'payload/shared'
+import type { FlattenedField } from 'payload'
 
 type Args = {
   doc: Record<string, unknown>
-  fields: Field[]
+  fields: FlattenedField[]
   locale?: string
   path: string
   rows: Record<string, unknown>[]
@@ -22,7 +20,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
               localeRows.forEach((row, i) => {
                 return traverseFields({
                   doc: row as Record<string, unknown>,
-                  fields: field.fields,
+                  fields: field.flattenedFields,
                   locale,
                   path: `${path ? `${path}.` : ''}${field.name}.${i}`,
                   rows,
@@ -36,7 +34,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
           rowData.forEach((row, i) => {
             return traverseFields({
               doc: row as Record<string, unknown>,
-              fields: field.fields,
+              fields: field.flattenedFields,
               path: `${path ? `${path}.` : ''}${field.name}.${i}`,
               rows,
             })
@@ -58,7 +56,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
                 if (matchedBlock) {
                   return traverseFields({
                     doc: row as Record<string, unknown>,
-                    fields: matchedBlock.fields,
+                    fields: matchedBlock.flattenedFields,
                     locale,
                     path: `${path ? `${path}.` : ''}${field.name}.${i}`,
                     rows,
@@ -76,7 +74,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
             if (matchedBlock) {
               return traverseFields({
                 doc: row as Record<string, unknown>,
-                fields: matchedBlock.fields,
+                fields: matchedBlock.flattenedFields,
                 path: `${path ? `${path}.` : ''}${field.name}.${i}`,
                 rows,
               })
@@ -86,18 +84,9 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
 
         break
       }
-      case 'collapsible':
-      // falls through
-      case 'row': {
-        return traverseFields({
-          doc,
-          fields: field.fields,
-          path,
-          rows,
-        })
-      }
 
-      case 'group': {
+      case 'group':
+      case 'tab': {
         const newPath = `${path ? `${path}.` : ''}${field.name}`
         const newDoc = doc?.[field.name]
 
@@ -106,7 +95,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
             Object.entries(newDoc).forEach(([locale, localeDoc]) => {
               return traverseFields({
                 doc: localeDoc,
-                fields: field.fields,
+                fields: field.flattenedFields,
                 locale,
                 path: newPath,
                 rows,
@@ -115,7 +104,7 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
           } else {
             return traverseFields({
               doc: newDoc as Record<string, unknown>,
-              fields: field.fields,
+              fields: field.flattenedFields,
               path: newPath,
               rows,
             })
@@ -176,42 +165,6 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
           }
         }
         break
-      }
-      case 'tabs': {
-        return field.tabs.forEach((tab) => {
-          if (tabHasName(tab)) {
-            const newDoc = doc?.[tab.name]
-            const newPath = `${path ? `${path}.` : ''}${tab.name}`
-
-            if (typeof newDoc === 'object' && newDoc !== null) {
-              if (tab.localized) {
-                Object.entries(newDoc).forEach(([locale, localeDoc]) => {
-                  return traverseFields({
-                    doc: localeDoc,
-                    fields: tab.fields,
-                    locale,
-                    path: newPath,
-                    rows,
-                  })
-                })
-              } else {
-                return traverseFields({
-                  doc: newDoc as Record<string, unknown>,
-                  fields: tab.fields,
-                  path: newPath,
-                  rows,
-                })
-              }
-            }
-          } else {
-            traverseFields({
-              doc,
-              fields: tab.fields,
-              path,
-              rows,
-            })
-          }
-        })
       }
     }
   })

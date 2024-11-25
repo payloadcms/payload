@@ -1,5 +1,5 @@
 import type { DBQueryConfig } from 'drizzle-orm'
-import type { Field, JoinQuery, SelectType } from 'payload'
+import type { FlattenedField, JoinQuery, SelectType } from 'payload'
 
 import { getSelectMode } from 'payload/shared'
 
@@ -10,7 +10,7 @@ import { traverseFields } from './traverseFields.js'
 type BuildFindQueryArgs = {
   adapter: DrizzleAdapter
   depth: number
-  fields: Field[]
+  fields: FlattenedField[]
   joinQuery?: JoinQuery
   /**
    * The joins array will be mutated by pushing any joins needed for the where queries of join field joins

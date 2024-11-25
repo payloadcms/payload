@@ -295,4 +295,10 @@ describe('Array', () => {
       'Updated 3 Array Fields successfully.',
     )
   })
+
+  test('should externally update array rows and render custom fields', async () => {
+    await page.goto(url.create)
+    await page.locator('#updateArrayExternally').click()
+    await expect(page.locator('#custom-field')).toBeVisible()
+  })
 })

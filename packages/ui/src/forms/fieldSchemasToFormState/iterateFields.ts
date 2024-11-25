@@ -6,7 +6,7 @@ import type {
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
-  SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
 } from 'payload'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
@@ -47,12 +47,7 @@ type Args = {
   parentPassesCondition?: boolean
   parentPath: string
   parentSchemaPath: string
-  permissions:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | null
-    | SanitizedFieldPermissions
+  permissions: SanitizedFieldsPermissions
   preferences?: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
@@ -130,9 +125,9 @@ export const iterateFields = async ({
         operation,
         parentIndexPath,
         parentPath,
+        parentPermissions: permissions,
         parentSchemaPath,
         passesCondition,
-        permissions,
         preferences,
         previousFormState,
         renderAllFields,

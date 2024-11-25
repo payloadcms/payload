@@ -108,15 +108,15 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
     <Fragment>
       <HydrateAuthProvider permissions={permissions} />
       <SetStepNav nav={[]} />
-      <RenderServerComponent
-        clientProps={{
+      {RenderServerComponent({
+        clientProps: {
           Link,
           locale,
-        }}
-        Component={config.admin?.components?.views?.dashboard?.Component}
-        Fallback={DefaultDashboard}
-        importMap={payload.importMap}
-        serverProps={{
+        },
+        Component: config.admin?.components?.views?.dashboard?.Component,
+        Fallback: DefaultDashboard,
+        importMap: payload.importMap,
+        serverProps: {
           globalData,
           i18n,
           Link,
@@ -128,8 +128,8 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
           searchParams,
           user,
           visibleEntities,
-        }}
-      />
+        },
+      })}
     </Fragment>
   )
 }

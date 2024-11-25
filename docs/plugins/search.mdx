@@ -39,7 +39,7 @@ This plugin is a great way to implement a fast, immersive search experience such
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  pnpm add @payloadcms/plugin-search@beta
+  pnpm add @payloadcms/plugin-search
 ```
 
 ## Basic Usage
@@ -134,7 +134,7 @@ Note that the `fields` property is a function that receives an object with a `de
 
 #### `beforeSync`
 
-Before creating or updating a search record, the `beforeSync` function runs. This is an [afterChange](<[afterChange](https://payloadcms.com/docs/hooks/globals#afterchange)>) hook that allows you to modify the data or provide fallbacks before its search record is created or updated.
+Before creating or updating a search record, the `beforeSync` function runs. This is an [afterChange](https://payloadcms.com/docs/hooks/globals#afterchange) hook that allows you to modify the data or provide fallbacks before its search record is created or updated.
 
 ```ts
 // payload.config.ts

@@ -57,9 +57,9 @@ export class UploadNode extends UploadServerNode {
     return super.getType()
   }
 
-  static importDOM(): DOMConversionMap | null {
+  static importDOM(): DOMConversionMap<HTMLImageElement> {
     return {
-      img: (node: HTMLImageElement) => ({
+      img: (node) => ({
         conversion: $convertUploadElement,
         priority: 0,
       }),

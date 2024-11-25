@@ -3,7 +3,7 @@
 // @ts-nocheck
 //This copy-and-pasted from lexical here here: https://github.com/facebook/lexical/blob/c2ceee223f46543d12c574e62155e619f9a18a5d/packages/lexical/src/LexicalConstants.ts
 
-import type { ElementFormatType, TextFormatType } from 'lexical'
+import type { ElementFormatType, TextFormatType } from '@payloadcms/richtext-lexical/lexical'
 import type { TextDetailType, TextModeType } from 'lexical/nodes/LexicalTextNode'
 
 /**
@@ -81,7 +81,7 @@ export const RTL_REGEX = new RegExp('^[^' + LTR + ']*[' + RTL + ']')
 // eslint-disable-next-line
 export const LTR_REGEX = new RegExp('^[^' + RTL + ']*[' + LTR + ']')
 
-export const TEXT_TYPE_TO_FORMAT: Record<TextFormatType | string, number> = {
+export const TEXT_TYPE_TO_FORMAT: Record<string | TextFormatType, number> = {
   bold: IS_BOLD,
   code: IS_CODE,
   highlight: IS_HIGHLIGHT,
@@ -92,7 +92,7 @@ export const TEXT_TYPE_TO_FORMAT: Record<TextFormatType | string, number> = {
   underline: IS_UNDERLINE,
 }
 
-export const DETAIL_TYPE_TO_DETAIL: Record<TextDetailType | string, number> = {
+export const DETAIL_TYPE_TO_DETAIL: Record<string | TextDetailType, number> = {
   directionless: IS_DIRECTIONLESS,
   unmergeable: IS_UNMERGEABLE,
 }

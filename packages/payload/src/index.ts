@@ -242,9 +242,7 @@ export class BasePayload {
 
   authStrategies: AuthStrategy[]
 
-  collections: {
-    [slug: CollectionSlug]: Collection
-  } = {}
+  collections: Record<CollectionSlug, Collection> = {}
 
   config: SanitizedConfig
   /**
@@ -1146,6 +1144,12 @@ export type {
   FieldWithSubFieldsClient,
   FilterOptions,
   FilterOptionsProps,
+  FlattenedArrayField,
+  FlattenedBlock,
+  FlattenedBlocksField,
+  FlattenedField,
+  FlattenedGroupField,
+  FlattenedTabAsField,
   GroupField,
   GroupFieldClient,
   HookName,
@@ -1328,6 +1332,7 @@ export {
   pathExistsAndIsAccessible,
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
+export { flattenAllFields } from './utilities/flattenAllFields.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
@@ -1341,7 +1346,6 @@ export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
-export { recursivelySanitizePermissions as sanitizePermissions } from './utilities/sanitizePermissions.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'

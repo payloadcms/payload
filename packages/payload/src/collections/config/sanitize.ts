@@ -9,6 +9,7 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
+import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
@@ -35,7 +36,13 @@ export const sanitizeCollection = async (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = config.collections.map((c) => c.slug) || []
+  const validRelationships = config.collections.reduce(
+    (acc, c) => {
+      acc.push(c.slug)
+      return acc
+    },
+    [collection.slug],
+  )
   const joins: SanitizedJoins = {}
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,
@@ -200,6 +207,8 @@ export const sanitizeCollection = async (
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
   sanitizedConfig.joins = joins
+
+  sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
 
   return sanitizedConfig
 }

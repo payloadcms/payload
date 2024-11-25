@@ -1,4 +1,3 @@
-import type { Transformer } from '@lexical/markdown'
 import type { GenericLanguages, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type {
@@ -13,7 +12,6 @@ import type {
   Field,
   FieldSchemaMap,
   JsonObject,
-  Payload,
   PayloadComponent,
   PayloadRequest,
   PopulateType,
@@ -27,6 +25,7 @@ import type {
 } from 'payload'
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
+import type { Transformer } from '../packages/@lexical/markdown/index.js'
 import type { AdapterProps } from '../types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
 import type { BaseClientFeatureProps } from './typesClient.js'

@@ -67,8 +67,12 @@ export async function GET(
     // Verify the given slug exists
     try {
       const docs = await payload.find({
-        collection: collection,
+        collection,
         draft: true,
+        limit: 1,
+        pagination: false,
+        depth: 0,
+        select: {},
         where: {
           slug: {
             equals: slug,
