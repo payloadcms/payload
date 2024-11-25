@@ -1,5 +1,6 @@
 import { AdminBar } from './_components/AdminBar'
 import { Header } from './_components/Header'
+
 import './app.scss'
 
 export const metadata = {

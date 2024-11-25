@@ -1,13 +1,12 @@
-import type { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from 'next'
-import type { ParsedUrlQuery } from 'querystring'
-
-import QueryString from 'qs'
 import React from 'react'
-
-import type { MainMenu, Page as PageType } from '../payload-types'
+import type { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from 'next'
+import QueryString from 'qs'
+import type { ParsedUrlQuery } from 'querystring'
 
 import { Gutter } from '../components/Gutter'
 import RichText from '../components/RichText'
+import type { MainMenu, Page as PageType } from '../payload-types'
+
 import classes from './[slug].module.scss'
 
 const Page: React.FC<

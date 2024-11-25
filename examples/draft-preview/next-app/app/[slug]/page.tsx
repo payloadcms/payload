@@ -2,11 +2,11 @@ import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
 import type { Page as PageType } from '../../payload-types'
-
 import { fetchPage } from '../_api/fetchPage'
 import { fetchPages } from '../_api/fetchPages'
 import { Gutter } from '../_components/Gutter'
 import RichText from '../_components/RichText'
+
 import classes from './index.module.scss'
 
 interface PageParams {

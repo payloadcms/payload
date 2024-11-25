@@ -1,5 +1,4 @@
 import type { Ref } from 'react'
-
 import React, { forwardRef } from 'react'
 
 import classes from './index.module.scss'

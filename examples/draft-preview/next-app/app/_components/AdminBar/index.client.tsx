@@ -1,11 +1,11 @@
 'use client'
 
-import type { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
-
-import { PayloadAdminBar } from 'payload-admin-bar'
 import React, { useState } from 'react'
+import type { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
+import { PayloadAdminBar } from 'payload-admin-bar'
 
 import { Gutter } from '../Gutter'
+
 import classes from './index.module.scss'
 
 const Title: React.FC = () => <span>Dashboard</span>

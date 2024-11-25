@@ -1,11 +1,11 @@
+import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
 
 import type { MainMenu } from '../../../payload-types'
-
 import { CMSLink } from '../CMSLink'
 import { Gutter } from '../Gutter'
+
 import classes from './index.module.scss'
 
 export async function Header() {
