@@ -514,6 +514,7 @@ describe('Access Control', () => {
           hidden: false,
         },
       })
+
       const { docs } = await payload.findVersions({
         collection: restrictedVersionsSlug,
         overrideAccess: false,
@@ -528,34 +529,72 @@ describe('Access Control', () => {
     it('should ignore false access on query constraint added by top collection level access control', async () => {
       await payload.create({
         collection: 'fields-and-top-access',
-        data: { secret: '123456' },
+        data: { secret: 'will-fail-access-read' },
       })
       const { id } = await payload.create({
         collection: 'fields-and-top-access',
-        data: { secret: '12345' },
+        data: { secret: 'will-success-access-read' },
       })
       await payload.create({
         collection: 'fields-and-top-access',
-        data: { secret: '123456' },
+        data: { secret: 'will-fail-access-read' },
       })
 
+      // assert find
       const resFind = await payload.find({
         overrideAccess: false,
         collection: 'fields-and-top-access',
       })
       expect(resFind.docs[0].id).toBe(id)
+      expect(resFind.docs).toHaveLength(1)
 
+      // assert find draft: true
       const resFindDraft = await payload.find({
         draft: true,
         overrideAccess: false,
         collection: 'fields-and-top-access',
       })
 
+      expect(resFindDraft.docs).toHaveLength(1)
       expect(resFind.docs[0].id).toBe(id)
-      expect(resFindDraft.docs[0].id).toBe(id)
 
+      // assert findByID
       const res = await payload.findByID({
         id,
+        collection: 'fields-and-top-access',
+        overrideAccess: false,
+      })
+
+      expect(res).toBeTruthy()
+    })
+
+    it('should ignore false access in versions on query constraint added by top collection level access control', async () => {
+      await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: 'will-fail-access-read' },
+      })
+      const { id } = await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: 'will-success-access-read' },
+      })
+      await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: 'will-fail-access-read' },
+      })
+
+      // Assert findVersions
+      const resFind = await payload.findVersions({
+        overrideAccess: false,
+        collection: 'fields-and-top-access',
+      })
+      expect(resFind.docs).toHaveLength(1)
+
+      const version = resFind.docs[0]
+      expect(version.parent).toBe(id)
+
+      // Assert findVersionByID
+      const res = await payload.findVersionByID({
+        id: version.id,
         collection: 'fields-and-top-access',
         overrideAccess: false,
       })

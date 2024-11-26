@@ -512,9 +512,14 @@ export default buildConfigWithDefaults({
     {
       slug: 'fields-and-top-access',
       access: {
+        readVersions: () => ({
+          'version.secret': {
+            equals: 'will-success-access-read',
+          },
+        }),
         read: () => ({
           secret: {
-            equals: '12345',
+            equals: 'will-success-access-read',
           },
         }),
       },
