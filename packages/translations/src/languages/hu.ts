@@ -202,9 +202,12 @@ export const huTranslations: DefaultTranslationsObject = {
     confirm: 'Megerősítés',
     confirmDeletion: 'Törlés megerősítése',
     confirmDuplication: 'Duplikáció megerősítése',
-    confirmReindex: 'Újraindexelés megerősítése',
+    confirmReindex: 'Újraindexálja az összes {{collections}}-t?',
+    confirmReindexAll: 'Újraindexálja az összes gyűjteményt?',
     confirmReindexDescription:
-      'Ez eltávolítja a meglévő indexeket, és újraindexeli az összes dokumentumot a kiválasztott gyűjteményekben.',
+      'Ez eltávolítja a meglévő indexeket, és újraindexálja a dokumentumokat a {{collections}} gyűjteményekben.',
+    confirmReindexDescriptionAll:
+      'Ez eltávolítja a meglévő indexeket, és újraindexálja a dokumentumokat az összes gyűjteményben.',
     copied: 'Másolva',
     copy: 'Másolás',
     create: 'Létrehozás',
@@ -286,6 +289,7 @@ export const huTranslations: DefaultTranslationsObject = {
     perPage: 'Oldalanként: {{limit}}',
     previous: 'Előző',
     reindex: 'Újraindexelés',
+    reindexingAll: 'Az összes {{collections}} újraindexálása folyamatban.',
     remove: 'Törlés',
     reset: 'Visszaállítás',
     row: 'Sor',

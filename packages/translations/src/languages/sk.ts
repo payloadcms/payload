@@ -201,9 +201,12 @@ export const skTranslations: DefaultTranslationsObject = {
     confirm: 'Potvrdiť',
     confirmDeletion: 'Potvrdiť odstránenie',
     confirmDuplication: 'Potvrdiť duplikáciu',
-    confirmReindex: 'Potvrdiť reindexáciu',
+    confirmReindex: 'Znova zaindexovať všetky {{collections}}?',
+    confirmReindexAll: 'Znova zaindexovať všetky kolekcie?',
     confirmReindexDescription:
-      'Toto odstráni existujúce indexy a znovu indexuje všetky dokumenty vo vybraných kolekciách.',
+      'Týmto sa odstránia existujúce indexy a znova sa zaindexujú dokumenty v kolekciách {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Týmto sa odstránia existujúce indexy a znova sa zaindexujú dokumenty vo všetkých kolekciách.',
     copied: 'Skopírované',
     copy: 'Kopírovať',
     create: 'Vytvoriť',
@@ -285,6 +288,7 @@ export const skTranslations: DefaultTranslationsObject = {
     perPage: 'Na stránku: {{limit}}',
     previous: 'Predchádzajúci',
     reindex: 'Reindexovať',
+    reindexingAll: 'Znova sa indexujú všetky {{collections}}.',
     remove: 'Odstrániť',
     reset: 'Resetovať',
     row: 'Riadok',

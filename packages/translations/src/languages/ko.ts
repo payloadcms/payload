@@ -199,9 +199,12 @@ export const koTranslations: DefaultTranslationsObject = {
     confirm: '확인',
     confirmDeletion: '삭제하시겠습니까?',
     confirmDuplication: '복제하시겠습니까?',
-    confirmReindex: '재인덱싱 확인',
+    confirmReindex: '모든 {{collections}}를 다시 인덱싱하시겠습니까?',
+    confirmReindexAll: '모든 컬렉션을 다시 인덱싱하시겠습니까?',
     confirmReindexDescription:
-      '이것은 기존 인덱스를 제거하고 선택한 컬렉션의 모든 문서를 재인덱싱합니다.',
+      '이 작업은 기존 인덱스를 삭제하고 {{collections}} 컬렉션 내의 문서를 다시 인덱싱합니다.',
+    confirmReindexDescriptionAll:
+      '이 작업은 기존 인덱스를 삭제하고 모든 컬렉션 내의 문서를 다시 인덱싱합니다.',
     copied: '복사됨',
     copy: '복사',
     create: '생성',
@@ -283,6 +286,7 @@ export const koTranslations: DefaultTranslationsObject = {
     perPage: '페이지당 개수: {{limit}}',
     previous: '이전',
     reindex: '재인덱싱',
+    reindexingAll: '모든 {{collections}}를 다시 인덱싱하는 중입니다.',
     remove: '제거',
     reset: '초기화',
     row: '행',

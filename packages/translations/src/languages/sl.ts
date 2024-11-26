@@ -200,9 +200,12 @@ export const slTranslations: DefaultTranslationsObject = {
     confirm: 'Potrdi',
     confirmDeletion: 'Potrdi brisanje',
     confirmDuplication: 'Potrdi podvajanje',
-    confirmReindex: 'Potrdi reindeksiranje',
+    confirmReindex: 'Ponovno indeksirati vse {{collections}}?',
+    confirmReindexAll: 'Ponovno indeksirati vse zbirke?',
     confirmReindexDescription:
-      'To bo odstranilo obstoječe indekse in ponovno indeksiralo vse dokumente v izbranih zbirkah.',
+      'To bo odstranilo obstoječe indekse in ponovno indeksiralo dokumente v zbirkah {{collections}}.',
+    confirmReindexDescriptionAll:
+      'To bo odstranilo obstoječe indekse in ponovno indeksiralo dokumente v vseh zbirkah.',
     copied: 'Kopirano',
     copy: 'Kopiraj',
     create: 'Ustvari',
@@ -284,6 +287,7 @@ export const slTranslations: DefaultTranslationsObject = {
     perPage: 'Na stran: {{limit}}',
     previous: 'Prejšnji',
     reindex: 'Reindeksiraj',
+    reindexingAll: 'Ponovno indeksiranje vseh {{collections}}.',
     remove: 'Odstrani',
     reset: 'Ponastavi',
     row: 'Vrstica',

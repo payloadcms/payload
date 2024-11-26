@@ -197,9 +197,12 @@ export const arTranslations: DefaultTranslationsObject = {
     confirm: 'تأكيد',
     confirmDeletion: 'تأكيد الحذف',
     confirmDuplication: 'تأكيد التّكرار',
-    confirmReindex: 'تأكيد إعادة الفهرسة',
+    confirmReindex: 'إعادة فهرسة جميع {{collections}}؟',
+    confirmReindexAll: 'إعادة فهرسة جميع المجموعات؟',
     confirmReindexDescription:
-      'سيؤدي هذا إلى إزالة الفهارس الحالية وإعادة فهرسة جميع المستندات في المجموعات المحددة.',
+      'سيؤدي هذا إلى إزالة الفهارس الحالية وإعادة فهرسة المستندات في مجموعات {{collections}}.',
+    confirmReindexDescriptionAll:
+      'سيؤدي هذا إلى إزالة الفهارس الحالية وإعادة فهرسة المستندات في جميع المجموعات.',
     copied: 'تمّ النّسخ',
     copy: 'نسخ',
     create: 'إنشاء',
@@ -281,6 +284,7 @@ export const arTranslations: DefaultTranslationsObject = {
     perPage: 'لكلّ صفحة: {{limit}}',
     previous: 'سابق',
     reindex: 'إعادة الفهرسة',
+    reindexingAll: 'جاري إعادة فهرسة جميع {{collections}}.',
     remove: 'إزالة',
     reset: 'إعادة تعيين',
     row: 'سطر',

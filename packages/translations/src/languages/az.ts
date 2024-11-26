@@ -200,9 +200,12 @@ export const azTranslations: DefaultTranslationsObject = {
     confirm: 'Təsdiqlə',
     confirmDeletion: 'Silməni təsdiqlə',
     confirmDuplication: 'Dublikasiyanı təsdiqlə',
-    confirmReindex: 'Yenidən indekslənməni təsdiqlə',
+    confirmReindex: 'Bütün {{collections}} yenidən indekslənsin?',
+    confirmReindexAll: 'Bütün kolleksiyalar yenidən indekslənsin?',
     confirmReindexDescription:
-      'Bu, mövcud indeksləri siləcək və seçilmiş kolleksiyalardakı bütün sənədləri yenidən indeksləyəcək.',
+      'Bu, mövcud indeksləri siləcək və {{collections}} kolleksiyalarında sənədləri yenidən indeksləyəcək.',
+    confirmReindexDescriptionAll:
+      'Bu, mövcud indeksləri siləcək və bütün kolleksiyalardakı sənədləri yenidən indeksləyəcək.',
     copied: 'Kopyalandı',
     copy: 'Kopyala',
     create: 'Yarat',
@@ -284,6 +287,7 @@ export const azTranslations: DefaultTranslationsObject = {
     perPage: 'Hər səhifədə: {{limit}}',
     previous: 'Əvvəlki',
     reindex: 'Yenidən indekslə',
+    reindexingAll: 'Bütün {{collections}} yenidən indekslənir.',
     remove: 'Sil',
     reset: 'Yenidən başlat',
     row: 'Sətir',

@@ -200,9 +200,12 @@ export const svTranslations: DefaultTranslationsObject = {
     confirm: 'Bekräfta',
     confirmDeletion: 'Bekräfta radering',
     confirmDuplication: 'Bekräfta dubblering',
-    confirmReindex: 'Bekräfta omindexering',
+    confirmReindex: 'Omindexera alla {{collections}}?',
+    confirmReindexAll: 'Omindexera alla samlingar?',
     confirmReindexDescription:
-      'Detta kommer att ta bort befintliga index och omindexera alla dokument i de valda samlingarna.',
+      'Detta kommer att ta bort befintliga index och omindexera dokumenten i {{collections}}-samlingarna.',
+    confirmReindexDescriptionAll:
+      'Detta kommer att ta bort befintliga index och omindexera dokumenten i alla samlingar.',
     copied: 'Kopierad',
     copy: 'Kopiera',
     create: 'Skapa',
@@ -284,6 +287,7 @@ export const svTranslations: DefaultTranslationsObject = {
     perPage: 'Per Sida: {{limit}}',
     previous: 'Föregående',
     reindex: 'Omindexera',
+    reindexingAll: 'Omindexerar alla {{collections}}.',
     remove: 'Ta bort',
     reset: 'Återställ',
     row: 'Rad',

@@ -200,9 +200,12 @@ export const nbTranslations: DefaultTranslationsObject = {
     confirm: 'Bekreft',
     confirmDeletion: 'Bekreft sletting',
     confirmDuplication: 'Bekreft duplisering',
-    confirmReindex: 'Bekreft reindeksering',
+    confirmReindex: 'Reindekser alle {{collections}}?',
+    confirmReindexAll: 'Reindekser alle samlinger?',
     confirmReindexDescription:
-      'Dette vil fjerne eksisterende indekser og reindeksere alle dokumenter i de valgte samlingene.',
+      'Dette vil fjerne eksisterende indekser og reindeksere dokumentene i {{collections}}-samlingene.',
+    confirmReindexDescriptionAll:
+      'Dette vil fjerne eksisterende indekser og reindeksere dokumentene i alle samlinger.',
     copied: 'Kopiert',
     copy: 'Kopiér',
     create: 'Opprett',
@@ -284,6 +287,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     perPage: 'Per side: {{limit}}',
     previous: 'Forrige',
     reindex: 'Reindekser',
+    reindexingAll: 'Reindekserer alle {{collections}}.',
     remove: 'Fjern',
     reset: 'Tilbakestill',
     row: 'Rad',

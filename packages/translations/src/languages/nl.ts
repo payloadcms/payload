@@ -202,9 +202,12 @@ export const nlTranslations: DefaultTranslationsObject = {
     confirm: 'Bevestigen',
     confirmDeletion: 'Bevestig verwijdering',
     confirmDuplication: 'Bevestig duplicatie',
-    confirmReindex: 'Herindexering bevestigen',
+    confirmReindex: 'Alle {{collections}} opnieuw indexeren?',
+    confirmReindexAll: 'Alle collecties opnieuw indexeren?',
     confirmReindexDescription:
-      'Dit zal de bestaande indexen verwijderen en alle documenten in de geselecteerde collecties herindexeren.',
+      'Dit verwijdert bestaande indexen en indexeert de documenten in de {{collections}}-collecties opnieuw.',
+    confirmReindexDescriptionAll:
+      'Dit verwijdert bestaande indexen en indexeert de documenten in alle collecties opnieuw.',
     copied: 'Gekopieerd',
     copy: 'Kopiëren',
     create: 'Aanmaken',
@@ -286,6 +289,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     perPage: 'Per pagina: {{limit}}',
     previous: 'Vorige',
     reindex: 'Herindexeren',
+    reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',
     remove: 'Verwijderen',
     reset: 'Resetten',
     row: 'Rij',

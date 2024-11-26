@@ -199,9 +199,12 @@ export const bgTranslations: DefaultTranslationsObject = {
     confirm: 'Потвърди',
     confirmDeletion: 'Потвърди изтриване',
     confirmDuplication: 'Потвърди дупликация',
-    confirmReindex: 'Потвърдете преиндексирането',
+    confirmReindex: 'Да се преиндексират всички {{collections}}?',
+    confirmReindexAll: 'Да се преиндексират всички колекции?',
     confirmReindexDescription:
-      'Това ще премахне съществуващите индекси и ще преиндексира всички документи в избраните колекции.',
+      'Това ще премахне съществуващите индекси и ще преиндексира документите в колекциите {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Това ще премахне съществуващите индекси и ще преиндексира документите във всички колекции.',
     copied: 'Копирано',
     copy: 'Копирай',
     create: 'Създай',
@@ -283,6 +286,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     perPage: 'На страница: {{limit}}',
     previous: 'Предишен',
     reindex: 'Преиндексиране',
+    reindexingAll: 'Преиндексиране на всички {{collections}}.',
     remove: 'Премахни',
     reset: 'Нулиране',
     row: 'ред',

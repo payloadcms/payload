@@ -204,9 +204,12 @@ export const deTranslations: DefaultTranslationsObject = {
     confirm: 'Bestätigen',
     confirmDeletion: 'Löschen bestätigen',
     confirmDuplication: 'Duplizieren bestätigen',
-    confirmReindex: 'Neuindizierung bestätigen',
+    confirmReindex: 'Alle {{collections}} neu indizieren?',
+    confirmReindexAll: 'Alle Sammlungen neu indizieren?',
     confirmReindexDescription:
-      'Dadurch werden bestehende Indizes entfernt und alle Dokumente in den ausgewählten Sammlungen neu indiziert.',
+      'Dies entfernt bestehende Indizes und indiziert die Dokumente in den {{collections}}-Sammlungen neu.',
+    confirmReindexDescriptionAll:
+      'Dies entfernt bestehende Indizes und indiziert die Dokumente in allen Sammlungen neu.',
     copied: 'Kopiert',
     copy: 'Kopieren',
     create: 'Erstellen',
@@ -288,6 +291,7 @@ export const deTranslations: DefaultTranslationsObject = {
     perPage: 'Pro Seite: {{limit}}',
     previous: 'Vorherige',
     reindex: 'Neuindizieren',
+    reindexingAll: 'Alle {{collections}} werden neu indiziert.',
     remove: 'Entfernen',
     reset: 'Zurücksetzen',
     row: 'Zeile',

@@ -204,9 +204,12 @@ export const esTranslations: DefaultTranslationsObject = {
     confirm: 'Confirmar',
     confirmDeletion: 'Confirmar eliminación',
     confirmDuplication: 'Confirmar duplicado',
-    confirmReindex: 'Confirmar reindexación',
+    confirmReindex: '¿Reindexar todas las {{collections}}?',
+    confirmReindexAll: '¿Reindexar todas las colecciones?',
     confirmReindexDescription:
-      'Esto eliminará los índices existentes y reindexará todos los documentos en las colecciones seleccionadas.',
+      'Esto eliminará los índices existentes y volverá a indexar los documentos en las colecciones {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Esto eliminará los índices existentes y volverá a indexar los documentos en todas las colecciones.',
     copied: 'Copiado',
     copy: 'Copiar',
     create: 'Crear',
@@ -288,6 +291,7 @@ export const esTranslations: DefaultTranslationsObject = {
     perPage: 'Por página: {{limit}}',
     previous: 'Anterior',
     reindex: 'Reindexar',
+    reindexingAll: 'Reindexando todas las {{collections}}.',
     remove: 'Remover',
     reset: 'Reiniciar',
     row: 'Fila',

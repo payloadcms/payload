@@ -203,9 +203,12 @@ export const trTranslations: DefaultTranslationsObject = {
     confirm: 'Onayla',
     confirmDeletion: 'Silmeyi onayla',
     confirmDuplication: 'Çoğaltmayı onayla',
-    confirmReindex: 'Yeniden indekslemeyi onayla',
+    confirmReindex: 'Tüm {{collections}} yeniden dizine alınsın mı?',
+    confirmReindexAll: 'Tüm koleksiyonlar yeniden dizine alinsın mı?',
     confirmReindexDescription:
-      'Bu işlem mevcut indeksleri kaldıracak ve seçili koleksiyonlardaki tüm belgeleri yeniden indeksleyecektir.',
+      'Bu işlem mevcut dizinleri kaldıracak ve {{collections}} koleksiyonlarındaki belgeleri yeniden dizine alacaktır.',
+    confirmReindexDescriptionAll:
+      'Bu işlem mevcut dizinleri kaldıracak ve tüm koleksiyonlardaki belgeleri yeniden dizine alacaktır.',
     copied: 'Kopyalandı',
     copy: 'Kopyala',
     create: 'Oluştur',
@@ -287,6 +290,7 @@ export const trTranslations: DefaultTranslationsObject = {
     perPage: 'Sayfa başına: {{limit}}',
     previous: 'Önceki',
     reindex: 'Yeniden İndeksle',
+    reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',
     remove: 'Kaldır',
     reset: 'Sıfırla',
     row: 'Satır',

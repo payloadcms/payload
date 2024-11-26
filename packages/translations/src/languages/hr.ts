@@ -200,9 +200,12 @@ export const hrTranslations: DefaultTranslationsObject = {
     confirm: 'Potvrdi',
     confirmDeletion: 'Potvrdi brisanje',
     confirmDuplication: 'Potvrdi duplikaciju',
-    confirmReindex: 'Potvrdi ponovno indeksiranje',
+    confirmReindex: 'Ponovno indeksirati sve {{collections}}?',
+    confirmReindexAll: 'Ponovno indeksirati sve kolekcije?',
     confirmReindexDescription:
-      'Ovo će ukloniti postojeće indekse i ponovno indeksirati sve dokumente u odabranim kolekcijama.',
+      'Ovo će ukloniti postojeće indekse i ponovno indeksirati dokumente u {{collections}} kolekcijama.',
+    confirmReindexDescriptionAll:
+      'Ovo će ukloniti postojeće indekse i ponovno indeksirati dokumente u svim kolekcijama.',
     copied: 'Kopirano',
     copy: 'Kopiraj',
     create: 'Izradi',
@@ -284,6 +287,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     perPage: 'Po stranici: {{limit}}',
     previous: 'Prethodni',
     reindex: 'Ponovno indeksiraj',
+    reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
     remove: 'Ukloni',
     reset: 'Ponovno postavi',
     row: 'Red',

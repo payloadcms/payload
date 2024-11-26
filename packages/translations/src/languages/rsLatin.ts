@@ -199,9 +199,12 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     confirm: 'Potvrdi',
     confirmDeletion: 'Potvrdi brisanje',
     confirmDuplication: 'Potvrdi duplikaciju',
-    confirmReindex: 'Potvrdi reindeksiranje',
+    confirmReindex: 'Ponovo indeksirati sve {{collections}}?',
+    confirmReindexAll: 'Ponovo indeksirati sve kolekcije?',
     confirmReindexDescription:
-      'Ovo će ukloniti postojeće indekse i reindeksirati sve dokumente u izabranim kolekcijama.',
+      'Ovo će ukloniti postojeće indekse i ponovo indeksirati dokumente u kolekcijama {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Ovo će ukloniti postojeće indekse i ponovo indeksirati dokumente u svim kolekcijama.',
     copied: 'Kopirano',
     copy: 'Kopiraj',
     create: 'Kreiraj',
@@ -283,6 +286,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     perPage: 'Po stranici: {{limit}}',
     previous: 'Prethodni',
     reindex: 'Reindeksiraj',
+    reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
     remove: 'Ukloni',
     reset: 'Ponovo postavi',
     row: 'Red',

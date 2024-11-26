@@ -200,9 +200,12 @@ export const enTranslations = {
     confirm: 'Confirm',
     confirmDeletion: 'Confirm deletion',
     confirmDuplication: 'Confirm duplication',
-    confirmReindex: 'Confirm Reindex',
+    confirmReindex: 'Reindex all {{collections}}?',
+    confirmReindexAll: 'Reindex all collections?',
     confirmReindexDescription:
-      'This will remove existing indexes and reindex all documents in the selected collections.',
+      'This will remove existing indexes and reindex documents in the {{collections}} collections.',
+    confirmReindexDescriptionAll:
+      'This will remove existing indexes and reindex documents in all collections.',
     copied: 'Copied',
     copy: 'Copy',
     create: 'Create',
@@ -284,6 +287,7 @@ export const enTranslations = {
     perPage: 'Per Page: {{limit}}',
     previous: 'Previous',
     reindex: 'Reindex',
+    reindexingAll: 'Reindexing all {{collections}}.',
     remove: 'Remove',
     reset: 'Reset',
     row: 'Row',

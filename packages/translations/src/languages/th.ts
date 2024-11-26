@@ -196,9 +196,12 @@ export const thTranslations: DefaultTranslationsObject = {
     confirm: 'ยืนยัน',
     confirmDeletion: 'ยืนยันการลบ',
     confirmDuplication: 'ยืนยันการสำเนา',
-    confirmReindex: 'ยืนยันการจัดทำดัชนีใหม่',
+    confirmReindex: 'ทำการจัดทำดัชนีใหม่ทั้งหมดใน {{collections}}?',
+    confirmReindexAll: 'ทำการจัดทำดัชนีใหม่ทั้งหมดในทุกคอลเลกชัน?',
     confirmReindexDescription:
-      'การดำเนินการนี้จะลบดัชนีที่มีอยู่และจัดทำดัชนีใหม่ของเอกสารทั้งหมดในคอลเลกชันที่เลือก',
+      'การดำเนินการนี้จะลบดัชนีที่มีอยู่และทำการจัดทำดัชนีใหม่ในเอกสารของคอลเลกชัน {{collections}}.',
+    confirmReindexDescriptionAll:
+      'การดำเนินการนี้จะลบดัชนีที่มีอยู่และทำการจัดทำดัชนีใหม่ในเอกสารของทุกคอลเลกชัน.',
     copied: 'คัดลอกแล้ว',
     copy: 'คัดลอก',
     create: 'สร้าง',
@@ -280,6 +283,7 @@ export const thTranslations: DefaultTranslationsObject = {
     perPage: 'จำนวนต่อหน้า: {{limit}}',
     previous: 'ก่อนหน้านี้',
     reindex: 'จัดทำดัชนีใหม่',
+    reindexingAll: 'กำลังทำการจัดทำดัชนีใหม่ทั้งหมดใน {{collections}}.',
     remove: 'ลบ',
     reset: 'รีเซ็ต',
     row: 'แถว',

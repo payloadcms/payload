@@ -200,9 +200,12 @@ export const ukTranslations: DefaultTranslationsObject = {
     confirm: 'Підтвердити',
     confirmDeletion: 'Підтвердити видалення',
     confirmDuplication: 'Підтвердити копіювання',
-    confirmReindex: 'Підтвердити повторне індексування',
+    confirmReindex: 'Перебудувати індекс для всіх {{collections}}?',
+    confirmReindexAll: 'Перебудувати індекс для всіх колекцій?',
     confirmReindexDescription:
-      'Це видалить існуючі індекси та повторно індексує всі документи в обраних колекціях.',
+      'Це видалить наявні індекси та перебудує індекси документів у колекціях {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Це видалить наявні індекси та перебудує індекси документів у всіх колекціях.',
     copied: 'Скопійовано',
     copy: 'Скопіювати',
     create: 'Створити',
@@ -284,6 +287,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     perPage: 'На сторінці: {{limit}}',
     previous: 'Попередній',
     reindex: 'Повторне індексування',
+    reindexingAll: 'Перебудова індексів для всіх {{collections}}.',
     remove: 'Видалити',
     reset: 'Скидання',
     row: 'Рядок',

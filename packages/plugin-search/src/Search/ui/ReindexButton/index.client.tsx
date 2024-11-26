@@ -104,6 +104,19 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
     }, {})
   }, [searchCollections, getPluralizedLabel])
 
+  const selectedAll = reindexCollections.length === searchCollections.length
+  const selectedLabels = reindexCollections.map((slug) => pluralizedLabels[slug]).join(', ')
+
+  const modalTitle = selectedAll
+    ? t('general:confirmReindexAll')
+    : t('general:confirmReindex', { collections: selectedLabels })
+  const modalDescription = selectedAll
+    ? t('general:confirmReindexDescriptionAll')
+    : t('general:confirmReindexDescription', { collections: selectedLabels })
+  const loadingText = selectedAll
+    ? t('general:reindexingAll', { collections: t('general:collections') })
+    : t('general:reindexingAll', { collections: selectedLabels })
+
   return (
     <div>
       <Popup
@@ -128,11 +141,13 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
         verticalAlign="bottom"
       />
       <ReindexConfirmModal
+        description={modalDescription}
         onCancel={closeConfirmModal}
         onConfirm={handleReindexSubmit}
         slug={confirmReindexModalSlug}
+        title={modalTitle}
       />
-      {isLoading && <LoadingOverlay />}
+      {isLoading && <LoadingOverlay loadingText={loadingText} />}
     </div>
   )
 }

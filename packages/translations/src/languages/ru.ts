@@ -202,9 +202,12 @@ export const ruTranslations: DefaultTranslationsObject = {
     confirm: 'Подтвердить',
     confirmDeletion: 'Подтвердить удаление',
     confirmDuplication: 'Подтвердить копирование',
-    confirmReindex: 'Подтвердите переиндексацию',
+    confirmReindex: 'Переиндексировать все {{collections}}?',
+    confirmReindexAll: 'Переиндексировать все коллекции?',
     confirmReindexDescription:
-      'Это удалит существующие индексы и переиндексирует все документы в выбранных коллекциях.',
+      'Это удалит существующие индексы и переиндексирует документы в коллекциях {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Это удалит существующие индексы и переиндексирует документы во всех коллекциях.',
     copied: 'Скопировано',
     copy: 'Скопировать',
     create: 'Создать',
@@ -286,6 +289,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     perPage: 'На странице: {{limit}}',
     previous: 'Предыдущий',
     reindex: 'Переиндексировать',
+    reindexingAll: 'Переиндексирование всех {{collections}}.',
     remove: 'Удалить',
     reset: 'Сброс',
     row: 'Строка',

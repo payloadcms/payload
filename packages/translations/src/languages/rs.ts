@@ -199,9 +199,12 @@ export const rsTranslations: DefaultTranslationsObject = {
     confirm: 'Потврди',
     confirmDeletion: 'Потврди брисање',
     confirmDuplication: 'Потврди дупликацију',
-    confirmReindex: 'Потврди реиндексирање',
+    confirmReindex: 'Ponovo indeksirati sve {{collections}}?',
+    confirmReindexAll: 'Ponovo indeksirati sve kolekcije?',
     confirmReindexDescription:
-      'Ово ће уклонити постојеће индексе и реиндексирати све документе у изабраним колекцијама.',
+      'Ovo će ukloniti postojeće indekse i ponovo indeksirati dokumente u kolekcijama {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Ovo će ukloniti postojeće indekse i ponovo indeksirati dokumente u svim kolekcijama.',
     copied: 'Копирано',
     copy: 'Копирај',
     create: 'Креирај',
@@ -283,6 +286,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     perPage: 'По страници: {{limit}}',
     previous: 'Prethodni',
     reindex: 'Реиндексирај',
+    reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
     remove: 'Уклони',
     reset: 'Поново постави',
     row: 'Ред',

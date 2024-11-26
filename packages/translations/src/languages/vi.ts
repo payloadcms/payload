@@ -198,9 +198,12 @@ export const viTranslations: DefaultTranslationsObject = {
     confirm: 'Xác nhận',
     confirmDeletion: 'Xác nhận xóa',
     confirmDuplication: 'Xác nhận tạo bản sao',
-    confirmReindex: 'Xác nhận tái lập chỉ mục',
+    confirmReindex: 'Tái lập chỉ mục tất cả {{collections}}?',
+    confirmReindexAll: 'Tái lập chỉ mục tất cả các bộ sưu tập?',
     confirmReindexDescription:
-      'Điều này sẽ xóa các chỉ mục hiện tại và tái lập chỉ mục tất cả các tài liệu trong các bộ sưu tập đã chọn.',
+      'Điều này sẽ xóa các chỉ mục hiện tại và tái lập chỉ mục các tài liệu trong các bộ sưu tập {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Điều này sẽ xóa các chỉ mục hiện tại và tái lập chỉ mục các tài liệu trong tất cả các bộ sưu tập.',
     copied: 'Đâ sao chép',
     copy: 'Sao chép',
     create: 'Tạo',
@@ -282,6 +285,7 @@ export const viTranslations: DefaultTranslationsObject = {
     perPage: 'Hiển thị mỗi trang: {{limit}}',
     previous: 'Trước đó',
     reindex: 'Tái lập chỉ mục',
+    reindexingAll: 'Đang tái lập chỉ mục tất cả {{collections}}.',
     remove: 'Loại bỏ',
     reset: 'Đặt lại',
     row: 'Hàng',

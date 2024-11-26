@@ -199,9 +199,12 @@ export const csTranslations: DefaultTranslationsObject = {
     confirm: 'Potvrdit',
     confirmDeletion: 'Potvrdit odstranění',
     confirmDuplication: 'Potvrdit duplikaci',
-    confirmReindex: 'Potvrdit přeindexování',
+    confirmReindex: 'Přeindexovat všechny {{collections}}?',
+    confirmReindexAll: 'Přeindexovat všechny kolekce?',
     confirmReindexDescription:
-      'Tímto se odstraní stávající indexy a všechny dokumenty ve vybraných kolekcích budou znovu indexovány.',
+      'Tímto budou odstraněny stávající indexy a dokumenty v kolekcích {{collections}} budou znovu zaindexovány.',
+    confirmReindexDescriptionAll:
+      'Tímto budou odstraněny stávající indexy a dokumenty ve všech kolekcích budou znovu zaindexovány.',
     copied: 'Zkopírováno',
     copy: 'Kopírovat',
     create: 'Vytvořit',
@@ -283,6 +286,7 @@ export const csTranslations: DefaultTranslationsObject = {
     perPage: 'Na stránku: {{limit}}',
     previous: 'Předchozí',
     reindex: 'Přeindexovat',
+    reindexingAll: 'Přeindexování všech {{collections}}.',
     remove: 'Odstranit',
     reset: 'Resetovat',
     row: 'Řádek',

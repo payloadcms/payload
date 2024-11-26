@@ -200,9 +200,12 @@ export const jaTranslations: DefaultTranslationsObject = {
     confirm: '実行',
     confirmDeletion: '削除の確認',
     confirmDuplication: '複製の確認',
-    confirmReindex: '再インデックスを確認',
+    confirmReindex: 'すべての{{collections}}を再インデックスしますか？',
+    confirmReindexAll: 'すべてのコレクションを再インデックスしますか？',
     confirmReindexDescription:
-      'これにより既存のインデックスが削除され、選択されたコレクション内のすべてのドキュメントが再インデックスされます。',
+      'これにより既存のインデックスが削除され、{{collections}}コレクション内のドキュメントが再インデックスされます。',
+    confirmReindexDescriptionAll:
+      'これにより既存のインデックスが削除され、すべてのコレクション内のドキュメントが再インデックスされます。',
     copied: 'コピーしました',
     copy: 'コピー',
     create: '作成',
@@ -284,6 +287,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     perPage: '表示件数: {{limit}}',
     previous: '前の',
     reindex: '再インデックス',
+    reindexingAll: 'すべての{{collections}}を再インデックスしています。',
     remove: '削除',
     reset: 'リセット',
     row: '列',

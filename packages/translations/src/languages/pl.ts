@@ -200,9 +200,12 @@ export const plTranslations: DefaultTranslationsObject = {
     confirm: 'Potwierdź',
     confirmDeletion: 'Potwierdź usunięcie',
     confirmDuplication: 'Potwierdź duplikację',
-    confirmReindex: 'Potwierdź ponowne indeksowanie',
+    confirmReindex: 'Ponownie zaindeksować wszystkie {{collections}}?',
+    confirmReindexAll: 'Ponownie zaindeksować wszystkie kolekcje?',
     confirmReindexDescription:
-      'Spowoduje to usunięcie istniejących indeksów i ponowne indeksowanie wszystkich dokumentów w wybranych kolekcjach.',
+      'Spowoduje to usunięcie istniejących indeksów i ponowne zaindeksowanie dokumentów w kolekcjach {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Spowoduje to usunięcie istniejących indeksów i ponowne zaindeksowanie dokumentów we wszystkich kolekcjach.',
     copied: 'Skopiowano',
     copy: 'Skopiuj',
     create: 'Stwórz',
@@ -284,6 +287,7 @@ export const plTranslations: DefaultTranslationsObject = {
     perPage: 'Na stronę: {{limit}}',
     previous: 'Poprzedni',
     reindex: 'Ponowne indeksowanie',
+    reindexingAll: 'Ponowne indeksowanie wszystkich {{collections}}.',
     remove: 'Usuń',
     reset: 'Zresetuj',
     row: 'Wiersz',

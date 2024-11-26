@@ -198,9 +198,12 @@ export const faTranslations: DefaultTranslationsObject = {
     confirm: 'تأیید',
     confirmDeletion: 'تأئید عملیات حذف',
     confirmDuplication: 'تأئید رونوشت',
-    confirmReindex: 'تأیید بازنمایه‌سازی',
+    confirmReindex: 'آیا همه {{collections}} بازایندکس شوند؟',
+    confirmReindexAll: 'آیا همه مجموعه‌ها بازایندکس شوند؟',
     confirmReindexDescription:
-      'این کار فهرست‌های موجود را حذف کرده و تمام اسناد موجود در مجموعه‌های انتخاب‌شده را دوباره فهرست می‌کند.',
+      'این کار ایندکس‌های موجود را حذف کرده و اسناد را در مجموعه‌های {{collections}} بازایندکس می‌کند.',
+    confirmReindexDescriptionAll:
+      'این کار ایندکس‌های موجود را حذف کرده و اسناد را در همه مجموعه‌ها بازایندکس می‌کند.',
     copied: 'رونوشت شده',
     copy: 'رونوشت',
     create: 'ساختن',
@@ -282,6 +285,7 @@ export const faTranslations: DefaultTranslationsObject = {
     perPage: 'هر برگه: {{limit}}',
     previous: 'قبلی',
     reindex: 'بازنمایه‌سازی',
+    reindexingAll: 'در حال بازایندکس همه {{collections}}.',
     remove: 'برداشتن',
     reset: 'بازنشانی',
     row: 'ردیف',

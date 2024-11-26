@@ -202,9 +202,12 @@ export const myTranslations: DefaultTranslationsObject = {
     confirm: 'သေချာပါပြီ။',
     confirmDeletion: 'ဖျက်တော့မယ်နော်။',
     confirmDuplication: 'ပုံတူပွားခြင်းကို အတည်ပြုပါ။',
-    confirmReindex: 'အညွှန်းပြုလုပ်ခြင်းအား အတည်ပြုပါ',
+    confirmReindex: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်ပါသလား?',
+    confirmReindexAll: 'အပေါ် ကော်လက်ရှင်းများအားလုံးကို ထပ်လိပ်ပါသလား?',
     confirmReindexDescription:
-      'ဤအလုပ်ဆောင်ခြင်းဖြင့် ရှိပြီးသား အညွှန်းများကို ဖျက်သိမ်းပြီး ရွေးချယ်ထားသော စုစည်းမှုများတွင်ရှိသော စာရွက်စာတမ်းအားလုံးကို ပြန်လည်အညွှန်းပြုလုပ်မည်ဖြစ်သည်။',
+      'ဤသည်သည် ရှိပြီးသား အညွှန်းများကို ဖျက်ပစ်ပြီး {{collections}} ကော်လက်ရှင်းများတွင် စာရွက်များကို ထပ်လိပ်ပါလိမ့်မည်။',
+    confirmReindexDescriptionAll:
+      'ဤသည်သည် ရှိပြီးသား အညွှန်းများကို ဖျက်ပစ်ပြီး အားလုံးသော ကော်လက်ရှင်းများတွင် စာရွက်များကို ထပ်လိပ်ပါလိမ့်မည်။',
     copied: 'ကူးယူပြီးပြီ။',
     copy: 'ကူးယူမည်။',
     create: 'ဖန်တီးမည်။',
@@ -286,6 +289,7 @@ export const myTranslations: DefaultTranslationsObject = {
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
+    reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',
     remove: 'ဖယ်ရှားမည်။',
     reset: 'Tetapkan semula',
     row: 'အတန်း',

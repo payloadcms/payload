@@ -199,9 +199,12 @@ export const daTranslations: DefaultTranslationsObject = {
     confirm: 'Bekræft',
     confirmDeletion: 'Bekræft sletning',
     confirmDuplication: 'Bekræft duplikering',
-    confirmReindex: 'Bekræft genindeksering',
+    confirmReindex: 'Genindeksér alle {{collections}}?',
+    confirmReindexAll: 'Genindeksér alle samlinger?',
     confirmReindexDescription:
-      'Dette vil fjerne eksisterende indeks og genindeksere alle dokumenter i de valgte samlinger.',
+      'Dette vil fjerne eksisterende indekser og genindeksere dokumenter i {{collections}}-samlingerne.',
+    confirmReindexDescriptionAll:
+      'Dette vil fjerne eksisterende indekser og genindeksere dokumenter i alle samlinger.',
     copied: 'Kopieret',
     copy: 'Kopier',
     create: 'Opret',
@@ -282,6 +285,7 @@ export const daTranslations: DefaultTranslationsObject = {
     perPage: 'Per side: {{limit}}',
     previous: 'Tidligere',
     reindex: 'Genindekser',
+    reindexingAll: 'Genindekserer alle {{collections}}.',
     remove: 'Fjern',
     reset: 'Nulstil',
     row: 'Række',

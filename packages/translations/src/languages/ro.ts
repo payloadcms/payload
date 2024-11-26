@@ -204,9 +204,12 @@ export const roTranslations: DefaultTranslationsObject = {
     confirm: 'Confirmați',
     confirmDeletion: 'Confirmați ștergerea',
     confirmDuplication: 'Confirmați duplicarea',
-    confirmReindex: 'Confirmare reindexare',
+    confirmReindex: 'Reindexați toate {{collections}}?',
+    confirmReindexAll: 'Reindexați toate colecțiile?',
     confirmReindexDescription:
-      'Aceasta va elimina indexurile existente și va reindexa toate documentele din colecțiile selectate.',
+      'Aceasta va elimina indexurile existente și va reindexa documentele din colecțiile {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Aceasta va elimina indexurile existente și va reindexa documentele din toate colecțiile.',
     copied: 'Copiat',
     copy: 'Copiați',
     create: 'Creează',
@@ -288,6 +291,7 @@ export const roTranslations: DefaultTranslationsObject = {
     perPage: 'Pe pagină: {{limit}}',
     previous: 'Anterior',
     reindex: 'Reindexare',
+    reindexingAll: 'Reindexarea tuturor {{collections}}.',
     remove: 'Eliminați',
     reset: 'Resetare',
     row: 'Rând',
