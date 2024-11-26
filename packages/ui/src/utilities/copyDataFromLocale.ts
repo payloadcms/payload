@@ -169,9 +169,12 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
         }),
   ])
 
-  if (fromLocaleData.status === 'rejected' || toLocaleData.status === 'rejected') {
-    // not sure what the return type should be yet
-    return
+  if (fromLocaleData.status === 'rejected') {
+    throw new Error(`Error fetching data from locale "${fromLocale}"`)
+  }
+
+  if (toLocaleData.status === 'rejected') {
+    throw new Error(`Error fetching data from locale "${toLocale}"`)
   }
 
   const newToLocaleData = globalSlug
@@ -197,5 +200,5 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
         user,
       })
 
-  // return success
+  return newToLocaleData
 }
