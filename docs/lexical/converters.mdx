@@ -16,9 +16,9 @@ If you have a React-based frontend, converting lexical to JSX is the recommended
 import React from 'react'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 
-export const MyComponent = ({ lexicalContent }) => {
+export const MyComponent = ({ lexicalData }) => {
   return (
-    <RichText data={lexicalContent} />
+    <RichText data={lexicalData} />
   )
 }
 ```
@@ -39,6 +39,7 @@ import {
   type JSXConvertersFunction,
   RichText,
 } from '@payloadcms/richtext-lexical/react'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
   ...defaultConverters,
@@ -48,11 +49,11 @@ const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
   },
 })
 
-export const MyComponent = ({ lexicalContent }) => {
+export const MyComponent = ({ lexicalData }) => {
   return (
     <RichText
       converters={jsxConverters}
-      data={data.lexicalWithBlocks as SerializedEditorState}
+      data={lexicalData.lexicalWithBlocks as SerializedEditorState}
     />
   )
 }
