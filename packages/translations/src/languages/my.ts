@@ -196,10 +196,14 @@ export const myTranslations: DefaultTranslationsObject = {
     columns: 'ကော်လံများ',
     columnToSort: 'ကော်လံ စီရန်',
     confirm: 'သေချာပါပြီ။',
+    confirmCopy: 'အောင်မြင်စေသည့်ကူးထားပြီးအတည်ပြုပါ',
     confirmDeletion: 'ဖျက်တော့မယ်နော်။',
     confirmDuplication: 'ပုံတူပွားခြင်းကို အတည်ပြုပါ။',
     copied: 'ကူးယူပြီးပြီ။',
     copy: 'ကူးယူမည်။',
+    copying: 'ကူးယူခြင်း',
+    copyWarning:
+      'Anda akan menulis ganti {{to}} dengan {{from}} untuk {{label}} {{title}}. Adakah anda pasti?',
     create: 'ဖန်တီးမည်။',
     created: 'ဖန်တီးခဲ့သည်။',
     createdAt: 'ဖန်တီးခဲ့သည့်အချိန်',
@@ -273,6 +277,7 @@ export const myTranslations: DefaultTranslationsObject = {
     open: 'ဖွင့်မည်။',
     or: 'သို့မဟုတ်',
     order: 'အစဉ်လိုက်',
+    overwriteExistingData: 'Menulis semula data bidang yang sedia ada',
     pageNotFound: 'ရောက်ရှိနေသော စာမျက်နှာသည် မရှိပါ။',
     password: 'စကားဝှက်',
     payloadSettings: 'ရွေးချယ်စရာများ',
@@ -305,6 +310,8 @@ export const myTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
+    unsavedChanges:
+      'Anda mempunyai perubahan yang belum disimpan. Simpan atau buang sebelum meneruskan.',
     unsavedChangesDuplicate:
       'သင့်တွင် မသိမ်းဆည်းရသေးသော ပြောင်းလဲမှုများ ရှိနေပါသည်။ ပုံတူပွားမှာ သေချာပြီလား။',
     untitled: 'ခေါင်းစဥ်မဲ့',
@@ -320,6 +327,14 @@ export const myTranslations: DefaultTranslationsObject = {
     value: 'တန်ဖိုး',
     viewReadOnly: 'ဖတ်ရှုရန်သာကြည့်ပါ',
     welcome: 'ကြိုဆိုပါတယ်။',
+  },
+  localization: {
+    cannotCopySameLocale: 'Tidak boleh menyalin ke lokasi yang sama',
+    copyFrom: 'Salin dari',
+    copyFromTo: 'Menyalin dari {{from}} ke {{to}}',
+    copyTo: 'Salin ke',
+    copyToLocale: 'Salin ke tempat setempat',
+    selectLocaleToCopy: 'Pilih tempatan untuk menyalin',
   },
   operators: {
     contains: 'ပါဝင်သည်',

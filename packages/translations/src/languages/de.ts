@@ -198,10 +198,14 @@ export const deTranslations: DefaultTranslationsObject = {
     columns: 'Spalten',
     columnToSort: 'Spalten zum Sortieren',
     confirm: 'Bestätigen',
+    confirmCopy: 'Kopie bestätigen',
     confirmDeletion: 'Löschen bestätigen',
     confirmDuplication: 'Duplizieren bestätigen',
     copied: 'Kopiert',
     copy: 'Kopieren',
+    copying: 'Kopieren',
+    copyWarning:
+      'Sie sind dabei, {{to}} mit {{from}} für {{label}} {{title}} zu überschreiben. Sind Sie sicher?',
     create: 'Erstellen',
     created: 'Erstellt',
     createdAt: 'Erstellt am',
@@ -275,6 +279,7 @@ export const deTranslations: DefaultTranslationsObject = {
     open: 'Öffnen',
     or: 'oder',
     order: 'Reihenfolge',
+    overwriteExistingData: 'Überschreiben Sie vorhandene Felddaten',
     pageNotFound: 'Seite nicht gefunden',
     password: 'Passwort',
     payloadSettings: 'Payload Einstellungen',
@@ -307,6 +312,8 @@ export const deTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
+    unsavedChanges:
+      'Sie haben ungespeicherte Änderungen. Speichern oder verwerfen Sie diese, bevor Sie fortfahren.',
     unsavedChangesDuplicate:
       'Du hast ungespeicherte Änderungen, möchtest du mit dem Duplizieren fortfahren?',
     untitled: 'ohne Titel',
@@ -322,6 +329,14 @@ export const deTranslations: DefaultTranslationsObject = {
     value: 'Wert',
     viewReadOnly: 'Nur-Lese-Ansicht',
     welcome: 'Willkommen',
+  },
+  localization: {
+    cannotCopySameLocale: 'Kann nicht in dieselbe Gebietsschema kopieren',
+    copyFrom: 'Kopieren von',
+    copyFromTo: 'Kopieren von {{from}} zu {{to}}',
+    copyTo: 'Kopieren nach',
+    copyToLocale: 'Kopieren in das Gebietsschema',
+    selectLocaleToCopy: 'Wählen Sie den Ort zum Kopieren aus',
   },
   operators: {
     contains: 'enthält',

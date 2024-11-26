@@ -196,10 +196,14 @@ export const ruTranslations: DefaultTranslationsObject = {
     columns: 'Колонки',
     columnToSort: 'Колонка для сортировки',
     confirm: 'Подтвердить',
+    confirmCopy: 'Подтвердить копирование',
     confirmDeletion: 'Подтвердить удаление',
     confirmDuplication: 'Подтвердить копирование',
     copied: 'Скопировано',
     copy: 'Скопировать',
+    copying: 'Копирование',
+    copyWarning:
+      'Вы собираетесь перезаписать {{to}} на {{from}} для {{label}} {{title}}. Вы уверены?',
     create: 'Создать',
     created: 'Создано',
     createdAt: 'Дата создания',
@@ -273,6 +277,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     open: 'Открыть',
     or: 'Или же',
     order: 'Порядок',
+    overwriteExistingData: 'Перезаписать существующие данные поля',
     pageNotFound: 'Страница не найдена',
     password: 'Пароль',
     payloadSettings: 'Настройки Payload',
@@ -305,6 +310,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} {{title}} успешно удалено.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
+    unsavedChanges:
+      'У вас есть несохраненные изменения. Сохраните или отмените их перед продолжением.',
     unsavedChangesDuplicate:
       'У вас есть несохраненные изменения. Вы хотите продолжить дублирование?',
     untitled: 'Без названия',
@@ -320,6 +327,14 @@ export const ruTranslations: DefaultTranslationsObject = {
     value: 'Значение',
     viewReadOnly: 'Просмотр только для чтения',
     welcome: 'Добро пожаловать',
+  },
+  localization: {
+    cannotCopySameLocale: 'Невозможно скопировать в ту же локаль',
+    copyFrom: 'Скопировать из',
+    copyFromTo: 'Копирование из {{from}} в {{to}}',
+    copyTo: 'Копировать в',
+    copyToLocale: 'Копировать в локаль',
+    selectLocaleToCopy: 'Выберите локаль для копирования',
   },
   operators: {
     contains: 'содержит',

@@ -194,10 +194,14 @@ export const azTranslations: DefaultTranslationsObject = {
     columns: 'Sütunlar',
     columnToSort: 'Sıralamağa sütun',
     confirm: 'Təsdiqlə',
+    confirmCopy: 'Kopyanı təsdiqləyin',
     confirmDeletion: 'Silməni təsdiqlə',
     confirmDuplication: 'Dublikasiyanı təsdiqlə',
     copied: 'Kopyalandı',
     copy: 'Kopyala',
+    copying: 'Kopyalama',
+    copyWarning:
+      'Siz {{label}} {{title}} üçün {{from}} ilə {{to}} -nu üzərindən yazmaq ətrafındasınız. Eminsiniz?',
     create: 'Yarat',
     created: 'Yaradıldı',
     createdAt: 'Yaradıldığı tarix',
@@ -271,6 +275,7 @@ export const azTranslations: DefaultTranslationsObject = {
     open: 'Aç',
     or: 'Və ya',
     order: 'Sıra',
+    overwriteExistingData: 'Mövcud sahə məlumatlarını yenidən yazın',
     pageNotFound: 'Səhifə tapılmadı',
     password: 'Şifrə',
     payloadSettings: 'Payload Parametrləri',
@@ -303,6 +308,8 @@ export const azTranslations: DefaultTranslationsObject = {
     titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
+    unsavedChanges:
+      'Sizin saxlanılmamış dəyişiklikləriniz var. Davam etmədən əvvəl saxlayın və ya atın.',
     unsavedChangesDuplicate:
       'Saxlanılmamış dəyişiklikləriniz var. Dublikatla davam etmək istəyirsiniz?',
     untitled: 'Başlıqsız',
@@ -318,6 +325,14 @@ export const azTranslations: DefaultTranslationsObject = {
     value: 'Dəyər',
     viewReadOnly: 'Yalnız oxu rejimində bax',
     welcome: 'Xoş gəldiniz',
+  },
+  localization: {
+    cannotCopySameLocale: 'Eyni dildə köçürmək mümkün deyil',
+    copyFrom: 'Kopyalayın',
+    copyFromTo: '{{from}}-dan {{to}}-ya kopyalama',
+    copyTo: 'Köçür',
+    copyToLocale: 'Yerliyə köçürün',
+    selectLocaleToCopy: 'Köçürmək üçün yerli seçin',
   },
   operators: {
     contains: 'daxilində',
