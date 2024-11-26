@@ -257,6 +257,7 @@ describe('Localization', () => {
 
   describe('copy localized data', () => {
     test('should show Copy To Locale button and drawer', async () => {
+      await changeLocale(page, defaultLocale)
       await createAndSaveDoc(page, url, { description, title })
       await openCopyToLocaleDrawer(page)
       await expect(page.locator('.copy-locale-data__content')).toBeVisible()
@@ -264,9 +265,11 @@ describe('Localization', () => {
 
     test('should copy data to correct locale', async () => {
       await createAndSaveDoc(page, url, { title })
+
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
       await runCopy(page)
+
       await expect(page.locator('#field-title')).toHaveValue(title)
     })
 
@@ -322,6 +325,7 @@ describe('Localization', () => {
       await fillValues({ title: spanishTitle, description: 'Spanish description' })
       await saveDocAndAssert(page)
 
+      await changeLocale(page, defaultLocale)
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
       const overwriteCheckbox = page.locator('#field-overwriteExisting')
@@ -333,10 +337,12 @@ describe('Localization', () => {
     })
 
     test('should overwrite existing data when overwrite is checked', async () => {
+      await changeLocale(page, defaultLocale)
       await createAndSaveDoc(page, url, { title: englishTitle, description })
       await changeLocale(page, spanishLocale)
       await fillValues({ title: spanishTitle })
       await saveDocAndAssert(page)
+      await changeLocale(page, defaultLocale)
 
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
