@@ -350,7 +350,7 @@ describe('Localization', () => {
       await overwriteCheckbox.click()
       await runCopy(page)
 
-      await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+      await expect(page.locator('#field-title')).toHaveValue(englishTitle)
     })
 
     test('should not include current locale in toLocale options', async () => {
