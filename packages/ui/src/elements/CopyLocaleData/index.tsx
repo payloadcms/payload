@@ -2,16 +2,16 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { useRouter } from 'next/navigation.js'
-import { deepMergeWithCombinedArrays } from 'payload/shared'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { CheckboxField } from '../../fields/Checkbox/index.js'
 import { SelectInput } from '../../fields/Select/index.js'
-import { useForm, useFormModified } from '../../forms/Form/context.js'
+import { useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DrawerHeader } from '../BulkUpload/Header/index.js'
 import { Button } from '../Button/index.js'
@@ -26,16 +26,16 @@ export const CopyLocaleData: React.FC = () => {
   const {
     config: {
       localization,
-      routes: { admin, api },
+      routes: { admin },
       serverURL,
     },
   } = useConfig()
   const { code } = useLocale()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const { t } = useTranslation()
-  const { submit } = useForm()
   const modified = useFormModified()
   const { toggleModal } = useModal()
+  const { copyDataFromLocale } = useServerFunctions()
   const router = useRouter()
 
   const localeOptions =
@@ -58,48 +58,42 @@ export const CopyLocaleData: React.FC = () => {
       // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setFromLocale(code)
     }
-  }, [code])
+  }, [code, fromLocale])
 
   const copyLocaleData = useCallback(
     async ({ from, to }) => {
-      const isCollection = Boolean(collectionSlug)
-      const url = `${serverURL}${api}/${isCollection ? `${collectionSlug}/${id}` : `globals/${globalSlug}`}?depth=0&locale=${from}`
-      const redirectURL = `${serverURL}${admin}/${isCollection ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}?locale=${to}`
-      const method = isCollection ? 'PATCH' : 'POST'
-      const action = url.replace(`locale=${from}`, `locale=${to}`)
-      let data = {}
       setCopying(true)
 
       try {
-        const fromLocaleReq = await fetch(url)
-        const fromLocaleData = await fromLocaleReq.json()
-        const toLocaleReq = await fetch(action)
-        const toLocaleData = await toLocaleReq.json()
-        const mergedData = overwriteExisting
-          ? fromLocaleData
-          : deepMergeWithCombinedArrays(fromLocaleData, toLocaleData)
-
-        data = mergedData
-        await submit({
-          action,
-          method,
-          overrides: {
-            ...data,
-            _status: 'draft',
-          },
-          skipValidation: true,
+        await copyDataFromLocale({
+          collectionSlug,
+          docID: id,
+          fromLocale: from,
+          globalSlug,
+          overrideData: overwriteExisting,
+          toLocale: to,
         })
 
-        // wait for the data to be saved before redirecting
-        await new Promise((resolve) => setTimeout(resolve, 100))
         setCopying(false)
         toggleModal(drawerSlug)
-        router.push(redirectURL)
+        router.push(
+          `${serverURL}${admin}/${collectionSlug ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}?locale=${to}`,
+        )
       } catch (error) {
         toast.error(error.message)
       }
     },
-    [collectionSlug, globalSlug, id, serverURL, api, admin, submit, overwriteExisting],
+    [
+      copyDataFromLocale,
+      collectionSlug,
+      id,
+      globalSlug,
+      overwriteExisting,
+      toggleModal,
+      router,
+      serverURL,
+      admin,
+    ],
   )
 
   if (!id && !globalSlug) {
@@ -118,7 +112,7 @@ export const CopyLocaleData: React.FC = () => {
           }
         }}
       >
-        {t('localization:copyToLocale')}
+        {t('localization:copyToLocal')}
       </PopupList.Button>
       <Drawer
         className={baseClass}
@@ -179,6 +173,7 @@ export const CopyLocaleData: React.FC = () => {
             }}
             options={localeOptions}
             path="fromLocale"
+            readOnly
             value={fromLocale}
           />
           <SelectInput
