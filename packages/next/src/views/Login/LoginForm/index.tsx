@@ -11,6 +11,7 @@ import type { FormState } from 'payload'
 
 import { Form, FormSubmit, PasswordField, useAuth, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
+import { getLoginOptions } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
 
@@ -36,9 +37,7 @@ export const LoginForm: React.FC<{
   const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
   const { auth: authOptions } = collectionConfig
   const loginWithUsername = authOptions.loginWithUsername
-  const canLoginWithEmail =
-    !authOptions.loginWithUsername || authOptions.loginWithUsername.allowEmailLogin
-  const canLoginWithUsername = authOptions.loginWithUsername
+  const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
   const [loginType] = React.useState<LoginFieldProps['type']>(() => {
     if (canLoginWithEmail && canLoginWithUsername) {

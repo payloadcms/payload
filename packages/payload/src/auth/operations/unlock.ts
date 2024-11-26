@@ -12,6 +12,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import executeAccess from '../executeAccess.js'
+import { getLoginOptions } from '../getLoginOptions.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -32,8 +33,8 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
   } = args
 
   const loginWithUsername = collectionConfig.auth.loginWithUsername
-  const canLoginWithUsername = Boolean(loginWithUsername)
-  const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
+
+  const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
   const sanitizedEmail = canLoginWithEmail && (args.data?.email || '').toLowerCase().trim()
   const sanitizedUsername =

@@ -212,10 +212,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
         editor.update(() => {
           const node = $getNodeByKey(nodeKey)
           if (node && $isBlockNode(node)) {
-            const newData = {
-              ...newFormStateData,
-              blockType: formData.blockType,
-            }
+            const newData = newFormStateData
+            newData.blockType = formData.blockType
             node.setFields(newData)
           }
         })

@@ -1,4 +1,5 @@
 import type {
+  ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field,
@@ -35,6 +36,7 @@ export type AddFieldStatePromiseArgs = {
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
+  clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
   field: Field
@@ -93,6 +95,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     id,
     addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
+    clientFieldSchemaMap,
     collectionSlug,
     data,
     field,
@@ -118,6 +121,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     skipValidation = false,
     state,
   } = args
+
+  if (!args.clientFieldSchemaMap && args.renderFieldFn) {
+    console.warn(
+      'clientFieldSchemaMap is not passed to addFieldStatePromise - this will reduce performance',
+    )
+  }
 
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -237,6 +246,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 id,
                 addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
+                clientFieldSchemaMap,
                 collectionSlug,
                 data: row,
                 fields: field.fields,
@@ -370,6 +380,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   id,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
+                  clientFieldSchemaMap,
                   collectionSlug,
                   data: row,
                   fields: block.fields,
@@ -460,6 +471,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           id,
           addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
+          clientFieldSchemaMap,
           collectionSlug,
           data: data?.[field.name] || {},
           fields: field.fields,
@@ -605,6 +617,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: field.localized || anyParentLocalized,
+      clientFieldSchemaMap,
       collectionSlug,
       data,
       fields: field.fields,
@@ -668,6 +681,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
+        clientFieldSchemaMap,
         collectionSlug,
         data: isNamedTab ? data?.[tab.name] || {} : data,
         fields: tab.fields,
@@ -733,6 +747,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     renderFieldFn({
       id,
+      clientFieldSchemaMap,
       collectionSlug,
       data: fullData,
       fieldConfig: fieldConfig as Field,
