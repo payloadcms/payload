@@ -13,14 +13,14 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      gap: base(0.8);
+      gap: base(2);
       padding: base(2);
     }
 
     &__content {
       display: flex;
       flex-direction: column;
-      gap: base(0.4);
+      gap: base(1);
 
       > * {
         margin: 0;
