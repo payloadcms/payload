@@ -163,8 +163,6 @@ export const ServerFunctionsProvider: React.FC<{
         if (!remoteSignal?.aborted) {
           return result
         }
-
-        return result
       } catch (_err) {
         console.error(_err) // eslint-disable-line no-console
       }
