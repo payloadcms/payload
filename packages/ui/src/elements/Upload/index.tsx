@@ -329,7 +329,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
               <div className={`${baseClass}__thumbnail-wrap`}>
                 <Thumbnail
                   collectionSlug={collectionSlug}
-                  fileSrc={isImage(value.type) ? fileSrc : null}
+                  doc={{ mimeType: value.type }}
+                  fileSrc={fileSrc}
+                  key={fileSrc}
                 />
               </div>
               <div className={`${baseClass}__file-adjustments`}>

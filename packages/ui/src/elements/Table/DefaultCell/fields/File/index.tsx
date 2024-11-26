@@ -16,6 +16,8 @@ export const FileCell: React.FC<FileCellProps> = ({
   collectionConfig,
   rowData,
 }) => {
+  const src = rowData?.thumbnailURL || rowData?.url
+
   return (
     <div className={baseClass}>
       <Thumbnail
@@ -25,7 +27,8 @@ export const FileCell: React.FC<FileCellProps> = ({
           ...rowData,
           filename,
         }}
-        fileSrc={rowData?.thumbnailURL || rowData?.url}
+        fileSrc={src}
+        key={src}
         size="small"
         uploadConfig={collectionConfig?.upload}
       />

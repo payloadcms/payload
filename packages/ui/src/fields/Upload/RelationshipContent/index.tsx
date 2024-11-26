@@ -9,7 +9,7 @@ import type { ReloadDoc } from '../types.js'
 
 import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
-import { ThumbnailComponent } from '../../../elements/Thumbnail/index.js'
+import { Thumbnail } from '../../../elements/Thumbnail/index.js'
 import './index.scss'
 
 const baseClass = 'upload-relationship-details'
@@ -82,10 +82,10 @@ export function RelationshipContent(props: Props) {
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__imageAndDetails`}>
-        <ThumbnailComponent
+        <Thumbnail
           alt={alt}
           className={`${baseClass}__thumbnail`}
-          filename={filename}
+          doc={{ filename, mimeType }}
           fileSrc={src}
           size="small"
         />

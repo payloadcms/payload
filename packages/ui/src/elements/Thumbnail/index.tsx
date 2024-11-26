@@ -10,8 +10,10 @@ import type { SanitizedCollectionConfig } from 'payload'
 import { File } from '../../graphics/File/index.js'
 import { useIntersect } from '../../hooks/useIntersect.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
+import { createThumbnail } from './createThumbnail.js'
 
 export type ThumbnailProps = {
+  alt?: string
   className?: string
   collectionSlug?: string
   doc?: Record<string, unknown>
@@ -21,80 +23,44 @@ export type ThumbnailProps = {
   uploadConfig?: SanitizedCollectionConfig['upload']
 }
 
-export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
-  const { className = '', doc: { filename } = {}, fileSrc, imageCacheTag, size } = props
-  const [fileExists, setFileExists] = React.useState(undefined)
-
+export const Thumbnail = (props: ThumbnailProps) => {
+  const { className = '', doc: { filename, mimeType } = {}, fileSrc, imageCacheTag, size } = props
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
-
-  React.useEffect(() => {
-    if (!fileSrc) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
-      setFileExists(false)
-      return
-    }
-
-    const img = new Image()
-    img.src = fileSrc
-    img.onload = () => {
-      setFileExists(true)
-    }
-    img.onerror = () => {
-      setFileExists(false)
-    }
-  }, [fileSrc])
-
-  return (
-    <div className={classNames}>
-      {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && (
-        <img
-          alt={filename as string}
-          src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`}
-        />
-      )}
-      {fileExists === false && <File />}
-    </div>
+  const fileType = (mimeType as string)?.split('/')?.[0]
+  const [fileExists, setFileExists] = React.useState<boolean | undefined>(undefined)
+  const [src, setSrc] = React.useState<null | string>(
+    fileSrc ? `${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}` : null,
   )
-}
-
-type ThumbnailComponentProps = {
-  readonly alt?: string
-  readonly className?: string
-  readonly filename: string
-  readonly fileSrc: string
-  readonly imageCacheTag?: string
-  readonly size?: 'expand' | 'large' | 'medium' | 'small'
-}
-export function ThumbnailComponent(props: ThumbnailComponentProps) {
-  const { alt, className = '', filename, fileSrc, imageCacheTag, size } = props
-  const [fileExists, setFileExists] = React.useState(undefined)
-
-  const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
+  const [intersectionRef, entry] = useIntersect()
+  const [hasPreloaded, setHasPreloaded] = React.useState(false)
 
   React.useEffect(() => {
     if (!fileSrc) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setFileExists(false)
       return
     }
 
-    const img = new Image()
-    img.src = fileSrc
-    img.onload = () => {
-      setFileExists(true)
+    if (!entry?.isIntersecting || hasPreloaded) {
+      return
     }
-    img.onerror = () => {
-      setFileExists(false)
-    }
-  }, [fileSrc])
+    setHasPreloaded(true)
+
+    createThumbnail(null, fileSrc, mimeType as string)
+      .then((src) => {
+        setSrc(src)
+        setFileExists(true)
+      })
+      .catch(() => {
+        setFileExists(false)
+      })
+  }, [fileSrc, fileType, imageCacheTag, entry, hasPreloaded])
+
+  const alt = props.alt || (filename as string)
 
   return (
-    <div className={classNames}>
+    <div className={classNames} ref={intersectionRef}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && (
-        <img alt={alt || filename} src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`} />
-      )}
+      {fileExists && <img alt={alt} src={src} />}
       {fileExists === false && <File />}
     </div>
   )
