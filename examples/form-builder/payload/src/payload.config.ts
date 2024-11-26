@@ -6,11 +6,11 @@ import {
   HeadingFeature,
   InlineToolbarFeature,
   ItalicFeature,
-  LinkFeature,
   lexicalEditor,
+  LinkFeature,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Pages } from './_payload/collections/Pages'
@@ -19,20 +19,18 @@ import { MainMenu } from './_payload/globals/MainMenu'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { seed } from '@/_payload/seed'
 
-import BeforeLogin from './_payload/components/BeforeLogin'
-
+// eslint-disable-next-line no-restricted-exports
 export default buildConfig({
   admin: {
-    components: {
-      beforeLogin: [BeforeLogin],
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
     user: Users.slug,
   },
   collections: [Pages, Users],
   // We need to set CORS rules pointing to our hosted domains for the frontend to be able to submit to our API
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [process.env.NEXT_PUBLIC_PAYLOAD_URL || ''],
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
@@ -49,11 +47,8 @@ export default buildConfig({
     },
   }),
   globals: [MainMenu],
-  onInit: async (payload) => {
-    if (process.env.PAYLOAD_SEED === 'true') {
-      payload.logger.info('---- SEEDING DATABASE ----')
-      await seed(payload)
-    }
+  graphQL: {
+    schemaOutputFile: path.resolve(dirname, 'generated-schema.graphql'),
   },
   plugins: [
     formBuilderPlugin({
@@ -61,7 +56,7 @@ export default buildConfig({
         payment: false,
       },
       formOverrides: {
-        fields: [],
+        fields: undefined,
       },
     }),
   ],
