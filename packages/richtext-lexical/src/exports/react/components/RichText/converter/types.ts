@@ -1,10 +1,15 @@
 import type { SerializedLexicalNode } from 'lexical'
 
-export type JSXConverters<T extends SerializedLexicalNode = SerializedLexicalNode> = {
-  [nodeType in T['type']]?: (args: {
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from '../../../../../nodeTypes.js'
+export type JSXConverter<T extends { [key: string]: any; type?: string } = SerializedLexicalNode> =
+  (args: {
     childIndex: number
     converters: JSXConverters
-    node: Extract<T, { type: nodeType }>
+    node: T
     nodesToJSX: (args: {
       converters?: JSXConverters
       disableIndent?: boolean | string[]
@@ -14,6 +19,22 @@ export type JSXConverters<T extends SerializedLexicalNode = SerializedLexicalNod
     }) => React.ReactNode[]
     parent: SerializedLexicalNodeWithParent
   }) => React.ReactNode
+export type JSXConverters<T extends { [key: string]: any; type?: string } = DefaultNodeTypes> = {
+  [key: string]:
+    | {
+        [blockSlug: string]: JSXConverter<any> // Not true, but need to appease TypeScript
+      }
+    | JSXConverter<any>
+    | undefined
+} & {
+  [nodeType in NonNullable<T['type']>]?: JSXConverter<Extract<T, { type: nodeType }>>
+} & {
+  block?: {
+    [blockSlug: string]: JSXConverter<{ fields: Record<string, any> } & SerializedBlockNode>
+  }
+  inlineBlock?: {
+    [blockSlug: string]: JSXConverter<{ fields: Record<string, any> } & SerializedInlineBlockNode>
+  }
 }
 
 export type SerializedLexicalNodeWithParent = {

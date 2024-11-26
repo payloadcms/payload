@@ -18,7 +18,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 
 export const MyComponent = ({ lexicalContent }) => {
   return (
-    <RichText editorState={lexicalContent} />
+    <RichText data={lexicalContent} />
   )
 }
 ```
@@ -27,31 +27,28 @@ The `RichText` component will come with the most common serializers built-in, th
 
 ### Converting Lexical Blocks to JSX
 
-In order to convert lexical blocks or inline blocks to JSX, you will have to add the `BlocksJSXConverter` to the RichText component. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
+In order to convert lexical blocks or inline blocks to JSX, you will have to add the converter for your block to the RichText component. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
 
 ```tsx
 import React from 'react'
 import {
-  BlocksJSXConverter,
   type JSXConvertersFunction,
   RichText,
 } from '@payloadcms/richtext-lexical/react'
 
 const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => [
   ...defaultConverters,
-  BlocksJSXConverter({
-    blocks: {
-      // myTextBlock is the slug of the block
-      myTextBlock: ({ fields }) => <div style={{ backgroundColor: 'red' }}>{fields.text}</div>,
-    },
-  }),
+  block: {
+    // myTextBlock is the slug of the block
+    myTextBlock: ({ fields }) => <div style={{ backgroundColor: 'red' }}>{fields.text}</div>,
+  },
 ]
 
 export const MyComponent = ({ lexicalContent }) => {
   return (
     <RichText
       converters={jsxConverters}
-      editorState={data.lexicalWithBlocks as SerializedEditorState}
+      data={data.lexicalWithBlocks as SerializedEditorState}
     />
   )
 }

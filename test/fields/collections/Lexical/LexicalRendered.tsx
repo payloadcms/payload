@@ -1,22 +1,16 @@
 'use client'
-import type { SerializedEditorState } from 'lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-import {
-  BlocksJSXConverter,
-  type JSXConvertersFunction,
-  RichText,
-} from '@payloadcms/richtext-lexical/react'
+import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
 import { useConfig, useDocumentInfo, usePayloadAPI } from '@payloadcms/ui'
 import React from 'react'
 
-const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => [
+const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
   ...defaultConverters,
-  BlocksJSXConverter({
-    blocks: {
-      myTextBlock: ({ fields }) => <div style={{ backgroundColor: 'red' }}>{fields.text}</div>,
-    },
-  }),
-]
+  block: {
+    myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
+  },
+})
 
 export const LexicalRendered: React.FC = () => {
   const { id, collectionSlug } = useDocumentInfo()
@@ -41,10 +35,7 @@ export const LexicalRendered: React.FC = () => {
   return (
     <div>
       <h1>Rendered:</h1>
-      <RichText
-        converters={jsxConverters}
-        editorState={data.lexicalWithBlocks as SerializedEditorState}
-      />
+      <RichText converters={jsxConverters} data={data.lexicalWithBlocks as SerializedEditorState} />
       <h1>Raw JSON:</h1>
       <pre>{JSON.stringify(data.lexicalWithBlocks, null, 2)}</pre>
     </div>

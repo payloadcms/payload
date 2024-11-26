@@ -2,10 +2,11 @@ import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
 import React from 'react'
 
-import type { JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
+import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../../nodeTypes.js'
+import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
 
 export type ConvertLexicalToHTMLArgs = {
-  converters: JSXConverters[]
+  converters: JSXConverters
   data: SerializedEditorState
   disableIndent?: boolean | string[]
   disableTextAlign?: boolean | string[]
@@ -18,14 +19,8 @@ export function convertLexicalToJSX({
   disableTextAlign,
 }: ConvertLexicalToHTMLArgs): React.ReactNode {
   if (data?.root?.children?.length) {
-    const allConverters = {}
-    for (const converter of converters) {
-      for (const key of Object.keys(converter)) {
-        allConverters[key] = converter[key]
-      }
-    }
     return convertLexicalNodesToJSX({
-      converters: allConverters,
+      converters,
       disableIndent,
       disableTextAlign,
       nodes: data?.root?.children,
@@ -48,10 +43,29 @@ export function convertLexicalNodesToJSX({
   nodes: SerializedLexicalNode[]
   parent: SerializedLexicalNodeWithParent
 }): React.ReactNode[] {
-  const unknownConverter = converters.unknown
+  const unknownConverter: JSXConverter<any> = converters.unknown as JSXConverter<any>
 
   const jsxArray: React.ReactNode[] = nodes.map((node, i) => {
-    const converterForNode = converters[node.type]
+    let converterForNode: JSXConverter<any> | undefined
+    if (node.type === 'block') {
+      converterForNode = converters?.block?.[(node as SerializedBlockNode)?.fields?.blockType]
+      if (!converterForNode) {
+        console.error(
+          `Lexical => JSX converter: Blocks converter: found ${(node as SerializedBlockNode)?.fields?.blockType} block, but no converter is provided`,
+        )
+      }
+    } else if (node.type === 'inlineBlock') {
+      converterForNode =
+        converters?.inlineBlock?.[(node as SerializedInlineBlockNode)?.fields?.blockType]
+      if (!converterForNode) {
+        console.error(
+          `Lexical => JSX converter: Inline Blocks converter: found ${(node as SerializedInlineBlockNode)?.fields?.blockType} inline block, but no converter is provided`,
+        )
+      }
+    } else {
+      converterForNode = converters[node.type] as JSXConverter<any>
+    }
+
     try {
       if (!converterForNode) {
         if (unknownConverter) {
@@ -76,6 +90,7 @@ export function convertLexicalNodesToJSX({
         }
         return <span key={i}>unknown node</span>
       }
+
       const reactNode = converterForNode({
         childIndex: i,
         converters,
@@ -117,11 +132,11 @@ export function convertLexicalNodesToJSX({
               //style.textAlign = 'left'
               // Do nothing, as left is the default
               break
-            case 'start':
-              style.textAlign = 'left'
-              break
             case 'right':
               style.textAlign = 'right'
+              break
+            case 'start':
+              style.textAlign = 'left'
               break
           }
         }

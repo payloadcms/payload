@@ -11,15 +11,15 @@ import { TableJSXConverter } from './converters/table.js'
 import { TextJSXConverter } from './converters/text.js'
 import { UploadJSXConverter } from './converters/upload.js'
 
-export const defaultJSXConverters: JSXConverters[] = [
-  ParagraphJSXConverter,
-  TextJSXConverter,
-  LinebreakJSXConverter,
-  BlockquoteJSXConverter,
-  TableJSXConverter,
-  HeadingJSXConverter,
-  HorizontalRuleJSXConverter,
-  ListJSXConverter,
-  LinkJSXConverter({}),
-  UploadJSXConverter,
-]
+export const defaultJSXConverters: JSXConverters = {
+  ...ParagraphJSXConverter,
+  ...TextJSXConverter,
+  ...LinebreakJSXConverter,
+  ...BlockquoteJSXConverter,
+  ...TableJSXConverter,
+  ...HeadingJSXConverter,
+  ...HorizontalRuleJSXConverter,
+  ...ListJSXConverter,
+  ...LinkJSXConverter({}),
+  ...UploadJSXConverter,
+}

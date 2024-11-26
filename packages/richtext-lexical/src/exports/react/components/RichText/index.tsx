@@ -7,38 +7,36 @@ import type { JSXConverters } from './converter/types.js'
 import { defaultJSXConverters } from './converter/defaultConverters.js'
 import { convertLexicalToJSX } from './converter/index.js'
 
-export type JSXConvertersFunction = (args: {
-  defaultConverters: JSXConverters[]
-}) => JSXConverters[]
+export type JSXConvertersFunction = (args: { defaultConverters: JSXConverters }) => JSXConverters
 
 type Props = {
   className?: string
-  converters?: JSXConverters[] | JSXConvertersFunction
+  converters?: JSXConverters | JSXConvertersFunction
+  data: SerializedEditorState
   disableIndent?: boolean | string[]
   disableTextAlign?: boolean | string[]
-  editorState: SerializedEditorState
 }
 
 export const RichText: React.FC<Props> = ({
   className,
   converters,
+  data: editorState,
   disableIndent,
   disableTextAlign,
-  editorState,
 }) => {
   if (!editorState) {
     return null
   }
 
-  let finalConverters: JSXConverters[] = []
+  let finalConverters: JSXConverters = {}
   if (converters) {
     if (typeof converters === 'function') {
-      finalConverters = converters({ defaultConverters: [...defaultJSXConverters] })
+      finalConverters = converters({ defaultConverters: defaultJSXConverters })
     } else {
       finalConverters = converters
     }
   } else {
-    finalConverters = [...defaultJSXConverters]
+    finalConverters = defaultJSXConverters
   }
 
   return (

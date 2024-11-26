@@ -1,5 +1,4 @@
 export { BlockquoteJSXConverter } from './components/RichText/converter/converters/blockquote.js'
-export { BlocksJSXConverter } from './components/RichText/converter/converters/blocks.js'
 export { HeadingJSXConverter } from './components/RichText/converter/converters/heading.js'
 export { HorizontalRuleJSXConverter } from './components/RichText/converter/converters/horizontalRule.js'
 export { LinebreakJSXConverter } from './components/RichText/converter/converters/linebreak.js'
