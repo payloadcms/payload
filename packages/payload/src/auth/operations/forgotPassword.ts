@@ -153,7 +153,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     <a href="${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}">${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}</a>
     ${req.t('authentication:youDidNotRequestPassword')}`
 
-      if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
+      if (typeof collectionConfig.auth.forgotPassword?.generateEmailHTML === 'function') {
         html = await collectionConfig.auth.forgotPassword.generateEmailHTML({
           req,
           token,
@@ -163,7 +163,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
 
       let subject = req.t('authentication:resetYourPassword')
 
-      if (typeof collectionConfig.auth.forgotPassword.generateEmailSubject === 'function') {
+      if (typeof collectionConfig.auth.forgotPassword?.generateEmailSubject === 'function') {
         subject = await collectionConfig.auth.forgotPassword.generateEmailSubject({
           req,
           token,
