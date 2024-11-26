@@ -28,6 +28,9 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
         if (authConfig.loginWithUsername.requireUsername === false) {
           usernameField.required = false
         }
+        if (authConfig.loginWithUsername.allowEmailLogin === false) {
+          emailField.unique = false
+        }
       }
     }
 

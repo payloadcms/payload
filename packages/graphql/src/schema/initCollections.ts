@@ -14,7 +14,7 @@ import {
   GraphQLString,
 } from 'graphql'
 import { buildVersionCollectionFields, flattenTopLevelFields, formatNames, toWords } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, getLoginOptions } from 'payload/shared'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'
 
@@ -442,10 +442,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       if (!collectionConfig.auth.disableLocalStrategy) {
         const authArgs = {}
 
-        const canLoginWithEmail =
-          !collectionConfig.auth.loginWithUsername ||
-          collectionConfig.auth.loginWithUsername?.allowEmailLogin
-        const canLoginWithUsername = collectionConfig.auth.loginWithUsername
+        const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(
+          collectionConfig.auth.loginWithUsername,
+        )
 
         if (canLoginWithEmail) {
           authArgs['email'] = { type: new GraphQLNonNull(GraphQLString) }
