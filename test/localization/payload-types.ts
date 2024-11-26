@@ -11,11 +11,13 @@ export interface Config {
     users: UserAuthOperations;
   };
   collections: {
+    richText: RichText;
     'blocks-fields': BlocksField;
     'nested-arrays': NestedArray;
     'nested-field-tables': NestedFieldTable;
     users: User;
     'localized-posts': LocalizedPost;
+    'no-localized-fields': NoLocalizedField;
     'array-fields': ArrayField;
     'localized-required': LocalizedRequired;
     'with-localized-relationship': WithLocalizedRelationship;
@@ -33,11 +35,13 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    richText: RichTextSelect<false> | RichTextSelect<true>;
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
     'nested-arrays': NestedArraysSelect<false> | NestedArraysSelect<true>;
     'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
+    'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'localized-required': LocalizedRequiredSelect<false> | LocalizedRequiredSelect<true>;
     'with-localized-relationship': WithLocalizedRelationshipSelect<false> | WithLocalizedRelationshipSelect<true>;
@@ -62,14 +66,15 @@ export interface Config {
   };
   globalsSelect: {
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
+    'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
   };
   locale: 'en' | 'es' | 'pt' | 'ar' | 'hu';
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -92,6 +97,35 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText".
+ */
+export interface RichText {
+  id: string;
+  richText?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  lexical?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blocks-fields".
  */
 export interface BlocksField {
@@ -106,6 +140,21 @@ export interface BlocksField {
               blockType: 'textBlock';
             }[]
           | null;
+        array?:
+          | {
+              link?: {
+                label?: string | null;
+              };
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockInsideBlock';
+      }[]
+    | null;
+  nonLocalizedBlocksField?:
+    | {
         array?:
           | {
               link?: {
@@ -244,6 +293,16 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-localized-fields".
+ */
+export interface NoLocalizedField {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -420,6 +479,13 @@ export interface Nested {
         blockType: 'block';
       }[]
     | null;
+  topLevelArray?:
+    | {
+        localizedText?: string | null;
+        notLocalizedText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -561,6 +627,10 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'richText';
+        value: string | RichText;
+      } | null)
+    | ({
         relationTo: 'blocks-fields';
         value: string | BlocksField;
       } | null)
@@ -579,6 +649,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized-posts';
         value: string | LocalizedPost;
+      } | null)
+    | ({
+        relationTo: 'no-localized-fields';
+        value: string | NoLocalizedField;
       } | null)
     | ({
         relationTo: 'array-fields';
@@ -668,6 +742,16 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText_select".
+ */
+export interface RichTextSelect<T extends boolean = true> {
+  richText?: T;
+  lexical?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blocks-fields_select".
  */
 export interface BlocksFieldsSelect<T extends boolean = true> {
@@ -688,6 +772,26 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
                           blockName?: T;
                         };
                   };
+              array?:
+                | T
+                | {
+                    link?:
+                      | T
+                      | {
+                          label?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  nonLocalizedBlocksField?:
+    | T
+    | {
+        blockInsideBlock?:
+          | T
+          | {
               array?:
                 | T
                 | {
@@ -819,6 +923,15 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
         children?: T;
       };
   unique?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-localized-fields_select".
+ */
+export interface NoLocalizedFieldsSelect<T extends boolean = true> {
+  text?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -965,6 +1078,13 @@ export interface NestedSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  topLevelArray?:
+    | T
+    | {
+        localizedText?: T;
+        notLocalizedText?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1172,6 +1292,16 @@ export interface GlobalArray {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text".
+ */
+export interface GlobalText {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array_select".
  */
 export interface GlobalArraySelect<T extends boolean = true> {
@@ -1187,6 +1317,16 @@ export interface GlobalArraySelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text_select".
+ */
+export interface GlobalTextSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -1195,6 +1335,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
