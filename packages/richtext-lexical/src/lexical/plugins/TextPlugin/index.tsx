@@ -1,3 +1,4 @@
+'use client'
 import type { TextFormatType } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
