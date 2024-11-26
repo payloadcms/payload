@@ -38,7 +38,7 @@ const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
 
   const [ListDrawer, ListDrawerToggler, { closeDrawer }] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
-    overrideEntityVisibility: true,
+
     uploads: true,
   })
 

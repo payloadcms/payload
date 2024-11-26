@@ -25,7 +25,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   onDelete: onDeleteFromProps,
   onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
-  overrideEntityVisibility,
+  overrideEntityVisibility = true,
   redirectAfterDelete,
   redirectAfterDuplicate,
 }) => {

@@ -140,7 +140,6 @@ export function UploadInput(props: UploadInputProps) {
     useListDrawer({
       collectionSlugs: typeof relationTo === 'string' ? [relationTo] : relationTo,
       filterOptions,
-      overrideEntityVisibility: true,
     })
 
   const [
@@ -149,7 +148,6 @@ export function UploadInput(props: UploadInputProps) {
     { closeDrawer: closeCreateDocDrawer, openDrawer: openCreateDocDrawer },
   ] = useDocumentDrawer({
     collectionSlug: activeRelationTo,
-    overrideEntityVisibility: true,
   })
 
   /**

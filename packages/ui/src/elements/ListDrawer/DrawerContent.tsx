@@ -22,7 +22,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   filterOptions,
   onBulkSelect,
   onSelect,
-  overrideEntityVisibility,
+  overrideEntityVisibility = true,
   selectedCollection: selectedCollectionFromProps,
 }) => {
   const { closeModal, isModalOpen } = useModal()
@@ -57,7 +57,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [DocumentDrawer, DocumentDrawerToggler, { drawerSlug: documentDrawerSlug }] =
     useDocumentDrawer({
       collectionSlug: selectedOption.value,
-      overrideEntityVisibility: true,
     })
 
   useEffect(() => {

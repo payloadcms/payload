@@ -48,7 +48,6 @@ export const AddNewRelation: React.FC<Props> = ({
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen, toggleDrawer }] = useDocumentDrawer(
     {
       collectionSlug: collectionConfig?.slug,
-      overrideEntityVisibility: true,
     },
   )
 

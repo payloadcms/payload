@@ -61,14 +61,13 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
 
   const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
-    overrideEntityVisibility: true,
+
     selectedCollection: relatedCollection.slug,
   })
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     id: value?.id,
     collectionSlug: relatedCollection.slug,
-    overrideEntityVisibility: true,
   })
 
   const editor = useSlateStatic()

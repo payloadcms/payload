@@ -118,7 +118,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
     id: currentlyOpenRelationship.id,
     collectionSlug: currentlyOpenRelationship.collectionSlug,
-    overrideEntityVisibility: true,
   })
 
   const openDrawerWhenRelationChanges = useRef(false)

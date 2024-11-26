@@ -141,7 +141,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
     collectionSlug: relationTo,
-    overrideEntityVisibility: true,
   })
 
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
