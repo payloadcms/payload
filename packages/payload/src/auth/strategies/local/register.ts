@@ -37,7 +37,7 @@ export const registerLocalStrategy = async ({
       or: [],
     }
 
-    if (doc.email) {
+    if (loginWithUsername.allowEmailLogin && doc.email) {
       whereConstraint.or?.push({
         email: {
           equals: doc.email,
