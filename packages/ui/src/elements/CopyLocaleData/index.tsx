@@ -112,7 +112,7 @@ export const CopyLocaleData: React.FC = () => {
           }
         }}
       >
-        {t('localization:copyToLocal')}
+        {t('localization:copyToLocale')}
       </PopupList.Button>
       <Drawer
         className={baseClass}
