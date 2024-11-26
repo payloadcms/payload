@@ -125,9 +125,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs: {
+  jobs?: {
     tasks: unknown;
-    workflows: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -1604,20 +1604,7 @@ export interface TabsField {
     | number
     | boolean
     | null;
-  tab: {
-    array: {
-      text: string;
-      id?: string | null;
-    }[];
-    text?: string | null;
-    defaultValue?: string | null;
-    arrayInRow?:
-      | {
-          textInArrayInRow?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
+  tab: TabWithName;
   namedTabWithDefaultValue?: {
     defaultValue?: string | null;
   };
@@ -1654,6 +1641,24 @@ export interface TabsField {
   };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TabWithName".
+ */
+export interface TabWithName {
+  array: {
+    text: string;
+    id?: string | null;
+  }[];
+  text?: string | null;
+  defaultValue?: string | null;
+  arrayInRow?:
+    | {
+        textInArrayInRow?: string | null;
+        id?: string | null;
+      }[]
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2092,7 +2097,6 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
         anotherText?: T;
-        uiField?: T;
         localizedText?: T;
         subArray?:
           | T
@@ -2163,10 +2167,8 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
   externallyUpdatedArray?:
     | T
     | {
-        customField?: T;
         id?: T;
       };
-  ui?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2552,7 +2554,6 @@ export interface BlockFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  ui?: T;
   relationshipBlocks?:
     | T
     | {
@@ -3095,7 +3096,6 @@ export interface TabsFields2Select<T extends boolean = true> {
  */
 export interface TabsFieldsSelect<T extends boolean = true> {
   sidebarField?: T;
-  demoUIField?: T;
   array?:
     | T
     | {
@@ -3374,7 +3374,6 @@ export interface UploadsRestrictedSelect<T extends boolean = true> {
  */
 export interface UiFieldsSelect<T extends boolean = true> {
   text?: T;
-  uiCustomClient?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -31,7 +31,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
+  const fields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
   return findMany({
     adapter: this,

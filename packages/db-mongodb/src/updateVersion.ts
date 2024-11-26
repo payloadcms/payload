@@ -33,7 +33,15 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     ...(await withSession(this, req)),
     lean: true,
     new: true,
-    projection: buildProjectionFromSelect({ adapter: this, fields, select }),
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: buildVersionCollectionFields(
+        this.payload.config,
+        this.payload.collections[collection].config,
+        true,
+      ),
+      select,
+    }),
   }
 
   const query = await VersionModel.buildQuery({

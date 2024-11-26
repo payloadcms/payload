@@ -98,7 +98,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
 
       if (updatePreferences && preferenceKey) {
-        await setPreference(preferenceKey, updatedPreferences)
+        await setPreference(preferenceKey, updatedPreferences, true)
       }
 
       const newQuery: ListQuery = {
@@ -151,7 +151,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const handleSearchChange = useCallback(
     async (arg: string) => {
       const search = arg === '' ? undefined : arg
-
       await refineListData({ search })
     },
     [refineListData],
