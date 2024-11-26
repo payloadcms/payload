@@ -1,7 +1,7 @@
 import React from 'react'
-import { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from 'next'
+import type { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from 'next'
 import QueryString from 'qs'
-import { ParsedUrlQuery } from 'querystring'
+import type { ParsedUrlQuery } from 'querystring'
 
 import { Gutter } from '../components/Gutter'
 import RichText from '../components/RichText'
@@ -10,12 +10,12 @@ import type { MainMenu, Page as PageType } from '../payload-types'
 import classes from './[slug].module.scss'
 
 const Page: React.FC<
-  PageType & {
+  {
     mainMenu: MainMenu
     preview?: boolean
-  }
+  } & PageType
 > = (props) => {
-  const { title, richText } = props
+  const { richText, title } = props
 
   return (
     <main className={classes.page}>
@@ -35,7 +35,7 @@ interface IParams extends ParsedUrlQuery {
 
 // when 'preview' cookies are set in the browser, getStaticProps runs on every request :)
 export const getStaticProps: GetStaticProps = async (context: GetStaticPropsContext) => {
-  const { preview, previewData, params } = context
+  const { params, preview, previewData } = context
 
   const { payloadToken } =
     (previewData as {
@@ -43,7 +43,9 @@ export const getStaticProps: GetStaticProps = async (context: GetStaticPropsCont
     }) || {}
 
   let { slug } = (params as IParams) || {}
-  if (!slug) slug = 'home'
+  if (!slug) {
+    slug = 'home'
+  }
 
   let doc = {}
   const notFound = false
@@ -52,17 +54,17 @@ export const getStaticProps: GetStaticProps = async (context: GetStaticPropsCont
 
   const searchParams = QueryString.stringify(
     {
+      depth: 1,
+      draft: preview ? true : undefined,
       where: {
         slug: {
           equals: lowerCaseSlug,
         },
       },
-      depth: 1,
-      draft: preview ? true : undefined,
     },
     {
-      encode: false,
       addQueryPrefix: true,
+      encode: false,
     },
   )
 
@@ -88,12 +90,12 @@ export const getStaticProps: GetStaticProps = async (context: GetStaticPropsCont
   }
 
   return {
+    notFound,
     props: {
       ...doc,
-      preview: preview || null,
       collection: 'pages',
+      preview: preview || null,
     },
-    notFound,
     revalidate: 3600, // in seconds
   }
 }
@@ -124,7 +126,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }
 
   return {
-    paths,
     fallback: true,
+    paths,
   }
 }

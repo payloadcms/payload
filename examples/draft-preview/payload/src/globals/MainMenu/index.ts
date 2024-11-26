@@ -1,6 +1,7 @@
-import type { GlobalConfig } from 'payload/types'
+import type { GlobalConfig } from 'payload'
 
-import link from '../fields/link'
+import link from '../../fields/link'
+import { revalidateMainMenu } from './hooks/revalidateMainMenu'
 
 export const MainMenu: GlobalConfig = {
   slug: 'main-menu',
@@ -11,12 +12,15 @@ export const MainMenu: GlobalConfig = {
     {
       name: 'navItems',
       type: 'array',
-      maxRows: 6,
       fields: [
         link({
           appearances: false,
         }),
       ],
+      maxRows: 6,
     },
   ],
+  hooks: {
+    afterChange: [revalidateMainMenu],
+  },
 }

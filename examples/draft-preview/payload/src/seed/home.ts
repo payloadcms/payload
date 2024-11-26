@@ -1,6 +1,8 @@
 import type { Page } from '../payload-types'
 
-export const home: Partial<Page> = {
+// Used for pre-seeded content so that the homepage is not empty
+// @ts-expect-error: Page type is not fully compatible with the provided object structure
+export const home: Page = {
   slug: 'home',
   _status: 'published',
   richText: [
@@ -59,7 +61,7 @@ export const home: Partial<Page> = {
           type: 'link',
           children: [{ text: 'example page' }],
           linkType: 'custom',
-          url: 'http://localhost:3001/example-page',
+          url: 'http://localhost:3000/example-page',
         },
         { text: ' to see how we control access to draft content. ' },
       ],

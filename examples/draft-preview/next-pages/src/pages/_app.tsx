@@ -1,10 +1,11 @@
 import React, { useCallback } from 'react'
 import { CookiesProvider } from 'react-cookie'
-import App, { AppContext, AppProps as NextAppProps } from 'next/app'
+import type { AppContext, AppProps as NextAppProps } from 'next/app'
+import App from 'next/app'
 import { useRouter } from 'next/router'
 
 import { Header } from '../components/Header'
-import { MainMenu } from '../payload-types'
+import type { MainMenu } from '../payload-types'
 
 import './app.scss'
 
@@ -26,13 +27,13 @@ type AppProps<P = any> = {
 } & Omit<NextAppProps<P>, 'pageProps'>
 
 const PayloadApp = (
-  appProps: AppProps & {
+  appProps: {
     globals: IGlobals
-  },
+  } & AppProps,
 ): React.ReactElement => {
-  const { Component, pageProps, globals } = appProps
+  const { Component, globals, pageProps } = appProps
 
-  const { collection, id, preview } = pageProps
+  const { id, collection, preview } = pageProps
 
   const router = useRouter()
 
@@ -43,25 +44,27 @@ const PayloadApp = (
         router.reload()
       }
     }
-    exit()
+    exit().catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to exit preview:', error)
+    })
   }, [router])
 
   return (
     <CookiesProvider>
       <Header
-        globals={globals}
         adminBarProps={{
-          collection,
           id,
-          preview,
+          collection,
           onPreviewExit,
+          preview,
         }}
+        globals={globals}
       />
       {/* typescript flags this `@ts-expect-error` declaration as unneeded, but types are breaking the build process
       Remove these comments when the issue is resolved
       See more here: https://github.com/facebook/react/issues/24304
       */}
-      {/* @ts-expect-error */}
       <Component {...pageProps} />
     </CookiesProvider>
   )

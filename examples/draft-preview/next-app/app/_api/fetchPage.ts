@@ -5,12 +5,12 @@ import type { Page } from '../../payload-types'
 export const fetchPage = async (
   slug: string,
   draft?: boolean,
-): Promise<Page | undefined | null> => {
+): Promise<null | Page | undefined> => {
   let payloadToken: RequestCookie | undefined
 
   if (draft) {
     const { cookies } = await import('next/headers')
-    payloadToken = cookies().get('payload-token')
+    payloadToken = (await cookies()).get('payload-token')
   }
 
   const pageRes: {

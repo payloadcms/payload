@@ -1,10 +1,10 @@
-import type { Payload } from 'payload'
+import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
 
-import { home } from './home'
-import { examplePage } from './page'
-import { examplePageDraft } from './pageDraft'
+import { home } from '../seed/home'
+import { examplePage } from '../seed/page'
+import { examplePageDraft } from '../seed/pageDraft'
 
-export const seed = async (payload: Payload): Promise<void> => {
+export async function up({ payload }: MigrateUpArgs): Promise<void> {
   await payload.create({
     collection: 'users',
     data: {
@@ -15,54 +15,66 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   const { id: examplePageID } = await payload.create({
     collection: 'pages',
+    context: {
+      skipRevalidate: true,
+    },
     data: examplePage as any, // eslint-disable-line
   })
 
   await payload.update({
-    collection: 'pages',
     id: examplePageID,
-    draft: true,
+    collection: 'pages',
+    context: {
+      skipRevalidate: true,
+    },
     data: examplePageDraft as any, // eslint-disable-line
+    draft: true,
   })
 
   const homepageJSON = JSON.parse(JSON.stringify(home).replace('{{DRAFT_PAGE_ID}}', examplePageID))
 
   const { id: homePageID } = await payload.create({
     collection: 'pages',
+    context: {
+      skipRevalidate: true,
+    },
     data: homepageJSON,
   })
 
   await payload.updateGlobal({
     slug: 'main-menu',
+    context: {
+      skipRevalidate: true,
+    },
     data: {
       navItems: [
         {
           link: {
             type: 'reference',
+            label: 'Home',
             reference: {
               relationTo: 'pages',
               value: homePageID,
             },
-            label: 'Home',
             url: '',
           },
         },
         {
           link: {
             type: 'reference',
+            label: 'Example Page',
             reference: {
               relationTo: 'pages',
               value: examplePageID,
             },
-            label: 'Example Page',
             url: '',
           },
         },
         {
           link: {
             type: 'custom',
-            reference: null,
             label: 'Dashboard',
+            reference: undefined,
             url: 'http://localhost:3000/admin',
           },
         },

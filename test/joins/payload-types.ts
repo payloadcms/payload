@@ -75,9 +75,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs: {
+  jobs?: {
     tasks: unknown;
-    workflows: unknown;
+    workflows?: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -105,6 +105,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  conditionalField?: string | null;
   isFiltered?: boolean | null;
   restrictedField?: string | null;
   upload?: (string | null) | Upload;
@@ -388,6 +389,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  conditionalField?: T;
   isFiltered?: T;
   restrictedField?: T;
   upload?: T;
