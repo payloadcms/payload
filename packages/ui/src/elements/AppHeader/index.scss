@@ -90,7 +90,6 @@
       display: flex;
       align-items: center;
       flex-grow: 1;
-      overflow: hidden;
       width: 100%;
     }
 
@@ -128,7 +127,6 @@
       gap: calc(var(--base) / 2);
       flex-shrink: 0;
       max-width: 600px;
-      overflow: auto;
       white-space: nowrap;
 
       &::-webkit-scrollbar {
