@@ -94,6 +94,7 @@ export const frTranslations: DefaultTranslationsObject = {
     incorrectCollection: 'Collection incorrecte',
     invalidFileType: 'Type de fichier invalide',
     invalidFileTypeValue: 'Type de fichier invalide : {{value}}',
+    invalidRequestArgs: 'Arguments non valides dans la requête : {{args}}',
     loadingDocument:
       'Un problème est survenu lors du chargement du document qui a pour identifiant {{id}}.',
     localesNotSaved_one: 'Le paramètre régional suivant n’a pas pu être enregistré :',
@@ -114,6 +115,8 @@ export const frTranslations: DefaultTranslationsObject = {
     tokenInvalidOrExpired: 'Le jeton n’est soit pas valide ou a expiré.',
     tokenNotProvided: 'Jeton non fourni.',
     unableToDeleteCount: 'Impossible de supprimer {{count}} sur {{total}} {{label}}.',
+    unableToReindexCollection:
+      'Erreur lors de la réindexation de la collection {{collection}}. Opération annulée.',
     unableToUpdateCount: 'Impossible de mettre à jour {{count}} sur {{total}} {{label}}.',
     unauthorized: 'Non autorisé, vous devez être connecté pour effectuer cette demande.',
     unknown: 'Une erreur inconnue s’est produite.',
@@ -184,6 +187,7 @@ export const frTranslations: DefaultTranslationsObject = {
     addBelow: 'Ajoutez ci-dessous',
     addFilter: 'Ajouter un filtre',
     adminTheme: 'Thème d’administration',
+    allCollections: 'Toutes les collections',
     and: 'Et',
     anotherUser: 'Un autre utilisateur',
     anotherUserTakenOver: 'Un autre utilisateur a pris en charge la modification de ce document.',
@@ -204,6 +208,12 @@ export const frTranslations: DefaultTranslationsObject = {
     confirmCopy: 'Confirmer la copie',
     confirmDeletion: 'Confirmer la suppression',
     confirmDuplication: 'Confirmer la duplication',
+    confirmReindex: 'Réindexer toutes les {{collections}} ?',
+    confirmReindexAll: 'Réindexer toutes les collections ?',
+    confirmReindexDescription:
+      'Cela supprimera les index existants et réindexera les documents dans les collections {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Cela supprimera les index existants et réindexera les documents dans toutes les collections.',
     copied: 'Copié',
     copy: 'Copie',
     copying: 'Copie',
@@ -288,6 +298,8 @@ export const frTranslations: DefaultTranslationsObject = {
     payloadSettings: 'Paramètres de Payload',
     perPage: 'Par Page: {{limit}}',
     previous: 'Précédent',
+    reindex: 'Réindexer',
+    reindexingAll: 'Réindexation de toutes les {{collections}}.',
     remove: 'Retirer',
     reset: 'Réinitialiser',
     row: 'Ligne',
@@ -310,6 +322,8 @@ export const frTranslations: DefaultTranslationsObject = {
     success: 'Succès',
     successfullyCreated: '{{label}} créé(e) avec succès.',
     successfullyDuplicated: '{{label}} dupliqué(e) avec succès.',
+    successfullyReindexed:
+      '{{count}} des {{total}} documents des collections {{collections}} ont été réindexés avec succès.',
     takeOver: 'Prendre en charge',
     thisLanguage: 'Français',
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
