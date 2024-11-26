@@ -99,6 +99,7 @@ const Component: React.FC<ElementProps> = (props) => {
   const { closeDocumentDrawer, DocumentDrawer, DocumentDrawerToggler } = useLexicalDocumentDrawer({
     id: value,
     collectionSlug: relatedCollection.slug,
+    overrideEntityVisibility: true,
   })
 
   // Get the referenced document

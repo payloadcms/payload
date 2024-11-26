@@ -58,6 +58,7 @@ export function RelationshipContent(props: Props) {
   const [DocumentDrawer, _, { openDrawer }] = useDocumentDrawer({
     id,
     collectionSlug,
+    overrideEntityVisibility: true,
   })
 
   function generateMetaText(mimeType: string, size: number): string {

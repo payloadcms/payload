@@ -29,6 +29,7 @@ type RenderDocument = (args: {
   docID?: number | string
   drawerSlug?: string
   initialData?: Data
+  overrideEntityVisibility?: boolean
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   signal?: AbortSignal

@@ -31,6 +31,7 @@ export const FileMeta: React.FC<FileMetaProps> = (props) => {
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     id,
     collectionSlug: collection,
+    overrideEntityVisibility: true,
   })
 
   return (

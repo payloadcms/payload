@@ -39,6 +39,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     id,
     collectionSlug,
+    overrideEntityVisibility: true,
   })
 
   return (

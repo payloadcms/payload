@@ -13,6 +13,7 @@ export type DocumentDrawerProps = {
   readonly id?: null | number | string
   readonly initialData?: Data
   readonly initialState?: FormState
+  readonly overrideEntityVisibility?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
 } & Pick<DocumentDrawerContextProps, 'onDelete' | 'onDuplicate' | 'onSave'> &
@@ -28,7 +29,11 @@ export type DocumentTogglerProps = {
   readonly onClick?: () => void
 } & Readonly<HTMLAttributes<HTMLButtonElement>>
 
-export type UseDocumentDrawer = (args: { collectionSlug: string; id?: number | string }) => [
+export type UseDocumentDrawer = (args: {
+  collectionSlug: string
+  id?: number | string
+  overrideEntityVisibility?: boolean
+}) => [
   React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer
   React.FC<Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>>, // toggler
   {

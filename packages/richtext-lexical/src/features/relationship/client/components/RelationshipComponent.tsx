@@ -79,6 +79,7 @@ const Component: React.FC<Props> = (props) => {
   const { closeDocumentDrawer, DocumentDrawer, DocumentDrawerToggler } = useLexicalDocumentDrawer({
     id: value,
     collectionSlug: relatedCollection.slug,
+    overrideEntityVisibility: true,
   })
 
   const removeRelationship = useCallback(() => {

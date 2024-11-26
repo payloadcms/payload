@@ -59,6 +59,7 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
 
   const { closeListDrawer, ListDrawer, openListDrawer } = useLexicalListDrawer({
     collectionSlugs: enabledCollectionSlugs,
+    overrideEntityVisibility: true,
     uploads: true,
   })
 
