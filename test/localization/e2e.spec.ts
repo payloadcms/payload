@@ -17,6 +17,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
 import { richTextSlug } from './collections/RichText/index.js'
 import {
   defaultLocale,
@@ -281,6 +282,26 @@ describe('Localization', () => {
       await runCopy(page)
 
       await expect(richTextField).toContainText(richTextContent)
+    })
+
+    test('should copy nested array to locale', async () => {
+      const sampleText = 'Copy this text'
+      const nestedArrayURL = new AdminUrlUtil(serverURL, nestedToArrayAndBlockCollectionSlug)
+      await page.goto(nestedArrayURL.create)
+      await changeLocale(page, 'ar')
+      const addArrayRow = page.locator('.array-field__add-row')
+      await addArrayRow.click()
+
+      const arrayField = page.locator('#field-topLevelArray__0__localizedText')
+      await expect(arrayField).toBeVisible()
+      await arrayField.fill(sampleText)
+      await saveDocAndAssert(page)
+
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'English')
+      await runCopy(page)
+
+      await expect(arrayField).toHaveValue(sampleText)
     })
 
     test('should default source locale to current locale', async () => {
