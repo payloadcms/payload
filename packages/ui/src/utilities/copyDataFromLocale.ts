@@ -39,8 +39,9 @@ function iterateFields(fields: Field[], fromLocaleData: Data, toLocaleData: Data
         case 'upload':
           if (
             field.name in toLocaleData &&
-            toLocaleData[field.name] === undefined &&
-            fromLocaleData?.[field.name] !== undefined
+            // only replace if the target value is null or undefined
+            [null, undefined].includes(toLocaleData[field.name]) &&
+            field.name in fromLocaleData
           ) {
             toLocaleData[field.name] = fromLocaleData[field.name]
           }
