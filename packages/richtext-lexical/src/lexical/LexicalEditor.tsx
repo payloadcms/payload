@@ -18,6 +18,7 @@ import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/ind
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
+import { TextPlugin } from './plugins/TextPlugin/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<
@@ -121,6 +122,7 @@ export const LexicalEditor: React.FC<
           }
           ErrorBoundary={LexicalErrorBoundary}
         />
+        <TextPlugin features={editorConfig.features} />
         <OnChangePlugin
           // Selection changes can be ignored here, reducing the
           // frequency that the FieldComponent and Payload receive updates.
