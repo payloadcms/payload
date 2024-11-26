@@ -1,24 +1,34 @@
 import type { I18n } from '@payloadcms/translations'
-import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
 
-import { MissingEditorProp } from 'payload'
+import {
+  type ClientConfig,
+  type ClientField,
+  type ClientFieldSchemaMap,
+  createClientFields,
+  type FieldSchemaMap,
+  type Payload,
+} from 'payload'
 import { getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
-  config: SanitizedConfig
-  fields: Field[]
+  clientSchemaMap: ClientFieldSchemaMap
+  config: ClientConfig
+  fields: ClientField[]
   i18n: I18n<any, any>
   parentIndexPath: string
   parentSchemaPath: string
+  payload: Payload
   schemaMap: FieldSchemaMap
 }
 
 export const traverseFields = ({
+  clientSchemaMap,
   config,
   fields,
   i18n,
   parentIndexPath,
   parentSchemaPath,
+  payload,
   schemaMap,
 }: Args) => {
   for (const [index, field] of fields.entries()) {
@@ -30,17 +40,19 @@ export const traverseFields = ({
       parentSchemaPath,
     })
 
-    schemaMap.set(schemaPath, field)
+    clientSchemaMap.set(schemaPath, field)
 
     switch (field.type) {
       case 'array':
       case 'group':
         traverseFields({
+          clientSchemaMap,
           config,
           fields: field.fields,
           i18n,
           parentIndexPath: '',
           parentSchemaPath: schemaPath,
+          payload,
           schemaMap,
         })
 
@@ -50,13 +62,15 @@ export const traverseFields = ({
         field.blocks.map((block) => {
           const blockSchemaPath = `${schemaPath}.${block.slug}`
 
-          schemaMap.set(blockSchemaPath, block)
+          clientSchemaMap.set(blockSchemaPath, block)
           traverseFields({
+            clientSchemaMap,
             config,
             fields: block.fields,
             i18n,
             parentIndexPath: '',
             parentSchemaPath: blockSchemaPath,
+            payload,
             schemaMap,
           })
         })
@@ -65,37 +79,48 @@ export const traverseFields = ({
       case 'collapsible':
       case 'row':
         traverseFields({
+          clientSchemaMap,
           config,
           fields: field.fields,
           i18n,
           parentIndexPath: indexPath,
           parentSchemaPath,
+          payload,
           schemaMap,
         })
-
         break
 
-      case 'richText':
-        if (!field?.editor) {
-          throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      case 'richText': {
+        // richText sub-fields are not part of the ClientConfig or the Config.
+        // They only exist in the field schema map.
+        // Thus, we need to
+        // 1. get them from the field schema map
+        // 2. convert them to client fields
+        // 3. add them to the client schema map
+
+        // So these would basically be all fields that are not part of the client config already
+        const richTextFieldSchemaMap: FieldSchemaMap = new Map()
+        for (const [path, subField] of schemaMap.entries()) {
+          if (path.startsWith(`${schemaPath}.`)) {
+            richTextFieldSchemaMap.set(path, subField)
+          }
         }
 
-        if (typeof field.editor === 'function') {
-          throw new Error('Attempted to access unsanitized rich text editor.')
-        }
-
-        if (typeof field.editor.generateSchemaMap === 'function') {
-          field.editor.generateSchemaMap({
-            config,
-            field,
+        // Now loop through them, convert each entry to a client field and add it to the client schema map
+        for (const [path, subField] of richTextFieldSchemaMap.entries()) {
+          const clientFields = createClientFields({
+            defaultIDType: payload.config.db.defaultIDType,
+            disableAddingID: true,
+            fields: 'fields' in subField ? subField.fields : [subField],
             i18n,
-            schemaMap,
-            schemaPath,
+            importMap: payload.importMap,
+          })
+          clientSchemaMap.set(path, {
+            fields: clientFields,
           })
         }
-
         break
-
+      }
       case 'tabs':
         field.tabs.map((tab, tabIndex) => {
           const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
@@ -109,14 +134,16 @@ export const traverseFields = ({
             parentSchemaPath,
           })
 
-          schemaMap.set(tabSchemaPath, tab)
+          clientSchemaMap.set(tabSchemaPath, tab)
 
           traverseFields({
+            clientSchemaMap,
             config,
             fields: tab.fields,
             i18n,
             parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
             parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
+            payload,
             schemaMap,
           })
         })

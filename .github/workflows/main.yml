@@ -296,6 +296,7 @@ jobs:
           - admin__e2e__3
           - admin-root
           - auth
+          - auth-basic
           - field-error-states
           - fields-relationship
           - fields

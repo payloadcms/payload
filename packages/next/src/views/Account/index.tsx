@@ -102,6 +102,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       await getVersions({
         id: user.id,
         collectionConfig,
+        doc: data,
         docPermissions,
         locale: locale?.code,
         payload,

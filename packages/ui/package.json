@@ -53,6 +53,11 @@
       "types": "./src/utilities/buildTableState.ts",
       "default": "./src/utilities/buildTableState.ts"
     },
+    "./utilities/getClientConfig": {
+      "import": "./src/utilities/getClientConfig.ts",
+      "types": "./src/utilities/getClientConfig.ts",
+      "default": "./src/utilities/getClientConfig.ts"
+    },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",

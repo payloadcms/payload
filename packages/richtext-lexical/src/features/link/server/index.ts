@@ -9,7 +9,6 @@ import type {
 
 import escapeHTML from 'escape-html'
 import { sanitizeFields } from 'payload'
-import { deepCopyObject } from 'payload/shared'
 
 import type { ClientProps } from '../client/index.js'
 
@@ -78,7 +77,7 @@ export const LinkFeature = createServerFeature<
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
     const _transformedFields = transformExtraFields(
-      props.fields ? deepCopyObject(props.fields) : null,
+      props.fields ? props.fields : null,
       _config,
       props.enabledCollections,
       props.disabledCollections,
@@ -97,7 +96,7 @@ export const LinkFeature = createServerFeature<
     // the text field is not included in the node data.
     // Thus, for tasks like validation, we do not want to pass it a text field in the schema which will never have data.
     // Otherwise, it will cause a validation error (field is required).
-    const sanitizedFieldsWithoutText = deepCopyObject(sanitizedFields).filter(
+    const sanitizedFieldsWithoutText = sanitizedFields.filter(
       (field) => !('name' in field) || field.name !== 'text',
     )
 
