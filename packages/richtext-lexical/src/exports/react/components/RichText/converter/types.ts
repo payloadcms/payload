@@ -29,10 +29,10 @@ export type JSXConverters<T extends { [key: string]: any; type?: string } = Defa
 } & {
   [nodeType in NonNullable<T['type']>]?: JSXConverter<Extract<T, { type: nodeType }>>
 } & {
-  block?: {
+  blocks?: {
     [blockSlug: string]: JSXConverter<{ fields: Record<string, any> } & SerializedBlockNode>
   }
-  inlineBlock?: {
+  inlineBlocks?: {
     [blockSlug: string]: JSXConverter<{ fields: Record<string, any> } & SerializedInlineBlockNode>
   }
 }

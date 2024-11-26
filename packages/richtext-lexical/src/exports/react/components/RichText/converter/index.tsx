@@ -48,7 +48,7 @@ export function convertLexicalNodesToJSX({
   const jsxArray: React.ReactNode[] = nodes.map((node, i) => {
     let converterForNode: JSXConverter<any> | undefined
     if (node.type === 'block') {
-      converterForNode = converters?.block?.[(node as SerializedBlockNode)?.fields?.blockType]
+      converterForNode = converters?.blocks?.[(node as SerializedBlockNode)?.fields?.blockType]
       if (!converterForNode) {
         console.error(
           `Lexical => JSX converter: Blocks converter: found ${(node as SerializedBlockNode)?.fields?.blockType} block, but no converter is provided`,
@@ -56,7 +56,7 @@ export function convertLexicalNodesToJSX({
       }
     } else if (node.type === 'inlineBlock') {
       converterForNode =
-        converters?.inlineBlock?.[(node as SerializedInlineBlockNode)?.fields?.blockType]
+        converters?.inlineBlocks?.[(node as SerializedInlineBlockNode)?.fields?.blockType]
       if (!converterForNode) {
         console.error(
           `Lexical => JSX converter: Inline Blocks converter: found ${(node as SerializedInlineBlockNode)?.fields?.blockType} inline block, but no converter is provided`,

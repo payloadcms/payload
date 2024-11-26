@@ -43,7 +43,7 @@ import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical
 
 const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
   ...defaultConverters,
-  block: {
+  blocks: {
     // myTextBlock is the slug of the block
     myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
   },

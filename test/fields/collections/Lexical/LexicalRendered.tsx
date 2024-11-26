@@ -7,7 +7,7 @@ import React from 'react'
 
 const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
   ...defaultConverters,
-  block: {
+  blocks: {
     myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
     relationshipBlock: ({ node, nodesToJSX }) => {
       return <p>Test</p>
