@@ -1,24 +1,23 @@
-import type { Permissions } from 'payload/auth'
+import type { SanitizedPermissions } from 'payload'
 
 import type { User } from '../../../../payload-types'
 
-// eslint-disable-next-line no-unused-vars
 export type ResetPassword = (args: {
   password: string
   passwordConfirm: string
   token: string
-}) => Promise<User>
+}) => Promise<undefined | User>
 
-export type ForgotPassword = (args: { email: string }) => Promise<User> // eslint-disable-line no-unused-vars
+export type ForgotPassword = (args: { email: string }) => Promise<undefined | User>
 
 export type Create = (args: {
   email: string
   firstName: string
   lastName: string
   password: string
-}) => Promise<User> // eslint-disable-line no-unused-vars
+}) => Promise<undefined | User>
 
-export type Login = (args: { email: string; password: string }) => Promise<User> // eslint-disable-line no-unused-vars
+export type Login = (args: { email: string; password: string }) => Promise<null | undefined | User>
 
 export type Logout = () => Promise<void>
 
@@ -27,9 +26,9 @@ export interface AuthContext {
   forgotPassword: ForgotPassword
   login: Login
   logout: Logout
-  permissions?: Permissions | null
+  permissions?: null | SanitizedPermissions
   resetPassword: ResetPassword
-  setPermissions: (permissions: Permissions | null) => void
-  setUser: (user: User | null) => void // eslint-disable-line no-unused-vars
-  user?: User | null
+  setPermissions: (permissions: null | SanitizedPermissions) => void
+  setUser: (user: null | User) => void
+  user?: null | User
 }

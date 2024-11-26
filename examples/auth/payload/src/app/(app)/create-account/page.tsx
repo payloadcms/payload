@@ -1,18 +1,15 @@
-import { headers as getHeaders } from 'next/headers.js'
+/* eslint-disable no-restricted-exports */
 import { redirect } from 'next/navigation'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '../../../payload.config'
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
+import { auth } from '../auth'
 import { CreateAccountForm } from './CreateAccountForm'
 import classes from './index.module.scss'
 
 export default async function CreateAccount() {
-  const headers = getHeaders()
-  const payload = await getPayload({ config })
-  const { user } = await payload.auth({ headers })
+  const { user } = await auth()
 
   if (user) {
     redirect(

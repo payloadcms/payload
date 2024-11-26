@@ -39,8 +39,11 @@ export const LoginForm: React.FC = () => {
     async (data: FormData) => {
       try {
         await login(data)
-        if (redirect?.current) router.push(redirect.current)
-        else router.push('/account')
+        if (redirect?.current) {
+          router.push(redirect.current)
+        } else {
+          router.push('/account')
+        }
       } catch (_) {
         setError('There was an error with the credentials provided. Please try again.')
       }

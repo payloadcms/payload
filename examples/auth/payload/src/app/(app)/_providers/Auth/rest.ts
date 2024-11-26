@@ -1,10 +1,8 @@
-import type { User } from '../../../../payload-types'
-
-export const rest = async (
+export const rest = async <T = any>(
   url: string,
   args?: any, // eslint-disable-line @typescript-eslint/no-explicit-any
   options?: RequestInit,
-): Promise<User | null | undefined> => {
+): Promise<T | undefined> => {
   const method = options?.method || 'POST'
 
   try {
@@ -19,14 +17,14 @@ export const rest = async (
       ...options,
     })
 
-    const { errors, user } = await res.json()
+    const json = await res.json()
 
-    if (errors) {
-      throw new Error(errors[0].message)
+    if (json?.errors) {
+      throw new Error(json.errors[0].message)
     }
 
     if (res.ok) {
-      return user
+      return json as T
     }
   } catch (e: unknown) {
     throw new Error(e as string)

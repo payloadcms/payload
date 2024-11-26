@@ -1,4 +1,4 @@
-import type { Access } from 'payload/config'
+import type { Access } from 'payload'
 
 import { checkRole } from './checkRole'
 
@@ -9,7 +9,9 @@ const adminsAndUser: Access = ({ req: { user } }) => {
     }
 
     return {
-      id: user.id,
+      id: {
+        equals: user.id,
+      },
     }
   }
 

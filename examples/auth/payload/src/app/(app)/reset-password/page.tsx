@@ -1,17 +1,14 @@
-import { headers as getHeaders } from 'next/headers.js'
+/* eslint-disable no-restricted-exports */
 import { redirect } from 'next/navigation'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '../../../payload.config'
 import { Gutter } from '../_components/Gutter'
+import { auth } from '../auth'
 import classes from './index.module.scss'
 import { ResetPasswordForm } from './ResetPasswordForm'
 
 export default async function ResetPassword() {
-  const headers = getHeaders()
-  const payload = await getPayload({ config })
-  const { user } = await payload.auth({ headers })
+  const { user } = await auth()
 
   if (user) {
     redirect(`/account?message=${encodeURIComponent('Cannot reset password while logged in.')}`)

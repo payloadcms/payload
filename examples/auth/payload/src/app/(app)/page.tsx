@@ -1,16 +1,13 @@
-import { headers as getHeaders } from 'next/headers.js'
+/* eslint-disable no-restricted-exports */
 import Link from 'next/link'
-import { getPayload } from 'payload'
 import React, { Fragment } from 'react'
 
-import config from '../../payload.config'
 import { Gutter } from './_components/Gutter'
 import { HydrateClientUser } from './_components/HydrateClientUser'
+import { auth } from './auth'
 
 export default async function HomePage() {
-  const headers = getHeaders()
-  const payload = await getPayload({ config })
-  const { permissions, user } = await payload.auth({ headers })
+  const { permissions, user } = await auth()
 
   return (
     <Fragment>

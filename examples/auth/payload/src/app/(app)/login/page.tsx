@@ -1,18 +1,15 @@
-import { headers as getHeaders } from 'next/headers.js'
 import { redirect } from 'next/navigation'
-import { getPayload } from 'payload'
 import React from 'react'
 
-import config from '../../../payload.config'
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
+import { auth } from '../auth'
 import classes from './index.module.scss'
 import { LoginForm } from './LoginForm'
 
+// eslint-disable-next-line no-restricted-exports
 export default async function Login() {
-  const headers = getHeaders()
-  const payload = await getPayload({ config })
-  const { user } = await payload.auth({ headers })
+  const { user } = await auth()
 
   if (user) {
     redirect(`/account?message=${encodeURIComponent('You are already logged in.')}`)
