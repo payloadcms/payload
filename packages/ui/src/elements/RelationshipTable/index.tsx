@@ -7,12 +7,8 @@ import type {
   Where,
 } from 'payload'
 
-import React, { Fragment, useCallback, useState } from 'react'
-import AnimateHeightImport from 'react-animate-height'
-
-const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
-
 import { getTranslation } from '@payloadcms/translations'
+import React, { Fragment, useCallback, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 import type { Column } from '../Table/index.js'
@@ -27,12 +23,13 @@ import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
+import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
-import { DrawerLink } from './cells/DrawerLink/index.js'
 import './index.scss'
+import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
 
 const baseClass = 'relationship-table'
@@ -239,7 +236,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                   }}
                   tableAppearance="condensed"
                 >
-                  {/* @ts-expect-error TODO: get this CJS import to work, eslint keeps removing the type assertion */}
                   <AnimateHeight
                     className={`${baseClass}__columns`}
                     height={openColumnSelector ? 'auto' : 0}

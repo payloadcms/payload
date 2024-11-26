@@ -1,46 +1,52 @@
 import React from 'react'
 import Link from 'next/link'
 
-import { Page } from '../../../payload-types'
+import type { Page } from '../../../payload-types'
 import { Button } from '../Button'
 
 export type CMSLinkType = {
-  type?: 'custom' | 'reference'
-  url?: string
-  newTab?: boolean
-  reference?: {
-    value: string | Page
-    relationTo: 'pages'
-  }
-  label?: string
   appearance?: 'default' | 'primary' | 'secondary'
   children?: React.ReactNode
   className?: string
+  label?: string
+  newTab?: boolean | null
+  reference?: {
+    relationTo: 'pages'
+    value: number | Page | string
+  } | null
+  type?: 'custom' | 'reference' | null
+  url?: null | string
 }
 
 export const CMSLink: React.FC<CMSLinkType> = ({
   type,
-  url,
-  newTab,
-  reference,
-  label,
   appearance,
   children,
   className,
+  label,
+  newTab,
+  reference,
+  url,
 }) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? `/${reference.value.slug === 'home' ? '' : reference.value.slug}`
+      ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
+          reference.value.slug
+        }`
       : url
 
+  if (!href) {
+    return null
+  }
+
   if (!appearance) {
-    const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+    const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
 
     if (type === 'custom') {
       return (
-        <a href={url} {...newTabProps} className={className}>
+        <a href={url || ''} {...newTabProps} className={className}>
           {label && label}
-          {children && children}
+          {children ? <>{children}</> : null}
         </a>
       )
     }
@@ -49,17 +55,17 @@ export const CMSLink: React.FC<CMSLinkType> = ({
       return (
         <Link href={href} {...newTabProps} className={className} prefetch={false}>
           {label && label}
-          {children && children}
+          {children ? <>{children}</> : null}
         </Link>
       )
     }
   }
 
   const buttonProps = {
-    newTab,
-    href,
     appearance,
+    href,
     label,
+    newTab,
   }
 
   return <Button className={className} {...buttonProps} el="link" />

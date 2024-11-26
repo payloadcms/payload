@@ -7,7 +7,7 @@ import type {
   SanitizedCollectionConfig,
 } from 'payload'
 
-import { dequal } from 'dequal' // TODO: Can we change this to dequal/lite ? If not, please add comment explaining why
+import { dequal } from 'dequal/lite'
 import { formatErrors } from 'payload'
 
 import type { Column } from '../elements/Table/index.js'
@@ -168,10 +168,6 @@ export const buildTableState = async (
   let newPrefs = preferencesResult.value
 
   if (!preferencesResult.id || !dequal(columns, preferencesResult?.columns)) {
-    const mergedPrefs = {
-      ...(preferencesResult || {}),
-      columns,
-    }
     const preferencesArgs = {
       collection: 'payload-preferences',
       data: {
@@ -180,7 +176,10 @@ export const buildTableState = async (
           collection: user.collection,
           value: user.id,
         },
-        value: mergedPrefs,
+        value: {
+          ...(preferencesResult?.value || {}),
+          columns,
+        },
       },
       depth: 0,
       req,

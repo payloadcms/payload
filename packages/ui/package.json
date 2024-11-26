@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -115,7 +115,6 @@
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
     "qs-esm": "7.0.2",
-    "react-animate-height": "2.1.2",
     "react-datepicker": "6.9.0",
     "react-image-crop": "10.1.8",
     "react-select": "5.8.0",

@@ -77,7 +77,7 @@ export const MyFeature = createServerFeature({
 
 This allows you to add i18n translations scoped to your feature. This specific example translation will be available under `lexical:myFeature:label` - `myFeature` being your feature key.
 
-### Markdown Transformers
+### Markdown Transformers#server-feature-markdown-transformers
 
 The Server Feature, just like the Client Feature, allows you to add markdown transformers. Markdown transformers on the server are used when [converting the editor from or to markdown](/docs/lexical/converters#markdown-lexical).
 
@@ -120,7 +120,7 @@ export const MyFeature = createServerFeature({
 
 In this example, the node will be outputted as `+++` in Markdown, and the markdown `+++` will be converted to a `MyNode` node in the editor.
 
-### Nodes
+### Nodes#server-feature-nodes
 
 While nodes added to the server feature do not control how the node is rendered in the editor, they control other aspects of the node:
 - HTML conversion
@@ -266,7 +266,7 @@ export const MyClientFeature = createClientFeature({
 
 Explore the APIs available through ClientFeature to add the specific functionality you need. Remember, do not import directly from `'@payloadcms/richtext-lexical'` when working on the client-side, as it will cause errors with webpack or turbopack. Instead, use `'@payloadcms/richtext-lexical/client'` for all client-side imports. Type-imports are excluded from this rule and can always be imported.
 
-### Nodes
+### Nodes#client-feature-nodes
 
 Add nodes to the `nodes` array in **both** your client & server feature. On the server side, nodes are utilized for backend operations like HTML conversion in a headless editor. On the client side, these nodes are integral to how content is displayed and managed in the editor, influencing how they are rendered, behave, and saved in the database.
 
@@ -705,7 +705,7 @@ export const MyClientFeature = createClientFeature({
 | **`keywords`** | Keywords are used to match the item for different texts typed after the '/'. E.g. you might want to show a horizontal rule item if you type both /hr, /separator, /horizontal etc. In addition to the keywords, the label and key will be used to find the right slash menu item. |
 
 
-### Markdown Transformers
+### Markdown Transformers#client-feature-markdown-transformers
 
 The Client Feature, just like the Server Feature, allows you to add markdown transformers. Markdown transformers on the client are used to create new nodes when a certain markdown pattern is typed in the editor.
 

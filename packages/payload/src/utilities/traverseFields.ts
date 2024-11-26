@@ -76,9 +76,15 @@ export const traverseFields = ({
     const next = () => {
       skip = true
     }
+
+    if (!ref || typeof ref !== 'object') {
+      return
+    }
+
     if (callback && callback({ field, next, parentRef, ref })) {
       return true
     }
+
     if (skip) {
       return false
     }
@@ -89,6 +95,7 @@ export const traverseFields = ({
 
     if (field.type === 'tabs' && 'tabs' in field) {
       for (const tab of field.tabs) {
+        let tabRef = ref
         if ('name' in tab && tab.name) {
           if (!ref[tab.name] || typeof ref[tab.name] !== 'object') {
             if (fillEmpty) {
@@ -98,13 +105,17 @@ export const traverseFields = ({
             }
           }
 
-          parentRef = ref
-          currentRef = ref[tab.name]
+          tabRef = tabRef[tab.name]
 
           if (tab.localized) {
-            for (const key in currentRef as Record<string, unknown>) {
-              if (currentRef[key] && typeof currentRef[key] === 'object') {
-                traverseFields({ callback, fields: tab.fields, parentRef, ref: currentRef[key] })
+            for (const key in tabRef as Record<string, unknown>) {
+              if (tabRef[key] && typeof tabRef[key] === 'object') {
+                traverseFields({
+                  callback,
+                  fields: tab.fields,
+                  parentRef: currentParentRef,
+                  ref: tabRef[key],
+                })
               }
             }
             continue
@@ -113,16 +124,27 @@ export const traverseFields = ({
 
         if (
           callback &&
-          callback({ field: { ...tab, type: 'tab' }, next, parentRef, ref: currentRef })
+          callback({
+            field: { ...tab, type: 'tab' },
+            next,
+            parentRef: currentParentRef,
+            ref: tabRef,
+          })
         ) {
           return true
         }
 
-        traverseFields({ callback, fields: tab.fields, parentRef, ref: currentRef })
+        traverseFields({
+          callback,
+          fields: tab.fields,
+          parentRef: currentParentRef,
+          ref: tabRef,
+        })
       }
 
       return
     }
+
     if (field.type !== 'tab' && (fieldHasSubFields(field) || field.type === 'blocks')) {
       if ('name' in field && field.name) {
         currentParentRef = currentRef

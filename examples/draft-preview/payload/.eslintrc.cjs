@@ -1,4 +1,8 @@
 module.exports = {
+  extends: 'next',
   root: true,
-  extends: ['@payloadcms'],
+  parserOptions: {
+    project: ['./tsconfig.json'],
+    tsconfigRootDir: __dirname,
+  },
 }

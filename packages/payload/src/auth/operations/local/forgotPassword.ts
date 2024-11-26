@@ -42,4 +42,4 @@ async function localForgotPassword<T extends CollectionSlug>(
   })
 }
 
-export default localForgotPassword
+export const forgotPassword = localForgotPassword
