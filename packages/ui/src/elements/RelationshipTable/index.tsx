@@ -178,7 +178,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       <div className={`${baseClass}__header`}>
         {Label}
         <div className={`${baseClass}__actions`}>
-          {canCreate && <DocumentDrawerToggler>{i18n.t('fields:addNew')}</DocumentDrawerToggler>}
+          {canCreate && (
+            <DocumentDrawerToggler className={`${baseClass}__add-new`}>
+              {i18n.t('fields:addNew')}
+            </DocumentDrawerToggler>
+          )}
           <Pill
             aria-controls={`${baseClass}-columns`}
             aria-expanded={openColumnSelector}

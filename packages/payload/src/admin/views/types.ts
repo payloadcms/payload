@@ -8,7 +8,7 @@ import type { Locale, MetaConfig, PayloadComponent, ServerProps } from '../../co
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
-import type { Data, DocumentSlots, PayloadServerAction } from '../types.js'
+import type { Data, DocumentSlots } from '../types.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
