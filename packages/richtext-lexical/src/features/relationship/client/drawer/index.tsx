@@ -50,7 +50,6 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
 
   const { closeListDrawer, isListDrawerOpen, ListDrawer, openListDrawer } = useLexicalListDrawer({
     collectionSlugs: enabledCollectionSlugs ? enabledCollectionSlugs : undefined,
-
     selectedCollection: selectedCollectionSlug,
   })
 

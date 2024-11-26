@@ -67,7 +67,6 @@ const RelationshipElementComponent: React.FC = () => {
 
   const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
-
     selectedCollection: relatedCollection.slug,
   })
 

@@ -61,7 +61,6 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
 
   const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
-
     selectedCollection: relatedCollection.slug,
   })
 

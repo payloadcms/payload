@@ -39,7 +39,6 @@ const RelationshipButtonComponent: React.FC<Props> = ({ enabledCollectionSlugs }
   )
   const [ListDrawer, ListDrawerToggler, { closeDrawer, isDrawerOpen }] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
-
     selectedCollection: selectedCollectionSlug,
   })
 
