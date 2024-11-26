@@ -73,7 +73,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
 
     const fullWhere = combineQueries(where, accessResult)
 
-    const versionFields = buildVersionCollectionFields(payload.config, collectionConfig)
+    const versionFields = buildVersionCollectionFields(payload.config, collectionConfig, true)
 
     await validateQueryPaths({
       collectionConfig,

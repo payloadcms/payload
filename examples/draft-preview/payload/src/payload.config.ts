@@ -1,37 +1,42 @@
-import { webpackBundler } from '@payloadcms/bundler-webpack'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { slateEditor } from '@payloadcms/richtext-slate'
+import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
-import BeforeLogin from './components/BeforeLogin'
 import { MainMenu } from './globals/MainMenu'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+// eslint-disable-next-line no-restricted-exports
 export default buildConfig({
-  collections: [Pages, Users],
   admin: {
-    bundler: webpackBundler(),
-    components: {
-      beforeLogin: [BeforeLogin],
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
   },
-  editor: slateEditor({}),
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
-  }),
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
+  collections: [Pages, Users],
   cors: [
-    process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
+    process.env.NEXT_PUBLIC_SERVER_URL || '',
     process.env.PAYLOAD_PUBLIC_SITE_URL || '',
   ].filter(Boolean),
   csrf: [
-    process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
+    process.env.NEXT_PUBLIC_SERVER_URL || '',
     process.env.PAYLOAD_PUBLIC_SITE_URL || '',
   ].filter(Boolean),
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI || '',
+  }),
+  editor: slateEditor({}),
   globals: [MainMenu],
+  graphQL: {
+    schemaOutputFile: path.resolve(dirname, 'generated-schema.graphql'),
+  },
+  secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts'),
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

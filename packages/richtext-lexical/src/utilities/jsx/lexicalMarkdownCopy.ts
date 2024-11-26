@@ -1,15 +1,16 @@
 /* eslint-disable regexp/no-unused-capturing-group */
 
+import type { ElementNode } from 'lexical'
+
 import type {
   MultilineElementTransformer as _MultilineElementTransformer,
   Transformer,
-} from '@lexical/markdown'
-import type { ElementNode } from 'lexical'
+} from '../../packages/@lexical/markdown/index.js'
 
 import {
   $convertFromMarkdownString as $originalConvertFromMarkdownString,
   TRANSFORMERS,
-} from '@lexical/markdown'
+} from '../../packages/@lexical/markdown/index.js'
 
 const EMPTY_OR_WHITESPACE_ONLY = /^[\t ]*$/
 const ORDERED_LIST_REGEX = /^(\s*)(\d+)\.\s/

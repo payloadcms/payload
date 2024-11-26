@@ -9,10 +9,18 @@ Follow the instructions in each respective README to get started. If you are set
 
 ## Quick Start
 
+To spin up this example locally, follow these steps:
+
 1. Clone this repo
-2. `cd` into this directory and run `yarn` or `npm install`
+2. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+
+   > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
+
 3. `cp .env.example .env` to copy the example environment variables
-4. `yarn dev` or `npm run dev` to start the server and seed the database
+
+   > Adjust `PAYLOAD_PUBLIC_SITE_URL` in the `.env` if your front-end is running on a separate domain or port.
+
+4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
 5. `open http://localhost:3000/admin` to access the admin panel
 6. Login with email `demo@payloadcms.com` and password `demo`
 
@@ -21,6 +29,33 @@ That's it! Changes made in `./src` will be reflected in your app. See the [Devel
 ## How it works
 
 Draft preview works by sending the user to your front-end with a `secret` along with their http-only cookies. Your front-end catches the request, verifies the authenticity, then enters into it's own preview mode. Once in preview mode, your front-end can begin securely requesting draft documents from Payload. See [Preview Mode](#preview-mode) for more details.
+
+### Environment Variables
+
+Depending on how you run this example, you need different environment variables:
+
+- #### Running Payload and the Front-End Together
+
+  When the Payload server and front-end run on the same domain and port:
+
+  ```ts
+  DATABASE_URI=mongodb://127.0.0.1/payload-draft-preview-example
+  PAYLOAD_SECRET=YOUR_SECRET_HERE
+  NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+  ```
+
+- #### Running Payload and the Front-End Separately
+
+  When running Payload on one domain (e.g., `localhost:3000`) and the front-end on another (e.g., `localhost:3001`):
+
+  ```ts
+  DATABASE_URI=mongodb://127.0.0.1/payload-draft-preview-example
+  PAYLOAD_SECRET=YOUR_SECRET_HERE
+  NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+  PAYLOAD_PUBLIC_SITE_URL=http://localhost:3001
+  REVALIDATION_KEY=EXAMPLE_REVALIDATION_KEY
+  PAYLOAD_PUBLIC_DRAFT_SECRET=EXAMPLE_DRAFT_SECRET
+  ```
 
 ### Collections
 
@@ -53,11 +88,11 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
   })
   ```
 
-  For more details on how to extend this functionality, see the [Authentication](https://payloadcms.com/docs/authentication) docs.
+  For more details on how to extend this functionality, see the [Authentication](https://payloadcms.com/docs/authentication/overview) docs.
 
 ### Preview Mode
 
-To preview draft documents, the user first needs to have at least one draft document saved. When they click the "preview" button from the Payload admin panel, a custom [preview function](https://payloadcms.com/docs/configuration/collections#preview) routes them to your front-end with a `secret` along with their http-only cookies. An API route on your front-end will verify the secret and token before entering into it's own preview mode. Once in preview mode, it can begin requesting drafts from Payload using the `Authorization` header. See [Pages](#pages) for more details.
+To preview draft documents, the user first needs to have at least one draft document saved. When they click the "preview" button from the Payload admin panel, a custom [preview function](https://payloadcms.com/docs/admin/collections#preview) routes them to your front-end with a `secret` along with their http-only cookies. An API route on your front-end will verify the secret and token before entering into it's own preview mode. Once in preview mode, it can begin requesting drafts from Payload using the `Authorization` header. See [Pages](#pages) for more details.
 
 > "Preview mode" looks differently for every front-end framework. For instance, check out the differences between Next.js [Preview Mode](https://nextjs.org/docs/pages/building-your-application/configuring/preview-mode) in the Pages Router and [Draft Mode](https://nextjs.org/docs/pages/building-your-application/configuring/draft-mode) in the App Router. In Next.js, methods are provided that set cookies in your browser, but this may not be the case for all frameworks.
 
@@ -83,16 +118,16 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ### Seed
 
-On boot, a seed script is included to scaffold a basic database for you to use as an example. This is done by setting the `PAYLOAD_DROP_DATABASE` and `PAYLOAD_PUBLIC_SEED` environment variables which are included in the `.env.example` by default. You can remove these from your `.env` to prevent this behavior. You can also freshly seed your project at any time by running `yarn seed`. This seed creates a user with email `demo@payloadcms.com` and password `demo` along with a home page and an example page with two versions, one published and the other draft.
+On boot, a seed script is included to scaffold a basic database for you to use as an example. You can remove `pnpm seed` from the `dev` script in the `package.json` to prevent this behavior. You can also freshly seed your project at any time by running `pnpm seed`. This seed creates a user with email `demo@payloadcms.com` and password `demo` along with a home page and an example page with two versions, one published and the other draft.
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 
 ## Production
 
-To run Payload in production, you need to build and serve the Admin panel. To do so, follow these steps:
+To run Payload in production, you need to build and start the Admin panel. To do so, follow these steps:
 
-1. First invoke the `payload build` script by running `yarn build` or `npm run build` in your project root. This creates a `./build` directory with a production-ready admin bundle.
-1. Then run `yarn serve` or `npm run serve` to run Node in production and serve Payload from the `./build` directory.
+1. Invoke the `next build` script by running `pnpm build` or `npm run build` in your project root. This creates a `.next` directory with a production-ready admin bundle.
+1. Finally run `pnpm start` or `npm run start` to run Node in production and serve Payload from the `.build` directory.
 
 ### Deployment
 

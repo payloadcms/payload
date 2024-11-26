@@ -1,6 +1,6 @@
 import type { asc, desc, SQL } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
-import type { Field, Sort, Where } from 'payload'
+import type { FlattenedField, Sort, Where } from 'payload'
 
 import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
 
@@ -15,7 +15,7 @@ export type BuildQueryJoinAliases = {
 
 type BuildQueryArgs = {
   adapter: DrizzleAdapter
-  fields: Field[]
+  fields: FlattenedField[]
   joins?: BuildQueryJoinAliases
   locale?: string
   sort?: Sort

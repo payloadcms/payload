@@ -1,7 +1,5 @@
-import type { ElementTransformer, Transformer } from '@lexical/markdown'
 import type { LexicalNode } from 'lexical'
 
-import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
 import {
   $createTableCellNode,
   $createTableNode,
@@ -15,6 +13,13 @@ import {
   TableRowNode,
 } from '@lexical/table'
 import { $isParagraphNode, $isTextNode } from 'lexical'
+
+import {
+  $convertToMarkdownString,
+  type ElementTransformer,
+  type Transformer,
+} from '../../packages/@lexical/markdown/index.js'
+import { $convertFromMarkdownString } from '../../utilities/jsx/lexicalMarkdownCopy.js'
 
 // Very primitive table setup
 const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/

@@ -1,5 +1,5 @@
 'use client'
-import type { KeyboardEventHandler } from 'react'
+import type { CSSProperties, KeyboardEventHandler } from 'react'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
@@ -67,6 +67,13 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     .filter(Boolean)
     .join(' ')
 
+  const styles = {
+    // Remove the default react-select z-index from the menu so that our custom
+    // z-index in the "payload-default" css layer can take effect, in such a way
+    // that end users can easily override it as with other styles.
+    menu: (rsStyles: CSSProperties): CSSProperties => ({ ...rsStyles, zIndex: undefined }),
+  }
+
   if (!hasMounted) {
     return <ShimmerEffect height="calc(var(--base) * 2 + 2px)" />
   }
@@ -106,6 +113,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         onMenuClose={onMenuClose}
         onMenuOpen={onMenuOpen}
         options={options}
+        styles={styles}
         unstyled={true}
         value={value}
       />
@@ -183,6 +191,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       onMenuClose={onMenuClose}
       onMenuOpen={onMenuOpen}
       options={options}
+      styles={styles}
       unstyled={true}
       value={value}
     />

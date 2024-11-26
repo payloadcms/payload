@@ -243,18 +243,18 @@ export const renderListView = async (
             modifySearchParams={!isInDrawer}
             preferenceKey={preferenceKey}
           >
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={collectionConfig?.admin?.components?.views?.list?.Component}
-              Fallback={DefaultListView}
-              importMap={payload.importMap}
-              serverProps={{
+            {RenderServerComponent({
+              clientProps,
+              Component: collectionConfig?.admin?.components?.views?.list?.Component,
+              Fallback: DefaultListView,
+              importMap: payload.importMap,
+              serverProps: {
                 ...sharedServerProps,
                 data,
                 listPreferences,
                 listSearchableFields: collectionConfig.admin.listSearchableFields,
-              }}
-            />
+              },
+            })}
           </ListQueryProvider>
         </Fragment>
       ),

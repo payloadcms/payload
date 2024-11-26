@@ -36,7 +36,7 @@ Forms can be as simple or complex as you need, from a basic contact form, to a m
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-pnpm add @payloadcms/plugin-form-builder@beta
+pnpm add @payloadcms/plugin-form-builder
 ```
 
 ## Basic Usage
@@ -103,7 +103,7 @@ formBuilder({
 
 ### `beforeEmail`
 
-The `beforeEmail` property is a [beforeChange](<[beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)>) hook that is called just after emails are prepared, but before they are sent. This is a great place to inject your own HTML template to add custom styles.
+The `beforeEmail` property is a [beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange) hook that is called just after emails are prepared, but before they are sent. This is a great place to inject your own HTML template to add custom styles.
 
 ```ts
 // payload.config.ts
@@ -215,7 +215,7 @@ formBuilder({
 
 ### `handlePayment`
 
-The `handlePayment` property is a [beforeChange](<[beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)>) hook that is called upon form submission. You can integrate into any third-party payment processing API here to accept payment based on form input. You can use the `getPaymentTotal` function to calculate the total cost after all conditions have been applied. This is only applicable if the form has enabled the `payment` field.
+The `handlePayment` property is a [beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange) hook that is called upon form submission. You can integrate into any third-party payment processing API here to accept payment based on form input. You can use the `getPaymentTotal` function to calculate the total cost after all conditions have been applied. This is only applicable if the form has enabled the `payment` field.
 
 First import the utility function. This will execute all of the price conditions that you have set in your form's `payment` field and returns the total price.
 

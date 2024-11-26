@@ -20,7 +20,11 @@ export async function generateStaticParams() {
     collection: 'posts',
     draft: false,
     limit: 1000,
+    pagination: false,
     overrideAccess: false,
+    select: {
+      slug: true,
+    },
   })
 
   const params = posts.docs.map(({ slug }) => {
@@ -53,20 +57,15 @@ export default async function Post({ params: paramsPromise }: Args) {
       <PostHero post={post} />
 
       <div className="flex flex-col items-center gap-4 pt-8">
-        <div className="container lg:mx-0 lg:grid lg:grid-cols-[1fr_48rem_1fr] grid-rows-[1fr]">
-          <RichText
-            className="lg:grid lg:grid-cols-subgrid col-start-1 col-span-3 grid-rows-[1fr]"
-            content={post.content}
-            enableGutter={false}
-          />
+        <div className="container">
+          <RichText className="max-w-[48rem] mx-auto" content={post.content} enableGutter={false} />
+          {post.relatedPosts && post.relatedPosts.length > 0 && (
+            <RelatedPosts
+              className="mt-12 max-w-[52rem] lg:grid lg:grid-cols-subgrid col-start-1 col-span-3 grid-rows-[2fr]"
+              docs={post.relatedPosts.filter((post) => typeof post === 'object')}
+            />
+          )}
         </div>
-
-        {post.relatedPosts && post.relatedPosts.length > 0 && (
-          <RelatedPosts
-            className="mt-12"
-            docs={post.relatedPosts.filter((post) => typeof post === 'object')}
-          />
-        )}
       </div>
     </article>
   )
@@ -89,6 +88,7 @@ const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
     draft,
     limit: 1,
     overrideAccess: draft,
+    pagination: false,
     where: {
       slug: {
         equals: slug,

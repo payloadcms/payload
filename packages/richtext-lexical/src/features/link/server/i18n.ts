@@ -17,6 +17,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Odkaz',
     loadingWithEllipsis: 'Načítání...',
   },
+  da: {
+    label: 'Link',
+    loadingWithEllipsis: 'Indlæser...',
+  },
   de: {
     label: 'Verknüpfung',
     loadingWithEllipsis: 'Laden...',

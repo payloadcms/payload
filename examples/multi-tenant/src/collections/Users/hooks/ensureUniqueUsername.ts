@@ -46,8 +46,8 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
       throw new ValidationError({
         errors: [
           {
-            field: 'username',
             message: `The "${attemptedTenantChange.name}" tenant already has a user with the username "${value}". Usernames must be unique per tenant.`,
+            path: 'username',
           },
         ],
       })
@@ -56,8 +56,8 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
     throw new ValidationError({
       errors: [
         {
-          field: 'username',
           message: `A user with the username ${value} already exists. Usernames must be unique per tenant.`,
+          path: 'username',
         },
       ],
     })

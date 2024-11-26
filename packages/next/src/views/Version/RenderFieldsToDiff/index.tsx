@@ -25,6 +25,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   // typing it as `as typeof _diffComponents` here ensures the TField generics of DiffComponentProps are respected.
   // Without it, you could pass a UI field to the Tabs component, without it erroring
   const diffComponents: typeof _diffComponents = __diffComponents as typeof _diffComponents
+
   return (
     <div className={baseClass}>
       {fields?.map((field, i) => {
@@ -51,10 +52,14 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               : comparison?.[fieldName]
 
             const hasPermission =
-              fieldPermissions?.[fieldName] === true || fieldPermissions?.[fieldName]?.read
+              fieldPermissions === true ||
+              fieldPermissions?.[fieldName] === true ||
+              fieldPermissions?.[fieldName]?.read
 
             const subFieldPermissions =
-              fieldPermissions?.[fieldName] === true || fieldPermissions?.[fieldName]?.fields
+              fieldPermissions === true ||
+              fieldPermissions?.[fieldName] === true ||
+              fieldPermissions?.[fieldName]?.fields
 
             if (!hasPermission) {
               return null
@@ -113,6 +118,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 comparison={comparison}
                 diffComponents={diffComponents}
                 field={field}
+                fieldPermissions={fieldPermissions}
                 fields={[]}
                 i18n={i18n}
                 key={i}
@@ -130,11 +136,11 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 diffComponents={diffComponents}
                 disableGutter
                 field={field}
+                fieldPermissions={fieldPermissions}
                 fields={field.fields}
                 i18n={i18n}
                 key={i}
                 locales={locales}
-                permissions={fieldPermissions}
                 version={version}
               />
             )

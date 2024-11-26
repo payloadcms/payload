@@ -8,7 +8,7 @@ keywords: plugins, stripe, payments, ecommerce
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-stripe)](https://www.npmjs.com/package/@payloadcms/plugin-stripe)
 
-With this plugin you can easily integrate [Stripe](https://stripe.com) into Payload. Simply provide your Stripe credentials and this plugin will open up a two-way communication channel between the two platforms. This enables you to easily sync data back and forth, as well as proxy the Stripe REST API through Payload's [Access Control](../access-control). Use this plugin to completely offload billing to Stripe and retain full control over your application's data.
+With this plugin you can easily integrate [Stripe](https://stripe.com) into Payload. Simply provide your Stripe credentials and this plugin will open up a two-way communication channel between the two platforms. This enables you to easily sync data back and forth, as well as proxy the Stripe REST API through Payload's [Access Control](../access-control/overview). Use this plugin to completely offload billing to Stripe and retain full control over your application's data.
 
 For example, you might be building an e-commerce or SaaS application, where you have a `products` or a `plans` collection that requires either a one-time payment or a subscription. You can to tie each of these products to Stripe, then easily subscribe to billing-related events to perform your application's business logic, such as active purchases or subscription cancellations.
 
@@ -39,7 +39,7 @@ The beauty of this plugin is the entirety of your application's content and busi
 Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
 
 ```bash
-  pnpm add @payloadcms/plugin-stripe@beta
+  pnpm add @payloadcms/plugin-stripe
 ```
 
 ## Basic Usage

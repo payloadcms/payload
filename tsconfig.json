@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
-    "target": "esnext",
+    "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "allowJs": true,
@@ -12,9 +12,9 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
     "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
     ],
     "noEmit": true,
     "outDir": "./dist",

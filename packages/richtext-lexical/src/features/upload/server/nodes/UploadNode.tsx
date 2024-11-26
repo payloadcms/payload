@@ -97,9 +97,9 @@ export class UploadServerNode extends DecoratorBlockNode {
     return 'upload'
   }
 
-  static importDOM(): DOMConversionMap | null {
+  static importDOM(): DOMConversionMap<HTMLImageElement> {
     return {
-      img: (node: HTMLImageElement) => ({
+      img: (node) => ({
         conversion: $convertUploadServerElement,
         priority: 0,
       }),

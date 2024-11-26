@@ -1,9 +1,7 @@
 import type { ServerEditorConfig } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from 'lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { CollectionConfig } from 'payload'
 
-import { createHeadlessEditor } from '@lexical/headless'
-import { $convertToMarkdownString } from '@lexical/markdown'
 import {
   BlocksFeature,
   defaultEditorFeatures,
@@ -17,6 +15,8 @@ import {
   TreeViewFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
+import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
+import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
 
 import { lexicalFieldsSlug } from '../../slugs.js'
 import {
@@ -121,6 +121,25 @@ const editorConfig: ServerEditorConfig = {
           admin: {
             components: {
               Block: '/collections/Lexical/blockComponents/BlockComponent.js#BlockComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'BlockRSC',
+
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC',
             },
           },
           fields: [

@@ -4,7 +4,8 @@ import type {
   Field,
   FieldPaths,
   RichTextFieldClient,
- ServerComponentProps } from 'payload'
+  ServerComponentProps,
+} from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { createClientFields, deepCopyObjectSimple } from 'payload'
@@ -56,31 +57,31 @@ export const RscEntrySlateField: React.FC<
 
       componentMap.set(
         `leaf.button.${leafObject.name}`,
-        <RenderServerComponent
-          clientProps={clientProps}
-          Component={LeafButton}
-          importMap={payload.importMap}
-        />,
+        RenderServerComponent({
+          clientProps,
+          Component: LeafButton,
+          importMap: payload.importMap,
+        }),
       )
 
       componentMap.set(
         `leaf.component.${leafObject.name}`,
-        <RenderServerComponent
-          clientProps={clientProps}
-          Component={LeafComponent}
-          importMap={payload.importMap}
-        />,
+        RenderServerComponent({
+          clientProps,
+          Component: LeafComponent,
+          importMap: payload.importMap,
+        }),
       )
 
       if (Array.isArray(leafObject.plugins)) {
         leafObject.plugins.forEach((Plugin, i) => {
           componentMap.set(
             `leaf.plugin.${leafObject.name}.${i}`,
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={Plugin}
-              importMap={payload.importMap}
-            />,
+            RenderServerComponent({
+              clientProps,
+              Component: Plugin,
+              importMap: payload.importMap,
+            }),
           )
         })
       }
@@ -102,31 +103,31 @@ export const RscEntrySlateField: React.FC<
       if (ElementButton) {
         componentMap.set(
           `element.button.${element.name}`,
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={ElementButton}
-            importMap={payload.importMap}
-          />,
+          RenderServerComponent({
+            clientProps,
+            Component: ElementButton,
+            importMap: payload.importMap,
+          }),
         )
       }
       componentMap.set(
         `element.component.${element.name}`,
-        <RenderServerComponent
-          clientProps={clientProps}
-          Component={ElementComponent}
-          importMap={payload.importMap}
-        />,
+        RenderServerComponent({
+          clientProps,
+          Component: ElementComponent,
+          importMap: payload.importMap,
+        }),
       )
 
       if (Array.isArray(element.plugins)) {
         element.plugins.forEach((Plugin, i) => {
           componentMap.set(
             `element.plugin.${element.name}.${i}`,
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={Plugin}
-              importMap={payload.importMap}
-            />,
+            RenderServerComponent({
+              clientProps,
+              Component: Plugin,
+              importMap: payload.importMap,
+            }),
           )
         })
       }

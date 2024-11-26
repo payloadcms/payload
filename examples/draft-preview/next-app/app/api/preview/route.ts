@@ -2,13 +2,13 @@ import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 export async function GET(
-  req: Request & {
+  req: {
     cookies: {
       get: (name: string) => {
         value: string
       }
     }
-  },
+  } & Request,
 ): Promise<Response> {
   const payloadToken = req.cookies.get('payload-token')?.value
   const { searchParams } = new URL(req.url)
@@ -32,8 +32,10 @@ export async function GET(
 
   const userRes = await userReq.json()
 
+  const draft = await draftMode()
+
   if (!userReq.ok || !userRes?.user) {
-    draftMode().disable()
+    draft.disable()
     return new Response('You are not allowed to preview this page', { status: 403 })
   }
 
@@ -41,7 +43,7 @@ export async function GET(
     return new Response('Invalid token', { status: 401 })
   }
 
-  draftMode().enable()
+  draft.enable()
 
   redirect(url)
 }

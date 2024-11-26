@@ -13,8 +13,14 @@ export const QuoteHTMLConverter: HTMLConverter<any> = {
       },
       submissionData,
     })
+    const style = [
+      node.format ? `text-align: ${node.format};` : '',
+      node.indent > 0 ? `padding-inline-start: ${node.indent * 40}px;` : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
 
-    return `<blockquote>${childrenText}</blockquote>`
+    return `<blockquote${style ? ` style='${style}'` : ''}>${childrenText}</blockquote>`
   },
   nodeTypes: ['quote'],
 }

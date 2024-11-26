@@ -1,5 +1,6 @@
 import React from 'react'
-import { PayloadAdminBar, PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
+import type { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
+import { PayloadAdminBar } from 'payload-admin-bar'
 
 import { Gutter } from '../Gutter'
 
@@ -9,30 +10,30 @@ const Title: React.FC = () => <span>Dashboard</span>
 
 export const AdminBar: React.FC<{
   adminBarProps?: PayloadAdminBarProps
+  setUser?: (user: PayloadMeUser) => void
   user?: PayloadMeUser
-  setUser?: (user: PayloadMeUser) => void // eslint-disable-line no-unused-vars
 }> = (props) => {
-  const { adminBarProps, user, setUser } = props
+  const { adminBarProps, setUser, user } = props
 
   return (
     <div className={[classes.adminBar, user && classes.show].filter(Boolean).join(' ')}>
       <Gutter className={classes.container}>
         <PayloadAdminBar
           {...adminBarProps}
-          logo={<Title />}
-          cmsURL={process.env.NEXT_PUBLIC_PAYLOAD_URL}
-          onAuthChange={setUser}
           className={classes.payloadAdminBar}
           classNames={{
-            user: classes.user,
-            logo: classes.logo,
             controls: classes.controls,
+            logo: classes.logo,
+            user: classes.user,
           }}
+          cmsURL={process.env.NEXT_PUBLIC_PAYLOAD_URL}
+          logo={<Title />}
+          onAuthChange={setUser}
           style={{
+            backgroundColor: 'transparent',
+            padding: 0,
             position: 'relative',
             zIndex: 'unset',
-            padding: 0,
-            backgroundColor: 'transparent',
           }}
         />
       </Gutter>

@@ -24,6 +24,7 @@ import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
 import { PublishMany } from '../../elements/PublishMany/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
@@ -36,8 +37,8 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import './index.scss'
 import { ListHeader } from './ListHeader/index.js'
+import './index.scss'
 
 const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
@@ -88,7 +89,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const { createNewDrawerSlug, drawerSlug: listDrawerSlug } = useListDrawerContext()
+  const { createNewDrawerSlug, drawerSlug: listDrawerSlug, onBulkSelect } = useListDrawerContext()
 
   useEffect(() => {
     if (InitialTable) {
@@ -197,7 +198,13 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 t={t}
               />
               <ListControls
-                beforeActions={beforeActions}
+                beforeActions={
+                  enableRowSelections && typeof onBulkSelect === 'function'
+                    ? beforeActions
+                      ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
+                      : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                    : beforeActions
+                }
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
                 disableBulkDelete={disableBulkDelete}
@@ -265,7 +272,14 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                             label={getTranslation(collectionConfig.labels.plural, i18n)}
                           />
                           <div className={`${baseClass}__list-selection-actions`}>
-                            {beforeActions && beforeActions}
+                            {enableRowSelections && typeof onBulkSelect === 'function'
+                              ? beforeActions
+                                ? [
+                                    ...beforeActions,
+                                    <SelectMany key="select-many" onClick={onBulkSelect} />,
+                                  ]
+                                : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                              : beforeActions}
                             {!disableBulkEdit && (
                               <Fragment>
                                 <EditMany collection={collectionConfig} />

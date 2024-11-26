@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { PayloadAdminBar, PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
+import type { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
+import { PayloadAdminBar } from 'payload-admin-bar'
 
 import { Gutter } from '../Gutter'
 
@@ -17,24 +18,24 @@ export const AdminBarClient: React.FC<PayloadAdminBarProps> = (props) => {
       <Gutter className={classes.container}>
         <PayloadAdminBar
           {...props}
-          logo={<Title />}
+          className={classes.payloadAdminBar}
+          classNames={{
+            controls: classes.controls,
+            logo: classes.logo,
+            user: classes.user,
+          }}
           cmsURL={process.env.NEXT_PUBLIC_PAYLOAD_URL}
+          logo={<Title />}
+          onAuthChange={setUser}
           onPreviewExit={async () => {
             await fetch(`/api/exit-preview`)
             window.location.reload()
           }}
-          onAuthChange={setUser}
-          className={classes.payloadAdminBar}
-          classNames={{
-            user: classes.user,
-            logo: classes.logo,
-            controls: classes.controls,
-          }}
           style={{
+            backgroundColor: 'transparent',
+            padding: 0,
             position: 'relative',
             zIndex: 'unset',
-            padding: 0,
-            backgroundColor: 'transparent',
           }}
         />
       </Gutter>
