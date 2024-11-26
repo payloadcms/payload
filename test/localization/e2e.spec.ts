@@ -315,6 +315,7 @@ describe('Localization', () => {
 
       const fromLocaleField = page.locator('#field-fromLocale')
       await expect(fromLocaleField).toContainText('Spanish')
+      await page.locator('.drawer-close-button').click()
     })
 
     test('should not overwrite existing data when overwrite is unchecked', async () => {
@@ -365,9 +366,11 @@ describe('Localization', () => {
         .evaluateAll((els) => els.map((el) => el.textContent))
 
       await expect.poll(() => options).not.toContain('English')
+      await page.locator('.drawer-close-button').click()
     })
 
     test('should handle back to back copies', async () => {
+      await changeLocale(page, defaultLocale)
       await createAndSaveDoc(page, url, { title })
 
       await openCopyToLocaleDrawer(page)
