@@ -29,13 +29,9 @@ const local = {
 }
 
 for (const operation in local) {
-  if (typeof local[operation] === 'function') {
+  if (operation !== 'auth') {
     local[operation] = enforceCallDepth(local[operation])
   }
-}
-
-for (const operation in local.auth) {
-  local.auth[operation] = enforceCallDepth(local.auth[operation])
 }
 
 export default local
