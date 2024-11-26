@@ -166,13 +166,10 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     }
 
     if (all && selected.size === docs.length) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.AllInPage)
     } else if (some) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.Some)
     } else {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.None)
     }
   }, [selectAll, selected, totalDocs, docs])
@@ -190,7 +187,6 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       }
     }
 
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
 

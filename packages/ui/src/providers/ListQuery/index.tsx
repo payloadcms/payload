@@ -184,7 +184,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         shouldUpdateQueryString = true
       }
 
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setCurrentQuery(currentQuery)
 
       if (shouldUpdateQueryString) {
