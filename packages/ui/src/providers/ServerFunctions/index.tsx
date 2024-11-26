@@ -158,7 +158,11 @@ export const ServerFunctionsProvider: React.FC<{
         const result = (await serverFunction({
           name: 'copy-data-from-locale',
           args: rest,
-        })) as { success: boolean }
+        })) as { data: Data }
+
+        if (!remoteSignal?.aborted) {
+          return result
+        }
 
         return result
       } catch (_err) {
