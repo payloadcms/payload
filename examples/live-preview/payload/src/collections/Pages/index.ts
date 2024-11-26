@@ -17,7 +17,7 @@ export const Pages: CollectionConfig = {
     livePreview: {
       url: ({ data }) => {
         const isHomePage = data.slug === 'home'
-        return `${process.env.PAYLOAD_PUBLIC_SITE_URL}${!isHomePage ? `/${data.slug}` : ''}`
+        return `${process.env.NEXT_PUBLIC_SERVER_URL}${!isHomePage ? `/${data.slug}` : ''}`
       },
     },
     useAsTitle: 'title',

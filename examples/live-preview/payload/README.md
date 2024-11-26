@@ -2,30 +2,21 @@
 
 The [Payload Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview/payload) demonstrates how to implement [Live Preview](https://payloadcms.com/docs/live-preview) in [Payload](https://github.com/payloadcms/payload). With Live Preview you can render your front-end application directly within the Admin panel. As you type, your changes take effect in real-time. No need to save a draft or publish your changes.
 
-**IMPORTANT—This example includes a fully integrated Next.js App Router front-end that runs on the same server as Payload.** If you are working on an application running on an entirely separate server, there are various fully working, separately running front-ends made explicitly for this example, including:
-
-- [Next.js App Router](../next-app)
-- [Next.js Pages Router](../next-pages)
-
-Those applications run directly alongside this one. Follow the instructions in each respective README to get started. If you are setting up authentication for another front-end, please consider contributing to this repo with your own example!
-
-To learn more about this, [check out how Payload can be used in its various headless capacities](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
+**IMPORTANT—This example includes a fully integrated Next.js App Router front-end that runs on the same server as Payload.**
 
 ## Quick Start
 
 1. Clone this repo
-1. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+2. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
 
    > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
 
-1. `cp .env.example .env` to copy the example environment variables
+3. `cp .env.example .env` to copy the example environment variables
 
-   > Adjust `PAYLOAD_PUBLIC_SITE_URL` in the `.env` if your front-end is running on a separate domain or port.
-
-1. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
    - Press `y` when prompted to seed the database
-1. `open http://localhost:3000` to access the home page
-1. `open http://localhost:3000/admin` to access the admin panel
+5. `open http://localhost:3000` to access the home page
+6. `open http://localhost:3000/admin` to access the admin panel
    - Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.
@@ -214,7 +205,7 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ### Seed
 
-On boot, a seed script is included to scaffold a basic database for you to use as an example. This is done by setting the `PAYLOAD_DROP_DATABASE` and `PAYLOAD_PUBLIC_SEED` environment variables which are included in the `.env.example` by default. You can remove these from your `.env` to prevent this behavior. You can also freshly seed your project at any time by running `yarn seed`. This seed creates a user with email `demo@payloadcms.com` and password `demo` along with a home page.
+On boot, a seed script is included to scaffold a basic database for you to use as an example. You can remove `pnpm seed` from the `dev` script in the `package.json` to prevent this behavior. You can also freshly seed your project at any time by running `pnpm seed`. This seed creates a user with email `demo@payloadcms.com` and password `demo` along with a home page and an example page with two versions, one published and the other draft.
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 
@@ -222,8 +213,8 @@ On boot, a seed script is included to scaffold a basic database for you to use a
 
 To run Payload in production, you need to build and serve the Admin panel. To do so, follow these steps:
 
-1. First invoke the `payload build` script by running `yarn build` or `npm run build` in your project root. This creates a `./build` directory with a production-ready admin bundle.
-1. Then run `yarn serve` or `npm run serve` to run Node in production and serve Payload from the `./build` directory.
+1. Invoke the `next build` script by running `pnpm build` or `npm run build` in your project root. This creates a `.next` directory with a production-ready admin bundle.
+1. Finally run `pnpm start` or `npm run start` to run Node in production and serve Payload from the `.build` directory.
 
 ### Deployment
 

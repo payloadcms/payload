@@ -13,7 +13,7 @@ export const Header = async () => {
 
   const mainMenu = await payload.findGlobal({
     slug: 'main-menu',
-    depth: 0,
+    depth: 1,
   })
 
   const { navItems } = mainMenu
@@ -40,7 +40,14 @@ export const Header = async () => {
         {hasNavItems && (
           <nav className={classes.nav}>
             {navItems.map(({ link }, i) => {
-              return <CMSLink key={i} {...link} />
+              const sanitizedLink = {
+                ...link,
+                type: link.type ?? undefined,
+                newTab: link.newTab ?? false,
+                url: link.url ?? undefined,
+              }
+
+              return <CMSLink key={i} {...sanitizedLink} />
             })}
           </nav>
         )}

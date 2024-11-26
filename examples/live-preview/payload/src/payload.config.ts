@@ -32,7 +32,7 @@ export default buildConfig({
   editor: slateEditor({}),
   globals: [MainMenu],
   secret: process.env.PAYLOAD_SECRET || '',
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

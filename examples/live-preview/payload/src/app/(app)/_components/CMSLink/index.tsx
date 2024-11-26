@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
-import type { Page } from '../../../payload-types'
+import type { Page } from '../../../../payload-types'
 
 import { Button } from '../Button'
 
@@ -10,13 +10,13 @@ export type CMSLinkType = {
   children?: React.ReactNode
   className?: string
   label?: string
-  newTab?: boolean
+  newTab?: boolean | null
   reference?: {
     relationTo: 'pages'
-    value: Page | string
-  }
-  type?: 'custom' | 'reference'
-  url?: string
+    value: number | Page | string
+  } | null
+  type?: 'custom' | 'reference' | null
+  url?: null | string
 }
 
 export const CMSLink: React.FC<CMSLinkType> = ({
@@ -31,17 +31,23 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 }) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? `/${reference.value.slug === 'home' ? '' : reference.value.slug}`
+      ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
+          reference.value.slug
+        }`
       : url
+
+  if (!href) {
+    return null
+  }
 
   if (!appearance) {
     const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
 
     if (type === 'custom') {
       return (
-        <a href={url} {...newTabProps} className={className}>
+        <a href={url || ''} {...newTabProps} className={className}>
           {label && label}
-          {children && children}
+          {children ? <>{children}</> : null}
         </a>
       )
     }
@@ -50,7 +56,7 @@ export const CMSLink: React.FC<CMSLinkType> = ({
       return (
         <Link href={href} {...newTabProps} className={className} prefetch={false}>
           {label && label}
-          {children && children}
+          {children ? <>{children}</> : null}
         </Link>
       )
     }
