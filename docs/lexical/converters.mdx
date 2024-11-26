@@ -25,9 +25,13 @@ export const MyComponent = ({ lexicalContent }) => {
 
 The `RichText` component will come with the most common serializers built-in, though you can also pass in your own serializers if you need to.
 
+<Banner type="default">
+  The JSX converter expects the input data to be fully populated. When fetching data, ensure the `depth` setting is high enough, to ensure that lexical nodes such as uploads are populated.
+</Banner>
+
 ### Converting Lexical Blocks to JSX
 
-In order to convert lexical blocks or inline blocks to JSX, you will have to add the converter for your block to the RichText component. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
+In order to convert lexical blocks or inline blocks to JSX, you will have to pass the converter for your block to the RichText component. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
 
 ```tsx
 import React from 'react'
