@@ -38,7 +38,7 @@ export const registerLocalStrategy = async ({
     }
 
     if (doc.email) {
-      whereConstraint.or.push({
+      whereConstraint.or?.push({
         email: {
           equals: doc.email,
         },
@@ -46,7 +46,7 @@ export const registerLocalStrategy = async ({
     }
 
     if (doc.username) {
-      whereConstraint.or.push({
+      whereConstraint.or?.push({
         username: {
           equals: doc.username,
         },

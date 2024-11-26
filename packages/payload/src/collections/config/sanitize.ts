@@ -36,7 +36,7 @@ export const sanitizeCollection = async (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = config.collections.reduce(
+  const validRelationships = (config.collections || []).reduce(
     (acc, c) => {
       acc.push(c.slug)
       return acc
@@ -57,8 +57,8 @@ export const sanitizeCollection = async (
 
   if (sanitized.timestamps !== false) {
     // add default timestamps fields only as needed
-    let hasUpdatedAt = null
-    let hasCreatedAt = null
+    let hasUpdatedAt: boolean | null = null
+    let hasCreatedAt: boolean | null = null
     sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
         if (field.name === 'updatedAt') {
@@ -144,7 +144,7 @@ export const sanitizeCollection = async (
     sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
-      sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id'
+      sanitized.admin?.useAsTitle && sanitized.admin.useAsTitle !== 'id'
         ? sanitized.admin.useAsTitle
         : 'filename'
 
