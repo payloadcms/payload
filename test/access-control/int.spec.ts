@@ -569,6 +569,9 @@ describe('Access Control', () => {
     })
 
     it('should ignore false access in versions on query constraint added by top collection level access control', async () => {
+      // clean up
+      await payload.delete({ collection: 'fields-and-top-access', where: {} })
+
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
