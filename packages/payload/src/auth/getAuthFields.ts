@@ -42,7 +42,7 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
       authFields.push(...verificationFields)
     }
 
-    if (authConfig.maxLoginAttempts > 0) {
+    if (authConfig?.maxLoginAttempts && authConfig.maxLoginAttempts > 0) {
       authFields.push(...accountLockFields)
     }
   }
