@@ -531,7 +531,7 @@ describe('Access Control', () => {
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
       })
-      const { id } = await payload.create({
+      const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
       })
@@ -540,12 +540,12 @@ describe('Access Control', () => {
         data: { secret: 'will-fail-access-read' },
       })
 
-      // assert find
+      // assert find, only will-success should be in the result
       const resFind = await payload.find({
         overrideAccess: false,
         collection: 'fields-and-top-access',
       })
-      expect(resFind.docs[0].id).toBe(id)
+      expect(resFind.docs[0].id).toBe(hitID)
       expect(resFind.docs).toHaveLength(1)
 
       // assert find draft: true
@@ -556,11 +556,11 @@ describe('Access Control', () => {
       })
 
       expect(resFindDraft.docs).toHaveLength(1)
-      expect(resFind.docs[0].id).toBe(id)
+      expect(resFind.docs[0].id).toBe(hitID)
 
       // assert findByID
       const res = await payload.findByID({
-        id,
+        id: hitID,
         collection: 'fields-and-top-access',
         overrideAccess: false,
       })
@@ -573,7 +573,7 @@ describe('Access Control', () => {
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
       })
-      const { id } = await payload.create({
+      const { id: hitID } = await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
       })
@@ -582,7 +582,7 @@ describe('Access Control', () => {
         data: { secret: 'will-fail-access-read' },
       })
 
-      // Assert findVersions
+      // Assert findVersions only will-success should be in the result
       const resFind = await payload.findVersions({
         overrideAccess: false,
         collection: 'fields-and-top-access',
@@ -590,7 +590,7 @@ describe('Access Control', () => {
       expect(resFind.docs).toHaveLength(1)
 
       const version = resFind.docs[0]
-      expect(version.parent).toBe(id)
+      expect(version.parent).toBe(hitID)
 
       // Assert findVersionByID
       const res = await payload.findVersionByID({
