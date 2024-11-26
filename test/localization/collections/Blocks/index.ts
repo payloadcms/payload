@@ -49,33 +49,5 @@ export const BlocksCollection: CollectionConfig = {
         },
       ],
     },
-    {
-      name: 'nonLocalizedBlocksField',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'blockInsideBlock',
-          fields: [
-            {
-              name: 'array',
-              type: 'array',
-              fields: [
-                {
-                  name: 'link',
-                  type: 'group',
-                  fields: [
-                    {
-                      name: 'label',
-                      type: 'text',
-                      localized: true,
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
   ],
 }
