@@ -1,14 +1,13 @@
-import type { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
-
+import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import type { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
 
 import type { MainMenu } from '../../payload-types'
-
 import { AdminBar } from '../AdminBar'
 import { CMSLink } from '../CMSLink'
 import { Gutter } from '../Gutter'
+
 import classes from './index.module.scss'
 
 type HeaderBarProps = {

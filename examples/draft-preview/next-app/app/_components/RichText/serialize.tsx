@@ -6,14 +6,14 @@ import { Text } from 'slate'
 type Children = Leaf[]
 
 type Leaf = {
-  type: string
-  value?: {
-    url: string
-    alt: string
-  }
-  children: Children
-  url?: string
   [key: string]: unknown
+  children: Children
+  type: string
+  url?: string
+  value?: {
+    alt: string
+    url: string
+  }
 }
 
 const serialize = (children: Children): React.ReactNode[] =>
@@ -35,7 +35,7 @@ const serialize = (children: Children): React.ReactNode[] =>
 
       if (node.underline) {
         text = (
-          <span style={{ textDecoration: 'underline' }} key={i}>
+          <span key={i} style={{ textDecoration: 'underline' }}>
             {text}
           </span>
         )
@@ -43,7 +43,7 @@ const serialize = (children: Children): React.ReactNode[] =>
 
       if (node.strikethrough) {
         text = (
-          <span style={{ textDecoration: 'line-through' }} key={i}>
+          <span key={i} style={{ textDecoration: 'line-through' }}>
             {text}
           </span>
         )
@@ -57,6 +57,8 @@ const serialize = (children: Children): React.ReactNode[] =>
     }
 
     switch (node.type) {
+      case 'blockquote':
+        return <blockquote key={i}>{serialize(node.children)}</blockquote>
       case 'h1':
         return <h1 key={i}>{serialize(node.children)}</h1>
       case 'h2':
@@ -69,12 +71,6 @@ const serialize = (children: Children): React.ReactNode[] =>
         return <h5 key={i}>{serialize(node.children)}</h5>
       case 'h6':
         return <h6 key={i}>{serialize(node.children)}</h6>
-      case 'blockquote':
-        return <blockquote key={i}>{serialize(node.children)}</blockquote>
-      case 'ul':
-        return <ul key={i}>{serialize(node.children)}</ul>
-      case 'ol':
-        return <ol key={i}>{serialize(node.children)}</ol>
       case 'li':
         return <li key={i}>{serialize(node.children)}</li>
       case 'link':
@@ -83,6 +79,10 @@ const serialize = (children: Children): React.ReactNode[] =>
             {serialize(node.children)}
           </a>
         )
+      case 'ol':
+        return <ol key={i}>{serialize(node.children)}</ol>
+      case 'ul':
+        return <ul key={i}>{serialize(node.children)}</ul>
 
       default:
         return <p key={i}>{serialize(node.children)}</p>
