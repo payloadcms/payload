@@ -22,7 +22,53 @@ function iterateFields(fields: Field[], fromLocaleData: Data, toLocaleData: Data
     if (fieldAffectsData(field)) {
       switch (field.type) {
         case 'array':
+          // if the field has no value, take the source value
+          if (
+            field.name in toLocaleData &&
+            // only replace if the target value is null or undefined
+            [null, undefined].includes(toLocaleData[field.name]) &&
+            field.name in fromLocaleData
+          ) {
+            toLocaleData[field.name] = fromLocaleData[field.name]
+            break
+          }
+
+          // if the field has a value but is not localized, loop over the data from target
+          if (!field.localized && field.name in toLocaleData) {
+            toLocaleData[field.name].map((item: Data, index: number) => {
+              if (fromLocaleData[field.name]?.[index]) {
+                iterateFields(field.fields, fromLocaleData[field.name][index], item)
+              }
+            })
+          }
+          break
+
         case 'blocks':
+          // if the field has no value, take the source value
+          if (
+            field.name in toLocaleData &&
+            // only replace if the target value is null or undefined
+            [null, undefined].includes(toLocaleData[field.name]) &&
+            field.name in fromLocaleData
+          ) {
+            toLocaleData[field.name] = fromLocaleData[field.name]
+            break
+          }
+
+          // if the field has a value but is not localized, loop over the data from target
+          if (!field.localized && field.name in toLocaleData) {
+            toLocaleData[field.name].map((blockData: Data, index: number) => {
+              const blockFields = field.blocks.find(
+                ({ slug }) => slug === blockData.blockType,
+              )?.fields
+
+              if (blockFields?.length) {
+                iterateFields(blockFields, fromLocaleData[field.name][index], blockData)
+              }
+            })
+          }
+          break
+
         case 'checkbox':
         case 'code':
         case 'date':
