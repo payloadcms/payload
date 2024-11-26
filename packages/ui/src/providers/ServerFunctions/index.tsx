@@ -39,7 +39,7 @@ type CopyDataFromLocaleClient = (
   args: {
     signal?: AbortSignal
   } & Omit<CopyDataFromLocaleArgs, 'req'>,
-) => Promise<{ success: boolean }>
+) => Promise<{ data: Data }>
 
 type GetDocumentSlots = (args: {
   collectionSlug: string
