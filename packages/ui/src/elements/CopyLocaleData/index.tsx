@@ -43,6 +43,8 @@ export const CopyLocaleData: React.FC = () => {
       localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))) ||
     []
 
+  const localeOptionsWithoutCurrent = localeOptions.filter((locale) => locale.value !== code)
+
   const getLocaleLabel = (code: string) => {
     const locale = localization && localization.locales.find((l) => l.code === code)
     return locale && locale.label ? locale.label : code
@@ -184,7 +186,7 @@ export const CopyLocaleData: React.FC = () => {
                 setToLocale(selectedOption.value)
               }
             }}
-            options={localeOptions}
+            options={localeOptionsWithoutCurrent}
             path="toLocale"
             value={toLocale}
           />

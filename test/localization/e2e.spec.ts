@@ -271,6 +271,7 @@ describe('Localization', () => {
     })
 
     test('should copy rich text data to correct locale', async () => {
+      await changeLocale(page, defaultLocale)
       await page.goto(richTextURL.create)
       const richTextField = page.locator('#field-richText')
       const richTextContent = '<p>This is rich text in English</p>'
@@ -314,6 +315,7 @@ describe('Localization', () => {
     })
 
     test('should not overwrite existing data when overwrite is unchecked', async () => {
+      await changeLocale(page, defaultLocale)
       await createAndSaveDoc(page, url, { title: englishTitle, description })
 
       await changeLocale(page, spanishLocale)
@@ -345,13 +347,18 @@ describe('Localization', () => {
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
     })
 
-    test('should not copy when from and to locales are the same', async () => {
+    test('should not include current locale in toLocale options', async () => {
+      await changeLocale(page, defaultLocale)
       await createAndSaveDoc(page, url, { title })
       await openCopyToLocaleDrawer(page)
-      await setToLocale(page, 'English')
-      await runCopy(page)
+      const toLocaleDropdown = page.locator('#field-toLocale')
+      await toLocaleDropdown.click()
 
-      await expect(page.locator('.payload-toast-container')).toContainText('same locale')
+      const options = await page
+        .locator('.rs__option')
+        .evaluateAll((els) => els.map((el) => el.textContent))
+
+      await expect.poll(() => options).not.toContain('English')
     })
 
     test('should handle back to back copies', async () => {
