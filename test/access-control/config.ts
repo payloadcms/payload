@@ -509,6 +509,24 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'fields-and-top-access',
+      access: {
+        read: () => ({
+          secret: {
+            equals: '12345',
+          },
+        }),
+      },
+      versions: { drafts: true },
+      fields: [
+        {
+          type: 'text',
+          name: 'secret',
+          access: { read: () => false },
+        },
+      ],
+    },
     Disabled,
     RichText,
     Regression1,

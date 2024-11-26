@@ -1,3 +1,4 @@
+import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   CollectionSlug,
   DataFromCollectionSlug,
@@ -28,6 +29,7 @@ import {
 } from './shared.js'
 
 let payload: Payload
+let restClient: NextRESTClient
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 describe('Access Control', () => {
@@ -35,7 +37,7 @@ describe('Access Control', () => {
   let restricted: FullyRestricted
 
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   beforeEach(async () => {
@@ -521,6 +523,44 @@ describe('Access Control', () => {
       })
 
       expect(docs).toHaveLength(1)
+    })
+
+    it('should ignore false access on query constraint added by top collection level access control', async () => {
+      await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: '123456' },
+      })
+      const { id } = await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: '12345' },
+      })
+      await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: '123456' },
+      })
+
+      const resFind = await payload.find({
+        overrideAccess: false,
+        collection: 'fields-and-top-access',
+      })
+      expect(resFind.docs[0].id).toBe(id)
+
+      const resFindDraft = await payload.find({
+        draft: true,
+        overrideAccess: false,
+        collection: 'fields-and-top-access',
+      })
+
+      expect(resFind.docs[0].id).toBe(id)
+      expect(resFindDraft.docs[0].id).toBe(id)
+
+      const res = await payload.findByID({
+        id,
+        collection: 'fields-and-top-access',
+        overrideAccess: false,
+      })
+
+      expect(res).toBeTruthy()
     })
   })
 })
