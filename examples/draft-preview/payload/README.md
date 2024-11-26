@@ -1,11 +1,6 @@
 # Payload Draft Preview Example
 
-The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview/payload) demonstrates how to implement draft preview in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). Draft preview allows you to see content on your front-end before it is published. There are various fully working front-ends made explicitly for this example, including:
-
-- [Next.js App Router](../next-app)
-- [Next.js Pages Router](../next-pages)
-
-Follow the instructions in each respective README to get started. If you are setting up draft preview for another front-end, please consider contributing to this repo with your own example!
+The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview/payload) demonstrates how to implement draft preview in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). Draft preview allows you to see content on your front-end before it is published.
 
 ## Quick Start
 
@@ -17,9 +12,6 @@ To spin up this example locally, follow these steps:
    > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
 
 3. `cp .env.example .env` to copy the example environment variables
-
-   > Adjust `PAYLOAD_PUBLIC_SITE_URL` in the `.env` if your front-end is running on a separate domain or port.
-
 4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
 5. `open http://localhost:3000/admin` to access the admin panel
 6. Login with email `demo@payloadcms.com` and password `demo`
@@ -29,33 +21,6 @@ That's it! Changes made in `./src` will be reflected in your app. See the [Devel
 ## How it works
 
 Draft preview works by sending the user to your front-end with a `secret` along with their http-only cookies. Your front-end catches the request, verifies the authenticity, then enters into it's own preview mode. Once in preview mode, your front-end can begin securely requesting draft documents from Payload. See [Preview Mode](#preview-mode) for more details.
-
-### Environment Variables
-
-Depending on how you run this example, you need different environment variables:
-
-- #### Running Payload and the Front-End Together
-
-  When the Payload server and front-end run on the same domain and port:
-
-  ```ts
-  DATABASE_URI=mongodb://127.0.0.1/payload-draft-preview-example
-  PAYLOAD_SECRET=YOUR_SECRET_HERE
-  NEXT_PUBLIC_SERVER_URL=http://localhost:3000
-  ```
-
-- #### Running Payload and the Front-End Separately
-
-  When running Payload on one domain (e.g., `localhost:3000`) and the front-end on another (e.g., `localhost:3001`):
-
-  ```ts
-  DATABASE_URI=mongodb://127.0.0.1/payload-draft-preview-example
-  PAYLOAD_SECRET=YOUR_SECRET_HERE
-  NEXT_PUBLIC_SERVER_URL=http://localhost:3000
-  PAYLOAD_PUBLIC_SITE_URL=http://localhost:3001
-  REVALIDATION_KEY=EXAMPLE_REVALIDATION_KEY
-  PAYLOAD_PUBLIC_DRAFT_SECRET=EXAMPLE_DRAFT_SECRET
-  ```
 
 ### Collections
 
@@ -94,13 +59,13 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 To preview draft documents, the user first needs to have at least one draft document saved. When they click the "preview" button from the Payload admin panel, a custom [preview function](https://payloadcms.com/docs/admin/collections#preview) routes them to your front-end with a `secret` along with their http-only cookies. An API route on your front-end will verify the secret and token before entering into it's own preview mode. Once in preview mode, it can begin requesting drafts from Payload using the `Authorization` header. See [Pages](#pages) for more details.
 
-> "Preview mode" looks differently for every front-end framework. For instance, check out the differences between Next.js [Preview Mode](https://nextjs.org/docs/pages/building-your-application/configuring/preview-mode) in the Pages Router and [Draft Mode](https://nextjs.org/docs/pages/building-your-application/configuring/draft-mode) in the App Router. In Next.js, methods are provided that set cookies in your browser, but this may not be the case for all frameworks.
+> "Preview mode" can vary between frameworks. In the Next.js App Router, [Draft Mode](https://nextjs.org/docs/pages/building-your-application/configuring/draft-mode) enables you to work with previewable content. It provides methods to set cookies in your browser, ensuring content is displayed as a draft, but this behavior might differ in other frameworks.
 
 ### On-demand Revalidation
 
 If your front-end is statically generated then you may also want to regenerate the HTML for each page individually as they are published, referred to as On-demand Revalidation. This will prevent your static site from having to fully rebuild every page in order to deploy content changes. To do this, we add an `afterChange` hook to the collection that fires a request to your front-end in the background each time the document is updated. You can handle this request on your front-end to revalidate the HTML for your page.
 
-> On-demand revalidation looks differently for every front-end framework. For instance, check out the differences between Next.js on-demand revalidation in the [Pages Router](https://nextjs.org/docs/pages/building-your-application/data-fetching/incremental-static-regeneration) and the [App Router](https://nextjs.org/docs/app/building-your-application/data-fetching/revalidating#on-demand-revalidation). In Next.js, methods are provided that regenerate the HTML for each page, but this may not be the case for all frameworks.
+> On-demand revalidation can vary between frameworks. In the Next.js [App Router](https://nextjs.org/docs/app/building-your-application/data-fetching/revalidating#on-demand-revalidation), on-demand revalidation allows you to regenerate the HTML for specific pages as needed. However, this behavior may differ in other frameworks.
 
 ### Admin Bar
 
