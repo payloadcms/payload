@@ -76,90 +76,85 @@ export const generateReindexHandler =
     let aggregateErrors = 0
     let aggregateDocs = 0
 
-    await initTransaction(req)
+    const countDocuments = async (collection: string): Promise<number> => {
+      const { totalDocs } = await payload.count({
+        collection,
+        ...defaultLocalApiProps,
+      })
+      return totalDocs
+    }
 
-    try {
-      const countDocuments = async (collection: string): Promise<number> => {
-        const { totalDocs } = await payload.count({
-          collection,
-          ...defaultLocalApiProps,
-        })
-        return totalDocs
-      }
+    const deleteIndexes = async (collection: string) => {
+      await payload.delete({
+        collection: searchSlug,
+        depth: 0,
+        select: { id: true },
+        where: { 'doc.relationTo': { equals: collection } },
+        ...defaultLocalApiProps,
+      })
+    }
 
-      const deleteIndexes = async (collection: string) => {
-        await payload.delete({
-          collection: searchSlug,
-          depth: 0,
-          select: { id: true },
-          where: { 'doc.relationTo': { equals: collection } },
-          ...defaultLocalApiProps,
-        })
-      }
+    const reindexCollection = async (collection: string) => {
+      const totalDocs = await countDocuments(collection)
+      const totalBatches = Math.ceil(totalDocs / batchSize)
+      aggregateDocs += totalDocs
 
-      const reindexCollection = async (collection: string) => {
-        const totalDocs = await countDocuments(collection)
-        const totalBatches = Math.ceil(totalDocs / batchSize)
-        aggregateDocs += totalDocs
+      for (let j = 0; j < reindexLocales.length; j++) {
+        // create first index, then we update with other locales accordingly
+        const operation = j === 0 ? 'create' : 'update'
+        const localeToSync = reindexLocales[j]
 
-        for (let j = 0; j < reindexLocales.length; j++) {
-          // create first index, then we update with other locales accordingly
-          const operation = j === 0 ? 'create' : 'update'
-          const localeToSync = reindexLocales[j]
+        for (let i = 0; i < totalBatches; i++) {
+          const { docs } = await payload.find({
+            collection,
+            limit: batchSize,
+            locale: localeToSync,
+            page: i + 1,
+            ...defaultLocalApiProps,
+          })
 
-          for (let i = 0; i < totalBatches; i++) {
-            const { docs } = await payload.find({
+          const promises = docs.map((doc) =>
+            syncDocAsSearchIndex({
               collection,
-              limit: batchSize,
+              doc,
               locale: localeToSync,
-              page: i + 1,
-              ...defaultLocalApiProps,
-            })
+              onSyncError: () => operation === 'create' && aggregateErrors++,
+              operation,
+              pluginConfig,
+              req,
+            }),
+          )
 
-            const promises = docs.map((doc) =>
-              syncDocAsSearchIndex({
-                collection,
-                doc,
-                locale: localeToSync,
-                onSyncError: () => operation === 'create' && aggregateErrors++,
-                operation,
-                pluginConfig,
-                req,
-              }),
-            )
-
-            // Sequentially await promises to avoid transaction issues
-            for (const promise of promises) {
-              await promise
-            }
+          // Sequentially await promises to avoid transaction issues
+          for (const promise of promises) {
+            await promise
           }
         }
       }
-
-      for (const collection of collections) {
-        try {
-          await deleteIndexes(collection)
-          await reindexCollection(collection)
-        } catch (err) {
-          const message = t('error:unableToReindexCollection', { collection })
-          payload.logger.error({ err, msg: message })
-          return Response.json({ message }, { headers, status: 500 })
-        }
-      }
-
-      const message = t('general:successfullyReindexed', {
-        collections: collections.join(', '),
-        count: aggregateDocs - aggregateErrors,
-        total: aggregateDocs,
-      })
-
-      await commitTransaction(req)
-
-      return Response.json({ message }, { headers, status: 200 })
-    } catch (error) {
-      await killTransaction(req)
-
-      payload.logger.error({ err: error, msg: 'Error during reindexing' })
-      return Response.json('Internal error.', { headers, status: 500 })
     }
+
+    await initTransaction(req)
+
+    for (const collection of collections) {
+      try {
+        await deleteIndexes(collection)
+        await reindexCollection(collection)
+      } catch (err) {
+        const message = t('error:unableToReindexCollection', { collection })
+        payload.logger.error({ err, msg: message })
+
+        await killTransaction(req)
+        return Response.json({ message }, { headers, status: 500 })
+      }
+    }
+
+    const message = t('general:successfullyReindexed', {
+      collections: collections.join(', '),
+      count: aggregateDocs - aggregateErrors,
+      total: aggregateDocs,
+    })
+
+    await commitTransaction(req)
+
+    return Response.json({ message }, { headers, status: 200 })
   }
