@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
-import { AuthenticationError } from 'payload'
+import { AuthenticationError, ReachedMaxCallDepth } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -327,6 +327,28 @@ describe('Hooks', () => {
       })
 
       expect(retrievedDoc.value).toEqual('data from rest API')
+    })
+
+    it('should throw ReachedMaxCallDepth if reached call depth more than config.maxCallDepth', async () => {
+      await expect(
+        payload.create({
+          collection: 'infinity-loop',
+          data: {},
+          context: {
+            callDepth: payload.config.maxCallDepth,
+          },
+        }),
+      ).rejects.toBeInstanceOf(ReachedMaxCallDepth)
+
+      await expect(
+        payload.create({
+          collection: 'infinity-loop',
+          data: {},
+          context: {
+            callDepth: payload.config.maxCallDepth - 1,
+          },
+        }),
+      ).resolves.toBeTruthy()
     })
   })
 

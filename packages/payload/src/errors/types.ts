@@ -15,4 +15,5 @@ export type ErrorName =
   | 'MissingFile'
   | 'NotFound'
   | 'QueryError'
+  | 'ReachedMaxCallDepth'
   | 'ValidationError'

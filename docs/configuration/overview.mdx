@@ -64,7 +64,7 @@ export default buildConfig({
 The following options are available:
 
 | Option                     | Description                                                                                                                                                                                    |
-|----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`admin`**                | The configuration options for the Admin Panel, including Custom Components, Live Preview, etc. [More details](../admin/overview#admin-options).                                                |
 | **`bin`**                  | Register custom bin scripts for Payload to execute.                                                                                                                                            |
 | **`editor`**               | The Rich Text Editor which will be used by `richText` fields. [More details](../rich-text/overview).                                                                                           |
@@ -83,6 +83,7 @@ The following options are available:
 | **`defaultDepth`**         | If a user does not specify `depth` while requesting a resource, this depth will be used. [More details](../queries/depth).                                                                     |
 | **`defaultMaxTextLength`** | The maximum allowed string length to be permitted application-wide. Helps to prevent malicious public document creation.                                                                       |
 | **`maxDepth`**             | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. [More details](../queries/depth).                          |
+| **`maxCallDepth`**         | The maximum allowed call depth for Local API operations. This setting helps prevent against hooks that lead to infinity loops. Can be disabled with passing `false`. Defaults to `30`.         |
 | **`indexSortableFields`**  | Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar.                                     |
 | **`upload`**               | Base Payload upload configuration. [More details](../upload/overview#payload-wide-upload-options).                                                                                             |
 | **`routes`**               | Control the routing structure that Payload binds itself to. [More details](../admin/overview#root-level-routes).                                                                               |

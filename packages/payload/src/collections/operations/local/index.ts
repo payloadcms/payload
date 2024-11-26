@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-exports */
 import * as auth from '../../../auth/operations/local/index.js'
+import { enforceCallDepth } from '../../../utilities/enforceCallDepth.js'
 import count from './count.js'
 import countVersions from './countVersions.js'
 import create from './create.js'
@@ -12,7 +13,7 @@ import findVersions from './findVersions.js'
 import restoreVersion from './restoreVersion.js'
 import update from './update.js'
 
-export default {
+const local = {
   auth,
   count,
   countVersions,
@@ -26,3 +27,15 @@ export default {
   restoreVersion,
   update,
 }
+
+for (const operation in local) {
+  if (typeof local[operation] === 'function') {
+    local[operation] = enforceCallDepth(local[operation])
+  }
+}
+
+for (const operation in local.auth) {
+  local.auth[operation] = enforceCallDepth(local.auth[operation])
+}
+
+export default local

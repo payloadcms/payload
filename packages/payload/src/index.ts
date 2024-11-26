@@ -1086,6 +1086,7 @@ export {
   MissingFile,
   NotFound,
   QueryError,
+  ReachedMaxCallDepth,
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
