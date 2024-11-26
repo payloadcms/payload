@@ -264,7 +264,6 @@ describe('Localization', () => {
     test('should copy data to correct locale', async () => {
       await createAndSaveDoc(page, url, { title })
       await openCopyToLocaleDrawer(page)
-      await setFromLocale(page, 'English')
       await setToLocale(page, 'Spanish')
       await runCopy(page)
       await expect(page.locator('#field-title')).toHaveValue(title)
@@ -278,7 +277,6 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       await openCopyToLocaleDrawer(page)
-      await setFromLocale(page, 'English')
       await setToLocale(page, 'Spanish')
       await runCopy(page)
 
@@ -302,7 +300,6 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       await openCopyToLocaleDrawer(page)
-      await setFromLocale(page, 'English')
       await setToLocale(page, 'Spanish')
       const overwriteCheckbox = page.locator('#field-overwriteExisting')
       await expect(overwriteCheckbox).not.toBeChecked()
@@ -319,7 +316,6 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       await openCopyToLocaleDrawer(page)
-      await setFromLocale(page, 'English')
       await setToLocale(page, 'Spanish')
       const overwriteCheckbox = page.locator('#field-overwriteExisting')
       await overwriteCheckbox.click()
@@ -331,7 +327,6 @@ describe('Localization', () => {
     test('should not copy when from and to locales are the same', async () => {
       await createAndSaveDoc(page, url, { title })
       await openCopyToLocaleDrawer(page)
-      await setFromLocale(page, 'English')
       await setToLocale(page, 'English')
       await runCopy(page)
 
@@ -342,7 +337,6 @@ describe('Localization', () => {
       await createAndSaveDoc(page, url, { title })
 
       await openCopyToLocaleDrawer(page)
-      await setFromLocale(page, 'English')
       await setToLocale(page, 'Spanish')
       await runCopy(page)
       await expect(page.locator('#field-title')).toHaveValue(title)
@@ -399,12 +393,7 @@ async function openCopyToLocaleDrawer(page) {
   await copyButton.click()
   await expect(page.locator('.copy-locale-data__content')).toBeVisible()
 }
-async function setFromLocale(page, locale) {
-  const fromField = page.locator('#field-fromLocale')
-  await fromField.click({ delay: 100 })
-  const options = page.locator('.rs__option')
-  await options.locator(`text=${locale}`).click()
-}
+
 async function setToLocale(page, locale) {
   const toField = page.locator('#field-toLocale')
   await toField.click({ delay: 100 })
