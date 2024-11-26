@@ -40,7 +40,7 @@ const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => [
   ...defaultConverters,
   block: {
     // myTextBlock is the slug of the block
-    myTextBlock: ({ fields }) => <div style={{ backgroundColor: 'red' }}>{fields.text}</div>,
+    myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
   },
 ]
 
