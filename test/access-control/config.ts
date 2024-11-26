@@ -66,7 +66,7 @@ function isUser(user: Config['user']): user is {
   return user?.collection === 'users'
 }
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     autoLogin: false,
     user: 'users',
@@ -706,4 +706,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

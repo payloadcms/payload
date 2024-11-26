@@ -43,7 +43,7 @@ export const errorOnHookSlug = 'error-on-hooks'
 
 export const endpointsSlug = 'endpoints'
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -409,4 +409,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

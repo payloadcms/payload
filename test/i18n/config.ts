@@ -30,7 +30,7 @@ const customTranslationsObject = {
 export type CustomTranslationsObject = typeof customTranslationsObject.en
 export type CustomTranslationsKeys = NestedKeysStripped<CustomTranslationsObject>
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -94,4 +94,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

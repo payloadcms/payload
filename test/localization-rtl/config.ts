@@ -13,7 +13,7 @@ import { Posts } from './collections/posts.js'
 import { Users } from './collections/users.js'
 import deepMerge from './deepMerge.js'
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -62,4 +62,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

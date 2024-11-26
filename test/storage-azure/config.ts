@@ -19,7 +19,7 @@ dotenv.config({
   path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated'),
 })
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -53,4 +53,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

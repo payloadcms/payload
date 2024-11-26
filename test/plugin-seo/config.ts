@@ -30,7 +30,7 @@ const generateURL: GenerateURL<Page> = ({ doc, locale }) => {
   return `https://yoursite.com/${locale ? locale + '/' : ''}${doc?.slug || ''}`
 }
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   collections: [Users, Pages, Media, PagesWithImportedFields],
   i18n: {
     supportedLanguages: {
@@ -107,4 +107,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

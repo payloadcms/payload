@@ -10,7 +10,7 @@ import { adminRoute } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   collections: [PostsCollection],
   admin: {
     autoLogin: {
@@ -47,4 +47,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

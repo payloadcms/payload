@@ -11,7 +11,7 @@ import { Posts } from './collections/Posts.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   collections: [Users, Pages, Posts],
   localization: {
     defaultLocale: 'en',
@@ -71,4 +71,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

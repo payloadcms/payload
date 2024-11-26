@@ -12,7 +12,7 @@ import { clearAndSeedEverything } from './seed.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   collections: [
     {
       slug: 'posts',
@@ -577,4 +577,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

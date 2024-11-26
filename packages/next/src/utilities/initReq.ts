@@ -1,9 +1,9 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
-import type { PayloadRequest, SanitizedConfig, SanitizedPermissions, User } from 'payload'
+import type { ConfigImport, PayloadRequest, SanitizedPermissions, User } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
 import { headers as getHeaders } from 'next/headers.js'
-import { createLocalReq, getPayload, parseCookies } from 'payload'
+import { createLocalReq, getConfig, getPayload, parseCookies } from 'payload'
 import { cache } from 'react'
 
 import { getRequestLanguage } from './getRequestLanguage.js'
@@ -15,10 +15,9 @@ type Result = {
   user: User
 }
 
-export const initReq = cache(async function (
-  configPromise: Promise<SanitizedConfig> | SanitizedConfig,
-): Promise<Result> {
-  const config = await configPromise
+export const initReq = cache(async function (configImport: ConfigImport): Promise<Result> {
+  const config = await getConfig(configImport)
+
   const payload = await getPayload({ config })
 
   const headers = await getHeaders()

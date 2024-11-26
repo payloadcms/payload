@@ -15,7 +15,7 @@ const defaultValueField: TextField = {
   defaultValue: 'default value from database',
 }
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -469,7 +469,7 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))
 
 export const postDoc = {
   title: 'test post',

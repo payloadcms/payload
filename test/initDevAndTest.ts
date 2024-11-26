@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { generateImportMap, type SanitizedConfig } from 'payload'
+import { type ConfigImport, generateImportMap, getConfig } from 'payload'
 
 import type { allDatabaseAdapters } from './generateDatabaseAdapter.js'
 
@@ -45,13 +45,13 @@ export async function initDevAndTest(
   console.log('Generating import map for config:', testDir)
 
   const configUrl = pathToFileURL(path.resolve(testDir, 'config.ts')).href
-  const config: SanitizedConfig = await (await import(configUrl)).default
+  const configImport: ConfigImport = (await import(configUrl)).default
+
+  const config = await getConfig(configImport)
 
   process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
 
   await generateImportMap(config, { log: true, force: true })
-
-  console.log('Done')
 }
 
 if (runImmediately === 'true') {

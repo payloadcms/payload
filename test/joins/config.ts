@@ -20,7 +20,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   collections: [
     Posts,
     Categories,
@@ -126,4 +126,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

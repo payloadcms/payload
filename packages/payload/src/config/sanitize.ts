@@ -58,6 +58,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
+  console.log('Sanitizing config')
   const configWithDefaults = {
     ...defaults,
     ...incomingConfig,

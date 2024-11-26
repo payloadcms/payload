@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -122,4 +122,4 @@ export default buildConfigWithDefaults({
     origins: '*',
     headers: ['x-custom-header'],
   },
-})
+}))

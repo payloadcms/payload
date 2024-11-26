@@ -44,7 +44,7 @@ import type {
   ManyOptions as UpdateManyOptions,
   Options as UpdateOptions,
 } from './collections/operations/local/update.js'
-import type { InitOptions, SanitizedConfig } from './config/types.js'
+import type { ConfigImport, InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
@@ -790,6 +790,29 @@ export const reload = async (
   global._payload_doNotCacheClientSchemaMap = true
 }
 
+export const getConfig = async (configImport: ConfigImport): Promise<SanitizedConfig> => {
+  if (global._payload_config) {
+    let config = await global._payload_config
+    if (typeof config === 'function') {
+      config = await config()
+    }
+    return await config
+  }
+  if (typeof configImport === 'function') {
+    global._payload_config = configImport()
+    await global._payload_config
+    return global._payload_config
+  } else {
+    global._payload_config = configImport
+    global._payload_config = await global._payload_config
+
+    if (typeof global._payload_config === 'function') {
+      global._payload_config = global._payload_config()
+      global._payload_config = await global._payload_config
+    }
+    return global._payload_config
+  }
+}
 export const getPayload = async (
   options: Pick<InitOptions, 'config' | 'importMap'>,
 ): Promise<Payload> => {

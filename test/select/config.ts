@@ -14,7 +14,7 @@ import { VersionedPostsCollection } from './collections/VersionedPosts/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   // ...extend config here
   collections: [
     PostsCollection,
@@ -74,4 +74,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

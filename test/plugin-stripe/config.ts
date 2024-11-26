@@ -17,7 +17,7 @@ import { syncPriceJSON } from './webhooks/syncPriceJSON.js'
 process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET = 'whsec_123'
 process.env.STRIPE_SECRET_KEY = 'sk_test_123'
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -98,4 +98,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

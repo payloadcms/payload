@@ -1,7 +1,7 @@
 import type { Payload, SanitizedConfig } from 'payload'
 
 import path from 'path'
-import { getPayload } from 'payload'
+import { getConfig, getPayload } from 'payload'
 
 import { runInit } from '../runInit.js'
 import { NextRESTClient } from './NextRESTClient.js'
@@ -17,15 +17,15 @@ export async function initPayloadInt(
   const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
   await runInit(testSuiteName, false, true)
   console.log('importing config', path.resolve(dirname, 'config.ts'))
-  const { default: config } = await import(path.resolve(dirname, 'config.ts'))
+  const { default: configImport } = await import(path.resolve(dirname, 'config.ts'))
 
   if (!initializePayload) {
-    return { config: await config }
+    return { config: await getConfig(configImport) }
   }
 
   console.log('starting payload')
 
-  const payload = await getPayload({ config })
+  const payload = await getPayload({ config: await getConfig(configImport) })
   console.log('initializing rest client')
   const restClient = new NextRESTClient(payload.config)
   console.log('initPayloadInt done')

@@ -15,7 +15,7 @@ dotenv.config({
   path: path.resolve(process.cwd(), './test/plugin-cloud/.env'),
 })
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -36,4 +36,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))

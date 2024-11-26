@@ -2,10 +2,8 @@ import path from 'path'
 
 const [testConfigDir] = process.argv.slice(2)
 
-import type { SanitizedConfig } from 'payload'
-
 import fs from 'fs'
-import { generateImportMap } from 'payload'
+import { type ConfigImport, generateImportMap, getConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
 const filename = fileURLToPath(import.meta.url)
@@ -20,7 +18,8 @@ async function run() {
     const pathWithConfig = path.resolve(testDir, 'config.ts')
     console.log('Generating ad-hoc import map for config:', pathWithConfig)
 
-    const config: SanitizedConfig = await (await import(pathWithConfig)).default
+    const configImport: ConfigImport = (await import(pathWithConfig)).default
+    const config = await getConfig(configImport)
 
     let rootDir = ''
     if (testConfigDir === 'live-preview' || testConfigDir === 'admin-root') {

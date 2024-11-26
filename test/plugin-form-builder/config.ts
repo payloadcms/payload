@@ -35,7 +35,7 @@ const beforeEmail: BeforeEmail<FormSubmission> = (emails, { req: { payload }, or
   return emails
 }
 
-export default buildConfigWithDefaults({
+export default buildConfigWithDefaults(() => ({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -136,4 +136,4 @@ export default buildConfigWithDefaults({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-})
+}))
