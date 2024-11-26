@@ -1,13 +1,7 @@
 import type { PayloadHandler } from 'payload'
 
 import { addLocalesToRequestFromData, headersWithCors } from '@payloadcms/next/utilities'
-import {
-  commitTransaction,
-  getAccessResults,
-  initTransaction,
-  isolateObjectProperty,
-  killTransaction,
-} from 'payload'
+import { commitTransaction, getAccessResults, initTransaction, killTransaction } from 'payload'
 
 import type { SearchPluginConfigWithLocales } from '../types.js'
 
