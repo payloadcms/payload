@@ -190,6 +190,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       ? payload.findGlobal({
           slug: globalSlug,
           locale: fromLocale,
+          overrideAccess: false,
           user,
           // `select` would allow us to select only the fields we need in the future
         })
@@ -197,6 +198,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           id: docID,
           collection: collectionSlug,
           locale: fromLocale,
+          overrideAccess: false,
           user,
           // `select` would allow us to select only the fields we need in the future
         }),
@@ -204,6 +206,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       ? payload.findGlobal({
           slug: globalSlug,
           locale: toLocale,
+          overrideAccess: false,
           user,
           // `select` would allow us to select only the fields we need in the future
         })
@@ -211,6 +214,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           id: docID,
           collection: collectionSlug,
           locale: toLocale,
+          overrideAccess: false,
           user,
           // `select` would allow us to select only the fields we need in the future
         }),
@@ -231,6 +235,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           ? fromLocaleData.value
           : mergeData(fromLocaleData.value, toLocaleData.value, globals[globalSlug].config.fields),
         locale: toLocale,
+        overrideAccess: false,
         user,
       })
     : await payload.update({
@@ -244,6 +249,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
               collections[collectionSlug].config.fields,
             ),
         locale: toLocale,
+        overrideAccess: false,
         user,
       })
 
