@@ -325,18 +325,11 @@ export const Form: React.FC<FormProps> = (props) => {
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json)
             if (newFormState) {
-              const { changed, newState } = mergeServerFormState(
-                contextRef.current.fields || {},
-                newFormState,
-              )
-
-              if (changed) {
-                dispatchFields({
-                  type: 'REPLACE_STATE',
-                  optimize: false,
-                  state: newState,
-                })
-              }
+              dispatchFields({
+                type: 'REPLACE_STATE',
+                optimize: false,
+                state: newFormState,
+              })
             }
           }
           setSubmitted(false)
