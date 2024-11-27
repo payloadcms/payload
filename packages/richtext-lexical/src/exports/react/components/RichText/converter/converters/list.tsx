@@ -36,7 +36,7 @@ export const ListJSXConverter: JSXConverters<SerializedListItemNode | Serialized
             children
           ) : (
             <>
-              <input checked={node.checked} id={uuid} type="checkbox" />
+              <input checked={node.checked} id={uuid} readOnly={true} type="checkbox" />
               <label htmlFor={uuid}>{children}</label>
               <br />
             </>
