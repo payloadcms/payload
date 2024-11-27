@@ -2,12 +2,15 @@ import type { SerializedEditorState } from 'lexical'
 
 import React from 'react'
 
+import type { DefaultNodeTypes } from '../../../../nodeTypes.js'
 import type { JSXConverters } from './converter/types.js'
 
 import { defaultJSXConverters } from './converter/defaultConverters.js'
 import { convertLexicalToJSX } from './converter/index.js'
 
-export type JSXConvertersFunction = (args: { defaultConverters: JSXConverters }) => JSXConverters
+export type JSXConvertersFunction<
+  T extends { [key: string]: any; type?: string } = DefaultNodeTypes,
+> = (args: { defaultConverters: JSXConverters }) => JSXConverters<T>
 
 type Props = {
   className?: string
