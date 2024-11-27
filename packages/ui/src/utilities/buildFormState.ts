@@ -10,11 +10,17 @@ import { getClientSchemaMap } from './getClientSchemaMap.js'
 import { getSchemaMap } from './getSchemaMap.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
 
+export type LockedState = {
+  isLocked: boolean
+  lastEditedAt: string
+  user: ClientUser | number | string
+}
+
 type BuildFormStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
   indexPath?: string
-  lockedState?: { isLocked: boolean; lastEditedAt: string; user: ClientUser | number | string }
+  lockedState?: LockedState
   state: FormState
 }
 

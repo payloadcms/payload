@@ -35,9 +35,16 @@ export const mergeServerFormState = (
       }
 
       /**
+       * Handle value differences
+       */
+      if ('value' in incomingState[path] && incomingState[path].value !== newFieldState.value) {
+        changed = true
+        newFieldState.value = incomingState[path].value
+      }
+
+      /**
        * Handle error paths
        */
-
       const errorPathsResult = mergeErrorPaths(
         newFieldState.errorPaths,
         incomingState[path].errorPaths as unknown as string[],
