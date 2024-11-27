@@ -834,6 +834,18 @@ describe('lexicalMain', () => {
 
   test('creating a link, then clicking in the link drawer, then saving the link, should preserve cursor position and not move cursor to beginning of richtext field', async () => {
     await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
     /**
      * Type some text
      */
@@ -1164,7 +1176,7 @@ describe('lexicalMain', () => {
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
 
       // @ts-expect-error no need to type this
-      await expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
+      expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
