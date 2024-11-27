@@ -391,7 +391,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
                 permissions={permissions}
                 readOnly={false}
               />
-              <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+              <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
             </>
           ) : null}
         </Drawer>
