@@ -174,6 +174,19 @@ describe('admin2', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
+      test('search should persist through browser back button', async () => {
+        const url = `${postsUrl.list}?limit=10&page=1&search=post1`
+        await page.goto(url)
+        await page.waitForURL(url)
+        await expect(page.locator('#search-filter-input')).toHaveValue('post1')
+        const linkCell = page.locator('.cell-title').first()
+        await linkCell.locator('a').click()
+        await page.waitForURL(new RegExp(`${postsUrl.list}/`))
+        await page.goBack()
+        await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
+        await page.waitForURL(url)
+      })
+
       test('search should not persist between navigation', async () => {
         const url = `${postsUrl.list}?limit=10&page=1&search=test`
         await page.goto(url)
