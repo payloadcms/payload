@@ -143,15 +143,18 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const lockDurationInMilliseconds = lockDuration * 1000
 
   let preventLeaveWithoutSaving = true
+  let autosaveEnabled = false
 
   if (collectionConfig) {
-    preventLeaveWithoutSaving = !(
-      collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave
+    autosaveEnabled = Boolean(
+      collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave,
     )
+    preventLeaveWithoutSaving = !autosaveEnabled
   } else if (globalConfig) {
-    preventLeaveWithoutSaving = !(
-      globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave
+    autosaveEnabled = Boolean(
+      globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave,
     )
+    preventLeaveWithoutSaving = !autosaveEnabled
   } else if (typeof disableLeaveWithoutSaving !== 'undefined') {
     preventLeaveWithoutSaving = !disableLeaveWithoutSaving
   }
@@ -273,7 +276,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
       await getDocPermissions(json)
 
-      if (id || globalSlug) {
+      if ((id || globalSlug) && !autosaveEnabled) {
         abortAndIgnore(onSaveAbortControllerRef.current)
         const controller = new AbortController()
         onSaveAbortControllerRef.current = controller
@@ -328,6 +331,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       updateSavedDocumentData,
       user,
       userSlug,
+      autosaveEnabled,
     ],
   )
 
