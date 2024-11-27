@@ -19,21 +19,59 @@ export type JSXConverter<T extends { [key: string]: any; type?: string } = Seria
     }) => React.ReactNode[]
     parent: SerializedLexicalNodeWithParent
   }) => React.ReactNode
-export type JSXConverters<T extends { [key: string]: any; type?: string } = DefaultNodeTypes> = {
+
+export type JSXConverters<
+  T extends { [key: string]: any; type?: string } =
+    | DefaultNodeTypes
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
+    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
+> = {
   [key: string]:
     | {
-        [blockSlug: string]: JSXConverter<any> // Not true, but need to appease TypeScript
+        [blockSlug: string]: JSXConverter<any>
       }
     | JSXConverter<any>
     | undefined
 } & {
-  [nodeType in NonNullable<T['type']>]?: JSXConverter<Extract<T, { type: nodeType }>>
+  [nodeType in Exclude<NonNullable<T['type']>, 'block' | 'inlineBlock'>]?: JSXConverter<
+    Extract<T, { type: nodeType }>
+  >
 } & {
   blocks?: {
-    [blockSlug: string]: JSXConverter<{ fields: Record<string, any> } & SerializedBlockNode>
+    [K in Extract<
+      T extends { type: 'block' }
+        ? T extends SerializedBlockNode<infer B>
+          ? B extends { blockType: string }
+            ? B['blockType']
+            : never
+          : never
+        : never,
+      string
+    >]?: JSXConverter<
+      T extends SerializedBlockNode<any>
+        ? SerializedBlockNode<
+            Extract<T extends SerializedBlockNode<infer B> ? B : never, { blockType: K }>
+          >
+        : SerializedBlockNode
+    >
   }
   inlineBlocks?: {
-    [blockSlug: string]: JSXConverter<{ fields: Record<string, any> } & SerializedInlineBlockNode>
+    [K in Extract<
+      T extends { type: 'inlineBlock' }
+        ? T extends SerializedInlineBlockNode<infer B>
+          ? B extends { blockType: string }
+            ? B['blockType']
+            : never
+          : never
+        : never,
+      string
+    >]?: JSXConverter<
+      T extends SerializedInlineBlockNode<any>
+        ? SerializedInlineBlockNode<
+            Extract<T extends SerializedInlineBlockNode<infer B> ? B : never, { blockType: K }>
+          >
+        : SerializedInlineBlockNode
+    >
   }
 }
 
