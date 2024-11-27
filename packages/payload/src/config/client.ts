@@ -1,4 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
+import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type {
@@ -12,7 +13,6 @@ import {
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
 import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
-import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
@@ -39,7 +39,6 @@ export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'],
 
 export type ClientConfig = {
   admin: {
-    components: null
     dependencies?: Record<string, React.ReactNode>
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
@@ -81,56 +80,95 @@ export const createClientConfig = ({
   i18n: I18nClient
   importMap: ImportMap
 }): ClientConfig => {
-  // We can use deepCopySimple here, as the clientConfig should be JSON serializable anyways, since it will be sent from server => client
-  const clientConfig = deepCopyObjectSimple(config, true) as unknown as ClientConfig
+  const clientConfig = {} as DeepPartial<ClientConfig>
 
-  for (const key of serverOnlyConfigProperties) {
-    if (key in clientConfig) {
-      delete clientConfig[key]
+  for (const key in config) {
+    if (serverOnlyConfigProperties.includes(key as any)) {
+      continue
+    }
+    switch (key) {
+      case 'admin':
+        clientConfig.admin = {
+          autoLogin: config.admin.autoLogin,
+          avatar: config.admin.avatar,
+          custom: config.admin.custom,
+          dateFormat: config.admin.dateFormat,
+          dependencies: config.admin.dependencies,
+          disable: config.admin.disable,
+          importMap: config.admin.importMap,
+          meta: config.admin.meta,
+          routes: config.admin.routes,
+          theme: config.admin.theme,
+          user: config.admin.user,
+        }
+        if (config.admin.livePreview) {
+          clientConfig.admin.livePreview = {}
+
+          if (config.admin.livePreview.breakpoints) {
+            clientConfig.admin.livePreview.breakpoints = config.admin.livePreview.breakpoints
+          }
+        }
+        break
+      case 'collections':
+        ;(clientConfig.collections as ClientCollectionConfig[]) = createClientCollectionConfigs({
+          collections: config.collections,
+          defaultIDType: config.db.defaultIDType,
+          i18n,
+          importMap,
+        })
+        break
+      case 'globals':
+        ;(clientConfig.globals as ClientGlobalConfig[]) = createClientGlobalConfigs({
+          defaultIDType: config.db.defaultIDType,
+          globals: config.globals,
+          i18n,
+          importMap,
+        })
+        break
+      case 'i18n':
+        clientConfig.i18n = {
+          fallbackLanguage: config.i18n.fallbackLanguage,
+          translations: config.i18n.translations,
+        }
+        break
+      case 'localization':
+        if (typeof config.localization === 'object' && config.localization) {
+          clientConfig.localization = {}
+          if (config.localization.defaultLocale) {
+            clientConfig.localization.defaultLocale = config.localization.defaultLocale
+          }
+          if (config.localization.fallback) {
+            clientConfig.localization.fallback = config.localization.fallback
+          }
+          if (config.localization.localeCodes) {
+            clientConfig.localization.localeCodes = config.localization.localeCodes
+          }
+          if (config.localization.locales) {
+            clientConfig.localization.locales = []
+            for (const locale of config.localization.locales) {
+              if (locale) {
+                const clientLocale: Partial<(typeof config.localization.locales)[0]> = {}
+                if (locale.code) {
+                  clientLocale.code = locale.code
+                }
+                if (locale.fallbackLocale) {
+                  clientLocale.fallbackLocale = locale.fallbackLocale
+                }
+                if (locale.label) {
+                  clientLocale.label = locale.label
+                }
+                if (locale.rtl) {
+                  clientLocale.rtl = locale.rtl
+                }
+                clientConfig.localization.locales.push(clientLocale)
+              }
+            }
+          }
+        }
+        break
+      default:
+        clientConfig[key] = config[key]
     }
   }
-
-  if ('localization' in clientConfig && clientConfig.localization) {
-    for (const locale of clientConfig.localization.locales) {
-      delete locale.toString
-    }
-  }
-
-  if (
-    'i18n' in clientConfig &&
-    'supportedLanguages' in clientConfig.i18n &&
-    clientConfig.i18n.supportedLanguages
-  ) {
-    delete clientConfig.i18n.supportedLanguages
-  }
-
-  if (!clientConfig.admin) {
-    clientConfig.admin = {} as ClientConfig['admin']
-  }
-
-  clientConfig.admin.components = null
-
-  if (
-    'livePreview' in clientConfig.admin &&
-    clientConfig.admin.livePreview &&
-    'url' in clientConfig.admin.livePreview
-  ) {
-    delete clientConfig.admin.livePreview.url
-  }
-
-  clientConfig.collections = createClientCollectionConfigs({
-    collections: config.collections,
-    defaultIDType: config.db.defaultIDType,
-    i18n,
-    importMap,
-  })
-
-  clientConfig.globals = createClientGlobalConfigs({
-    defaultIDType: config.db.defaultIDType,
-    globals: config.globals,
-    i18n,
-    importMap,
-  })
-
-  return clientConfig
+  return clientConfig as ClientConfig
 }

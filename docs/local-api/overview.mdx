@@ -102,7 +102,7 @@ const post = await payload.find({
 
 The following Collection operations are available through the Local API:
 
-### Create
+### Create#collection-create
 
 ```js
 // The created Post document is returned
@@ -134,7 +134,7 @@ const post = await payload.create({
 })
 ```
 
-### Find
+### Find#collection-find
 
 ```js
 // Result will be a paginated set of Posts.
@@ -155,7 +155,7 @@ const result = await payload.find({
 })
 ```
 
-### Find by ID
+### Find by ID#collection-find-by-id
 
 ```js
 // Result will be a Post document.
@@ -171,7 +171,7 @@ const result = await payload.findByID({
 })
 ```
 
-### Count
+### Count#collection-count
 
 ```js
 // Result will be an object with:
@@ -187,7 +187,7 @@ const result = await payload.count({
 })
 ```
 
-### Update by ID
+### Update by ID#collection-update-by-id
 
 ```js
 // Result will be the updated Post document.
@@ -219,7 +219,7 @@ const result = await payload.update({
 })
 ```
 
-### Update Many
+### Update Many#collection-update-many
 
 ```js
 // Result will be an object with:
@@ -258,7 +258,7 @@ const result = await payload.update({
 })
 ```
 
-### Delete
+### Delete#collection-delete
 
 ```js
 // Result will be the now-deleted Post document.
@@ -275,7 +275,7 @@ const result = await payload.delete({
 })
 ```
 
-### Delete Many
+### Delete Many#collection-delete-many
 
 ```js
 // Result will be an object with:
@@ -394,7 +394,7 @@ const result = await payload.verifyEmail({
 
 The following Global operations are available through the Local API:
 
-### Find
+### Find#global-find
 
 ```js
 // Result will be the Header Global.
@@ -409,7 +409,7 @@ const result = await payload.findGlobal({
 })
 ```
 
-### Update
+### Update#global-update
 
 ```js
 // Result will be the updated Header Global.

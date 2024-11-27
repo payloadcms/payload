@@ -40,4 +40,4 @@ async function localUnlock<TSlug extends CollectionSlug>(
   })
 }
 
-export default localUnlock
+export const unlock = localUnlock

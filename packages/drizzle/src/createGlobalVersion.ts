@@ -39,7 +39,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
       version: versionData,
     },
     db,
-    fields: buildVersionGlobalFields(this.payload.config, global),
+    fields: buildVersionGlobalFields(this.payload.config, global, true),
     operation: 'create',
     req,
     select,
