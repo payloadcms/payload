@@ -26,6 +26,7 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { goToFirstCell, navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -179,9 +180,7 @@ describe('admin2', () => {
         await page.goto(url)
         await page.waitForURL(url)
         await expect(page.locator('#search-filter-input')).toHaveValue('post1')
-        const linkCell = page.locator('.cell-title').first()
-        await linkCell.locator('a').click()
-        await page.waitForURL(new RegExp(`${postsUrl.list}/`))
+        await goToFirstCell(page, postsUrl)
         await page.goBack()
         await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
         await page.waitForURL(url)
