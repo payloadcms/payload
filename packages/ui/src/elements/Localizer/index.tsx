@@ -7,7 +7,7 @@ import React from 'react'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { parseQueryParams } from '../../utilities/parseQueryParams.js'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { LocalizerLabel } from './LocalizerLabel/index.js'
 import './index.scss'
@@ -43,7 +43,7 @@ export const Localizer: React.FC<{
                     active={locale.code === localeOption.code}
                     href={qs.stringify(
                       {
-                        ...parseQueryParams(searchParams),
+                        ...parseSearchParams(searchParams),
                         locale: localeOption.code,
                       },
                       { addQueryPrefix: true },

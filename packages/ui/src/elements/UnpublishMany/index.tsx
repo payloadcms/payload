@@ -21,7 +21,7 @@ import type { ClientCollectionConfig } from 'payload'
 
 import { toast } from 'sonner'
 
-import { parseQueryParams } from '../../utilities/parseQueryParams.js'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 
 export type UnpublishManyProps = {
   collection: ClientCollectionConfig
@@ -90,7 +90,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
             router.replace(
               qs.stringify(
                 {
-                  ...parseQueryParams(searchParams),
+                  ...parseSearchParams(searchParams),
                   page: selectAll ? '1' : undefined,
                 },
                 { addQueryPrefix: true },

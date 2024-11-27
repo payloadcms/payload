@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
-import { parseQueryParams } from '../../utilities/parseQueryParams.js'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useLocale } from '../Locale/index.js'
 
 export enum SelectAllStatus {
@@ -111,7 +111,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       let where: Where
 
       if (selectAll === SelectAllStatus.AllAvailable) {
-        const params = parseQueryParams(searchParams)?.where as Where
+        const params = parseSearchParams(searchParams)?.where as Where
 
         where = params || {
           id: { not_equals: '' },

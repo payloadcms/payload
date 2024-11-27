@@ -25,7 +25,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
-import { parseQueryParams } from '../../utilities/parseQueryParams.js'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import './index.scss'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
@@ -206,7 +206,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     router.replace(
       qs.stringify(
         {
-          ...parseQueryParams(searchParams),
+          ...parseSearchParams(searchParams),
           page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined,
         },
         { addQueryPrefix: true },

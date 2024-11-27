@@ -14,7 +14,7 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { parseQueryParams } from '../../utilities/parseQueryParams.js'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Button } from '../Button/index.js'
 import { Pill } from '../Pill/index.js'
 import './index.scss'
@@ -93,7 +93,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
             router.replace(
               qs.stringify(
                 {
-                  ...parseQueryParams(searchParams),
+                  ...parseSearchParams(searchParams),
                   page: selectAll ? '1' : undefined,
                 },
                 { addQueryPrefix: true },

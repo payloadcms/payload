@@ -9,7 +9,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import type { Column } from '../../elements/Table/index.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
-import { parseQueryParams } from '../../utilities/parseQueryParams.js'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { usePreferences } from '../Preferences/index.js'
 
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
@@ -59,7 +59,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const router = useRouter()
   const { setPreference } = usePreferences()
   const rawSearchParams = useSearchParams()
-  const searchParams = useMemo(() => parseQueryParams(rawSearchParams), [rawSearchParams])
+  const searchParams = useMemo(() => parseSearchParams(rawSearchParams), [rawSearchParams])
 
   const { onQueryChange } = useListDrawerContext()
 
