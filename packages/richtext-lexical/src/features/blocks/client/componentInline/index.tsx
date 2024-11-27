@@ -39,7 +39,7 @@ import './index.scss'
 
 import { v4 as uuid } from 'uuid'
 
-import type { InlineBlockFields } from '../nodes/InlineBlocksNode.js'
+import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
