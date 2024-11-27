@@ -323,7 +323,19 @@ export const Form: React.FC<FormProps> = (props) => {
         }
         if (res.status < 400) {
           if (typeof onSuccess === 'function') {
-            await onSuccess(json)
+            const newFormState = await onSuccess(json)
+            if (newFormState) {
+              const { newState: mergedFormState } = mergeServerFormState(
+                contextRef.current.fields || {},
+                newFormState,
+              )
+
+              dispatchFields({
+                type: 'REPLACE_STATE',
+                optimize: false,
+                state: mergedFormState,
+              })
+            }
           }
           setSubmitted(false)
           setProcessing(false)

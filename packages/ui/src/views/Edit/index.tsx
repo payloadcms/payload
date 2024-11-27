@@ -1,15 +1,18 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation.js'
-import {
-  type ClientCollectionConfig,
-  type ClientGlobalConfig,
-  type ClientSideEditViewProps,
-  type ClientUser,
+import type {
+  ClientCollectionConfig,
+  ClientGlobalConfig,
+  ClientSideEditViewProps,
+  ClientUser,
+  FormState,
 } from 'payload'
+
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
+import type { LockedState } from '../../utilities/buildFormState.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
 import { DocumentDrawerHeader } from '../../elements/DocumentDrawer/DrawerHeader/index.js'
@@ -34,9 +37,9 @@ import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
-import './index.scss'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
+import './index.scss'
 
 const baseClass = 'collection-edit'
 
@@ -118,6 +121,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const { getFormState } = useServerFunctions()
 
   const onChangeAbortControllerRef = useRef<AbortController>(null)
+  const onSaveAbortControllerRef = useRef<AbortController>(null)
 
   const locale = params.get('locale')
 
@@ -139,15 +143,18 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const lockDurationInMilliseconds = lockDuration * 1000
 
   let preventLeaveWithoutSaving = true
+  let autosaveEnabled = false
 
   if (collectionConfig) {
-    preventLeaveWithoutSaving = !(
-      collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave
+    autosaveEnabled = Boolean(
+      collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave,
     )
+    preventLeaveWithoutSaving = !autosaveEnabled
   } else if (globalConfig) {
-    preventLeaveWithoutSaving = !(
-      globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave
+    autosaveEnabled = Boolean(
+      globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave,
     )
+    preventLeaveWithoutSaving = !autosaveEnabled
   } else if (typeof disableLeaveWithoutSaving !== 'undefined') {
     preventLeaveWithoutSaving = !disableLeaveWithoutSaving
   }
@@ -197,8 +204,40 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     return false
   })
 
+  const handleDocumentLocking = useCallback(
+    (lockedState: LockedState) => {
+      setDocumentIsLocked(true)
+      const previousOwnerId =
+        typeof documentLockStateRef.current?.user === 'object'
+          ? documentLockStateRef.current?.user?.id
+          : documentLockStateRef.current?.user
+
+      if (lockedState) {
+        const lockedUserID =
+          typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
+            ? lockedState.user
+            : lockedState.user.id
+
+        if (!documentLockStateRef.current || lockedUserID !== previousOwnerId) {
+          if (previousOwnerId === user.id && lockedUserID !== user.id) {
+            setShowTakeOverModal(true)
+            documentLockStateRef.current.hasShownLockedModal = true
+          }
+
+          documentLockStateRef.current = {
+            hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
+            isLocked: true,
+            user: lockedState.user as ClientUser,
+          }
+          setCurrentEditor(lockedState.user as ClientUser)
+        }
+      }
+    },
+    [setCurrentEditor, setDocumentIsLocked, user.id],
+  )
+
   const onSave = useCallback(
-    async (json) => {
+    async (json): Promise<FormState> => {
       reportUpdate({
         id,
         entitySlug,
@@ -224,11 +263,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         })
       }
 
-      // Unlock the document after save
-      if ((id || globalSlug) && isLockingEnabled) {
-        setDocumentIsLocked(false)
-      }
-
       if (!isEditing && depth < 2) {
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
@@ -241,28 +275,63 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       }
 
       await getDocPermissions(json)
+
+      if ((id || globalSlug) && !autosaveEnabled) {
+        abortAndIgnore(onSaveAbortControllerRef.current)
+        const controller = new AbortController()
+        onSaveAbortControllerRef.current = controller
+
+        const docPreferences = await getDocPreferences()
+
+        const { state } = await getFormState({
+          id,
+          collectionSlug,
+          data: json?.doc,
+          docPermissions,
+          docPreferences,
+          globalSlug,
+          operation,
+          renderAllFields: true,
+          returnLockStatus: false,
+          schemaPath: schemaPathSegments.join('.'),
+          signal: controller.signal,
+        })
+
+        // Unlock the document after save
+        if (isLockingEnabled) {
+          setDocumentIsLocked(false)
+        }
+
+        return state
+      }
     },
     [
-      updateSavedDocumentData,
-      reportUpdate,
-      id,
-      entitySlug,
-      user,
-      collectionSlug,
-      userSlug,
-      incrementVersionCount,
-      onSaveFromContext,
-      globalSlug,
-      isLockingEnabled,
-      isEditing,
-      depth,
-      getDocPermissions,
-      refreshCookieAsync,
-      setDocumentIsLocked,
       adminRoute,
+      collectionSlug,
+      depth,
+      docPermissions,
+      entitySlug,
+      getDocPermissions,
+      getDocPreferences,
+      getFormState,
+      globalSlug,
+      id,
+      incrementVersionCount,
+      isEditing,
+      isLockingEnabled,
       locale,
-      router,
+      onSaveFromContext,
+      operation,
+      refreshCookieAsync,
+      reportUpdate,
       resetUploadEdits,
+      router,
+      schemaPathSegments,
+      setDocumentIsLocked,
+      updateSavedDocumentData,
+      user,
+      userSlug,
+      autosaveEnabled,
     ],
   )
 
@@ -293,92 +362,54 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         globalSlug,
         operation,
         // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
-        // We only wanna render ALL fields on initial render, not in onChange.
+        // We only want to render ALL fields on initial render, not in onChange.
         renderAllFields: false,
-        returnLockStatus: isLockingEnabled ? true : false,
+        returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
         signal: controller.signal,
         updateLastEdited,
       })
 
-      setDocumentIsLocked(true)
-
       if (isLockingEnabled) {
-        const previousOwnerId =
-          typeof documentLockStateRef.current?.user === 'object'
-            ? documentLockStateRef.current?.user?.id
-            : documentLockStateRef.current?.user
-
-        if (lockedState) {
-          const lockedUserID =
-            typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
-              ? lockedState.user
-              : lockedState.user.id
-
-          if (!documentLockStateRef.current || lockedUserID !== previousOwnerId) {
-            if (previousOwnerId === user.id && lockedUserID !== user.id) {
-              setShowTakeOverModal(true)
-              documentLockStateRef.current.hasShownLockedModal = true
-            }
-
-            documentLockStateRef.current = documentLockStateRef.current = {
-              hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
-              isLocked: true,
-              user: lockedState.user as ClientUser,
-            }
-            setCurrentEditor(lockedState.user as ClientUser)
-          }
-        }
+        handleDocumentLocking(lockedState)
       }
 
       return state
     },
     [
-      editSessionStartTime,
-      isLockingEnabled,
-      getDocPreferences,
-      getFormState,
       id,
       collectionSlug,
-      docPermissions,
+      getDocPreferences,
+      getFormState,
       globalSlug,
+      handleDocumentLocking,
+      isLockingEnabled,
       operation,
       schemaPathSegments,
-      setDocumentIsLocked,
-      user.id,
-      setCurrentEditor,
+      docPermissions,
+      editSessionStartTime,
     ],
   )
 
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
-      if (!isLockingEnabled) {
-        return
-      }
-
-      const currentPath = window.location.pathname
-
-      const documentId = id || globalSlug
-
-      // Routes where we do NOT want to unlock the document
-      const stayWithinDocumentPaths = ['preview', 'api', 'versions']
-
-      const isStayingWithinDocument = stayWithinDocumentPaths.some((path) =>
-        currentPath.includes(path),
-      )
-
-      // Unlock the document only if we're actually navigating away from the document
-      if (documentId && documentIsLocked && !isStayingWithinDocument) {
-        // Check if this user is still the current editor
-        if (
-          typeof documentLockStateRef.current?.user === 'object'
-            ? documentLockStateRef.current?.user?.id === user?.id
-            : documentLockStateRef.current?.user === user?.id
-        ) {
-          void unlockDocument(id, collectionSlug ?? globalSlug)
-          setDocumentIsLocked(false)
-          setCurrentEditor(null)
+      if (isLockingEnabled && documentIsLocked && (id || globalSlug)) {
+        // Only retain the lock if the user is still viewing the document
+        const shouldUnlockDocument = !['preview', 'api', 'versions'].some((path) =>
+          window.location.pathname.includes(path),
+        )
+        if (shouldUnlockDocument) {
+          // Check if this user is still the current editor
+          if (
+            typeof documentLockStateRef.current?.user === 'object'
+              ? documentLockStateRef.current?.user?.id === user?.id
+              : documentLockStateRef.current?.user === user?.id
+          ) {
+            void unlockDocument(id, collectionSlug ?? globalSlug)
+            setDocumentIsLocked(false)
+            setCurrentEditor(null)
+          }
         }
       }
 
@@ -399,6 +430,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   useEffect(() => {
     return () => {
       abortAndIgnore(onChangeAbortControllerRef.current)
+      abortAndIgnore(onSaveAbortControllerRef.current)
     }
   }, [])
 
