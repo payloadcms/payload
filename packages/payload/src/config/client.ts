@@ -39,7 +39,6 @@ export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'],
 
 export type ClientConfig = {
   admin: {
-    dependencies?: Record<string, React.ReactNode>
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
   collections: ClientCollectionConfig[]
@@ -93,7 +92,6 @@ export const createClientConfig = ({
           avatar: config.admin.avatar,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,
-          dependencies: config.admin.dependencies,
           disable: config.admin.disable,
           importMap: config.admin.importMap,
           meta: config.admin.meta,
