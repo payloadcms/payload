@@ -1,4 +1,4 @@
-@import '../../../../../../ui/src/scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .reindex-confirm-modal {
@@ -26,7 +26,7 @@
         margin: 0;
       }
     }
-  
+
     &__controls {
       display: flex;
       gap: base(0.4);
