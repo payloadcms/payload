@@ -146,7 +146,7 @@ export function convertLexicalNodesToJSX({
         !disableIndent &&
         (!Array.isArray(disableIndent) || !disableIndent?.includes(node.type))
       ) {
-        if ('indent' in node && node.indent) {
+        if ('indent' in node && node.indent && node.type !== 'listitem') {
           style.paddingInlineStart = `${Number(node.indent) * 2}em`
         }
       }
