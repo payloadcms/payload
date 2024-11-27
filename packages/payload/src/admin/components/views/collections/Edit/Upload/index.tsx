@@ -74,7 +74,7 @@ export const Upload: React.FC<Props> = (props) => {
 
   const handleFileChange = useCallback(
     (newFile: File) => {
-      if (newFile instanceof File) {
+      if (newFile instanceof File && isImage(newFile.type)) {
         const fileReader = new FileReader()
         fileReader.onload = (e) => {
           const imgSrc = e.target?.result
