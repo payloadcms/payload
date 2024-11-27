@@ -32,8 +32,11 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
       return null
     }
 
-    return findLocaleFromCode(localization, localeFromParams || localeCode)
-  }, [localeCode, localeFromParams, localization])
+    return (
+      findLocaleFromCode(localization, localeFromParams || localeCode) ||
+      findLocaleFromCode(localization, defaultLocale)
+    )
+  }, [localeCode, localeFromParams, localization, defaultLocale])
 
   useEffect(() => {
     async function setInitialLocale() {
@@ -41,7 +44,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
         if (typeof localeFromParams !== 'string') {
           try {
             const localeToSet = await getPreference<string>('locale')
-            setLocaleCode(findLocaleFromCode(localization, localeToSet)?.code || defaultLocale)
+            setLocaleCode(localeToSet)
           } catch (_) {
             setLocaleCode(defaultLocale)
           }
