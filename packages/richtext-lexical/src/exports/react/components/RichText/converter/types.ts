@@ -23,8 +23,8 @@ export type JSXConverter<T extends { [key: string]: any; type?: string } = Seria
 export type JSXConverters<
   T extends { [key: string]: any; type?: string } =
     | DefaultNodeTypes
-    | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
-    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
 > = {
   [key: string]:
     | {
