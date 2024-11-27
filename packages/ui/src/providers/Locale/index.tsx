@@ -21,12 +21,13 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
   const defaultLocale =
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
 
+  const { getPreference, setPreference } = usePreferences()
   const { searchParams } = useSearchParams()
   const localeFromParams = searchParams?.locale as string
 
-  const [localeCode, setLocaleCode] = useState<string>(localeFromParams || defaultLocale)
+  const [localeCode, setLocaleCode] = useState<string>(defaultLocale)
 
-  const locale = React.useMemo(() => {
+  const locale: Locale | null = React.useMemo(() => {
     if (!localization) {
       return null
     }
@@ -34,20 +35,21 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
     return findLocaleFromCode(localization, localeFromParams || localeCode)
   }, [localeCode, localeFromParams, localization])
 
-  const { getPreference, setPreference } = usePreferences()
-
   useEffect(() => {
     async function setInitialLocale() {
       if (localization && user) {
         if (typeof localeFromParams !== 'string') {
           try {
-            const localeToSet = (await getPreference<string>('locale')) || defaultLocale
-            setLocaleCode(localeToSet)
+            const localeToSet = await getPreference<string>('locale')
+            setLocaleCode(findLocaleFromCode(localization, localeToSet)?.code || defaultLocale)
           } catch (_) {
             setLocaleCode(defaultLocale)
           }
         } else {
-          void setPreference('locale', localeFromParams)
+          void setPreference(
+            'locale',
+            findLocaleFromCode(localization, localeFromParams)?.code || defaultLocale,
+          )
         }
       }
     }
