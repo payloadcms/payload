@@ -17,7 +17,7 @@ export type JSXConvertersFunction<
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
-> = (args: { defaultConverters: JSXConverters }) => JSXConverters<T>
+> = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
 
 type Props = {
   className?: string

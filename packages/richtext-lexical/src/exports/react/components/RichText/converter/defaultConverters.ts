@@ -1,3 +1,4 @@
+import type { DefaultNodeTypes } from '../../../../../nodeTypes.js'
 import type { JSXConverters } from './types.js'
 
 import { BlockquoteJSXConverter } from './converters/blockquote.js'
@@ -11,7 +12,7 @@ import { TableJSXConverter } from './converters/table.js'
 import { TextJSXConverter } from './converters/text.js'
 import { UploadJSXConverter } from './converters/upload.js'
 
-export const defaultJSXConverters: JSXConverters = {
+export const defaultJSXConverters: JSXConverters<DefaultNodeTypes> = {
   ...ParagraphJSXConverter,
   ...TextJSXConverter,
   ...LinebreakJSXConverter,
