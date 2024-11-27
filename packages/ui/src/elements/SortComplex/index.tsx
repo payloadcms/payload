@@ -3,7 +3,7 @@ import type { OptionObject, SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { usePathname, useRouter } from 'next/navigation.js'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
 import { sortableFieldTypes } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -18,7 +18,6 @@ export type SortComplexProps = {
 
 import type { Option } from '../ReactSelect/index.js'
 
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
@@ -30,7 +29,7 @@ export const SortComplex: React.FC<SortComplexProps> = (props) => {
 
   const router = useRouter()
   const pathname = usePathname()
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
   const { i18n, t } = useTranslation()
   const [sortOptions, setSortOptions] = useState<OptionObject[]>()
 
@@ -58,7 +57,7 @@ export const SortComplex: React.FC<SortComplexProps> = (props) => {
         handleChange(newSortValue)
       }
 
-      if (searchParams.sort !== newSortValue && modifySearchQuery) {
+      if (searchParams.get('sort') !== newSortValue && modifySearchQuery) {
         const search = qs.stringify(
           {
             ...searchParams,

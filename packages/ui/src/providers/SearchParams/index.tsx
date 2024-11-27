@@ -1,16 +1,15 @@
 'use client'
-import type { ReadonlyURLSearchParams } from 'next/navigation.js'
 
 import { useSearchParams as useNextSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { createContext, useContext } from 'react'
 
+import { parseQueryParams } from '../../utilities/parseQueryParams.js'
+
 export type SearchParamsContext = {
   searchParams: qs.ParsedQs
-  stringifyParams: ({ params, replace }: { params: State; replace?: boolean }) => string
+  stringifyParams: ({ params, replace }: { params: qs.ParsedQs; replace?: boolean }) => string
 }
-
-export type State = qs.ParsedQs
 
 const initialContext: SearchParamsContext = {
   searchParams: {},
@@ -19,23 +18,21 @@ const initialContext: SearchParamsContext = {
 
 const Context = createContext(initialContext)
 
-export function createParams(params: ReadonlyURLSearchParams): State {
-  const search = params.toString()
-
-  return qs.parse(search, {
-    depth: 10,
-    ignoreQueryPrefix: true,
-  })
-}
-
-// TODO: this provider should likely be marked as deprecated and then removed in the next major release
+/**
+ * @deprecated
+ * This provider is deprecated and will be removed in the next major release. Instead, use the `useSearchParams` hook from `next/navigation` instead. See https://github.com/payloadcms/payload/pull/9576.
+ * @example
+ * ```tsx
+ * import { useSearchParams } from 'next/navigation'
+ * ```
+ */
 export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const nextSearchParams = useNextSearchParams()
 
-  const [searchParams, setSearchParams] = React.useState(() => createParams(nextSearchParams))
+  const [searchParams, setSearchParams] = React.useState(() => parseQueryParams(nextSearchParams))
 
   const stringifyParams = React.useCallback(
-    ({ params, replace = false }: { params: State; replace?: boolean }) => {
+    ({ params, replace = false }: { params: qs.ParsedQs; replace?: boolean }) => {
       return qs.stringify(
         {
           ...(replace ? {} : searchParams),
@@ -48,10 +45,18 @@ export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({
   )
 
   React.useEffect(() => {
-    setSearchParams(createParams(nextSearchParams))
+    setSearchParams(parseQueryParams(nextSearchParams))
   }, [nextSearchParams])
 
   return <Context.Provider value={{ searchParams, stringifyParams }}>{children}</Context.Provider>
 }
 
+/**
+ * @deprecated
+ * This provider is deprecated and will be removed in the next major release. Instead, use the `useParams` hook from `next/navigation` instead. See https://github.com/payloadcms/payload/pull/9576.
+ * @example
+ * ```tsx
+ * import { useParams } from 'next/navigation'
+ * ```
+ */
 export const useSearchParams = (): SearchParamsContext => useContext(Context)
