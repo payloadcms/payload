@@ -20,10 +20,10 @@ export type InlineBlockFields<TInlineBlockFields extends JsonObject = JsonObject
   id: string
 } & TInlineBlockFields
 
-export type SerializedServerInlineBlockNode = Spread<
+export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObject> = Spread<
   {
     children?: never // required so that our typed editor state doesn't automatically add children
-    fields: InlineBlockFields
+    fields: InlineBlockFields<TBlockFields>
     type: 'inlineBlock'
   },
   SerializedLexicalNode
@@ -52,7 +52,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return {}
   }
 
-  static importJSON(serializedNode: SerializedServerInlineBlockNode): ServerInlineBlockNode {
+  static importJSON(serializedNode: SerializedInlineBlockNode): ServerInlineBlockNode {
     const node = $createServerInlineBlockNode(serializedNode.fields)
     return node
   }
@@ -84,7 +84,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return { element }
   }
 
-  exportJSON(): SerializedServerInlineBlockNode {
+  exportJSON(): SerializedInlineBlockNode {
     return {
       type: 'inlineBlock',
       fields: this.getFields(),
