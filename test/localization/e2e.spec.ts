@@ -261,6 +261,7 @@ describe('Localization', () => {
       await createAndSaveDoc(page, url, { description, title })
       await openCopyToLocaleDrawer(page)
       await expect(page.locator('.copy-locale-data__content')).toBeVisible()
+      await page.locator('.drawer-close-button').click()
     })
 
     test('should copy data to correct locale', async () => {
