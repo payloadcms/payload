@@ -39,42 +39,33 @@ export type JSXConverters<
 } & {
   blocks?: {
     [K in Extract<
-      T extends { type: 'block' }
-        ? T extends SerializedBlockNode<infer B>
-          ? B extends { blockType: string }
-            ? B['blockType']
-            : never
+      Extract<T, { type: 'block' }> extends SerializedBlockNode<infer B>
+        ? B extends { blockType: string }
+          ? B['blockType']
           : never
         : never,
       string
     >]?: JSXConverter<
-      T extends SerializedBlockNode<any>
-        ? SerializedBlockNode<
-            Extract<T extends SerializedBlockNode<infer B> ? B : never, { blockType: K }>
-          >
+      Extract<T, { type: 'block' }> extends SerializedBlockNode<infer B>
+        ? SerializedBlockNode<Extract<B, { blockType: K }>>
         : SerializedBlockNode
     >
   }
   inlineBlocks?: {
     [K in Extract<
-      T extends { type: 'inlineBlock' }
-        ? T extends SerializedInlineBlockNode<infer B>
-          ? B extends { blockType: string }
-            ? B['blockType']
-            : never
+      Extract<T, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
+        ? B extends { blockType: string }
+          ? B['blockType']
           : never
         : never,
       string
     >]?: JSXConverter<
-      T extends SerializedInlineBlockNode<any>
-        ? SerializedInlineBlockNode<
-            Extract<T extends SerializedInlineBlockNode<infer B> ? B : never, { blockType: K }>
-          >
+      Extract<T, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
+        ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
         : SerializedInlineBlockNode
     >
   }
 }
-
 export type SerializedLexicalNodeWithParent = {
   parent?: SerializedLexicalNode
 } & SerializedLexicalNode
