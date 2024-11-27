@@ -20,7 +20,9 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-export const Pages: CollectionConfig = {
+import { getServerSideURL } from '@/utilities/getURL'
+
+export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
     create: authenticated,
@@ -28,18 +30,33 @@ export const Pages: CollectionConfig = {
     read: authenticatedOrPublished,
     update: authenticated,
   },
+  // This config controls what's populated by default when a page is referenced
+  // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
+  // Type safe if the collection slug generic is passed to `CollectionConfig` - `CollectionConfig<'pagess'>
+  defaultPopulate: {
+    title: true,
+    slug: true,
+  },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data }) => {
         const path = generatePreviewPath({
-          path: `/${typeof data?.slug === 'string' ? data.slug : ''}`,
+          slug: typeof data?.slug === 'string' ? data.slug : '',
+          collection: 'pages',
         })
-        return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
+
+        return `${getServerSideURL()}${path}`
       },
     },
-    preview: (doc) =>
-      generatePreviewPath({ path: `/${typeof doc?.slug === 'string' ? doc.slug : ''}` }),
+    preview: (data) => {
+      const path = generatePreviewPath({
+        slug: typeof data?.slug === 'string' ? data.slug : '',
+        collection: 'pages',
+      })
+
+      return `${getServerSideURL()}${path}`
+    },
     useAsTitle: 'title',
   },
   fields: [

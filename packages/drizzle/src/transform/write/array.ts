@@ -1,4 +1,4 @@
-import type { ArrayField } from 'payload'
+import type { FlattenedArrayField } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
@@ -15,7 +15,7 @@ type Args = {
   }
   blocksToDelete: Set<string>
   data: unknown
-  field: ArrayField
+  field: FlattenedArrayField
   locale?: string
   numbers: Record<string, unknown>[]
   path: string
@@ -96,7 +96,7 @@ export const transformArray = ({
         columnPrefix: '',
         data: arrayRow,
         fieldPrefix: '',
-        fields: field.fields,
+        fields: field.flattenedFields,
         locales: newRow.locales,
         numbers,
         parentTableName: arrayTableName,

@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken'
 import url from 'url'
 
 import type { BeforeOperationHook, Collection } from '../../collections/config/types.js'
@@ -10,6 +9,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
+import { jwtSign } from '../jwt.js'
 
 export type Result = {
   exp: number
@@ -102,11 +102,11 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         user: args?.req?.user,
       })
 
-      const refreshedToken = jwt.sign(fieldsToSign, secret, {
-        expiresIn: collectionConfig.auth.tokenExpiration,
+      const { exp, token: refreshedToken } = await jwtSign({
+        fieldsToSign,
+        secret,
+        tokenExpiration: collectionConfig.auth.tokenExpiration,
       })
-
-      const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number
 
       result = {
         exp,

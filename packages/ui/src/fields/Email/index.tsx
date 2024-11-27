@@ -6,46 +6,37 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
 const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
-    autoComplete,
-    descriptionProps,
-    errorProps,
+    field,
     field: {
-      name,
-      _path: pathFromProps,
       admin: {
-        readOnly: readOnlyFromAdmin,
-
+        autoComplete,
         className,
         description,
         placeholder,
-        style,
-        width,
       } = {} as EmailFieldClientProps['field']['admin'],
       label,
+      localized,
       required,
     } = {} as EmailFieldClientProps['field'],
-    field,
-    labelProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path,
+    readOnly,
     validate,
   } = props
-
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
 
@@ -58,39 +49,42 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField({
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <div
-      className={[fieldBaseClass, 'email', className, showError && 'error', disabled && 'read-only']
+      className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
-      <FieldLabel field={field} Label={field?.admin?.components?.Label} {...(labelProps || {})} />
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
+      />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
-        <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
+        {BeforeInput}
         {/* disable eslint here because the label is dynamic */}
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
-          disabled={disabled}
+          disabled={readOnly}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}
           onChange={setValue}
@@ -99,13 +93,11 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
           type="email"
           value={(value as string) || ''}
         />
-        <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
+        {AfterInput}
       </div>
-      <FieldDescription
-        Description={field?.admin?.components?.Description}
-        description={description}
-        field={field}
-        {...(descriptionProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
       />
     </div>
   )

@@ -14,5 +14,9 @@ export const withDefault = (
     return column.default(escapedString)
   }
 
+  if (field.type === 'point' && Array.isArray(field.defaultValue)) {
+    return column.default(`SRID=4326;POINT(${field.defaultValue[0]} ${field.defaultValue[1]})`)
+  }
+
   return column.default(field.defaultValue)
 }

@@ -19,10 +19,10 @@ export const Status: React.FC = () => {
     id,
     collectionSlug,
     docPermissions,
-    getVersions,
     globalSlug,
-    publishedDoc,
-    unpublishedVersions,
+    hasPublishedDoc,
+    incrementVersionCount,
+    unpublishedVersionCount,
   } = useDocumentInfo()
   const { toggleModal } = useModal()
   const {
@@ -41,20 +41,12 @@ export const Status: React.FC = () => {
 
   let statusToRender: 'changed' | 'draft' | 'published'
 
-  const isChangedFromPublished = unpublishedVersions?.docs?.[0]?.version?._status === 'draft'
-
-  if (unpublishedVersions?.docs?.length > 0 && isChangedFromPublished && publishedDoc) {
+  if (unpublishedVersionCount > 0 && hasPublishedDoc) {
     statusToRender = 'changed'
-  } else if (!publishedDoc) {
+  } else if (!hasPublishedDoc) {
     statusToRender = 'draft'
-  } else if (publishedDoc && unpublishedVersions?.docs?.length <= 2) {
+  } else if (hasPublishedDoc && unpublishedVersionCount <= 0) {
     statusToRender = 'published'
-  }
-
-  const lastVersion = unpublishedVersions?.docs?.[0]
-
-  if (lastVersion && lastVersion.publishedLocale) {
-    statusToRender = locale === lastVersion.publishedLocale ? 'published' : 'draft'
   }
 
   const performAction = useCallback(
@@ -71,17 +63,26 @@ export const Status: React.FC = () => {
         }
       }
 
-      if (action === 'revert') {
-        body = publishedDoc
-      }
-
       if (collectionSlug) {
-        url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null`
+        url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`
         method = 'patch'
       }
       if (globalSlug) {
-        url = `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null`
+        url = `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`
         method = 'post'
+      }
+
+      if (action === 'revert') {
+        const publishedDoc = await requests
+          .get(url, {
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((res) => res.json())
+
+        body = publishedDoc
       }
 
       const res = await requests[method](url, {
@@ -105,8 +106,8 @@ export const Status: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         resetForm(data)
         toast.success(json.message)
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        getVersions()
+
+        incrementVersionCount()
       } else {
         toast.error(t('error:unPublishingDocument'))
       }
@@ -123,12 +124,11 @@ export const Status: React.FC = () => {
     [
       api,
       collectionSlug,
-      getVersions,
+      incrementVersionCount,
       globalSlug,
       i18n.language,
       id,
       locale,
-      publishedDoc,
       resetForm,
       revertModalSlug,
       serverURL,
@@ -138,7 +138,7 @@ export const Status: React.FC = () => {
     ],
   )
 
-  const canUpdate = docPermissions?.update?.permission
+  const canUpdate = docPermissions?.update
 
   if (statusToRender) {
     return (

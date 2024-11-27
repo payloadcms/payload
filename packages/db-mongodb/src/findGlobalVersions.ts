@@ -6,6 +6,7 @@ import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -18,6 +19,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     page,
     pagination,
     req = {} as PayloadRequest,
+    select,
     skip,
     sort: sortArg,
     where,
@@ -27,6 +29,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   const versionFields = buildVersionGlobalFields(
     this.payload.config,
     this.payload.globals.config.find(({ slug }) => slug === global),
+    true,
   )
   const options = {
     ...(await withSession(this, req)),
@@ -62,13 +65,13 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
     limit,
     options,
     page,
     pagination,
+    projection: buildProjectionFromSelect({ adapter: this, fields: versionFields, select }),
     sort,
     useEstimatedCount,
   }

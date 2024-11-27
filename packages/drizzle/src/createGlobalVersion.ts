@@ -12,10 +12,13 @@ export async function createGlobalVersion<T extends TypeWithID>(
   this: DrizzleAdapter,
   {
     autosave,
+    createdAt,
     globalSlug,
     publishedLocale,
     req = {} as PayloadRequest,
+    select,
     snapshot,
+    updatedAt,
     versionData,
   }: CreateGlobalVersionArgs,
 ) {
@@ -28,15 +31,18 @@ export async function createGlobalVersion<T extends TypeWithID>(
     adapter: this,
     data: {
       autosave,
+      createdAt,
       latest: true,
       publishedLocale,
       snapshot,
+      updatedAt,
       version: versionData,
     },
     db,
-    fields: buildVersionGlobalFields(this.payload.config, global),
+    fields: buildVersionGlobalFields(this.payload.config, global, true),
     operation: 'create',
     req,
+    select,
     tableName,
   })
 

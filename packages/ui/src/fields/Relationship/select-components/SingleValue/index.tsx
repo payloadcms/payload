@@ -25,21 +25,21 @@ export const SingleValue: React.FC<
 > = (props) => {
   const {
     children,
-    data: { label, relationTo, value },
+    data: { allowEdit, label, relationTo, value },
     selectProps: { customProps: { onDocumentDrawerOpen } = {} } = {},
   } = props
 
   const [showTooltip, setShowTooltip] = useState(false)
   const { t } = useTranslation()
   const { permissions } = useAuth()
-  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
+  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
 
   return (
     <SelectComponents.SingleValue {...props} className={baseClass}>
       <div className={`${baseClass}__label`}>
         <div className={`${baseClass}__label-text`}>
           <div className={`${baseClass}__text`}>{children}</div>
-          {relationTo && hasReadPermission && (
+          {relationTo && hasReadPermission && allowEdit !== false && (
             <Fragment>
               <button
                 aria-label={t('general:editLabel', { label })}

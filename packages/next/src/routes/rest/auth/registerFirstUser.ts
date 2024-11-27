@@ -28,8 +28,8 @@ export const registerFirstUser: CollectionRouteHandler = async ({ collection, re
   })
 
   const cookie = generatePayloadCookie({
-    collectionConfig: collection.config,
-    payload: req.payload,
+    collectionAuthConfig: collection.config.auth,
+    cookiePrefix: req.payload.config.cookiePrefix,
     token: result.token,
   })
 

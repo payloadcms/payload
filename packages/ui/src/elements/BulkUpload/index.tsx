@@ -3,10 +3,13 @@
 import type { JsonObject } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { validateMimeType } from 'payload/shared'
 import React from 'react'
+import { toast } from 'sonner'
 
-import { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
-import { Drawer } from '../Drawer/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Drawer, useDrawerDepth } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
 import { AddingFilesView } from './AddingFilesView/index.js'
 import { FormsManagerProvider, useFormsManager } from './FormsManager/index.js'
@@ -17,12 +20,32 @@ function DrawerContent() {
   const { addFiles, forms, isInitializing } = useFormsManager()
   const { closeModal } = useModal()
   const { collectionSlug, drawerSlug } = useBulkUpload()
+  const { config } = useConfig()
+  const { t } = useTranslation()
+
+  const uploadCollection = config.collections.find((col) => col.slug === collectionSlug)
+  const uploadConfig = uploadCollection?.upload
+  const uploadMimeTypes = uploadConfig?.mimeTypes
 
   const onDrop = React.useCallback(
     (acceptedFiles: FileList) => {
-      void addFiles(acceptedFiles)
+      const fileTransfer = new DataTransfer()
+      for (const candidateFile of acceptedFiles) {
+        if (
+          uploadMimeTypes === undefined ||
+          uploadMimeTypes.length === 0 ||
+          validateMimeType(candidateFile.type, uploadMimeTypes)
+        ) {
+          fileTransfer.items.add(candidateFile)
+        }
+      }
+      if (fileTransfer.files.length === 0) {
+        toast.error(t('error:invalidFileType'))
+      } else {
+        void addFiles(fileTransfer.files)
+      }
     },
-    [addFiles],
+    [addFiles, t, uploadMimeTypes],
   )
 
   if (!collectionSlug) {
@@ -30,7 +53,13 @@ function DrawerContent() {
   }
 
   if (!forms.length && !isInitializing) {
-    return <AddFilesView onCancel={() => closeModal(drawerSlug)} onDrop={onDrop} />
+    return (
+      <AddFilesView
+        acceptMimeTypes={uploadMimeTypes?.join(', ')}
+        onCancel={() => closeModal(drawerSlug)}
+        onDrop={onDrop}
+      />
+    )
   } else {
     return <AddingFilesView />
   }
@@ -41,17 +70,14 @@ export type BulkUploadProps = {
 }
 
 export function BulkUploadDrawer() {
-  const currentDepth = useEditDepth()
   const { drawerSlug } = useBulkUpload()
 
   return (
-    <EditDepthProvider depth={currentDepth || 1}>
-      <Drawer gutter={false} Header={null} slug={drawerSlug}>
-        <FormsManagerProvider>
-          <DrawerContent />
-        </FormsManagerProvider>
-      </Drawer>
-    </EditDepthProvider>
+    <Drawer gutter={false} Header={null} slug={drawerSlug}>
+      <FormsManagerProvider>
+        <DrawerContent />
+      </FormsManagerProvider>
+    </Drawer>
   )
 }
 
@@ -133,7 +159,7 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
 export const useBulkUpload = () => React.useContext(Context)
 
 export function useBulkUploadDrawerSlug() {
-  const depth = useEditDepth()
+  const depth = useDrawerDepth()
 
   return `${drawerSlug}-${depth || 1}`
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { Block, Field, Tab } from '../../fields/config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
@@ -9,6 +10,12 @@ function hasKey<T, K extends string>(
   return obj != null && Object.prototype.hasOwnProperty.call(obj, key)
 }
 
+const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
+  'Cell',
+  'Description',
+  'Field',
+  'Filter',
+]
 export function genImportMapIterateFields({
   addToImportMap,
   baseDir,
@@ -67,43 +74,41 @@ export function genImportMapIterateFields({
           imports,
         })
       }
-    }
-
-    if ('admin' in field && 'components' in field.admin) {
-      if (hasKey(field?.admin?.components, 'Label')) {
-        addToImportMap(field.admin.components.Label)
-      }
-
-      if (hasKey(field?.admin?.components, 'Cell')) {
-        addToImportMap(field?.admin?.components?.Cell)
-      }
-
-      if (hasKey(field?.admin?.components, 'Description')) {
-        addToImportMap(field?.admin?.components?.Description)
-      }
-
-      if (hasKey(field?.admin?.components, 'Field')) {
-        addToImportMap(field?.admin?.components?.Field)
-      }
-      if (hasKey(field?.admin?.components, 'Filter')) {
-        addToImportMap(field?.admin?.components?.Filter)
-      }
-
-      if (hasKey(field?.admin?.components, 'Error')) {
-        addToImportMap(field?.admin?.components?.Error)
-      }
-
-      if (hasKey(field?.admin?.components, 'afterInput')) {
-        addToImportMap(field?.admin?.components?.afterInput)
-      }
-
-      if (hasKey(field?.admin?.components, 'beforeInput')) {
-        addToImportMap(field?.admin?.components?.beforeInput)
-      }
-
-      if (hasKey(field?.admin?.components, 'RowLabel')) {
-        addToImportMap(field?.admin?.components?.RowLabel)
+    } else if (field.type === 'ui') {
+      if (field?.admin?.components) {
+        // Render any extra, untyped components
+        for (const key in field.admin.components) {
+          if (key in defaultUIFieldComponentKeys) {
+            continue
+          }
+          addToImportMap(field.admin.components[key])
+        }
       }
     }
+
+    hasKey(field?.admin, 'jsx') && addToImportMap(field.admin.jsx) // For Blocks
+
+    hasKey(field?.admin?.components, 'Label') && addToImportMap(field.admin.components.Label)
+
+    hasKey(field?.admin?.components, 'Block') && addToImportMap(field.admin.components.Block)
+
+    hasKey(field?.admin?.components, 'Cell') && addToImportMap(field?.admin?.components?.Cell)
+
+    hasKey(field?.admin?.components, 'Description') &&
+      addToImportMap(field?.admin?.components?.Description)
+
+    hasKey(field?.admin?.components, 'Field') && addToImportMap(field?.admin?.components?.Field)
+    hasKey(field?.admin?.components, 'Filter') && addToImportMap(field?.admin?.components?.Filter)
+
+    hasKey(field?.admin?.components, 'Error') && addToImportMap(field?.admin?.components?.Error)
+
+    hasKey(field?.admin?.components, 'afterInput') &&
+      addToImportMap(field?.admin?.components?.afterInput)
+
+    hasKey(field?.admin?.components, 'beforeInput') &&
+      addToImportMap(field?.admin?.components?.beforeInput)
+
+    hasKey(field?.admin?.components, 'RowLabel') &&
+      addToImportMap(field?.admin?.components?.RowLabel)
   }
 }

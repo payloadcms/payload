@@ -11,6 +11,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -22,18 +23,27 @@ import type {
 } from '../types.js'
 
 export type ClientTab =
-  | ({ fields: ClientField[]; passesCondition?: boolean } & Omit<NamedTab, 'fields'>)
+  | ({ fields: ClientField[]; passesCondition?: boolean; readonly path?: string } & Omit<
+      NamedTab,
+      'fields'
+    >)
   | ({ fields: ClientField[]; passesCondition?: boolean } & Omit<UnnamedTab, 'fields'>)
+
+type TabsFieldBaseClientProps = FieldPaths & Pick<ServerFieldBase, 'permissions'>
 
 type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 
-export type TabsFieldClientProps = ClientFieldBase<TabsFieldClientWithoutType>
+export type TabsFieldClientProps = ClientFieldBase<TabsFieldClientWithoutType> &
+  TabsFieldBaseClientProps
 
 export type TabsFieldServerProps = ServerFieldBase<TabsField, TabsFieldClientWithoutType>
 
 export type TabsFieldServerComponent = FieldServerComponent<TabsField, TabsFieldClientWithoutType>
 
-export type TabsFieldClientComponent = FieldClientComponent<TabsFieldClientWithoutType>
+export type TabsFieldClientComponent = FieldClientComponent<
+  TabsFieldClientWithoutType,
+  TabsFieldBaseClientProps
+>
 
 export type TabsFieldLabelServerComponent = FieldLabelServerComponent<
   TabsField,

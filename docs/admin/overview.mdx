@@ -98,6 +98,7 @@ The following options are available:
 | **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                         |
 | **`meta`**        | Base metadata to use for the Admin Panel. [More details](./metadata). |
 | **`routes`**      | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                 |
+| **`theme`**       | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.
 | **`user`**        | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                          |
 
 <Banner type="success">
@@ -142,7 +143,7 @@ It is also possible to allow multiple user types into the Admin Panel with limit
 - `super-admin` - full access to the Admin Panel to perform any action
 - `editor` - limited access to the Admin Panel to only manage content
 
-To do this, add a `roles` or similar field to your auth-enabled Collection, then use the `access.admin` property to grant or deny access based on the value of that field. See [Access Control](/docs/access-control/overview) for full details. For a complete, working example of role-based access control, check out the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/payload).
+To do this, add a `roles` or similar field to your auth-enabled Collection, then use the `access.admin` property to grant or deny access based on the value of that field. See [Access Control](/docs/access-control/overview) for full details. For a complete, working example of role-based access control, check out the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth).
 
 ## Customizing Routes
 
@@ -176,7 +177,7 @@ The following options are available:
 
 <Banner type="success">
   <strong>Tip:</strong>
-   You can easily add _new_ routes to the Admin Panel through [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Views](./views).
+  You can easily add _new_ routes to the Admin Panel through [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Views](./views).
 </Banner>
 
 #### Customizing Root-level Routes
@@ -194,7 +195,7 @@ app/
 
 <Banner type="warning">
   <strong>Note:</strong>
-  If you set Root-level Routes _before_ auto-generating the Admin Panel, your [Project Structure](#project-structure) will already be set up correctly.
+  If you set Root-level Routes _before_ auto-generating the Admin Panel via `create-payload-app`, your [Project Structure](#project-structure) will already be set up correctly.
 </Banner>
 
 ### Admin-level Routes
@@ -236,7 +237,7 @@ The following options are available:
 
 ## I18n
 
-The Payload Admin Panel is translated in over [30 languages and counting](https://github.com/payloadcms/payload/tree/beta/packages/translations). Languages are automatically detected based on the user's browser and used by the Admin Panel to display all text in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily specify their language by selecting one from their account page. See [I18n](../configuration/i18n) for more information.
+The Payload Admin Panel is translated in over [30 languages and counting](https://github.com/payloadcms/payload/tree/main/packages/translations). Languages are automatically detected based on the user's browser and used by the Admin Panel to display all text in that language. If no language was detected, or if the user's language is not yet supported, English will be chosen. Users can easily specify their language by selecting one from their account page. See [I18n](../configuration/i18n) for more information.
 
 ## Light and Dark Modes
 

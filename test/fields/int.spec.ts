@@ -1,9 +1,8 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
-import type { PaginatedDocs, Payload } from 'payload'
 
-import { reload } from '@payloadcms/next/utilities'
 import path from 'path'
+import { type PaginatedDocs, type Payload, reload, ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -62,7 +61,6 @@ describe('Fields', () => {
       slug: 'users',
       credentials: devUser,
     })
-
     user = await payload.login({
       collection: 'users',
       data: {
@@ -523,6 +521,25 @@ describe('Fields', () => {
       expect(updatedDoc.selectHasMany).toEqual(['one', 'two'])
     })
 
+    it('should clear select hasMany field', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id,
+        collection: 'select-fields',
+        data: {
+          selectHasMany: [],
+        },
+      })
+
+      expect(updatedDoc.selectHasMany).toHaveLength(0)
+    })
+
     it('should query hasMany in', async () => {
       const hit = await payload.create({
         collection: 'select-fields',
@@ -552,6 +569,54 @@ describe('Fields', () => {
 
       expect(hitResult).toBeDefined()
       expect(missResult).toBeFalsy()
+    })
+
+    it('should CRUD within array hasMany', async () => {
+      const doc = await payload.create({
+        collection: 'select-fields',
+        data: { array: [{ selectHasMany: ['one', 'two'] }] },
+      })
+
+      expect(doc.array[0].selectHasMany).toStrictEqual(['one', 'two'])
+
+      const upd = await payload.update({
+        collection: 'select-fields',
+        id: doc.id,
+        data: {
+          array: [
+            {
+              id: doc.array[0].id,
+              selectHasMany: ['six'],
+            },
+          ],
+        },
+      })
+
+      expect(upd.array[0].selectHasMany).toStrictEqual(['six'])
+    })
+
+    it('should CRUD within array + group hasMany', async () => {
+      const doc = await payload.create({
+        collection: 'select-fields',
+        data: { array: [{ group: { selectHasMany: ['one', 'two'] } }] },
+      })
+
+      expect(doc.array[0].group.selectHasMany).toStrictEqual(['one', 'two'])
+
+      const upd = await payload.update({
+        collection: 'select-fields',
+        id: doc.id,
+        data: {
+          array: [
+            {
+              id: doc.array[0].id,
+              group: { selectHasMany: ['six'] },
+            },
+          ],
+        },
+      })
+
+      expect(upd.array[0].group.selectHasMany).toStrictEqual(['six'])
     })
   })
 
@@ -686,6 +751,37 @@ describe('Fields', () => {
 
       expect(hitResult).toBeDefined()
       expect(missResult).toBeFalsy()
+    })
+
+    it('should properly query numbers with exists operator', async () => {
+      await payload.create({
+        collection: 'number-fields',
+        data: {
+          number: null,
+        },
+      })
+
+      const numbersExist = await payload.find({
+        collection: 'number-fields',
+        where: {
+          number: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(numbersExist.totalDocs).toBe(4)
+
+      const numbersNotExists = await payload.find({
+        collection: 'number-fields',
+        where: {
+          number: {
+            exists: false,
+          },
+        },
+      })
+
+      expect(numbersNotExists.docs).toHaveLength(1)
     })
   })
 
@@ -904,87 +1000,96 @@ describe('Fields', () => {
         expect(definitions['version.text']).toEqual(1)
       })
     })
-
-    describe('point', () => {
-      let doc
-      const point = [7, -7]
-      const localized = [5, -2]
-      const group = { point: [1, 9] }
-
-      beforeEach(async () => {
-        const findDoc = await payload.find({
-          collection: 'point-fields',
-          pagination: false,
-        })
-        ;[doc] = findDoc.docs
-      })
-
-      it('should read', async () => {
-        const find = await payload.find({
-          collection: 'point-fields',
-          pagination: false,
-        })
-
-        ;[doc] = find.docs
-
-        expect(doc.point).toEqual(pointDoc.point)
-        expect(doc.localized).toEqual(pointDoc.localized)
-        expect(doc.group).toMatchObject(pointDoc.group)
-      })
-
-      it('should create', async () => {
-        doc = await payload.create({
-          collection: 'point-fields',
-          data: {
-            group,
-            localized,
-            point,
-          },
-        })
-
-        expect(doc.point).toEqual(point)
-        expect(doc.localized).toEqual(localized)
-        expect(doc.group).toMatchObject(group)
-      })
-
-      it('should not create duplicate point when unique', async () => {
-        // first create the point field
-        doc = await payload.create({
-          collection: 'point-fields',
-          data: {
-            group,
-            localized,
-            point,
-          },
-        })
-
-        // Now make sure we can't create a duplicate (since 'localized' is a unique field)
-        await expect(() =>
-          payload.create({
-            collection: 'point-fields',
-            data: {
-              group,
-              localized,
-              point,
-            },
-          }),
-        ).rejects.toThrow(Error)
-
-        await expect(async () =>
-          payload.create({
-            collection: 'number-fields',
-            data: {
-              min: 5,
-            },
-          }),
-        ).rejects.toThrow('The following field is invalid: min')
-
-        expect(doc.point).toEqual(point)
-        expect(doc.localized).toEqual(localized)
-        expect(doc.group).toMatchObject(group)
-      })
-    })
   }
+
+  describe('point', () => {
+    let doc
+    const point = [7, -7]
+    const localized = [5, -2]
+    const group = { point: [1, 9] }
+
+    beforeEach(async () => {
+      const findDoc = await payload.find({
+        collection: 'point-fields',
+        pagination: false,
+      })
+      ;[doc] = findDoc.docs
+    })
+
+    it('should read', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      const find = await payload.find({
+        collection: 'point-fields',
+        pagination: false,
+      })
+
+      ;[doc] = find.docs
+
+      expect(doc.point).toEqual(pointDoc.point)
+      expect(doc.localized).toEqual(pointDoc.localized)
+      expect(doc.group).toMatchObject(pointDoc.group)
+    })
+
+    it('should create', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          group,
+          localized,
+          point,
+        },
+      })
+
+      expect(doc.point).toEqual(point)
+      expect(doc.localized).toEqual(localized)
+      expect(doc.group).toMatchObject(group)
+    })
+
+    it('should not create duplicate point when unique', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      // first create the point field
+      doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          group,
+          localized,
+          point,
+        },
+      })
+
+      // Now make sure we can't create a duplicate (since 'localized' is a unique field)
+      await expect(() =>
+        payload.create({
+          collection: 'point-fields',
+          data: {
+            group,
+            localized,
+            point,
+          },
+        }),
+      ).rejects.toThrow(Error)
+
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            min: 5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: min')
+
+      expect(doc.point).toEqual(point)
+      expect(doc.localized).toEqual(localized)
+      expect(doc.group).toMatchObject(group)
+    })
+  })
 
   describe('unique indexes', () => {
     it('should throw validation error saving on unique fields', async () => {
@@ -1003,6 +1108,218 @@ describe('Fields', () => {
         })
         return result.error
       }).toBeDefined()
+    })
+
+    it('should throw validation error saving on unique relationship fields hasMany: false non polymorphic', async () => {
+      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '1',
+            text: '2',
+            uniqueRequiredText: '3',
+            uniqueRelationship: textDoc.id,
+          },
+        })
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '20' },
+            id: doc.id,
+          }),
+        )
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '4',
+            text: '5',
+            uniqueRequiredText: '10',
+            uniqueRelationship: textDoc.id,
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('should throw validation error saving on unique relationship fields hasMany: true', async () => {
+      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '1',
+            text: '2',
+            uniqueRequiredText: '3',
+            uniqueHasManyRelationship: [textDoc.id],
+          },
+        })
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '40' },
+            id: doc.id,
+          }),
+        )
+
+      // Should allow the same relationship on a diferrent field!
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '31',
+            text: '24',
+            uniqueRequiredText: '55',
+            uniqueHasManyRelationship_2: [textDoc.id],
+          },
+        })
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '30' },
+            id: doc.id,
+          }),
+        )
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '4',
+            text: '5',
+            uniqueRequiredText: '10',
+            uniqueHasManyRelationship: [textDoc.id],
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('should throw validation error saving on unique relationship fields polymorphic not hasMany', async () => {
+      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '1',
+            text: '2',
+            uniqueRequiredText: '3',
+            uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
+          },
+        })
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '20' },
+            id: doc.id,
+          }),
+        )
+
+      // Should allow the same relationship on a diferrent field!
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '31',
+            text: '24',
+            uniqueRequiredText: '55',
+            uniquePolymorphicRelationship_2: { relationTo: 'text-fields', value: textDoc.id },
+          },
+        })
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '100' },
+            id: doc.id,
+          }),
+        )
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '4',
+            text: '5',
+            uniqueRequiredText: '10',
+            uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('should throw validation error saving on unique relationship fields polymorphic hasMany: true', async () => {
+      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '1',
+            text: '2',
+            uniqueRequiredText: '3',
+            uniqueHasManyPolymorphicRelationship: [
+              { relationTo: 'text-fields', value: textDoc.id },
+            ],
+          },
+        })
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '100' },
+            id: doc.id,
+          }),
+        )
+
+      // Should allow the same relationship on a diferrent field!
+      await payload
+        .create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '31',
+            text: '24',
+            uniqueRequiredText: '55',
+            uniqueHasManyPolymorphicRelationship_2: [
+              { relationTo: 'text-fields', value: textDoc.id },
+            ],
+          },
+        })
+        // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
+        .then((doc) =>
+          payload.update({
+            locale: 'es',
+            collection: 'indexed-fields',
+            data: { localizedUniqueRequiredText: '300' },
+            id: doc.id,
+          }),
+        )
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            localizedUniqueRequiredText: '4',
+            text: '5',
+            uniqueRequiredText: '10',
+            uniqueHasManyPolymorphicRelationship: [
+              { relationTo: 'text-fields', value: textDoc.id },
+            ],
+          },
+        }),
+      ).rejects.toBeTruthy()
     })
 
     it('should not throw validation error saving multiple null values for unique fields', async () => {
@@ -1256,6 +1573,50 @@ describe('Fields', () => {
       expect(allLocales.localized.en[0].text).toStrictEqual(enText)
       expect(allLocales.localized.es[0].text).toStrictEqual(esText)
     })
+
+    it('should query by the same array', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              localizedText: 'test',
+              text: 'required',
+              anotherText: 'another',
+            },
+          ],
+          localized: [{ text: 'a' }],
+        },
+      })
+
+      // left join collection_items + left join collection_items_locales
+      const {
+        docs: [res],
+      } = await payload.find({
+        collection,
+        where: {
+          and: [
+            {
+              'items.localizedText': {
+                equals: 'test',
+              },
+            },
+            {
+              'items.anotherText': {
+                equals: 'another',
+              },
+            },
+            {
+              'items.text': {
+                equals: 'required',
+              },
+            },
+          ],
+        },
+      })
+
+      expect(res.id).toBe(doc.id)
+    })
   })
 
   describe('group', () => {
@@ -1458,6 +1819,201 @@ describe('Fields', () => {
 
       expect(docAll.localizedGroupRel.en.email).toBe(rel_1.id)
       expect(docAll.localizedGroupRel.es.email).toBe(rel_2.id)
+    })
+
+    it('should insert/update/read localized group with hasMany relationship inside', async () => {
+      const rel_1 = await payload.create({
+        collection: 'email-fields',
+        data: { email: 'pro123@gmail.com' },
+      })
+
+      const rel_2 = await payload.create({
+        collection: 'email-fields',
+        data: { email: 'frank@gmail.com' },
+      })
+
+      const doc = await payload.create({
+        collection: 'group-fields',
+        depth: 0,
+        data: {
+          group: { text: 'requireddd' },
+          localizedGroupManyRel: {
+            email: [rel_1.id],
+          },
+        },
+      })
+
+      expect(doc.localizedGroupManyRel.email).toStrictEqual([rel_1.id])
+
+      const upd = await payload.update({
+        collection: 'group-fields',
+        depth: 0,
+        id: doc.id,
+        locale: 'es',
+        data: {
+          localizedGroupManyRel: {
+            email: [rel_2.id],
+          },
+        },
+      })
+
+      expect(upd.localizedGroupManyRel.email).toStrictEqual([rel_2.id])
+
+      const docAll = await payload.findByID({
+        collection: 'group-fields',
+        id: doc.id,
+        locale: 'all',
+        depth: 0,
+      })
+
+      expect(docAll.localizedGroupManyRel.en.email).toStrictEqual([rel_1.id])
+      expect(docAll.localizedGroupManyRel.es.email).toStrictEqual([rel_2.id])
+    })
+
+    it('should insert/update/read localized group with poly relationship inside', async () => {
+      const rel_1 = await payload.create({
+        collection: 'email-fields',
+        data: { email: 'pro123@gmail.com' },
+      })
+
+      const rel_2 = await payload.create({
+        collection: 'email-fields',
+        data: { email: 'frank@gmail.com' },
+      })
+
+      const doc = await payload.create({
+        collection: 'group-fields',
+        depth: 0,
+        data: {
+          group: { text: 'requireddd' },
+          localizedGroupPolyRel: {
+            email: {
+              relationTo: 'email-fields',
+              value: rel_1.id,
+            },
+          },
+        },
+      })
+
+      expect(doc.localizedGroupPolyRel.email).toStrictEqual({
+        relationTo: 'email-fields',
+        value: rel_1.id,
+      })
+
+      const upd = await payload.update({
+        collection: 'group-fields',
+        depth: 0,
+        id: doc.id,
+        locale: 'es',
+        data: {
+          localizedGroupPolyRel: {
+            email: {
+              value: rel_2.id,
+              relationTo: 'email-fields',
+            },
+          },
+        },
+      })
+
+      expect(upd.localizedGroupPolyRel.email).toStrictEqual({
+        value: rel_2.id,
+        relationTo: 'email-fields',
+      })
+
+      const docAll = await payload.findByID({
+        collection: 'group-fields',
+        id: doc.id,
+        locale: 'all',
+        depth: 0,
+      })
+
+      expect(docAll.localizedGroupPolyRel.en.email).toStrictEqual({
+        value: rel_1.id,
+        relationTo: 'email-fields',
+      })
+      expect(docAll.localizedGroupPolyRel.es.email).toStrictEqual({
+        value: rel_2.id,
+        relationTo: 'email-fields',
+      })
+    })
+
+    it('should insert/update/read localized group with poly hasMany relationship inside', async () => {
+      const rel_1 = await payload.create({
+        collection: 'email-fields',
+        data: { email: 'pro123@gmail.com' },
+      })
+
+      const rel_2 = await payload.create({
+        collection: 'email-fields',
+        data: { email: 'frank@gmail.com' },
+      })
+
+      const doc = await payload.create({
+        collection: 'group-fields',
+        depth: 0,
+        data: {
+          group: { text: 'requireddd' },
+          localizedGroupPolyHasManyRel: {
+            email: [
+              {
+                relationTo: 'email-fields',
+                value: rel_1.id,
+              },
+            ],
+          },
+        },
+      })
+
+      expect(doc.localizedGroupPolyHasManyRel.email).toStrictEqual([
+        {
+          relationTo: 'email-fields',
+          value: rel_1.id,
+        },
+      ])
+
+      const upd = await payload.update({
+        collection: 'group-fields',
+        depth: 0,
+        id: doc.id,
+        locale: 'es',
+        data: {
+          localizedGroupPolyHasManyRel: {
+            email: [
+              {
+                value: rel_2.id,
+                relationTo: 'email-fields',
+              },
+            ],
+          },
+        },
+      })
+
+      expect(upd.localizedGroupPolyHasManyRel.email).toStrictEqual([
+        {
+          value: rel_2.id,
+          relationTo: 'email-fields',
+        },
+      ])
+
+      const docAll = await payload.findByID({
+        collection: 'group-fields',
+        id: doc.id,
+        locale: 'all',
+        depth: 0,
+      })
+
+      expect(docAll.localizedGroupPolyHasManyRel.en.email).toStrictEqual([
+        {
+          value: rel_1.id,
+          relationTo: 'email-fields',
+        },
+      ])
+      expect(docAll.localizedGroupPolyHasManyRel.es.email).toStrictEqual([
+        {
+          value: rel_2.id,
+          relationTo: 'email-fields',
+        },
+      ])
     })
   })
 
@@ -2118,6 +2674,66 @@ describe('Fields', () => {
         expect(docIDs).not.toContain(1)
         expect(docIDs).not.toContain(3)
         expect(docIDs).toContain(2)
+      })
+
+      it('should query deeply', async () => {
+        // eslint-disable-next-line jest/no-conditional-in-test
+        if (payload.db.name === 'sqlite') {
+          return
+        }
+
+        const json_1 = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: {
+              array: [
+                {
+                  text: 'some-text',
+                  object: {
+                    text: 'deep-text',
+                    array: [10],
+                  },
+                },
+              ],
+            },
+          },
+        })
+
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              {
+                'json.array.text': {
+                  equals: 'some-text',
+                },
+              },
+              {
+                'json.array.object.text': {
+                  equals: 'deep-text',
+                },
+              },
+              {
+                'json.array.object.array': {
+                  in: [10, 20],
+                },
+              },
+              {
+                'json.array.object.array': {
+                  exists: true,
+                },
+              },
+              {
+                'json.array.object.notexists': {
+                  exists: false,
+                },
+              },
+            ],
+          },
+        })
+
+        expect(docs).toHaveLength(1)
+        expect(docs[0].id).toBe(json_1.id)
       })
     })
   })

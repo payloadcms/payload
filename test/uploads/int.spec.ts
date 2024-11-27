@@ -779,6 +779,31 @@ describe('Collections - Uploads', () => {
       )
     })
   })
+
+  describe('Duplicate', () => {
+    it('should duplicate upload collection doc', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+      file.name = 'file-to-duplicate.png'
+
+      const mediaDoc = await payload.create({
+        collection: 'media',
+        data: {},
+        file,
+      })
+
+      expect(mediaDoc).toBeDefined()
+
+      const duplicatedDoc = await payload.duplicate({
+        collection: 'media',
+        id: mediaDoc.id,
+      })
+
+      const expectedPath = path.join(dirname, './media')
+
+      expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
+    })
+  })
 })
 
 async function fileExists(fileName: string): Promise<boolean> {

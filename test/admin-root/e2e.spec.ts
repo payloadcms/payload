@@ -34,6 +34,15 @@ test.describe('Admin Panel (Root)', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
+    await ensureCompilationIsDone({
+      customRoutes: {
+        admin: adminRoute,
+      },
+      page,
+      serverURL,
+      noAutoLogin: true,
+    })
+
     await login({ page, serverURL, customRoutes: { admin: adminRoute } })
 
     await ensureCompilationIsDone({
@@ -97,5 +106,12 @@ test.describe('Admin Panel (Root)', () => {
     await expect(favicons.nth(1)).toHaveAttribute('sizes', '32x32')
     await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
     await expect(favicons.nth(1)).toHaveAttribute('href', /\/payload-favicon-light\.[a-z\d]+\.png/)
+  })
+
+  test('config.admin.theme should restrict the theme', async () => {
+    await page.goto(url.account)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+    await expect(page.locator('#field-theme')).toBeHidden()
+    await expect(page.locator('#field-theme-auto')).toBeHidden()
   })
 })

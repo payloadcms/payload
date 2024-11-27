@@ -19,7 +19,7 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/withPayload.js" /* Include the withPayload.js file in the build */
-  ],
+, "../ui/src/utilities/renderFields.tsx"  ],
   "references": [
     { "path": "../payload" },
     { "path": "../ui" },

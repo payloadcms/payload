@@ -25,24 +25,24 @@ type Args = {
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
+  joinPath?: string
   /**
    * When not passed in, assume that join are not supported (globals, arrays, blocks)
    */
   joins?: SanitizedJoins
   parentIsLocalized: boolean
+
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
    *
    * @default false
    */
   requireFieldLevelRichTextEditor?: boolean
-
   /**
    * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
-  schemaPath?: string
   /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
@@ -54,18 +54,16 @@ export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
   fields,
+  joinPath = '',
   joins,
   parentIsLocalized,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
-  schemaPath: schemaPathArg,
   validRelationships,
 }: Args): Promise<Field[]> => {
   if (!fields) {
     return []
   }
-
-  let schemaPath = schemaPathArg
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
@@ -104,7 +102,7 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'join') {
-      sanitizeJoinField({ config, field, joins, schemaPath })
+      sanitizeJoinField({ config, field, joinPath, joins })
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
@@ -178,10 +176,6 @@ export const sanitizeFields = async ({
         }
       }
 
-      if (typeof field.virtual === 'undefined') {
-        field.virtual = false
-      }
-
       if (!field.hooks) {
         field.hooks = {}
       }
@@ -235,7 +229,6 @@ export const sanitizeFields = async ({
         block._sanitized = true
         block.fields = block.fields.concat(baseBlockFields)
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
-
         block.fields = await sanitizeFields({
           config,
           existingFieldNames: new Set(),
@@ -249,18 +242,17 @@ export const sanitizeFields = async ({
     }
 
     if ('fields' in field && field.fields) {
-      if ('name' in field && field.name) {
-        schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${field.name}`
-      }
       field.fields = await sanitizeFields({
         config,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
+        joinPath: fieldAffectsData(field)
+          ? `${joinPath ? joinPath + '.' : ''}${field.name}`
+          : joinPath,
         joins,
         parentIsLocalized: parentIsLocalized || field.localized,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
-        schemaPath,
         validRelationships,
       })
     }
@@ -268,12 +260,8 @@ export const sanitizeFields = async ({
     if (field.type === 'tabs') {
       for (let j = 0; j < field.tabs.length; j++) {
         const tab = field.tabs[j]
-
-        if (tabHasName(tab)) {
-          schemaPath = `${schemaPath || ''}${schemaPath ? '.' : ''}${tab.name}`
-          if (typeof tab.label === 'undefined') {
-            tab.label = toWords(tab.name)
-          }
+        if (tabHasName(tab) && typeof tab.label === 'undefined') {
+          tab.label = toWords(tab.name)
         }
 
         if (
@@ -289,15 +277,19 @@ export const sanitizeFields = async ({
           config,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
+          joinPath: tabHasName(tab) ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
           joins,
           parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
-          schemaPath,
           validRelationships,
         })
         field.tabs[j] = tab
       }
+    }
+
+    if (field.type === 'ui' && typeof field.admin.disableBulkEdit === 'undefined') {
+      field.admin.disableBulkEdit = true
     }
 
     if ('_sanitized' in field) {

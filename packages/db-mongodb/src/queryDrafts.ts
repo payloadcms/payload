@@ -1,17 +1,30 @@
 import type { PaginateOptions } from 'mongoose'
 import type { PayloadRequest, QueryDrafts } from 'payload'
 
-import { combineQueries, flattenWhereToOperators } from 'payload'
+import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
+import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
-  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
+  {
+    collection,
+    joins,
+    limit,
+    locale,
+    page,
+    pagination,
+    req = {} as PayloadRequest,
+    select,
+    sort: sortArg,
+    where,
+  },
 ) {
   const VersionModel = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
@@ -28,7 +41,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
-      fields: collectionConfig.fields,
+      fields: collectionConfig.flattenedFields,
       locale,
       sort: sortArg || collectionConfig.defaultSort,
       timestamps: true,
@@ -43,16 +56,21 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     where: combinedWhere,
   })
 
+  const projection = buildProjectionFromSelect({
+    adapter: this,
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
+    select,
+  })
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
     options,
     page,
     pagination,
+    projection,
     sort,
     useEstimatedCount,
   }
@@ -89,7 +107,29 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     paginationOptions.options.limit = limit
   }
 
-  const result = await VersionModel.paginate(versionQuery, paginationOptions)
+  let result
+
+  const aggregate = await buildJoinAggregation({
+    adapter: this,
+    collection,
+    collectionConfig,
+    joins,
+    locale,
+    projection,
+    query: versionQuery,
+    versions: true,
+  })
+
+  // build join aggregation
+  if (aggregate) {
+    result = await VersionModel.aggregatePaginate(
+      VersionModel.aggregate(aggregate),
+      paginationOptions,
+    )
+  } else {
+    result = await VersionModel.paginate(versionQuery, paginationOptions)
+  }
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
@@ -99,8 +139,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
         _id: doc.parent,
         id: doc.parent,
         ...doc.version,
-        createdAt: doc.createdAt,
-        updatedAt: doc.updatedAt,
       }
 
       return sanitizeInternalFields(doc)

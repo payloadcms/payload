@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Vztah',
   },
+  da: {
+    label: 'Forhold',
+  },
   de: {
     label: 'Beziehung',
   },

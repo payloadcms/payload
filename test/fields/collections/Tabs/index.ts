@@ -182,6 +182,7 @@ const TabsFields: CollectionConfig = {
         {
           name: 'tab',
           label: 'Tab with Name',
+          interfaceName: 'TabWithName',
           description: 'This tab has a name, which should namespace the contained fields.',
           fields: [
             {

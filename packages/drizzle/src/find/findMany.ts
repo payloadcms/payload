@@ -1,4 +1,4 @@
-import type { Field, FindArgs, PayloadRequest, TypeWithID } from 'payload'
+import type { FindArgs, FlattenedField, PayloadRequest, TypeWithID } from 'payload'
 
 import { inArray } from 'drizzle-orm'
 
@@ -12,8 +12,9 @@ import { buildFindManyArgs } from './buildFindManyArgs.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  fields: Field[]
+  fields: FlattenedField[]
   tableName: string
+  versions?: boolean
 } & Omit<FindArgs, 'collection'>
 
 export const findMany = async function find({
@@ -25,9 +26,11 @@ export const findMany = async function find({
   page = 1,
   pagination,
   req = {} as PayloadRequest,
+  select,
   skip,
   sort,
   tableName,
+  versions,
   where: whereArg,
 }: Args) {
   const db = adapter.sessions[await req.transactionID]?.db || adapter.drizzle
@@ -57,9 +60,9 @@ export const findMany = async function find({
 
   const selectDistinctMethods: ChainedMethods = []
 
-  if (orderBy?.order && orderBy?.column) {
+  if (orderBy) {
     selectDistinctMethods.push({
-      args: [orderBy.order(orderBy.column)],
+      args: [() => orderBy.map(({ column, order }) => order(column))],
       method: 'orderBy',
     })
   }
@@ -70,7 +73,9 @@ export const findMany = async function find({
     fields,
     joinQuery,
     joins,
+    select,
     tableName,
+    versions,
   })
 
   selectDistinctMethods.push({ args: [offset], method: 'offset' })
@@ -111,7 +116,7 @@ export const findMany = async function find({
   } else {
     findManyArgs.limit = limit
     findManyArgs.offset = offset
-    findManyArgs.orderBy = orderBy.order(orderBy.column)
+    findManyArgs.orderBy = () => orderBy.map(({ column, order }) => order(column))
 
     if (where) {
       findManyArgs.where = where

@@ -1,6 +1,6 @@
 'use client'
-import type { LexicalEditor } from 'lexical'
-
+import { Button } from '@payloadcms/ui'
+import { $addUpdateTag, type LexicalEditor } from 'lexical'
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -19,15 +19,17 @@ export function DropDownItem({
   children,
   editor,
   enabled,
+  Icon,
   item,
-  title,
+  tooltip,
 }: {
   active?: boolean
   children: React.ReactNode
   editor: LexicalEditor
   enabled?: boolean
+  Icon: React.ReactNode
   item: ToolbarGroupItem
-  title?: string
+  tooltip?: string
 }): React.ReactNode {
   const [className, setClassName] = useState<string>(baseClass)
 
@@ -61,13 +63,20 @@ export function DropDownItem({
   }, [ref, registerItem])
 
   return (
-    <button
+    <Button
+      aria-label={tooltip}
+      buttonStyle="none"
       className={className}
+      disabled={enabled === false}
+      icon={Icon}
+      iconPosition="left"
+      iconStyle="none"
       onClick={() => {
         if (enabled !== false) {
-          editor._updateTags = new Set([...editor._updateTags, 'toolbar']) // without setting the tags, our onSelect will not be able to trigger our onChange as focus onChanges are ignored.
-
           editor.focus(() => {
+            editor.update(() => {
+              $addUpdateTag('toolbar')
+            })
             // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
             item.onSelect?.({
               editor,
@@ -82,11 +91,11 @@ export function DropDownItem({
         e.preventDefault()
       }}
       ref={ref}
-      title={title}
+      tooltip={tooltip}
       type="button"
     >
       {children}
-    </button>
+    </Button>
   )
 }
 

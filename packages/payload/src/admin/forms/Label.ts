@@ -1,21 +1,22 @@
 import type { ServerProps, StaticLabel } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { MappedComponent } from '../types.js'
 import type { ClientFieldWithOptionalType } from './Field.js'
 
 export type GenericLabelProps = {
   readonly as?: 'label' | 'span'
+  readonly hideLocale?: boolean
   readonly htmlFor?: string
-  readonly Label?: MappedComponent
   readonly label?: StaticLabel
+  readonly localized?: boolean
+  readonly path?: string
   readonly required?: boolean
   readonly unstyled?: boolean
 }
 
 export type FieldLabelClientProps<
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
+  TFieldClient extends Partial<ClientFieldWithOptionalType> = Partial<ClientFieldWithOptionalType>,
 > = {
-  field: TFieldClient
+  field?: TFieldClient
 } & GenericLabelProps
 
 export type FieldLabelServerProps<

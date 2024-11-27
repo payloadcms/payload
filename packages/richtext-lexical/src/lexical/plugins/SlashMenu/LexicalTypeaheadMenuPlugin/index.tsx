@@ -1,11 +1,5 @@
 'use client'
-import type {
-  LexicalCommand,
-  LexicalEditor,
-  ParagraphNode,
-  RangeSelection,
-  TextNode,
-} from 'lexical'
+import type { LexicalCommand, LexicalEditor, ParagraphNode, RangeSelection } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { mergeRegister } from '@lexical/utils'
@@ -21,7 +15,7 @@ import * as React from 'react'
 
 import type { MenuTextMatch, TriggerFn } from '../useMenuTriggerMatch.js'
 import type { MenuRenderFn, MenuResolution } from './LexicalMenu.js'
-import type { SlashMenuGroupInternal, SlashMenuItem } from './types.js'
+import type { SlashMenuGroupInternal } from './types.js'
 
 import { LexicalMenu, useMenuAnchorRef } from './LexicalMenu.js'
 
@@ -110,12 +104,6 @@ export type TypeaheadMenuPluginProps = {
   onClose?: () => void
   onOpen?: (resolution: MenuResolution) => void
   onQueryChange: (matchingString: null | string) => void
-  onSelectItem: (
-    item: SlashMenuItem,
-    textNodeContainingQuery: null | TextNode,
-    closeMenu: () => void,
-    matchingString: string,
-  ) => void
   triggerFn: TriggerFn
 }
 
@@ -131,7 +119,6 @@ export function LexicalTypeaheadMenuPlugin({
   onClose,
   onOpen,
   onQueryChange,
-  onSelectItem,
   triggerFn,
 }: TypeaheadMenuPluginProps): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
@@ -242,14 +229,13 @@ export function LexicalTypeaheadMenuPlugin({
     }
   }, [editor, triggerFn, onQueryChange, resolution, closeTypeahead, openTypeahead])
 
-  return resolution === null || editor === null ? null : (
+  return anchorElementRef.current === null || resolution === null || editor === null ? null : (
     <LexicalMenu
       anchorElementRef={anchorElementRef}
       close={closeTypeahead}
       editor={editor}
       groups={groups}
       menuRenderFn={menuRenderFn}
-      onSelectItem={onSelectItem}
       resolution={resolution}
       shouldSplitNodeWithQuery
     />

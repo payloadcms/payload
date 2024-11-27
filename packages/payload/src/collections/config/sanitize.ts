@@ -9,6 +9,7 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
+import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
@@ -35,23 +36,29 @@ export const sanitizeCollection = async (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = config.collections.map((c) => c.slug) || []
+  const validRelationships = (config.collections || []).reduce(
+    (acc, c) => {
+      acc.push(c.slug)
+      return acc
+    },
+    [collection.slug],
+  )
   const joins: SanitizedJoins = {}
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
+    joinPath: '',
     joins,
     parentIsLocalized: false,
     richTextSanitizationPromises,
-    schemaPath: '',
     validRelationships,
   })
 
   if (sanitized.timestamps !== false) {
     // add default timestamps fields only as needed
-    let hasUpdatedAt = null
-    let hasCreatedAt = null
+    let hasUpdatedAt: boolean | null = null
+    let hasCreatedAt: boolean | null = null
     sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
         if (field.name === 'updatedAt') {
@@ -71,6 +78,7 @@ export const sanitizeCollection = async (
           disableBulkEdit: true,
           hidden: true,
         },
+        index: true,
         label: ({ t }) => t('general:updatedAt'),
       })
     }
@@ -93,12 +101,15 @@ export const sanitizeCollection = async (
 
   if (sanitized.versions) {
     if (sanitized.versions === true) {
-      sanitized.versions = { drafts: false }
+      sanitized.versions = { drafts: false, maxPerDoc: 100 }
     }
 
     if (sanitized.timestamps === false) {
       throw new TimestampsRequired(collection)
     }
+
+    sanitized.versions.maxPerDoc =
+      typeof sanitized.versions.maxPerDoc === 'number' ? sanitized.versions.maxPerDoc : 100
 
     if (sanitized.versions.drafts) {
       if (sanitized.versions.drafts === true) {
@@ -130,13 +141,10 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeUploadFields(sanitized.fields, sanitized)
 
-    // disable duplicate for uploads by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate || true
-
     sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
-      sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id'
+      sanitized.admin?.useAsTitle && sanitized.admin.useAsTitle !== 'id'
         ? sanitized.admin.useAsTitle
         : 'filename'
 
@@ -162,7 +170,7 @@ export const sanitizeCollection = async (
     }
 
     // disable duplicate for auth enabled collections by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate || true
+    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
 
     if (!sanitized.auth.strategies) {
       sanitized.auth.strategies = []
@@ -199,6 +207,8 @@ export const sanitizeCollection = async (
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
   sanitizedConfig.joins = joins
+
+  sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
 
   return sanitizedConfig
 }

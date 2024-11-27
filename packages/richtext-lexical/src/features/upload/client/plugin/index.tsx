@@ -14,7 +14,7 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
-import type { PluginComponentWithAnchor } from '../../../typesClient.js'
+import type { PluginComponent } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
 import type { UploadFeaturePropsClient } from '../feature.client.js'
 
@@ -26,9 +26,7 @@ export type InsertUploadPayload = Readonly<Omit<UploadData, 'id'> & Partial<Pick
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
 
-export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> = ({
-  clientProps,
-}) => {
+export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
   const {
     config: { collections },

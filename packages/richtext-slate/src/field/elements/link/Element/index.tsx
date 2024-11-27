@@ -6,17 +6,16 @@ import {
   Button,
   Popup,
   Translation,
-  useAuth,
   useConfig,
   useDocumentInfo,
   useDrawerSlug,
   useLocale,
   useModal,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
 import { deepCopyObject, reduceFieldsToValues } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
@@ -65,21 +64,20 @@ export const LinkElement = () => {
 
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
 
-  const {
-    field: { richTextComponentMap },
-  } = fieldProps
-  const fields = richTextComponentMap.get(linkFieldsSchemaPath)
+  const { componentMap } = fieldProps
+  const fields = componentMap[linkFieldsSchemaPath]
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const editor = useSlate()
   const { config } = useConfig()
-  const { user } = useAuth()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
   const { closeModal, openModal, toggleModal } = useModal()
   const [renderModal, setRenderModal] = useState(false)
   const [renderPopup, setRenderPopup] = useState(false)
   const [initialState, setInitialState] = useState<FormState>({})
-  const { id, collectionSlug } = useDocumentInfo()
+
+  const { getFormState } = useServerFunctions()
 
   const drawerSlug = useDrawerSlug('rich-text-link')
 
@@ -101,13 +99,14 @@ export const LinkElement = () => {
       }
 
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          data,
-          operation: 'update',
-          schemaPath: fieldMapPath,
-        },
-        serverURL: config.serverURL,
+        collectionSlug,
+        data,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        globalSlug,
+        operation: 'update',
+        renderAllFields: true,
+        schemaPath: fieldMapPath ?? '',
       })
 
       setInitialState(state)
@@ -116,7 +115,20 @@ export const LinkElement = () => {
     if (renderModal) {
       void awaitInitialState()
     }
-  }, [renderModal, element, user, locale, t, collectionSlug, config, id, fieldMapPath])
+  }, [
+    renderModal,
+    element,
+    locale,
+    t,
+    collectionSlug,
+    config,
+    id,
+    fieldMapPath,
+    getFormState,
+    globalSlug,
+    getDocPreferences,
+    docPermissions,
+  ])
 
   return (
     <span className={baseClass} {...attributes}>
@@ -135,6 +147,7 @@ export const LinkElement = () => {
               setRenderModal(false)
             }}
             initialState={initialState}
+            schemaPath={schemaPath}
           />
         )}
         <Popup

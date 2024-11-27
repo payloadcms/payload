@@ -14,9 +14,10 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { Button } from '../Button/index.js'
-import { Pill } from '../Pill/index.js'
 import './index.scss'
+import { Pill } from '../Pill/index.js'
 
 const baseClass = 'delete-documents'
 
@@ -26,7 +27,7 @@ export type Props = {
 }
 
 export const DeleteMany: React.FC<Props> = (props) => {
-  const { collection: { slug, labels: { plural } } = {} } = props
+  const { collection, collection: { slug, labels: { plural, singular } } = {} } = props
 
   const { permissions } = useAuth()
   const {
@@ -40,11 +41,11 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
-  const { stringifyParams } = useSearchParams()
+  const { searchParams, stringifyParams } = useSearchParams()
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasDeletePermission = collectionPermissions?.delete?.permission
+  const hasDeletePermission = collectionPermissions?.delete
 
   const modalSlug = `delete-${slug}`
 
@@ -54,8 +55,16 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
   const handleDelete = useCallback(async () => {
     setDeleting(true)
+
+    const queryWithSearch = mergeListSearchAndWhere({
+      collectionConfig: collection,
+      search: searchParams?.search as string,
+    })
+
+    const queryString = getQueryParams(queryWithSearch)
+
     await requests
-      .delete(`${serverURL}${api}/${slug}${getQueryParams()}`, {
+      .delete(`${serverURL}${api}/${slug}${queryString}`, {
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/json',
@@ -65,8 +74,22 @@ export const DeleteMany: React.FC<Props> = (props) => {
         try {
           const json = await res.json()
           toggleModal(modalSlug)
-          if (res.status < 400) {
-            toast.success(json.message || t('general:deletedSuccessfully'))
+
+          const deletedDocs = json?.docs.length || 0
+          const successLabel = deletedDocs > 1 ? plural : singular
+
+          if (res.status < 400 || deletedDocs > 0) {
+            toast.success(
+              t('general:deletedCountSuccessfully', {
+                count: deletedDocs,
+                label: getTranslation(successLabel, i18n),
+              }),
+            )
+            if (json?.errors.length > 0) {
+              toast.error(json.message, {
+                description: json.errors.map((error) => error.message).join('\n'),
+              })
+            }
             toggleAll()
             router.replace(
               stringifyParams({
@@ -93,20 +116,24 @@ export const DeleteMany: React.FC<Props> = (props) => {
         }
       })
   }, [
+    searchParams,
     addDefaultError,
     api,
     getQueryParams,
-    i18n.language,
+    i18n,
     modalSlug,
+    plural,
     router,
     selectAll,
     serverURL,
+    singular,
     slug,
     stringifyParams,
     t,
     toggleAll,
     toggleModal,
     clearRouteCache,
+    collection,
   ])
 
   if (selectAll === SelectAllStatus.None || !hasDeletePermission) {

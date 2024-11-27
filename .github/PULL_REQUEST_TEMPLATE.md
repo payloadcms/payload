@@ -1,23 +1,23 @@
-## Description
+<!--
 
-<!-- Please include a summary of the pull request and any related issues it fixes. Please also include relevant motivation and context. -->
+Thank you for the PR! Please go through the checklist below and make sure you've completed all the steps.
 
-- [ ] I have read and understand the [CONTRIBUTING.md](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md) document in this repository.
+Please review the [CONTRIBUTING.md](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md) document in this repository if you haven't already.
 
-## Type of change
+The following items will ensure that your PR is handled as smoothly as possible:
 
-<!-- Please delete options that are not relevant. -->
+- PR Title must follow conventional commits format. For example, `feat: my new feature`, `fix(plugin-seo): my fix`.
+- Minimal description explained as if explained to someone not immediately familiar with the code.
+- Provide before/after screenshots or code diffs if applicable.
+- Link any related issues/discussions from GitHub or Discord.
+- Add review comments if necessary to explain to the reviewer the logic behind a change
 
-- [ ] Chore (non-breaking change which does not add functionality)
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Change to the [templates](https://github.com/payloadcms/payload/tree/main/templates) directory (does not affect core functionality)
-- [ ] Change to the [examples](https://github.com/payloadcms/payload/tree/main/examples) directory (does not affect core functionality)
-- [ ] This change requires a documentation update
+### What?
 
-## Checklist:
+### Why?
 
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] Existing test suite passes locally with my changes
-- [ ] I have made corresponding changes to the documentation
+### How?
+
+Fixes #
+
+-->

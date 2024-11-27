@@ -1,17 +1,16 @@
 'use client'
-import type { ClientField, FormState } from 'payload'
+import type { FormState } from 'payload'
 
 import {
   Form,
   FormSubmit,
   RenderFields,
-  useConfig,
   useDocumentInfo,
-  useFieldProps,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import { abortAndIgnore } from '@payloadcms/ui/shared'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { FieldsDrawerProps } from './Drawer.js'
@@ -24,62 +23,93 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   fieldMapOverride,
   handleDrawerSubmit,
   schemaFieldsPathOverride,
+  schemaPath,
   schemaPathSuffix,
 }) => {
   const { t } = useTranslation()
-  const { id } = useDocumentInfo()
-  const { schemaPath } = useFieldProps()
-  const { config } = useConfig()
-  const [initialState, setInitialState] = useState<false | FormState>(false)
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
+
+  const onChangeAbortControllerRef = useRef(new AbortController())
+
+  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
+
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, permissions },
   } = useEditorConfigContext()
 
-  const componentMapRenderedFieldsPath = `lexical_internal_feature.${featureKey}.fields${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
+  const { getFormState } = useServerFunctions()
+
   const schemaFieldsPath =
     schemaFieldsPathOverride ??
     `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
-  const fields: any =
-    fieldMapOverride ?? (richTextComponentMap?.get(componentMapRenderedFieldsPath) as ClientField[]) // Field Schema
+  const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
 
   useEffect(() => {
+    const controller = new AbortController()
+
     const awaitInitialState = async () => {
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id: id!,
-          data: data ?? {},
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
+        id,
+        collectionSlug,
+        data: data ?? {},
+        docPermissions: {
+          fields: true,
         },
-        serverURL: config.serverURL,
-      }) // Form State
+        docPreferences: await getDocPreferences(),
+        globalSlug,
+        operation: 'update',
+        renderAllFields: true,
+        schemaPath: schemaFieldsPath,
+        signal: controller.signal,
+      })
 
       setInitialState(state)
     }
 
     void awaitInitialState()
-  }, [config.routes.api, config.serverURL, schemaFieldsPath, id, data])
+
+    return () => {
+      abortAndIgnore(controller)
+    }
+  }, [schemaFieldsPath, id, data, getFormState, collectionSlug, globalSlug, getDocPreferences])
 
   const onChange = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState }: { formState: FormState }) => {
+      abortAndIgnore(onChangeAbortControllerRef.current)
+
+      const controller = new AbortController()
+      onChangeAbortControllerRef.current = controller
+
       const { state } = await getFormState({
-        apiRoute: config.routes.api,
-        body: {
-          id: id!,
-          formState: prevFormState,
-          operation: 'update',
-          schemaPath: schemaFieldsPath,
+        id,
+        collectionSlug,
+        docPermissions: {
+          fields: true,
         },
-        serverURL: config.serverURL,
+        docPreferences: await getDocPreferences(),
+        formState: prevFormState,
+        globalSlug,
+        operation: 'update',
+        schemaPath: schemaFieldsPath,
+        signal: controller.signal,
       })
+
+      if (!state) {
+        return prevFormState
+      }
 
       return state
     },
-
-    [config.routes.api, config.serverURL, schemaFieldsPath, id],
+    [getFormState, id, collectionSlug, getDocPreferences, globalSlug, schemaFieldsPath],
   )
+
+  // cleanup effect
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(onChangeAbortControllerRef.current)
+    }
+  }, [])
 
   if (initialState === false) {
     return null
@@ -98,11 +128,12 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       <RenderFields
         fields={Array.isArray(fields) ? fields : []}
         forceRender
-        path="" // See Blocks feature path for details as for why this is empty
+        parentIndexPath=""
+        parentPath="" // See Blocks feature path for details as for why this is empty
+        parentSchemaPath={schemaFieldsPath}
+        permissions={permissions}
         readOnly={false}
-        schemaPath={schemaFieldsPath}
       />
-
       <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
     </Form>
   )

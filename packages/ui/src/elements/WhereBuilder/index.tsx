@@ -24,17 +24,16 @@ export { WhereBuilderProps }
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
-  const { collectionPluralLabel, fields } = props
+  const { collectionPluralLabel, fields, renderedFilters } = props
   const { i18n, t } = useTranslation()
 
   const [reducedFields, setReducedColumns] = useState(() => reduceClientFields({ fields, i18n }))
 
   useEffect(() => {
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     setReducedColumns(reduceClientFields({ fields, i18n }))
   }, [fields, i18n])
 
-  const { handleWhereChange, params } = useListQuery()
+  const { handleWhereChange, query } = useListQuery()
   const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
@@ -66,7 +65,8 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   */
 
   const [conditions, setConditions] = React.useState(() => {
-    const whereFromSearch = params.where
+    const whereFromSearch = query.where
+
     if (whereFromSearch) {
       if (validateWhereQuery(whereFromSearch)) {
         return whereFromSearch.or
@@ -190,6 +190,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                               operator={initialOperator}
                               orIndex={orIndex}
                               removeCondition={removeCondition}
+                              RenderedFilter={renderedFilters?.get(initialFieldName)}
                               updateCondition={updateCondition}
                             />
                           </li>

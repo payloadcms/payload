@@ -1,22 +1,34 @@
 'use client'
-import type { ClientConfig } from 'payload'
+import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
 
-import React, { createContext, useCallback, useContext } from 'react'
+import React, { createContext, useCallback, useContext, useState } from 'react'
 
 export type ClientConfigContext = {
   config: ClientConfig
   getEntityConfig: (args: {
     collectionSlug?: string
     globalSlug?: string
-  }) => ClientConfig['collections'][number] | ClientConfig['globals'][number]
+  }) => ClientCollectionConfig | ClientGlobalConfig | null
+  setConfig: (config: ClientConfig) => void
 }
 
-const Context = createContext<ClientConfigContext | undefined>(undefined)
+export type EntityConfigContext = {
+  collectionConfig?: ClientCollectionConfig
+  globalConfig?: ClientGlobalConfig
+  setEntityConfig: (args: {
+    collectionConfig?: ClientCollectionConfig | null
+    globalConfig?: ClientGlobalConfig | null
+  }) => void
+}
+
+const RootConfigContext = createContext<ClientConfigContext | undefined>(undefined)
 
 export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
   readonly config: ClientConfig
-}> = ({ children, config }) => {
+}> = ({ children, config: configFromProps }) => {
+  const [config, setConfig] = useState<ClientConfig>(configFromProps)
+
   const getEntityConfig = useCallback(
     ({ collectionSlug, globalSlug }: { collectionSlug?: string; globalSlug?: string }) => {
       if (collectionSlug) {
@@ -32,7 +44,11 @@ export const ConfigProvider: React.FC<{
     [config],
   )
 
-  return <Context.Provider value={{ config, getEntityConfig }}>{children}</Context.Provider>
+  return (
+    <RootConfigContext.Provider value={{ config, getEntityConfig, setConfig }}>
+      {children}
+    </RootConfigContext.Provider>
+  )
 }
 
-export const useConfig = (): ClientConfigContext => useContext(Context)
+export const useConfig = (): ClientConfigContext => useContext(RootConfigContext)
