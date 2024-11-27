@@ -1,4 +1,9 @@
-import type { CollectionPermission, Document, GlobalPermission, OptionObject } from 'payload'
+import type {
+  Document,
+  OptionObject,
+  SanitizedCollectionPermission,
+  SanitizedGlobalPermission,
+} from 'payload'
 
 export type CompareOption = {
   label: React.ReactNode | string
@@ -9,7 +14,7 @@ export type CompareOption = {
 
 export type DefaultVersionsViewProps = {
   readonly doc: Document
-  readonly docPermissions: CollectionPermission | GlobalPermission
+  readonly docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
   readonly initialComparisonDoc: Document
   readonly latestDraftVersion?: string
   readonly latestPublishedVersion?: string

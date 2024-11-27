@@ -1,5 +1,5 @@
 'use client'
-import type { Where } from 'payload'
+import type { ClientUser, Where } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
@@ -33,12 +33,14 @@ type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly docs: any[]
   readonly totalDocs: number
+  user: ClientUser
 }
 
-export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs }) => {
+export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs, user }) => {
   const contextRef = useRef({} as SelectionContext)
 
   const { code: locale } = useLocale()
+
   const [selected, setSelected] = useState<SelectionContext['selected']>(() => {
     const rows = new Map()
     docs.forEach(({ id }) => {
@@ -56,8 +58,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       const rows = new Map()
       if (allAvailable) {
         setSelectAll(SelectAllStatus.AllAvailable)
-        docs.forEach(({ id, _isLocked }) => {
-          if (!_isLocked) {
+        docs.forEach(({ id, _isLocked, _userEditing }) => {
+          if (!_isLocked || _userEditing?.id === user?.id) {
             rows.set(id, true)
           }
         })
@@ -67,22 +69,23 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       ) {
         setSelectAll(SelectAllStatus.None)
       } else {
-        docs.forEach(({ id, _isLocked }) => {
-          if (!_isLocked) {
+        docs.forEach(({ id, _isLocked, _userEditing }) => {
+          if (!_isLocked || _userEditing?.id === user?.id) {
             rows.set(id, selectAll !== SelectAllStatus.Some)
           }
         })
       }
+
       setSelected(rows)
     },
-    [docs, selectAll],
+    [docs, selectAll, user?.id],
   )
 
   const setSelection = useCallback(
     (id) => {
       const doc = docs.find((doc) => doc.id === id)
 
-      if (doc?._isLocked) {
+      if (doc?._isLocked && user?.id !== doc?._userEditing.id) {
         return // Prevent selection if the document is locked
       }
 
@@ -99,14 +102,16 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
       setSelected(newMap)
     },
-    [selected, docs],
+    [selected, docs, user?.id],
   )
 
   const getQueryParams = useCallback(
-    (additionalParams?: Where): string => {
+    (additionalWhereParams?: Where): string => {
       let where: Where
+
       if (selectAll === SelectAllStatus.AllAvailable) {
         const params = searchParams?.where as Where
+
         where = params || {
           id: { not_equals: '' },
         }
@@ -125,11 +130,13 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
           },
         }
       }
-      if (additionalParams) {
+
+      if (additionalWhereParams) {
         where = {
-          and: [{ ...additionalParams }, where],
+          and: [{ ...additionalWhereParams }, where],
         }
       }
+
       return qs.stringify(
         {
           locale,
@@ -159,13 +166,10 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     }
 
     if (all && selected.size === docs.length) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.AllInPage)
     } else if (some) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.Some)
     } else {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.None)
     }
   }, [selectAll, selected, totalDocs, docs])
@@ -183,7 +187,6 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       }
     }
 
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
 

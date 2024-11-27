@@ -1,5 +1,5 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired, MarkOptional } from 'ts-essentials'
+import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
 import type {
   CustomPreviewButton,
@@ -16,6 +16,8 @@ import type {
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
+  AfterErrorHookArgs,
+  AfterErrorResult,
   CustomComponent,
   EditConfig,
   Endpoint,
@@ -29,14 +31,29 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type {
+  Field,
+  FlattenedField,
+  JoinField,
+  RelationshipField,
+  UploadField,
+} from '../../fields/config/types.js'
 import type {
   CollectionSlug,
   JsonObject,
+  RequestContext,
   TypedAuthOperations,
   TypedCollection,
+  TypedCollectionSelect,
+  TypedLocale,
 } from '../../index.js'
-import type { PayloadRequest, RequestContext } from '../../types/index.js'
+import type {
+  PayloadRequest,
+  SelectType,
+  Sort,
+  TransformCollectionWithSelect,
+  Where,
+} from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
   IncomingCollectionVersions,
@@ -45,6 +62,9 @@ import type {
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+
+export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
+
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 
@@ -59,6 +79,7 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
 export type HookOperationType =
   | 'autosave'
   | 'count'
+  | 'countVersions'
   | 'create'
   | 'delete'
   | 'forgotPassword'
@@ -178,14 +199,6 @@ export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string
       >
     >
 
-export type AfterErrorHook = (
-  err: Error,
-  res: unknown,
-  context: RequestContext,
-  /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
-  collection: null | SanitizedCollectionConfig,
-) => { response: any; status: number } | void
-
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
@@ -237,6 +250,10 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   token: string
 }) => any
 
+export type AfterErrorHook = (
+  args: { collection: SanitizedCollectionConfig } & AfterErrorHookArgs,
+) => AfterErrorResult | Promise<AfterErrorResult>
+
 export type AfterForgotPasswordHook = (args: {
   args?: any
   /** The collection which this hook is being run on */
@@ -244,7 +261,16 @@ export type AfterForgotPasswordHook = (args: {
   context: RequestContext
 }) => any
 
+export type BaseListFilter = (args: {
+  limit: number
+  locale?: TypedLocale
+  page: number
+  req: PayloadRequest
+  sort: string
+}) => null | Promise<null | Where> | Where
+
 export type CollectionAdminOptions = {
+  baseListFilter?: BaseListFilter
   /**
    * Custom admin components
    */
@@ -374,10 +400,13 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
    */
   dbName?: DBIdentifierName
+  defaultPopulate?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectType
+    : SelectFromCollectionSlug<TSlug>
   /**
    * Default field to sort by in collection list view
    */
-  defaultSort?: string
+  defaultSort?: Sort
   /**
    * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
    */
@@ -402,7 +431,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   hooks?: {
     afterChange?: AfterChangeHook[]
     afterDelete?: AfterDeleteHook[]
-    afterError?: AfterErrorHook
+    afterError?: AfterErrorHook[]
     afterForgotPassword?: AfterForgotPasswordHook[]
     afterLogin?: AfterLoginHook[]
     afterLogout?: AfterLogoutHook[]
@@ -478,14 +507,42 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   versions?: boolean | IncomingCollectionVersions
 }
 
+export type SanitizedJoin = {
+  /**
+   * The field configuration defining the join
+   */
+  field: JoinField
+  /**
+   * The path of the join field in dot notation
+   */
+  joinPath: string
+  targetField: RelationshipField | UploadField
+}
+
+export type SanitizedJoins = {
+  [collectionSlug: string]: SanitizedJoin[]
+}
+
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
+    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
+
+  /**
+   * Fields in the database schema structure
+   * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
+   */
+  flattenedFields: FlattenedField[]
+
+  /**
+   * Object of collections to join 'Join Fields object keyed by collection
+   */
+  joins: SanitizedJoins
+  slug: CollectionSlug
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }
@@ -505,8 +562,8 @@ export type Collection = {
   }
 }
 
-export type BulkOperationResult<TSlug extends CollectionSlug> = {
-  docs: DataFromCollectionSlug<TSlug>[]
+export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+  docs: TransformCollectionWithSelect<TSlug, TSelect>[]
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
     message: string

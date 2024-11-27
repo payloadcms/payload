@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-vercel-postgres",
-  "version": "3.0.0-beta.107",
+  "version": "3.2.1",
   "description": "Vercel Postgres adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -10,6 +10,13 @@
   },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -49,9 +56,10 @@
   "dependencies": {
     "@payloadcms/drizzle": "workspace:*",
     "@vercel/postgres": "^0.9.0",
-    "console-table-printer": "2.11.2",
-    "drizzle-kit": "0.23.2-df9e596",
-    "drizzle-orm": "0.32.1",
+    "console-table-printer": "2.12.1",
+    "drizzle-kit": "0.28.0",
+    "drizzle-orm": "0.36.1",
+    "pg": "8.11.3",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "10.0.0"

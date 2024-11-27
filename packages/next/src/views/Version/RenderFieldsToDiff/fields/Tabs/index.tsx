@@ -14,10 +14,10 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
   comparison,
   diffComponents,
   field,
+  fieldPermissions,
   i18n,
   locale,
   locales,
-  permissions,
   version,
 }) => {
   return (
@@ -30,12 +30,12 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
                 comparison={comparison?.[tab.name]}
                 diffComponents={diffComponents}
                 field={field}
+                fieldPermissions={fieldPermissions}
                 fields={tab.fields}
                 i18n={i18n}
                 key={i}
                 locale={locale}
                 locales={locales}
-                permissions={permissions}
                 version={version?.[tab.name]}
               />
             )
@@ -45,7 +45,7 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
             <RenderFieldsToDiff
               comparison={comparison}
               diffComponents={diffComponents}
-              fieldPermissions={permissions}
+              fieldPermissions={fieldPermissions}
               fields={tab.fields}
               i18n={i18n}
               key={i}

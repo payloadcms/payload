@@ -12,14 +12,17 @@ import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import ConditionalLogic from './collections/ConditionalLogic/index.js'
+import { CustomIdCollection } from './collections/CustomID/index.js'
 import DateFields from './collections/Date/index.js'
 import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
 import { LexicalFields } from './collections/Lexical/index.js'
+import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
+import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
 import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
@@ -37,6 +40,7 @@ import Uploads2 from './collections/Upload2/index.js'
 import UploadsMulti from './collections/UploadMulti/index.js'
 import UploadsMultiPoly from './collections/UploadMultiPoly/index.js'
 import UploadsPoly from './collections/UploadPoly/index.js'
+import UploadRestricted from './collections/UploadRestricted/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
 import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
@@ -45,6 +49,7 @@ export const collectionSlugs: CollectionConfig[] = [
   LexicalFields,
   LexicalMigrateFields,
   LexicalLocalizedFields,
+  LexicalObjectReferenceBugCollection,
   {
     slug: 'users',
     admin: {
@@ -59,12 +64,15 @@ export const collectionSlugs: CollectionConfig[] = [
       },
     ],
   },
+  LexicalInBlock,
+
   ArrayFields,
   BlockFields,
   CheckboxFields,
   CodeFields,
   CollapsibleFields,
   ConditionalLogic,
+  CustomIdCollection,
   DateFields,
   EmailFields,
   RadioFields,
@@ -87,6 +95,7 @@ export const collectionSlugs: CollectionConfig[] = [
   UploadsMulti,
   UploadsPoly,
   UploadsMultiPoly,
+  UploadRestricted,
   UIFields,
 ]
 

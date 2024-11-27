@@ -1,12 +1,24 @@
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
-import type { Collection, DataFromCollectionSlug } from '../config/types.js'
+import type { CollectionSlug, JoinQuery } from '../../index.js'
+import type {
+  ApplyDisableErrors,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
+import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { validateQueryPaths } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
@@ -19,14 +31,21 @@ export type Arguments = {
   draft?: boolean
   id: number | string
   includeLockStatus?: boolean
+  joins?: JoinQuery
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-export const findByIDOperation = async <TSlug extends CollectionSlug>(
+export const findByIDOperation = async <
+  TSlug extends CollectionSlug,
+  TDisableErrors extends boolean,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   incomingArgs: Arguments,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
   let args = incomingArgs
 
   try {
@@ -55,9 +74,12 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       disableErrors,
       draft: draftEnabled = false,
       includeLockStatus,
+      joins,
       overrideAccess = false,
+      populate,
       req: { fallbackLocale, locale, t },
       req,
+      select,
       showHiddenFields,
     } = args
 
@@ -74,15 +96,37 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       return null
     }
 
+    const where = { id: { equals: id } }
+
+    const fullWhere = combineQueries(where, accessResult)
+
+    const sanitizedJoins = await sanitizeJoinQuery({
+      collectionConfig,
+      joins,
+      overrideAccess,
+      req,
+    })
+
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
+      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
       locale,
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
-      where: combineQueries({ id: { equals: id } }, accessResult),
+      select,
+      where: fullWhere,
     }
 
+    // execute only if there's a custom ID and potentially overwriten access on id
+    if (req.payload.collections[collectionConfig.slug].customIDType) {
+      await validateQueryPaths({
+        collectionConfig,
+        overrideAccess,
+        req,
+        where,
+      })
+    }
     // /////////////////////////////////////
     // Find by ID
     // /////////////////////////////////////
@@ -109,10 +153,18 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       let lockStatus = null
 
       try {
+        const lockDocumentsProp = collectionConfig?.lockDocuments
+
+        const lockDurationDefault = 300 // Default 5 minutes in seconds
+        const lockDuration =
+          typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+        const lockDurationInMilliseconds = lockDuration * 1000
+
         const lockedDocument = await req.payload.find({
           collection: 'payload-locked-documents',
           depth: 1,
           limit: 1,
+          overrideAccess: false,
           pagination: false,
           req,
           where: {
@@ -125,6 +177,12 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
               {
                 'document.value': {
                   equals: id,
+                },
+              },
+              // Query where the lock is newer than the current time minus lock time
+              {
+                updatedAt: {
+                  greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
                 },
               },
             ],
@@ -154,6 +212,7 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
         entityType: 'collection',
         overrideAccess,
         req,
+        select,
       })
     }
 
@@ -189,7 +248,9 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
+      select,
       showHiddenFields,
     })
 
@@ -225,7 +286,10 @@ export const findByIDOperation = async <TSlug extends CollectionSlug>(
     // Return results
     // /////////////////////////////////////
 
-    return result
+    return result as ApplyDisableErrors<
+      TransformCollectionWithSelect<TSlug, TSelect>,
+      TDisableErrors
+    >
   } catch (error: unknown) {
     await killTransaction(args.req)
     throw error

@@ -79,6 +79,8 @@ describe('fields - relationship', () => {
   })
 
   beforeEach(async () => {
+    await ensureCompilationIsDone({ page, serverURL })
+
     await clearAllDocs()
 
     // Create docs to relate to
@@ -152,8 +154,6 @@ describe('fields - relationship', () => {
         relationshipWithTitle: relationWithTitle.id,
       },
     })) as any
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   const tableRowLocator = 'table > tbody > tr'
@@ -179,10 +179,9 @@ describe('fields - relationship', () => {
     await expect(options).toHaveCount(2) // two docs
     await options.nth(0).click()
     await expect(field).toContainText(relationOneDoc.id)
-    await saveDocAndAssert(page)
-    await wait(200)
-    await trackNetworkRequests(page, `/api/${relationOneSlug}`, {
-      beforePoll: async () => await page.reload(),
+    await trackNetworkRequests(page, `/api/${relationOneSlug}`, async () => {
+      await saveDocAndAssert(page)
+      await wait(200)
     })
   })
 
@@ -451,6 +450,27 @@ describe('fields - relationship', () => {
     await expect(
       page.locator('#field-relationshipHasMany .value-container .rs__multi-value'),
     ).toHaveCount(1)
+  })
+
+  test('should update relationship from drawer without enabling save in main doc', async () => {
+    await page.goto(url.edit(docWithExistingRelations.id))
+
+    const saveButton = page.locator('#action-save')
+    await expect(saveButton).toBeDisabled()
+
+    await openDocDrawer(
+      page,
+      '#field-relationship button.relationship--single-value__drawer-toggler ',
+    )
+
+    const field = page.locator('#field-name')
+    await field.fill('Updated')
+
+    await saveButton.nth(1).click()
+    await expect(page.locator('.payload-toast-container')).toContainText('Updated successfully')
+    await page.locator('.doc-drawer__header-close').click()
+
+    await expect(saveButton).toBeDisabled()
   })
 
   test('should allow filtering by polymorphic relationships with version drafts enabled', async () => {

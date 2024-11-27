@@ -32,6 +32,7 @@ describe('SEO Plugin', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
 
     const filePath = path.resolve(dirname, './image-1.jpg')
     const file = await getFileByPath(filePath)
@@ -56,8 +57,6 @@ describe('SEO Plugin', () => {
       },
     })) as unknown as PayloadPage
     id = createdPage.id
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('Core functionality', () => {
@@ -116,7 +115,7 @@ describe('SEO Plugin', () => {
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
       const metaDescriptionClass = '#field-meta__description'
       const previewClass =
-        '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(6)'
+        '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(5)'
 
       const secondTab = page.locator(contentTabsClass).nth(1)
       await secondTab.click()

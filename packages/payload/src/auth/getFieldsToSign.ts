@@ -17,8 +17,8 @@ const traverseFields = ({
 }: TraverseFieldsArgs) => {
   fields.forEach((field) => {
     switch (field.type) {
-      case 'row':
-      case 'collapsible': {
+      case 'collapsible':
+      case 'row': {
         traverseFields({
           data,
           fields: field.fields,
@@ -44,14 +44,6 @@ const traverseFields = ({
           data: groupData,
           fields: field.fields,
           result: groupResult,
-        })
-        break
-      }
-      case 'tabs': {
-        traverseFields({
-          data,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-          result,
         })
         break
       }
@@ -84,6 +76,14 @@ const traverseFields = ({
         }
         break
       }
+      case 'tabs': {
+        traverseFields({
+          data,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          result,
+        })
+        break
+      }
       default:
         if (fieldAffectsData(field)) {
           if (field.saveToJWT) {
@@ -109,7 +109,7 @@ export const getFieldsToSign = (args: {
   const { collectionConfig, email, user } = args
 
   const result: Record<string, unknown> = {
-    id: user.id,
+    id: user?.id,
     collection: collectionConfig.slug,
     email,
   }

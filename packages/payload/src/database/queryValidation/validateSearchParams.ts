@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
@@ -13,7 +13,7 @@ import { validateQueryPaths } from './validateQueryPaths.js'
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
   errors: { path: string }[]
-  fields: Field[]
+  fields: FlattenedField[]
   globalConfig?: SanitizedGlobalConfig
   operator: string
   overrideAccess: boolean
@@ -21,7 +21,7 @@ type Args = {
   policies: EntityPolicies
   req: PayloadRequest
   val: unknown
-  versionFields?: Field[]
+  versionFields?: FlattenedField[]
 }
 
 /**
@@ -51,8 +51,6 @@ export async function validateSearchParam({
   const { slug } = collectionConfig || globalConfig
 
   if (globalConfig && !policies.globals[slug]) {
-    globalConfig.fields = fields
-
     policies.globals[slug] = await getEntityPolicies({
       type: 'global',
       entity: globalConfig,
@@ -62,7 +60,7 @@ export async function validateSearchParam({
   }
 
   if (sanitizedPath !== 'id') {
-    paths = await getLocalizedPaths({
+    paths = getLocalizedPaths({
       collectionSlug: collectionConfig?.slug,
       fields,
       globalSlug: globalConfig?.slug,
@@ -73,6 +71,19 @@ export async function validateSearchParam({
     })
   }
   const promises = []
+
+  // Sanitize relation.otherRelation.id to relation.otherRelation
+  if (paths.at(-1)?.path === 'id') {
+    const previousField = paths.at(-2)?.field
+    if (
+      previousField &&
+      (previousField.type === 'relationship' || previousField.type === 'upload') &&
+      typeof previousField.relationTo === 'string'
+    ) {
+      paths.pop()
+    }
+  }
+
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
@@ -115,6 +126,7 @@ export async function validateSearchParam({
         ) {
           fieldPath = fieldPath.replace('.value', '')
         }
+
         const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections'
         const entitySlug = collectionSlug || globalConfig.slug
         const segments = fieldPath.split('.')

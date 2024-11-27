@@ -28,61 +28,6 @@ const sortOptions = (options: Option[]): Option[] =>
 
 export const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => {
   switch (action.type) {
-    case 'CLEAR': {
-      const exemptValues = action.exemptValues
-        ? Array.isArray(action.exemptValues)
-          ? action.exemptValues
-          : [action.exemptValues]
-        : []
-
-      const clearedStateWithExemptValues = state.filter((optionGroup) => {
-        const clearedOptions = optionGroup.options.filter((option) => {
-          if (exemptValues) {
-            return exemptValues.some((exemptValue) => {
-              return (
-                exemptValue &&
-                option.value === (typeof exemptValue === 'object' ? exemptValue.value : exemptValue)
-              )
-            })
-          }
-
-          return false
-        })
-
-        optionGroup.options = clearedOptions
-
-        return clearedOptions.length > 0
-      })
-
-      return clearedStateWithExemptValues
-    }
-
-    case 'UPDATE': {
-      const { collection, config, doc, i18n } = action
-      const relation = collection.slug
-      const newOptions = [...state]
-
-      const docTitle = formatDocTitle({
-        collectionConfig: collection,
-        data: doc,
-        dateFormat: config.admin.dateFormat,
-        fallback: `${i18n.t('general:untitled')} - ID: ${doc.id}`,
-        i18n,
-      })
-
-      const foundOptionGroup = newOptions.find(
-        (optionGroup) => optionGroup.label === collection.labels.plural,
-      )
-      const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id)
-
-      if (foundOption) {
-        foundOption.label = docTitle
-        foundOption.relationTo = relation
-      }
-
-      return newOptions
-    }
-
     case 'ADD': {
       const { collection, config, docs, i18n, ids = [], sort } = action
       const relation = collection.slug
@@ -146,6 +91,35 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
       return newOptions
     }
 
+    case 'CLEAR': {
+      const exemptValues = action.exemptValues
+        ? Array.isArray(action.exemptValues)
+          ? action.exemptValues
+          : [action.exemptValues]
+        : []
+
+      const clearedStateWithExemptValues = state.filter((optionGroup) => {
+        const clearedOptions = optionGroup.options.filter((option) => {
+          if (exemptValues) {
+            return exemptValues.some((exemptValue) => {
+              return (
+                exemptValue &&
+                option.value === (typeof exemptValue === 'object' ? exemptValue.value : exemptValue)
+              )
+            })
+          }
+
+          return false
+        })
+
+        optionGroup.options = clearedOptions
+
+        return clearedOptions.length > 0
+      })
+
+      return clearedStateWithExemptValues
+    }
+
     case 'REMOVE': {
       const { id, collection } = action
 
@@ -162,6 +136,32 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
       newOptions[indexOfGroup] = {
         ...newOptions[indexOfGroup],
         options: newOptions[indexOfGroup].options.filter((option) => option.value !== id),
+      }
+
+      return newOptions
+    }
+
+    case 'UPDATE': {
+      const { collection, config, doc, i18n } = action
+      const relation = collection.slug
+      const newOptions = [...state]
+
+      const docTitle = formatDocTitle({
+        collectionConfig: collection,
+        data: doc,
+        dateFormat: config.admin.dateFormat,
+        fallback: `${i18n.t('general:untitled')} - ID: ${doc.id}`,
+        i18n,
+      })
+
+      const foundOptionGroup = newOptions.find(
+        (optionGroup) => optionGroup.label === collection.labels.plural,
+      )
+      const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id)
+
+      if (foundOption) {
+        foundOption.label = docTitle
+        foundOption.relationTo = relation
       }
 
       return newOptions

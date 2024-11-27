@@ -14,7 +14,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { TablePlugin as LexicalReactTablePlugin } from '@lexical/react/LexicalTablePlugin'
 import { INSERT_TABLE_COMMAND, TableNode } from '@lexical/table'
 import { mergeRegister } from '@lexical/utils'
-import { formatDrawerSlug, useEditDepth, useModal } from '@payloadcms/ui'
+import { formatDrawerSlug, useEditDepth } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
@@ -23,6 +23,7 @@ import type { PluginComponent } from '../../../../typesClient.js'
 
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../../../utilities/fieldsDrawer/Drawer.js'
+import { useLexicalDrawer } from '../../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import './index.scss'
 
 export type CellContextShape = {
@@ -83,14 +84,17 @@ export function TableContext({ children }: { children: JSX.Element }) {
 export const TablePlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
   const cellContext = useContext(CellContext)
-  const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()
-  const { uuid } = useEditorConfigContext()
+  const {
+    fieldProps: { schemaPath },
+    uuid,
+  } = useEditorConfigContext()
 
   const drawerSlug = formatDrawerSlug({
     slug: 'lexical-table-create-' + uuid,
     depth: editDepth,
   })
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
 
   useEffect(() => {
     if (!editor.hasNodes([TableNode])) {
@@ -111,14 +115,14 @@ export const TablePlugin: PluginComponent = () => {
           })
 
           if (rangeSelection) {
-            toggleModal(drawerSlug)
+            toggleDrawer()
           }
           return true
         },
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [cellContext, editor, toggleModal])
+  }, [cellContext, editor, toggleDrawer])
 
   return (
     <React.Fragment>
@@ -127,8 +131,6 @@ export const TablePlugin: PluginComponent = () => {
         drawerTitle="Create Table"
         featureKey="experimental_table"
         handleDrawerSubmit={(_fields, data) => {
-          closeModal(drawerSlug)
-
           if (!data.columns || !data.rows) {
             return
           }
@@ -138,6 +140,7 @@ export const TablePlugin: PluginComponent = () => {
             rows: String(data.rows),
           })
         }}
+        schemaPath={schemaPath}
         schemaPathSuffix="fields"
       />
       <LexicalReactTablePlugin hasCellBackgroundColor={false} hasCellMerge />

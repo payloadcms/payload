@@ -21,6 +21,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     global,
     locale,
     req = {} as PayloadRequest,
+    select,
     versionData,
     where: whereArg,
   }: UpdateGlobalVersionArgs<T>,
@@ -35,9 +36,9 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
+  const fields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
-  const { where } = await buildQuery({
+  const { where } = buildQuery({
     adapter: this,
     fields,
     locale,
@@ -53,6 +54,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     fields,
     operation: 'update',
     req,
+    select,
     tableName,
     where,
   })

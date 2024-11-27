@@ -5,7 +5,6 @@ on:
     types:
       - opened
       - edited
-      - synchronize
 
 permissions:
   pull-requests: write
@@ -38,6 +37,7 @@ jobs:
             db-\*
             db-mongodb
             db-postgres
+            db-vercel-postgres
             db-sqlite
             drizzle
             email-nodemailer
@@ -46,13 +46,12 @@ jobs:
             live-preview
             live-preview-react
             next
-            payload
+            payload-cloud
             plugin-cloud
             plugin-cloud-storage
             plugin-form-builder
             plugin-nested-docs
             plugin-redirects
-            plugin-relationship-object-ids
             plugin-search
             plugin-sentry
             plugin-seo
@@ -63,6 +62,7 @@ jobs:
             storage-\*
             storage-azure
             storage-gcs
+            storage-uploadthing
             storage-vercel-blob
             storage-s3
             translations
@@ -109,13 +109,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.action == 'opened'
     steps:
-      - name: Tag with main branch with v2
-        if: github.event.pull_request.base.ref == 'main'
+      - name: Tag with 2.x branch with v2
+        if: github.event.pull_request.base.ref == '2.x'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: v2
-      - name: Tag with beta branch with v3
-        if: github.event.pull_request.base.ref == 'beta'
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: v3

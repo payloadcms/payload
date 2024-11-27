@@ -9,7 +9,7 @@ import { mergeRegister } from '@lexical/utils'
 import { useTranslation } from '@payloadcms/ui'
 import { $getSelection } from 'lexical'
 
-import type { ToolbarGroupItem } from '../../types.js'
+import type { ToolbarDropdownGroup, ToolbarGroupItem } from '../../types.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { DropDown, DropDownItem } from './DropDown.js'
@@ -28,9 +28,9 @@ const ToolbarItem = ({
   enabled?: boolean
   item: ToolbarGroupItem
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
 
   if (item.Component) {
@@ -49,19 +49,31 @@ const ToolbarItem = ({
   }
 
   let title = item.key
+  let croppedTitle = item.key
   if (item.label) {
     title =
-      typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
+      typeof item.label === 'function'
+        ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+        : item.label
   }
   // Crop title to max. 25 characters
   if (title.length > 25) {
-    title = title.substring(0, 25) + '...'
+    croppedTitle = title.substring(0, 25) + '...'
+  } else {
+    croppedTitle = title
   }
 
   return (
-    <DropDownItem active={active} editor={editor} enabled={enabled} item={item} key={item.key}>
-      {item?.ChildComponent && <item.ChildComponent />}
-      <span className="text">{title}</span>
+    <DropDownItem
+      active={active}
+      editor={editor}
+      enabled={enabled}
+      Icon={item?.ChildComponent ? <item.ChildComponent /> : undefined}
+      item={item}
+      key={item.key}
+      tooltip={title}
+    >
+      <span className="text">{croppedTitle}</span>
     </DropDownItem>
   )
 }
@@ -70,9 +82,8 @@ export const ToolbarDropdown = ({
   anchorElem,
   classNames,
   editor,
-  groupKey,
+  group,
   Icon,
-  items,
   itemsContainerClassNames,
   label,
   maxActiveItems,
@@ -81,9 +92,8 @@ export const ToolbarDropdown = ({
   anchorElem: HTMLElement
   classNames?: string[]
   editor: LexicalEditor
-  groupKey: string
+  group: ToolbarDropdownGroup
   Icon?: React.FC
-  items: ToolbarGroupItem[]
   itemsContainerClassNames?: string[]
   label?: string
   /**
@@ -95,11 +105,16 @@ export const ToolbarDropdown = ({
 }) => {
   const [activeItemKeys, setActiveItemKeys] = React.useState<string[]>([])
   const [enabledItemKeys, setEnabledItemKeys] = React.useState<string[]>([])
+  const [enabledGroup, setEnabledGroup] = React.useState<boolean>(true)
   const editorConfigContext = useEditorConfigContext()
+  const { items, key: groupKey } = group
 
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
       const selection = $getSelection()
+      if (!selection) {
+        return
+      }
 
       const _activeItemKeys: string[] = []
       const _activeItems: ToolbarGroupItem[] = []
@@ -122,6 +137,9 @@ export const ToolbarDropdown = ({
           _enabledItemKeys.push(item.key)
         }
       }
+      if (group.isEnabled) {
+        setEnabledGroup(group.isEnabled({ editor, editorConfigContext, selection }))
+      }
       setActiveItemKeys(_activeItemKeys)
       setEnabledItemKeys(_enabledItemKeys)
 
@@ -129,7 +147,7 @@ export const ToolbarDropdown = ({
         onActiveChange({ activeItems: _activeItems })
       }
     })
-  }, [editor, editorConfigContext, items, maxActiveItems, onActiveChange])
+  }, [editor, editorConfigContext, group, items, maxActiveItems, onActiveChange])
 
   useEffect(() => {
     updateStates()
@@ -149,24 +167,26 @@ export const ToolbarDropdown = ({
       buttonClassName={[baseClass, `${baseClass}-${groupKey}`, ...(classNames || [])]
         .filter(Boolean)
         .join(' ')}
+      disabled={!enabledGroup}
       Icon={Icon}
       itemsContainerClassNames={[`${baseClass}-items`, ...(itemsContainerClassNames || [])]}
       key={groupKey}
       label={label}
     >
-      {items.length &&
-        items.map((item) => {
-          return (
-            <ToolbarItem
-              active={activeItemKeys.includes(item.key)}
-              anchorElem={anchorElem}
-              editor={editor}
-              enabled={enabledItemKeys.includes(item.key)}
-              item={item}
-              key={item.key}
-            />
-          )
-        })}
+      {items.length
+        ? items.map((item) => {
+            return (
+              <ToolbarItem
+                active={activeItemKeys.includes(item.key)}
+                anchorElem={anchorElem}
+                editor={editor}
+                enabled={enabledItemKeys.includes(item.key)}
+                item={item}
+                key={item.key}
+              />
+            )
+          })
+        : null}
     </DropDown>
   )
 }

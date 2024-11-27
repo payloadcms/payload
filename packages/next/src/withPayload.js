@@ -4,10 +4,36 @@
  * @returns {import('next').NextConfig}
  * */
 export const withPayload = (nextConfig = {}) => {
+  const env = nextConfig?.env || {}
+
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
-      'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This may cause stale data to load in the Admin Panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
+      'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This will slow down page transitions and may cause stale data to load within the Admin panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
     )
+    env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
+  }
+
+  if (process.env.PAYLOAD_PATCH_TURBOPACK_WARNINGS !== 'false') {
+    const turbopackWarningText =
+      'Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.\nTry to install it into the project directory by running'
+
+    const consoleWarn = console.warn
+    console.warn = (...args) => {
+      // Force to disable serverExternalPackages warnings: https://github.com/vercel/next.js/issues/68805
+      if (
+        (typeof args[1] === 'string' && args[1].includes(turbopackWarningText)) ||
+        (typeof args[0] === 'string' && args[0].includes(turbopackWarningText))
+      ) {
+        return
+      }
+
+      consoleWarn(...args)
+    }
+  }
+
+  const poweredByHeader = {
+    key: 'X-Powered-By',
+    value: 'Next.js, Payload',
   }
 
   /**
@@ -15,9 +41,7 @@ export const withPayload = (nextConfig = {}) => {
    */
   const toReturn = {
     ...nextConfig,
-    env: {
-      ...(nextConfig?.env || {}),
-    },
+    env,
     outputFileTracingExcludes: {
       ...(nextConfig?.outputFileTracingExcludes || {}),
       '**/*': [
@@ -40,6 +64,8 @@ export const withPayload = (nextConfig = {}) => {
         },
       },
     },
+    // We disable the poweredByHeader here because we add it manually in the headers function below
+    ...(nextConfig?.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
 
@@ -60,6 +86,7 @@ export const withPayload = (nextConfig = {}) => {
               key: 'Critical-CH',
               value: 'Sec-CH-Prefers-Color-Scheme',
             },
+            ...(nextConfig?.poweredByHeader !== false ? [poweredByHeader] : []),
           ],
         },
       ]

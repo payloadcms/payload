@@ -1,26 +1,35 @@
 'use client'
-import type { ClientCollectionConfig, FormState, LoginWithUsernameOptions } from 'payload'
+import type { FormProps, UserWithToken } from '@payloadcms/ui'
+import type {
+  ClientCollectionConfig,
+  DocumentPreferences,
+  FormState,
+  LoginWithUsernameOptions,
+  SanitizedDocumentPermissions,
+} from 'payload'
 
 import {
   ConfirmPasswordField,
+  EmailAndUsernameFields,
   Form,
-  type FormProps,
   FormSubmit,
   PasswordField,
   RenderFields,
+  useAuth,
   useConfig,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getFormState } from '@payloadcms/ui/shared'
-import React from 'react'
-
-import { RenderEmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
+import { abortAndIgnore } from '@payloadcms/ui/shared'
+import React, { useEffect } from 'react'
 
 export const CreateFirstUserClient: React.FC<{
+  docPermissions: SanitizedDocumentPermissions
+  docPreferences: DocumentPreferences
   initialState: FormState
   loginWithUsername?: false | LoginWithUsernameOptions
   userSlug: string
-}> = ({ initialState, loginWithUsername, userSlug }) => {
+}> = ({ docPermissions, docPreferences, initialState, loginWithUsername, userSlug }) => {
   const {
     config: {
       routes: { admin, api: apiRoute },
@@ -29,26 +38,48 @@ export const CreateFirstUserClient: React.FC<{
     getEntityConfig,
   } = useConfig()
 
+  const { getFormState } = useServerFunctions()
+
   const { t } = useTranslation()
+  const { setUser } = useAuth()
+
+  const formStateAbortControllerRef = React.useRef<AbortController>(null)
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) => {
-      const { state } = await getFormState({
-        apiRoute,
-        body: {
-          collectionSlug: userSlug,
-          formState: prevFormState,
-          operation: 'create',
-          schemaPath: `_${userSlug}.auth`,
-        },
-        serverURL,
+      abortAndIgnore(formStateAbortControllerRef.current)
+
+      const controller = new AbortController()
+      formStateAbortControllerRef.current = controller
+
+      const response = await getFormState({
+        collectionSlug: userSlug,
+        docPermissions,
+        docPreferences,
+        formState: prevFormState,
+        operation: 'create',
+        schemaPath: `_${userSlug}.auth`,
+        signal: controller.signal,
       })
-      return state
+
+      if (response && response.state) {
+        return response.state
+      }
     },
-    [apiRoute, userSlug, serverURL],
+    [userSlug, getFormState, docPermissions, docPreferences],
   )
+
+  const handleFirstRegister = (data: UserWithToken) => {
+    setUser(data)
+  }
+
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(formStateAbortControllerRef.current)
+    }
+  }, [])
 
   return (
     <Form
@@ -56,31 +87,35 @@ export const CreateFirstUserClient: React.FC<{
       initialState={initialState}
       method="POST"
       onChange={[onChange]}
+      onSuccess={handleFirstRegister}
       redirect={admin}
       validationOperation="create"
     >
-      <RenderEmailAndUsernameFields
+      <EmailAndUsernameFields
         className="emailAndUsername"
         loginWithUsername={loginWithUsername}
         operation="create"
         readOnly={false}
+        t={t}
       />
       <PasswordField
-        autoComplete={'off'}
+        autoComplete="off"
         field={{
           name: 'password',
           label: t('authentication:newPassword'),
           required: true,
         }}
+        path="password"
       />
       <ConfirmPasswordField />
       <RenderFields
         fields={collectionConfig.fields}
         forceRender
-        operation="create"
-        path=""
+        parentIndexPath=""
+        parentPath=""
+        parentSchemaPath={userSlug}
+        permissions={true}
         readOnly={false}
-        schemaPath={userSlug}
       />
       <FormSubmit size="large">{t('general:create')}</FormSubmit>
     </Form>

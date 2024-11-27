@@ -1,5 +1,7 @@
 import type { Validate } from '../fields/config/types.js'
 
+import { validateMimeType } from '../utilities/validateMimeType.js'
+
 export const mimeTypeValidator =
   (mimeTypes: string[]): Validate =>
   (val: string, { siblingData }) => {
@@ -11,6 +13,6 @@ export const mimeTypeValidator =
       return 'Invalid file type'
     }
 
-    const cleanedMimeTypes = mimeTypes.map((v) => v.replace('*', ''))
-    return !cleanedMimeTypes.some((v) => val.startsWith(v)) ? `Invalid file type: '${val}'` : true
+    const isValidMimeType = validateMimeType(val, mimeTypes)
+    return isValidMimeType ? true : `Invalid file type: '${val}'`
   }

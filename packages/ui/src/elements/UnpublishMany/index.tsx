@@ -26,7 +26,7 @@ export type UnpublishManyProps = {
 }
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
-  const { collection: { slug, labels: { plural }, versions } = {} } = props
+  const { collection: { slug, labels: { plural, singular }, versions } = {} } = props
 
   const {
     config: {
@@ -45,7 +45,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasPermission = collectionPermissions?.update?.permission
+  const hasPermission = collectionPermissions?.update
 
   const modalSlug = `unpublish-${slug}`
 
@@ -69,8 +69,22 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
         try {
           const json = await res.json()
           toggleModal(modalSlug)
-          if (res.status < 400) {
-            toast.success(t('general:updatedSuccessfully'))
+
+          const deletedDocs = json?.docs.length || 0
+          const successLabel = deletedDocs > 1 ? plural : singular
+
+          if (res.status < 400 || deletedDocs > 0) {
+            toast.success(
+              t('general:updatedCountSuccessfully', {
+                count: deletedDocs,
+                label: getTranslation(successLabel, i18n),
+              }),
+            )
+            if (json?.errors.length > 0) {
+              toast.error(json.message, {
+                description: json.errors.map((error) => error.message).join('\n'),
+              })
+            }
             router.replace(
               stringifyParams({
                 params: {
@@ -78,7 +92,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
                 },
               }),
             )
-            clearRouteCache()
+            clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
             return null
           }
 
@@ -96,10 +110,12 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
     addDefaultError,
     api,
     getQueryParams,
-    i18n.language,
+    i18n,
     modalSlug,
+    plural,
     selectAll,
     serverURL,
+    singular,
     slug,
     t,
     toggleModal,

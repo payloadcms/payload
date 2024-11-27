@@ -6,6 +6,9 @@ import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter } from '../types.js'
 
+import { getCollectionIdType } from '../utilities/getCollectionIdType.js'
+import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+
 type SanitizeQueryValueArgs = {
   adapter: DrizzleAdapter
   columns?: {
@@ -13,6 +16,7 @@ type SanitizeQueryValueArgs = {
     rawColumn: SQL<unknown>
   }[]
   field: Field | TabAsField
+  isUUID: boolean
   operator: string
   relationOrPath: string
   val: any
@@ -27,6 +31,7 @@ export const sanitizeQueryValue = ({
   adapter,
   columns,
   field,
+  isUUID,
   operator: operatorArg,
   relationOrPath,
   val,
@@ -87,6 +92,16 @@ export const sanitizeQueryValue = ({
 
   if (field.type === 'number' && typeof formattedValue === 'string') {
     formattedValue = Number(val)
+
+    if (Number.isNaN(formattedValue)) {
+      formattedValue = null
+    }
+  }
+
+  if (isUUID && typeof formattedValue === 'string') {
+    if (!uuidValidate(val)) {
+      formattedValue = null
+    }
   }
 
   if (field.type === 'date' && operator !== 'exists') {
@@ -107,17 +122,28 @@ export const sanitizeQueryValue = ({
       // convert the value to the idType of the relationship
       let idType: 'number' | 'text'
       if (typeof field.relationTo === 'string') {
-        const collection = adapter.payload.collections[field.relationTo]
-        const mixedType: 'number' | 'serial' | 'text' | 'uuid' =
-          collection.customIDType || adapter.idType
-        const typeMap: Record<string, 'number' | 'text'> = {
-          number: 'number',
-          serial: 'number',
-          text: 'text',
-          uuid: 'text',
-        }
-        idType = typeMap[mixedType]
+        idType = getCollectionIdType({
+          adapter,
+          collection: adapter.payload.collections[field.relationTo],
+        })
       } else {
+        if (isPolymorphicRelationship(val)) {
+          if (operator !== 'equals') {
+            throw new APIError(
+              `Only 'equals' operator is supported for polymorphic relationship object notation. Given - ${operator}`,
+            )
+          }
+          idType = getCollectionIdType({
+            adapter,
+            collection: adapter.payload.collections[val.relationTo],
+          })
+
+          return {
+            operator,
+            value: idType === 'number' ? Number(val.value) : String(val.value),
+          }
+        }
+
         formattedColumns = columns
           .map(({ idType, rawColumn }) => {
             let formattedValue: number | number[] | string | string[]
@@ -186,10 +212,10 @@ export const sanitizeQueryValue = ({
     operator = 'equals'
   }
 
-  if (operator === 'near' || operator === 'within' || operator === 'intersects') {
-    throw new APIError(
-      `Querying with '${operator}' is not supported with the postgres database adapter.`,
-    )
+  if (operator === 'near' && field.type === 'point' && typeof formattedValue === 'string') {
+    const [lng, lat, maxDistance, minDistance] = formattedValue.split(',')
+
+    formattedValue = [Number(lng), Number(lat), Number(maxDistance), Number(minDistance)]
   }
 
   if (operator === 'contains') {
@@ -197,8 +223,11 @@ export const sanitizeQueryValue = ({
   }
 
   if (operator === 'exists') {
-    formattedValue = formattedValue === 'true' || formattedValue === true
-    if (formattedValue === false) {
+    formattedValue = val === 'true' || val === true
+
+    if (formattedValue) {
+      operator = 'exists'
+    } else {
       operator = 'isNull'
     }
   }

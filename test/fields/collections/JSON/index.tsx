@@ -11,11 +11,41 @@ const JSON: CollectionConfig = {
     {
       name: 'json',
       type: 'json',
+      admin: {
+        maxHeight: 542,
+      },
       jsonSchema: {
         fileMatch: ['a://b/foo.json'],
         schema: {
           type: 'object',
           properties: {
+            array: {
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  object: {
+                    type: 'object',
+                    additionalProperties: false,
+                    properties: {
+                      array: {
+                        type: 'array',
+                        items: {
+                          type: 'number',
+                        },
+                      },
+                      text: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                  text: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
             foo: {
               enum: ['bar', 'foobar'],
             },

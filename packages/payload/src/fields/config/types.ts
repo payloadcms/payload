@@ -3,8 +3,15 @@
 import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
-import type { DeepUndefinable } from 'ts-essentials'
+import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
 
+import type {
+  JoinFieldClientProps,
+  JoinFieldErrorClientComponent,
+  JoinFieldErrorServerComponent,
+  JoinFieldLabelClientComponent,
+  JoinFieldLabelServerComponent,
+} from '../../admin/fields/Join.js'
 import type { FieldClientComponent, FieldServerComponent } from '../../admin/forms/Field.js'
 import type { RichTextAdapter, RichTextAdapterProvider } from '../../admin/RichText.js'
 import type {
@@ -53,7 +60,6 @@ import type {
   JSONFieldErrorServerComponent,
   JSONFieldLabelClientComponent,
   JSONFieldLabelServerComponent,
-  MappedComponent,
   NumberFieldClientProps,
   NumberFieldErrorClientComponent,
   NumberFieldErrorServerComponent,
@@ -89,6 +95,7 @@ import type {
   TextareaFieldErrorServerComponent,
   TextareaFieldLabelClientComponent,
   TextareaFieldLabelServerComponent,
+  TextFieldClientProps,
   TextFieldErrorClientComponent,
   TextFieldErrorServerComponent,
   TextFieldLabelClientComponent,
@@ -115,10 +122,12 @@ import type {
   JSONFieldValidation,
   PointFieldValidation,
   RadioFieldValidation,
+  RequestContext,
+  Sort,
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
+import type { Operation, PayloadRequest, Where } from '../../types/index.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -293,15 +302,6 @@ type Admin = {
 
 export type AdminClient = {
   className?: string
-  components?: {
-    Cell?: MappedComponent
-    Description?: MappedComponent
-    Field?: MappedComponent
-    /**
-     * The Filter component has to be a client component
-     */
-    Filter?: MappedComponent
-  }
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
   description?: StaticDescription
@@ -418,14 +418,12 @@ export interface FieldBase {
   /**
    * Pass `true` to disable field in the DB
    * for [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges):
+   * A virtual field cannot be used in `admin.useAsTitle`
    */
   virtual?: boolean
 }
 
 export interface FieldBaseClient {
-  _isPresentational?: undefined
-  _path?: string
-  _schemaPath?: string
   admin?: AdminClient
   hidden?: boolean
   index?: boolean
@@ -437,7 +435,7 @@ export interface FieldBaseClient {
    * Must not be one of reserved field names: ['__v', 'salt', 'hash', 'file']
    * @link https://payloadcms.com/docs/fields/overview#field-names
    */
-  name?: string
+  name: string
   required?: boolean
   saveToJWT?: boolean | string
   /**
@@ -491,15 +489,7 @@ export type NumberField = {
   Omit<FieldBase, 'validate'>
 
 export type NumberFieldClient = {
-  admin?: {
-    components?: {
-      afterInput?: MappedComponent[]
-      beforeInput?: MappedComponent[]
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<NumberField['admin'], 'autoComplete' | 'placeholder' | 'step'>
+  admin?: AdminClient & Pick<NumberField['admin'], 'autoComplete' | 'placeholder' | 'step'>
 } & FieldBaseClient &
   Pick<NumberField, 'hasMany' | 'max' | 'maxRows' | 'min' | 'minRows' | 'type'>
 
@@ -541,15 +531,7 @@ export type TextField = {
   Omit<FieldBase, 'validate'>
 
 export type TextFieldClient = {
-  admin?: {
-    components?: {
-      afterInput?: MappedComponent[]
-      beforeInput?: MappedComponent[]
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<TextField['admin'], 'autoComplete' | 'placeholder' | 'rtl'>
+  admin?: AdminClient & Pick<TextField['admin'], 'autoComplete' | 'placeholder' | 'rtl'>
 } & FieldBaseClient &
   Pick<TextField, 'hasMany' | 'maxLength' | 'maxRows' | 'minLength' | 'minRows' | 'type'>
 
@@ -569,15 +551,7 @@ export type EmailField = {
 } & Omit<FieldBase, 'validate'>
 
 export type EmailFieldClient = {
-  admin?: {
-    components?: {
-      afterInput?: MappedComponent[]
-      beforeInput?: MappedComponent[]
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<EmailField['admin'], 'placeholder'>
+  admin?: AdminClient & Pick<EmailField['admin'], 'autoComplete' | 'placeholder'>
 } & FieldBaseClient &
   Pick<EmailField, 'type'>
 
@@ -600,15 +574,7 @@ export type TextareaField = {
 } & Omit<FieldBase, 'validate'>
 
 export type TextareaFieldClient = {
-  admin?: {
-    components?: {
-      afterInput?: MappedComponent[]
-      beforeInput?: MappedComponent[]
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<TextareaField['admin'], 'placeholder' | 'rows' | 'rtl'>
+  admin?: AdminClient & Pick<TextareaField['admin'], 'placeholder' | 'rows' | 'rtl'>
 } & FieldBaseClient &
   Pick<TextareaField, 'maxLength' | 'minLength' | 'type'>
 
@@ -626,14 +592,7 @@ export type CheckboxField = {
 } & Omit<FieldBase, 'validate'>
 
 export type CheckboxFieldClient = {
-  admin?: {
-    components?: {
-      afterInput?: MappedComponent[]
-      beforeInput?: MappedComponent[]
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient
+  admin?: AdminClient
 } & FieldBaseClient &
   Pick<CheckboxField, 'type'>
 
@@ -653,15 +612,7 @@ export type DateField = {
 } & Omit<FieldBase, 'validate'>
 
 export type DateFieldClient = {
-  admin?: {
-    components?: {
-      afterInput?: MappedComponent[]
-      beforeInput?: MappedComponent[]
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<DateField['admin'], 'date' | 'placeholder'>
+  admin?: AdminClient & Pick<DateField['admin'], 'date' | 'placeholder'>
 } & FieldBaseClient &
   Pick<DateField, 'type'>
 
@@ -685,12 +636,7 @@ export type GroupField = {
 } & Omit<FieldBase, 'required' | 'validate'>
 
 export type GroupFieldClient = {
-  admin?: {
-    components?: {
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<GroupField['admin'], 'hideGutter'>
+  admin?: AdminClient & Pick<GroupField['admin'], 'hideGutter'>
   fields: ClientField[]
 } & Omit<FieldBaseClient, 'required'> &
   Pick<GroupField, 'interfaceName' | 'type'>
@@ -714,10 +660,9 @@ export type CollapsibleField = {
   | {
       admin: {
         components: {
-          Label?: CustomComponent<
+          Label: CustomComponent<
             CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
           >
-          RowLabel: RowLabelComponent
         } & Admin['components']
         initCollapsed?: boolean
       } & Admin
@@ -738,29 +683,16 @@ export type CollapsibleField = {
   Omit<FieldBase, 'label' | 'name' | 'validate' | 'virtual'>
 
 export type CollapsibleFieldClient = {
+  admin?: {
+    initCollapsed?: boolean
+  } & AdminClient
   fields: ClientField[]
-} & (
-  | {
-      admin: {
-        components: {
-          RowLabel: MappedComponent
-        } & AdminClient['components']
-        initCollapsed?: boolean
-      } & AdminClient
-      label?: Required<FieldBaseClient['label']>
-    }
-  | {
-      admin?: {
-        initCollapsed?: boolean
-      } & AdminClient
-      label: Required<FieldBaseClient['label']>
-    }
-) &
-  Omit<FieldBaseClient, 'label' | 'name' | 'validate'> &
+  label: StaticLabel
+} & Omit<FieldBaseClient, 'label' | 'name' | 'validate'> &
   Pick<CollapsibleField, 'type'>
 
 type TabBase = {
-  description?: Description
+  description?: LabelFunction | StaticDescription
   fields: Field[]
   interfaceName?: string
   saveToJWT?: boolean | string
@@ -816,8 +748,14 @@ export type TabAsFieldClient = ClientTab & Pick<TabAsField, 'name' | 'type'>
 export type UIField = {
   admin: {
     components?: {
+      /**
+       * Allow any custom components to be added to the UI field. This allows
+       * the UI field to be used as a vessel for getting components rendered.
+       */
+      [key: string]: PayloadComponent | undefined
       Cell?: CustomComponent
-      Field: CustomComponent
+      // Can be optional, in case the UI field is just used as a vessel for custom components
+      Field?: CustomComponent
       /**
        * The Filter component has to be a client component
        */
@@ -826,6 +764,10 @@ export type UIField = {
     condition?: Condition
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Set `false` make the UI field appear in the list view column selector. `true` by default for UI fields.
+     * @default true
+     */
     disableBulkEdit?: boolean
     /**
      * Shows / hides fields from appearing in the list view column selector.
@@ -843,20 +785,14 @@ export type UIField = {
 }
 
 export type UIFieldClient = {
-  _isPresentational?: true
   // still include FieldBaseClient.admin (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
-  // eslint-disable-next-line perfectionist/sort-intersection-types
-  admin: DeepUndefinable<FieldBaseClient['admin']> & {
-    components?: {
-      Cell?: MappedComponent
-      Field: MappedComponent
-      Filter?: MappedComponent
-    } & AdminClient['components']
-  } & Pick<
+
+  admin: DeepUndefinable<FieldBaseClient['admin']> &
+    Pick<
       UIField['admin'],
       'custom' | 'disableBulkEdit' | 'disableListColumn' | 'position' | 'width'
     >
-} & Omit<DeepUndefinable<FieldBaseClient>, '_isPresentational' | 'admin'> & // still include FieldBaseClient (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
+} & Omit<DeepUndefinable<FieldBaseClient>, 'admin'> & // still include FieldBaseClient (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
   Pick<UIField, 'label' | 'name' | 'type'>
 
 type SharedUploadProperties = {
@@ -922,17 +858,12 @@ type UploadAdmin = {
   } & Admin['components']
   isSortable?: boolean
 } & Admin
-type UploadAdminClient = {
-  components?: {
-    Error?: MappedComponent
-    Label?: MappedComponent
-  } & AdminClient['components']
-} & AdminClient &
-  Pick<UploadAdmin, 'allowCreate' | 'isSortable'>
+
+type UploadAdminClient = AdminClient & Pick<UploadAdmin, 'allowCreate' | 'isSortable'>
 
 export type PolymorphicUploadField = {
   admin?: {
-    sortOptions?: { [collectionSlug: CollectionSlug]: string }
+    sortOptions?: Partial<Record<CollectionSlug, string>>
   } & UploadAdmin
   relationTo: CollectionSlug[]
 } & SharedUploadProperties
@@ -978,15 +909,7 @@ export type CodeField = {
 } & Omit<FieldBase, 'admin' | 'validate'>
 
 export type CodeFieldClient = {
-  admin?: {
-    components?: {
-      afterInput?: MappedComponent[]
-      beforeInput?: MappedComponent[]
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<CodeField['admin'], 'editorOptions' | 'language'>
+  admin?: AdminClient & Pick<CodeField['admin'], 'editorOptions' | 'language'>
 } & Omit<FieldBaseClient, 'admin'> &
   Pick<CodeField, 'maxLength' | 'minLength' | 'type'>
 
@@ -999,6 +922,7 @@ export type JSONField = {
       Label?: CustomComponent<JSONFieldLabelClientComponent | JSONFieldLabelServerComponent>
     } & Admin['components']
     editorOptions?: EditorProps['options']
+    maxHeight?: number
   } & Admin
 
   jsonSchema?: {
@@ -1011,15 +935,7 @@ export type JSONField = {
 } & Omit<FieldBase, 'admin' | 'validate'>
 
 export type JSONFieldClient = {
-  admin?: {
-    components?: {
-      afterInput?: MappedComponent[]
-      beforeInput?: MappedComponent[]
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<JSONField['admin'], 'editorOptions'>
+  admin?: AdminClient & Pick<JSONField['admin'], 'editorOptions' | 'maxHeight'>
 } & Omit<FieldBaseClient, 'admin'> &
   Pick<JSONField, 'jsonSchema' | 'type'>
 
@@ -1058,15 +974,7 @@ export type SelectField = {
   Omit<FieldBase, 'validate'>
 
 export type SelectFieldClient = {
-  admin?: {
-    components?: {
-      afterInput?: MappedComponent[]
-      beforeInput?: MappedComponent[]
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<SelectField['admin'], 'isClearable' | 'isSortable'>
+  admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable'>
 } & FieldBaseClient &
   Pick<SelectField, 'hasMany' | 'options' | 'type'>
 
@@ -1119,6 +1027,7 @@ type SharedRelationshipPropertiesClient = FieldBaseClient &
 
 type RelationshipAdmin = {
   allowCreate?: boolean
+  allowEdit?: boolean
   components?: {
     Error?: CustomComponent<
       RelationshipFieldErrorClientComponent | RelationshipFieldErrorServerComponent
@@ -1130,17 +1039,12 @@ type RelationshipAdmin = {
   isSortable?: boolean
 } & Admin
 
-type RelationshipAdminClient = {
-  components?: {
-    Error?: MappedComponent
-    Label?: MappedComponent
-  } & AdminClient['components']
-} & AdminClient &
-  Pick<RelationshipAdmin, 'allowCreate' | 'isSortable'>
+type RelationshipAdminClient = AdminClient &
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'isSortable'>
 
 export type PolymorphicRelationshipField = {
   admin?: {
-    sortOptions?: { [collectionSlug: CollectionSlug]: string }
+    sortOptions?: Partial<Record<CollectionSlug, string>>
   } & RelationshipAdmin
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
@@ -1160,7 +1064,7 @@ export type SingleRelationshipField = {
 } & SharedRelationshipProperties
 
 export type SingleRelationshipFieldClient = {
-  admin?: Pick<SingleRelationshipField['admin'], 'sortOptions'> & RelationshipAdminClient
+  admin?: Partial<Pick<SingleRelationshipField['admin'], 'sortOptions'>> & RelationshipAdminClient
 } & Pick<SingleRelationshipField, 'relationTo'> &
   SharedRelationshipPropertiesClient
 
@@ -1213,16 +1117,7 @@ export type RichTextFieldClient<
   TValue extends object = any,
   TAdapterProps = any,
   TExtraProperties = object,
-> = {
-  admin?: {
-    components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-    placeholder?: Record<string, string> | string
-  } & AdminClient
-  richTextComponentMap?: Map<string, any>
-} & FieldBaseClient &
+> = FieldBaseClient &
   Pick<RichTextField<TValue, TAdapterProps, TExtraProperties>, 'maxDepth' | 'type'> &
   TExtraProperties
 
@@ -1259,14 +1154,7 @@ export type ArrayField = {
 } & Omit<FieldBase, 'validate'>
 
 export type ArrayFieldClient = {
-  admin?: {
-    components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
-      RowLabel?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<ArrayField['admin'], 'initCollapsed' | 'isSortable'>
+  admin?: AdminClient & Pick<ArrayField['admin'], 'initCollapsed' | 'isSortable'>
   fields: ClientField[]
   labels?: LabelsClient
 } & FieldBaseClient &
@@ -1294,15 +1182,73 @@ export type RadioField = {
 } & Omit<FieldBase, 'validate'>
 
 export type RadioFieldClient = {
-  admin?: {
-    components?: {
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<RadioField['admin'], 'layout'>
+  admin?: AdminClient & Pick<RadioField['admin'], 'layout'>
 } & FieldBaseClient &
   Pick<RadioField, 'options' | 'type'>
+
+type BlockFields = {
+  [key: string]: any
+  blockName?: string
+  blockType?: string
+}
+
+export type BlockJSX = {
+  /**
+   * Override the default regex used to search for the start of the block in the JSX.
+   * By default, it's <BlockSlugHere
+   */
+  customEndRegex?:
+    | {
+        /**
+         * Whether the end match is optional. If true, the end match is
+         * not required to match for the transformer to be triggered.
+         * The entire text from regexpStart to the end of the document will then be matched.
+         */
+        optional?: true
+        regExp: RegExp
+      }
+    | RegExp
+  /**
+   * Override the default regex used to search for the start of the block in the JSX.
+   * By default, it's <BlockSlugHere/>
+   */
+  customStartRegex?: RegExp
+  /**
+   * By default, all spaces at the beginning and end of every line of the
+   * children (text between the open and close match) are removed.
+   * Set this to true to disable this behavior.
+   */
+  doNotTrimChildren?: boolean
+  /**
+   * Function that receives the data for a given block and returns a JSX representation of it.
+   *
+   * This is used to convert Lexical => JSX
+   */
+  export: (props: {
+    fields: BlockFields
+    lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
+  }) =>
+    | {
+        children?: string
+        props?: object
+      }
+    | false
+    | string
+  /**
+   * Function that receives the markdown string and parsed
+   * JSX props for a given matched block and returns a Lexical representation of it.
+   *
+   * This is used to convert JSX => Lexical
+   */
+  import: (props: {
+    children: string
+    closeMatch: null | RegExpMatchArray // Only available when customEndRegex is set
+    htmlToLexical?: ((props: { html: string }) => any) | null
+    markdownToLexical?: (props: { markdown: string }) => Record<string, any>
+    openMatch?: RegExpMatchArray
+    props: Record<string, any>
+  }) => BlockFields | false
+}
 
 export type Block = {
   /**
@@ -1312,19 +1258,15 @@ export type Block = {
   _sanitized?: boolean
   admin?: {
     components?: {
-      Label?: PayloadComponent<
-        never,
-        {
-          blockKind: 'block' | 'lexicalBlock' | 'lexicalInlineBlock' | string
-          /**
-           * May contain the formData
-           */
-          formData: Record<string, any>
-        }
-      >
+      /**
+       * This will replace the entire block component, including the block header / collapsible.
+       */
+      Block?: PayloadComponent<any, any>
+      Label?: PayloadComponent<any, any>
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    jsx?: PayloadComponent
   }
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
@@ -1346,18 +1288,16 @@ export type Block = {
    * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
+  jsx?: BlockJSX
   labels?: Labels
   slug: string
 }
+
 export type ClientBlock = {
-  admin?: {
-    components?: {
-      Label?: MappedComponent
-    }
-  } & Pick<Block['admin'], 'custom'>
+  admin?: Pick<Block['admin'], 'custom'>
   fields: ClientField[]
   labels?: LabelsClient
-} & Pick<Block, 'imageAltText' | 'imageURL' | 'slug'>
+} & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>
 
 export type BlocksField = {
   admin?: {
@@ -1380,12 +1320,7 @@ export type BlocksField = {
 } & Omit<FieldBase, 'validate'>
 
 export type BlocksFieldClient = {
-  admin?: {
-    components?: {
-      Error?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
+  admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
   blocks: ClientBlock[]
   labels?: LabelsClient
 } & FieldBaseClient &
@@ -1407,18 +1342,100 @@ export type PointField = {
 } & Omit<FieldBase, 'validate'>
 
 export type PointFieldClient = {
-  admin?: {
-    components?: {
-      afterInput?: MappedComponent[]
-      beforeInput?: MappedComponent[]
-      Error?: MappedComponent
-      Label?: MappedComponent
-    } & AdminClient['components']
-  } & AdminClient &
-    Pick<PointField['admin'], 'placeholder' | 'step'>
+  admin?: AdminClient & Pick<PointField['admin'], 'placeholder' | 'step'>
 } & FieldBaseClient &
   Pick<PointField, 'type'>
 
+/**
+ * A virtual field that loads in related collections by querying a relationship or upload field.
+ */
+export type JoinField = {
+  access?: {
+    create?: never
+    read?: FieldAccess
+    update?: never
+  }
+  admin?: {
+    allowCreate?: boolean
+    components?: {
+      Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
+      Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
+    } & Admin['components']
+    disableBulkEdit?: never
+    readOnly?: never
+  } & Admin
+  /**
+   * The slug of the collection to relate with.
+   */
+  collection: CollectionSlug
+  defaultLimit?: number
+  defaultSort?: Sort
+  defaultValue?: never
+  /**
+   * This does not need to be set and will be overridden by the relationship field's hasMany property.
+   */
+  hasMany?: boolean
+  hidden?: false
+  index?: never
+  /**
+   * This does not need to be set and will be overridden by the relationship field's localized property.
+   */
+  localized?: boolean
+  maxDepth?: number
+  /**
+   * A string for the field in the collection being joined to.
+   */
+  on: string
+  type: 'join'
+  validate?: never
+  where?: Where
+} & FieldBase
+
+export type JoinFieldClient = {
+  admin?: AdminClient & Pick<JoinField['admin'], 'allowCreate' | 'disableBulkEdit' | 'readOnly'>
+} & FieldBaseClient &
+  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
+
+export type FlattenedBlock = {
+  flattenedFields: FlattenedField[]
+} & Block
+
+export type FlattenedBlocksField = {
+  blocks: FlattenedBlock[]
+} & BlocksField
+
+export type FlattenedGroupField = {
+  flattenedFields: FlattenedField[]
+} & GroupField
+
+export type FlattenedArrayField = {
+  flattenedFields: FlattenedField[]
+} & ArrayField
+
+export type FlattenedTabAsField = {
+  flattenedFields: FlattenedField[]
+} & MarkRequired<TabAsField, 'name'>
+
+export type FlattenedField =
+  | CheckboxField
+  | CodeField
+  | DateField
+  | EmailField
+  | FlattenedArrayField
+  | FlattenedBlocksField
+  | FlattenedGroupField
+  | FlattenedTabAsField
+  | JoinField
+  | JSONField
+  | NumberField
+  | PointField
+  | RadioField
+  | RelationshipField
+  | RichTextField
+  | SelectField
+  | TextareaField
+  | TextField
+  | UploadField
 export type Field =
   | ArrayField
   | BlocksField
@@ -1428,6 +1445,7 @@ export type Field =
   | DateField
   | EmailField
   | GroupField
+  | JoinField
   | JSONField
   | NumberField
   | PointField
@@ -1451,6 +1469,7 @@ export type ClientField =
   | DateFieldClient
   | EmailFieldClient
   | GroupFieldClient
+  | JoinFieldClient
   | JSONFieldClient
   | NumberFieldClient
   | PointFieldClient
@@ -1475,6 +1494,7 @@ export type ClientFieldProps =
   | EmailFieldClientProps
   | GroupFieldClientProps
   | HiddenFieldProps
+  | JoinFieldClientProps
   | JSONFieldClientProps
   | NumberFieldClientProps
   | PointFieldClientProps
@@ -1485,6 +1505,7 @@ export type ClientFieldProps =
   | SelectFieldClientProps
   | TabsFieldClientProps
   | TextareaFieldClientProps
+  | TextFieldClientProps
   | UploadFieldClientProps
 
 type ExtractFieldTypes<T> = T extends { type: infer U } ? U : never
@@ -1499,6 +1520,7 @@ export type FieldAffectingData =
   | DateField
   | EmailField
   | GroupField
+  | JoinField
   | JSONField
   | NumberField
   | PointField
@@ -1519,6 +1541,7 @@ export type FieldAffectingDataClient =
   | DateFieldClient
   | EmailFieldClient
   | GroupFieldClient
+  | JoinFieldClient
   | JSONFieldClient
   | NumberFieldClient
   | PointFieldClient
@@ -1598,7 +1621,7 @@ export type FieldWithMany = RelationshipField | SelectField
 export type FieldWithManyClient = RelationshipFieldClient | SelectFieldClient
 
 export type FieldWithMaxDepth = RelationshipField | UploadField
-export type FieldWithMaxDepthClient = RelationshipFieldClient | UploadFieldClient
+export type FieldWithMaxDepthClient = JoinFieldClient | RelationshipFieldClient | UploadFieldClient
 
 export function fieldHasSubFields<TField extends ClientField | Field>(
   field: TField,
@@ -1651,7 +1674,8 @@ export function fieldHasMaxDepth<TField extends ClientField | Field>(
   field: TField,
 ): field is TField & (TField extends ClientField ? FieldWithMaxDepthClient : FieldWithMaxDepth) {
   return (
-    (field.type === 'upload' || field.type === 'relationship') && typeof field.maxDepth === 'number'
+    (field.type === 'upload' || field.type === 'relationship' || field.type === 'join') &&
+    typeof field.maxDepth === 'number'
   )
 }
 

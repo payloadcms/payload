@@ -6,16 +6,21 @@ import type {
 } from '@payloadcms/translations'
 import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
+import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
-import type { DestinationStream, pino } from 'pino'
+import type { DestinationStream, Level, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
-import type { AdminViewConfig, ServerSideEditViewProps } from '../admin/views/types.js'
-import type { Permissions } from '../auth/index.js'
+import type {
+  AdminViewConfig,
+  ServerSideEditViewProps,
+  VisibleEntities,
+} from '../admin/views/types.js'
+import type { SanitizedPermissions } from '../auth/index.js'
 import type {
   AddToImportMap,
   ImportMap,
@@ -23,15 +28,15 @@ import type {
   InternalImportMap,
 } from '../bin/generateImportMap/index.js'
 import type {
-  AfterErrorHook,
   Collection,
   CollectionConfig,
   SanitizedCollectionConfig,
 } from '../collections/config/types.js'
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
+import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload, TypedUser } from '../index.js'
+import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -384,16 +389,20 @@ export type EditViewConfig = {
     }
 )
 
+type ClientProps = {
+  readonly [key: string]: unknown
+}
+
 export type ServerProps = {
   readonly i18n: I18nClient
   readonly locale?: Locale
   readonly params?: { [key: string]: string | string[] | undefined }
   readonly payload: Payload
-  readonly permissions?: Permissions
-  readonly [key: string]: unknown
+  readonly permissions?: SanitizedPermissions
   readonly searchParams?: { [key: string]: string | string[] | undefined }
   readonly user?: TypedUser
-}
+  readonly visibleEntities?: VisibleEntities
+} & ClientProps
 
 export const serverProps: (keyof ServerProps)[] = [
   'payload',
@@ -435,7 +444,11 @@ export type BaseLocalizationConfig = {
    * @example `"en"`
    */
   defaultLocale: string
-  /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale` */
+  /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
+   *
+   * If false, then no requests will fallback unless a fallbackLocale is specified in the request.
+   * @default true
+   */
   fallback?: boolean
 }
 
@@ -621,6 +634,33 @@ export type FetchAPIFileUploadOptions = {
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
 
+export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
+
+export type AfterErrorResult = {
+  graphqlResult?: GraphQLFormattedError
+  response?: Partial<ErrorResult> & Record<string, unknown>
+  status?: number
+} | void
+
+export type AfterErrorHookArgs = {
+  /** The Collection that the hook is operating on. This will be undefined if the hook is executed from a non-collection endpoint or GraphQL. */
+  collection?: SanitizedCollectionConfig
+  /** 	Custom context passed between hooks */
+  context: RequestContext
+  /** The error that occurred. */
+  error: Error
+  /** The GraphQL result object, available if the hook is executed within a GraphQL context. */
+  graphqlResult?: GraphQLFormattedError
+  /** The Request object containing the currently authenticated user. */
+  req: PayloadRequest
+  /** The formatted error result object, available if the hook is executed from a REST context. */
+  result?: ErrorResult
+}
+
+export type AfterErrorHook = (
+  args: AfterErrorHookArgs,
+) => AfterErrorResult | Promise<AfterErrorResult>
+
 /**
  * This is the central configuration
  *
@@ -724,9 +764,9 @@ export type Config = {
         /** Add custom admin views */
         [key: string]: AdminViewConfig
         /** Replace the account screen */
-        Account?: AdminViewConfig
+        account?: AdminViewConfig
         /** Replace the admin homepage */
-        Dashboard?: AdminViewConfig
+        dashboard?: AdminViewConfig
       }
     }
     /** Extension point to add your custom data. Available in server and client. */
@@ -791,6 +831,12 @@ export type Config = {
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
+    /**
+     * Restrict the Admin Panel theme to use only one of your choice
+     *
+     * @default 'all' // The theme can be configured by users
+     */
+    theme?: 'all' | 'dark' | 'light'
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
@@ -895,13 +941,17 @@ export type Config = {
    * @see https://payloadcms.com/docs/hooks/overview
    */
   hooks?: {
-    afterError?: AfterErrorHook
+    afterError?: AfterErrorHook[]
   }
   /** i18n config settings */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   i18n?: I18nOptions<{} | DefaultTranslationsObject> // loosen the type here to allow for custom translations
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
+  /**
+   * @experimental There may be frequent breaking changes to this API
+   */
+  jobs?: JobsConfig
   /**
    * Translate your content to different languages/locales.
    *
@@ -934,6 +984,28 @@ export type Config = {
    * ```
    */
   logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
+
+  /**
+   * Override the log level of errors for Payload's error handler or disable logging with `false`.
+   * Levels can be any of the following: 'trace', 'debug', 'info', 'warn', 'error', 'fatal' or false.
+   *
+   * Default levels:
+   * {
+  `*   APIError: 'error',
+  `*   AuthenticationError: 'error',
+  `*   ErrorDeletingFile: 'error',
+  `*   FileRetrievalError: 'error',
+  `*   FileUploadError: 'error',
+  `*   Forbidden: 'info',
+  `*   Locked: 'info',
+  `*   LockedAuth: 'error',
+  `*   MissingFile: 'info',
+  `*   NotFound: 'info',
+  `*   QueryError: 'error',
+  `*   ValidationError: 'info',
+   * }
+   */
+  loggingLevels?: Partial<Record<ErrorName, false | Level>>
 
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
@@ -1025,6 +1097,7 @@ export type SanitizedConfig = {
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
+  jobs: JobsConfig // Redefine here, as the DeepRequired<Config> can break its type
   localization: false | SanitizedLocalizationConfig
   paths: {
     config: string
@@ -1045,44 +1118,43 @@ export type SanitizedConfig = {
   'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 >
 
-export type EditConfig =
-  | {
-      [key: string]: EditViewConfig
-      /**
-       * Replace or modify individual nested routes, or add new ones:
-       * + `default` - `/admin/collections/:collection/:id`
-       * + `api` - `/admin/collections/:collection/:id/api`
-       * + `livePreview` - `/admin/collections/:collection/:id/preview`
-       * + `references` - `/admin/collections/:collection/:id/references`
-       * + `relationships` - `/admin/collections/:collection/:id/relationships`
-       * + `versions` - `/admin/collections/:collection/:id/versions`
-       * + `version` - `/admin/collections/:collection/:id/versions/:version`
-       * + `customView` - `/admin/collections/:collection/:id/:path`
-       *
-       * To override the entire Edit View including all nested views, use the `root` key.
-       */
-      api?: Partial<EditViewConfig>
-      default?: Partial<EditViewConfig>
-      livePreview?: Partial<EditViewConfig>
-      root?: never
-      version?: Partial<EditViewConfig>
-      versions?: Partial<EditViewConfig>
-      // TODO: uncomment these as they are built
-      // references?: EditView
-      // relationships?: EditView
-    }
-  | {
-      api?: never
-      default?: never
-      livePreview?: never
-      /**
-       * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
-       * + `root` - `/admin/collections/:collection/:id/**\/*`
-       */
-      root: Partial<EditViewConfig>
-      version?: never
-      versions?: never
-    }
+export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
+
+export type EditConfigWithRoot = {
+  api?: never
+  default?: never
+  livePreview?: never
+  /**
+   * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
+   * + `root` - `/admin/collections/:collection/:id/**\/*`
+   */
+  root: Partial<EditViewConfig>
+  version?: never
+  versions?: never
+}
+
+export type EditConfigWithoutRoot = {
+  [key: string]: EditViewConfig
+  /**
+   * Replace or modify individual nested routes, or add new ones:
+   * + `default` - `/admin/collections/:collection/:id`
+   * + `api` - `/admin/collections/:collection/:id/api`
+   * + `livePreview` - `/admin/collections/:collection/:id/preview`
+   * + `references` - `/admin/collections/:collection/:id/references`
+   * + `relationships` - `/admin/collections/:collection/:id/relationships`
+   * + `versions` - `/admin/collections/:collection/:id/versions`
+   * + `version` - `/admin/collections/:collection/:id/versions/:version`
+   * + `customView` - `/admin/collections/:collection/:id/:path`
+   *
+   * To override the entire Edit View including all nested views, use the `root` key.
+   */
+  api?: Partial<EditViewConfig>
+  default?: Partial<EditViewConfig>
+  livePreview?: Partial<EditViewConfig>
+  root?: never
+  version?: Partial<EditViewConfig>
+  versions?: Partial<EditViewConfig>
+}
 
 export type EntityDescriptionComponent = CustomComponent
 

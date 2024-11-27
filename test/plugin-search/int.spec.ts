@@ -1,19 +1,67 @@
-import type { Payload } from 'payload'
-
 import path from 'path'
+import { NotFound, type Payload } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+
+import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { pagesSlug, postsSlug } from './shared.js'
 
 let payload: Payload
+let restClient: NextRESTClient
+let token: string
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-search', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
+
+    const data = await restClient
+      .POST('/users/login', {
+        body: JSON.stringify({
+          email: devUser.email,
+          password: devUser.password,
+        }),
+      })
+      .then((res) => res.json())
+
+    token = data.token
+  })
+
+  beforeEach(async () => {
+    await payload.delete({
+      collection: 'search',
+      depth: 0,
+      where: {
+        id: {
+          exists: true,
+        },
+      },
+    })
+    await Promise.all([
+      payload.delete({
+        collection: postsSlug,
+        depth: 0,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      }),
+      payload.delete({
+        collection: pagesSlug,
+        depth: 0,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      }),
+    ])
   })
 
   afterAll(async () => {
@@ -193,7 +241,7 @@ describe('@payloadcms/plugin-search', () => {
     const createdDoc = await payload.create({
       collection: 'posts',
       data: {
-        _status: 'draft',
+        _status: 'published',
         title: 'test title',
         slug: 'es',
       },
@@ -226,5 +274,151 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     expect(syncedSearchData.docs[0].slug).toEqual('es')
+  })
+
+  it('should respond with 401 when invalid permissions on user before reindex', async () => {
+    const testCreds = {
+      email: 'test@payloadcms.com',
+      password: 'test',
+    }
+
+    await payload.create({
+      collection: 'users',
+      data: testCreds,
+    })
+
+    const testUserRes = await restClient.POST(`/users/login`, {
+      body: JSON.stringify(testCreds),
+    })
+
+    const testUser = await testUserRes.json()
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [postsSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${testUser.token}`,
+      },
+    })
+
+    expect(endpointRes.status).toEqual(401)
+  })
+
+  it('should respond with 400 when invalid collection args passed to reindex', async () => {
+    const endpointNoArgsRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({}),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    const endpointEmptyArrRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    const endpointInvalidArrRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: ['users'],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointNoArgsRes.status).toBe(400)
+    expect(endpointEmptyArrRes.status).toBe(400)
+    expect(endpointInvalidArrRes.status).toBe(400)
+  })
+
+  it('should delete existing search indexes before reindexing', async () => {
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post_1',
+        _status: 'published',
+      },
+    })
+
+    await wait(200)
+
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post_2',
+        _status: 'published',
+      },
+    })
+
+    const { docs } = await payload.find({ collection: 'search' })
+
+    await wait(200)
+
+    const endpointRes = await restClient.POST('/search/reindex', {
+      body: JSON.stringify({
+        collections: [postsSlug, pagesSlug],
+      }),
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const { docs: results } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        id: {
+          in: docs.map((doc) => doc.id),
+        },
+      },
+    })
+
+    // Should have no docs with these ID
+    // after reindex since it deletes indexes and recreates them
+    expect(results).toHaveLength(0)
+  })
+
+  it('should reindex whole collections', async () => {
+    await payload.create({
+      collection: pagesSlug,
+      data: {
+        title: 'Test page title',
+        _status: 'published',
+      },
+    })
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Test page title',
+        _status: 'published',
+      },
+    })
+
+    await wait(200)
+
+    const { totalDocs: totalBeforeReindex } = await payload.count({
+      collection: 'search',
+    })
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [postsSlug, pagesSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const { totalDocs: totalAfterReindex } = await payload.count({
+      collection: 'search',
+    })
+
+    expect(totalAfterReindex).toBe(totalBeforeReindex)
   })
 })

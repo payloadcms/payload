@@ -1,6 +1,7 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -19,6 +20,7 @@ import {
   arrayFieldsSlug,
   blockFieldsSlug,
   collapsibleFieldsSlug,
+  customIdSlug,
   tabsFields2Slug,
   tabsFieldsSlug,
 } from './slugs.js'
@@ -45,11 +47,7 @@ describe('fields', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
@@ -243,7 +241,7 @@ describe('fields', () => {
     test('should render collapsible as collapsed if initCollapsed is true', async () => {
       await page.goto(url.create)
       const collapsedCollapsible = page.locator(
-        '#field-collapsible-1 .collapsible__toggle--collapsed',
+        '#field-collapsible-_index-1 .collapsible__toggle--collapsed',
       )
       await expect(collapsedCollapsible).toBeVisible()
     })
@@ -251,10 +249,10 @@ describe('fields', () => {
     test('should render CollapsibleLabel using a function', async () => {
       const label = 'custom row label'
       await page.goto(url.create)
-      await page.locator('#field-collapsible-3__1 #field-nestedTitle').fill(label)
+      await page.locator('#field-collapsible-_index-3-1 #field-nestedTitle').fill(label)
       await wait(100)
       const customCollapsibleLabel = page.locator(
-        `#field-collapsible-3__1 .collapsible-field__row-label-wrap :text("${label}")`,
+        `#field-collapsible-_index-3-1 .collapsible-field__row-label-wrap :text("${label}")`,
       )
       await expect(customCollapsibleLabel).toContainText(label)
     })
@@ -271,7 +269,7 @@ describe('fields', () => {
 
       await page
         .locator(
-          '#arrayWithCollapsibles-row-0 #field-collapsible-4__0-arrayWithCollapsibles__0 #field-arrayWithCollapsibles__0__innerCollapsible',
+          '#arrayWithCollapsibles-row-0 #field-collapsible-arrayWithCollapsibles__0___index-0 #field-arrayWithCollapsibles__0__innerCollapsible',
         )
         .fill(label)
       await wait(100)
@@ -590,6 +588,33 @@ describe('fields', () => {
       await expect(async () => await expect(tab2).toHaveClass(/--active/)).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
+    })
+  })
+
+  describe('id', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, customIdSlug)
+    })
+
+    function createCustomIDDoc(id: string) {
+      return payload.create({
+        collection: customIdSlug,
+        data: {
+          id,
+        },
+      })
+    }
+
+    test('allow create of non standard ID', async () => {
+      await createCustomIDDoc('id 1')
+      await page.goto(url.list)
+
+      await navigateToDoc(page, url)
+
+      // Page should load and ID should be correct
+      await expect(page.locator('#field-id')).toHaveValue('id 1')
+      await expect(page.locator('.id-label')).toContainText('id 1')
     })
   })
 })

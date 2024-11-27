@@ -1,5 +1,5 @@
-import type { PayloadRequest } from '../../../types/index.js'
-import type { RelationshipField, UploadField } from '../../config/types.js'
+import type { PayloadRequest, PopulateType } from '../../../types/index.js'
+import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
 
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
 import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types.js'
@@ -11,11 +11,12 @@ type PopulateArgs = {
   depth: number
   draft: boolean
   fallbackLocale: null | string
-  field: RelationshipField | UploadField
+  field: JoinField | RelationshipField | UploadField
   index?: number
   key?: string
   locale: null | string
   overrideAccess: boolean
+  populateArg?: PopulateType
   req: PayloadRequest
   showHiddenFields: boolean
 }
@@ -32,15 +33,21 @@ const populate = async ({
   key,
   locale,
   overrideAccess,
+  populateArg,
   req,
   showHiddenFields,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference
-  const relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo
+  let relation
+  if (field.type === 'join') {
+    relation = field.collection
+  } else {
+    relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo
+  }
   const relatedCollection = req.payload.collections[relation]
 
   if (relatedCollection) {
-    let id = Array.isArray(field.relationTo) ? data.value : data
+    let id = field.type !== 'join' && Array.isArray(field.relationTo) ? data.value : data
     let relationshipValue
     const shouldPopulate = depth && currentDepth <= depth
 
@@ -64,6 +71,9 @@ const populate = async ({
           fallbackLocale,
           locale,
           overrideAccess,
+          select:
+            populateArg?.[relatedCollection.config.slug] ??
+            relatedCollection.config.defaultPopulate,
           showHiddenFields,
           transactionID: req.transactionID,
         }),
@@ -74,20 +84,21 @@ const populate = async ({
       // ids are visible regardless of access controls
       relationshipValue = id
     }
-
     if (typeof index === 'number' && typeof key === 'string') {
-      if (Array.isArray(field.relationTo)) {
+      if (field.type !== 'join' && Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][key][index].value = relationshipValue
       } else {
         dataToUpdate[field.name][key][index] = relationshipValue
       }
     } else if (typeof index === 'number' || typeof key === 'string') {
-      if (Array.isArray(field.relationTo)) {
+      if (field.type === 'join') {
+        dataToUpdate[field.name].docs[index ?? key] = relationshipValue
+      } else if (Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][index ?? key].value = relationshipValue
       } else {
         dataToUpdate[field.name][index ?? key] = relationshipValue
       }
-    } else if (Array.isArray(field.relationTo)) {
+    } else if (field.type !== 'join' && Array.isArray(field.relationTo)) {
       dataToUpdate[field.name].value = relationshipValue
     } else {
       dataToUpdate[field.name] = relationshipValue
@@ -100,9 +111,10 @@ type PromiseArgs = {
   depth: number
   draft: boolean
   fallbackLocale: null | string
-  field: RelationshipField | UploadField
+  field: JoinField | RelationshipField | UploadField
   locale: null | string
   overrideAccess: boolean
+  populate?: PopulateType
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, any>
@@ -116,6 +128,7 @@ export const relationshipPopulationPromise = async ({
   field,
   locale,
   overrideAccess,
+  populate: populateArg,
   req,
   showHiddenFields,
   siblingDoc,
@@ -124,7 +137,7 @@ export const relationshipPopulationPromise = async ({
   const populateDepth = fieldHasMaxDepth(field) && field.maxDepth < depth ? field.maxDepth : depth
   const rowPromises = []
 
-  if (fieldSupportsMany(field) && field.hasMany) {
+  if (field.type === 'join' || (fieldSupportsMany(field) && field.hasMany)) {
     if (
       field.localized &&
       locale === 'all' &&
@@ -147,6 +160,7 @@ export const relationshipPopulationPromise = async ({
                 key: localeKey,
                 locale,
                 overrideAccess,
+                populateArg,
                 req,
                 showHiddenFields,
               })
@@ -155,13 +169,19 @@ export const relationshipPopulationPromise = async ({
           })
         }
       })
-    } else if (Array.isArray(siblingDoc[field.name])) {
-      siblingDoc[field.name].forEach((relatedDoc, index) => {
+    } else if (
+      Array.isArray(siblingDoc[field.name]) ||
+      Array.isArray(siblingDoc[field.name]?.docs)
+    ) {
+      ;(Array.isArray(siblingDoc[field.name])
+        ? siblingDoc[field.name]
+        : siblingDoc[field.name].docs
+      ).forEach((relatedDoc, index) => {
         const rowPromise = async () => {
           if (relatedDoc) {
             await populate({
               currentDepth,
-              data: relatedDoc,
+              data: relatedDoc?.id ? relatedDoc.id : relatedDoc,
               dataReference: resultingDoc,
               depth: populateDepth,
               draft,
@@ -170,6 +190,7 @@ export const relationshipPopulationPromise = async ({
               index,
               locale,
               overrideAccess,
+              populateArg,
               req,
               showHiddenFields,
             })
@@ -198,6 +219,7 @@ export const relationshipPopulationPromise = async ({
           key: localeKey,
           locale,
           overrideAccess,
+          populateArg,
           req,
           showHiddenFields,
         })
@@ -217,6 +239,7 @@ export const relationshipPopulationPromise = async ({
       field,
       locale,
       overrideAccess,
+      populateArg,
       req,
       showHiddenFields,
     })

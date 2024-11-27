@@ -1,5 +1,6 @@
 'use client'
 
+import { $isTableSelection } from '@lexical/table'
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
@@ -14,7 +15,7 @@ const toolbarGroups: ToolbarGroup[] = [
     {
       ChildComponent: CodeIcon,
       isActive: ({ selection }) => {
-        if ($isRangeSelection(selection)) {
+        if ($isRangeSelection(selection) || $isTableSelection(selection)) {
           return selection.hasFormat('code')
         }
         return false
@@ -29,6 +30,7 @@ const toolbarGroups: ToolbarGroup[] = [
 ]
 
 export const InlineCodeFeatureClient = createClientFeature({
+  enableFormats: ['code'],
   markdownTransformers: [INLINE_CODE],
   toolbarFixed: {
     groups: toolbarGroups,

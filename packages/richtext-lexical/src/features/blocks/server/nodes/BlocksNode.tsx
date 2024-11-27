@@ -14,14 +14,20 @@ import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
-import { deepCopyObjectSimple } from 'payload/shared'
 
-export type BlockFields<TBlockFields extends JsonObject = JsonObject> = {
+type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */
   blockName: string
   blockType: string
-  id: string
 } & TBlockFields
+
+export type BlockFields<TBlockFields extends JsonObject = JsonObject> = {
+  id: string
+} & BaseBlockFields<TBlockFields>
+
+export type BlockFieldsOptionalID<TBlockFields extends JsonObject = JsonObject> = {
+  id?: string
+} & BaseBlockFields<TBlockFields>
 
 export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = Spread<
   {
@@ -84,7 +90,7 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return false
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
     return null
   }
 
@@ -114,14 +120,12 @@ export class ServerBlockNode extends DecoratorBlockNode {
   }
 
   setFields(fields: BlockFields): void {
-    const fieldsCopy = deepCopyObjectSimple(fields)
-
     const writable = this.getWritable()
-    writable.__fields = fieldsCopy
+    writable.__fields = fields
   }
 }
 
-export function $createServerBlockNode(fields: Exclude<BlockFields, 'id'>): ServerBlockNode {
+export function $createServerBlockNode(fields: BlockFieldsOptionalID): ServerBlockNode {
   return new ServerBlockNode({
     fields: {
       ...fields,

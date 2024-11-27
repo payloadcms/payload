@@ -11,8 +11,8 @@ import { validateUrl, validateUrlMinimal } from '../../../lexical/utils/url.js'
 
 export const getBaseFields = (
   config: SanitizedConfig,
-  enabledCollections: CollectionSlug[],
-  disabledCollections: CollectionSlug[],
+  enabledCollections?: CollectionSlug[],
+  disabledCollections?: CollectionSlug[],
   maxDepth?: number,
 ): FieldAffectingData[] => {
   let enabledRelations: CollectionSlug[]
@@ -76,6 +76,7 @@ export const getBaseFields = (
       },
       label: ({ t }) => t('fields:enterURL'),
       required: true,
+      // @ts-expect-error - TODO: fix this
       validate: (value: string) => {
         if (!validateUrlMinimal(value)) {
           return 'Invalid URL'
@@ -106,10 +107,12 @@ export const getBaseFields = (
       filterOptions:
         !enabledCollections && !disabledCollections
           ? ({ relationTo, user }) => {
-              const hidden = config.collections.find(({ slug }) => slug === relationTo).admin.hidden
+              const hidden = config.collections.find(({ slug }) => slug === relationTo)?.admin
+                .hidden
               if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
                 return false
               }
+              return true
             }
           : null,
       label: ({ t }) => t('fields:chooseDocumentToLink'),

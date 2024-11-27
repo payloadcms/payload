@@ -6,12 +6,26 @@ import { flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
+import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
-  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
+  {
+    collection,
+    joins = {},
+    limit = 0,
+    locale,
+    page,
+    pagination,
+    projection,
+    req = {} as PayloadRequest,
+    select,
+    sort: sortArg,
+    where,
+  },
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config
@@ -28,7 +42,7 @@ export const find: Find = async function find(
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
-      fields: collectionConfig.fields,
+      fields: collectionConfig.flattenedFields,
       locale,
       sort: sortArg || collectionConfig.defaultSort,
       timestamps: true,
@@ -44,14 +58,22 @@ export const find: Find = async function find(
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
     options,
     page,
     pagination,
+    projection,
     sort,
     useEstimatedCount,
+  }
+
+  if (select) {
+    paginationOptions.projection = buildProjectionFromSelect({
+      adapter: this,
+      fields: collectionConfig.flattenedFields,
+      select,
+    })
   }
 
   if (this.collation) {
@@ -88,7 +110,23 @@ export const find: Find = async function find(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  let result
+
+  const aggregate = await buildJoinAggregation({
+    adapter: this,
+    collection,
+    collectionConfig,
+    joins,
+    locale,
+    query,
+  })
+  // build join aggregation
+  if (aggregate) {
+    result = await Model.aggregatePaginate(Model.aggregate(aggregate), paginationOptions)
+  } else {
+    result = await Model.paginate(query, paginationOptions)
+  }
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {

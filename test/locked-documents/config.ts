@@ -5,7 +5,9 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser, regularUser } from '../credentials.js'
 import { PagesCollection, pagesSlug } from './collections/Pages/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import { TestsCollection } from './collections/Tests/index.js'
 import { Users } from './collections/Users/index.js'
+import { AdminGlobal } from './globals/Admin/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -17,8 +19,8 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [PagesCollection, PostsCollection, Users],
-  globals: [MenuGlobal],
+  collections: [PagesCollection, PostsCollection, TestsCollection, Users],
+  globals: [AdminGlobal, MenuGlobal],
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await payload.create({
@@ -27,6 +29,7 @@ export default buildConfigWithDefaults({
           email: devUser.email,
           password: devUser.password,
           name: 'Admin',
+          roles: ['is_admin', 'is_user'],
         },
       })
 
@@ -36,6 +39,7 @@ export default buildConfigWithDefaults({
           email: regularUser.email,
           password: regularUser.password,
           name: 'Dev',
+          roles: ['is_user'],
         },
       })
 

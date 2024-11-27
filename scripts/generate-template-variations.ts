@@ -25,6 +25,8 @@ const dirname = path.dirname(filename)
 type TemplateVariations = {
   /** package.json name */
   name: string
+  /** Base template to copy from */
+  base?: string
   /** Directory in templates dir */
   dirname: string
   db: DbType
@@ -35,6 +37,7 @@ type TemplateVariations = {
     dbUri: string
   }
   configureConfig?: boolean
+  generateLockfile?: boolean
 }
 
 main().catch((error) => {
@@ -46,19 +49,40 @@ async function main() {
   const templatesDir = path.resolve(dirname, '../templates')
 
   // WARNING: This will need to be updated when this merges into main
-  const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/beta/templates`
+  const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
 
   const variations: TemplateVariations[] = [
     {
       name: 'payload-vercel-postgres-template',
       dirname: 'with-vercel-postgres',
-      db: 'vercelPostgres',
+      db: 'vercel-postgres',
       storage: 'vercelBlobStorage',
       sharp: false,
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
           `${templateRepoUrlBase}/with-vercel-postgres` +
+            '&project-name=payload-project' +
+            '&env=PAYLOAD_SECRET' +
+            '&build-command=pnpm run ci' +
+            '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
+        ),
+      envNames: {
+        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        dbUri: 'POSTGRES_URL',
+      },
+    },
+    {
+      name: 'payload-vercel-website-template',
+      base: 'website', // This is the base template to copy from
+      dirname: 'with-vercel-website',
+      db: 'vercel-postgres',
+      storage: 'vercelBlobStorage',
+      sharp: true,
+      vercelDeployButtonLink:
+        `https://vercel.com/new/clone?repository-url=` +
+        encodeURI(
+          `${templateRepoUrlBase}/with-vercel-website` +
             '&project-name=payload-project' +
             '&env=PAYLOAD_SECRET' +
             '&build-command=pnpm run ci' +
@@ -110,6 +134,7 @@ async function main() {
       name: 'payload-cloud-mongodb-template',
       dirname: 'with-payload-cloud',
       db: 'mongodb',
+      generateLockfile: true,
       storage: 'payloadCloud',
       sharp: true,
     },
@@ -117,8 +142,10 @@ async function main() {
 
   for (const {
     name,
+    base,
     dirname,
     db,
+    generateLockfile,
     storage,
     vercelDeployButtonLink,
     envNames,
@@ -127,7 +154,14 @@ async function main() {
   } of variations) {
     header(`Generating ${name}...`)
     const destDir = path.join(templatesDir, dirname)
-    copyRecursiveSync(path.join(templatesDir, '_template'), destDir)
+    copyRecursiveSync(path.join(templatesDir, base || '_template'), destDir, [
+      'node_modules',
+      '\\*\\.tgz',
+      '.next',
+      '.env$',
+      'pnpm-lock.yaml',
+    ])
+
     log(`Copied to ${destDir}`)
 
     if (configureConfig !== false) {
@@ -160,16 +194,35 @@ async function main() {
     })
 
     // Copy in initial migration if db is postgres. This contains user and media.
-    if (db === 'postgres') {
-      const migrationSrcDir = path.join(templatesDir, '_data/migrations')
+    if (db === 'postgres' || db === 'vercel-postgres') {
+      // Add "ci" script to package.json
+      const packageJsonPath = path.join(destDir, 'package.json')
+      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'))
+      packageJson.scripts = packageJson.scripts || {}
+      packageJson.scripts.ci = 'payload migrate && pnpm build'
+      await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
+
       const migrationDestDir = path.join(destDir, 'src/migrations')
 
-      // Make directory if it doesn't exist
-      if ((await fs.stat(migrationDestDir).catch(() => null)) === null) {
-        await fs.mkdir(migrationDestDir, { recursive: true })
-      }
-      log(`Copying migrations from ${migrationSrcDir} to ${migrationDestDir}`)
-      copyRecursiveSync(migrationSrcDir, migrationDestDir)
+      // Delete and recreate migrations directory
+      await fs.rm(migrationDestDir, { recursive: true, force: true })
+      await fs.mkdir(migrationDestDir, { recursive: true })
+
+      log(`Generating initial migrations in ${migrationDestDir}`)
+
+      execSyncSafe(`pnpm run payload migrate:create initial`, {
+        cwd: destDir,
+        env: {
+          ...process.env,
+          BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
+          DATABASE_URI: 'postgres://localhost:5432/payloadtests',
+        },
+      })
+    }
+
+    if (generateLockfile) {
+      log('Generating pnpm-lock.yaml')
+      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
     }
 
     // TODO: Email?
@@ -180,7 +233,7 @@ async function main() {
   }
   // TODO: Run prettier manually on the generated files, husky blows up
   log('Running prettier on generated files...')
-  execSync(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`)
+  execSyncSafe(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`)
 
   log('Template generation complete!')
 }
@@ -245,4 +298,26 @@ function header(message: string) {
 
 function log(message: string) {
   console.log(chalk.dim(message))
+}
+function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1]) {
+  try {
+    console.log(`Executing: ${command}`)
+    execSync(command, options)
+  } catch (error) {
+    if (error instanceof Error) {
+      const stderr = (error as any).stderr?.toString()
+      const stdout = (error as any).stdout?.toString()
+
+      if (stderr && stderr.trim()) {
+        console.error('Standard Error:', stderr)
+      } else if (stdout && stdout.trim()) {
+        console.error('Standard Output (likely contains error details):', stdout)
+      } else {
+        console.error('An unknown error occurred with no output.')
+      }
+    } else {
+      console.error('An unexpected error occurred:', error)
+    }
+    throw error
+  }
 }

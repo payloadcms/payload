@@ -79,7 +79,7 @@ Returns a boolean which allows/denies access to the `create` request.
 To add create Access Control to a Collection, use the `create` property in the [Collection Config](../collections/overview):
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const CollectionWithCreateAccess: CollectionConfig = {
   // ...
@@ -315,7 +315,7 @@ The following arguments are provided to the `unlock` function:
 
 If the Collection has [Versions](../versions/overview) enabled, the `readVersions` Access Control function determines whether or not the currently logged in user can access the version history of a Document.
 
-To add Read Versions Access Control to a Collection, use the `readVersions` property in the [Collection Config](../collections/overview):
+To add Read Versions Access Control to a Collection, use the `readVersions` property in the [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'

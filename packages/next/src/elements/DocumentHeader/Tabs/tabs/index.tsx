@@ -72,9 +72,8 @@ export const tabs: Record<
     condition: ({ collectionConfig, globalConfig, permissions }) =>
       Boolean(
         (collectionConfig?.versions &&
-          permissions?.collections?.[collectionConfig?.slug]?.readVersions?.permission) ||
-          (globalConfig?.versions &&
-            permissions?.globals?.[globalConfig?.slug]?.readVersions?.permission),
+          permissions?.collections?.[collectionConfig?.slug]?.readVersions) ||
+          (globalConfig?.versions && permissions?.globals?.[globalConfig?.slug]?.readVersions),
       ),
     href: '/versions',
     label: ({ t }) => t('version:versions'),

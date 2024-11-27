@@ -1,79 +1,137 @@
 import type { DeepRequired } from 'ts-essentials'
 
-import type { Payload } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
+/**
+ * A permission object that can be used to determine if a user has access to a specific operation.
+ */
 export type Permission = {
   permission: boolean
-  where?: Record<string, unknown>
+  where?: Where
 }
 
-export type FieldPermissions = {
-  blocks?: {
-    [blockSlug: string]: {
-      fields: {
-        [fieldName: string]: FieldPermissions
-      }
-    }
-  }
-  create: {
-    permission: boolean
-  }
-  fields?: {
-    [fieldName: string]: FieldPermissions
-  }
-  read: {
-    permission: boolean
-  }
-  update: {
-    permission: boolean
-  }
+export type FieldsPermissions = {
+  [fieldName: string]: FieldPermissions
 }
+
+export type BlockPermissions = {
+  create: Permission
+  fields: FieldsPermissions
+  read: Permission
+  update: Permission
+}
+
+export type SanitizedBlockPermissions =
+  | {
+      fields: SanitizedFieldsPermissions
+    }
+  | true
+
+export type BlocksPermissions = {
+  [blockSlug: string]: BlockPermissions
+}
+
+export type SanitizedBlocksPermissions =
+  | {
+      [blockSlug: string]: SanitizedBlockPermissions
+    }
+  | true
+
+export type FieldPermissions = {
+  blocks?: BlocksPermissions
+  create: Permission
+  fields?: FieldsPermissions
+  read: Permission
+  update: Permission
+}
+
+export type SanitizedFieldPermissions =
+  | {
+      blocks?: SanitizedBlocksPermissions
+      create: true
+      fields?: SanitizedFieldsPermissions
+      read: true
+      update: true
+    }
+  | true
+
+export type SanitizedFieldsPermissions =
+  | {
+      [fieldName: string]: SanitizedFieldPermissions
+    }
+  | true
 
 export type CollectionPermission = {
   create: Permission
   delete: Permission
-  fields: {
-    [fieldName: string]: FieldPermissions
-  }
+  fields: FieldsPermissions
   read: Permission
   readVersions?: Permission
   update: Permission
+}
+
+export type SanitizedCollectionPermission = {
+  create?: true
+  delete?: true
+  fields: SanitizedFieldsPermissions
+  read?: true
+  readVersions?: true
+  update?: true
 }
 
 export type GlobalPermission = {
-  fields: {
-    [fieldName: string]: FieldPermissions
-  }
+  fields: FieldsPermissions
   read: Permission
   readVersions?: Permission
   update: Permission
 }
 
+export type SanitizedGlobalPermission = {
+  fields: SanitizedFieldsPermissions
+  read?: true
+  readVersions?: true
+  update?: true
+}
+
 export type DocumentPermissions = CollectionPermission | GlobalPermission
+
+export type SanitizedDocumentPermissions = SanitizedCollectionPermission | SanitizedGlobalPermission
+
 export type Permissions = {
   canAccessAdmin: boolean
-  collections: {
-    [collectionSlug: string]: CollectionPermission
+  collections?: Record<CollectionSlug, CollectionPermission>
+  globals?: Record<GlobalSlug, GlobalPermission>
+}
+
+export type SanitizedPermissions = {
+  canAccessAdmin?: boolean
+  collections?: {
+    [collectionSlug: string]: SanitizedCollectionPermission
   }
   globals?: {
-    [globalSlug: string]: GlobalPermission
+    [globalSlug: string]: SanitizedGlobalPermission
   }
 }
 
-export type User = {
-  [key: string]: any // This NEEDS to be an any, otherwise it breaks the Omit for ClientUser below
+type BaseUser = {
   collection: string
   email?: string
   id: number | string
   username?: string
 }
 
+export type User = {
+  [key: string]: any
+} & BaseUser
+
 /**
  * `collection` is not available one the client. It's only available on the server (req.user)
  * On the client, you can access the collection via config.admin.user. Config can be accessed using the useConfig() hook
  */
-export type ClientUser = Omit<User, 'collection'>
+export type ClientUser = {
+  [key: string]: any
+} & BaseUser
 
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
@@ -151,7 +209,7 @@ export interface IncomingAuthType {
   disableLocalStrategy?: true
   /**
    * Customize the way that the forgotPassword operation functions.
-   * @link https://payloadcms.com/docs/beta/authentication/email#forgot-password
+   * @link https://payloadcms.com/docs/authentication/email#forgot-password
    */
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
@@ -164,7 +222,7 @@ export interface IncomingAuthType {
   /**
    * Ability to allow users to login with username/password.
    *
-   * @link https://payloadcms.com/docs/beta/authentication/overview#login-with-username
+   * @link https://payloadcms.com/docs/authentication/overview#login-with-username
    */
   loginWithUsername?: boolean | LoginWithUsernameOptions
   /**
@@ -177,24 +235,24 @@ export interface IncomingAuthType {
   removeTokenFromResponses?: true
   /**
    * Advanced - an array of custom authentification strategies to extend this collection's authentication with.
-   * @link https://payloadcms.com/docs/beta/authentication/custom-strategies
+   * @link https://payloadcms.com/docs/authentication/custom-strategies
    */
   strategies?: AuthStrategy[]
   /**
    * Controls how many seconds the token will be valid for. Default is 2 hours.
    * @default 7200
-   * @link https://payloadcms.com/docs/beta/authentication/overview#config-options
+   * @link https://payloadcms.com/docs/authentication/overview#config-options
    */
   tokenExpiration?: number
   /**
    * Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection.
    * @default false
-   * @link https://payloadcms.com/docs/beta/authentication/api-keys
+   * @link https://payloadcms.com/docs/authentication/api-keys
    */
   useAPIKey?: boolean
   /**
    * Set to true or pass an object with verification options to require users to verify by email before they are allowed to log into your app.
-   * @link https://payloadcms.com/docs/beta/authentication/email#email-verification
+   * @link https://payloadcms.com/docs/authentication/email#email-verification
    */
   verify?:
     | {

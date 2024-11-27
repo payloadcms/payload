@@ -12,7 +12,7 @@ export const SlateListItemConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'listitem',
-        slateNodes: slateNode.children,
+        slateNodes: slateNode.children!,
       }),
       direction: 'ltr',
       format: '',

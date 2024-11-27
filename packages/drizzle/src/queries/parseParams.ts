@@ -1,7 +1,8 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, Operator, Where } from 'payload'
+import type { FlattenedField, Operator, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { PgUUID } from 'drizzle-orm/pg-core'
 import { QueryError } from 'payload'
 import { validOperators } from 'payload/shared'
 
@@ -14,7 +15,7 @@ import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  fields: Field[]
+  fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale: string
   selectFields: Record<string, GenericColumn>
@@ -22,7 +23,7 @@ type Args = {
   where: Where
 }
 
-export async function parseParams({
+export function parseParams({
   adapter,
   fields,
   joins,
@@ -30,7 +31,7 @@ export async function parseParams({
   selectFields,
   tableName,
   where,
-}: Args): Promise<SQL> {
+}: Args): SQL {
   let result: SQL
   const constraints: SQL[] = []
 
@@ -46,7 +47,7 @@ export async function parseParams({
           conditionOperator = or
         }
         if (Array.isArray(condition)) {
-          const builtConditions = await buildAndOrConditions({
+          const builtConditions = buildAndOrConditions({
             adapter,
             fields,
             joins,
@@ -102,6 +103,18 @@ export async function parseParams({
                   Array.isArray(pathSegments) &&
                   pathSegments.length > 1
                 ) {
+                  if (adapter.name === 'postgres') {
+                    const constraint = adapter.createJSONQuery({
+                      column: rawColumn || table[columnName],
+                      operator,
+                      pathSegments,
+                      value: val,
+                    })
+
+                    constraints.push(sql.raw(constraint))
+                    break
+                  }
+
                   const segments = pathSegments.slice(1)
                   segments.unshift(table[columnName].name)
 
@@ -141,11 +154,7 @@ export async function parseParams({
                   if (adapter.name === 'sqlite' && operator === 'equals' && !isNaN(val)) {
                     formattedValue = val
                   } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
-                    if (adapter.name === 'sqlite') {
-                      formattedValue = `(${val.map((v) => `${v}`).join(',')})`
-                    } else {
-                      formattedValue = `(${val.map((v) => `'${v}'`).join(', ')})`
-                    }
+                    formattedValue = `(${val.map((v) => `${v}`).join(',')})`
                   } else {
                     formattedValue = `'${operatorKeys[operator].wildcard}${val}${operatorKeys[operator].wildcard}'`
                   }
@@ -194,6 +203,7 @@ export async function parseParams({
                   adapter,
                   columns,
                   field,
+                  isUUID: table?.[columnName] instanceof PgUUID,
                   operator,
                   relationOrPath,
                   val,
@@ -280,6 +290,39 @@ export async function parseParams({
 
                 if (operator === 'not_equals' && queryValue === null) {
                   constraints.push(isNotNull(rawColumn || table[columnName]))
+                  break
+                }
+
+                if (field.type === 'point' && adapter.name === 'postgres') {
+                  switch (operator) {
+                    case 'intersects': {
+                      constraints.push(
+                        sql`ST_Intersects(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
+                      )
+                      break
+                    }
+
+                    case 'near': {
+                      const [lng, lat, maxDistance, minDistance] = queryValue as number[]
+
+                      let constraint = sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`
+                      if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
+                        constraint = sql`${constraint} AND ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`
+                      }
+                      constraints.push(constraint)
+                      break
+                    }
+
+                    case 'within': {
+                      constraints.push(
+                        sql`ST_Within(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
+                      )
+                      break
+                    }
+
+                    default:
+                      break
+                  }
                   break
                 }
 

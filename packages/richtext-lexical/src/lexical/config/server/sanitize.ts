@@ -51,33 +51,39 @@ export const sanitizeServerFeatures = (
     }
 
     if (feature?.hooks?.beforeValidate?.length) {
-      sanitized.hooks.beforeValidate = sanitized.hooks.beforeValidate.concat(
+      sanitized.hooks.beforeValidate = sanitized.hooks.beforeValidate?.concat(
         feature.hooks.beforeValidate,
       )
     }
     if (feature?.hooks?.beforeChange?.length) {
-      sanitized.hooks.beforeChange = sanitized.hooks.beforeChange.concat(feature.hooks.beforeChange)
+      sanitized.hooks.beforeChange = sanitized.hooks.beforeChange?.concat(
+        feature.hooks.beforeChange,
+      )
     }
     if (feature?.hooks?.afterRead?.length) {
-      sanitized.hooks.afterRead = sanitized.hooks.afterRead.concat(feature.hooks.afterRead)
+      sanitized.hooks.afterRead = sanitized.hooks.afterRead?.concat(feature.hooks.afterRead)
     }
     if (feature?.hooks?.afterChange?.length) {
-      sanitized.hooks.afterChange = sanitized.hooks.afterChange.concat(feature.hooks.afterChange)
+      sanitized.hooks.afterChange = sanitized.hooks.afterChange?.concat(feature.hooks.afterChange)
     }
 
     if (feature?.i18n) {
       for (const lang in feature.i18n) {
-        if (!sanitized.i18n[lang]) {
-          sanitized.i18n[lang] = {
+        if (!sanitized.i18n[lang as keyof typeof sanitized.i18n]) {
+          sanitized.i18n[lang as keyof typeof sanitized.i18n] = {
             lexical: {},
           }
         }
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         sanitized.i18n[lang].lexical[feature.key] = feature.i18n[lang]
       }
     }
 
     if (feature.nodes?.length) {
-      sanitized.nodes = sanitized.nodes.concat(feature.nodes)
+      // Do not concat here. We need to keep the object reference of sanitized.nodes so that function markdown transformers of features automatically get the updated nodes
+      for (const node of feature.nodes) {
+        sanitized.nodes.push(node)
+      }
       feature.nodes.forEach((node) => {
         const nodeType = 'with' in node.node ? node.node.replace.getType() : node.node.getType() // TODO: Idk if this works for node replacements
         if (node?.graphQLPopulationPromises?.length) {
@@ -90,30 +96,41 @@ export const sanitizeServerFeatures = (
           sanitized.converters.html.push(node.converters.html)
         }
         if (node?.hooks?.afterChange) {
-          sanitized.nodeHooks.afterChange.set(nodeType, node.hooks.afterChange)
+          sanitized.nodeHooks?.afterChange?.set(nodeType, node.hooks.afterChange)
         }
         if (node?.hooks?.afterRead) {
-          sanitized.nodeHooks.afterRead.set(nodeType, node.hooks.afterRead)
+          sanitized.nodeHooks?.afterRead?.set(nodeType, node.hooks.afterRead)
         }
         if (node?.hooks?.beforeChange) {
-          sanitized.nodeHooks.beforeChange.set(nodeType, node.hooks.beforeChange)
+          sanitized.nodeHooks?.beforeChange?.set(nodeType, node.hooks.beforeChange)
         }
         if (node?.hooks?.beforeValidate) {
-          sanitized.nodeHooks.beforeValidate.set(nodeType, node.hooks.beforeValidate)
+          sanitized.nodeHooks?.beforeValidate?.set(nodeType, node.hooks.beforeValidate)
         }
         if (node?.getSubFields) {
-          sanitized.getSubFields.set(nodeType, node.getSubFields)
+          sanitized.getSubFields?.set(nodeType, node.getSubFields)
         }
         if (node?.getSubFieldsData) {
-          sanitized.getSubFieldsData.set(nodeType, node.getSubFieldsData)
+          sanitized.getSubFieldsData?.set(nodeType, node.getSubFieldsData)
         }
       })
     }
 
     if (feature.markdownTransformers?.length) {
-      sanitized.markdownTransformers = sanitized.markdownTransformers.concat(
-        feature.markdownTransformers,
-      )
+      // Do not concat here. We need to keep the object reference of feature.markdownTransformers
+
+      for (const transformer of feature.markdownTransformers) {
+        if (typeof transformer === 'function') {
+          sanitized.markdownTransformers.push(
+            transformer({
+              allNodes: sanitized.nodes,
+              allTransformers: sanitized.markdownTransformers,
+            }),
+          )
+        } else {
+          sanitized.markdownTransformers.push(transformer)
+        }
+      }
     }
 
     sanitized.enabledFeatures.push(feature.key)
@@ -129,13 +146,13 @@ export async function sanitizeServerEditorConfig(
 ): Promise<SanitizedServerEditorConfig> {
   const resolvedFeatureMap = await loadFeatures({
     config,
-    parentIsLocalized,
+    parentIsLocalized: parentIsLocalized!,
     unSanitizedEditorConfig: editorConfig,
   })
 
   return {
     features: sanitizeServerFeatures(resolvedFeatureMap),
-    lexical: editorConfig.lexical,
+    lexical: editorConfig.lexical!,
     resolvedFeatureMap,
   }
 }

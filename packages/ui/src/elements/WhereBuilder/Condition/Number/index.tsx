@@ -10,6 +10,7 @@ const baseClass = 'condition-value-number'
 
 export const NumberField: React.FC<Props> = ({ disabled, onChange, value }) => {
   const { t } = useTranslation()
+
   return (
     <input
       className={baseClass}

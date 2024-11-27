@@ -4,28 +4,25 @@ import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'
 
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
-    afterInput,
-    beforeInput,
+    AfterInput,
+    BeforeInput,
     className,
     Description,
     description,
-    descriptionProps,
     Error,
-    errorProps,
-    field,
     Label,
     label,
-    labelProps,
+    localized,
     onChange,
     path,
     placeholder,
@@ -36,7 +33,6 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     showError,
     style,
     value,
-    width,
   } = props
 
   const { i18n } = useTranslation()
@@ -52,21 +48,20 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={style}
     >
-      <FieldLabel
-        field={field}
-        Label={Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError CustomError={Error} field={field} path={path} {...(errorProps || {})} />
-        <RenderComponent mappedComponent={beforeInput} />
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
+        {BeforeInput}
         <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
           <div className="textarea-inner">
             <div className="textarea-clone" data-value={value || placeholder || ''} />
@@ -83,12 +78,10 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             />
           </div>
         </label>
-        <RenderComponent mappedComponent={afterInput} />
-        <FieldDescription
-          Description={Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
+        {AfterInput}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
         />
       </div>
     </div>

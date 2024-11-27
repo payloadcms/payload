@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken'
+import { decodeJwt } from 'jose'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
@@ -38,13 +38,15 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       showHiddenFields: false,
     })) as User
 
+    if (user) {
+      user.collection = collection.config.slug
+    }
+
     if (req.user.collection !== collection.config.slug) {
       return {
         user: null,
       }
     }
-
-    delete user.collection
 
     // /////////////////////////////////////
     // me hook - Collection
@@ -68,7 +70,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       result.user = user
 
       if (currentToken) {
-        const decoded = jwt.decode(currentToken) as jwt.JwtPayload
+        const decoded = decodeJwt(currentToken)
         if (decoded) {
           result.exp = decoded.exp
         }

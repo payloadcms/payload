@@ -2,6 +2,7 @@ import type {
   CollectionSlug,
   Config,
   Field,
+  FieldSchemaMap,
   FileData,
   FileSize,
   Payload,
@@ -85,11 +86,13 @@ export const UploadFeature = createServerFeature<
           return null
         }
 
-        const schemaMap = new Map<string, Field[]>()
+        const schemaMap: FieldSchemaMap = new Map()
 
         for (const collection in props.collections) {
           if (props.collections[collection].fields?.length) {
-            schemaMap.set(collection, props.collections[collection].fields)
+            schemaMap.set(collection, {
+              fields: props.collections[collection].fields,
+            })
           }
         }
 
@@ -109,8 +112,8 @@ export const UploadFeature = createServerFeature<
                 req,
                 showHiddenFields,
               }) => {
-                // @ts-expect-error
-                const id = node?.value?.id || node?.value // for backwards-compatibility
+                // @ts-expect-error - for backwards-compatibility
+                const id = node?.value?.id || node?.value
 
                 if (req?.payload) {
                   const uploadDocument: {
@@ -141,7 +144,7 @@ export const UploadFeature = createServerFeature<
                     return `<img />`
                   }
 
-                  const url = getAbsoluteURL(uploadDocument?.value?.url, req?.payload)
+                  const url = getAbsoluteURL(uploadDocument?.value?.url ?? '', req?.payload)
 
                   /**
                    * If the upload is not an image, return a link to the upload
@@ -232,6 +235,7 @@ export const UploadFeature = createServerFeature<
                 draft,
                 node,
                 overrideAccess,
+                populateArg,
                 populationPromises,
                 req,
                 showHiddenFields,
@@ -261,6 +265,8 @@ export const UploadFeature = createServerFeature<
                     key: 'value',
                     overrideAccess,
                     req,
+                    select:
+                      populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate,
                     showHiddenFields,
                   }),
                 )

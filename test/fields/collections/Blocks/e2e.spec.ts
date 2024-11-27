@@ -38,17 +38,13 @@ describe('Block fields', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'blockFieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'blockFieldsTest',
+      snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
@@ -128,6 +124,24 @@ describe('Block fields', () => {
 
     const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
     expect(await blocks.count()).toEqual(4)
+  })
+
+  test('should save when duplicating subblocks', async () => {
+    await page.goto(url.create)
+    const subblocksRow = page.locator('#field-blocks #blocks-row-2')
+    const rowActions = subblocksRow.locator('.collapsible__actions').first()
+    await expect(rowActions).toBeVisible()
+
+    await rowActions.locator('.array-actions__button').click()
+    const duplicateButton = rowActions.locator('.array-actions__action.array-actions__duplicate')
+    await expect(duplicateButton).toBeVisible()
+    await duplicateButton.click()
+
+    const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
+    expect(await blocks.count()).toEqual(4)
+
+    await page.click('#action-save')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should use i18n block labels', async () => {

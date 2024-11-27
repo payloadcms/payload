@@ -10,6 +10,7 @@ import type {
   Field,
   GraphQLInfo,
   GroupField,
+  JoinField,
   JSONField,
   NumberField,
   PointField,
@@ -38,7 +39,7 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { createDataloaderCacheKey, MissingEditorProp, toWords } from 'payload'
+import { combineQueries, createDataloaderCacheKey, MissingEditorProp, toWords } from 'payload'
 import { tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'
@@ -209,7 +210,69 @@ export function buildObjectType({
 
       return {
         ...objectTypeConfig,
-        [field.name]: { type: graphqlResult.types.groupTypes[interfaceName] },
+        [field.name]: {
+          type: graphqlResult.types.groupTypes[interfaceName],
+          resolve: (parent, args, context: Context) => {
+            return {
+              ...parent[field.name],
+              _id: parent._id ?? parent.id,
+            }
+          },
+        },
+      }
+    },
+    join: (objectTypeConfig: ObjectTypeConfig, field: JoinField) => {
+      const joinName = combineParentName(parentName, toWords(field.name, true))
+
+      const joinType = {
+        type: new GraphQLObjectType({
+          name: joinName,
+          fields: {
+            docs: {
+              type: new GraphQLList(graphqlResult.collections[field.collection].graphQL.type),
+            },
+            hasNextPage: { type: GraphQLBoolean },
+          },
+        }),
+        args: {
+          limit: {
+            type: GraphQLInt,
+          },
+          sort: {
+            type: GraphQLString,
+          },
+          where: {
+            type: graphqlResult.collections[field.collection].graphQL.whereInputType,
+          },
+        },
+        extensions: { complexity: 10 },
+        async resolve(parent, args, context: Context) {
+          const { collection } = field
+          const { limit, sort, where } = args
+          const { req } = context
+
+          const fullWhere = combineQueries(where, {
+            [field.on]: { equals: parent._id ?? parent.id },
+          })
+
+          const results = await req.payload.find({
+            collection,
+            depth: 0,
+            fallbackLocale: req.fallbackLocale,
+            limit,
+            locale: req.locale,
+            req,
+            sort,
+            where: fullWhere,
+          })
+
+          return results
+        },
+      }
+
+      return {
+        ...objectTypeConfig,
+        [field.name]: joinType,
       }
     },
     json: (objectTypeConfig: ObjectTypeConfig, field: JSONField) => ({
@@ -369,8 +432,11 @@ export function buildObjectType({
             const createPopulationPromise = async (relatedDoc, i) => {
               let id = relatedDoc
               let collectionSlug = field.relationTo
+              const isValidGraphQLCollection = isRelatedToManyCollections
+                ? graphQLCollections.some((collection) => collectionSlug.includes(collection.slug))
+                : graphQLCollections.some((collection) => collectionSlug === collection.slug)
 
-              if (graphQLCollections.some((collection) => collection.slug === collectionSlug)) {
+              if (isValidGraphQLCollection) {
                 if (isRelatedToManyCollections) {
                   collectionSlug = relatedDoc.relationTo
                   id = relatedDoc.value
@@ -577,7 +643,15 @@ export function buildObjectType({
 
           return {
             ...tabSchema,
-            [tab.name]: { type: graphqlResult.types.groupTypes[interfaceName] },
+            [tab.name]: {
+              type: graphqlResult.types.groupTypes[interfaceName],
+              resolve(parent, args, context: Context) {
+                return {
+                  ...parent[tab.name],
+                  _id: parent._id ?? parent.id,
+                }
+              },
+            },
           }
         }
 

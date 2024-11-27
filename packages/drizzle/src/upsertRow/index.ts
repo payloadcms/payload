@@ -20,9 +20,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   db,
   fields,
   ignoreResult,
+  joinQuery,
   operation,
   path = '',
   req,
+  select,
   tableName,
   upsertTarget,
   where,
@@ -112,13 +114,13 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // store by table name and rows
     if (Object.keys(rowToInsert.selects).length > 0) {
       Object.entries(rowToInsert.selects).forEach(([selectTableName, selectRows]) => {
+        selectsToInsert[selectTableName] = []
+
         selectRows.forEach((row) => {
           if (typeof row.parent === 'undefined') {
             row.parent = insertedRow.id
           }
-          if (!selectsToInsert[selectTableName]) {
-            selectsToInsert[selectTableName] = []
-          }
+
           selectsToInsert[selectTableName].push(row)
         })
       })
@@ -341,11 +343,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           where: eq(selectTable.parent, insertedRow.id),
         })
       }
-      await adapter.insert({
-        db,
-        tableName: selectTableName,
-        values: tableRows,
-      })
+
+      if (tableRows.length) {
+        await adapter.insert({
+          db,
+          tableName: selectTableName,
+          values: tableRows,
+        })
+      }
     }
 
     // //////////////////////////////////
@@ -389,8 +394,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           id,
           errors: [
             {
-              field: fieldName,
               message: req.t('error:valueMustBeUnique'),
+              path: fieldName,
             },
           ],
         },
@@ -409,10 +414,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   // RETRIEVE NEWLY UPDATED ROW
   // //////////////////////////////////
 
+  joinQuery = operation === 'create' ? false : joinQuery
+
   const findManyArgs = buildFindManyArgs({
     adapter,
     depth: 0,
     fields,
+    joinQuery,
+    select,
     tableName,
   })
 
@@ -429,6 +438,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     config: adapter.payload.config,
     data: doc,
     fields,
+    joinQuery,
   })
 
   return result

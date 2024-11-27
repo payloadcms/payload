@@ -24,6 +24,19 @@ const ArrayFields: CollectionConfig = {
           required: true,
         },
         {
+          name: 'anotherText',
+          type: 'text',
+        },
+        {
+          name: 'uiField',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: './collections/Array/LabelComponent.js#ArrayRowLabel',
+            },
+          },
+        },
+        {
           name: 'localizedText',
           type: 'text',
           localized: true,
@@ -152,6 +165,47 @@ const ArrayFields: CollectionConfig = {
         },
       ],
       type: 'array',
+    },
+    {
+      name: 'nestedArrayLocalized',
+      type: 'array',
+      fields: [
+        {
+          type: 'array',
+          name: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'externallyUpdatedArray',
+      type: 'array',
+      fields: [
+        {
+          name: 'customField',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '/collections/Array/CustomField.js#CustomField',
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'ui',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Array/AddRowButton.js',
+        },
+      },
     },
   ],
   slug: arrayFieldsSlug,

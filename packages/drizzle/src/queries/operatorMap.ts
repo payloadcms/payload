@@ -48,10 +48,6 @@ export const operatorMap: Operators = {
   less_than_equal: lte,
   like: ilike,
   not_equals: ne,
-  // TODO: geojson queries
-  // intersects: intersects,
-  // near: near,
-  // within: within,
   // all: all,
   not_in: notInArray,
   or,

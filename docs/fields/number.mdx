@@ -18,7 +18,7 @@ The Number Field stores and validates numeric entry and supports additional nume
 To add a Number Field, set the `type` to `number` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyNumberField: Field = {
   // ...
@@ -59,7 +59,7 @@ _\* An asterisk denotes that a property is required._
 The customize the appearance and behavior of the Number Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyNumberField: Field = {
   // ...
@@ -82,7 +82,7 @@ The Number Field inherits all of the default options from the base [Field Admin 
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

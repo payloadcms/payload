@@ -46,18 +46,14 @@ describe('Number', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'fieldsNumberTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsNumberTest',
+      snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
     if (client) {
@@ -137,5 +133,17 @@ describe('Number', () => {
     await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: withMinRows',
     )
+  })
+
+  test('should keep data removed on save if deleted', async () => {
+    const input = 1
+    await page.goto(url.create)
+    const field = page.locator('#field-number')
+    await field.fill(String(input))
+    await saveDocAndAssert(page)
+    await expect(field).toHaveValue(String(input))
+    await field.fill('')
+    await saveDocAndAssert(page)
+    await expect(field).toHaveValue('')
   })
 })

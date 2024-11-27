@@ -1,7 +1,8 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -15,6 +16,7 @@ type Args = {
   data: JsonObject
   doc: JsonObject
   field: Field | TabAsField
+  fieldIndex: number
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   /**
@@ -41,6 +43,7 @@ export const promise = async ({
   data,
   doc,
   field,
+  fieldIndex,
   global,
   operation,
   parentPath,
@@ -51,11 +54,15 @@ export const promise = async ({
   siblingData,
   siblingDoc,
 }: Args): Promise<void> => {
-  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
     field,
-    parentPath,
-    parentSchemaPath,
+    index: fieldIndex,
+    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
+    parentPath: parentPath.join('.'),
+    parentSchemaPath: parentSchemaPath.join('.'),
   })
+  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
+  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
 
   if (fieldAffectsData(field)) {
     // Execute hooks
@@ -90,27 +97,6 @@ export const promise = async ({
 
   // Traverse subfields
   switch (field.type) {
-    case 'group': {
-      await traverseFields({
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        path: fieldPath,
-        previousDoc,
-        previousSiblingDoc: previousDoc[field.name] as JsonObject,
-        req,
-        schemaPath: fieldSchemaPath,
-        siblingData: (siblingData?.[field.name] as JsonObject) || {},
-        siblingDoc: siblingDoc[field.name] as JsonObject,
-      })
-
-      break
-    }
-
     case 'array': {
       const rows = siblingDoc[field.name]
 
@@ -178,8 +164,9 @@ export const promise = async ({
       break
     }
 
-    case 'row':
-    case 'collapsible': {
+    case 'collapsible':
+
+    case 'row': {
       await traverseFields({
         collection,
         context,
@@ -197,6 +184,66 @@ export const promise = async ({
         siblingDoc: { ...siblingDoc },
       })
 
+      break
+    }
+    case 'group': {
+      await traverseFields({
+        collection,
+        context,
+        data,
+        doc,
+        fields: field.fields,
+        global,
+        operation,
+        path: fieldPath,
+        previousDoc,
+        previousSiblingDoc: previousDoc[field.name] as JsonObject,
+        req,
+        schemaPath: fieldSchemaPath,
+        siblingData: (siblingData?.[field.name] as JsonObject) || {},
+        siblingDoc: siblingDoc[field.name] as JsonObject,
+      })
+
+      break
+    }
+
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.afterChange?.length) {
+        await editor.hooks.afterChange.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const hookedValue = await currentHook({
+            collection,
+            context,
+            data,
+            field,
+            global,
+            operation,
+            originalDoc: doc,
+            path: fieldPath,
+            previousDoc,
+            previousSiblingDoc,
+            previousValue: previousDoc[field.name],
+            req,
+            schemaPath: fieldSchemaPath,
+            siblingData,
+            value: siblingDoc[field.name],
+          })
+
+          if (hookedValue !== undefined) {
+            siblingDoc[field.name] = hookedValue
+          }
+        }, Promise.resolve())
+      }
       break
     }
 
@@ -248,46 +295,6 @@ export const promise = async ({
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
       })
-      break
-    }
-
-    case 'richText': {
-      if (!field?.editor) {
-        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-      }
-      if (typeof field?.editor === 'function') {
-        throw new Error('Attempted to access unsanitized rich text editor.')
-      }
-
-      const editor: RichTextAdapter = field?.editor
-
-      if (editor?.hooks?.afterChange?.length) {
-        await editor.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
-            collection,
-            context,
-            data,
-            field,
-            global,
-            operation,
-            originalDoc: doc,
-            path: fieldPath,
-            previousDoc,
-            previousSiblingDoc,
-            previousValue: previousDoc[field.name],
-            req,
-            schemaPath: fieldSchemaPath,
-            siblingData,
-            value: siblingDoc[field.name],
-          })
-
-          if (hookedValue !== undefined) {
-            siblingDoc[field.name] = hookedValue
-          }
-        }, Promise.resolve())
-      }
       break
     }
 

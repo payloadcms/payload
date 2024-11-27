@@ -3,72 +3,61 @@ import type {
   ClientGlobalConfig,
   ClientUser,
   Data,
-  DocumentPermissions,
   DocumentPreferences,
   FormState,
   InsideFieldsPreferences,
-  PaginatedDocs,
   SanitizedCollectionConfig,
+  SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
-  TypeWithID,
-  TypeWithTimestamps,
-  TypeWithVersion,
+  TypedUser,
 } from 'payload'
 import type React from 'react'
 
 export type DocumentInfoProps = {
-  action?: string
-  AfterDocument?: React.ReactNode
-  AfterFields?: React.ReactNode
-  apiURL?: string
-  BeforeDocument?: React.ReactNode
-  BeforeFields?: React.ReactNode
-  collectionSlug?: SanitizedCollectionConfig['slug']
-  disableActions?: boolean
-  disableCreate?: boolean
-  disableLeaveWithoutSaving?: boolean
-  docPermissions?: DocumentPermissions
-  globalSlug?: SanitizedGlobalConfig['slug']
-  hasPublishPermission?: boolean
-  hasSavePermission?: boolean
-  id: null | number | string
-  initialData?: Data
-  initialState?: FormState
-  isEditing?: boolean
-  onDelete?: (args: {
-    collectionConfig?: ClientCollectionConfig
-    id: string
-  }) => Promise<void> | void
-  onDrawerCreate?: () => void
-  /* only available if `redirectAfterDuplicate` is `false` */
-  onDuplicate?: (args: {
-    collectionConfig?: ClientCollectionConfig
-    doc: TypeWithID
-  }) => Promise<void> | void
-  onLoadError?: (data?: any) => Promise<void> | void
-  onSave?: (args: {
-    collectionConfig?: ClientCollectionConfig
-    doc: TypeWithID
-    operation: 'create' | 'update'
-    result: Data
-  }) => Promise<void> | void
-  redirectAfterDelete?: boolean
-  redirectAfterDuplicate?: boolean
+  readonly action?: string
+  readonly AfterDocument?: React.ReactNode
+  readonly AfterFields?: React.ReactNode
+  readonly apiURL?: string
+  readonly BeforeFields?: React.ReactNode
+  readonly collectionSlug?: SanitizedCollectionConfig['slug']
+  readonly currentEditor: TypedUser
+  readonly disableActions?: boolean
+  readonly disableCreate?: boolean
+  readonly disableLeaveWithoutSaving?: boolean
+  readonly docPermissions?: SanitizedDocumentPermissions
+  readonly globalSlug?: SanitizedGlobalConfig['slug']
+  readonly hasPublishedDoc: boolean
+  readonly hasPublishPermission?: boolean
+  readonly hasSavePermission?: boolean
+  readonly id?: number | string
+  readonly initialData?: Data
+  readonly initialState?: FormState
+  readonly isEditing?: boolean
+  readonly isLocked: boolean
+  readonly lastUpdateTime: number
+  readonly mostRecentVersionIsAutosaved: boolean
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
+  readonly unpublishedVersionCount: number
+  readonly Upload?: React.ReactNode
+  readonly versionCount: number
 }
 
 export type DocumentInfoContext = {
-  currentEditor?: ClientUser
+  currentEditor?: ClientUser | null | number | string
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
-  getVersions: () => Promise<void>
+  hasPublishedDoc: boolean
+  incrementVersionCount: () => void
   initialData: Data
   initialState?: FormState
   isInitializing: boolean
-  isLoading: boolean
+  lastUpdateTime?: number
+  mostRecentVersionIsAutosaved: boolean
   preferencesKey?: string
-  publishedDoc?: { _status?: string } & TypeWithID & TypeWithTimestamps
+  savedDocumentData?: Data
   setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
   setDocFieldPreferences: (
     field: string,
@@ -76,10 +65,14 @@ export type DocumentInfoContext = {
   ) => void
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setDocumentTitle: (title: string) => void
+  setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
+  setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
+  setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
+  setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
   title: string
   unlockDocument: (docId: number | string, slug: string) => Promise<void>
-  unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
+  unpublishedVersionCount: number
   updateDocumentEditor: (docId: number | string, slug: string, user: ClientUser) => Promise<void>
-  versions?: PaginatedDocs<TypeWithVersion<any>>
-  versionsCount?: PaginatedDocs<TypeWithVersion<any>>
+  updateSavedDocumentData: (data: Data) => void
+  versionCount: number
 } & DocumentInfoProps
