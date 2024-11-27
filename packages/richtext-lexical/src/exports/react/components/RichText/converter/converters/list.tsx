@@ -29,7 +29,6 @@ export const ListJSXConverter: JSXConverters<SerializedListItemNode | Serialized
           className={`list-item-checkbox${node.checked ? ' list-item-checkbox-checked' : ' list-item-checkbox-unchecked'}${hasSubLists ? ' nestedListItem' : ''}`}
           // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
           role="checkbox"
-          style={{ listStyleType: 'none' }}
           tabIndex={-1}
           value={node?.value}
         >
@@ -37,7 +36,7 @@ export const ListJSXConverter: JSXConverters<SerializedListItemNode | Serialized
             children
           ) : (
             <>
-              <input checked={node.checked} id={uuid} type="checkbox" />
+              <input checked={node.checked} id={uuid} readOnly={true} type="checkbox" />
               <label htmlFor={uuid}>{children}</label>
               <br />
             </>
@@ -46,11 +45,7 @@ export const ListJSXConverter: JSXConverters<SerializedListItemNode | Serialized
       )
     } else {
       return (
-        <li
-          className={hasSubLists ? 'nestedListItem' : ''}
-          style={hasSubLists ? { listStyleType: 'none' } : {}}
-          value={node?.value}
-        >
+        <li className={hasSubLists ? 'nestedListItem' : ''} value={node?.value}>
           {children}
         </li>
       )
