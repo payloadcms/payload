@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import type {
   AdminClient,
+  BlockJSX,
   BlocksFieldClient,
   ClientBlock,
   ClientField,
@@ -15,9 +16,11 @@ import type {
 } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 
+import { getFromImportMap } from '../../bin/generateImportMap/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { flattenTopLevelFields } from '../../index.js'
+import { flattenTopLevelFields, type ImportMap } from '../../index.js'
+import { removeUndefined } from '../../utilities/removeUndefined.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -36,77 +39,97 @@ export type ServerOnlyFieldProperties =
 
 export type ServerOnlyFieldAdminProperties = keyof Pick<FieldBase['admin'], 'condition'>
 
+const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
+  'hooks',
+  'access',
+  'validate',
+  'defaultValue',
+  'filterOptions', // This is a `relationship` and `upload` only property
+  'editor', // This is a `richText` only property
+  'custom',
+  'typescriptSchema',
+  'dbName', // can be a function
+  'enumName', // can be a function
+  // the following props are handled separately (see below):
+  // `label`
+  // `fields`
+  // `blocks`
+  // `tabs`
+  // `admin`
+]
+const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
+type FieldWithDescription = {
+  admin: AdminClient
+} & ClientField
+
 export const createClientField = ({
-  clientField = {} as ClientField,
   defaultIDType,
   field: incomingField,
   i18n,
+  importMap,
 }: {
-  clientField?: ClientField
   defaultIDType: Payload['config']['db']['defaultIDType']
   field: Field
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientField => {
-  const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
-    'hooks',
-    'access',
-    'validate',
-    'defaultValue',
-    'filterOptions', // This is a `relationship` and `upload` only property
-    'editor', // This is a `richText` only property
-    'custom',
-    'typescriptSchema',
-    'dbName', // can be a function
-    'enumName', // can be a function
-    // the following props are handled separately (see below):
-    // `label`
-    // `fields`
-    // `blocks`
-    // `tabs`
-    // `admin`
-  ]
-
-  clientField.admin = clientField.admin || {}
-  // clientField.admin.readOnly = true
-
-  serverOnlyFieldProperties.forEach((key) => {
-    if (key in clientField) {
-      delete clientField[key]
-    }
-  })
+  const clientField: ClientField = {} as ClientField
 
   const isHidden = 'hidden' in incomingField && incomingField?.hidden
   const disabledFromAdmin =
     incomingField?.admin && 'disabled' in incomingField.admin && incomingField.admin.disabled
 
-  if (fieldAffectsData(clientField) && (isHidden || disabledFromAdmin)) {
+  if (fieldAffectsData(incomingField) && (isHidden || disabledFromAdmin)) {
     return null
   }
 
-  if (
-    'label' in clientField &&
-    'label' in incomingField &&
-    typeof incomingField.label === 'function'
-  ) {
-    clientField.label = incomingField.label({ t: i18n.t })
-  }
-
-  if (!(clientField.admin instanceof Object)) {
-    clientField.admin = {} as AdminClient
-  }
-
-  if ('admin' in incomingField && 'width' in incomingField.admin) {
-    clientField.admin.style = {
-      ...clientField.admin.style,
-      '--field-width': clientField.admin.width,
-      width: undefined, // avoid needlessly adding this to the element's style attribute
+  for (const key in incomingField) {
+    if (serverOnlyFieldProperties.includes(key as any)) {
+      continue
     }
-  } else {
-    if (!(clientField.admin.style instanceof Object)) {
-      clientField.admin.style = {}
-    }
+    switch (key) {
+      case 'admin':
+        if (!incomingField.admin) {
+          break
+        }
+        clientField.admin = {} as AdminClient
+        for (const adminKey in incomingField.admin) {
+          if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {
+            continue
+          }
+          switch (adminKey) {
+            case 'description':
+              if ('description' in incomingField.admin) {
+                if (typeof incomingField.admin?.description !== 'function') {
+                  ;(clientField as FieldWithDescription).admin.description =
+                    incomingField.admin.description
+                }
+              }
 
-    clientField.admin.style.flex = '1 1 auto'
+              break
+            default:
+              clientField.admin[adminKey] = incomingField.admin[adminKey]
+          }
+        }
+        break
+      case 'blocks':
+      case 'fields':
+      case 'tabs':
+        // Skip - we handle sub-fields in the switch below
+        break
+      case 'label':
+        //@ts-expect-error - would need to type narrow
+        if (typeof incomingField.label === 'function') {
+          //@ts-expect-error - would need to type narrow
+          clientField.label = incomingField.label({ t: i18n.t })
+        } else {
+          //@ts-expect-error - would need to type narrow
+          clientField.label = incomingField.label
+        }
+        break
+      default:
+        clientField[key] = incomingField[key]
+    }
   }
 
   switch (incomingField.type) {
@@ -121,11 +144,11 @@ export const createClientField = ({
       }
 
       field.fields = createClientFields({
-        clientFields: field.fields,
         defaultIDType,
         disableAddingID: incomingField.type !== 'array',
         fields: incomingField.fields,
         i18n,
+        importMap,
       })
 
       break
@@ -137,19 +160,33 @@ export const createClientField = ({
       if (incomingField.blocks?.length) {
         for (let i = 0; i < incomingField.blocks.length; i++) {
           const block = incomingField.blocks[i]
-          const clientBlock: ClientBlock = {
+
+          // prevent $undefined from being passed through the rsc requests
+          const clientBlock = removeUndefined<ClientBlock>({
             slug: block.slug,
-            admin: {
-              components: {},
-              custom: block.admin?.custom,
-            },
             fields: field.blocks?.[i]?.fields || [],
             imageAltText: block.imageAltText,
             imageURL: block.imageURL,
+          }) satisfies ClientBlock
+
+          if (block.admin?.custom) {
+            clientBlock.admin = {
+              custom: block.admin.custom,
+            }
+          }
+
+          if (block?.admin?.jsx) {
+            const jsxResolved = getFromImportMap<BlockJSX>({
+              importMap,
+              PayloadComponent: block.admin.jsx,
+              schemaPath: '',
+            })
+            clientBlock.jsx = jsxResolved
           }
 
           if (block.labels) {
             clientBlock.labels = {} as unknown as LabelsClient
+
             if (block.labels.singular) {
               if (typeof block.labels.singular === 'function') {
                 clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
@@ -165,10 +202,10 @@ export const createClientField = ({
           }
 
           clientBlock.fields = createClientFields({
-            clientFields: clientBlock.fields,
             defaultIDType,
             fields: block.fields,
             i18n,
+            importMap,
           })
 
           if (!field.blocks) {
@@ -183,7 +220,7 @@ export const createClientField = ({
     }
 
     case 'radio':
-
+    // falls through
     case 'select': {
       const field = clientField as RadioFieldClient | SelectFieldClient
 
@@ -206,7 +243,6 @@ export const createClientField = ({
 
       break
     }
-
     case 'richText': {
       if (!incomingField?.editor) {
         throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
@@ -218,27 +254,34 @@ export const createClientField = ({
 
       break
     }
+
     case 'tabs': {
       const field = clientField as unknown as TabsFieldClient
 
       if (incomingField.tabs?.length) {
+        field.tabs = []
+
         for (let i = 0; i < incomingField.tabs.length; i++) {
           const tab = incomingField.tabs[i]
-          const clientTab = field.tabs[i]
+          const clientTab = {} as unknown as TabsFieldClient['tabs'][0]
 
-          serverOnlyFieldProperties.forEach((key) => {
-            if (key in clientTab) {
-              delete clientTab[key]
+          for (const key in tab) {
+            if (serverOnlyFieldProperties.includes(key as any)) {
+              continue
             }
-          })
-
-          clientTab.fields = createClientFields({
-            clientFields: clientTab.fields,
-            defaultIDType,
-            disableAddingID: true,
-            fields: tab.fields,
-            i18n,
-          })
+            if (key === 'fields') {
+              clientTab.fields = createClientFields({
+                defaultIDType,
+                disableAddingID: true,
+                fields: tab.fields,
+                i18n,
+                importMap,
+              })
+            } else {
+              clientTab[key] = tab[key]
+            }
+          }
+          field.tabs[i] = clientTab
         }
       }
 
@@ -249,72 +292,43 @@ export const createClientField = ({
       break
   }
 
-  const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
-
-  if (!clientField.admin) {
-    clientField.admin = {} as AdminClient
-  }
-
-  serverOnlyFieldAdminProperties.forEach((key) => {
-    if (key in clientField.admin) {
-      delete clientField.admin[key]
-    }
-  })
-
-  type FieldWithDescription = {
-    admin: AdminClient
-  } & ClientField
-
-  if (incomingField.admin && 'description' in incomingField.admin) {
-    if (
-      typeof incomingField.admin?.description === 'string' ||
-      typeof incomingField.admin?.description === 'object'
-    ) {
-      ;(clientField as FieldWithDescription).admin.description = incomingField.admin.description
-    } else if (typeof incomingField.admin?.description === 'function') {
-      ;(clientField as FieldWithDescription).admin.description = incomingField.admin?.description({
-        t: i18n.t,
-      })
-    }
-  }
-
   return clientField
 }
 
 export const createClientFields = ({
-  clientFields,
   defaultIDType,
   disableAddingID,
   fields,
   i18n,
+  importMap,
 }: {
-  clientFields: ClientField[]
   defaultIDType: Payload['config']['db']['defaultIDType']
   disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
+  importMap: ImportMap
 }): ClientField[] => {
-  const newClientFields: ClientField[] = []
+  const clientFields: ClientField[] = []
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
 
-    const newField = createClientField({
-      clientField: clientFields[i],
+    const clientField = createClientField({
       defaultIDType,
       field,
       i18n,
+      importMap,
     })
 
-    if (newField) {
-      newClientFields.push(newField)
+    if (clientField) {
+      clientFields.push(clientField)
     }
   }
 
   const hasID = flattenTopLevelFields(fields).some((f) => fieldAffectsData(f) && f.name === 'id')
 
   if (!disableAddingID && !hasID) {
-    newClientFields.push({
+    clientFields.push({
       name: 'id',
       type: defaultIDType,
       admin: {
@@ -325,9 +339,8 @@ export const createClientFields = ({
       },
       hidden: true,
       label: 'ID',
-      localized: undefined,
     })
   }
 
-  return newClientFields
+  return clientFields
 }

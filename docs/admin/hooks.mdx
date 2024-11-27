@@ -21,10 +21,11 @@ To do so, import the `useField` hook as follows:
 
 ```tsx
 'use client'
+import type { TextFieldClientComponent } from 'payload'
 import { useField } from '@payloadcms/ui'
 
-const CustomTextField: React.FC = () => {
-  const { value, setValue, path } = useField() // highlight-line
+export const CustomTextField: TextFieldClientComponent = ({ path }) => {
+  const { value, setValue } = useField({ path }) // highlight-line
 
   return (
     <div>
@@ -784,7 +785,7 @@ const Greeting: React.FC = () => {
 
 ## useConfig
 
-Used to easily retrieve the Payload [Client Config](./components#accessing-the-payload-config).
+Used to retrieve the Payload [Client Config](./components#accessing-the-payload-config).
 
 ```tsx
 'use client'

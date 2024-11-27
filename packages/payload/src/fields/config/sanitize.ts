@@ -175,10 +175,6 @@ export const sanitizeFields = async ({
         }
       }
 
-      if (typeof field.virtual === 'undefined') {
-        field.virtual = false
-      }
-
       if (!field.hooks) {
         field.hooks = {}
       }

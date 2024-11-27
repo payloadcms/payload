@@ -20,6 +20,14 @@ export const OGImage: React.FC<{
   leader,
   title,
 }) => {
+  const IconComponent = RenderServerComponent({
+    clientProps: {
+      fill: 'white',
+    },
+    Component: Icon,
+    Fallback,
+    importMap,
+  })
   return (
     <div
       style={{
@@ -95,14 +103,7 @@ export const OGImage: React.FC<{
           width: '38px',
         }}
       >
-        <RenderServerComponent
-          clientProps={{
-            fill: 'white',
-          }}
-          Component={Icon}
-          Fallback={Fallback}
-          importMap={importMap}
-        />
+        {IconComponent}
       </div>
     </div>
   )

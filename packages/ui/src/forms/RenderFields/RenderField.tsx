@@ -1,6 +1,11 @@
 'use client'
 
-import type { ClientComponentProps, ClientField, FieldPaths, FieldPermissions } from 'payload'
+import type {
+  ClientComponentProps,
+  ClientField,
+  FieldPaths,
+  SanitizedFieldPermissions,
+} from 'payload'
 
 import React from 'react'
 
@@ -31,7 +36,7 @@ import { useFormFields } from '../../forms/Form/index.js'
 
 type RenderFieldProps = {
   clientFieldConfig: ClientField
-  permissions: FieldPermissions
+  permissions: SanitizedFieldPermissions
 } & FieldPaths &
   Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'>
 
@@ -67,7 +72,7 @@ export function RenderField({
   }
 
   if (clientFieldConfig.admin?.hidden) {
-    return <HiddenField {...baseFieldProps} field={clientFieldConfig} path={path} />
+    return <HiddenField {...baseFieldProps} path={path} />
   }
 
   switch (clientFieldConfig.type) {

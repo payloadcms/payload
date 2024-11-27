@@ -15,7 +15,7 @@ export async function downloadTemplate({
   projectDir: string
   template: ProjectTemplate
 }) {
-  const branchOrTag = template.url.split('#')?.[1] || 'beta'
+  const branchOrTag = template.url.split('#')?.[1] || 'latest'
   const url = `https://codeload.github.com/payloadcms/payload/tar.gz/${branchOrTag}`
   const filter = `payload-${branchOrTag.replace(/^v/, '')}/templates/${template.name}/`
 

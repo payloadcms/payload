@@ -3,8 +3,16 @@ import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { Block, Field, FieldTypes, Tab } from '../fields/config/types.js'
+import type {
+  Block,
+  ClientBlock,
+  ClientField,
+  Field,
+  FieldTypes,
+  Tab,
+} from '../fields/config/types.js'
 import type { JsonObject } from '../types/index.js'
+import type { ClientTab } from './fields/Tabs.js'
 import type {
   BuildFormStateArgs,
   Data,
@@ -16,7 +24,7 @@ import type {
   Row,
 } from './forms/Form.js'
 
-export type { DefaultCellComponentProps } from './elements/Cell.js'
+export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
 export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
@@ -488,4 +496,14 @@ export type FieldSchemaMap = Map<
   | Block
   | Field
   | Tab
+>
+
+export type ClientFieldSchemaMap = Map<
+  SchemaPath,
+  | {
+      fields: ClientField[]
+    }
+  | ClientBlock
+  | ClientField
+  | ClientTab
 >

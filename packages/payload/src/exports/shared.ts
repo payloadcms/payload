@@ -5,6 +5,8 @@ export {
   getCookieExpiration,
   parseCookies,
 } from '../auth/cookies.js'
+export { getLoginOptions } from '../auth/getLoginOptions.js'
+export { getFromImportMap } from '../bin/generateImportMap/getFromImportMap.js'
 export { parsePayloadComponent } from '../bin/generateImportMap/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 

@@ -1,6 +1,6 @@
-import type { ClientField, FieldPermissions } from 'payload'
+import type { ClientField, SanitizedFieldPermissions } from 'payload'
 
-export type Props = {
+export type RenderFieldsProps = {
   readonly className?: string
   readonly fields: ClientField[]
   /**
@@ -17,9 +17,8 @@ export type Props = {
   readonly parentSchemaPath: string
   readonly permissions:
     | {
-        [fieldName: string]: FieldPermissions
+        [fieldName: string]: SanitizedFieldPermissions
       }
-    | FieldPermissions
-    | null
+    | SanitizedFieldPermissions
   readonly readOnly?: boolean
 }

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/translations",
-  "version": "3.0.0-beta.130",
+  "version": "3.2.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -54,7 +54,7 @@
     "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys/run.ts"
   },
   "dependencies": {
-    "date-fns": "3.3.1"
+    "date-fns": "4.1.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -63,7 +63,7 @@
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "dotenv": "16.4.5",
     "prettier": "3.3.3",
-    "typescript": "5.6.3"
+    "typescript": "5.7.2"
   },
   "publishConfig": {
     "exports": {

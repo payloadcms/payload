@@ -1,7 +1,6 @@
 import type { TransactionPg } from '@payloadcms/drizzle/types'
-import type { Field, Payload } from 'payload'
+import type { FlattenedField, Payload } from 'payload'
 
-import { tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { VercelPostgresAdapter } from '../../types.js'
@@ -13,7 +12,7 @@ type Args = {
   columnPrefix: string
   db: TransactionPg
   disableNotNull: boolean
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   isVersions: boolean
   newTableName: string
@@ -35,7 +34,7 @@ export const traverseFields = (args: Args) => {
         return traverseFields({
           ...args,
           columnPrefix: '',
-          fields: field.fields,
+          fields: field.flattenedFields,
           newTableName,
           parentTableName: newTableName,
           path: `${args.path ? `${args.path}.` : ''}${field.name}.%`,
@@ -51,23 +50,16 @@ export const traverseFields = (args: Args) => {
           traverseFields({
             ...args,
             columnPrefix: '',
-            fields: block.fields,
+            fields: block.flattenedFields,
             newTableName,
             parentTableName: newTableName,
             path: `${args.path ? `${args.path}.` : ''}${field.name}.%`,
           })
         })
       }
-      case 'collapsible':
 
-      case 'row': {
-        return traverseFields({
-          ...args,
-          fields: field.fields,
-        })
-      }
-
-      case 'group': {
+      case 'group':
+      case 'tab': {
         let newTableName = `${args.newTableName}_${toSnakeCase(field.name)}`
 
         if (field.localized && args.payload.config.localization) {
@@ -77,14 +69,13 @@ export const traverseFields = (args: Args) => {
         return traverseFields({
           ...args,
           columnPrefix: `${args.columnPrefix}${toSnakeCase(field.name)}_`,
-          fields: field.fields,
+          fields: field.flattenedFields,
           newTableName,
           path: `${args.path ? `${args.path}.` : ''}${field.name}`,
         })
       }
 
       case 'relationship':
-
       case 'upload': {
         if (typeof field.relationTo === 'string') {
           if (field.type === 'upload' || !field.hasMany) {
@@ -93,24 +84,6 @@ export const traverseFields = (args: Args) => {
         }
 
         return null
-      }
-      case 'tabs': {
-        return field.tabs.forEach((tab) => {
-          if (tabHasName(tab)) {
-            args.columnPrefix = `${args.columnPrefix}_${toSnakeCase(tab.name)}_`
-            args.path = `${args.path ? `${args.path}.` : ''}${tab.name}`
-            args.newTableName = `${args.newTableName}_${toSnakeCase(tab.name)}`
-
-            if (tab.localized && args.payload.config.localization) {
-              args.newTableName += args.adapter.localesSuffix
-            }
-          }
-
-          traverseFields({
-            ...args,
-            fields: tab.fields,
-          })
-        })
       }
     }
   })

@@ -31,6 +31,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     field: { label, localized, relationTo, required },
     hasGenerateImageFn,
     path,
+    readOnly,
   } = props || {}
 
   const {
@@ -133,6 +134,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
+                disabled={readOnly}
                 onClick={() => {
                   void regenerateImage()
                 }}
@@ -186,6 +188,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
             }
           }}
           path={path}
+          readOnly={readOnly}
           relationTo={relationTo}
           required={required}
           serverURL={serverURL}

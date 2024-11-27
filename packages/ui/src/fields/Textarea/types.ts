@@ -26,5 +26,4 @@ export type TextAreaInputProps = {
   readonly style?: React.CSSProperties
   readonly value?: string
   readonly valueToRender?: string
-  readonly width?: React.CSSProperties['width']
 }

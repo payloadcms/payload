@@ -16,8 +16,8 @@ import type { PackageDetails } from './lib/getPackageDetails.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { getPackageRegistryVersions } from './lib/getPackageRegistryVersions.js'
 import { packagePublishList } from './lib/publishList.js'
+import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
-import { updateChangelog } from './utils/updateChangelog.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -29,13 +29,13 @@ const execaOpts: execa.Options = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
 
 const {
-  bump = 'patch', // Semver release type
+  bump, // Semver release type: major, minor, patch, premajor, preminor, prepatch, prerelease
   changelog = false, // Whether to update the changelog. WARNING: This gets throttled on too many commits
   'dry-run': dryRun,
   'git-tag': gitTag = true, // Whether to run git tag and commit operations
   'git-commit': gitCommit = true, // Whether to run git commit operations
   versionOverride = undefined,
-  tag = 'latest',
+  tag, // Tag to publish to: latest, beta, canary
 } = args
 
 const logPrefix = dryRun ? chalk.bold.magenta('[dry-run] >') : ''
@@ -124,17 +124,12 @@ async function main() {
 
   // Preview/Update changelog
   header(`${logPrefix}📝 Updating changelog...`)
-  const {
-    changelog: changelogContent,
-    releaseNotes,
-    releaseUrl,
-  } = await updateChangelog({
+  const { changelog: changelogContent, releaseUrl } = await generateReleaseNotes({
     bump,
     dryRun,
     toVersion: 'HEAD',
     fromVersion,
     openReleaseUrl: true,
-    writeChangelog: changelog,
   })
 
   console.log(chalk.green('\nChangelog Preview:\n'))
@@ -194,7 +189,7 @@ async function main() {
   header(`🧑‍💻 Committing changes...`)
 
   // Commit all staged changes
-  runCmd(`git add CHANGELOG.md packages/**/package.json package.json`, execOpts)
+  runCmd(`git add packages/**/package.json package.json`, execOpts)
 
   // Wait 500ms to avoid .git/index.lock errors
   await new Promise((resolve) => setTimeout(resolve, 500))
@@ -344,7 +339,9 @@ async function question(message: string): Promise<string> {
 
 function header(message: string, opts?: { enable?: boolean }) {
   const { enable } = opts ?? {}
-  if (!enable) return
+  if (!enable) {
+    return
+  }
 
   console.log(chalk.bold.green(`${message}\n`))
 }

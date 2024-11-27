@@ -7,12 +7,8 @@ import type {
   Where,
 } from 'payload'
 
-import React, { Fragment, useCallback, useState } from 'react'
-import AnimateHeightImport from 'react-animate-height'
-
-const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
-
 import { getTranslation } from '@payloadcms/translations'
+import React, { Fragment, useCallback, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 import type { Column } from '../Table/index.js'
@@ -27,18 +23,20 @@ import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
+import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
-import { DrawerLink } from './cells/DrawerLink/index.js'
 import './index.scss'
+import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
 
 const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
   readonly allowCreate?: boolean
+  readonly disableTable?: boolean
   readonly field: JoinFieldClient
   readonly filterOptions?: Where
   readonly initialData?: PaginatedDocs
@@ -50,6 +48,7 @@ type RelationshipTableComponentProps = {
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
     allowCreate = true,
+    disableTable = false,
     filterOptions,
     initialData: initialDataFromProps,
     initialDrawerData,
@@ -132,11 +131,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   useIgnoredEffect(
     () => {
-      if (!Table || query) {
+      if (!disableTable && (!Table || query)) {
         void renderTable()
       }
     },
-    [query],
+    [query, disableTable],
     [Table, renderTable],
   )
 
@@ -172,15 +171,18 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const preferenceKey = `${relationTo}-list`
 
-  const canCreate =
-    allowCreate !== false && permissions?.collections?.[relationTo]?.create?.permission
+  const canCreate = allowCreate !== false && permissions?.collections?.[relationTo]?.create
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
         {Label}
         <div className={`${baseClass}__actions`}>
-          {canCreate && <DocumentDrawerToggler>{i18n.t('fields:addNew')}</DocumentDrawerToggler>}
+          {canCreate && (
+            <DocumentDrawerToggler className={`${baseClass}__add-new`}>
+              {i18n.t('fields:addNew')}
+            </DocumentDrawerToggler>
+          )}
           <Pill
             aria-controls={`${baseClass}-columns`}
             aria-expanded={openColumnSelector}
@@ -238,7 +240,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                   }}
                   tableAppearance="condensed"
                 >
-                  {/* @ts-expect-error TODO: get this CJS import to work, eslint keeps removing the type assertion */}
                   <AnimateHeight
                     className={`${baseClass}__columns`}
                     height={openColumnSelector ? 'auto' : 0}

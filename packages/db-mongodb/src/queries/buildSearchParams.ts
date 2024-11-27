@@ -1,7 +1,6 @@
-import type { Field, Operator, PathToQuery, Payload } from 'payload'
+import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
-import ObjectIdImport from 'bson-objectid'
-import mongoose from 'mongoose'
+import { Types } from 'mongoose'
 import { getLocalizedPaths } from 'payload'
 import { validOperators } from 'payload/shared'
 
@@ -9,9 +8,6 @@ import type { MongooseAdapter } from '../index.js'
 
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
-
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 type SearchParam = {
   path?: string
@@ -38,7 +34,7 @@ export async function buildSearchParam({
   val,
 }: {
   collectionSlug?: string
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   incomingPath: string
   locale?: string
@@ -72,11 +68,11 @@ export async function buildSearchParam({
       field: {
         name: 'id',
         type: idFieldType,
-      } as Field,
+      } as FlattenedField,
       path: '_id',
     })
   } else {
-    paths = await getLocalizedPaths({
+    paths = getLocalizedPaths({
       collectionSlug,
       fields,
       globalSlug,
@@ -87,13 +83,13 @@ export async function buildSearchParam({
   }
 
   const [{ field, path }] = paths
-
   if (path) {
     const sanitizedQueryValue = sanitizeQueryValue({
       field,
       hasCustomID,
       operator,
       path,
+      payload,
       val,
     })
 
@@ -145,7 +141,7 @@ export async function buildSearchParam({
               const stringID = doc._id.toString()
               $in.push(stringID)
 
-              if (mongoose.Types.ObjectId.isValid(stringID)) {
+              if (Types.ObjectId.isValid(stringID)) {
                 $in.push(doc._id)
               }
             })
@@ -207,9 +203,9 @@ export async function buildSearchParam({
         }
 
         if (typeof formattedValue === 'string') {
-          if (mongoose.Types.ObjectId.isValid(formattedValue)) {
+          if (Types.ObjectId.isValid(formattedValue)) {
             result.value[multiIDCondition].push({
-              [path]: { [operatorKey]: ObjectId(formattedValue) },
+              [path]: { [operatorKey]: new Types.ObjectId(formattedValue) },
             })
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(

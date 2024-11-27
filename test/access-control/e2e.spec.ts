@@ -65,6 +65,7 @@ describe('access control', () => {
   let restrictedUrl: AdminUrlUtil
   let unrestrictedURL: AdminUrlUtil
   let readOnlyCollectionUrl: AdminUrlUtil
+  let richTextUrl: AdminUrlUtil
   let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
   let userRestrictedCollectionURL: AdminUrlUtil
@@ -80,6 +81,7 @@ describe('access control', () => {
 
     url = new AdminUrlUtil(serverURL, slug)
     restrictedUrl = new AdminUrlUtil(serverURL, fullyRestrictedSlug)
+    richTextUrl = new AdminUrlUtil(serverURL, 'rich-text')
     unrestrictedURL = new AdminUrlUtil(serverURL, unrestrictedSlug)
     readOnlyCollectionUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
@@ -144,6 +146,154 @@ describe('access control', () => {
     test('should not show field without permission', async () => {
       await page.goto(url.account)
       await expect(page.locator('#field-roles')).toBeHidden()
+    })
+  })
+
+  describe('rich text', () => {
+    test('rich text within block should render as editable', async () => {
+      await page.goto(richTextUrl.create)
+
+      await page.locator('.blocks-field__drawer-toggler').click()
+      await page.locator('.thumbnail-card').click()
+      const richTextField = page.locator('.rich-text-lexical')
+      const contentEditable = richTextField.locator('.ContentEditable__root').first()
+      await expect(contentEditable).toBeVisible()
+      await contentEditable.click()
+
+      const typedText = 'Hello, this field is editable!'
+      await page.keyboard.type(typedText)
+
+      await expect(
+        page.locator('[data-lexical-text="true"]', {
+          hasText: exactText(typedText),
+        }),
+      ).toHaveCount(1)
+    })
+
+    const ensureRegression1FieldsHaveCorrectAccess = async () => {
+      await expect(
+        page.locator('#field-group1 .rich-text-lexical .ContentEditable__root'),
+      ).toBeVisible()
+      // Wait until the contenteditable is editable
+      await expect(
+        page.locator('#field-group1 .rich-text-lexical .ContentEditable__root'),
+      ).toBeEditable()
+
+      await expect(async () => {
+        const isAttached = page.locator('#field-group1 .rich-text-lexical--read-only')
+        await expect(isAttached).toBeHidden()
+      }).toPass({ timeout: 10000, intervals: [100] })
+      await expect(page.locator('#field-group1 #field-group1__text')).toBeEnabled()
+
+      // Click on button with text Tab1
+      await page.locator('.tabs-field__tab-button').getByText('Tab1').click()
+
+      await expect(
+        page.locator('.tabs-field__tab .rich-text-lexical .ContentEditable__root').first(),
+      ).toBeVisible()
+      await expect(
+        page.locator('.tabs-field__tab .rich-text-lexical--read-only').first(),
+      ).not.toBeAttached()
+
+      await expect(
+        page.locator(
+          '.tabs-field__tab #field-tab1__blocks2 .rich-text-lexical .ContentEditable__root',
+        ),
+      ).toBeVisible()
+      await expect(
+        page.locator('.tabs-field__tab #field-tab1__blocks2 .rich-text-lexical--read-only'),
+      ).not.toBeAttached()
+
+      await expect(
+        page.locator('#field-array #array-row-0 .rich-text-lexical .ContentEditable__root'),
+      ).toBeVisible()
+      await expect(
+        page.locator('#field-array #array-row-0 .rich-text-lexical--read-only'),
+      ).not.toBeAttached()
+
+      await expect(
+        page.locator(
+          '#field-arrayWithAccessFalse #arrayWithAccessFalse-row-0 .rich-text-lexical .ContentEditable__root',
+        ),
+      ).toBeVisible()
+      await expect(
+        page.locator(
+          '#field-arrayWithAccessFalse #arrayWithAccessFalse-row-0 .rich-text-lexical--read-only',
+        ),
+      ).toBeVisible()
+
+      await expect(
+        page.locator('#field-blocks .rich-text-lexical .ContentEditable__root'),
+      ).toBeVisible()
+      await expect(page.locator('#field-blocks.rich-text-lexical--read-only')).not.toBeAttached()
+    }
+    /**
+     * This reproduces a bug where certain fields were incorrectly marked as read-only
+     */
+    // eslint-disable-next-line playwright/expect-expect
+    test('ensure complex collection config fields show up in correct read-only state', async () => {
+      const regression1URL = new AdminUrlUtil(serverURL, 'regression1')
+      await page.goto(regression1URL.list)
+      // Click on first card
+      await page.locator('.cell-id a').first().click()
+      // wait for url
+      await page.waitForURL(`**/collections/regression1/**`)
+
+      await ensureRegression1FieldsHaveCorrectAccess()
+
+      // Edit any field
+      await page.locator('#field-group1__text').fill('test!')
+      // Save the doc
+      await saveDocAndAssert(page)
+      await wait(1000)
+      // Ensure fields still have the correct readOnly state. When saving the document, permissions are re-evaluated
+      await ensureRegression1FieldsHaveCorrectAccess()
+    })
+
+    const ensureRegression2FieldsHaveCorrectAccess = async () => {
+      await expect(
+        page.locator('#field-group .rich-text-lexical .ContentEditable__root'),
+      ).toBeVisible()
+      // Wait until the contenteditable is editable
+      await expect(
+        page.locator('#field-group .rich-text-lexical .ContentEditable__root'),
+      ).toBeEditable()
+
+      await expect(async () => {
+        const isAttached = page.locator('#field-group .rich-text-lexical--read-only')
+        await expect(isAttached).toBeHidden()
+      }).toPass({ timeout: 10000, intervals: [100] })
+      await expect(page.locator('#field-group #field-group__text')).toBeEnabled()
+
+      await expect(
+        page.locator('#field-array #array-row-0 .rich-text-lexical .ContentEditable__root'),
+      ).toBeVisible()
+      await expect(
+        page.locator('#field-array #array-row-0 .rich-text-lexical--read-only'),
+      ).toBeVisible() // => is read-only
+    }
+
+    /**
+     * This reproduces a bug where certain fields were incorrectly marked as read-only
+     */
+    // eslint-disable-next-line playwright/expect-expect
+    test('ensure complex collection config fields show up in correct read-only state 2', async () => {
+      const regression2URL = new AdminUrlUtil(serverURL, 'regression2')
+      await page.goto(regression2URL.list)
+      // Click on first card
+      await page.locator('.cell-id a').first().click()
+      // wait for url
+      await page.waitForURL(`**/collections/regression2/**`)
+
+      await ensureRegression2FieldsHaveCorrectAccess()
+
+      // Edit any field
+      await page.locator('#field-group__text').fill('test!')
+      // Save the doc
+      await saveDocAndAssert(page)
+      await wait(1000)
+      // Ensure fields still have the correct readOnly state. When saving the document, permissions are re-evaluated
+      await ensureRegression2FieldsHaveCorrectAccess()
     })
   })
 

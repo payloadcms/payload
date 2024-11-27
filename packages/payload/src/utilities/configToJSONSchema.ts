@@ -6,17 +6,17 @@ const { singular } = pluralize
 import type { Auth } from '../auth/types.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { Field, FieldAffectingData, Option } from '../fields/config/types.js'
+import type { FieldAffectingData, FlattenedField, Option } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
-import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
+import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
 import { deepCopyObject } from './deepCopyObject.js'
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
-const fieldIsRequired = (field: Field) => {
+const fieldIsRequired = (field: FlattenedField) => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
   if (isConditional) {
     return false
@@ -29,17 +29,7 @@ const fieldIsRequired = (field: Field) => {
 
   // if any subfields are required, this field is required
   if ('fields' in field && field.type !== 'array') {
-    return field.fields.some((subField) => fieldIsRequired(subField))
-  }
-
-  // if any tab subfields have required fields, this field is required
-  if (field.type === 'tabs') {
-    return field.tabs.some((tab) => {
-      if ('name' in tab) {
-        return tab.fields.some((subField) => fieldIsRequired(subField))
-      }
-      return false
-    })
+    return field.flattenedFields.some((subField) => fieldIsRequired(subField))
   }
 
   return false
@@ -214,7 +204,7 @@ export function fieldsToJSONSchema(
    * if they have custom ID fields.
    */
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
-  fields: Field[],
+  fields: FlattenedField[],
   /**
    * Allows you to define new top-level interfaces that can be re-used in the output schema.
    */
@@ -247,7 +237,7 @@ export function fieldsToJSONSchema(
                 additionalProperties: false,
                 ...fieldsToJSONSchema(
                   collectionIDFieldTypes,
-                  field.fields,
+                  field.flattenedFields,
                   interfaceNameDefinitions,
                   config,
                 ),
@@ -276,7 +266,7 @@ export function fieldsToJSONSchema(
                     oneOf: field.blocks.map((block) => {
                       const blockFieldSchemas = fieldsToJSONSchema(
                         collectionIDFieldTypes,
-                        block.fields,
+                        block.flattenedFields,
                         interfaceNameDefinitions,
                         config,
                       )
@@ -314,39 +304,20 @@ export function fieldsToJSONSchema(
           }
           case 'code':
           case 'date':
-
           case 'email':
-
           case 'textarea': {
             fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
             break
           }
 
-          case 'collapsible':
-
-          case 'row': {
-            const childSchema = fieldsToJSONSchema(
-              collectionIDFieldTypes,
-              field.fields,
-              interfaceNameDefinitions,
-              config,
-            )
-            Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
-              fieldSchemas.set(propName, propSchema)
-            })
-            childSchema.required.forEach((propName) => {
-              requiredFieldNames.add(propName)
-            })
-            break
-          }
-
-          case 'group': {
+          case 'group':
+          case 'tab': {
             fieldSchema = {
               type: 'object',
               additionalProperties: false,
               ...fieldsToJSONSchema(
                 collectionIDFieldTypes,
-                field.fields,
+                field.flattenedFields,
                 interfaceNameDefinitions,
                 config,
               ),
@@ -431,7 +402,6 @@ export function fieldsToJSONSchema(
           }
 
           case 'relationship':
-
           case 'upload': {
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
@@ -573,40 +543,6 @@ export function fieldsToJSONSchema(
             break
           }
 
-          case 'tabs': {
-            field.tabs.forEach((tab) => {
-              const childSchema = fieldsToJSONSchema(
-                collectionIDFieldTypes,
-                tab.fields,
-                interfaceNameDefinitions,
-                config,
-              )
-              if (tabHasName(tab)) {
-                // could have interface
-                fieldSchemas.set(tab.name, {
-                  type: 'object',
-                  additionalProperties: false,
-                  ...childSchema,
-                })
-
-                // If the named tab has any required fields then we mark this as required otherwise it should be optional
-                const hasRequiredFields = tab.fields.some((subField) => fieldIsRequired(subField))
-
-                if (hasRequiredFields) {
-                  requiredFieldNames.add(tab.name)
-                }
-              } else {
-                Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
-                  fieldSchemas.set(propName, propSchema)
-                })
-                childSchema.required.forEach((propName) => {
-                  requiredFieldNames.add(propName)
-                })
-              }
-            })
-            break
-          }
-
           case 'text':
             if (field.hasMany === true) {
               fieldSchema = {
@@ -651,26 +587,27 @@ export function entityToJSONSchema(
   if (!collectionIDFieldTypes) {
     collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
   }
+
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity)
   const title = entity.typescript?.interface
     ? entity.typescript.interface
     : singular(toWords(entity.slug, true))
 
   const idField: FieldAffectingData = { name: 'id', type: defaultIDType as 'text', required: true }
-  const customIdField = entity.fields.find(
-    (field) => fieldAffectsData(field) && field.name === 'id',
+  const customIdField = entity.flattenedFields.find(
+    (field) => field.name === 'id',
   ) as FieldAffectingData
 
   if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
     customIdField.required = true
   } else {
-    entity.fields.unshift(idField)
+    entity.flattenedFields.unshift(idField)
   }
 
   // mark timestamp fields required
   if ('timestamps' in entity && entity.timestamps !== false) {
-    entity.fields = entity.fields.map((field) => {
-      if (fieldAffectsData(field) && (field.name === 'createdAt' || field.name === 'updatedAt')) {
+    entity.flattenedFields = entity.flattenedFields.map((field) => {
+      if (field.name === 'createdAt' || field.name === 'updatedAt') {
         return {
           ...field,
           required: true,
@@ -681,7 +618,7 @@ export function entityToJSONSchema(
   }
 
   if ('auth' in entity && entity.auth && !entity.auth?.disableLocalStrategy) {
-    entity.fields.push({
+    entity.flattenedFields.push({
       name: 'password',
       type: 'text',
     })
@@ -691,11 +628,16 @@ export function entityToJSONSchema(
     type: 'object',
     additionalProperties: false,
     title,
-    ...fieldsToJSONSchema(collectionIDFieldTypes, entity.fields, interfaceNameDefinitions, config),
+    ...fieldsToJSONSchema(
+      collectionIDFieldTypes,
+      entity.flattenedFields,
+      interfaceNameDefinitions,
+      config,
+    ),
   }
 }
 
-export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONSchema4 {
+export function fieldsToSelectJSONSchema({ fields }: { fields: FlattenedField[] }): JSONSchema4 {
   const schema: JSONSchema4 = {
     type: 'object',
     additionalProperties: false,
@@ -706,12 +648,13 @@ export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONS
     switch (field.type) {
       case 'array':
       case 'group':
+      case 'tab':
         schema.properties[field.name] = {
           oneOf: [
             {
               type: 'boolean',
             },
-            fieldsToSelectJSONSchema({ fields: field.fields }),
+            fieldsToSelectJSONSchema({ fields: field.flattenedFields }),
           ],
         }
         break
@@ -729,7 +672,7 @@ export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONS
               {
                 type: 'boolean',
               },
-              fieldsToSelectJSONSchema({ fields: block.fields }),
+              fieldsToSelectJSONSchema({ fields: block.flattenedFields }),
             ],
           }
         }
@@ -745,36 +688,6 @@ export function fieldsToSelectJSONSchema({ fields }: { fields: Field[] }): JSONS
 
         break
       }
-      case 'collapsible':
-
-      case 'row':
-        schema.properties = {
-          ...schema.properties,
-          ...fieldsToSelectJSONSchema({ fields: field.fields }).properties,
-        }
-
-        break
-
-      case 'tabs':
-        for (const tab of field.tabs) {
-          if (tabHasName(tab)) {
-            schema.properties[tab.name] = {
-              oneOf: [
-                {
-                  type: 'boolean',
-                },
-                fieldsToSelectJSONSchema({ fields: tab.fields }),
-              ],
-            }
-            continue
-          }
-
-          schema.properties = {
-            ...schema.properties,
-            ...fieldsToSelectJSONSchema({ fields: tab.fields }).properties,
-          }
-        }
-        break
 
       default:
         schema.properties[field.name] = {
@@ -981,7 +894,7 @@ export function configToJSONSchema(
         defaultIDType,
         collectionIDFieldTypes,
       )
-      const select = fieldsToSelectJSONSchema({ fields: entity.fields })
+      const select = fieldsToSelectJSONSchema({ fields: entity.flattenedFields })
 
       if (type === 'global') {
         select.properties.globalType = {
@@ -1044,6 +957,7 @@ export function configToJSONSchema(
       'globals',
       'auth',
       'db',
+      'jobs',
     ],
     title: 'Config',
   }
@@ -1057,7 +971,7 @@ export function configToJSONSchema(
       type: 'object',
       additionalProperties: false,
       properties: jobsSchemas.properties,
-      required: ['tasks'],
+      required: ['tasks', 'workflows'],
     }
   }
 

@@ -1,9 +1,8 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
-import { reload } from '@payloadcms/next/utilities'
 import path from 'path'
-import { type PaginatedDocs, type Payload, ValidationError } from 'payload'
+import { type PaginatedDocs, type Payload, reload, ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -520,6 +519,25 @@ describe('Fields', () => {
 
       expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true)
       expect(updatedDoc.selectHasMany).toEqual(['one', 'two'])
+    })
+
+    it('should clear select hasMany field', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id,
+        collection: 'select-fields',
+        data: {
+          selectHasMany: [],
+        },
+      })
+
+      expect(updatedDoc.selectHasMany).toHaveLength(0)
     })
 
     it('should query hasMany in', async () => {

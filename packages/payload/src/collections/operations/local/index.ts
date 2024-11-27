@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-exports */
-import auth from '../../../auth/operations/local/index.js'
+import * as auth from '../../../auth/operations/local/index.js'
 import count from './count.js'
 import countVersions from './countVersions.js'
 import create from './create.js'

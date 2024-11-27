@@ -29,6 +29,7 @@ const toolbarGroups: ToolbarGroup[] = [
 ]
 
 export const SuperscriptFeatureClient = createClientFeature({
+  enableFormats: ['superscript'],
   toolbarFixed: {
     groups: toolbarGroups,
   },

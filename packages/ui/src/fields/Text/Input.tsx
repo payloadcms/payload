@@ -40,7 +40,6 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     style,
     value,
     valueToRender,
-    width,
   } = props
 
   const { i18n, t } = useTranslation()
@@ -57,10 +56,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={style}
     >
       <RenderCustomComponent
         CustomComponent={Label}

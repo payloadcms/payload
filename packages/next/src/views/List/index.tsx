@@ -23,6 +23,7 @@ type ListViewArgs = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections: boolean
+  overrideEntityVisibility?: boolean
   query: ListQuery
 } & AdminViewProps
 
@@ -39,6 +40,7 @@ export const renderListView = async (
     drawerSlug,
     enableRowSelections,
     initPageResult,
+    overrideEntityVisibility,
     params,
     query: queryFromArgs,
     searchParams,
@@ -66,7 +68,7 @@ export const renderListView = async (
     visibleEntities,
   } = initPageResult
 
-  if (!permissions?.collections?.[collectionSlug]?.read?.permission) {
+  if (!permissions?.collections?.[collectionSlug]?.read) {
     throw new Error('not-found')
   }
 
@@ -111,7 +113,7 @@ export const renderListView = async (
   } = config
 
   if (collectionConfig) {
-    if (!visibleEntities.collections.includes(collectionSlug)) {
+    if (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) {
       throw new Error('not-found')
     }
 
@@ -190,7 +192,7 @@ export const renderListView = async (
 
     const sharedClientProps: ListComponentClientProps = {
       collectionSlug,
-      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
+      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create,
       newDocumentURL: formatAdminURL({
         adminRoute,
         path: `/collections/${collectionSlug}/create`,
@@ -243,18 +245,18 @@ export const renderListView = async (
             modifySearchParams={!isInDrawer}
             preferenceKey={preferenceKey}
           >
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={collectionConfig?.admin?.components?.views?.list?.Component}
-              Fallback={DefaultListView}
-              importMap={payload.importMap}
-              serverProps={{
+            {RenderServerComponent({
+              clientProps,
+              Component: collectionConfig?.admin?.components?.views?.list?.Component,
+              Fallback: DefaultListView,
+              importMap: payload.importMap,
+              serverProps: {
                 ...sharedServerProps,
                 data,
                 listPreferences,
                 listSearchableFields: collectionConfig.admin.listSearchableFields,
-              }}
-            />
+              },
+            })}
           </ListQueryProvider>
         </Fragment>
       ),

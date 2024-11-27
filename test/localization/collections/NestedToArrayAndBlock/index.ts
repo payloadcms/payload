@@ -31,5 +31,21 @@ export const NestedToArrayAndBlock: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'topLevelArray',
+      type: 'array',
+      localized: false,
+      fields: [
+        {
+          name: 'localizedText',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'notLocalizedText',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }

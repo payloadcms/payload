@@ -6,7 +6,7 @@ import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 
-export interface BlocksCellProps extends DefaultCellComponentProps<any, BlocksFieldClient> {}
+export interface BlocksCellProps extends DefaultCellComponentProps<BlocksFieldClient> {}
 
 export const BlocksCell: React.FC<BlocksCellProps> = ({ cellData, field: { blocks, labels } }) => {
   const { i18n } = useTranslation()

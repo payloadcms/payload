@@ -1,8 +1,8 @@
 import type {
   Data,
-  DocumentPermissions,
   PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
 } from 'payload'
 
@@ -19,13 +19,13 @@ export const getDocumentPermissions = async (args: {
   id?: number | string
   req: PayloadRequest
 }): Promise<{
-  docPermissions: DocumentPermissions
+  docPermissions: SanitizedDocumentPermissions
   hasPublishPermission: boolean
   hasSavePermission: boolean
 }> => {
   const { id, collectionConfig, data = {}, globalConfig, req } = args
 
-  let docPermissions: DocumentPermissions
+  let docPermissions: SanitizedDocumentPermissions
   let hasPublishPermission = false
 
   if (collectionConfig) {
@@ -57,7 +57,7 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
-        }).then(({ update }) => update?.permission)
+        }).then((permissions) => permissions.update)
       }
     } catch (error) {
       req.payload.logger.error(error)
@@ -84,7 +84,7 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
-        }).then(({ update }) => update?.permission)
+        }).then((permissions) => permissions.update)
       }
     } catch (error) {
       req.payload.logger.error(error)

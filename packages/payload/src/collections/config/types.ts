@@ -31,7 +31,13 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
-import type { Field, JoinField, RelationshipField, UploadField } from '../../fields/config/types.js'
+import type {
+  Field,
+  FlattenedField,
+  JoinField,
+  RelationshipField,
+  UploadField,
+} from '../../fields/config/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -520,15 +526,23 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
+    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
+
+  /**
+   * Fields in the database schema structure
+   * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
+   */
+  flattenedFields: FlattenedField[]
+
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+  slug: CollectionSlug
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }

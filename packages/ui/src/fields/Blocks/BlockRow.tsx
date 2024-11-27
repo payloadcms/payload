@@ -1,10 +1,18 @@
 'use client'
-import type { ClientBlock, ClientField, FieldPermissions, Labels, Row } from 'payload'
+import type {
+  ClientBlock,
+  ClientField,
+  Labels,
+  Row,
+  SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
+import type { RenderFieldsProps } from '../../forms/RenderFields/types.js'
 
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -31,7 +39,7 @@ type BlocksFieldProps = {
   moveRow: (fromIndex: number, toIndex: number) => void
   parentPath: string
   path: string
-  permissions: FieldPermissions
+  permissions: SanitizedFieldPermissions
   readOnly: boolean
   removeRow: (rowIndex: number) => void
   row: Row
@@ -79,6 +87,19 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   ]
     .filter(Boolean)
     .join(' ')
+
+  let blockPermissions: RenderFieldsProps['permissions'] = undefined
+
+  if (permissions === true) {
+    blockPermissions = true
+  } else {
+    const permissionsBlockSpecific = permissions?.blocks?.[block.slug]
+    if (permissionsBlockSpecific === true) {
+      blockPermissions = true
+    } else {
+      blockPermissions = permissionsBlockSpecific?.fields
+    }
+  }
 
   return (
     <div
@@ -147,7 +168,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
           parentIndexPath=""
           parentPath={path}
           parentSchemaPath={schemaPath}
-          permissions={permissions?.blocks?.[block.slug]?.fields}
+          permissions={blockPermissions}
           readOnly={readOnly}
         />
       </Collapsible>

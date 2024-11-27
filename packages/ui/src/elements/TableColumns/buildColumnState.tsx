@@ -1,16 +1,16 @@
 import type { I18nClient } from '@payloadcms/translations'
-
-import {
-  type ClientCollectionConfig,
-  type DefaultCellComponentProps,
-  type Field,
-  MissingEditorProp,
-  type PaginatedDocs,
-  type Payload,
-  type PayloadComponent,
-  type SanitizedCollectionConfig,
-  type StaticLabel,
+import type {
+  ClientCollectionConfig,
+  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
+  Field,
+  PaginatedDocs,
+  Payload,
+  SanitizedCollectionConfig,
+  StaticLabel,
 } from 'payload'
+
+import { MissingEditorProp } from 'payload'
 import { deepCopyObjectSimple, fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 
@@ -150,9 +150,9 @@ export const buildColumnState = (args: Args): Column[] => {
         ? _field.admin.components.Label
         : undefined
 
-    const CustomLabel = CustomLabelToRender ? (
-      <RenderServerComponent Component={CustomLabelToRender} importMap={payload.importMap} />
-    ) : undefined
+    const CustomLabel = CustomLabelToRender
+      ? RenderServerComponent({ Component: CustomLabelToRender, importMap: payload.importMap })
+      : undefined
 
     const fieldAffectsDataSubFields =
       field &&
@@ -177,7 +177,7 @@ export const buildColumnState = (args: Args): Column[] => {
       rowData: undefined,
     }
 
-    const serverProps = {
+    const serverProps: Pick<DefaultServerCellComponentProps, 'field' | 'i18n' | 'payload'> = {
       field: _field,
       i18n,
       payload,
@@ -219,41 +219,25 @@ export const buildColumnState = (args: Args): Column[] => {
                 _field.admin.components = {}
               }
 
-              /**
-               * We have to deep copy all the props we send to the client (= CellComponent.clientProps).
-               * That way, every editor's field / cell props we send to the client have their own object references.
-               *
-               * If we send the same object reference to the client twice (e.g. through some configurations where 2 or more fields
-               * reference the same editor object, like the root editor), the admin panel may hang indefinitely. This has been happening since
-               * a newer Next.js update that made it break when sending the same object reference to the client twice.
-               *
-               * We can use deepCopyObjectSimple as client props should be JSON-serializable.
-               */
-              const CellComponent: PayloadComponent = _field.editor.CellComponent
-              if (typeof CellComponent === 'object' && CellComponent.clientProps) {
-                CellComponent.clientProps = deepCopyObjectSimple(CellComponent.clientProps)
-              }
-
-              CustomCell = (
-                <RenderServerComponent
-                  clientProps={cellClientProps}
-                  Component={CellComponent}
-                  importMap={payload.importMap}
-                  serverProps={serverProps}
-                />
-              )
+              CustomCell = RenderServerComponent({
+                clientProps: cellClientProps,
+                Component: _field.editor.CellComponent,
+                importMap: payload.importMap,
+                serverProps,
+              })
             } else {
               CustomCell =
-                _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell ? (
-                  <RenderServerComponent
-                    clientProps={cellClientProps}
-                    Component={
-                      _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
-                    }
-                    importMap={payload.importMap}
-                    serverProps={serverProps}
-                  />
-                ) : undefined
+                _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
+                  ? RenderServerComponent({
+                      clientProps: cellClientProps,
+                      Component:
+                        _field?.admin &&
+                        'components' in _field.admin &&
+                        _field.admin.components?.Cell,
+                      importMap: payload.importMap,
+                      serverProps,
+                    })
+                  : undefined
             }
 
             return (

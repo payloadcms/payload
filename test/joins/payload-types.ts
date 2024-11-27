@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     posts: Post;
     categories: Category;
+    'hidden-posts': HiddenPost;
     uploads: Upload;
     versions: Version;
     'categories-versions': CategoriesVersion;
@@ -34,6 +35,7 @@ export interface Config {
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
       filtered: 'posts';
+      hiddenPosts: 'hidden-posts';
       singulars: 'singular';
     };
     uploads: {
@@ -41,6 +43,7 @@ export interface Config {
     };
     'categories-versions': {
       relatedVersions: 'versions';
+      relatedVersionsMany: 'versions';
     };
     'localized-categories': {
       relatedPosts: 'localized-posts';
@@ -52,6 +55,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    'hidden-posts': HiddenPostsSelect<false> | HiddenPostsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
     'categories-versions': CategoriesVersionsSelect<false> | CategoriesVersionsSelect<true>;
@@ -74,9 +78,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -158,6 +162,10 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  hiddenPosts?: {
+    docs?: (string | HiddenPost)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   group?: {
     relatedPosts?: {
       docs?: (string | Post)[] | null;
@@ -181,6 +189,17 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-posts".
+ */
+export interface HiddenPost {
+  id: string;
+  title?: string | null;
+  category?: (string | null) | Category;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "singular".
  */
 export interface Singular {
@@ -197,6 +216,7 @@ export interface Version {
   id: string;
   category?: (string | null) | Category;
   categoryVersion?: (string | null) | CategoriesVersion;
+  categoryVersions?: (string | CategoriesVersion)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -208,6 +228,10 @@ export interface Version {
 export interface CategoriesVersion {
   id: string;
   relatedVersions?: {
+    docs?: (string | Version)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  relatedVersionsMany?: {
     docs?: (string | Version)[] | null;
     hasNextPage?: boolean | null;
   } | null;
@@ -297,6 +321,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'hidden-posts';
+        value: string | HiddenPost;
       } | null)
     | ({
         relationTo: 'uploads';
@@ -406,6 +434,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   relatedPosts?: T;
   hasManyPosts?: T;
   hasManyPostsLocalized?: T;
+  hiddenPosts?: T;
   group?:
     | T
     | {
@@ -414,6 +443,16 @@ export interface CategoriesSelect<T extends boolean = true> {
       };
   singulars?: T;
   filtered?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-posts_select".
+ */
+export interface HiddenPostsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -442,6 +481,7 @@ export interface UploadsSelect<T extends boolean = true> {
 export interface VersionsSelect<T extends boolean = true> {
   category?: T;
   categoryVersion?: T;
+  categoryVersions?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -452,6 +492,7 @@ export interface VersionsSelect<T extends boolean = true> {
  */
 export interface CategoriesVersionsSelect<T extends boolean = true> {
   relatedVersions?: T;
+  relatedVersionsMany?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

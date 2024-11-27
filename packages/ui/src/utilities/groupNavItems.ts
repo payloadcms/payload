@@ -1,8 +1,8 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
-  Permissions,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
+  SanitizedPermissions,
   StaticLabel,
 } from 'payload'
 
@@ -34,15 +34,12 @@ export type NavGroupType = {
 
 export function groupNavItems(
   entities: EntityToGroup[],
-  permissions: Permissions,
+  permissions: SanitizedPermissions,
   i18n: I18nClient,
 ): NavGroupType[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {
-      if (
-        permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read
-          .permission
-      ) {
+      if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read) {
         const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
 
         if (entityToGroup.entity.admin.group) {

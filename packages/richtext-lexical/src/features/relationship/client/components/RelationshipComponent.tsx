@@ -87,18 +87,15 @@ const Component: React.FC<Props> = (props) => {
     })
   }, [editor, nodeKey])
 
-  const updateRelationship = React.useCallback(
-    ({ doc }) => {
-      setParams({
-        ...initialParams,
-        cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
-      })
+  const updateRelationship = React.useCallback(() => {
+    setParams({
+      ...initialParams,
+      cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
+    })
 
-      closeDocumentDrawer()
-      dispatchCacheBust()
-    },
-    [cacheBust, setParams, closeDocumentDrawer],
-  )
+    closeDocumentDrawer()
+    dispatchCacheBust()
+  }, [cacheBust, setParams, closeDocumentDrawer])
 
   const $onDelete = useCallback(
     (payload: KeyboardEvent) => {

@@ -24,61 +24,51 @@ export const renderListViewSlots = ({
   const result: ListViewSlots = {} as ListViewSlots
 
   if (collectionConfig.admin.components?.afterList) {
-    result.AfterList = (
-      <RenderServerComponent
-        clientProps={clientProps}
-        Component={collectionConfig.admin.components.afterList}
-        importMap={payload.importMap}
-        serverProps={serverProps}
-      />
-    )
+    result.AfterList = RenderServerComponent({
+      clientProps,
+      Component: collectionConfig.admin.components.afterList,
+      importMap: payload.importMap,
+      serverProps,
+    })
   }
 
   if (collectionConfig.admin.components?.afterListTable) {
-    result.AfterListTable = (
-      <RenderServerComponent
-        clientProps={clientProps}
-        Component={collectionConfig.admin.components.afterListTable}
-        importMap={payload.importMap}
-        serverProps={serverProps}
-      />
-    )
+    result.AfterListTable = RenderServerComponent({
+      clientProps,
+      Component: collectionConfig.admin.components.afterListTable,
+      importMap: payload.importMap,
+      serverProps,
+    })
   }
 
   if (collectionConfig.admin.components?.beforeList) {
-    result.BeforeList = (
-      <RenderServerComponent
-        clientProps={clientProps}
-        Component={collectionConfig.admin.components.beforeList}
-        importMap={payload.importMap}
-        serverProps={serverProps}
-      />
-    )
+    result.BeforeList = RenderServerComponent({
+      clientProps,
+      Component: collectionConfig.admin.components.beforeList,
+      importMap: payload.importMap,
+      serverProps,
+    })
   }
 
   if (collectionConfig.admin.components?.beforeListTable) {
-    result.BeforeListTable = (
-      <RenderServerComponent
-        clientProps={clientProps}
-        Component={collectionConfig.admin.components.beforeListTable}
-        importMap={payload.importMap}
-        serverProps={serverProps}
-      />
-    )
+    result.BeforeListTable = RenderServerComponent({
+      clientProps,
+      Component: collectionConfig.admin.components.beforeListTable,
+      importMap: payload.importMap,
+      serverProps,
+    })
   }
 
   if (collectionConfig.admin.components?.Description) {
-    result.Description = (
-      <RenderServerComponent
-        clientProps={{
-          description,
-          ...clientProps,
-        }}
-        Component={collectionConfig.admin.components.Description}
-        importMap={payload.importMap}
-        serverProps={serverProps}
-      />
-    )
+    result.Description = RenderServerComponent({
+      clientProps: {
+        description,
+        ...clientProps,
+      },
+      Component: collectionConfig.admin.components.Description,
+      importMap: payload.importMap,
+      serverProps,
+    })
   }
 
   return result

@@ -19,7 +19,7 @@ export const create: Create = async function create(
     adapter: this,
     data,
     db,
-    fields: collection.fields,
+    fields: collection.flattenedFields,
     operation: 'create',
     req,
     select,
