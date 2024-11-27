@@ -4,7 +4,6 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary.js'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
-import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin.js'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
@@ -115,7 +114,7 @@ export const LexicalEditor: React.FC<
         <RichTextPlugin
           contentEditable={
             <div className="editor-scroller">
-              <div className="editor" ref={onRef}>
+              <div className="editor" ref={onRef} tabIndex={-1}>
                 <LexicalContentEditable />
               </div>
             </div>
@@ -173,8 +172,6 @@ export const LexicalEditor: React.FC<
             {editorConfig?.features?.markdownTransformers?.length > 0 && <MarkdownShortcutPlugin />}
           </React.Fragment>
         )}
-
-        <TabIndentationPlugin />
         {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'normal') {
             return (
