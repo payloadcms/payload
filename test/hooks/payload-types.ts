@@ -52,9 +52,9 @@ export interface Config {
   user: HooksUser & {
     collection: 'hooks-users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface HooksUserAuthOperations {
