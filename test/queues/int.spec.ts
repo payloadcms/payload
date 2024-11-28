@@ -224,6 +224,43 @@ describe('Queues', () => {
     payload.config.jobs.deleteJobOnComplete = true
   })
 
+  it('ensure workflows dont retry if no retries property is set, even if individual tasks have retries set', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const job = await payload.jobs.queue({
+      workflow: 'workflowNoRetries',
+      input: {
+        message: 'hello',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error amountRetried is new arbitrary data and not in the type
+    expect(jobAfterRun.input.amountRetried).toBe(0)
+
+    payload.config.jobs.deleteJobOnComplete = true
+  })
+
   /*
   // Task rollbacks are not supported in the current version of Payload. This test will be re-enabled when task rollbacks are supported once we figure out the transaction issues
   it('ensure failed tasks are rolled back via transactions', async () => {

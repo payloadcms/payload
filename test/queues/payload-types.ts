@@ -56,6 +56,7 @@ export interface Config {
       retriesTest: WorkflowRetriesTest;
       retriesRollbackTest: WorkflowRetriesRollbackTest;
       retriesWorkflowLevelTest: WorkflowRetriesWorkflowLevelTest;
+      workflowNoRetries: WorkflowWorkflowNoRetries;
       inlineTaskTest: WorkflowInlineTaskTest;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
@@ -220,6 +221,7 @@ export interface PayloadJob {
         | 'retriesTest'
         | 'retriesRollbackTest'
         | 'retriesWorkflowLevelTest'
+        | 'workflowNoRetries'
         | 'inlineTaskTest'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
@@ -511,6 +513,15 @@ export interface WorkflowRetriesRollbackTest {
  * via the `definition` "WorkflowRetriesWorkflowLevelTest".
  */
 export interface WorkflowRetriesWorkflowLevelTest {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowNoRetries".
+ */
+export interface WorkflowWorkflowNoRetries {
   input: {
     message: string;
   };

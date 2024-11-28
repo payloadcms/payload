@@ -26,12 +26,18 @@ export function handleWorkflowError({
   const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
 
   let hasFinalError = state.reachedMaxRetries // If any TASK reached max retries, the job has an error
-  const maxRetries =
+  const maxWorkflowRetries: number =
     (typeof workflowConfig.retries === 'object'
       ? workflowConfig.retries.attempts
       : workflowConfig.retries) ?? 0
+
+  if (job.totalTried >= maxWorkflowRetries) {
+    hasFinalError = true
+    state.reachedMaxRetries = true
+  }
+
   // Now let's handle workflow retries
-  if (!hasFinalError && workflowConfig.retries) {
+  if (!hasFinalError) {
     if (job.waitUntil) {
       // Check if waitUntil is in the past
       const waitUntil = new Date(job.waitUntil)
@@ -40,26 +46,22 @@ export function handleWorkflowError({
         delete job.waitUntil
       }
     }
-    if (job.totalTried >= maxRetries) {
-      state.reachedMaxRetries = true
-      hasFinalError = true
-    } else {
-      // Job will retry. Let's determine when!
-      const waitUntil: Date = calculateBackoffWaitUntil({
-        retriesConfig: workflowConfig.retries,
-        totalTried: job.totalTried ?? 0,
-      })
 
-      // Update job's waitUntil only if this waitUntil is later than the current one
-      if (!job.waitUntil || waitUntil > new Date(job.waitUntil)) {
-        job.waitUntil = waitUntil.toISOString()
-      }
+    // Job will retry. Let's determine when!
+    const waitUntil: Date = calculateBackoffWaitUntil({
+      retriesConfig: workflowConfig.retries,
+      totalTried: job.totalTried ?? 0,
+    })
+
+    // Update job's waitUntil only if this waitUntil is later than the current one
+    if (!job.waitUntil || waitUntil > new Date(job.waitUntil)) {
+      job.waitUntil = waitUntil.toISOString()
     }
   }
 
   req.payload.logger.error({
     err: error,
-    msg: `Error running job ${jobLabel} id: ${job.id} attempt ${job.totalTried}/${maxRetries}`,
+    msg: `Error running job ${jobLabel} id: ${job.id} attempt ${job.totalTried + 1}/${maxWorkflowRetries + 1}`,
   })
 
   return {
