@@ -65,7 +65,10 @@ const StepNav: React.FC<{
             ) : (
               <Fragment key={i}>
                 {item.url ? (
-                  <LinkElement href={item.url} {...baseLinkProps}>
+                  <LinkElement
+                    href={`${item.url}${item.query && '?' + item.query}`}
+                    {...baseLinkProps}
+                  >
                     <span key={i}>{StepLabel}</span>
                   </LinkElement>
                 ) : (

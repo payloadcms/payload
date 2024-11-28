@@ -31,7 +31,7 @@ export const SetDocumentStepNav: React.FC<{
   const { isEntityVisible } = useEntityVisibility()
   const isVisible = isEntityVisible({ collectionSlug, globalSlug })
 
-  const { setStepNav } = useStepNav()
+  const { setStepNav, stepNav } = useStepNav()
 
   const { i18n, t } = useTranslation()
 
@@ -50,6 +50,7 @@ export const SetDocumentStepNav: React.FC<{
       if (collectionSlug) {
         nav.push({
           label: getTranslation(pluralLabel, i18n),
+          query: stepNav[0]?.query ?? '',
           url: isVisible
             ? formatAdminURL({
                 adminRoute,
