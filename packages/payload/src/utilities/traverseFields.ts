@@ -1,4 +1,12 @@
-import type { ArrayField, BlocksField, Field, TabAsField } from '../fields/config/types.js'
+import type {
+  ArrayField,
+  BlocksField,
+  Field,
+  FlattenedArrayField,
+  FlattenedBlock,
+  FlattenedField,
+  TabAsField,
+} from '../fields/config/types.js'
 
 import { fieldHasSubFields } from '../fields/config/types.js'
 
@@ -6,29 +14,34 @@ const traverseArrayOrBlocksField = ({
   callback,
   data,
   field,
+  fillEmpty,
   parentRef,
 }: {
   callback: TraverseFieldsCallback
   data: Record<string, unknown>[]
   field: ArrayField | BlocksField
+  fillEmpty?: boolean
   parentRef?: unknown
 }) => {
   for (const ref of data) {
     let fields: Field[]
+    let flattenedFields: FlattenedField[]
     if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
-      const block = field.blocks.find((block) => block.slug === ref.blockType)
+      const block = field.blocks.find((block) => block.slug === ref.blockType) as FlattenedBlock
       fields = block?.fields
+      flattenedFields = block?.flattenedFields
     } else if (field.type === 'array') {
       fields = field.fields
+      flattenedFields = (field as FlattenedArrayField)?.flattenedFields
     }
 
-    if (fields) {
-      traverseFields({ callback, fields, parentRef, ref })
+    if (flattenedFields || fields) {
+      traverseFields({ callback, fields, fillEmpty, flattenedFields, parentRef, ref })
     }
   }
 }
 
-export type TraverseFieldsCallback = (args: {
+type TraverseFieldsCallbackArgs = {
   /**
    * The current field
    */
@@ -45,13 +58,45 @@ export type TraverseFieldsCallback = (args: {
    * The current reference object
    */
   ref?: Record<string, unknown> | unknown
+}
+
+export type TraverseFieldsCallback = (args: TraverseFieldsCallbackArgs) => boolean | void
+
+export type TraverseFlattenedFieldsCallback = (args: {
+  /**
+   * The current field
+   */
+  field: FlattenedField
+  /**
+   * Function that when called will skip the current field and continue to the next
+   */
+  next?: () => void
+  /**
+   * The parent reference object
+   */
+  parentRef?: Record<string, unknown> | unknown
+  /**
+   * The current reference object
+   */
+  ref?: Record<string, unknown> | unknown
 }) => boolean | void
+
+type TraverseFlattenedFieldsArgs = {
+  callback: TraverseFlattenedFieldsCallback
+  fields?: Field[]
+  /** fill empty properties to use this without data */
+  fillEmpty?: boolean
+  flattenedFields: FlattenedField[]
+  parentRef?: Record<string, unknown> | unknown
+  ref?: Record<string, unknown> | unknown
+}
 
 type TraverseFieldsArgs = {
   callback: TraverseFieldsCallback
-  fields: (Field | TabAsField)[]
+  fields: (Field | FlattenedField | TabAsField)[]
   /** fill empty properties to use this without data */
   fillEmpty?: boolean
+  flattenedFields?: FlattenedField[]
   parentRef?: Record<string, unknown> | unknown
   ref?: Record<string, unknown> | unknown
 }
@@ -68,10 +113,11 @@ export const traverseFields = ({
   callback,
   fields,
   fillEmpty = true,
+  flattenedFields,
   parentRef = {},
   ref = {},
-}: TraverseFieldsArgs): void => {
-  fields.some((field) => {
+}: TraverseFieldsArgs | TraverseFlattenedFieldsArgs): void => {
+  ;(flattenedFields ?? fields).some((field) => {
     let skip = false
     const next = () => {
       skip = true
@@ -81,7 +127,16 @@ export const traverseFields = ({
       return
     }
 
-    if (callback && callback({ field, next, parentRef, ref })) {
+    if (
+      callback &&
+      callback({
+        // @ts-expect-error compatibillity Field | FlattenedField
+        field,
+        next,
+        parentRef,
+        ref,
+      })
+    ) {
       return true
     }
 
@@ -113,6 +168,7 @@ export const traverseFields = ({
                 traverseFields({
                   callback,
                   fields: tab.fields,
+                  fillEmpty,
                   parentRef: currentParentRef,
                   ref: tabRef[key],
                 })
@@ -125,6 +181,7 @@ export const traverseFields = ({
         if (
           callback &&
           callback({
+            // @ts-expect-error compatibillity Field | FlattenedField
             field: { ...tab, type: 'tab' },
             next,
             parentRef: currentParentRef,
@@ -137,6 +194,7 @@ export const traverseFields = ({
         traverseFields({
           callback,
           fields: tab.fields,
+          fillEmpty,
           parentRef: currentParentRef,
           ref: tabRef,
         })
@@ -145,12 +203,15 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type !== 'tab' && (fieldHasSubFields(field) || field.type === 'blocks')) {
+    if (
+      (flattenedFields || field.type !== 'tab') &&
+      (fieldHasSubFields(field as Field) || field.type === 'tab' || field.type === 'blocks')
+    ) {
       if ('name' in field && field.name) {
         currentParentRef = currentRef
         if (!ref[field.name]) {
           if (fillEmpty) {
-            if (field.type === 'group') {
+            if (field.type === 'group' || field.type === 'tab') {
               ref[field.name] = {}
             } else if (field.type === 'array' || field.type === 'blocks') {
               if (field.localized) {
@@ -167,7 +228,7 @@ export const traverseFields = ({
       }
 
       if (
-        field.type === 'group' &&
+        (field.type === 'group' || field.type === 'tab') &&
         field.localized &&
         currentRef &&
         typeof currentRef === 'object'
@@ -177,9 +238,11 @@ export const traverseFields = ({
             traverseFields({
               callback,
               fields: field.fields,
+              fillEmpty,
+              flattenedFields: 'flattenedFields' in field ? field.flattenedFields : undefined,
               parentRef: currentParentRef,
               ref: currentRef[key],
-            })
+            } as TraverseFieldsArgs)
           }
         }
         return
@@ -205,6 +268,7 @@ export const traverseFields = ({
               callback,
               data: localeData,
               field,
+              fillEmpty,
               parentRef: currentParentRef,
             })
           }
@@ -213,6 +277,7 @@ export const traverseFields = ({
             callback,
             data: currentRef as Record<string, unknown>[],
             field,
+            fillEmpty,
             parentRef: currentParentRef,
           })
         }
@@ -220,6 +285,8 @@ export const traverseFields = ({
         traverseFields({
           callback,
           fields: field.fields,
+          fillEmpty,
+          flattenedFields: 'flattenedFields' in field ? field.flattenedFields : undefined,
           parentRef: currentParentRef,
           ref: currentRef,
         })

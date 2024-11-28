@@ -1353,7 +1353,10 @@ export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { traverseFields } from './utilities/traverseFields.js'
-export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
+export type {
+  TraverseFieldsCallback,
+  TraverseFlattenedFieldsCallback,
+} from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { versionDefaults } from './versions/defaults.js'

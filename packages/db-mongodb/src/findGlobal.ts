@@ -4,24 +4,15 @@ import { combineQueries } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getSession } from './getSession.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
+import { transform } from './utilities/transform.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
   { slug, locale, req = {} as PayloadRequest, select, where },
 ) {
   const Model = this.globals
-  const options = {
-    ...(await withSession(this, req)),
-    lean: true,
-    select: buildProjectionFromSelect({
-      adapter: this,
-      fields: this.payload.globals.config.find((each) => each.slug === slug).flattenedFields,
-      select,
-    }),
-  }
 
   const query = await Model.buildQuery({
     globalSlug: slug,
@@ -30,18 +21,22 @@ export const findGlobal: FindGlobal = async function findGlobal(
     where: combineQueries({ globalType: { equals: slug } }, where),
   })
 
-  let doc = (await Model.findOne(query, {}, options)) as any
+  const fields = this.payload.globals.config.find((each) => each.slug === slug).flattenedFields
+
+  const doc = await Model.collection.findOne(query, {
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields,
+      select,
+    }),
+    session: await getSession(this, req),
+  })
 
   if (!doc) {
     return null
   }
-  if (doc._id) {
-    doc.id = doc._id
-    delete doc._id
-  }
 
-  doc = JSON.parse(JSON.stringify(doc))
-  doc = sanitizeInternalFields(doc)
+  transform({ type: 'read', adapter: this, data: doc, fields })
 
-  return doc
+  return doc as any
 }

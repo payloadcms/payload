@@ -1,12 +1,10 @@
-import type { QueryOptions } from 'mongoose'
-
 import { buildVersionCollectionFields, type PayloadRequest, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getSession } from './getSession.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
+import { transform } from './utilities/transform.js'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
@@ -26,23 +24,8 @@ export const updateVersion: UpdateVersion = async function updateVersion(
   const fields = buildVersionCollectionFields(
     this.payload.config,
     this.payload.collections[collection].config,
+    true,
   )
-
-  const options: QueryOptions = {
-    ...optionsArgs,
-    ...(await withSession(this, req)),
-    lean: true,
-    new: true,
-    projection: buildProjectionFromSelect({
-      adapter: this,
-      fields: buildVersionCollectionFields(
-        this.payload.config,
-        this.payload.collections[collection].config,
-        true,
-      ),
-      select,
-    }),
-  }
 
   const query = await VersionModel.buildQuery({
     locale,
@@ -50,22 +33,38 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     where: whereToUse,
   })
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
+  transform({
+    type: 'write',
+    adapter: this,
     data: versionData,
     fields,
   })
 
-  const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
+  const doc = await VersionModel.collection.findOneAndUpdate(
+    query,
+    { $set: versionData },
+    {
+      ...optionsArgs,
+      projection: buildProjectionFromSelect({
+        adapter: this,
+        fields: buildVersionCollectionFields(
+          this.payload.config,
+          this.payload.collections[collection].config,
+          true,
+        ),
+        select,
+      }),
+      returnDocument: 'after',
+      session: await getSession(this, req),
+    },
+  )
 
-  const result = JSON.parse(JSON.stringify(doc))
+  transform({
+    type: 'read',
+    adapter: this,
+    data: doc,
+    fields,
+  })
 
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
-  return result
+  return doc as any
 }

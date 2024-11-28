@@ -36,6 +36,22 @@ const buildExistsQuery = (formattedValue, path, treatEmptyString = true) => {
   }
 }
 
+const sanitizeCoordinates = (coordinates: unknown[]): unknown[] => {
+  const result: unknown[] = []
+
+  for (const value of coordinates) {
+    if (typeof value === 'string') {
+      result.push(Number(value))
+    } else if (Array.isArray(value)) {
+      result.push(sanitizeCoordinates(value))
+    } else {
+      result.push(value)
+    }
+  }
+
+  return result
+}
+
 // returns nestedField Field object from blocks.nestedField path because getLocalizedPaths splits them only for relationships
 const getFieldFromSegments = ({
   field,
@@ -334,6 +350,14 @@ export const sanitizeQueryValue = ({
   }
 
   if (operator === 'within' || operator === 'intersects') {
+    if (
+      formattedValue &&
+      typeof formattedValue === 'object' &&
+      Array.isArray(formattedValue.coordinates)
+    ) {
+      formattedValue.coordinates = sanitizeCoordinates(formattedValue.coordinates)
+    }
+
     formattedValue = {
       $geometry: formattedValue,
     }
