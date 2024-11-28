@@ -11,26 +11,29 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from 'lexical'
+import type { JsonObject } from 'payload'
 
 import ObjectID from 'bson-objectid'
 import { $isElementNode, $isRangeSelection, ElementNode } from 'lexical'
 import { deepCopyObjectSimple } from 'payload/shared'
 
-export type WrapperBlockFields = {
+export type WrapperBlockFields<TWrapperBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */
   [key: string]: any
   blockType: string
   id: string
-}
+} & TWrapperBlockFields
 
-export type SerializedWrapperBlockNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  Spread<
-    {
-      fields: WrapperBlockFields
-      type: 'wrapperBlock'
-    },
-    SerializedElementNode<T>
-  >
+export type SerializedWrapperBlockNode<
+  T extends SerializedLexicalNode = SerializedLexicalNode,
+  TBlockFields extends JsonObject = JsonObject,
+> = Spread<
+  {
+    fields: WrapperBlockFields<TBlockFields>
+    type: 'wrapperBlock'
+  },
+  SerializedElementNode<T>
+>
 
 export type DOMMap = {
   [blockType: string]: () => HTMLElement
