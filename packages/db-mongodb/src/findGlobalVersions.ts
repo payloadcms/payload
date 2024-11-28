@@ -51,14 +51,16 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     })
   }
 
+  const session = await getSession(this, req)
+
   const query = await Model.buildQuery({
     globalSlug: global,
     locale,
     payload: this.payload,
+    session,
     where,
   })
 
-  const session = await getSession(this, req)
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
 

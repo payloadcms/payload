@@ -19,6 +19,7 @@ export const findOne: FindOne = async function findOne(
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    session,
     where,
   })
 

@@ -24,6 +24,7 @@ export const count: Count = async function count(
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    session,
     where,
   })
 

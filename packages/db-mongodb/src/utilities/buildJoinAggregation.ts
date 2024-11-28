@@ -1,3 +1,4 @@
+import type { ClientSession } from 'mongodb'
 import type { PipelineStage } from 'mongoose'
 import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig, Where } from 'payload'
 
@@ -12,6 +13,7 @@ type BuildJoinAggregationArgs = {
   joins: JoinQuery
   locale: string
   projection?: Record<string, true>
+  session?: ClientSession
   /** whether the query is from drafts */
   versions?: boolean
 }
@@ -23,6 +25,7 @@ export const buildJoinAggregation = async ({
   joins,
   locale,
   projection,
+  session,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
   if (Object.keys(collectionConfig.joins).length === 0 || joins === false) {
@@ -61,6 +64,7 @@ export const buildJoinAggregation = async ({
       const $match = await joinModel.buildQuery({
         locale,
         payload: adapter.payload,
+        session,
         where: whereJoin,
       })
 

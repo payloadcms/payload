@@ -52,6 +52,7 @@ export const findVersions: FindVersions = async function findVersions(
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    session,
     where,
   })
 

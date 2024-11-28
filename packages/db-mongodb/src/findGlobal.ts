@@ -14,10 +14,13 @@ export const findGlobal: FindGlobal = async function findGlobal(
 ) {
   const Model = this.globals
 
+  const session = await getSession(this, req)
+
   const query = await Model.buildQuery({
     globalSlug: slug,
     locale,
     payload: this.payload,
+    session,
     where: combineQueries({ globalType: { equals: slug } }, where),
   })
 

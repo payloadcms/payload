@@ -1,3 +1,4 @@
+import type { ClientSession } from 'mongodb'
 import type { FilterQuery } from 'mongoose'
 import type { FlattenedField, Operator, Payload, Where } from 'payload'
 
@@ -13,6 +14,7 @@ export async function parseParams({
   globalSlug,
   locale,
   payload,
+  session,
   where,
 }: {
   collectionSlug?: string
@@ -20,6 +22,7 @@ export async function parseParams({
   globalSlug?: string
   locale: string
   payload: Payload
+  session?: ClientSession
   where: Where
 }): Promise<Record<string, unknown>> {
   let result = {} as FilterQuery<any>
@@ -62,6 +65,7 @@ export async function parseParams({
                 locale,
                 operator,
                 payload,
+                session,
                 val: pathOperators[operator],
               })
 

@@ -32,9 +32,12 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     true,
   )
 
+  const session = await getSession(this, req)
+
   const query = await VersionModel.buildQuery({
     locale,
     payload: this.payload,
+    session,
     where: whereToUse,
   })
 
@@ -56,7 +59,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
         select,
       }),
       returnDocument: 'after',
-      session: await getSession(this, req),
+      session,
     },
   )
 

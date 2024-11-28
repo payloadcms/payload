@@ -10,12 +10,15 @@ export const deleteMany: DeleteMany = async function deleteMany(
 ) {
   const Model = this.collections[collection]
 
+  const session = await getSession(this, req)
+
   const query = await Model.buildQuery({
     payload: this.payload,
+    session,
     where,
   })
 
   await Model.collection.deleteMany(query, {
-    session: await getSession(this, req),
+    session,
   })
 }

@@ -54,6 +54,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const versionQuery = await VersionModel.buildQuery({
     locale,
     payload: this.payload,
+    session,
     where: combinedWhere,
   })
 

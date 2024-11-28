@@ -54,6 +54,7 @@ export const find: Find = async function find(
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    session,
     where,
   })
 
@@ -79,6 +80,7 @@ export const find: Find = async function find(
     collectionConfig,
     joins,
     locale,
+    session,
   })
 
   const result = await findMany({

@@ -10,13 +10,16 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
 ) {
   const VersionsModel = this.versions[collection]
 
+  const session = await getSession(this, req)
+
   const query = await VersionsModel.buildQuery({
     locale,
     payload: this.payload,
+    session,
     where,
   })
 
   await VersionsModel.collection.deleteMany(query, {
-    session: await getSession(this, req),
+    session,
   })
 }

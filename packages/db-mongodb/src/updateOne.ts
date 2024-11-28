@@ -24,9 +24,12 @@ export const updateOne: UpdateOne = async function updateOne(
   const Model = this.collections[collection]
   const fields = this.payload.collections[collection].config.flattenedFields
 
+  const session = await getSession(this, req)
+
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    session,
     where,
   })
 
@@ -45,9 +48,10 @@ export const updateOne: UpdateOne = async function updateOne(
         ...optionsArgs,
         projection: buildProjectionFromSelect({ adapter: this, fields, select }),
         returnDocument: 'after',
-        session: await getSession(this, req),
+        session,
       },
     )
+
     transform({
       type: 'read',
       adapter: this,
