@@ -175,7 +175,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         }
       }
       const maxRetries: number =
-        typeof retriesConfig === 'object' ? retriesConfig?.attempts : retriesConfig
+        (typeof retriesConfig === 'object' ? retriesConfig?.attempts : retriesConfig) ?? 0
 
       const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[taskSlug]
         ? job.taskStatus[taskSlug][taskID]

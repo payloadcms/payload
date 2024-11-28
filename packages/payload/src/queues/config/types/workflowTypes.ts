@@ -115,6 +115,8 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
   queue?: string
   /**
    * Specify the number of times that this workflow should be retried if it fails for any reason.
+   *
+   * @default By default, workflows are not retried and `retries` is `0`.
    */
   retries?: number | RetryConfig
   /**

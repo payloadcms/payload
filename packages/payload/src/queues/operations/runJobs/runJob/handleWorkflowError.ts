@@ -23,11 +23,13 @@ export function handleWorkflowError({
 }): {
   hasFinalError: boolean
 } {
+  const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
+
   let hasFinalError = state.reachedMaxRetries // If any TASK reached max retries, the job has an error
   const maxRetries =
-    typeof workflowConfig.retries === 'object'
+    (typeof workflowConfig.retries === 'object'
       ? workflowConfig.retries.attempts
-      : workflowConfig.retries
+      : workflowConfig.retries) ?? 0
   // Now let's handle workflow retries
   if (!hasFinalError && workflowConfig.retries) {
     if (job.waitUntil) {
@@ -57,7 +59,7 @@ export function handleWorkflowError({
 
   req.payload.logger.error({
     err: error,
-    msg: `Error running job ${job.workflowSlug} ${job.taskSlug} id: ${job.id} attempt ${job.totalTried}/${maxRetries}`,
+    msg: `Error running job ${jobLabel} id: ${job.id} attempt ${job.totalTried}/${maxRetries}`,
   })
 
   return {

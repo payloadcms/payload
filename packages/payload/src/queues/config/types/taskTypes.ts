@@ -60,6 +60,11 @@ export type TaskHandlerResults = {
 // Helper type to create correct argument type for the function corresponding to each task.
 export type RunTaskFunctionArgs<TTaskSlug extends keyof TypedJobs['tasks']> = {
   input?: TaskInput<TTaskSlug>
+  /**
+   * Specify the number of times that this task should be retried if it fails for any reason.
+   *
+   * @default By default, tasks are not retried and `retries` is `0`.
+   */
   retries?: number | RetryConfig
 }
 
@@ -76,6 +81,11 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
   taskID: string,
   taskArgs: {
     input?: TTaskInput
+    /**
+     * Specify the number of times that this task should be retried if it fails for any reason.
+     *
+     * @default By default, tasks are not retried and `retries` is `0`.
+     */
     retries?: number | RetryConfig
     // This is the same as TaskHandler, but typed out explicitly in order to improve type inference
     task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
@@ -162,6 +172,8 @@ export type TaskConfig<
   outputSchema?: Field[]
   /**
    * Specify the number of times that this step should be retried if it fails.
+   *
+   * @default By default, tasks are not retried and `retries` is `0`.
    */
   retries?: number | RetryConfig
   /**
