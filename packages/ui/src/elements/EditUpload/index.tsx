@@ -174,7 +174,15 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     setFocalPosition({ x: xCenter, y: yCenter })
   }
 
-  const fileSrcToUse = imageCacheTag ? `${fileSrc}?${imageCacheTag}` : fileSrc
+  const getImageSrc = (url: string, tag?: string) => {  
+    if (!url) return ''
+    if (!tag) return url
+
+    const hasQueryParams = url.includes('?')
+    return hasQueryParams ? `${url}&${tag}` : `${url}?${tag}`
+  }
+  
+  const fileSrcToUse = getImageSrc(fileSrc, imageCacheTag)
 
   return (
     <div className={baseClass}>
