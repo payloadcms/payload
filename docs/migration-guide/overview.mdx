@@ -66,7 +66,14 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     pnpm remove express nodemon @payloadcms/bundler-webpack @payloadcms/bundler-vite
     ```
 
-1. For Payload Cloud users, the plugin has changed.
+1. Database Adapter Migrations
+
+    _If you have existing data_ and are using the MongoDB or Postgres adapters, you will need to run the database migrations to ensure your database schema is up-to-date.
+
+    - [postgres](https://github.com/payloadcms/payload/releases/tag/v3.0.0-beta.39)
+    - [mongodb](https://github.com/payloadcms/payload/releases/tag/v3.0.0-beta.131)
+
+2. For Payload Cloud users, the plugin has changed.
 
     Uninstall the old package:
 
@@ -94,7 +101,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     })
     ```
 
-1. **Optional** sharp dependency
+3. **Optional** sharp dependency
 
    If you have upload enabled collections that use `formatOptions`, `imageSizes`, or `resizeOptions`—payload expects to have `sharp` installed. In 2.0 this was a dependency was installed for you. Now it is only installed if needed. If you have any of these options set, you will need to install `sharp` and add it to your payload.config.ts:
 
@@ -110,10 +117,6 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     +   sharp,
     })
     ```
-
-1. Database Adapter Migrations
-
-    If you have existing data and are using the MongoDB or Postgres adapters, you will need to run the database migrations to ensure your database schema is up-to-date. Follow the instructions from the release notes for [postgres](https://github.com/payloadcms/payload/releases/edit/v3.0.0-beta.39) or [mongodb](https://github.com/payloadcms/payload/releases/edit/v3.0.0-beta.131) depending on your chosen adapter.
 
 ## Breaking Changes
 
@@ -406,6 +409,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
       }
     })
     ```
+1. The `./src/public` directory is now located directly at root level `./public` [see nextJS docs for details](https://nextjs.org/docs/pages/building-your-application/optimizing/static-assets)
 
 ## Custom Components
 
@@ -656,8 +660,8 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     +       edit: {
     +         tab: {
     +           isActive: ({ href }) => true,
-    +           href: ({ href }) => ''
-    +           Component: './path/to/CustomComponent.tsx', // Or use a Custom Component
+    +           href: ({ href }) => '' // or use a Custom Component (see below)
+    +           // Component: './path/to/CustomComponent.tsx'
     +         }
     +       },
           },
@@ -979,7 +983,7 @@ export default buildConfig({
 - If you have created a custom adapter, the type must now provide a `name` property.
 
 | Service              | Package                                                                      |
-| -------------------- |------------------------------------------------------------------------------|
+| -------------------- | ---------------------------------------------------------------------------- |
 | Vercel Blob          | https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob |
 | AWS S3               | https://github.com/payloadcms/payload/tree/main/packages/storage-s3          |
 | Azure                | https://github.com/payloadcms/payload/tree/main/packages/storage-azure       |

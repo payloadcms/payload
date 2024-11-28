@@ -56,7 +56,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       accessResults = await executeAccess({ req }, collectionConfig.access.readVersions)
     }
 
-    const versionFields = buildVersionCollectionFields(payload.config, collectionConfig)
+    const versionFields = buildVersionCollectionFields(payload.config, collectionConfig, true)
 
     await validateQueryPaths({
       collectionConfig,
@@ -93,6 +93,10 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       docs: await Promise.all(
         paginatedDocs.docs.map(async (doc) => {
           const docRef = doc
+          // Fallback if not selected
+          if (!docRef.version) {
+            ;(docRef as any).version = {}
+          }
           await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
             await priorHook
 

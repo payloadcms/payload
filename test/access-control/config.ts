@@ -8,7 +8,10 @@ import type { Config, User } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { textToLexicalJSON } from '../fields/collections/LexicalLocalized/textToLexicalJSON.js'
 import { Disabled } from './collections/Disabled/index.js'
+import { Regression1 } from './collections/Regression-1/index.js'
+import { Regression2 } from './collections/Regression-2/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
   createNotUpdateCollectionSlug,
@@ -506,8 +509,33 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'fields-and-top-access',
+      access: {
+        readVersions: () => ({
+          'version.secret': {
+            equals: 'will-success-access-read',
+          },
+        }),
+        read: () => ({
+          secret: {
+            equals: 'will-success-access-read',
+          },
+        }),
+      },
+      versions: { drafts: true },
+      fields: [
+        {
+          type: 'text',
+          name: 'secret',
+          access: { read: () => false },
+        },
+      ],
+    },
     Disabled,
     RichText,
+    Regression1,
+    Regression2,
   ],
   globals: [
     {
@@ -643,6 +671,58 @@ export default buildConfigWithDefaults({
       slug: userRestrictedGlobalSlug,
       data: {
         name: 'dev@payloadcms.com',
+      },
+    })
+
+    await payload.create({
+      collection: 'regression1',
+      data: {
+        richText4: textToLexicalJSON({ text: 'Text1' }),
+        array: [{ art: textToLexicalJSON({ text: 'Text2' }) }],
+        arrayWithAccessFalse: [{ richText6: textToLexicalJSON({ text: 'Text3' }) }],
+        group1: {
+          text: 'Text4',
+          richText1: textToLexicalJSON({ text: 'Text5' }),
+        },
+        blocks: [
+          {
+            blockType: 'myBlock3',
+            richText7: textToLexicalJSON({ text: 'Text6' }),
+            blockName: 'My Block 1',
+          },
+        ],
+        blocks3: [
+          {
+            blockType: 'myBlock2',
+            richText5: textToLexicalJSON({ text: 'Text7' }),
+            blockName: 'My Block 2',
+          },
+        ],
+        tab1: {
+          richText2: textToLexicalJSON({ text: 'Text8' }),
+          blocks2: [
+            {
+              blockType: 'myBlock',
+              richText3: textToLexicalJSON({ text: 'Text9' }),
+              blockName: 'My Block 3',
+            },
+          ],
+        },
+      },
+    })
+
+    await payload.create({
+      collection: 'regression2',
+      data: {
+        array: [
+          {
+            richText2: textToLexicalJSON({ text: 'Text1' }),
+          },
+        ],
+        group: {
+          text: 'Text2',
+          richText1: textToLexicalJSON({ text: 'Text3' }),
+        },
       },
     })
   },

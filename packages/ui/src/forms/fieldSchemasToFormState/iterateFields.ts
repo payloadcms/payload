@@ -1,4 +1,5 @@
 import type {
+  ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field as FieldSchema,
@@ -6,7 +7,7 @@ import type {
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
-  SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
 } from 'payload'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
@@ -20,6 +21,7 @@ type Args = {
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
+  clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
   fields: FieldSchema[]
@@ -47,12 +49,7 @@ type Args = {
   parentPassesCondition?: boolean
   parentPath: string
   parentSchemaPath: string
-  permissions:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | null
-    | SanitizedFieldPermissions
+  permissions: SanitizedFieldsPermissions
   preferences?: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
@@ -76,6 +73,7 @@ export const iterateFields = async ({
   id,
   addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
+  clientFieldSchemaMap,
   collectionSlug,
   data,
   fields,
@@ -117,6 +115,7 @@ export const iterateFields = async ({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized,
+        clientFieldSchemaMap,
         collectionSlug,
         data,
         field,
@@ -130,9 +129,9 @@ export const iterateFields = async ({
         operation,
         parentIndexPath,
         parentPath,
+        parentPermissions: permissions,
         parentSchemaPath,
         passesCondition,
-        permissions,
         preferences,
         previousFormState,
         renderAllFields,

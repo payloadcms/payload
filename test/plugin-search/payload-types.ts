@@ -38,9 +38,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -108,7 +108,6 @@ export interface Post {
  * via the `definition` "search".
  */
 export interface Search {
-  id: string;
   title?: string | null;
   priority?: number | null;
   doc:
@@ -120,6 +119,7 @@ export interface Search {
         relationTo: 'posts';
         value: string | Post;
       };
+  id: string;
   excerpt?: string | null;
   slug?: string | null;
   updatedAt: string;
@@ -236,7 +236,7 @@ export interface SearchSelect<T extends boolean = true> {
   title?: T;
   priority?: T;
   doc?: T;
-  docUrl?: T;
+  id?: T;
   excerpt?: T;
   slug?: T;
   updatedAt?: T;

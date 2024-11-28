@@ -3,7 +3,7 @@
 import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
-import type { DeepUndefinable } from 'ts-essentials'
+import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
 
 import type {
   JoinFieldClientProps,
@@ -863,7 +863,7 @@ type UploadAdminClient = AdminClient & Pick<UploadAdmin, 'allowCreate' | 'isSort
 
 export type PolymorphicUploadField = {
   admin?: {
-    sortOptions?: { [collectionSlug: CollectionSlug]: string }
+    sortOptions?: Partial<Record<CollectionSlug, string>>
   } & UploadAdmin
   relationTo: CollectionSlug[]
 } & SharedUploadProperties
@@ -1044,7 +1044,7 @@ type RelationshipAdminClient = AdminClient &
 
 export type PolymorphicRelationshipField = {
   admin?: {
-    sortOptions?: { [collectionSlug: CollectionSlug]: string }
+    sortOptions?: Partial<Record<CollectionSlug, string>>
   } & RelationshipAdmin
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
@@ -1396,6 +1396,46 @@ export type JoinFieldClient = {
 } & FieldBaseClient &
   Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
 
+export type FlattenedBlock = {
+  flattenedFields: FlattenedField[]
+} & Block
+
+export type FlattenedBlocksField = {
+  blocks: FlattenedBlock[]
+} & BlocksField
+
+export type FlattenedGroupField = {
+  flattenedFields: FlattenedField[]
+} & GroupField
+
+export type FlattenedArrayField = {
+  flattenedFields: FlattenedField[]
+} & ArrayField
+
+export type FlattenedTabAsField = {
+  flattenedFields: FlattenedField[]
+} & MarkRequired<TabAsField, 'name'>
+
+export type FlattenedField =
+  | CheckboxField
+  | CodeField
+  | DateField
+  | EmailField
+  | FlattenedArrayField
+  | FlattenedBlocksField
+  | FlattenedGroupField
+  | FlattenedTabAsField
+  | JoinField
+  | JSONField
+  | NumberField
+  | PointField
+  | RadioField
+  | RelationshipField
+  | RichTextField
+  | SelectField
+  | TextareaField
+  | TextField
+  | UploadField
 export type Field =
   | ArrayField
   | BlocksField

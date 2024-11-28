@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Neuspořádaný seznam',
   },
+  da: {
+    label: 'Usorteret Liste',
+  },
   de: {
     label: 'Ungeordnete Liste',
   },

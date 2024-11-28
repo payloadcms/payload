@@ -51,9 +51,9 @@ export function getRouteInfo({
       globalConfig = config.globals.find((global) => global.slug === globalSlug)
     }
 
-    // If the collection has an ID field, we need to determine the type of the ID field
+    // If the collection is using a custom ID, we need to determine it's type
     if (collectionConfig && payload) {
-      if (payload.collections?.[collectionSlug]) {
+      if (payload.collections?.[collectionSlug]?.customIDType) {
         idType = payload.collections?.[collectionSlug].customIDType
       }
     }

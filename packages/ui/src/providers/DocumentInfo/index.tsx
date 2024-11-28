@@ -42,7 +42,7 @@ const DocumentInfo: React.FC<
     hasPublishedDoc: hasPublishedDocFromProps,
     hasPublishPermission: hasPublishPermissionFromProps,
     hasSavePermission: hasSavePermissionFromProps,
-    initialData: data,
+    initialData,
     initialState,
     isLocked: isLockedFromProps,
     lastUpdateTime: lastUpdateTimeFromProps,
@@ -84,7 +84,7 @@ const DocumentInfo: React.FC<
   const [documentTitle, setDocumentTitle] = useState(() =>
     formatDocTitle({
       collectionConfig,
-      data: { ...data, id },
+      data: { ...(initialData || {}), id },
       dateFormat,
       fallback: id?.toString(),
       globalConfig,
@@ -105,8 +105,9 @@ const DocumentInfo: React.FC<
   const [documentIsLocked, setDocumentIsLocked] = useState<boolean | undefined>(isLockedFromProps)
   const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(currentEditorFromProps)
   const [lastUpdateTime, setLastUpdateTime] = useState<number>(lastUpdateTimeFromProps)
+  const [savedDocumentData, setSavedDocumentData] = useState(initialData)
 
-  const isInitializing = initialState === undefined || data === undefined
+  const isInitializing = initialState === undefined || initialData === undefined
 
   const { getPreference, setPreference } = usePreferences()
   const { code: locale } = useLocale()
@@ -251,18 +252,25 @@ const DocumentInfo: React.FC<
     }
   }, [collectionConfig, globalConfig, versionCount])
 
+  const updateSavedDocumentData = React.useCallback<DocumentInfoContext['updateSavedDocumentData']>(
+    (json) => {
+      setSavedDocumentData(json)
+    },
+    [],
+  )
+
   useEffect(() => {
     setDocumentTitle(
       formatDocTitle({
         collectionConfig,
-        data: { ...data, id },
+        data: { ...savedDocumentData, id },
         dateFormat,
         fallback: id?.toString(),
         globalConfig,
         i18n,
       }),
     )
-  }, [collectionConfig, globalConfig, data, dateFormat, i18n, id])
+  }, [collectionConfig, globalConfig, savedDocumentData, dateFormat, i18n, id])
 
   // clean on unmount
   useEffect(() => {
@@ -306,12 +314,13 @@ const DocumentInfo: React.FC<
     hasPublishPermission,
     hasSavePermission,
     incrementVersionCount,
-    initialData: data,
+    initialData,
     initialState,
     isInitializing,
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
     preferencesKey,
+    savedDocumentData,
     setCurrentEditor,
     setDocFieldPreferences,
     setDocumentIsLocked,
@@ -324,6 +333,7 @@ const DocumentInfo: React.FC<
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
+    updateSavedDocumentData,
     versionCount,
   }
 

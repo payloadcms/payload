@@ -128,6 +128,9 @@ export {
 } from '../../features/blocks/client/nodes/InlineBlocksNode.js'
 
 export { FieldsDrawer } from '../../utilities/fieldsDrawer/Drawer.js'
+export { useLexicalDocumentDrawer } from '../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
+export { useLexicalDrawer } from '../../utilities/fieldsDrawer/useLexicalDrawer.js'
+export { useLexicalListDrawer } from '../../utilities/fieldsDrawer/useLexicalListDrawer.js'
 
 export { InlineBlockEditButton } from '../../features/blocks/client/componentInline/components/InlineBlockEditButton.js'
 export { InlineBlockRemoveButton } from '../../features/blocks/client/componentInline/components/InlineBlockRemoveButton.js'

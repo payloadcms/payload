@@ -7,8 +7,6 @@ import {
   beforeChangeTraverseFields,
   beforeValidateTraverseFields,
   checkDependencies,
-  deepCopyObject,
-  deepCopyObjectSimple,
   withNullableJSONSchemaType,
 } from 'payload'
 
@@ -21,90 +19,80 @@ import type {
   LexicalRichTextAdapterProvider,
 } from './types.js'
 
+import { getDefaultSanitizedEditorConfig } from './getDefaultSanitizedEditorConfig.js'
 import { i18n } from './i18n.js'
 import { defaultEditorConfig, defaultEditorFeatures } from './lexical/config/server/default.js'
 import { loadFeatures } from './lexical/config/server/loader.js'
-import {
-  sanitizeServerEditorConfig,
-  sanitizeServerFeatures,
-} from './lexical/config/server/sanitize.js'
+import { sanitizeServerFeatures } from './lexical/config/server/sanitize.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
 import { recurseNodeTree } from './utilities/recurseNodeTree.js'
 import { richTextValidateHOC } from './validate/index.js'
 
-let defaultSanitizedServerEditorConfig: null | SanitizedServerEditorConfig = null
 let checkedDependencies = false
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
+    !checkedDependencies
+  ) {
+    checkedDependencies = true
+    void checkDependencies({
+      dependencyGroups: [
+        {
+          name: 'lexical',
+          dependencies: [
+            'lexical',
+            '@lexical/headless',
+            '@lexical/link',
+            '@lexical/list',
+            '@lexical/mark',
+            '@lexical/react',
+            '@lexical/rich-text',
+            '@lexical/selection',
+            '@lexical/utils',
+          ],
+          targetVersion: '0.20.0',
+        },
+      ],
+    })
+  }
   return async ({ config, isRoot, parentIsLocalized }) => {
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
-      !checkedDependencies
-    ) {
-      checkedDependencies = true
-      await checkDependencies({
-        dependencyGroups: [
-          {
-            name: 'lexical',
-            dependencies: [
-              'lexical',
-              '@lexical/headless',
-              '@lexical/link',
-              '@lexical/list',
-              '@lexical/mark',
-              '@lexical/markdown',
-              '@lexical/react',
-              '@lexical/rich-text',
-              '@lexical/selection',
-              '@lexical/utils',
-            ],
-            targetVersion: '0.20.0',
-          },
-        ],
-      })
-    }
-
-    let features: FeatureProviderServer<any, any, any>[] = []
+    let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
     if (!props || (!props.features && !props.lexical)) {
-      if (!defaultSanitizedServerEditorConfig) {
-        defaultSanitizedServerEditorConfig = await sanitizeServerEditorConfig(
-          defaultEditorConfig,
-          config,
-          parentIsLocalized,
-        )
-        features = deepCopyObject(defaultEditorFeatures)
-      }
+      finalSanitizedEditorConfig = await getDefaultSanitizedEditorConfig({
+        config,
+        parentIsLocalized,
+      })
 
-      finalSanitizedEditorConfig = deepCopyObject(defaultSanitizedServerEditorConfig)
-
-      delete finalSanitizedEditorConfig.lexical // We don't want to send the default lexical editor config to the client
+      features = defaultEditorFeatures
 
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
-      const rootEditor = config.editor
-      let rootEditorFeatures: FeatureProviderServer<unknown, unknown, unknown>[] = []
-      if (typeof rootEditor === 'object' && 'features' in rootEditor) {
-        rootEditorFeatures = (rootEditor as LexicalRichTextAdapter).features
+      if (props.features && typeof props.features === 'function') {
+        const rootEditor = config.editor
+        let rootEditorFeatures: FeatureProviderServer<unknown, unknown, unknown>[] = []
+        if (typeof rootEditor === 'object' && 'features' in rootEditor) {
+          rootEditorFeatures = (rootEditor as LexicalRichTextAdapter).features
+        }
+        features = props.features({
+          defaultFeatures: defaultEditorFeatures,
+          rootFeatures: rootEditorFeatures,
+        })
+      } else {
+        features = props.features as FeatureProviderServer<unknown, unknown, unknown>[]
       }
 
-      features =
-        props.features && typeof props.features === 'function'
-          ? props.features({
-              defaultFeatures: deepCopyObject(defaultEditorFeatures),
-              rootFeatures: rootEditorFeatures,
-            })
-          : (props.features as FeatureProviderServer<unknown, unknown, unknown>[])
       if (!features) {
-        features = deepCopyObject(defaultEditorFeatures)
+        features = defaultEditorFeatures
       }
 
-      const lexical = props.lexical ?? deepCopyObjectSimple(defaultEditorConfig.lexical)!
+      const lexical = props.lexical ?? defaultEditorConfig.lexical
 
       resolvedFeatureMap = await loadFeatures({
         config,
@@ -125,12 +113,12 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
     const featureI18n = finalSanitizedEditorConfig.features.i18n
     for (const lang in i18n) {
-      if (!featureI18n[lang]) {
-        featureI18n[lang] = {
+      if (!featureI18n[lang as keyof typeof featureI18n]) {
+        featureI18n[lang as keyof typeof featureI18n] = {
           lexical: {},
         }
       }
-
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       featureI18n[lang].lexical.general = i18n[lang]
     }
 
@@ -208,6 +196,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             ) {
               return value
             }
+            // TO-DO: We should not use context, as it is intended for external use only
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const context: any = _context
             const nodeIDMap: {
               [key: string]: SerializedLexicalNode
@@ -440,6 +430,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               return value
             }
 
+            // TO-DO: We should not use context, as it is intended for external use only
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const context: any = _context
             const nodeIDMap: {
               [key: string]: SerializedLexicalNode

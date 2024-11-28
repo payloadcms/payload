@@ -3,6 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { searchPlugin } from '@payloadcms/plugin-search'
+import { randomUUID } from 'node:crypto'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -49,8 +50,28 @@ export default buildConfigWithDefaults({
         posts: ({ title }) => (title === 'Hello, world!' ? 30 : 20),
       },
       searchOverrides: {
+        access: {
+          // Used for int test
+          delete: ({ req: { user } }) => user.email === devUser.email,
+        },
         fields: ({ defaultFields }) => [
           ...defaultFields,
+          // This is necessary to test whether search docs were deleted or not with SQLite
+          // Because IDs in SQLite, apparently, aren't unique if we count deleted rows without AUTOINCREMENT option
+          // Thus we have a custom UUID field.
+          {
+            name: 'id',
+            type: 'text',
+            hooks: {
+              beforeChange: [
+                ({ operation }) => {
+                  if (operation === 'create') {
+                    return randomUUID()
+                  }
+                },
+              ],
+            },
+          },
           {
             name: 'excerpt',
             type: 'textarea',

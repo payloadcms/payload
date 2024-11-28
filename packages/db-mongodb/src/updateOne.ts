@@ -30,7 +30,11 @@ export const updateOne: UpdateOne = async function updateOne(
     ...(await withSession(this, req)),
     lean: true,
     new: true,
-    projection: buildProjectionFromSelect({ adapter: this, fields, select }),
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: this.payload.collections[collection].config.flattenedFields,
+      select,
+    }),
   }
 
   const query = await Model.buildQuery({

@@ -242,9 +242,7 @@ export class BasePayload {
 
   authStrategies: AuthStrategy[]
 
-  collections: {
-    [slug: CollectionSlug]: Collection
-  } = {}
+  collections: Record<CollectionSlug, Collection> = {}
 
   config: SanitizedConfig
   /**
@@ -557,7 +555,7 @@ export class BasePayload {
       !checkedDependencies
     ) {
       checkedDependencies = true
-      await checkPayloadDependencies()
+      void checkPayloadDependencies()
     }
 
     this.importMap = options.importMap
@@ -784,6 +782,12 @@ export const reload = async (
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
   }
+  global._payload_clientConfig = null
+  global._payload_schemaMap = null
+  global._payload_clientSchemaMap = null
+  global._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
+  global._payload_doNotCacheSchemaMap = true
+  global._payload_doNotCacheClientSchemaMap = true
 }
 
 export const getPayload = async (
@@ -1146,6 +1150,12 @@ export type {
   FieldWithSubFieldsClient,
   FilterOptions,
   FilterOptionsProps,
+  FlattenedArrayField,
+  FlattenedBlock,
+  FlattenedBlocksField,
+  FlattenedField,
+  FlattenedGroupField,
+  FlattenedTabAsField,
   GroupField,
   GroupFieldClient,
   HookName,
@@ -1328,6 +1338,7 @@ export {
   pathExistsAndIsAccessible,
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
+export { flattenAllFields } from './utilities/flattenAllFields.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
@@ -1341,7 +1352,6 @@ export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
-export { recursivelySanitizePermissions as sanitizePermissions } from './utilities/sanitizePermissions.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'

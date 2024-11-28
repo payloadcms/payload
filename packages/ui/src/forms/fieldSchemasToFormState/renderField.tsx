@@ -1,14 +1,7 @@
-import type {
-  ClientComponentProps,
-  ClientField,
-  FieldPaths,
-  SanitizedFieldPermissions,
-  ServerComponentProps,
-} from 'payload'
+import type { ClientComponentProps, ClientField, FieldPaths, ServerComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { createClientField, deepCopyObjectSimple, MissingEditorProp } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { createClientField, MissingEditorProp } from 'payload'
 
 import type { RenderFieldMethod } from './types.js'
 
@@ -25,6 +18,7 @@ const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Fil
 
 export const renderField: RenderFieldMethod = ({
   id,
+  clientFieldSchemaMap,
   collectionSlug,
   data,
   fieldConfig,
@@ -36,35 +30,26 @@ export const renderField: RenderFieldMethod = ({
   parentPath,
   parentSchemaPath,
   path,
-  permissions: incomingPermissions,
+  permissions,
   preferences,
   req,
   schemaPath,
   siblingData,
 }) => {
-  // TODO (ALESSIO): why are we passing the fieldConfig twice?
-  // and especially, why are we deepCopyObject -here- instead of inside the createClientField func,
-  // so no one screws this up in the future?
-  const clientField = createClientField({
-    clientField: deepCopyObjectSimple(fieldConfig) as ClientField,
-    defaultIDType: req.payload.config.db.defaultIDType,
-    field: fieldConfig,
-    i18n: req.i18n,
-    importMap: req.payload.importMap,
-  })
-
-  const permissions =
-    incomingPermissions === true
-      ? true
-      : fieldAffectsData(fieldConfig)
-        ? incomingPermissions?.[fieldConfig.name]
-        : ({} as SanitizedFieldPermissions)
+  const clientField = clientFieldSchemaMap
+    ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
+    : createClientField({
+        defaultIDType: req.payload.config.db.defaultIDType,
+        field: fieldConfig,
+        i18n: req.i18n,
+        importMap: req.payload.importMap,
+      })
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},
     field: clientField,
     path,
-    readOnly: permissions !== true && !permissions?.[operation],
+    readOnly: typeof permissions === 'boolean' ? !permissions : !permissions?.[operation],
     schemaPath,
   }
 
@@ -78,6 +63,7 @@ export const renderField: RenderFieldMethod = ({
   const serverProps: ServerComponentProps = {
     id,
     clientField,
+    clientFieldSchemaMap,
     data,
     field: fieldConfig,
     fieldSchemaMap,

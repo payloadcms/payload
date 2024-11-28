@@ -147,12 +147,13 @@ function isTriggerVisibleInNearestScrollContainer(
 // Reposition the menu on scroll, window resize, and element resize.
 export function useDynamicPositioning(
   resolution: MenuResolution | null,
-  targetElement: HTMLElement | null,
+  targetElementRef: RefObject<HTMLElement | null>,
   onReposition: () => void,
   onVisibilityChange?: (isInView: boolean) => void,
 ) {
   const [editor] = useLexicalComposerContext()
   useEffect(() => {
+    const targetElement = targetElementRef.current
     if (targetElement != null && resolution != null) {
       const rootElement = editor.getRootElement()
       const rootScrollParent =
@@ -186,12 +187,12 @@ export function useDynamicPositioning(
       })
       resizeObserver.observe(targetElement)
       return () => {
-        resizeObserver.unobserve(targetElement)
+        resizeObserver.disconnect()
         window.removeEventListener('resize', onReposition)
         document.removeEventListener('scroll', handleScroll, true)
       }
     }
-  }, [targetElement, editor, onVisibilityChange, onReposition, resolution])
+  }, [editor, onVisibilityChange, onReposition, resolution, targetElementRef])
 }
 
 export const SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND: LexicalCommand<{
@@ -206,7 +207,6 @@ export function LexicalMenu({
   // groups filtering is already handled in SlashMenu/index.tsx. Thus, groups always contains the matching items.
   groups,
   menuRenderFn,
-  onSelectItem,
   resolution,
   shouldSplitNodeWithQuery = false,
 }: {
@@ -215,7 +215,6 @@ export function LexicalMenu({
   editor: LexicalEditor
   groups: Array<SlashMenuGroupInternal>
   menuRenderFn: MenuRenderFn
-  onSelectItem: (item: SlashMenuItem, closeMenu: () => void, matchingString: string) => void
   resolution: MenuResolution
   shouldSplitNodeWithQuery?: boolean
 }): JSX.Element | null {
@@ -253,22 +252,27 @@ export function LexicalMenu({
 
   const selectItemAndCleanUp = useCallback(
     (selectedItem: SlashMenuItem) => {
-      editor.update(
-        () => {
-          const textNodeContainingQuery =
-            resolution.match != null && shouldSplitNodeWithQuery
-              ? $splitNodeContainingQuery(resolution.match)
-              : null
+      close()
 
-          if (textNodeContainingQuery) {
-            textNodeContainingQuery.remove()
-          }
-        },
-        { discrete: true },
-      )
-      onSelectItem(selectedItem, close, resolution.match ? resolution.match.matchingString : '')
+      editor.update(() => {
+        const textNodeContainingQuery =
+          resolution.match != null && shouldSplitNodeWithQuery
+            ? $splitNodeContainingQuery(resolution.match)
+            : null
+
+        if (textNodeContainingQuery) {
+          textNodeContainingQuery.remove()
+        }
+      })
+
+      setTimeout(() => {
+        selectedItem.onSelect({
+          editor,
+          queryString: resolution.match ? resolution.match.matchingString : '',
+        })
+      }, 0)
     },
-    [editor, shouldSplitNodeWithQuery, resolution.match, onSelectItem, close],
+    [editor, shouldSplitNodeWithQuery, resolution.match, close],
   )
 
   useEffect(() => {
@@ -529,7 +533,7 @@ export function useMenuAnchorRef(
     [resolution, setResolution],
   )
 
-  useDynamicPositioning(resolution, anchorElementRef.current, positionMenu, onVisibilityChange)
+  useDynamicPositioning(resolution, anchorElementRef, positionMenu, onVisibilityChange)
 
   return anchorElementRef
 }

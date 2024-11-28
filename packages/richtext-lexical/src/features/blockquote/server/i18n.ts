@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Citace',
   },
+  da: {
+    label: 'Blokering',
+  },
   de: {
     label: 'Blockzitat',
   },

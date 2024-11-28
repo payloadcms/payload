@@ -109,7 +109,7 @@ export const getFieldsToSign = (args: {
   const { collectionConfig, email, user } = args
 
   const result: Record<string, unknown> = {
-    id: user.id,
+    id: user?.id,
     collection: collectionConfig.slug,
     email,
   }

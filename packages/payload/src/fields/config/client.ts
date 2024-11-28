@@ -39,61 +39,97 @@ export type ServerOnlyFieldProperties =
 
 export type ServerOnlyFieldAdminProperties = keyof Pick<FieldBase['admin'], 'condition'>
 
+const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
+  'hooks',
+  'access',
+  'validate',
+  'defaultValue',
+  'filterOptions', // This is a `relationship` and `upload` only property
+  'editor', // This is a `richText` only property
+  'custom',
+  'typescriptSchema',
+  'dbName', // can be a function
+  'enumName', // can be a function
+  // the following props are handled separately (see below):
+  // `label`
+  // `fields`
+  // `blocks`
+  // `tabs`
+  // `admin`
+]
+const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
+type FieldWithDescription = {
+  admin: AdminClient
+} & ClientField
+
 export const createClientField = ({
-  clientField = {} as ClientField,
   defaultIDType,
   field: incomingField,
   i18n,
   importMap,
 }: {
-  clientField?: ClientField
   defaultIDType: Payload['config']['db']['defaultIDType']
   field: Field
   i18n: I18nClient
   importMap: ImportMap
 }): ClientField => {
-  const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
-    'hooks',
-    'access',
-    'validate',
-    'defaultValue',
-    'filterOptions', // This is a `relationship` and `upload` only property
-    'editor', // This is a `richText` only property
-    'custom',
-    'typescriptSchema',
-    'dbName', // can be a function
-    'enumName', // can be a function
-    // the following props are handled separately (see below):
-    // `label`
-    // `fields`
-    // `blocks`
-    // `tabs`
-    // `admin`
-  ]
-
-  clientField.admin = clientField.admin || {}
-  // clientField.admin.readOnly = true
-
-  serverOnlyFieldProperties.forEach((key) => {
-    if (key in clientField) {
-      delete clientField[key]
-    }
-  })
+  const clientField: ClientField = {} as ClientField
 
   const isHidden = 'hidden' in incomingField && incomingField?.hidden
   const disabledFromAdmin =
     incomingField?.admin && 'disabled' in incomingField.admin && incomingField.admin.disabled
 
-  if (fieldAffectsData(clientField) && (isHidden || disabledFromAdmin)) {
+  if (fieldAffectsData(incomingField) && (isHidden || disabledFromAdmin)) {
     return null
   }
 
-  if (
-    'label' in clientField &&
-    'label' in incomingField &&
-    typeof incomingField.label === 'function'
-  ) {
-    clientField.label = incomingField.label({ t: i18n.t })
+  for (const key in incomingField) {
+    if (serverOnlyFieldProperties.includes(key as any)) {
+      continue
+    }
+    switch (key) {
+      case 'admin':
+        if (!incomingField.admin) {
+          break
+        }
+        clientField.admin = {} as AdminClient
+        for (const adminKey in incomingField.admin) {
+          if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {
+            continue
+          }
+          switch (adminKey) {
+            case 'description':
+              if ('description' in incomingField.admin) {
+                if (typeof incomingField.admin?.description !== 'function') {
+                  ;(clientField as FieldWithDescription).admin.description =
+                    incomingField.admin.description
+                }
+              }
+
+              break
+            default:
+              clientField.admin[adminKey] = incomingField.admin[adminKey]
+          }
+        }
+        break
+      case 'blocks':
+      case 'fields':
+      case 'tabs':
+        // Skip - we handle sub-fields in the switch below
+        break
+      case 'label':
+        //@ts-expect-error - would need to type narrow
+        if (typeof incomingField.label === 'function') {
+          //@ts-expect-error - would need to type narrow
+          clientField.label = incomingField.label({ t: i18n.t })
+        } else {
+          //@ts-expect-error - would need to type narrow
+          clientField.label = incomingField.label
+        }
+        break
+      default:
+        clientField[key] = incomingField[key]
+    }
   }
 
   switch (incomingField.type) {
@@ -108,7 +144,6 @@ export const createClientField = ({
       }
 
       field.fields = createClientFields({
-        clientFields: field.fields,
         defaultIDType,
         disableAddingID: incomingField.type !== 'array',
         fields: incomingField.fields,
@@ -167,7 +202,6 @@ export const createClientField = ({
           }
 
           clientBlock.fields = createClientFields({
-            clientFields: clientBlock.fields,
             defaultIDType,
             fields: block.fields,
             i18n,
@@ -225,24 +259,29 @@ export const createClientField = ({
       const field = clientField as unknown as TabsFieldClient
 
       if (incomingField.tabs?.length) {
+        field.tabs = []
+
         for (let i = 0; i < incomingField.tabs.length; i++) {
           const tab = incomingField.tabs[i]
-          const clientTab = field.tabs[i]
+          const clientTab = {} as unknown as TabsFieldClient['tabs'][0]
 
-          serverOnlyFieldProperties.forEach((key) => {
-            if (key in clientTab) {
-              delete clientTab[key]
+          for (const key in tab) {
+            if (serverOnlyFieldProperties.includes(key as any)) {
+              continue
             }
-          })
-
-          clientTab.fields = createClientFields({
-            clientFields: clientTab.fields,
-            defaultIDType,
-            disableAddingID: true,
-            fields: tab.fields,
-            i18n,
-            importMap,
-          })
+            if (key === 'fields') {
+              clientTab.fields = createClientFields({
+                defaultIDType,
+                disableAddingID: true,
+                fields: tab.fields,
+                i18n,
+                importMap,
+              })
+            } else {
+              clientTab[key] = tab[key]
+            }
+          }
+          field.tabs[i] = clientTab
         }
       }
 
@@ -253,70 +292,43 @@ export const createClientField = ({
       break
   }
 
-  const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
-
-  if (!clientField.admin) {
-    clientField.admin = {} as AdminClient
-  }
-
-  serverOnlyFieldAdminProperties.forEach((key) => {
-    if (key in clientField.admin) {
-      delete clientField.admin[key]
-    }
-  })
-
-  type FieldWithDescription = {
-    admin: AdminClient
-  } & ClientField
-
-  if (incomingField.admin && 'description' in incomingField.admin) {
-    if (typeof incomingField.admin?.description === 'function') {
-      delete (clientField as FieldWithDescription).admin.description
-    } else {
-      ;(clientField as FieldWithDescription).admin.description = incomingField.admin.description
-    }
-  }
-
   return clientField
 }
 
 export const createClientFields = ({
-  clientFields,
   defaultIDType,
   disableAddingID,
   fields,
   i18n,
   importMap,
 }: {
-  clientFields: ClientField[]
   defaultIDType: Payload['config']['db']['defaultIDType']
   disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
   importMap: ImportMap
 }): ClientField[] => {
-  const newClientFields: ClientField[] = []
+  const clientFields: ClientField[] = []
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]
 
-    const newField = createClientField({
-      clientField: clientFields[i],
+    const clientField = createClientField({
       defaultIDType,
       field,
       i18n,
       importMap,
     })
 
-    if (newField) {
-      newClientFields.push(newField)
+    if (clientField) {
+      clientFields.push(clientField)
     }
   }
 
   const hasID = flattenTopLevelFields(fields).some((f) => fieldAffectsData(f) && f.name === 'id')
 
   if (!disableAddingID && !hasID) {
-    newClientFields.push({
+    clientFields.push({
       name: 'id',
       type: defaultIDType,
       admin: {
@@ -330,5 +342,5 @@ export const createClientFields = ({
     })
   }
 
-  return newClientFields
+  return clientFields
 }

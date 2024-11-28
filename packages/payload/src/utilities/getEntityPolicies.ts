@@ -6,7 +6,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { AllOperations, Document, PayloadRequest, Where } from '../types/index.js'
 
 import { combineQueries } from '../database/combineQueries.js'
-import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
+import { tabHasName } from '../fields/config/types.js'
 
 type Args = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
