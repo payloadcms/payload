@@ -37,9 +37,9 @@ export type HandleDelete = (args: {
 export type GenerateURL = (args: {
   collection: CollectionConfig
   data: any
-  filename: string
+  filename?: string
   prefix?: string
-}) => Promise<string> | string
+}) => null | Promise<string> | string
 
 export type StaticHandler = (
   req: PayloadRequest,
@@ -66,10 +66,10 @@ export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) 
 
 export type GenerateFileURL = (args: {
   collection: CollectionConfig
-  filename: string
+  filename?: string
   prefix?: string
   size?: ImageSize
-}) => Promise<string> | string
+}) => null | Promise<string> | string
 
 export interface CollectionOptions {
   adapter: Adapter | null
