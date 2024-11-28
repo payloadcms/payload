@@ -1,18 +1,13 @@
 import type { I18nClient } from '@payloadcms/translations'
 
-import {
-  type ClientField,
-  createClientFields,
-  deepCopyObjectSimple,
-  type FieldSchemaMap,
-  type Payload,
-} from 'payload'
+import { type ClientFieldSchemaMap, type FieldSchemaMap, type Payload } from 'payload'
 import { getFromImportMap } from 'payload/shared'
 
 import type { FeatureProviderProviderClient } from '../features/typesClient.js'
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type { FeatureClientSchemaMap, LexicalRichTextFieldProps } from '../types.js'
 type Args = {
+  clientFieldSchemaMap: ClientFieldSchemaMap
   fieldSchemaMap: FieldSchemaMap
   i18n: I18nClient
   path: string
@@ -27,9 +22,6 @@ export function initLexicalFeatures(args: Args): {
   featureClientSchemaMap: FeatureClientSchemaMap
 } {
   const clientFeatures: LexicalRichTextFieldProps['clientFeatures'] = {}
-
-  const fieldSchemaMap = Object.fromEntries(new Map(args.fieldSchemaMap))
-  //&const value = deepCopyObjectSimple(args.fieldState.value)
 
   // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
   const resolvedFeatureMapArray = Array.from(
@@ -89,47 +81,31 @@ export function initLexicalFeatures(args: Args): {
         featureKey,
       ].join('.')
 
-      // Like args.fieldSchemaMap, we only want to include the sub-fields of the current feature
-      const featureSchemaMap: typeof fieldSchemaMap = {}
-      for (const key in fieldSchemaMap) {
-        const state = fieldSchemaMap[key]
+      featureClientSchemaMap[featureKey] = {}
 
+      // Like args.fieldSchemaMap, we only want to include the sub-fields of the current feature
+      for (const [key, entry] of args.clientFieldSchemaMap.entries()) {
         if (key.startsWith(featureSchemaPath)) {
-          featureSchemaMap[key] = state
+          featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
         }
       }
 
-      featureClientSchemaMap[featureKey] = {}
+      if (
+        resolvedFeature.componentImports &&
+        typeof resolvedFeature.componentImports === 'object'
+      ) {
+        for (const key in resolvedFeature.componentImports) {
+          const payloadComponent = resolvedFeature.componentImports[key]
 
-      for (const key in featureSchemaMap) {
-        const state = featureSchemaMap[key]
+          const resolvedComponent = getFromImportMap({
+            importMap: args.payload.importMap,
+            PayloadComponent: payloadComponent,
+            schemaPath: 'lexical-clientComponent',
+            silent: true,
+          })
 
-        const clientFields = createClientFields({
-          clientFields: ('fields' in state
-            ? deepCopyObjectSimple(state.fields)
-            : [deepCopyObjectSimple(state)]) as ClientField[],
-          defaultIDType: args.payload.config.db.defaultIDType,
-          disableAddingID: true,
-          fields: 'fields' in state ? state.fields : [state],
-          i18n: args.i18n,
-          importMap: args.payload.importMap,
-        })
-        featureClientSchemaMap[featureKey][key] = clientFields
-      }
-    }
-
-    if (resolvedFeature.componentImports && typeof resolvedFeature.componentImports === 'object') {
-      for (const key in resolvedFeature.componentImports) {
-        const payloadComponent = resolvedFeature.componentImports[key]
-
-        const resolvedComponent = getFromImportMap({
-          importMap: args.payload.importMap,
-          PayloadComponent: payloadComponent,
-          schemaPath: 'lexical-clientComponent',
-          silent: true,
-        })
-
-        featureClientImportMap[`${resolvedFeature.key}.${key}`] = resolvedComponent
+          featureClientImportMap[`${resolvedFeature.key}.${key}`] = resolvedComponent
+        }
       }
     }
   }

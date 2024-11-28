@@ -1,41 +1,21 @@
 'use client'
-import type {
-  EditorConfig,
-  LexicalEditor,
-  LexicalNode,
-  SerializedLexicalNode,
-  Spread,
-} from 'lexical'
+import type { EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
 
 import ObjectID from 'bson-objectid'
 import React, { type JSX } from 'react'
 
-import type { SerializedServerInlineBlockNode } from '../../server/nodes/InlineBlockNode.js'
+import type {
+  InlineBlockFields,
+  SerializedInlineBlockNode,
+} from '../../server/nodes/InlineBlocksNode.js'
 
-import { ServerInlineBlockNode } from '../../server/nodes/InlineBlockNode.js'
-
-export type InlineBlockFields = {
-  /** Block form data */
-  [key: string]: any
-  //blockName: string
-  blockType: string
-  id: string
-}
+import { ServerInlineBlockNode } from '../../server/nodes/InlineBlocksNode.js'
 
 const InlineBlockComponent = React.lazy(() =>
   import('../componentInline/index.js').then((module) => ({
     default: module.InlineBlockComponent,
   })),
 )
-
-export type SerializedInlineBlockNode = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    fields: InlineBlockFields
-    type: 'inlineBlock'
-  },
-  SerializedLexicalNode
->
 
 export class InlineBlockNode extends ServerInlineBlockNode {
   static clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
@@ -55,7 +35,7 @@ export class InlineBlockNode extends ServerInlineBlockNode {
     return <InlineBlockComponent formData={this.getFields()} nodeKey={this.getKey()} />
   }
 
-  exportJSON(): SerializedServerInlineBlockNode {
+  exportJSON(): SerializedInlineBlockNode {
     return super.exportJSON()
   }
 }

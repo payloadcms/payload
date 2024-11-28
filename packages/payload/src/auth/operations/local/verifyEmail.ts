@@ -33,4 +33,4 @@ async function localVerifyEmail<T extends CollectionSlug>(
   })
 }
 
-export default localVerifyEmail
+export const verifyEmail = localVerifyEmail

@@ -53,7 +53,10 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   }, [docID, on, field.where])
 
   return (
-    <div className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}>
+    <div
+      className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}
+      id={`field-${path?.replace(/\./g, '__')}`}
+    >
       {BeforeInput}
       <RelationshipTable
         allowCreate={typeof docID !== 'undefined' && allowCreate}

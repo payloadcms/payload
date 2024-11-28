@@ -1,5 +1,6 @@
 import type { SerializedLexicalNode } from 'lexical'
 import type {
+  ClientFieldSchemaMap,
   DocumentPreferences,
   FieldSchemaMap,
   FormState,
@@ -22,6 +23,7 @@ export type InitialLexicalFormState = {
 
 type Props = {
   context: {
+    clientFieldSchemaMap: ClientFieldSchemaMap
     collectionSlug: string
     field: RichTextField
     fieldSchemaMap: FieldSchemaMap
@@ -70,6 +72,7 @@ export async function buildInitialState({
 
       const formStateResult = await fieldSchemasToFormState({
         id: context.id,
+        clientFieldSchemaMap: context.clientFieldSchemaMap,
         collectionSlug: context.collectionSlug,
         data: blockNode.fields,
         fields: (context.fieldSchemaMap.get(schemaFieldsPath) as any)?.fields,

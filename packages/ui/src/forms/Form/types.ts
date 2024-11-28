@@ -41,7 +41,7 @@ export type FormProps = {
   log?: boolean
   onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
-  onSuccess?: (json: unknown) => Promise<void> | void
+  onSuccess?: (json: unknown) => Promise<FormState | void> | void
   redirect?: string
   submitted?: boolean
   uuid?: string

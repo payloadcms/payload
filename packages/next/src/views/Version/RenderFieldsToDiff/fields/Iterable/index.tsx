@@ -17,10 +17,10 @@ const Iterable: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
   field,
+  fieldPermissions,
   i18n,
   locale,
   locales,
-  permissions,
   version,
 }) => {
   const versionRowCount = Array.isArray(version) ? version.length : 0
@@ -86,7 +86,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
                 <RenderFieldsToDiff
                   comparison={comparisonRow}
                   diffComponents={diffComponents}
-                  fieldPermissions={permissions}
+                  fieldPermissions={fieldPermissions}
                   fields={fields}
                   i18n={i18n}
                   locales={locales}

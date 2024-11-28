@@ -8,25 +8,22 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from 'lexical'
+import type { JsonObject } from 'payload'
 import type React from 'react'
 import type { JSX } from 'react'
 
 import ObjectID from 'bson-objectid'
 import { DecoratorNode } from 'lexical'
-import { deepCopyObjectSimple } from 'payload/shared'
 
-export type InlineBlockFields = {
-  /** Block form data */
-  [key: string]: any
-  //blockName: string
+export type InlineBlockFields<TInlineBlockFields extends JsonObject = JsonObject> = {
   blockType: string
   id: string
-}
+} & TInlineBlockFields
 
-export type SerializedServerInlineBlockNode = Spread<
+export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObject> = Spread<
   {
     children?: never // required so that our typed editor state doesn't automatically add children
-    fields: InlineBlockFields
+    fields: InlineBlockFields<TBlockFields>
     type: 'inlineBlock'
   },
   SerializedLexicalNode
@@ -55,7 +52,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return {}
   }
 
-  static importJSON(serializedNode: SerializedServerInlineBlockNode): ServerInlineBlockNode {
+  static importJSON(serializedNode: SerializedInlineBlockNode): ServerInlineBlockNode {
     const node = $createServerInlineBlockNode(serializedNode.fields)
     return node
   }
@@ -87,7 +84,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return { element }
   }
 
-  exportJSON(): SerializedServerInlineBlockNode {
+  exportJSON(): SerializedInlineBlockNode {
     return {
       type: 'inlineBlock',
       fields: this.getFields(),
@@ -108,10 +105,8 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   }
 
   setFields(fields: InlineBlockFields): void {
-    const fieldsCopy = deepCopyObjectSimple(fields)
-
     const writable = this.getWritable()
-    writable.__fields = fieldsCopy
+    writable.__fields = fields
   }
 
   updateDOM(): boolean {

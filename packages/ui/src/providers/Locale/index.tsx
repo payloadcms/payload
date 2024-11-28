@@ -14,7 +14,7 @@ const LocaleContext = createContext({} as Locale)
 
 export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const {
-    config: { localization },
+    config: { localization = false },
   } = useConfig()
 
   const { user } = useAuth()

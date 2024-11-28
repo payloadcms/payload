@@ -10,6 +10,7 @@ import React, { createContext, useCallback } from 'react'
 
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
+import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
 
 type GetFormStateClient = (
   args: {
@@ -29,10 +30,17 @@ type RenderDocument = (args: {
   docID?: number | string
   drawerSlug?: string
   initialData?: Data
+  overrideEntityVisibility?: boolean
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   signal?: AbortSignal
 }) => Promise<{ data: Data; Document: React.ReactNode }>
+
+type CopyDataFromLocaleClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<CopyDataFromLocaleArgs, 'req'>,
+) => Promise<{ data: Data }>
 
 type GetDocumentSlots = (args: {
   collectionSlug: string
@@ -40,6 +48,7 @@ type GetDocumentSlots = (args: {
 }) => Promise<DocumentSlots>
 
 type ServerFunctionsContextType = {
+  copyDataFromLocale: CopyDataFromLocaleClient
   getDocumentSlots: GetDocumentSlots
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
@@ -142,9 +151,30 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const copyDataFromLocale = useCallback<CopyDataFromLocaleClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args || {}
+
+      try {
+        const result = (await serverFunction({
+          name: 'copy-data-from-locale',
+          args: rest,
+        })) as { data: Data }
+
+        if (!remoteSignal?.aborted) {
+          return result
+        }
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
   return (
     <ServerFunctionsContext.Provider
       value={{
+        copyDataFromLocale,
         getDocumentSlots,
         getFormState,
         getTableState,

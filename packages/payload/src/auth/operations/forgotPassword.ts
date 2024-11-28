@@ -14,6 +14,7 @@ import { APIError } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { getLoginOptions } from '../getLoginOptions.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
@@ -33,8 +34,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
   const loginWithUsername = incomingArgs.collection.config.auth.loginWithUsername
   const { data } = incomingArgs
 
-  const canLoginWithUsername = Boolean(loginWithUsername)
-  const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
+  const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
   const sanitizedEmail =
     (canLoginWithEmail && (incomingArgs.data.email || '').toLowerCase().trim()) || null
@@ -153,7 +153,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     <a href="${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}">${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}</a>
     ${req.t('authentication:youDidNotRequestPassword')}`
 
-      if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
+      if (typeof collectionConfig.auth.forgotPassword?.generateEmailHTML === 'function') {
         html = await collectionConfig.auth.forgotPassword.generateEmailHTML({
           req,
           token,
@@ -163,7 +163,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
 
       let subject = req.t('authentication:resetYourPassword')
 
-      if (typeof collectionConfig.auth.forgotPassword.generateEmailSubject === 'function') {
+      if (typeof collectionConfig.auth.forgotPassword?.generateEmailSubject === 'function') {
         subject = await collectionConfig.auth.forgotPassword.generateEmailSubject({
           req,
           token,
