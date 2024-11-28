@@ -38,6 +38,7 @@ export const findOne: FindOne = async function findOne(
     joins,
     locale,
     projection,
+    session,
   })
 
   let doc

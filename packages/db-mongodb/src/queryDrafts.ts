@@ -82,6 +82,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     joins,
     locale,
     projection,
+    session,
     versions: true,
   })
 
