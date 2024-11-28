@@ -173,6 +173,72 @@ const editorConfig: ServerEditorConfig = {
           ],
         },
       ],
+      wrapperBlocks: [
+        {
+          block: {
+            slug: 'wrapperBlock',
+            fields: [
+              {
+                name: 'name',
+                type: 'text',
+              },
+            ],
+          },
+          createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockCreateDOM',
+        },
+        {
+          block: {
+            slug: 'wrapperBlockCustomLabel',
+            admin: {
+              components: {
+                Label: '/collections/Lexical/wrapperBlocks/LabelComponent.js#NameLabelComponent',
+              },
+            },
+            fields: [
+              {
+                name: 'name',
+                type: 'text',
+              },
+            ],
+          },
+          createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockCreateDOM',
+        },
+        {
+          block: {
+            slug: 'wrapperBlockCustomBlock',
+            admin: {
+              components: {
+                Block: '/collections/Lexical/wrapperBlocks/BlockComponent.js#BlockComponent',
+              },
+            },
+            fields: [
+              {
+                name: 'name',
+                type: 'text',
+              },
+            ],
+          },
+          createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockCreateDOM',
+        },
+        {
+          block: {
+            slug: 'wrapperBlockCustomBlockAndLabel',
+            admin: {
+              components: {
+                Block: '/collections/Lexical/wrapperBlocks/BlockComponent.js#BlockComponent',
+                Label: '/collections/Lexical/wrapperBlocks/LabelComponent.js#NameLabelComponent',
+              },
+            },
+            fields: [
+              {
+                name: 'name',
+                type: 'text',
+              },
+            ],
+          },
+          createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockCreateDOM',
+        },
+      ],
       inlineBlocks: [
         {
           slug: 'myInlineBlock',
