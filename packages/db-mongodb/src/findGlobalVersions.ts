@@ -1,7 +1,7 @@
 import type { CollationOptions } from 'mongodb'
 import type { FindGlobalVersions, PayloadRequest } from 'payload'
 
-import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
+import { buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -9,6 +9,7 @@ import { getSession } from './getSession.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { findMany } from './utilities/findMany.js'
+import { getHasNearConstraint } from './utilities/getHasNearConstraint.js'
 import { transform } from './utilities/transform.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
@@ -33,12 +34,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     true,
   )
 
-  let hasNearConstraint = false
-
-  if (where) {
-    const constraints = flattenWhereToOperators(where)
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
-  }
+  const hasNearConstraint = getHasNearConstraint(where)
 
   let sort
   if (!hasNearConstraint) {

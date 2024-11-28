@@ -48,7 +48,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     operation: 'update',
   })
 
-  const doc = await VersionModel.collection.findOneAndUpdate(
+  const doc: any = await VersionModel.collection.findOneAndUpdate(
     query,
     { $set: versionData },
     {

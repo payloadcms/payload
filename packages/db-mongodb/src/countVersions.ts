@@ -1,11 +1,10 @@
 import type { CountOptions } from 'mongodb'
 import type { CountVersions, PayloadRequest } from 'payload'
 
-import { flattenWhereToOperators } from 'payload'
-
 import type { MongooseAdapter } from './index.js'
 
 import { getSession } from './getSession.js'
+import { getHasNearConstraint } from './utilities/getHasNearConstraint.js'
 
 export const countVersions: CountVersions = async function countVersions(
   this: MongooseAdapter,
@@ -14,12 +13,7 @@ export const countVersions: CountVersions = async function countVersions(
   const Model = this.versions[collection]
   const session = await getSession(this, req)
 
-  let hasNearConstraint = false
-
-  if (where) {
-    const constraints = flattenWhereToOperators(where)
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
-  }
+  const hasNearConstraint = getHasNearConstraint(where)
 
   const query = await Model.buildQuery({
     locale,

@@ -1,8 +1,6 @@
 import type { CollationOptions } from 'mongodb'
 import type { Find, PayloadRequest } from 'payload'
 
-import { flattenWhereToOperators } from 'payload'
-
 import type { MongooseAdapter } from './index.js'
 
 import { getSession } from './getSession.js'
@@ -10,6 +8,7 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { findMany } from './utilities/findMany.js'
+import { getHasNearConstraint } from './utilities/getHasNearConstraint.js'
 import { transform } from './utilities/transform.js'
 
 export const find: Find = async function find(
@@ -31,12 +30,7 @@ export const find: Find = async function find(
   const collectionConfig = this.payload.collections[collection].config
   const session = await getSession(this, req)
 
-  let hasNearConstraint = false
-
-  if (where) {
-    const constraints = flattenWhereToOperators(where)
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
-  }
+  const hasNearConstraint = getHasNearConstraint(where)
 
   const fields = collectionConfig.flattenedFields
 

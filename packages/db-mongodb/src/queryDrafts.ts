@@ -1,7 +1,7 @@
 import type { CollationOptions } from 'mongodb'
 import type { PayloadRequest, QueryDrafts } from 'payload'
 
-import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
+import { buildVersionCollectionFields, combineQueries } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -10,6 +10,7 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { findMany } from './utilities/findMany.js'
+import { getHasNearConstraint } from './utilities/getHasNearConstraint.js'
 import { transform } from './utilities/transform.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
@@ -31,13 +32,8 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const collectionConfig = this.payload.collections[collection].config
   const session = await getSession(this, req)
 
-  let hasNearConstraint
+  const hasNearConstraint = getHasNearConstraint(where)
   let sort
-
-  if (where) {
-    const constraints = flattenWhereToOperators(where)
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
-  }
 
   if (!hasNearConstraint) {
     sort = buildSortParam({
