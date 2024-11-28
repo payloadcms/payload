@@ -69,7 +69,7 @@ export function initLexicalFeatures(args: Args): {
     }
 
     /**
-     * Handle sub-fields (formstate of those)ttt
+     * Handle sub-fields (formstate of those)
      */
     // The args.fieldSchemaMap generated before in buildFormState should contain all of lexical features' sub-field schemas
     // as well, as it already called feature.generateSchemaMap for each feature.

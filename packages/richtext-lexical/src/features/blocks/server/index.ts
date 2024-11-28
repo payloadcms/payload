@@ -46,7 +46,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           blocks: props.inlineBlocks ?? [],
         },
         {
-          name: 'lexical_inline_wrapper_blocks',
+          name: 'lexical_wrapper_blocks',
           type: 'blocks',
           blocks: props.wrapperBlocks
             ? props.wrapperBlocks.map((wrapperBlock) => wrapperBlock.block)

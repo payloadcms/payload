@@ -1,18 +1,25 @@
 'use client'
 import type { LexicalNode } from 'lexical'
-import type { BlocksFieldClient, ClientBlock, Data, FormState } from 'payload'
+import type { BlocksFieldClient, ClientBlock, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
+import { getTranslation } from '@payloadcms/translations'
 import {
   CloseMenuIcon,
+  Drawer,
+  EditDepthProvider,
   EditIcon,
+  Form,
   formatDrawerSlug,
-  useConfig,
+  FormSubmit,
+  RenderFields,
+  useDocumentInfo,
   useEditDepth,
-  useLocale,
+  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
+import { abortAndIgnore } from '@payloadcms/ui/shared'
 import {
   $getSelection,
   $isLineBreakNode,
@@ -22,8 +29,9 @@ import {
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import { getTranslation } from 'packages/translations/src/utilities/getTranslation.js'
-import React, { type JSX, useCallback, useEffect, useRef, useState } from 'react'
+import { reduceFieldsToValues } from 'payload/shared'
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { v4 as uuid } from 'uuid'
 
 import type { WrapperBlockFields, WrapperBlockNodeType } from '../../../../WrapperBlockNode.js'
 import type { AdditionalWrapperBlocksPluginArgs } from '../index.js'
@@ -31,12 +39,28 @@ import type { AdditionalWrapperBlocksPluginArgs } from '../index.js'
 import { useEditorConfigContext } from '../../../../../../lexical/config/client/EditorConfigProvider.js'
 import { getSelectedNode } from '../../../../../../lexical/utils/getSelectedNode.js'
 import { setFloatingElemPositionForLinkEditor } from '../../../../../../lexical/utils/setFloatingElemPositionForLinkEditor.js'
-import { FieldsDrawer } from '../../../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDrawer } from '../../../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import {
   INSERT_WRAPPER_BLOCK_COMMAND,
   TOGGLE_WRAPPER_BLOCK_WITH_MODAL_COMMAND,
 } from '../../commands.js'
+
+type WrapperBlockComponentContextType = {
+  EditButton?: React.FC
+  formData: ({ text: string } & WrapperBlockFields) | undefined
+  initialState: false | FormState | undefined
+  Label?: React.FC
+  RemoveButton?: React.FC
+  WrapperBlockContainer?: React.FC<{ children: React.ReactNode }>
+  wrapperBlockNode?: WrapperBlockNodeType
+}
+
+const WrapperBlockComponentContext = createContext<WrapperBlockComponentContextType>({
+  formData: undefined,
+  initialState: false,
+})
+
+export const useWrapperBlockComponentContext = () => React.useContext(WrapperBlockComponentContext)
 
 export function BlockEditor({
   $createWrapperBlockNode,
@@ -45,31 +69,85 @@ export function BlockEditor({
 }: { anchorElem: HTMLElement } & AdditionalWrapperBlocksPluginArgs): React.ReactNode {
   const [editor] = useLexicalComposerContext()
   // TO-DO: There are several states that should not be state, because they
-  // are derived from linkNode (linkUrl, linkLabel, stateData, isLink, isAutoLink...)
+  // are derived from linkNode (linkUrl, linkLabel, formData, isLink, isAutoLink...)
   const [wrapperBlockNode, setWrapperBlockNode] = useState<null | WrapperBlockNodeType>()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
-  const [wrapperBlockComponent, setWrapperBlockComponent] = useState<JSX.Element | null>(null)
+  const [wrapperBlockComponent, setWrapperBlockComponent] = useState<null | React.ReactNode>(null)
+  const [wrapperBlockLabelComponent, setWrapperBlockLabelComponent] =
+    useState<null | React.ReactNode>(null)
   const [clientBlock, setClientBlock] = useState<ClientBlock | null>(null)
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const {
-    fieldProps: { featureClientSchemaMap, initialLexicalFormState, schemaPath },
-    uuid,
+    fieldProps: { featureClientSchemaMap, permissions, schemaPath },
+    uuid: uuidFromContext,
   } = useEditorConfigContext()
 
-  const [stateData, setStateData] = useState<({ text: string } & WrapperBlockFields) | undefined>()
+  const [formData, setFormData] = useState<({ text: string } & WrapperBlockFields) | undefined>()
   const { i18n, t } = useTranslation<object, string>()
+  const { getFormState } = useServerFunctions()
+  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(undefined)
+  const [schemaFieldsPath, setSchemaFieldsPath] = React.useState<string | undefined>(undefined)
 
   const editDepth = useEditDepth()
   const [isWrapperBlockNode, setIsWrapperBlockNode] = useState(false)
   const [selectedNodes, setSelectedNodes] = useState<LexicalNode[]>([])
 
   const drawerSlug = formatDrawerSlug({
-    slug: `lexical-rich-text-wrapper-block-` + uuid,
+    slug: `lexical-rich-text-wrapper-block-` + uuidFromContext,
     depth: editDepth,
   })
 
   const { toggleDrawer } = useLexicalDrawer(drawerSlug)
+
+  /**
+   * Handle drawer and form state
+   */
+  const onChangeAbortControllerRef = useRef(new AbortController())
+
+  const loadInitialState = useCallback(
+    async ({
+      formData,
+      schemaFieldsPath,
+    }: {
+      formData: { text: string } & WrapperBlockFields
+      schemaFieldsPath: string
+    }) => {
+      const abortController = new AbortController()
+
+      const awaitInitialState = async () => {
+        /*
+         * This will only run if a new block is created. For all existing blocks that are loaded when the document is loaded, or when the form is saved,
+         * this is not run, as the lexical field RSC will fetch the state server-side and pass it to the client. That way, we avoid unnecessary client-side
+         * requests. Though for newly created blocks, we need to fetch the state client-side, as the server doesn't know about the block yet.
+         */
+        const { state } = await getFormState({
+          id,
+          collectionSlug,
+          data: formData,
+          docPermissions: { fields: true },
+          docPreferences: await getDocPreferences(),
+          globalSlug,
+          operation: 'update',
+          renderAllFields: true,
+          schemaPath: schemaFieldsPath,
+          signal: abortController.signal,
+        })
+
+        if (state) {
+          setInitialState(state)
+          setWrapperBlockComponent(state['_components']?.customComponents?.Block)
+          setWrapperBlockLabelComponent(state['_components']?.customComponents?.BlockLabel)
+        }
+      }
+
+      if (formData && !initialState) {
+        void awaitInitialState()
+      }
+    },
+    [initialState, getFormState, id, collectionSlug, getDocPreferences, globalSlug],
+  )
 
   const hideBlockPopup = useCallback(() => {
     setIsWrapperBlockNode(false)
@@ -79,8 +157,12 @@ export function BlockEditor({
     }
     setWrapperBlockNode(null)
     setWrapperBlockComponent(null)
+    setWrapperBlockLabelComponent(null)
+    setClientBlock(null)
     setSelectedNodes([])
-    setStateData(undefined)
+    setFormData(undefined)
+    setInitialState(undefined)
+    setSchemaFieldsPath(undefined)
   }, [])
 
   const $updateBlockPopup = useCallback(() => {
@@ -122,8 +204,10 @@ export function BlockEditor({
       ...fields,
       text: focusWrapperBlockParent.getTextContent(),
     }
+    const schemaFieldsPath_ = `${schemaPath}.lexical_internal_feature.blocks.lexical_wrapper_blocks.${data.blockType}.fields`
+    setSchemaFieldsPath(schemaFieldsPath_)
 
-    setStateData(data)
+    setFormData(data)
     setIsWrapperBlockNode(true)
     setSelectedNodes(selection ? selection?.getNodes() : [])
 
@@ -137,6 +221,8 @@ export function BlockEditor({
 
     const clientBlock = blocksField.blocks[0]
     setClientBlock(clientBlock)
+
+    void loadInitialState({ formData: data, schemaFieldsPath: schemaFieldsPath_ })
 
     const editorElem = editorRef.current
     const nativeSelection = window.getSelection()
@@ -168,7 +254,15 @@ export function BlockEditor({
     }
 
     return true
-  }, [editor, $isWrapperBlockNode, schemaPath, featureClientSchemaMap, hideBlockPopup, anchorElem])
+  }, [
+    editor,
+    $isWrapperBlockNode,
+    schemaPath,
+    featureClientSchemaMap,
+    loadInitialState,
+    hideBlockPopup,
+    anchorElem,
+  ])
 
   useEffect(() => {
     return mergeRegister(
@@ -253,79 +347,200 @@ export function BlockEditor({
   }, [editor, $updateBlockPopup])
 
   /**
-   * Handle drawer and form state
+   * HANDLE ONCHANGE
    */
+  const onChange = useCallback(
+    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
+      abortAndIgnore(onChangeAbortControllerRef.current)
+
+      const controller = new AbortController()
+      onChangeAbortControllerRef.current = controller
+
+      const { state } = await getFormState({
+        id,
+        collectionSlug,
+        docPermissions: {
+          fields: true,
+        },
+        docPreferences: await getDocPreferences(),
+        formState: prevFormState,
+        globalSlug,
+        operation: 'update',
+        renderAllFields: submit ? true : false,
+        schemaPath: schemaFieldsPath!,
+        signal: controller.signal,
+      })
+
+      if (!state) {
+        return prevFormState
+      }
+
+      if (submit) {
+        setWrapperBlockComponent(state['_components']?.customComponents?.Block)
+        setWrapperBlockLabelComponent(state['_components']?.customComponents?.BlockLabel)
+      }
+
+      return state
+    },
+    [getFormState, id, collectionSlug, getDocPreferences, globalSlug, schemaFieldsPath],
+  )
+  // cleanup effect
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(onChangeAbortControllerRef.current)
+    }
+  }, [])
+
+  /**
+   * HANDLE FORM SUBMIT
+   */
+  const onFormSubmit = useCallback(
+    (formState: FormState) => {
+      const newData: any = reduceFieldsToValues(formState)
+      newData.blockType = formData?.blockType
+      editor.update(() => {
+        if (wrapperBlockNode && $isWrapperBlockNode(wrapperBlockNode)) {
+          wrapperBlockNode.setFields(newData)
+        }
+      })
+    },
+    [formData?.blockType, editor, wrapperBlockNode, $isWrapperBlockNode],
+  )
 
   const blockDisplayName = clientBlock?.labels?.singular
     ? getTranslation(clientBlock.labels.singular, i18n)
     : clientBlock?.slug
 
+  const EditButton = useMemo(
+    () => () => (
+      <button
+        aria-label="Edit Wrapper Block"
+        className="wrapper-block-edit"
+        onClick={() => {
+          toggleDrawer()
+        }}
+        onMouseDown={(event) => {
+          event.preventDefault()
+        }}
+        tabIndex={0}
+        type="button"
+      >
+        <EditIcon />
+      </button>
+    ),
+    [toggleDrawer],
+  )
+
+  const RemoveButton = useMemo(
+    () => () => (
+      <button
+        aria-label="Remove Wrapper Block"
+        className="wrapper-block-trash"
+        onClick={() => {
+          editor.dispatchCommand(INSERT_WRAPPER_BLOCK_COMMAND, null)
+        }}
+        onMouseDown={(event) => {
+          event.preventDefault()
+        }}
+        tabIndex={0}
+        type="button"
+      >
+        <CloseMenuIcon />
+      </button>
+    ),
+    [editor],
+  )
+
+  const Label = useMemo(() => {
+    if (wrapperBlockLabelComponent) {
+      return () => wrapperBlockLabelComponent
+    } else {
+      return () => blockDisplayName
+    }
+  }, [blockDisplayName, wrapperBlockLabelComponent])
+
+  const WrapperBlockContainer = useMemo(
+    () =>
+      ({ children }: { children: React.ReactNode }) => (
+        <div className="wrapper-block-editor" ref={editorRef}>
+          <div className="wraper-block-input">{children}</div>
+        </div>
+      ),
+    [],
+  )
+
+  if (!initialState || !clientBlock || !schemaFieldsPath) {
+    return null
+  }
+
   return (
-    <React.Fragment>
-      <div className="wrapper-block-editor" ref={editorRef}>
-        <div className="wraper-block-input">
-          {wrapperBlockComponent ? wrapperBlockComponent : blockDisplayName}
+    <Form
+      beforeSubmit={[
+        async ({ formState }) => {
+          // This is only called when form is submitted from drawer
+          return await onChange({ formState, submit: true })
+        },
+      ]}
+      disableValidationOnSubmit
+      fields={clientBlock?.fields}
+      initialState={initialState || {}}
+      onChange={[onChange]}
+      onSubmit={(formState) => {
+        onFormSubmit(formState)
+        toggleDrawer()
+      }}
+      uuid={uuid()}
+    >
+      {wrapperBlockComponent ? (
+        <WrapperBlockComponentContext.Provider
+          value={{
+            EditButton,
+            formData,
+            initialState,
+            Label,
+            RemoveButton,
+            WrapperBlockContainer,
+            wrapperBlockNode: wrapperBlockNode!,
+          }}
+        >
+          {wrapperBlockComponent}
+        </WrapperBlockComponentContext.Provider>
+      ) : (
+        <WrapperBlockContainer>
+          <Label />
           {editor.isEditable() && (
             <React.Fragment>
-              <button
-                aria-label="Edit Wrapper Block"
-                className="wrapper-block-edit"
-                onClick={() => {
-                  toggleDrawer()
-                }}
-                onMouseDown={(event) => {
-                  event.preventDefault()
-                }}
-                tabIndex={0}
-                type="button"
-              >
-                <EditIcon />
-              </button>
-              <button
-                aria-label="Remove Wrapper Block"
-                className="wrapper-block-trash"
-                onClick={() => {
-                  editor.dispatchCommand(INSERT_WRAPPER_BLOCK_COMMAND, null)
-                }}
-                onMouseDown={(event) => {
-                  event.preventDefault()
-                }}
-                tabIndex={0}
-                type="button"
-              >
-                <CloseMenuIcon />
-              </button>
+              <EditButton />
+              <RemoveButton />
             </React.Fragment>
           )}
-        </div>
-      </div>
-      <FieldsDrawer
-        className="lexical-wrapper-block-edit-drawer"
-        data={stateData}
-        drawerSlug={drawerSlug}
-        drawerTitle={t(`lexical:blocks:inlineBlocks:${stateData?.id ? 'edit' : 'create'}`, {
-          label: blockDisplayName ?? t('lexical:blocks:wrapperBlocks:label'),
-        })}
-        featureKey="blocks"
-        handleDrawerSubmit={(fields: FormState, data: Data) => {
-          const newWrapperBlockPayload = data as { text: string } & WrapperBlockFields
+        </WrapperBlockContainer>
+      )}
 
-          const bareWrapperBlockFields: WrapperBlockFields = {
-            ...newWrapperBlockPayload,
-          }
-          delete bareWrapperBlockFields.text
-
-          // Needs to happen AFTER a potential auto link => link node conversion, as otherwise, the updated text to display may be lost due to
-          // it being applied to the auto link node instead of the link node.
-          editor.dispatchCommand(INSERT_WRAPPER_BLOCK_COMMAND, {
-            fields: bareWrapperBlockFields,
-            selectedNodes,
-            text: newWrapperBlockPayload.text,
-          })
-        }}
-        schemaPath={schemaPath}
-        schemaPathSuffix="fields"
-      />
-    </React.Fragment>
+      <EditDepthProvider>
+        <Drawer
+          className={''}
+          slug={drawerSlug}
+          title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
+            label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
+          })}
+        >
+          {initialState && clientBlock ? (
+            <>
+              <RenderFields
+                fields={clientBlock.fields}
+                forceRender
+                parentIndexPath=""
+                parentPath="" // See Blocks feature path for details as for why this is empty
+                parentSchemaPath={schemaFieldsPath}
+                permissions={permissions}
+                readOnly={false}
+              />
+              <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
+            </>
+          ) : null}
+        </Drawer>
+      </EditDepthProvider>
+    </Form>
   )
 }
