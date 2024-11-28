@@ -13,7 +13,7 @@ export const count: Count = async function count(
   const Model = this.collections[collection]
   const session = await getSession(this, req)
 
-  const hasNearConstraint = getHasNearConstraint()
+  const hasNearConstraint = getHasNearConstraint(where)
 
   const query = await Model.buildQuery({
     locale,

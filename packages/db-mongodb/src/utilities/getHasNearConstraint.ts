@@ -6,18 +6,19 @@ export const getHasNearConstraint = (where?: Where): boolean => {
   }
 
   for (const key in where) {
-    if (key === 'near') {
-      return true
+    const value = where[key]
+
+    if (Array.isArray(value) && ['AND', 'OR'].includes(key.toUpperCase())) {
+      for (const where of value) {
+        if (getHasNearConstraint(where)) {
+          return true
+        }
+      }
     }
 
-    if (['AND', 'OR'].includes(key.toUpperCase())) {
-      const value = where[key]
-      if (Array.isArray(value)) {
-        for (const where of value) {
-          if (getHasNearConstraint(where)) {
-            return true
-          }
-        }
+    for (const key in value) {
+      if (key === 'near') {
+        return true
       }
     }
   }

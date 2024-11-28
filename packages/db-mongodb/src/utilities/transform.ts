@@ -1,5 +1,6 @@
 import type {
   CollectionConfig,
+  DateField,
   FlattenedField,
   JoinField,
   RelationshipField,
@@ -31,7 +32,7 @@ function isValidRelationObject(value: unknown): value is RelationObject {
   return typeof value === 'object' && value !== null && 'relationTo' in value && 'value' in value
 }
 
-const convertValue = ({
+const convertRelationshipValue = ({
   operation,
   relatedCollection,
   value,
@@ -120,7 +121,7 @@ const sanitizeRelationship = ({
         if (relatedCollectionForSingleValue) {
           return {
             relationTo: val.relationTo,
-            value: convertValue({
+            value: convertRelationshipValue({
               operation,
               relatedCollection: relatedCollectionForSingleValue,
               value: val.value,
@@ -130,7 +131,7 @@ const sanitizeRelationship = ({
       }
 
       if (relatedCollection) {
-        return convertValue({
+        return convertRelationshipValue({
           operation,
           relatedCollection,
           value: val,
@@ -147,13 +148,13 @@ const sanitizeRelationship = ({
     if (relatedCollection) {
       result = {
         relationTo: value.relationTo,
-        value: convertValue({ operation, relatedCollection, value: value.value }),
+        value: convertRelationshipValue({ operation, relatedCollection, value: value.value }),
       }
     }
   }
   // Handle has one
   else if (relatedCollection) {
-    result = convertValue({
+    result = convertRelationshipValue({
       operation,
       relatedCollection,
       value,
@@ -164,6 +165,44 @@ const sanitizeRelationship = ({
     ref[locale] = result
   } else {
     ref[field.name] = result
+  }
+}
+
+/**
+ * When sending data to Payload - convert Date to string.
+ * Vice versa when sending data to MongoDB so dates are stored properly.
+ */
+const sanitizeDate = ({
+  field,
+  locale,
+  operation,
+  ref,
+  value,
+}: {
+  field: DateField
+  locale?: string
+  operation: Args['operation']
+  ref: Record<string, unknown>
+  value: unknown
+}) => {
+  if (!value) {
+    return
+  }
+
+  if (operation === 'read') {
+    if (value instanceof Date) {
+      value = value.toISOString()
+    }
+  } else {
+    if (typeof value === 'string') {
+      value = new Date(value)
+    }
+  }
+
+  if (locale) {
+    ref[locale] = value
+  } else {
+    ref[field.name] = value
   }
 }
 
@@ -229,11 +268,27 @@ export const transform = ({ adapter, data, fields, globalSlug, operation }: Args
     }
 
     if (field.type === 'date') {
-      if (operation === 'read') {
-        const value = ref[field.name]
-        if (value && value instanceof Date) {
-          ref[field.name] = value.toISOString()
+      if (config.localization && field.localized) {
+        const fieldRef = ref[field.name]
+        if (!fieldRef || typeof fieldRef !== 'object') {
+          return
         }
+
+        for (const locale of config.localization.localeCodes) {
+          sanitizeDate({
+            field,
+            operation,
+            ref: fieldRef,
+            value: fieldRef[locale].locale,
+          })
+        }
+      } else {
+        sanitizeDate({
+          field,
+          operation,
+          ref: ref as Record<string, unknown>,
+          value: ref[field.name],
+        })
       }
     }
 
