@@ -31,6 +31,7 @@ export const mergeData = async <T>(args: {
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: Partial<T>
   initialData: T
+  locale?: string
   returnNumberOfRequests?: boolean
   serverURL: string
 }): Promise<
@@ -45,6 +46,7 @@ export const mergeData = async <T>(args: {
     fieldSchema,
     incomingData,
     initialData,
+    locale,
     returnNumberOfRequests,
     serverURL,
   } = args
@@ -69,10 +71,11 @@ export const mergeData = async <T>(args: {
       const requestHandler = args.collectionPopulationRequestHandler || defaultRequestHandler
 
       try {
+        console.log('using', locale)
         res = await requestHandler({
           apiPath: apiRoute || '/api',
           endpoint: encodeURI(
-            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}`,
+            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}${locale ? `&locale=${locale}` : ''}`,
           ),
           serverURL,
         }).then((res) => res.json())

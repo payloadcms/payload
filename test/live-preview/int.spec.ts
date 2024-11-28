@@ -1135,6 +1135,42 @@ describe('Collections - Live Preview', () => {
     ])
   })
 
+  it('— relationships - populates localized relationships', async () => {
+    // create a post with localizedTitle in both locales
+    const post = await payload.create({
+      collection: postsSlug,
+      data: {
+        localizedTitle: {
+          en: 'Test Post',
+          es: 'Test Post Spanish',
+        },
+      },
+    })
+
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      relationToLocalized: post.id,
+    }
+
+    // Populate the relationships
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        relationToLocalized: post.id,
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+      collectionPopulationRequestHandler,
+      locale: 'es',
+    })
+
+    expect(merge1).toHaveLength(1)
+    expect(merge1.relationToLocalized.localizedTitle).toBe('Test Post Spanish')
+  })
+
   it('— rich text - merges text changes', async () => {
     // Add a relationship
     const merge1 = await traverseRichText({

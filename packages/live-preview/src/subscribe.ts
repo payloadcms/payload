@@ -5,6 +5,7 @@ export const subscribe = <T>(args: {
   callback: (data: T) => void
   depth?: number
   initialData: T
+  locale
   serverURL: string
 }): ((event: MessageEvent) => void) => {
   const { apiRoute, callback, depth, initialData, serverURL } = args
