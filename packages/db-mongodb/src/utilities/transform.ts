@@ -21,6 +21,11 @@ type Args = {
   fields: FlattenedField[]
   globalSlug?: string
   operation: 'create' | 'read' | 'update'
+  /**
+   * Throw errors on invalid relationships
+   * @default true
+   */
+  validateRelationships?: boolean
 }
 
 interface RelationObject {
@@ -35,10 +40,12 @@ function isValidRelationObject(value: unknown): value is RelationObject {
 const convertRelationshipValue = ({
   operation,
   relatedCollection,
+  validateRelationships,
   value,
 }: {
   operation: Args['operation']
   relatedCollection: CollectionConfig
+  validateRelationships?: boolean
   value: unknown
 }) => {
   const customIDField = relatedCollection.fields.find(
@@ -60,7 +67,10 @@ const convertRelationshipValue = ({
   if (typeof value === 'string') {
     try {
       return new Types.ObjectId(value)
-    } catch {
+    } catch (e) {
+      if (validateRelationships) {
+        throw e
+      }
       return value
     }
   }
@@ -74,6 +84,7 @@ const sanitizeRelationship = ({
   locale,
   operation,
   ref,
+  validateRelationships,
   value,
 }: {
   config: SanitizedConfig
@@ -81,6 +92,7 @@ const sanitizeRelationship = ({
   locale?: string
   operation: Args['operation']
   ref: Record<string, unknown>
+  validateRelationships?: boolean
   value?: unknown
 }) => {
   if (field.type === 'join') {
@@ -124,6 +136,7 @@ const sanitizeRelationship = ({
             value: convertRelationshipValue({
               operation,
               relatedCollection: relatedCollectionForSingleValue,
+              validateRelationships,
               value: val.value,
             }),
           }
@@ -134,6 +147,7 @@ const sanitizeRelationship = ({
         return convertRelationshipValue({
           operation,
           relatedCollection,
+          validateRelationships,
           value: val,
         })
       }
@@ -148,7 +162,12 @@ const sanitizeRelationship = ({
     if (relatedCollection) {
       result = {
         relationTo: value.relationTo,
-        value: convertRelationshipValue({ operation, relatedCollection, value: value.value }),
+        value: convertRelationshipValue({
+          operation,
+          relatedCollection,
+          validateRelationships,
+          value: value.value,
+        }),
       }
     }
   }
@@ -157,6 +176,7 @@ const sanitizeRelationship = ({
     result = convertRelationshipValue({
       operation,
       relatedCollection,
+      validateRelationships,
       value,
     })
   }
@@ -206,10 +226,17 @@ const sanitizeDate = ({
   }
 }
 
-export const transform = ({ adapter, data, fields, globalSlug, operation }: Args) => {
+export const transform = ({
+  adapter,
+  data,
+  fields,
+  globalSlug,
+  operation,
+  validateRelationships = true,
+}: Args) => {
   if (Array.isArray(data)) {
     for (let i = 0; i < data.length; i++) {
-      transform({ adapter, data: data[i], fields, operation })
+      transform({ adapter, data: data[i], fields, globalSlug, operation, validateRelationships })
     }
     return
   }
@@ -279,7 +306,7 @@ export const transform = ({ adapter, data, fields, globalSlug, operation }: Args
             field,
             operation,
             ref: fieldRef,
-            value: fieldRef[locale].locale,
+            value: fieldRef[locale],
           })
         }
       } else {
@@ -323,19 +350,20 @@ export const transform = ({ adapter, data, fields, globalSlug, operation }: Args
               locale: code,
               operation,
               ref: fieldRef,
+              validateRelationships,
               value,
             })
           }
         }
       } else {
         // handle non-localized relationships
-
         sanitizeRelationship({
           config,
           field,
           locale: undefined,
           operation,
           ref: ref as Record<string, unknown>,
+          validateRelationships,
           value: ref[field.name],
         })
       }

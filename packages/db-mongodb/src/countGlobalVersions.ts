@@ -27,7 +27,7 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
 
   let result: number
   if (useEstimatedCount) {
-    result = await Model.collection.estimatedDocumentCount({ session })
+    result = await Model.collection.estimatedDocumentCount()
   } else {
     const options: CountOptions = { session }
 

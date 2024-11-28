@@ -86,17 +86,14 @@ export const findMany = async ({
 
   if (pagination !== false && limit) {
     if (useEstimatedCount) {
-      countPromise = collection.estimatedDocumentCount({ collation, session })
+      countPromise = collection.estimatedDocumentCount()
     } else {
       // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
       // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
       // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
       // the correct indexed field
 
-      const hint =
-        Object.keys(query).length === 0 && adapter.disableIndexHints !== true
-          ? { _id: 1 }
-          : undefined
+      const hint = adapter.disableIndexHints !== true ? { _id: 1 } : undefined
 
       countPromise = collection.countDocuments(query, { collation, hint, session })
     }

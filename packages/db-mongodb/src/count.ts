@@ -27,11 +27,11 @@ export const count: Count = async function count(
 
   let result: number
   if (useEstimatedCount) {
-    result = await Model.collection.estimatedDocumentCount({ session })
+    result = await Model.collection.estimatedDocumentCount()
   } else {
     const options: CountOptions = { session }
 
-    if (Object.keys(query).length === 0 && this.disableIndexHints !== true) {
+    if (this.disableIndexHints !== true) {
       // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
       // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
       // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
