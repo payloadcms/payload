@@ -40,11 +40,10 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   )
 
   transform({
-    type: 'write',
     adapter: this,
     data,
     fields,
-    insert: true,
+    operation: 'create',
   })
 
   const { insertedId } = await VersionModel.collection.insertOne(data, { session })
@@ -75,10 +74,10 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   )
 
   transform({
-    type: 'read',
     adapter: this,
     data,
     fields,
+    operation: 'read',
   })
 
   return data as any

@@ -19,8 +19,7 @@ type Args = {
   data: Record<string, unknown> | Record<string, unknown>[]
   fields: FlattenedField[]
   globalSlug?: string
-  insert?: boolean
-  type: 'read' | 'write'
+  operation: 'create' | 'read' | 'update'
 }
 
 interface RelationObject {
@@ -33,19 +32,19 @@ function isValidRelationObject(value: unknown): value is RelationObject {
 }
 
 const convertValue = ({
-  type,
+  operation,
   relatedCollection,
   value,
 }: {
+  operation: Args['operation']
   relatedCollection: CollectionConfig
-  type: 'read' | 'write'
   value: unknown
 }) => {
   const customIDField = relatedCollection.fields.find(
     (field) => fieldAffectsData(field) && field.name === 'id',
   )
 
-  if (type === 'read') {
+  if (operation === 'read') {
     if (value instanceof Types.ObjectId) {
       return value.toHexString()
     }
@@ -69,22 +68,28 @@ const convertValue = ({
 }
 
 const sanitizeRelationship = ({
-  type,
   config,
   field,
   locale,
+  operation,
   ref,
   value,
 }: {
   config: SanitizedConfig
   field: JoinField | RelationshipField | UploadField
   locale?: string
+  operation: Args['operation']
   ref: Record<string, unknown>
-  type: 'read' | 'write'
   value?: unknown
 }) => {
   if (field.type === 'join') {
-    if (value && typeof value === 'object' && 'docs' in value && Array.isArray(value.docs)) {
+    if (
+      operation === 'read' &&
+      value &&
+      typeof value === 'object' &&
+      'docs' in value &&
+      Array.isArray(value.docs)
+    ) {
       for (let i = 0; i < value.docs.length; i++) {
         const item = value.docs[i]
         if (item instanceof Types.ObjectId) {
@@ -116,7 +121,7 @@ const sanitizeRelationship = ({
           return {
             relationTo: val.relationTo,
             value: convertValue({
-              type,
+              operation,
               relatedCollection: relatedCollectionForSingleValue,
               value: val.value,
             }),
@@ -126,7 +131,7 @@ const sanitizeRelationship = ({
 
       if (relatedCollection) {
         return convertValue({
-          type,
+          operation,
           relatedCollection,
           value: val,
         })
@@ -142,14 +147,14 @@ const sanitizeRelationship = ({
     if (relatedCollection) {
       result = {
         relationTo: value.relationTo,
-        value: convertValue({ type, relatedCollection, value: value.value }),
+        value: convertValue({ operation, relatedCollection, value: value.value }),
       }
     }
   }
   // Handle has one
   else if (relatedCollection) {
     result = convertValue({
-      type,
+      operation,
       relatedCollection,
       value,
     })
@@ -162,10 +167,10 @@ const sanitizeRelationship = ({
   }
 }
 
-export const transform = ({ type, adapter, data, fields, globalSlug, insert }: Args) => {
+export const transform = ({ adapter, data, fields, globalSlug, operation }: Args) => {
   if (Array.isArray(data)) {
     for (let i = 0; i < data.length; i++) {
-      transform({ type, adapter, data: data[i], fields })
+      transform({ adapter, data: data[i], fields, operation })
     }
     return
   }
@@ -174,7 +179,7 @@ export const transform = ({ type, adapter, data, fields, globalSlug, insert }: A
     payload: { config },
   } = adapter
 
-  if (type === 'read') {
+  if (operation === 'read') {
     delete data['__v']
     data.id = data._id
     delete data['_id']
@@ -184,14 +189,12 @@ export const transform = ({ type, adapter, data, fields, globalSlug, insert }: A
     }
   }
 
-  if (type === 'write') {
-    if (insert && !data.createdAt) {
+  if (operation !== 'read') {
+    if (operation === 'create' && !data.createdAt) {
       data.createdAt = new Date()
     }
 
-    if (!data.updatedAt || insert) {
-      data.updatedAt = new Date()
-    }
+    data.updatedAt = new Date()
 
     if (globalSlug) {
       data.globalType = globalSlug
@@ -203,7 +206,7 @@ export const transform = ({ type, adapter, data, fields, globalSlug, insert }: A
       return
     }
 
-    if (type === 'write') {
+    if (operation !== 'read') {
       if (
         typeof ref[field.name] === 'undefined' &&
         typeof field.defaultValue !== 'undefined' &&
@@ -226,7 +229,7 @@ export const transform = ({ type, adapter, data, fields, globalSlug, insert }: A
     }
 
     if (field.type === 'date') {
-      if (type === 'read') {
+      if (operation === 'read') {
         const value = ref[field.name]
         if (value && value instanceof Date) {
           ref[field.name] = value.toISOString()
@@ -237,8 +240,13 @@ export const transform = ({ type, adapter, data, fields, globalSlug, insert }: A
     if (
       field.type === 'relationship' ||
       field.type === 'upload' ||
-      (type === 'read' && field.type === 'join')
+      (operation === 'read' && field.type === 'join')
     ) {
+      // sanitize passed undefined in objects to null
+      if (operation !== 'read' && field.name in ref && ref[field.name] === undefined) {
+        ref[field.name] = null
+      }
+
       if (!ref[field.name]) {
         return
       }
@@ -255,10 +263,10 @@ export const transform = ({ type, adapter, data, fields, globalSlug, insert }: A
           const value = ref[field.name][code]
           if (value) {
             sanitizeRelationship({
-              type,
               config,
               field,
               locale: code,
+              operation,
               ref: fieldRef,
               value,
             })
@@ -266,11 +274,12 @@ export const transform = ({ type, adapter, data, fields, globalSlug, insert }: A
         }
       } else {
         // handle non-localized relationships
+
         sanitizeRelationship({
-          type,
           config,
           field,
           locale: undefined,
+          operation,
           ref: ref as Record<string, unknown>,
           value: ref[field.name],
         })

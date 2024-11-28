@@ -37,10 +37,10 @@ export const updateVersion: UpdateVersion = async function updateVersion(
   })
 
   transform({
-    type: 'write',
     adapter: this,
     data: versionData,
     fields,
+    operation: 'update',
   })
 
   const doc = await VersionModel.collection.findOneAndUpdate(
@@ -63,10 +63,10 @@ export const updateVersion: UpdateVersion = async function updateVersion(
   )
 
   transform({
-    type: 'read',
     adapter: this,
     data: doc,
     fields,
+    operation: 'read',
   })
 
   return doc as any

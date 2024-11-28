@@ -89,10 +89,10 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   })
 
   transform({
-    type: 'read',
     adapter: this,
     data: result.docs,
     fields: versionFields,
+    operation: 'read',
   })
 
   return result

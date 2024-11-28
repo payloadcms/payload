@@ -31,10 +31,10 @@ export const deleteOne: DeleteOne = async function deleteOne(
   })
 
   transform({
-    type: 'read',
     adapter: this,
     data: doc,
     fields,
+    operation: 'read',
   })
 
   return doc

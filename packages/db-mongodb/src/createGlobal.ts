@@ -16,12 +16,11 @@ export const createGlobal: CreateGlobal = async function createGlobal(
   ).flattenedFields
 
   transform({
-    type: 'write',
     adapter: this,
     data,
     fields,
     globalSlug: slug,
-    insert: true,
+    operation: 'create',
   })
 
   const session = await getSession(this, req)
@@ -30,10 +29,10 @@ export const createGlobal: CreateGlobal = async function createGlobal(
   ;(data as any)._id = insertedId
 
   transform({
-    type: 'read',
     adapter: this,
     data,
     fields,
+    operation: 'read',
   })
 
   return data

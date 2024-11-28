@@ -42,10 +42,10 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   })
 
   transform({
-    type: 'write',
     adapter: this,
     data: versionData,
     fields,
+    operation: 'update',
   })
 
   const doc = await VersionModel.collection.findOneAndUpdate(
@@ -64,10 +64,10 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   )
 
   transform({
-    type: 'read',
     adapter: this,
     data: doc,
     fields,
+    operation: 'read',
   })
 
   return doc

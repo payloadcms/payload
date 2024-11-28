@@ -41,11 +41,10 @@ export const createVersion: CreateVersion = async function createVersion(
   )
 
   transform({
-    type: 'write',
     adapter: this,
     data,
     fields,
-    insert: true,
+    operation: 'create',
   })
 
   const { insertedId } = await VersionModel.collection.insertOne(data, { session })
@@ -89,10 +88,10 @@ export const createVersion: CreateVersion = async function createVersion(
   )
 
   transform({
-    type: 'read',
     adapter: this,
     data,
     fields,
+    operation: 'read',
   })
 
   return data

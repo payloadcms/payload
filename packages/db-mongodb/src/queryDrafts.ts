@@ -102,10 +102,10 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   })
 
   transform({
-    type: 'read',
     adapter: this,
     data: result.docs,
     fields: versionFields,
+    operation: 'read',
   })
 
   for (let i = 0; i < result.docs.length; i++) {

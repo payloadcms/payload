@@ -15,7 +15,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
 
   const session = await getSession(this, req)
 
-  transform({ type: 'write', adapter: this, data, fields })
+  transform({ adapter: this, data, fields, operation: 'update' })
 
   const result: any = await Model.collection.findOneAndUpdate(
     { globalType: slug },
@@ -29,10 +29,10 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
   )
 
   transform({
-    type: 'read',
     adapter: this,
     data: result,
     fields,
+    operation: 'read',
   })
 
   return result

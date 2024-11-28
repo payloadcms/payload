@@ -20,11 +20,10 @@ export const create: Create = async function create(
   }
 
   transform({
-    type: 'write',
     adapter: this,
     data,
     fields,
-    insert: true,
+    operation: 'create',
   })
 
   try {
@@ -32,10 +31,10 @@ export const create: Create = async function create(
     data._id = insertedId
 
     transform({
-      type: 'read',
       adapter: this,
       data,
       fields,
+      operation: 'read',
     })
 
     return data

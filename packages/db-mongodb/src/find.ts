@@ -98,7 +98,7 @@ export const find: Find = async function find(
     useEstimatedCount,
   })
 
-  transform({ type: 'read', adapter: this, data: result.docs, fields })
+  transform({ adapter: this, data: result.docs, fields, operation: 'read' })
 
   return result
 }

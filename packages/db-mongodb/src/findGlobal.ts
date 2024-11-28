@@ -39,7 +39,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     return null
   }
 
-  transform({ type: 'read', adapter: this, data: doc, fields })
+  transform({ adapter: this, data: doc, fields, operation: 'read' })
 
   return doc as any
 }

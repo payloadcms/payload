@@ -66,10 +66,10 @@ export const findOne: FindOne = async function findOne(
   }
 
   transform({
-    type: 'read',
     adapter: this,
     data: doc,
     fields,
+    operation: 'read',
   })
 
   return doc

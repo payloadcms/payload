@@ -47,7 +47,7 @@ const migrateModelWithBatching = async ({
     }
 
     for (const doc of docs) {
-      transform({ type: 'write', adapter, data: doc, fields })
+      transform({ adapter, data: doc, fields, operation: 'update' })
     }
 
     await Model.collection.bulkWrite(
@@ -156,7 +156,7 @@ export async function migrateRelationshipsV2_V3({
 
     // in case if the global doesn't exist in the database yet  (not saved)
     if (doc) {
-      transform({ type: 'write', adapter: db, data: doc, fields: global.flattenedFields })
+      transform({ adapter: db, data: doc, fields: global.flattenedFields, operation: 'update' })
 
       await GlobalsModel.collection.updateOne(
         {

@@ -89,10 +89,10 @@ export const findVersions: FindVersions = async function findVersions(
   })
 
   transform({
-    type: 'read',
     adapter: this,
     data: result.docs,
     fields: versionFields,
+    operation: 'read',
   })
 
   return result

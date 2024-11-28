@@ -34,10 +34,10 @@ export const updateOne: UpdateOne = async function updateOne(
   })
 
   transform({
-    type: 'write',
     adapter: this,
     data,
     fields,
+    operation: 'update',
   })
 
   try {
@@ -53,10 +53,10 @@ export const updateOne: UpdateOne = async function updateOne(
     )
 
     transform({
-      type: 'read',
       adapter: this,
       data: result,
       fields,
+      operation: 'read',
     })
     return result
   } catch (error) {
