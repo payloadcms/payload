@@ -51,6 +51,7 @@ describe('Collections - Live Preview', () => {
         slug: 'post-1',
         title: 'Test Post',
         tenant: tenant.id,
+        localizedTitle: 'Test Post',
       },
     })
 
@@ -60,6 +61,7 @@ describe('Collections - Live Preview', () => {
         slug: 'post-2',
         title: 'Test Post 2',
         tenant: tenant.id,
+        localizedTitle: 'Test Post 2',
       },
     })
 
