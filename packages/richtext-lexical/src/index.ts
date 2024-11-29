@@ -872,6 +872,7 @@ export {
   type RelationshipData,
   RelationshipServerNode,
 } from './features/relationship/server/nodes/RelationshipNode.js'
+export { TextAttributesFeature } from './features/textAttributes/feature.server.js'
 export { TextColorFeature } from './features/textColor/feature.server.js'
 
 export { FixedToolbarFeature } from './features/toolbars/fixed/server/index.js'

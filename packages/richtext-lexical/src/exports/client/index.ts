@@ -16,6 +16,7 @@ export { SubscriptFeatureClient } from '../../features/format/subscript/feature.
 export { SuperscriptFeatureClient } from '../../features/format/superscript/feature.client.js'
 export { UnderlineFeatureClient } from '../../features/format/underline/feature.client.js'
 export { TextColorFeatureClient } from '../../features/textColor/feature.client.js'
+export { TextAttributesFeatureClient } from '../../features/textAttributes/feature.client.js'
 export { HeadingFeatureClient } from '../../features/heading/client/index.js'
 export { HorizontalRuleFeatureClient } from '../../features/horizontalRule/client/index.js'
 export { IndentFeatureClient } from '../../features/indent/client/index.js'

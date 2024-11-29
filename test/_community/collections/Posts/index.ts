@@ -1,6 +1,11 @@
 import type { CollectionConfig } from 'payload'
 
-import { FixedToolbarFeature, lexicalEditor, TextColorFeature } from '@payloadcms/richtext-lexical'
+import {
+  FixedToolbarFeature,
+  lexicalEditor,
+  TextAttributesFeature,
+  TextColorFeature,
+} from '@payloadcms/richtext-lexical'
 
 export const postsSlug = 'posts'
 
@@ -21,6 +26,18 @@ export const PostsCollection: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           FixedToolbarFeature(),
+          TextAttributesFeature({
+            colors: [
+              { label: 'yellow', value: '#ffff00' },
+              { label: 'pink', value: '#ffc0cb' },
+            ],
+            // normalizeColor: (color) => {
+            //   if (color !== '#ff0000' && color !== 'green' && color !== 'blue') {
+            //     return null
+            //   }
+            //   return color
+            // },
+          }),
           TextColorFeature({
             colors: [
               { label: 'Red', value: '#ff0000' },

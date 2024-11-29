@@ -1,6 +1,6 @@
 'use client'
 
-import type { EditorConfig as LexicalEditorConfig } from 'lexical'
+import { type EditorConfig, type EditorConfig as LexicalEditorConfig, TextNode } from 'lexical'
 
 import type {
   ResolvedClientFeatureMap,
@@ -9,6 +9,22 @@ import type {
 import type { LexicalFieldAdminProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
+class MyTextNode extends TextNode {
+  static clone(node: MyTextNode) {
+    return new MyTextNode(node.__text, node.__key)
+  }
+
+  static getType() {
+    return 'asd' //TextNode.getType()
+  }
+
+  createDOM(config: EditorConfig) {
+    const dom = super.createDOM(config)
+    dom.style = 'background: green'
+    return dom
+  }
+}
+
 export const sanitizeClientFeatures = (
   features: ResolvedClientFeatureMap,
 ): SanitizedClientFeatures => {
@@ -16,7 +32,7 @@ export const sanitizeClientFeatures = (
     enabledFeatures: [],
     enabledFormats: [],
     markdownTransformers: [],
-    nodes: [],
+    nodes: [MyTextNode, { replace: TextNode, with: (node) => new MyTextNode(node.__text) }],
     plugins: [],
     providers: [],
     slashMenu: {
