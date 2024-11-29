@@ -1136,14 +1136,26 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates localized relationships', async () => {
-    // create a post with localizedTitle in both locales
     const post = await payload.create({
       collection: postsSlug,
       data: {
-        localizedTitle: {
-          en: 'Test Post',
-          es: 'Test Post Spanish',
+        title: 'Test Post',
+        slug: 'test-post',
+        hero: {
+          type: 'highImpact',
+          media: media.id,
         },
+        localizedTitle: 'Test Post Spanish',
+      },
+      locale: 'es',
+    })
+
+    await payload.update({
+      id: post.id,
+      locale: 'en',
+      collection: postsSlug,
+      data: {
+        localizedTitle: 'Test Post English',
       },
     })
 
@@ -1167,8 +1179,8 @@ describe('Collections - Live Preview', () => {
       locale: 'es',
     })
 
-    expect(merge1).toHaveLength(1)
-    expect(merge1.relationToLocalized.localizedTitle).toBe('Test Post Spanish')
+    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1.relationToLocalized).toHaveProperty('localizedTitle', 'Test Post Spanish')
   })
 
   it('— rich text - merges text changes', async () => {
