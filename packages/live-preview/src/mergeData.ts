@@ -15,6 +15,11 @@ const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
   })
 }
 
+// Relationships are only updated when they're ID or relationTo changes by comparing the old and new values
+// This needs to also happen when locale changes, but this is not not part of the API response
+// Instead, we need to keep track of the old locale ourselves and trigger a re-population when it changes
+let prevLocale: string | undefined
+
 export const mergeData = async <T>(args: {
   apiRoute?: string
   collectionPopulationRequestHandler?: ({
@@ -59,6 +64,7 @@ export const mergeData = async <T>(args: {
     externallyUpdatedRelationship,
     fieldSchema,
     incomingData,
+    localeChanged: prevLocale !== locale,
     populationsByCollection,
     result,
   })
@@ -71,7 +77,6 @@ export const mergeData = async <T>(args: {
       const requestHandler = args.collectionPopulationRequestHandler || defaultRequestHandler
 
       try {
-        console.log('using', locale)
         res = await requestHandler({
           apiPath: apiRoute || '/api',
           endpoint: encodeURI(
@@ -94,6 +99,8 @@ export const mergeData = async <T>(args: {
       }
     }),
   )
+
+  prevLocale = locale
 
   return {
     ...result,
