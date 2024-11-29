@@ -23,8 +23,6 @@ jobs:
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
         env:
@@ -40,6 +38,7 @@ jobs:
             🚀 This is included in version {release_link}
 
   update_templates:
+    if: false # Still needs some troubleshooting
     runs-on: ubuntu-latest
     permissions:
       contents: write
