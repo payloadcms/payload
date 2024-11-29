@@ -4,6 +4,7 @@ import type {
   DOMExportOutput,
   EditorConfig,
   ElementNode as ElementNodeType,
+  LexicalEditor,
   LexicalNode,
   NodeKey,
   RangeSelection,
@@ -80,7 +81,9 @@ export function getWrapperBlockNode(domMap: DOMMap) {
       return false
     }
 
-    createDOM() {
+    createDOM(_config: EditorConfig, _editor: LexicalEditor): HTMLElement {
+      // TODO: Can give access to formData here. No need for initialState, as no component displayed
+      console.log('ELNODE createDOM', { _config, _editor, key: super.getKey(), node: this })
       return domMap[this.__fields.blockType]()
     }
 
