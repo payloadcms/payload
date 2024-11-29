@@ -107,7 +107,7 @@ export function BlockEditor({
   const onChangeAbortControllerRef = useRef(new AbortController())
 
   const loadInitialState = useCallback(
-    async ({
+    ({
       formData,
       schemaFieldsPath,
     }: {
@@ -222,7 +222,7 @@ export function BlockEditor({
     const clientBlock = blocksField.blocks[0]
     setClientBlock(clientBlock)
 
-    void loadInitialState({ formData: data, schemaFieldsPath: schemaFieldsPath_ })
+    loadInitialState({ formData: data, schemaFieldsPath: schemaFieldsPath_ })
 
     const editorElem = editorRef.current
     const nativeSelection = window.getSelection()
