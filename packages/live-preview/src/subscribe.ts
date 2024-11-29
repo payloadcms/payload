@@ -5,9 +5,8 @@ export const subscribe = <T>(args: {
   callback: (data: T) => void
   depth?: number
   initialData: T
-  locale
   serverURL: string
-}): ((event: MessageEvent) => void) => {
+}): ((event: MessageEvent) => Promise<void> | void) => {
   const { apiRoute, callback, depth, initialData, serverURL } = args
 
   const onMessage = async (event: MessageEvent) => {
