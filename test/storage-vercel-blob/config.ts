@@ -8,7 +8,7 @@ import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { Users } from './collections/Users.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import { prefix } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -38,8 +38,8 @@ export default buildConfigWithDefaults({
   plugins: [
     vercelBlobStorage({
       collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
+        media: true,
+        'media-with-prefix': {
           prefix,
         },
       },

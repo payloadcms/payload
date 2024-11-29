@@ -1,9 +1,33 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "incremental": false
+    "allowJs": true,
+    "baseUrl": ".",
+    "checkJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "target": "esnext",
+    "types": ["jest", "node", "@types/jest"],
+    // "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@payload-config": ["./_community/config.ts"]
+    }
   },
-  "exclude": ["dist", "build", "temp", "node_modules"],
+  "exclude": ["dist", "build", "temp", "node_modules", "dist/**/*.js", "**/dist/**/*.js"],
   "include": [
     // Uncomment these as they are able to be compiled
 
@@ -128,6 +152,21 @@
     },
     {
       "path": "../packages/richtext-lexical"
+    },
+    {
+      "path": "../packages/storage-azure"
+    },
+    {
+      "path": "../packages/storage-gcs"
+    },
+    {
+      "path": "../packages/storage-s3"
+    },
+    {
+      "path": "../packages/storage-uploadthing"
+    },
+    {
+      "path": "../packages/storage-vercel-blob"
     },
     {
       "path": "../packages/translations"

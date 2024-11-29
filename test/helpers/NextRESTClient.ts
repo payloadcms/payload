@@ -69,6 +69,11 @@ export class NextRESTClient {
     args: { params: Promise<{ slug: string[] }> },
   ) => Promise<Response>
 
+  private _PUT: (
+    request: Request,
+    args: { params: Promise<{ slug: string[] }> },
+  ) => Promise<Response>
+
   private readonly config: SanitizedConfig
 
   private token: string
