@@ -54,7 +54,7 @@ export async function buildInitialState({
       })
     }
 
-    if (node.type === 'block' || node.type === 'inlineBlock' || node.type === 'wrapperBlock') {
+    if (node.type === 'block' || node.type === 'inlineBlock') {
       const blockNode = node as SerializedBlockNode
       const id = blockNode?.fields?.id
       if (!id) {
@@ -64,9 +64,7 @@ export async function buildInitialState({
       const schemaFieldsPath =
         node.type === 'block'
           ? `${context.lexicalFieldSchemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockNode.fields.blockType}.fields`
-          : node.type === 'inlineBlock'
-            ? `${context.lexicalFieldSchemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockNode.fields.blockType}.fields`
-            : `${context.lexicalFieldSchemaPath}.lexical_internal_feature.blocks.lexical_wrapper_blocks.${blockNode.fields.blockType}.fields`
+          : `${context.lexicalFieldSchemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockNode.fields.blockType}.fields`
 
       // Build form state for the block
 
