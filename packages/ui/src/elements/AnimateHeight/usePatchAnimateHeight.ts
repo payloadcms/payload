@@ -1,3 +1,4 @@
+'use client'
 import { useEffect, useMemo, useRef } from 'react'
 
 export const usePatchAnimateHeight = ({
@@ -10,7 +11,10 @@ export const usePatchAnimateHeight = ({
   open: boolean
 }): { browserSupportsKeywordAnimation: boolean } => {
   const browserSupportsKeywordAnimation = useMemo(
-    () => (CSS.supports ? Boolean(CSS.supports('interpolate-size', 'allow-keywords')) : false),
+    () =>
+      typeof CSS !== 'undefined' && CSS && CSS.supports
+        ? Boolean(CSS.supports('interpolate-size', 'allow-keywords'))
+        : false,
     [],
   )
 
