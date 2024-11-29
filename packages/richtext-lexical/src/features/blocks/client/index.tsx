@@ -26,10 +26,7 @@ import {
   INSERT_WRAPPER_BLOCK_COMMAND,
 } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
-import {
-  type AdditionalWrapperBlocksPluginArgs,
-  WrapperBlocksPlugin,
-} from './plugin/wrapperBlocks/index.js'
+import { WrapperBlocksPlugin } from './plugin/wrapperBlocks/index.js'
 
 export const BlocksFeatureClient = createClientFeature(
   ({ featureClientImportMap, featureClientSchemaMap, props, schemaPath }) => {
@@ -75,9 +72,6 @@ export const BlocksFeatureClient = createClientFeature(
       return field.blocks[0]
     })
 
-    console.log('ClientBlock > clientWrapperBlocks', clientWrapperBlocks)
-    console.log('ClientBlock > featureClientImportMap', featureClientImportMap)
-
     const domMap: DOMMap = {}
 
     if (clientWrapperBlocks.length) {
@@ -85,8 +79,6 @@ export const BlocksFeatureClient = createClientFeature(
         domMap[block.slug] = featureClientImportMap[`blocks.${block.slug}`]
       }
     }
-
-    console.log('ClientBlock > domMap', domMap)
 
     const { $createWrapperBlockNode, $isWrapperBlockNode, WrapperBlockNode } =
       getWrapperBlockNode(domMap)
