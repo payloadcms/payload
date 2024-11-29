@@ -4,7 +4,7 @@ import type { groupNavItems } from '@payloadcms/ui/shared'
 import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { NavGroup, useConfig, useNav, useTranslation } from '@payloadcms/ui'
+import { NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
 import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
 import LinkWithDefault from 'next/link.js'
 import { usePathname } from 'next/navigation.js'
@@ -25,7 +25,6 @@ export const DefaultNavClient: React.FC<{
   } = useConfig()
 
   const { i18n } = useTranslation()
-  const { navOpen } = useNav()
 
   return (
     <Fragment>
@@ -62,7 +61,6 @@ export const DefaultNavClient: React.FC<{
                   id={id}
                   key={i}
                   prefetch={Link ? false : undefined}
-                  tabIndex={!navOpen ? -1 : undefined}
                 >
                   {activeCollection && <div className={`${baseClass}__link-indicator`} />}
                   <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
