@@ -14,12 +14,9 @@ import {
   formatDrawerSlug,
   FormSubmit,
   RenderFields,
-  useDocumentInfo,
   useEditDepth,
-  useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { abortAndIgnore } from '@payloadcms/ui/shared'
 import {
   $getSelection,
   $isLineBreakNode,
@@ -44,6 +41,7 @@ import {
   INSERT_WRAPPER_BLOCK_COMMAND,
   TOGGLE_WRAPPER_BLOCK_WITH_MODAL_COMMAND,
 } from '../../commands.js'
+import { useLexicalFormState } from './useLexicalFormState.js'
 
 type WrapperBlockComponentContextType = {
   EditButton?: React.FC
@@ -77,7 +75,6 @@ export function BlockEditor({
   const [wrapperBlockLabelComponent, setWrapperBlockLabelComponent] =
     useState<null | React.ReactNode>(null)
   const [clientBlock, setClientBlock] = useState<ClientBlock | null>(null)
-  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const {
     fieldProps: { featureClientSchemaMap, permissions, schemaPath },
@@ -86,9 +83,15 @@ export function BlockEditor({
 
   const [formData, setFormData] = useState<({ text: string } & WrapperBlockFields) | undefined>()
   const { i18n, t } = useTranslation<object, string>()
-  const { getFormState } = useServerFunctions()
-  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(undefined)
-  const [schemaFieldsPath, setSchemaFieldsPath] = React.useState<string | undefined>(undefined)
+  const [schemaFieldsPath, setSchemaFieldsPath] = React.useState<null | string>(null)
+
+  const { initialState, loadInitialState, onFormChange } = useLexicalFormState({
+    onReceiveRenderedFields: ({ state }) => {
+      setWrapperBlockComponent(state['_components']?.customComponents?.Block)
+      setWrapperBlockLabelComponent(state['_components']?.customComponents?.BlockLabel)
+    },
+    schemaFieldsPath,
+  })
 
   const editDepth = useEditDepth()
   const [isWrapperBlockNode, setIsWrapperBlockNode] = useState(false)
@@ -101,55 +104,10 @@ export function BlockEditor({
 
   const { toggleDrawer } = useLexicalDrawer(drawerSlug)
 
-  /**
-   * Handle drawer and form state
-   */
-  const onChangeAbortControllerRef = useRef(new AbortController())
-
-  const loadInitialState = useCallback(
-    ({
-      formData,
-      schemaFieldsPath,
-    }: {
-      formData: { text: string } & WrapperBlockFields
-      schemaFieldsPath: string
-    }) => {
-      const abortController = new AbortController()
-
-      const awaitInitialState = async () => {
-        /*
-         * This will only run if a new block is created. For all existing blocks that are loaded when the document is loaded, or when the form is saved,
-         * this is not run, as the lexical field RSC will fetch the state server-side and pass it to the client. That way, we avoid unnecessary client-side
-         * requests. Though for newly created blocks, we need to fetch the state client-side, as the server doesn't know about the block yet.
-         */
-        const { state } = await getFormState({
-          id,
-          collectionSlug,
-          data: formData,
-          docPermissions: { fields: true },
-          docPreferences: await getDocPreferences(),
-          globalSlug,
-          operation: 'update',
-          renderAllFields: true,
-          schemaPath: schemaFieldsPath,
-          signal: abortController.signal,
-        })
-
-        if (state) {
-          setInitialState(state)
-          setWrapperBlockComponent(state['_components']?.customComponents?.Block)
-          setWrapperBlockLabelComponent(state['_components']?.customComponents?.BlockLabel)
-        }
-      }
-
-      if (formData && !initialState) {
-        void awaitInitialState()
-      }
-    },
-    [initialState, getFormState, id, collectionSlug, getDocPreferences, globalSlug],
-  )
-
   const hideBlockPopup = useCallback(() => {
+    if (!isWrapperBlockNode) {
+      return
+    }
     setIsWrapperBlockNode(false)
     if (editorRef && editorRef.current) {
       editorRef.current.style.opacity = '0'
@@ -161,9 +119,8 @@ export function BlockEditor({
     setClientBlock(null)
     setSelectedNodes([])
     setFormData(undefined)
-    setInitialState(undefined)
-    setSchemaFieldsPath(undefined)
-  }, [])
+    setSchemaFieldsPath(null)
+  }, [isWrapperBlockNode])
 
   const $updateBlockPopup = useCallback(() => {
     const selection = $getSelection()
@@ -195,34 +152,6 @@ export function BlockEditor({
       hideBlockPopup()
       return
     }
-    setWrapperBlockNode(focusWrapperBlockParent)
-
-    const fields = focusWrapperBlockParent.getFields()
-
-    // Initial state:
-    const data: { text: string } & WrapperBlockFields = {
-      ...fields,
-      text: focusWrapperBlockParent.getTextContent(),
-    }
-    const schemaFieldsPath_ = `${schemaPath}.lexical_internal_feature.blocks.lexical_wrapper_blocks.${data.blockType}.fields`
-    setSchemaFieldsPath(schemaFieldsPath_)
-
-    setFormData(data)
-    setIsWrapperBlockNode(true)
-    setSelectedNodes(selection ? selection?.getNodes() : [])
-
-    const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_wrapper_blocks.${data.blockType}`
-
-    const clientSchemaMap = featureClientSchemaMap['blocks']
-
-    const blocksField: BlocksFieldClient = clientSchemaMap[
-      componentMapRenderedBlockPath
-    ][0] as BlocksFieldClient
-
-    const clientBlock = blocksField.blocks[0]
-    setClientBlock(clientBlock)
-
-    loadInitialState({ formData: data, schemaFieldsPath: schemaFieldsPath_ })
 
     const editorElem = editorRef.current
     const nativeSelection = window.getSelection()
@@ -248,6 +177,40 @@ export function BlockEditor({
       if (selectedNodeDomRect != null) {
         selectedNodeDomRect.y += 40
         setFloatingElemPositionForLinkEditor(selectedNodeDomRect, editorElem, anchorElem)
+
+        const fields = focusWrapperBlockParent.getFields()
+
+        // Initial state:
+        const data: { text: string } & WrapperBlockFields = {
+          ...fields,
+          text: focusWrapperBlockParent.getTextContent(),
+        }
+        const schemaFieldsPath_ = `${schemaPath}.lexical_internal_feature.blocks.lexical_wrapper_blocks.${data.blockType}.fields`
+
+        if (schemaFieldsPath_ === schemaFieldsPath && data.id === formData?.id) {
+          return false
+        }
+
+        setWrapperBlockNode(focusWrapperBlockParent)
+
+        const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_wrapper_blocks.${data.blockType}`
+
+        setSchemaFieldsPath(schemaFieldsPath_)
+
+        setFormData(data)
+        setIsWrapperBlockNode(true)
+        setSelectedNodes(selection ? selection?.getNodes() : [])
+
+        const clientSchemaMap = featureClientSchemaMap['blocks']
+
+        const blocksField: BlocksFieldClient = clientSchemaMap[
+          componentMapRenderedBlockPath
+        ][0] as BlocksFieldClient
+
+        const clientBlock = blocksField.blocks[0]
+        setClientBlock(clientBlock)
+
+        loadInitialState({ formData: data, schemaFieldsPath: schemaFieldsPath_ })
       }
     } else if (activeElement == null || activeElement.className !== 'wraper-block-input') {
       hideBlockPopup()
@@ -257,11 +220,13 @@ export function BlockEditor({
   }, [
     editor,
     $isWrapperBlockNode,
-    schemaPath,
-    featureClientSchemaMap,
-    loadInitialState,
     hideBlockPopup,
     anchorElem,
+    schemaPath,
+    schemaFieldsPath,
+    formData?.id,
+    featureClientSchemaMap,
+    loadInitialState,
   ])
 
   useEffect(() => {
@@ -340,57 +305,6 @@ export function BlockEditor({
     )
   }, [editor, $updateBlockPopup, isWrapperBlockNode, hideBlockPopup])
 
-  useEffect(() => {
-    editor.getEditorState().read(() => {
-      void $updateBlockPopup()
-    })
-  }, [editor, $updateBlockPopup])
-
-  /**
-   * HANDLE ONCHANGE
-   */
-  const onChange = useCallback(
-    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-
-      const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
-
-      const { state } = await getFormState({
-        id,
-        collectionSlug,
-        docPermissions: {
-          fields: true,
-        },
-        docPreferences: await getDocPreferences(),
-        formState: prevFormState,
-        globalSlug,
-        operation: 'update',
-        renderAllFields: submit ? true : false,
-        schemaPath: schemaFieldsPath!,
-        signal: controller.signal,
-      })
-
-      if (!state) {
-        return prevFormState
-      }
-
-      if (submit) {
-        setWrapperBlockComponent(state['_components']?.customComponents?.Block)
-        setWrapperBlockLabelComponent(state['_components']?.customComponents?.BlockLabel)
-      }
-
-      return state
-    },
-    [getFormState, id, collectionSlug, getDocPreferences, globalSlug, schemaFieldsPath],
-  )
-  // cleanup effect
-  useEffect(() => {
-    return () => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-    }
-  }, [])
-
   /**
    * HANDLE FORM SUBMIT
    */
@@ -459,32 +373,28 @@ export function BlockEditor({
     }
   }, [blockDisplayName, wrapperBlockLabelComponent])
 
-  const WrapperBlockContainer = useMemo(
-    () =>
-      ({ children }: { children: React.ReactNode }) => (
+  const WrapperBlockContainer = useMemo(() => {
+    return ({ children }: { children: React.ReactNode }) => {
+      return (
         <div className="wrapper-block-editor" ref={editorRef}>
           <div className="wraper-block-input">{children}</div>
         </div>
-      ),
-    [],
-  )
-
-  if (!initialState || !clientBlock || !schemaFieldsPath) {
-    return null
-  }
+      )
+    }
+  }, [])
 
   return (
     <Form
       beforeSubmit={[
         async ({ formState }) => {
           // This is only called when form is submitted from drawer
-          return await onChange({ formState, submit: true })
+          return await onFormChange({ formState, submit: true })
         },
       ]}
       disableValidationOnSubmit
-      fields={clientBlock?.fields}
-      initialState={initialState || {}}
-      onChange={[onChange]}
+      fields={clientBlock?.fields ?? []}
+      initialState={initialState ?? {}}
+      onChange={[onFormChange]}
       onSubmit={(formState) => {
         onFormSubmit(formState)
         toggleDrawer()
@@ -525,7 +435,7 @@ export function BlockEditor({
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
-          {initialState && clientBlock ? (
+          {initialState && clientBlock && schemaFieldsPath ? (
             <>
               <RenderFields
                 fields={clientBlock.fields}

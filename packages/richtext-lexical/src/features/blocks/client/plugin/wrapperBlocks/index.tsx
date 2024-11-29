@@ -69,6 +69,7 @@ export const WrapperBlocksPlugin: PluginComponentWithAnchor<
                 parent.remove()
               }
             })
+            return true
           }
 
           nodes?.forEach((node) => {
