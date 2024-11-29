@@ -15,9 +15,9 @@ const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
   })
 }
 
-// Relationships are only updated when they're ID or relationTo changes by comparing the old and new values
-// This needs to also happen when locale changes, but this is not not part of the API response
-// Instead, we need to keep track of the old locale ourselves and trigger a re-population when it changes
+// Relationships are only updated when their `id` or `relationTo` changes, by comparing the old and new values
+// This needs to also happen when locale changes, except this is not not part of the API response
+// Instead, we keep track of the old locale ourselves and trigger a re-population when it changes
 let prevLocale: string | undefined
 
 export const mergeData = async <T>(args: {
