@@ -118,6 +118,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Blokkok',
   },
+  is: {
+    inlineBlocks: {
+      create: 'Stofna {{label}}',
+      edit: 'Breyta {{label}}',
+      label: 'Línublokkir',
+      remove: 'Fjarlæga {{label}}',
+    },
+    label: 'Blokkir',
+  },
   it: {
     inlineBlocks: {
       create: 'Crea {{etichetta}}',

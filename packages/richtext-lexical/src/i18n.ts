@@ -79,6 +79,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Listák',
     toolbarItemsActive: '{{count}} aktív',
   },
+  is: {
+    placeholder: "Byrjaðu að skrifa eða sláðu inn '/' fyrir skipanir...",
+    slashMenuBasicGroupLabel: 'Grunnur',
+    slashMenuListGroupLabel: 'Listar',
+    toolbarItemsActive: '{{count}} virk',
+  },
   it: {
     placeholder: "Inizia a digitare, oppure premi '/' per i comandi...",
     slashMenuBasicGroupLabel: 'Base',

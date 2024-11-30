@@ -9,6 +9,7 @@ import { faIR } from 'date-fns/locale/fa-IR'
 import { fr } from 'date-fns/locale/fr'
 import { hr } from 'date-fns/locale/hr'
 import { hu } from 'date-fns/locale/hu'
+import { is } from 'date-fns/locale/is'
 import { it } from 'date-fns/locale/it'
 import { ja } from 'date-fns/locale/ja'
 import { ko } from 'date-fns/locale/ko'
@@ -37,6 +38,7 @@ export const dateLocales = {
   fr,
   hr,
   hu,
+  is,
   it,
   ja,
   ko,
