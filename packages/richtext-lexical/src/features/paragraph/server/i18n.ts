@@ -105,6 +105,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Odsek',
     label2: 'Normálny text',
   },
+  sl: {
+    label: 'Odstavek',
+    label2: 'Normalno besedilo',
+  },
   sv: {
     label: 'Stycke',
     label2: 'Normal Text',

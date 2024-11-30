@@ -79,6 +79,9 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Citát',
   },
+  sl: {
+    label: 'Citiranje',
+  },
   sv: {
     label: 'Blockcitat',
   },

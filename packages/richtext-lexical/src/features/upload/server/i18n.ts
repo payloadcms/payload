@@ -79,6 +79,9 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Nahrať',
   },
+  sl: {
+    label: 'Prenesi',
+  },
   sv: {
     label: 'Ladda upp',
   },

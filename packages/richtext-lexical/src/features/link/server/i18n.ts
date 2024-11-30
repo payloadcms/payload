@@ -105,6 +105,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Odkaz',
     loadingWithEllipsis: 'Načítava sa...',
   },
+  sl: {
+    label: 'Povezava',
+    loadingWithEllipsis: 'Nalaganje...',
+  },
   sv: {
     label: 'Länk',
     loadingWithEllipsis: 'Laddar...',

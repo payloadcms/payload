@@ -9,6 +9,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'إزالة {{التسمية}}',
     },
     label: 'كتل',
+    wrapperBlocks: {
+      label: 'كتل الغلاف',
+    },
   },
   az: {
     inlineBlocks: {
@@ -18,6 +21,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: '{{label}} silin',
     },
     label: 'Bloklar',
+    wrapperBlocks: {
+      label: '"Wrapper Blokları"',
+    },
   },
   bg: {
     inlineBlocks: {
@@ -27,6 +33,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Премахнете {{етикет}}',
     },
     label: 'Блокове',
+    wrapperBlocks: {
+      label: 'Обвиващи блокове',
+    },
   },
   cs: {
     inlineBlocks: {
@@ -36,6 +45,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Odstraňte {{label}}',
     },
     label: 'Bloky',
+    wrapperBlocks: {
+      label: 'Bloky obalu',
+    },
   },
   da: {
     inlineBlocks: {
@@ -45,6 +57,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Fjern {{label}}',
     },
     label: 'Blokke',
+    wrapperBlocks: {
+      label: 'Omgangsblokke',
+    },
   },
   de: {
     inlineBlocks: {
@@ -54,6 +69,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Entferne {{label}}',
     },
     label: 'Blöcke',
+    wrapperBlocks: {
+      label: 'Wrapper-Blöcke',
+    },
   },
   en: {
     inlineBlocks: {
@@ -75,6 +93,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Eliminar {{label}}',
     },
     label: 'Bloques',
+    wrapperBlocks: {
+      label: 'Bloques de Contenedor',
+    },
   },
   fa: {
     inlineBlocks: {
@@ -84,6 +105,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'حذف {{برچسب}}',
     },
     label: 'بلوک ها',
+    wrapperBlocks: {
+      label: 'بلوک‌های پوششی',
+    },
   },
   fr: {
     inlineBlocks: {
@@ -93,6 +117,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Supprimer {{label}}',
     },
     label: 'Blocs',
+    wrapperBlocks: {
+      label: "Blocs d'enveloppe",
+    },
   },
   he: {
     inlineBlocks: {
@@ -102,6 +129,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'הסר {{תווית}}',
     },
     label: 'חסימות',
+    wrapperBlocks: {
+      label: 'בלוקים מעטפים',
+    },
   },
   hr: {
     inlineBlocks: {
@@ -111,6 +141,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Ukloni {{oznaka}}',
     },
     label: 'Blokovi',
+    wrapperBlocks: {
+      label: 'Blokovi omotači',
+    },
   },
   hu: {
     inlineBlocks: {
@@ -120,6 +153,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Távolítsa el a {{label}}',
     },
     label: 'Blokkok',
+    wrapperBlocks: {
+      label: 'Burkoló Blokkok',
+    },
   },
   it: {
     inlineBlocks: {
@@ -129,6 +165,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Rimuovi {{label}}',
     },
     label: 'Blocchi',
+    wrapperBlocks: {
+      label: 'Blocchi Wrapper',
+    },
   },
   ja: {
     inlineBlocks: {
@@ -138,6 +177,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: '{{ラベル}}を削除します',
     },
     label: 'ブロック',
+    wrapperBlocks: {
+      label: 'ラッパーブロック',
+    },
   },
   ko: {
     inlineBlocks: {
@@ -147,6 +189,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: '{{label}} 제거하세요',
     },
     label: '블록',
+    wrapperBlocks: {
+      label: '래퍼 블록',
+    },
   },
   my: {
     inlineBlocks: {
@@ -156,6 +201,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Buang {{label}}',
     },
     label: 'တံတားများ',
+    wrapperBlocks: {
+      label: 'Blok Pembalut',
+    },
   },
   nb: {
     inlineBlocks: {
@@ -165,6 +213,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Fjern {{label}}',
     },
     label: 'Blokker',
+    wrapperBlocks: {
+      label: 'Innpakkingsblokker',
+    },
   },
   nl: {
     inlineBlocks: {
@@ -174,6 +225,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Verwijder {{label}}',
     },
     label: 'Blokken',
+    wrapperBlocks: {
+      label: 'Omhullende Blokken',
+    },
   },
   pl: {
     inlineBlocks: {
@@ -183,6 +237,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Usuń {{etykieta}}',
     },
     label: 'Bloki',
+    wrapperBlocks: {
+      label: 'Bloki kontenerowe',
+    },
   },
   pt: {
     inlineBlocks: {
@@ -192,6 +249,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Remova {{label}}',
     },
     label: 'Blocos',
+    wrapperBlocks: {
+      label: 'Blocos de Invólucro',
+    },
   },
   ro: {
     inlineBlocks: {
@@ -201,6 +261,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Ștergeți {{etichetă}}',
     },
     label: 'Blocuri',
+    wrapperBlocks: {
+      label: 'Blocuri de învelitoare',
+    },
   },
   rs: {
     inlineBlocks: {
@@ -210,6 +273,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Ukloni {{label}}',
     },
     label: 'Blokovi',
+    wrapperBlocks: {
+      label: 'Blokovi omotača',
+    },
   },
   'rs-latin': {
     inlineBlocks: {
@@ -219,6 +285,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Ukloni {{oznaka}}',
     },
     label: 'Blokovi',
+    wrapperBlocks: {
+      label: 'Blokovi za oblaganje',
+    },
   },
   ru: {
     inlineBlocks: {
@@ -228,6 +297,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Удалить {{метка}}',
     },
     label: 'Блоки',
+    wrapperBlocks: {
+      label: 'Блоки-обертки',
+    },
   },
   sk: {
     inlineBlocks: {
@@ -237,6 +309,21 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Odstráňte {{label}}',
     },
     label: 'Bloky',
+    wrapperBlocks: {
+      label: 'Obalové bloky',
+    },
+  },
+  sl: {
+    inlineBlocks: {
+      create: 'Ustvari {{label}}',
+      edit: 'Uredi {{oznako}}',
+      label: 'Vrstični bloki',
+      remove: 'Odstrani {{oznaka}}',
+    },
+    label: 'Bloki',
+    wrapperBlocks: {
+      label: 'Ovojni bloki',
+    },
   },
   sv: {
     inlineBlocks: {
@@ -246,6 +333,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Ta bort {{etikett}}',
     },
     label: 'Block',
+    wrapperBlocks: {
+      label: 'Omslagsblock',
+    },
   },
   th: {
     inlineBlocks: {
@@ -255,6 +345,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'ลบ {{label}}',
     },
     label: 'บล็อค',
+    wrapperBlocks: {
+      label: 'บล็อกห่อ',
+    },
   },
   tr: {
     inlineBlocks: {
@@ -264,6 +357,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: '{{Etiketi}} kaldırın',
     },
     label: 'Bloklar',
+    wrapperBlocks: {
+      label: 'Sarmalayıcı Bloklar',
+    },
   },
   uk: {
     inlineBlocks: {
@@ -273,6 +369,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Видалити {{мітку}}',
     },
     label: 'Блоки',
+    wrapperBlocks: {
+      label: 'Блоки-обгортки',
+    },
   },
   vi: {
     inlineBlocks: {
@@ -282,6 +381,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Xóa {{nhãn}}',
     },
     label: 'Khối',
+    wrapperBlocks: {
+      label: 'Khối đóng gói',
+    },
   },
   zh: {
     inlineBlocks: {
@@ -291,6 +393,9 @@ export const i18n: Partial<GenericLanguages> = {
       remove: '删除{{label}}',
     },
     label: '块',
+    wrapperBlocks: {
+      label: '包装块',
+    },
   },
   'zh-TW': {
     inlineBlocks: {
@@ -300,5 +405,8 @@ export const i18n: Partial<GenericLanguages> = {
       remove: '移除 {{label}}',
     },
     label: '區塊',
+    wrapperBlocks: {
+      label: '包裹塊',
+    },
   },
 }

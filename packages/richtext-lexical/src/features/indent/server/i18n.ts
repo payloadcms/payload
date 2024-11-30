@@ -105,6 +105,10 @@ export const i18n: Partial<GenericLanguages> = {
     decreaseLabel: 'Znížiť odsadenie',
     increaseLabel: 'Zväčšiť odsadenie',
   },
+  sl: {
+    decreaseLabel: 'Zmanjšaj zamik',
+    increaseLabel: 'Povečaj zamik',
+  },
   sv: {
     decreaseLabel: 'Minska indrag',
     increaseLabel: 'Öka indrag',

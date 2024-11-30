@@ -79,6 +79,9 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Nadpis {{headingLevel}}',
   },
+  sl: {
+    label: 'Naslov {{headingLevel}}',
+  },
   sv: {
     label: 'Rubrik {{headingLevel}}',
   },

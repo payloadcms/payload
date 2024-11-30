@@ -157,6 +157,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Zarovnať doľava',
     alignRightLabel: 'Zarovnať doprava',
   },
+  sl: {
+    alignCenterLabel: 'Poravnaj na sredino',
+    alignJustifyLabel: 'Poravnaj utemelji',
+    alignLeftLabel: 'Poravnaj levo',
+    alignRightLabel: 'Poravnaj desno',
+  },
   sv: {
     alignCenterLabel: 'Centrera',
     alignJustifyLabel: 'Justera Justify',

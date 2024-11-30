@@ -79,6 +79,9 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Neusporiadaný zoznam',
   },
+  sl: {
+    label: 'Neurejen seznam',
+  },
   sv: {
     label: 'Oordnad lista',
   },

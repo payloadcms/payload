@@ -157,6 +157,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Zoznamy',
     toolbarItemsActive: '{{count}} aktívne',
   },
+  sl: {
+    placeholder: "Začnite tipkati ali pritisnite '/' za ukaze...",
+    slashMenuBasicGroupLabel: 'Osnovno',
+    slashMenuListGroupLabel: 'Seznami',
+    toolbarItemsActive: '{{count}} aktiven',
+  },
   sv: {
     placeholder: "Börja skriva, eller tryck på '/' för kommandon...",
     slashMenuBasicGroupLabel: 'Grundläggande',

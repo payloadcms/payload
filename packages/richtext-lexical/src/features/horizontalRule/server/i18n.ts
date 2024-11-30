@@ -79,6 +79,9 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Vodorovná čiara',
   },
+  sl: {
+    label: 'Vodoravna črta',
+  },
   sv: {
     label: 'Horisontell linje',
   },
