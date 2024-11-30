@@ -55,7 +55,7 @@ export const WrapperBlocksPlugin: PluginComponentWithAnchor<
           let wrapperBlockNode: null | WrapperBlockNodeType = null
 
           if (fields === null) {
-            // Remove LinkNodes
+            // Remove Wrapper Blocks
             nodes?.forEach((node) => {
               const parent = node.getParent()
 
