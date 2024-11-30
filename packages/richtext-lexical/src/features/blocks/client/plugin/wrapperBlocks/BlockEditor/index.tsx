@@ -212,7 +212,7 @@ export function BlockEditor({
 
         loadInitialState({ formData: data, schemaFieldsPath: schemaFieldsPath_ })
       }
-    } else if (activeElement == null || activeElement.className !== 'wraper-block-input') {
+    } else if (activeElement == null || activeElement.className !== 'wraper-block-popup__label') {
       hideBlockPopup()
     }
 
@@ -329,7 +329,7 @@ export function BlockEditor({
     () => () => (
       <button
         aria-label="Edit Wrapper Block"
-        className="wrapper-block-edit"
+        className="wrapper-block-popup__edit"
         onClick={() => {
           toggleDrawer()
         }}
@@ -349,7 +349,7 @@ export function BlockEditor({
     () => () => (
       <button
         aria-label="Remove Wrapper Block"
-        className="wrapper-block-trash"
+        className="wrapper-block-popup__remove"
         onClick={() => {
           editor.dispatchCommand(INSERT_WRAPPER_BLOCK_COMMAND, null)
         }}
@@ -376,8 +376,8 @@ export function BlockEditor({
   const WrapperBlockContainer = useMemo(() => {
     return ({ children }: { children: React.ReactNode }) => {
       return (
-        <div className="wrapper-block-editor" ref={editorRef}>
-          <div className="wraper-block-input">{children}</div>
+        <div className="wrapper-block-popup__wrapper">
+          <div className="wrapper-block-popup__label">{children}</div>
         </div>
       )
     }
@@ -401,31 +401,33 @@ export function BlockEditor({
       }}
       uuid={uuid()}
     >
-      {wrapperBlockComponent ? (
-        <WrapperBlockComponentContext.Provider
-          value={{
-            EditButton,
-            formData,
-            initialState,
-            Label,
-            RemoveButton,
-            WrapperBlockContainer,
-            wrapperBlockNode: wrapperBlockNode!,
-          }}
-        >
-          {wrapperBlockComponent}
-        </WrapperBlockComponentContext.Provider>
-      ) : (
-        <WrapperBlockContainer>
-          <Label />
-          {editor.isEditable() && (
-            <React.Fragment>
-              <EditButton />
-              <RemoveButton />
-            </React.Fragment>
-          )}
-        </WrapperBlockContainer>
-      )}
+      <div className="wrapper-block-popup" ref={editorRef}>
+        {wrapperBlockComponent ? (
+          <WrapperBlockComponentContext.Provider
+            value={{
+              EditButton,
+              formData,
+              initialState,
+              Label,
+              RemoveButton,
+              WrapperBlockContainer,
+              wrapperBlockNode: wrapperBlockNode!,
+            }}
+          >
+            {wrapperBlockComponent}
+          </WrapperBlockComponentContext.Provider>
+        ) : (
+          <WrapperBlockContainer>
+            <Label />
+            {editor.isEditable() && (
+              <React.Fragment>
+                <EditButton />
+                <RemoveButton />
+              </React.Fragment>
+            )}
+          </WrapperBlockContainer>
+        )}
+      </div>
 
       <EditDepthProvider>
         <Drawer

@@ -1,26 +1,50 @@
 @import '../../../../../scss/styles.scss';
 
 @layer payload-default {
-  .wrapper-block-editor {
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    background: var(--theme-input-bg);
-    padding: 4px 4px 4px 12px;
-    vertical-align: middle;
+  .wrapper-block-popup {
     position: absolute;
     top: 0;
     left: 0;
     opacity: 0;
-    border-radius: $style-radius-m;
+    z-index: 1;
     transition: opacity 0.2s;
     will-change: transform;
-    box-shadow:
-      0px 1px 2px 1px rgba(0, 0, 0, 0.1),
-      0px 4px 16px 0px rgba(0, 0, 0, 0.1),
-      0px -4px 16px 0px rgba(0, 0, 0, 0.1);
 
-    .wraper-block-input {
+    &__wrapper {
+      display: flex;
+      align-items: center;
+      background: var(--theme-input-bg);
+      padding: 4px 4px 4px 12px;
+      vertical-align: middle;
+
+      border-radius: $style-radius-m;
+      box-shadow:
+        0px 1px 2px 1px rgba(0, 0, 0, 0.1),
+        0px 4px 16px 0px rgba(0, 0, 0, 0.1),
+        0px -4px 16px 0px rgba(0, 0, 0, 0.1);
+
+      button {
+        all: unset;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-size: 16px;
+        background-position: center;
+        background-repeat: no-repeat;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        color: var(--theme-elevation-600);
+        border-radius: $style-radius-m;
+
+        &:hover:not([disabled]) {
+          color: var(--theme-elevation-800);
+          background-color: var(--theme-elevation-100);
+        }
+      }
+    }
+
+    &__label {
       display: flex;
       align-items: center;
       flex-direction: row;
@@ -32,57 +56,17 @@
       outline: 0;
       position: relative;
       font-family: var(--font-body);
-
-      &__label-pure {
-        color: var(--theme-elevation-1000);
-        margin-right: 15px;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-      }
-
-      a {
-        text-decoration: underline;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        margin-right: base(0.4);
-        text-overflow: ellipsis;
-        color: var(--theme-success-750);
-
-        &:hover {
-          color: var(--theme-success-850);
-        }
-      }
-    }
-
-    button {
-      all: unset;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-size: 16px;
-      background-position: center;
-      background-repeat: no-repeat;
-      width: 30px;
-      height: 30px;
-      cursor: pointer;
-      color: var(--theme-elevation-600);
-      border-radius: $style-radius-m;
-
-      &:hover:not([disabled]) {
-        color: var(--theme-elevation-800);
-        background-color: var(--theme-elevation-100);
-      }
     }
   }
 
   html[data-theme='light'] {
-    .wrapper-block-editor {
-      box-shadow:
-        0px 1px 2px 1px rgba(0, 0, 0, 0.05),
-        0px 4px 8px 0px rgba(0, 0, 0, 0.05),
-        0px -4px 16px 0px rgba(0, 0, 0, 0.05);
+    .wrapper-block-popup {
+      &__wrapper {
+        box-shadow:
+          0px 1px 2px 1px rgba(0, 0, 0, 0.05),
+          0px 4px 8px 0px rgba(0, 0, 0, 0.05),
+          0px -4px 16px 0px rgba(0, 0, 0, 0.05);
+      }
     }
   }
 }
