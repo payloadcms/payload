@@ -55,7 +55,7 @@ export const i18n: Partial<GenericLanguages> = {
   },
   is: {
     decreaseLabel: 'Minnka inndrátt',
-    increaseLabel: 'Hækka inndrátt',
+    increaseLabel: 'Stækka inndrátt',
   },
   it: {
     decreaseLabel: 'Diminuisci rientro',
