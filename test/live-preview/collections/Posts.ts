@@ -71,6 +71,16 @@ export const Posts: CollectionConfig = {
             },
           ],
         },
+        {
+          label: 'Test',
+          fields: [
+            {
+              name: 'localizedTitle',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
       ],
     },
     {

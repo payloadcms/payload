@@ -97,7 +97,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   )
 
   const drawerSlug = formatDrawerSlug({
-    slug: `lexical-inlineBlocks-create-` + uuidFromContext,
+    slug: `lexical-inlineBlocks-create-${uuidFromContext}-${formData.id}`,
     depth: editDepth,
   })
   const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)

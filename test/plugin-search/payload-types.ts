@@ -14,6 +14,8 @@ export interface Config {
     users: User;
     pages: Page;
     posts: Post;
+    'custom-ids-1': CustomIds1;
+    'custom-ids-2': CustomIds2;
     search: Search;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -24,6 +26,8 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'custom-ids-1': CustomIds1Select<false> | CustomIds1Select<true>;
+    'custom-ids-2': CustomIds2Select<false> | CustomIds2Select<true>;
     search: SearchSelect<false> | SearchSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -105,6 +109,24 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids-1".
+ */
+export interface CustomIds1 {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids-2".
+ */
+export interface CustomIds2 {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "search".
  */
 export interface Search {
@@ -118,6 +140,14 @@ export interface Search {
     | {
         relationTo: 'posts';
         value: string | Post;
+      }
+    | {
+        relationTo: 'custom-ids-1';
+        value: string | CustomIds1;
+      }
+    | {
+        relationTo: 'custom-ids-2';
+        value: string | CustomIds2;
       };
   id: string;
   excerpt?: string | null;
@@ -143,6 +173,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'custom-ids-1';
+        value: string | CustomIds1;
+      } | null)
+    | ({
+        relationTo: 'custom-ids-2';
+        value: string | CustomIds2;
       } | null)
     | ({
         relationTo: 'search';
@@ -227,6 +265,24 @@ export interface PostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids-1_select".
+ */
+export interface CustomIds1Select<T extends boolean = true> {
+  id?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids-2_select".
+ */
+export interface CustomIds2Select<T extends boolean = true> {
+  id?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
