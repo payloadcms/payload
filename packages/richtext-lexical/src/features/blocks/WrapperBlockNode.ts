@@ -36,8 +36,14 @@ export type SerializedWrapperBlockNode<
   SerializedElementNode<T>
 >
 
+export type CreateDOMFunction = (args: {
+  editor: LexicalEditor
+  editorConfig: EditorConfig
+  node: WrapperBlockNodeType
+}) => HTMLElement
+
 export type DOMMap = {
-  [blockType: string]: () => HTMLElement
+  [blockType: string]: CreateDOMFunction
 }
 
 export function getWrapperBlockNode(domMap: DOMMap) {
@@ -82,9 +88,7 @@ export function getWrapperBlockNode(domMap: DOMMap) {
     }
 
     createDOM(_config: EditorConfig, _editor: LexicalEditor): HTMLElement {
-      // TODO: Can give access to formData here. No need for initialState, as no component displayed
-      console.log('ELNODE createDOM', { _config, _editor, key: super.getKey(), node: this })
-      return domMap[this.__fields.blockType]()
+      return domMap[this.__fields.blockType]({ editor: _editor, editorConfig: _config, node: this })
     }
 
     exportDOM(): DOMExportOutput {
@@ -104,6 +108,7 @@ export function getWrapperBlockNode(domMap: DOMMap) {
         version: 1,
       }
     }
+
     extractWithChild(
       child: LexicalNode,
       selection: BaseSelection,
@@ -126,7 +131,6 @@ export function getWrapperBlockNode(domMap: DOMMap) {
     getFields(): WrapperBlockFields {
       return this.getLatest().__fields
     }
-
     insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNodeType | null {
       const element = this.getParentOrThrow().insertNewAfter(selection, restoreSelection)
       if ($isElementNode(element)) {
@@ -153,7 +157,7 @@ export function getWrapperBlockNode(domMap: DOMMap) {
       anchor: HTMLAnchorElement,
       config: EditorConfig,
     ): boolean {
-      return false
+      return true
     }
   }
 

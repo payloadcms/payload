@@ -238,6 +238,24 @@ const editorConfig: ServerEditorConfig = {
           },
           createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockCreateDOM',
         },
+        {
+          block: {
+            slug: 'wrapperBlockColor',
+            admin: {
+              components: {
+                Label:
+                  '/collections/Lexical/wrapperBlocks/ColorLabelComponent.js#ColorLabelComponent',
+              },
+            },
+            fields: [
+              {
+                name: 'color',
+                type: 'text',
+              },
+            ],
+          },
+          createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockColorCreateDOM',
+        },
       ],
       inlineBlocks: [
         {
