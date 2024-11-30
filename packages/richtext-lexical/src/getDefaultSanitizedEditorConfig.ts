@@ -1,7 +1,5 @@
 import type { SanitizedConfig } from 'payload'
 
-import { cache } from 'react'
-
 import { type SanitizedServerEditorConfig } from './index.js'
 import { defaultEditorConfig } from './lexical/config/server/default.js'
 import { sanitizeServerEditorConfig } from './lexical/config/server/sanitize.js'
@@ -18,29 +16,27 @@ if (!cachedDefaultSanitizedServerEditorConfig) {
   )._payload_lexical_defaultSanitizedServerEditorConfig = null
 }
 
-export const getDefaultSanitizedEditorConfig = cache(
-  async (args: {
-    config: SanitizedConfig
-    parentIsLocalized: boolean
-  }): Promise<SanitizedServerEditorConfig> => {
-    const { config, parentIsLocalized } = args
+export const getDefaultSanitizedEditorConfig = async (args: {
+  config: SanitizedConfig
+  parentIsLocalized: boolean
+}): Promise<SanitizedServerEditorConfig> => {
+  const { config, parentIsLocalized } = args
 
-    if (cachedDefaultSanitizedServerEditorConfig) {
-      return await cachedDefaultSanitizedServerEditorConfig
-    }
+  if (cachedDefaultSanitizedServerEditorConfig) {
+    return await cachedDefaultSanitizedServerEditorConfig
+  }
 
-    cachedDefaultSanitizedServerEditorConfig = sanitizeServerEditorConfig(
-      defaultEditorConfig,
-      config,
-      parentIsLocalized,
-    )
-    ;(global as any).payload_lexical_defaultSanitizedServerEditorConfig =
-      cachedDefaultSanitizedServerEditorConfig
+  cachedDefaultSanitizedServerEditorConfig = sanitizeServerEditorConfig(
+    defaultEditorConfig,
+    config,
+    parentIsLocalized,
+  )
+  ;(global as any).payload_lexical_defaultSanitizedServerEditorConfig =
+    cachedDefaultSanitizedServerEditorConfig
 
-    cachedDefaultSanitizedServerEditorConfig = await cachedDefaultSanitizedServerEditorConfig
-    ;(global as any).payload_lexical_defaultSanitizedServerEditorConfig =
-      cachedDefaultSanitizedServerEditorConfig
+  cachedDefaultSanitizedServerEditorConfig = await cachedDefaultSanitizedServerEditorConfig
+  ;(global as any).payload_lexical_defaultSanitizedServerEditorConfig =
+    cachedDefaultSanitizedServerEditorConfig
 
-    return cachedDefaultSanitizedServerEditorConfig
-  },
-)
+  return cachedDefaultSanitizedServerEditorConfig
+}
