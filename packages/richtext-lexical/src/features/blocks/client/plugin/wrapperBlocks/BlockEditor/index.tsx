@@ -66,8 +66,6 @@ export function BlockEditor({
   anchorElem,
 }: { anchorElem: HTMLElement } & AdditionalWrapperBlocksPluginArgs): React.ReactNode {
   const [editor] = useLexicalComposerContext()
-  // TO-DO: There are several states that should not be state, because they
-  // are derived from linkNode (linkUrl, linkLabel, formData, isLink, isAutoLink...)
   const [wrapperBlockNode, setWrapperBlockNode] = useState<null | WrapperBlockNodeType>()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
@@ -131,12 +129,12 @@ export function BlockEditor({
       return
     }
 
-    // Handle the data displayed in the floating link editor & drawer when you click on a link node
+    // Handle the data displayed in the popup & drawer when you click on a wrapper block
     const focusNode = getSelectedNode(selection)
     selectedNodeDomRect = editor.getElementByKey(focusNode.getKey())?.getBoundingClientRect()
     const focusWrapperBlockParent = $findMatchingParent(focusNode, $isWrapperBlockNode)
 
-    // Prevent link modal from showing if selection spans further than the link: https://github.com/facebook/lexical/issues/4064
+    // Prevent wrapper block modal from showing if selection spans further than the wrapper block: https://github.com/facebook/lexical/issues/4064
     const badNode = selection
       .getNodes()
       .filter((node) => !$isLineBreakNode(node))
