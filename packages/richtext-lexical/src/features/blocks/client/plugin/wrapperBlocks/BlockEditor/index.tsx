@@ -212,7 +212,7 @@ export function BlockEditor({
 
         loadInitialState({ formData: data, schemaFieldsPath: schemaFieldsPath_ })
       }
-    } else if (activeElement == null || activeElement.className !== 'wraper-block-popup__label') {
+    } else if (activeElement == null || activeElement.className !== 'wraper-block-popup__content') {
       hideBlockPopup()
     }
 
@@ -377,7 +377,7 @@ export function BlockEditor({
     return ({ children }: { children: React.ReactNode }) => {
       return (
         <div className="wrapper-block-popup__wrapper">
-          <div className="wrapper-block-popup__label">{children}</div>
+          <div className="wrapper-block-popup__content">{children}</div>
         </div>
       )
     }
