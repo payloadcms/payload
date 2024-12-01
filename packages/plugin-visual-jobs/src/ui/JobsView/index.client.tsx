@@ -49,22 +49,11 @@ export const JobsViewClient: React.FC<{ retrySequences: RetrySequences }> = (pro
   useEffect(() => {
     setNodes(
       log.map((entry, index) => {
-        if (entry.state === 'failed') {
-          return {
-            id: entry.id,
-            type: 'taskNode',
-            data: { label: entry.taskSlug, ...entry },
-            position: { x: 0, y: index * 100 },
-            style: { backgroundColor: 'red' },
-          } as Node
-        }
-
         return {
           id: entry.id,
           type: 'taskNode',
           data: { label: entry.taskSlug, ...entry },
           position: { x: 0, y: index * 100 },
-          style: { backgroundColor: 'green' },
         } as Node
       }),
     )

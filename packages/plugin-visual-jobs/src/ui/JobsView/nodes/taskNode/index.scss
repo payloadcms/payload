@@ -2,15 +2,22 @@
 
 .taskNode {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
+  gap: 1em;
   width: 100%;
   height: 100%;
   padding: 10px;
-  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--theme-elevation-100);
+  background: var(--theme-input-bg);
 
   &--selected {
-    outline: 3px solid var(--theme-elevation-800);
+    outline: 1px solid var(--theme-elevation-800);
+  }
+
+  &__label {
+    display: flex;
+    flex-direction: column;
   }
 }

@@ -1,10 +1,10 @@
 'use client'
 import type { JobLog } from 'payload'
 
-import { Handle, Position } from '@xyflow/react'
-
 import './index.scss'
 
+import { ErrorIcon, SuccessIcon } from '@payloadcms/ui'
+import { Handle, Position } from '@xyflow/react'
 import React, { memo } from 'react'
 
 import { useSelectedTaskContext } from '../../components/context.js'
@@ -31,13 +31,20 @@ export const TaskNode: React.FC<{
         type="target"
       />
       <div
-        className={['taskNode', isSelected ? 'taskNode--selected' : ''].join(' ')}
+        className={[
+          'taskNode',
+          isSelected ? 'taskNode--selected' : '',
+          data.state === 'succeeded' ? 'taskNode--succeeded' : 'taskNode--failed',
+        ].join(' ')}
         onClick={onHandleClick}
       >
-        <strong>
-          {data.taskSlug} Task {data.taskID}
-        </strong>
-        <span>{data.id}</span>
+        {data.state === 'succeeded' ? <SuccessIcon /> : <ErrorIcon />}
+        <div className="taskNode__label">
+          <strong>
+            {data.taskSlug} Task {data.taskID}
+          </strong>
+          <span>{data.id}</span>
+        </div>
       </div>
 
       <Handle id="a" isConnectable={isConnectable} position={Position.Bottom} type="source" />

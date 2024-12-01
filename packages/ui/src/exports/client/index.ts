@@ -213,6 +213,10 @@ export { PlusIcon } from '../../icons/Plus/index.js'
 export { SearchIcon } from '../../icons/Search/index.js'
 export { SwapIcon } from '../../icons/Swap/index.js'
 export { XIcon } from '../../icons/X/index.js'
+export { Error as ErrorIcon } from '../../providers/ToastContainer/icons/Error.js'
+export { Info as InfoIcon } from '../../providers/ToastContainer/icons/Info.js'
+export { Success as SuccessIcon } from '../../providers/ToastContainer/icons/Success.js'
+export { Warning as WarningIcon } from '../../providers/ToastContainer/icons/Warning.js'
 
 // providers
 export {
