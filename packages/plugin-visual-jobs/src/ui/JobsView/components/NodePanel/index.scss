@@ -1,0 +1,10 @@
+@import '~@payloadcms/ui/scss';
+
+.nodePanel {
+  display: flex;
+  flex-direction: column;
+  gap: base(2);
+  padding: base(2);
+  border: 1px solid var(--theme-elevation-100);
+  background: var(--theme-input-bg);
+}

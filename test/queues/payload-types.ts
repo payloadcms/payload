@@ -59,6 +59,7 @@ export interface Config {
       inlineTaskTest: WorkflowInlineTaskTest;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
+      randomRetries: WorkflowRandomRetries;
     };
   };
 }
@@ -223,6 +224,7 @@ export interface PayloadJob {
         | 'inlineTaskTest'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
+        | 'randomRetries'
       )
     | null;
   taskSlug?:
@@ -541,6 +543,13 @@ export interface WorkflowRetriesBackoffTest {
   input: {
     message: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowRandomRetries".
+ */
+export interface WorkflowRandomRetries {
+  input?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

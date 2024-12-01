@@ -1,5 +1,6 @@
 import type { TaskConfig, WorkflowConfig } from 'payload'
 
+import { visualJobsPlugin } from '@payloadcms/plugin-visual-jobs'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -13,6 +14,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
+  plugins: [visualJobsPlugin({})],
   collections: [
     {
       slug: 'posts',
@@ -76,6 +78,9 @@ export default buildConfigWithDefaults({
       email: devUser.email,
       password: devUser.password,
     },
+    components: {
+      beforeDashboard: ['./QueueDemoJobs#QueueDemoJobs'],
+    },
   },
   jobs: {
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
@@ -87,6 +92,7 @@ export default buildConfigWithDefaults({
         },
       }
     },
+    deleteJobOnComplete: false,
     tasks: [
       {
         retries: 2,
@@ -566,6 +572,99 @@ export default buildConfigWithDefaults({
           })
         },
       } as WorkflowConfig<'retriesBackoffTest'>,
+      {
+        slug: 'randomRetries',
+        retries: 200,
+        handler: async ({ job, inlineTask, req }) => {
+          await inlineTask('1', {
+            task: async ({ req }) => {
+              // 20% chance to fail
+              if (Math.random() < 0.2) {
+                throw new Error('Failed on purpose')
+              }
+              return {
+                output: {},
+              }
+            },
+            retries: {
+              attempts: 40,
+            },
+          })
+
+          await inlineTask('2', {
+            task: async ({ req }) => {
+              // 20% chance to fail
+              if (Math.random() < 0.4) {
+                throw new Error('Failed on purpose')
+              }
+              return {
+                output: {},
+              }
+            },
+            retries: {
+              attempts: 40,
+            },
+          })
+
+          await inlineTask('3', {
+            task: async ({ req }) => {
+              // 20% chance to fail
+              if (Math.random() < 0.6) {
+                throw new Error('Failed on purpose')
+              }
+              return {
+                output: {},
+              }
+            },
+            retries: {
+              attempts: 40,
+            },
+          })
+          await inlineTask('4', {
+            task: async ({ req }) => {
+              // 20% chance to fail
+              if (Math.random() < 0.8) {
+                throw new Error('Failed on purpose')
+              }
+              return {
+                output: {},
+              }
+            },
+            retries: {
+              attempts: 40,
+            },
+          })
+          await inlineTask('5', {
+            task: async ({ req }) => {
+              // 20% chance to fail
+              if (Math.random() < 0.8) {
+                throw new Error('Failed on purpose')
+              }
+              return {
+                output: {},
+              }
+            },
+            retries: {
+              attempts: 40,
+            },
+          })
+
+          await inlineTask('6', {
+            task: async ({ req }) => {
+              // 20% chance to fail
+              if (Math.random() < 0.9) {
+                throw new Error('Failed on purpose')
+              }
+              return {
+                output: {},
+              }
+            },
+            retries: {
+              attempts: 80,
+            },
+          })
+        },
+      } as WorkflowConfig<'randomRetries'>,
     ],
   },
   editor: lexicalEditor(),

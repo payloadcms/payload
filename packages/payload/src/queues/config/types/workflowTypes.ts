@@ -14,6 +14,10 @@ export type JobLog = {
   completedAt: string
   error?: unknown
   executedAt: string
+  /**
+   * ID added by the array field when the log is saved in the database
+   */
+  id?: string
   input?: any
   output?: any
   state: 'failed' | 'succeeded'

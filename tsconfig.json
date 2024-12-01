@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/live-preview/config.ts"
+        "./test/queues/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
@@ -77,6 +77,12 @@
       ],
       "@payloadcms/plugin-seo/client": [
         "./packages/plugin-seo/src/exports/client.ts"
+      ],
+      "@payloadcms/plugin-visual-jobs/client": [
+        "./packages/plugin-visual-jobs/src/exports/client.ts"
+      ],
+      "@payloadcms/plugin-visual-jobs/rsc": [
+        "./packages/plugin-visual-jobs/src/exports/rsc.ts"
       ],
       "@payloadcms/plugin-sentry/client": [
         "./packages/plugin-sentry/src/exports/client.ts"
@@ -153,6 +159,9 @@
     },
     {
       "path": "./packages/plugin-seo"
+    },
+    {
+      "path": "./packages/plugin-visual-jobs"
     },
     {
       "path": "./packages/plugin-stripe"

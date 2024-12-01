@@ -1,0 +1,16 @@
+@import '~@payloadcms/ui/scss';
+
+.taskNode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+
+  &--selected {
+    outline: 3px solid var(--theme-elevation-800);
+  }
+}

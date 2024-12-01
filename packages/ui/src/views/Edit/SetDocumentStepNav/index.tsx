@@ -73,6 +73,7 @@ export const SetDocumentStepNav: React.FC<{
             label: t('general:createNew'),
           })
         }
+        console.log('nav', nav)
       } else if (globalSlug) {
         nav.push({
           label: title,
@@ -92,6 +93,7 @@ export const SetDocumentStepNav: React.FC<{
       }
 
       if (drawerDepth <= 1) {
+        console.log('setStepNav', nav)
         setStepNav(nav)
       }
     }
