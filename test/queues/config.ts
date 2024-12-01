@@ -576,8 +576,8 @@ export default buildConfigWithDefaults({
         slug: 'randomRetries',
         retries: 200,
         handler: async ({ job, inlineTask, req }) => {
-          await inlineTask('1', {
-            task: async ({ req }) => {
+          await inlineTask('Fetch Customer Data', {
+            task: ({ req }) => {
               // 20% chance to fail
               if (Math.random() < 0.2) {
                 throw new Error('Failed on purpose')
@@ -591,8 +591,8 @@ export default buildConfigWithDefaults({
             },
           })
 
-          await inlineTask('2', {
-            task: async ({ req }) => {
+          await inlineTask('Analyze Segments', {
+            task: ({ req }) => {
               // 20% chance to fail
               if (Math.random() < 0.4) {
                 throw new Error('Failed on purpose')
@@ -606,8 +606,8 @@ export default buildConfigWithDefaults({
             },
           })
 
-          await inlineTask('3', {
-            task: async ({ req }) => {
+          await inlineTask('Generate Copy', {
+            task: ({ req }) => {
               // 20% chance to fail
               if (Math.random() < 0.6) {
                 throw new Error('Failed on purpose')
@@ -620,8 +620,8 @@ export default buildConfigWithDefaults({
               attempts: 40,
             },
           })
-          await inlineTask('4', {
-            task: async ({ req }) => {
+          await inlineTask('Create Images', {
+            task: ({ req }) => {
               // 20% chance to fail
               if (Math.random() < 0.8) {
                 throw new Error('Failed on purpose')
@@ -634,8 +634,8 @@ export default buildConfigWithDefaults({
               attempts: 40,
             },
           })
-          await inlineTask('5', {
-            task: async ({ req }) => {
+          await inlineTask('Schedule Posts', {
+            task: ({ req }) => {
               // 20% chance to fail
               if (Math.random() < 0.8) {
                 throw new Error('Failed on purpose')
@@ -649,8 +649,8 @@ export default buildConfigWithDefaults({
             },
           })
 
-          await inlineTask('6', {
-            task: async ({ req }) => {
+          await inlineTask('Track Metrics', {
+            task: ({ req }) => {
               // 20% chance to fail
               if (Math.random() < 0.9) {
                 throw new Error('Failed on purpose')

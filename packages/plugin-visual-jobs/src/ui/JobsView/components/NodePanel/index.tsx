@@ -49,7 +49,7 @@ export const NodePanel = () => {
   return (
     <Panel className="nodePanel" position="top-right">
       <h1>
-        {taskLog.taskSlug} Task {taskLog.taskID}
+        {taskLog.taskSlug} Task: {taskLog.taskID}
       </h1>
       <div className="task-details">
         <div className="detail-row">
