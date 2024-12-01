@@ -52,7 +52,7 @@ export const JobsViewClient: React.FC<{ retrySequences: RetrySequences }> = (pro
         return {
           id: entry.id,
           type: 'taskNode',
-          data: { label: entry.taskSlug, ...entry },
+          data: entry,
           position: { x: 0, y: index * 100 },
         } as Node
       }),

@@ -3,8 +3,85 @@
 .nodePanel {
   display: flex;
   flex-direction: column;
-  gap: base(2);
+  gap: base(1);
   padding: base(2);
   border: 1px solid var(--theme-elevation-100);
   background: var(--theme-input-bg);
+
+  .task-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .detail-row {
+      display: flex;
+      align-items: flex-start;
+
+      .label {
+        min-width: 100px;
+        font-weight: 600;
+      }
+
+      .value {
+        flex: 1;
+
+        &.state {
+          text-transform: capitalize;
+          font-weight: 600;
+
+          &.succeeded {
+            color: #2ecc71;
+          }
+
+          &.failed {
+            color: #e74c3c;
+          }
+
+          &.running {
+            color: #3498db;
+          }
+        }
+      }
+    }
+  }
+
+  .error-container {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--theme-error-300);
+    color: white;
+    border: 1px solid var(--theme-error-100);
+    border-radius: 6px;
+    max-width: 400px;
+
+    .error-type {
+      font-weight: 600;
+    }
+
+    .stack-trace {
+      margin-top: 8px;
+
+      .stack-header {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .stack-content {
+        background: var(--theme-error-200);
+        border: 1px solid var(--theme-error-400);
+        border-radius: 4px;
+        padding: 8px;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+
+        .stack-line {
+          padding: 2px 0;
+          white-space: pre-wrap;
+          word-break: break-all;
+        }
+      }
+    }
+  }
 }
