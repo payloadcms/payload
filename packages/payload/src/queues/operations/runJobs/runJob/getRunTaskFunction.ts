@@ -79,9 +79,17 @@ export async function handleTaskFailed({
   if (!job.log) {
     job.log = []
   }
+  const errorJSON = error
+    ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      }
+    : runnerOutput.state
+
   job.log.push({
     completedAt: new Date().toISOString(),
-    error: error ?? runnerOutput.state,
+    error: errorJSON,
     executedAt: executedAt.toISOString(),
     input,
     output,
