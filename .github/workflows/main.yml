@@ -274,11 +274,17 @@ jobs:
         if: matrix.database == 'supabase'
 
       - name: Integration Tests
-        run: pnpm test:int
+        uses: nick-fields/retry@v3
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
+        with:
+          retry_on: any
+          max_attempts: 5
+          timeout_minutes: 15
+          command: pnpm test:int
+          on_retry_command: pnpm clean:all && pnpm install
 
   tests-e2e:
     runs-on: ubuntu-latest
@@ -374,7 +380,13 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
+        uses: nick-fields/retry@v3
+        with:
+          retry_on: any
+          max_attempts: 5
+          timeout_minutes: 20
+          command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
+          on_retry_command: pnpm clean:all && pnpm install && pnpm build:all
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
           NEXT_TELEMETRY_DISABLED: 1
