@@ -1,12 +1,15 @@
 'use client'
-import { useEffect, useMemo, useRef } from 'react'
+
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 export const usePatchAnimateHeight = ({
   containerRef,
+  contentRef,
   duration,
   open,
 }: {
   containerRef: React.RefObject<HTMLDivElement>
+  contentRef: React.RefObject<HTMLDivElement>
   duration: number
   open: boolean
 }): { browserSupportsKeywordAnimation: boolean } => {
@@ -19,52 +22,69 @@ export const usePatchAnimateHeight = ({
   )
 
   const previousOpenState = useRef(open)
+  const [isAnimating, setIsAnimating] = useState(false)
+  const resizeObserverRef = useRef<null | ResizeObserver>(null)
 
   useEffect(() => {
-    if (containerRef.current && !browserSupportsKeywordAnimation) {
-      const container = containerRef.current
+    const container = containerRef.current
+    const content = contentRef.current
 
-      const getTotalHeight = (el: HTMLDivElement) => {
-        const styles = window.getComputedStyle(el)
-        const marginTop = parseFloat(styles.marginTop)
-        const marginBottom = parseFloat(styles.marginBottom)
-        return el.scrollHeight + marginTop + marginBottom
-      }
+    if (!container || !content || browserSupportsKeywordAnimation) {
+      return
+    }
 
-      const animate = () => {
-        const maxContentHeight = getTotalHeight(container)
+    let animationFrameId: number
 
-        // Set initial state
-        if (previousOpenState.current !== open) {
-          container.style.height = open ? '0px' : `${maxContentHeight}px`
-        }
-
-        // Trigger reflow
-        container.offsetHeight // eslint-disable-line @typescript-eslint/no-unused-expressions
-
-        // Start animation
-        container.style.transition = `height ${duration}ms ease`
-        container.style.height = open ? `${maxContentHeight}px` : '0px'
-
-        const transitionEndHandler = () => {
-          container.style.transition = ''
-          container.style.height = !open ? '0px' : 'auto'
-          container.removeEventListener('transitionend', transitionEndHandler)
-        }
-
-        container.addEventListener('transitionend', transitionEndHandler)
-      }
-
-      animate()
-
-      previousOpenState.current = open
-
-      return () => {
-        container.style.transition = ''
-        container.style.height = ''
+    const updateHeight = () => {
+      if (isAnimating && container && content) {
+        container.style.height = open ? `${content.scrollHeight}px` : '0px'
       }
     }
-  }, [open, duration, containerRef, browserSupportsKeywordAnimation])
+
+    const animate = () => {
+      setIsAnimating(true)
+
+      // Set initial state
+      if (previousOpenState.current !== open) {
+        container.style.height = open ? '0px' : `${content.scrollHeight}px`
+      }
+
+      // Trigger reflow
+      container.offsetHeight // eslint-disable-line @typescript-eslint/no-unused-expressions
+
+      // Start animation
+      container.style.transition = `height ${duration}ms ease`
+      container.style.height = open ? `${content.scrollHeight}px` : '0px'
+
+      const transitionEndHandler = () => {
+        container.style.transition = ''
+        container.style.height = open ? 'auto' : '0px'
+        container.removeEventListener('transitionend', transitionEndHandler)
+        setIsAnimating(false)
+      }
+
+      container.addEventListener('transitionend', transitionEndHandler)
+    }
+
+    animate()
+    previousOpenState.current = open
+
+    // Setup ResizeObserver
+    resizeObserverRef.current = new ResizeObserver(() => {
+      if (isAnimating) {
+        animationFrameId = requestAnimationFrame(updateHeight)
+      }
+    })
+
+    resizeObserverRef.current.observe(content)
+
+    return () => {
+      container.style.transition = ''
+      container.style.height = ''
+      resizeObserverRef.current?.disconnect()
+      cancelAnimationFrame(animationFrameId)
+    }
+  }, [open, duration, containerRef, contentRef, browserSupportsKeywordAnimation, isAnimating])
 
   return { browserSupportsKeywordAnimation }
 }
