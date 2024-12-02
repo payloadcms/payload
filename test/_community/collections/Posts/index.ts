@@ -23,9 +23,9 @@ export const PostsCollection: CollectionConfig = {
           FixedToolbarFeature(),
           TextColorFeature({
             colors: [
-              { label: 'Red', value: '#ff0000' },
-              { label: 'Green', value: 'green' },
-              { label: 'Blue', value: 'blue' },
+              { label: 'Red', inLightMode: '#ff0000', inDarkMode: '#ff0000' },
+              { label: 'Green', inLightMode: 'green', inDarkMode: 'green' },
+              { label: 'Blue', inLightMode: 'blue', inDarkMode: 'blue' },
             ],
             // normalizeColor: (color) => {
             //   if (color !== '#ff0000' && color !== 'green' && color !== 'blue') {
