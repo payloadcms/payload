@@ -69,6 +69,7 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
+  hiddenField?: string | null;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -201,6 +202,7 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
+  hiddenField?: T;
   title?: T;
   updatedAt?: T;
   createdAt?: T;
