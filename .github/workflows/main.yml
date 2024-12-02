@@ -280,7 +280,7 @@ jobs:
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
         with:
-          retry_on: error
+          retry_on: any
           max_attempts: 5
           timeout_minutes: 15
           command: pnpm test:int
@@ -381,7 +381,7 @@ jobs:
       - name: E2E Tests
         uses: nick-fields/retry@v3
         with:
-          retry_on: error
+          retry_on: any
           max_attempts: 5
           timeout_minutes: 20
           command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
