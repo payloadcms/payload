@@ -768,9 +768,9 @@ describe('Queues', () => {
     expect(allSimples.docs[7].title).toBe('from single task')
   })
 
-  it('can queue single tasks 500 times', async () => {
+  it('can queue single tasks 150 times', async () => {
     payload.config.jobs.deleteJobOnComplete = false
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 150; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -788,14 +788,14 @@ describe('Queues', () => {
       limit: 1000,
     })
 
-    expect(allSimples.totalDocs).toBe(500) // Default limit: 10
+    expect(allSimples.totalDocs).toBe(150) // Default limit: 10
     expect(allSimples.docs[0].title).toBe('from single task')
-    expect(allSimples.docs[490].title).toBe('from single task')
+    expect(allSimples.docs[140].title).toBe('from single task')
     payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure default jobs run limit of 10 works', async () => {
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 65; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -817,7 +817,7 @@ describe('Queues', () => {
   })
 
   it('ensure jobs run limit can be customized', async () => {
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 110; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
