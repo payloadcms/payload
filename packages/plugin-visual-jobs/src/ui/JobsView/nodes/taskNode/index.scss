@@ -12,12 +12,12 @@
   border: 1px solid var(--theme-elevation-100);
   background: var(--theme-input-bg);
 
-  &--selected {
-    outline: 1px solid var(--theme-elevation-800);
-  }
-
   &__label {
     display: flex;
     flex-direction: column;
   }
+}
+
+.selected .taskNode {
+  outline: 1px solid var(--theme-elevation-800);
 }

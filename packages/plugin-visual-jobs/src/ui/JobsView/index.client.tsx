@@ -22,7 +22,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { RetrySequences } from './utilities/logsToRetrySequences.js'
 
-import { SelectedTaskProvider } from './components/context.js'
 import { NodePanel } from './components/NodePanel/index.js'
 import { TaskNode } from './nodes/taskNode/index.js'
 
@@ -95,7 +94,7 @@ export const JobsViewClient: React.FC<{ retrySequences: RetrySequences }> = (pro
     [],
   )
   return (
-    <SelectedTaskProvider>
+    <div>
       <SetDocumentStepNav
         collectionSlug={'payload-jobs'}
         globalLabel={undefined}
@@ -149,6 +148,6 @@ export const JobsViewClient: React.FC<{ retrySequences: RetrySequences }> = (pro
           <NodePanel />
         </ReactFlow>
       </div>
-    </SelectedTaskProvider>
+    </div>
   )
 }

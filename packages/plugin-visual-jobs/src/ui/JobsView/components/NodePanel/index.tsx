@@ -1,10 +1,12 @@
 'use client'
 
-import { Panel } from '@xyflow/react'
-import React from 'react'
+import type { JobLog } from 'payload'
+
+import { Panel, useNodes } from '@xyflow/react'
 
 import './index.scss'
-import { useSelectedTaskContext } from '../context.js'
+
+import React from 'react'
 
 const ErrorDisplay = ({ error }: { error: any }) => {
   const formatStack = (stack: string) => {
@@ -36,11 +38,15 @@ const ErrorDisplay = ({ error }: { error: any }) => {
 }
 
 export const NodePanel = () => {
-  const { taskLog } = useSelectedTaskContext()
+  const nodes = useNodes()
 
-  if (!taskLog) {
+  const selectedNodes = nodes.filter((node) => node.selected)
+
+  if (selectedNodes.length !== 1) {
     return null
   }
+
+  const taskLog = selectedNodes[0].data as JobLog
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString()

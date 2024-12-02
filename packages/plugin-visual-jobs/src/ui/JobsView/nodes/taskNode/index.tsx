@@ -7,21 +7,10 @@ import { ErrorIcon, SuccessIcon } from '@payloadcms/ui'
 import { Handle, Position } from '@xyflow/react'
 import React, { memo } from 'react'
 
-import { useSelectedTaskContext } from '../../components/context.js'
-
 export const TaskNode: React.FC<{
   data: JobLog
   isConnectable: boolean
 }> = memo(({ data, isConnectable }) => {
-  const { setTaskLog, taskLog } = useSelectedTaskContext()
-
-  const isSelected = taskLog?.id === data.id
-
-  const onHandleClick = () => {
-    console.log('clicked')
-    setTaskLog(data)
-  }
-
   return (
     <>
       <Handle
@@ -33,10 +22,8 @@ export const TaskNode: React.FC<{
       <div
         className={[
           'taskNode',
-          isSelected ? 'taskNode--selected' : '',
           data.state === 'succeeded' ? 'taskNode--succeeded' : 'taskNode--failed',
         ].join(' ')}
-        onClick={onHandleClick}
       >
         {data.state === 'succeeded' ? <SuccessIcon /> : <ErrorIcon />}
         <div className="taskNode__label">
