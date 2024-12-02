@@ -36,6 +36,10 @@ type TemplateVariations = {
   envNames?: {
     dbUri: string
   }
+  /**
+   * @default false
+   */
+  skipReadme?: boolean
   configureConfig?: boolean
   generateLockfile?: boolean
 }
@@ -92,6 +96,7 @@ async function main() {
         // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
+      skipReadme: true,
     },
     {
       name: 'payload-postgres-template',
@@ -151,6 +156,7 @@ async function main() {
     envNames,
     sharp,
     configureConfig,
+    skipReadme = false,
   } of variations) {
     header(`Generating ${name}...`)
     const destDir = path.join(templatesDir, dirname)
@@ -160,6 +166,7 @@ async function main() {
       '.next',
       '.env$',
       'pnpm-lock.yaml',
+      ...(skipReadme ? ['README.md'] : ['']),
     ])
 
     log(`Copied to ${destDir}`)
@@ -183,15 +190,26 @@ async function main() {
       })
     }
 
-    await generateReadme({
-      destDir,
-      data: {
-        name,
-        description: name, // TODO: Add descriptions
-        attributes: { db, storage },
-        ...(vercelDeployButtonLink && { vercelDeployButtonLink }),
-      },
-    })
+    if (!skipReadme) {
+      await generateReadme({
+        destDir,
+        data: {
+          name,
+          description: name, // TODO: Add descriptions
+          attributes: { db, storage },
+          ...(vercelDeployButtonLink && { vercelDeployButtonLink }),
+        },
+      })
+    }
+
+    if (generateLockfile) {
+      log('Generating pnpm-lock.yaml')
+      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
+    } else {
+      log('Installing dependencies without generating lockfile')
+      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
+      await fs.rm(`${destDir}/pnpm-lock.yaml`, { force: true })
+    }
 
     // Copy in initial migration if db is postgres. This contains user and media.
     if (db === 'postgres' || db === 'vercel-postgres') {
@@ -214,15 +232,11 @@ async function main() {
         cwd: destDir,
         env: {
           ...process.env,
+          PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
           DATABASE_URI: 'postgres://localhost:5432/payloadtests',
         },
       })
-    }
-
-    if (generateLockfile) {
-      log('Generating pnpm-lock.yaml')
-      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
     }
 
     // TODO: Email?
@@ -302,7 +316,7 @@ function log(message: string) {
 function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1]) {
   try {
     console.log(`Executing: ${command}`)
-    execSync(command, options)
+    execSync(command, { stdio: 'inherit', ...options })
   } catch (error) {
     if (error instanceof Error) {
       const stderr = (error as any).stderr?.toString()
