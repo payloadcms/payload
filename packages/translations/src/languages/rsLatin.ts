@@ -479,6 +479,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
 }
 
 export const rsLatin: Language = {
-  dateFNSKey: 'en-US',
+  dateFNSKey: 'rs-Latin',
   translations: rsLatinTranslations,
 }

@@ -231,7 +231,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         return
       }
 
-      let output: object
+      let output: object = {}
 
       try {
         const runnerOutput = await runner({
