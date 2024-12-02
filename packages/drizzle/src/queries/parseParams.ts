@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, Operator, Where } from 'payload'
+import type { FlattenedField, Operator, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
@@ -15,7 +15,7 @@ import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  fields: Field[]
+  fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale: string
   selectFields: Record<string, GenericColumn>
@@ -295,6 +295,13 @@ export function parseParams({
 
                 if (field.type === 'point' && adapter.name === 'postgres') {
                   switch (operator) {
+                    case 'intersects': {
+                      constraints.push(
+                        sql`ST_Intersects(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
+                      )
+                      break
+                    }
+
                     case 'near': {
                       const [lng, lat, maxDistance, minDistance] = queryValue as number[]
 
@@ -309,13 +316,6 @@ export function parseParams({
                     case 'within': {
                       constraints.push(
                         sql`ST_Within(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
-                      )
-                      break
-                    }
-
-                    case 'intersects': {
-                      constraints.push(
-                        sql`ST_Intersects(${table[columnName]}, ST_GeomFromGeoJSON(${JSON.stringify(queryValue)}))`,
                       )
                       break
                     }

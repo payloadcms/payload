@@ -3,6 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomIdRow } from './collections/CustomIdRow.js'
 import { CustomIdTab } from './collections/CustomIdTab.js'
@@ -60,7 +61,7 @@ export default buildConfigWithDefaults({
         Button: '/components/Logout/index.js#Logout',
       },
       providers: [
-        '/components/CustomProvider/index.js#CustomProvider',
+        '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
       ],
       views: {
@@ -154,6 +155,7 @@ export default buildConfigWithDefaults({
     CustomIdTab,
     CustomIdRow,
     DisableDuplicate,
+    BaseListFilter,
   ],
   globals: [
     GlobalHidden,

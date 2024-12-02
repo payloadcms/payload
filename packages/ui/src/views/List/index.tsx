@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, StaticDescription } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
@@ -24,7 +24,7 @@ import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
 import { PublishMany } from '../../elements/PublishMany/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
-import { StaggeredShimmers } from '../../elements/ShimmerEffect/index.js'
+import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
@@ -35,11 +35,10 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
-import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import './index.scss'
 import { ListHeader } from './ListHeader/index.js'
+import './index.scss'
 
 const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
@@ -90,15 +89,13 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const { createNewDrawerSlug, drawerSlug: listDrawerSlug } = useListDrawerContext()
+  const { createNewDrawerSlug, drawerSlug: listDrawerSlug, onBulkSelect } = useListDrawerContext()
 
   useEffect(() => {
     if (InitialTable) {
       setTable(InitialTable)
     }
   }, [InitialTable])
-
-  const payloadServerAction = useServerFunctions()
 
   const { user } = useAuth()
 
@@ -136,30 +133,18 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
 
-  useEffect(() => {
-    if (!collectionConfig) {
-      const getNewConfig = async () => {
-        // @ts-expect-error eslint-disable-next-line
-        const res = (await payloadServerAction('render-config', {
-          collectionSlug,
-          languageCode: i18n.language,
-        })) as any as ClientCollectionConfig
-      }
-
-      void getNewConfig()
+  const docs = React.useMemo(() => {
+    if (isUploadCollection) {
+      return data.docs.map((doc) => {
+        return {
+          ...doc,
+          filesize: formatFilesize(doc.filesize),
+        }
+      })
+    } else {
+      return data.docs
     }
-  }, [payloadServerAction, collectionConfig, collectionSlug, data, i18n])
-
-  let docs = data.docs || []
-
-  if (isUploadCollection) {
-    docs = docs?.map((doc) => {
-      return {
-        ...doc,
-        filesize: formatFilesize(doc.filesize),
-      }
-    })
-  }
+  }, [data.docs, isUploadCollection])
 
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
@@ -182,14 +167,14 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
       <TableColumnsProvider
         collectionSlug={collectionSlug}
         columnState={columnState}
-        docs={data.docs}
+        docs={docs}
         enableRowSelections={enableRowSelections}
         listPreferences={listPreferences}
         preferenceKey={preferenceKey}
         setTable={setTable}
       >
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-          <SelectionProvider docs={data.docs} totalDocs={data.totalDocs} user={user}>
+          <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
               <ListHeader
@@ -213,7 +198,13 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 t={t}
               />
               <ListControls
-                beforeActions={beforeActions}
+                beforeActions={
+                  enableRowSelections && typeof onBulkSelect === 'function'
+                    ? beforeActions
+                      ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
+                      : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                    : beforeActions
+                }
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
                 disableBulkDelete={disableBulkDelete}
@@ -221,16 +212,8 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 renderedFilters={renderedFilters}
               />
               {BeforeListTable}
-              {!data.docs && (
-                <StaggeredShimmers
-                  className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
-                  count={6}
-                />
-              )}
-              {data.docs && data.docs.length > 0 && (
-                <RelationshipProvider>{Table}</RelationshipProvider>
-              )}
-              {data.docs && data.docs.length === 0 && (
+              {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
+              {docs.length === 0 && (
                 <div className={`${baseClass}__no-results`}>
                   <p>
                     {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
@@ -255,7 +238,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 </div>
               )}
               {AfterListTable}
-              {data.docs && data.docs.length > 0 && (
+              {docs.length > 0 && (
                 <div className={`${baseClass}__page-controls`}>
                   <Pagination
                     hasNextPage={data.hasNextPage}
@@ -268,7 +251,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                     prevPage={data.prevPage}
                     totalPages={data.totalPages}
                   />
-                  {data?.totalDocs > 0 && (
+                  {data.totalDocs > 0 && (
                     <Fragment>
                       <div className={`${baseClass}__page-info`}>
                         {data.page * data.limit - (data.limit - 1)}-
@@ -289,7 +272,14 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                             label={getTranslation(collectionConfig.labels.plural, i18n)}
                           />
                           <div className={`${baseClass}__list-selection-actions`}>
-                            {beforeActions && beforeActions}
+                            {enableRowSelections && typeof onBulkSelect === 'function'
+                              ? beforeActions
+                                ? [
+                                    ...beforeActions,
+                                    <SelectMany key="select-many" onClick={onBulkSelect} />,
+                                  ]
+                                : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                              : beforeActions}
                             {!disableBulkEdit && (
                               <Fragment>
                                 <EditMany collection={collectionConfig} />

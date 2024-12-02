@@ -218,6 +218,7 @@ function TableHoverActionsContainer({
           className={editorConfig.editorConfig.lexical.theme.tableAddRows}
           onClick={() => insertAction(true)}
           style={{ ...position }}
+          type="button"
         />
       )}
       {isShownColumn && (
@@ -225,6 +226,7 @@ function TableHoverActionsContainer({
           className={editorConfig.editorConfig.lexical.theme.tableAddColumns}
           onClick={() => insertAction(false)}
           style={{ ...position }}
+          type="button"
         />
       )}
     </>

@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - main
-      - beta
 
 concurrency:
   # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
@@ -275,16 +274,22 @@ jobs:
         if: matrix.database == 'supabase'
 
       - name: Integration Tests
-        run: pnpm test:int
+        uses: nick-fields/retry@v3
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
+        with:
+          retry_on: any
+          max_attempts: 5
+          timeout_minutes: 15
+          command: pnpm test:int
+          on_retry_command: pnpm clean:all && pnpm install
 
   tests-e2e:
     runs-on: ubuntu-latest
     needs: build
-    name: ${{ matrix.suite }}
+    name: e2e-${{ matrix.suite }}
     strategy:
       fail-fast: false
       matrix:
@@ -294,8 +299,10 @@ jobs:
           - access-control
           - admin__e2e__1
           - admin__e2e__2
+          - admin__e2e__3
           - admin-root
           - auth
+          - auth-basic
           - field-error-states
           - fields-relationship
           - fields
@@ -373,7 +380,13 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
+        uses: nick-fields/retry@v3
+        with:
+          retry_on: any
+          max_attempts: 5
+          timeout_minutes: 20
+          command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
+          on_retry_command: pnpm clean:all && pnpm install && pnpm build:all
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
           NEXT_TELEMETRY_DISABLED: 1
@@ -413,6 +426,10 @@ jobs:
             database: postgres
           - template: with-vercel-postgres
             database: postgres
+
+          # Re-enable once PG conncection is figured out
+          # - template: with-vercel-website
+          #   database: postgres
 
     name: ${{ matrix.template }}-${{ matrix.database }}
 
@@ -525,7 +542,7 @@ jobs:
   publish-canary:
     name: Publish Canary
     runs-on: ubuntu-latest
-    if: ${{ needs.all-green.result == 'success' && github.ref_name == 'beta' }}
+    if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
     needs:
       - all-green
 
@@ -533,4 +550,4 @@ jobs:
       # debug github.ref output
       - run: |
           echo github.ref: ${{ github.ref }}
-          echo isBeta: ${{ github.ref == 'refs/heads/beta' }}
+          echo isV3: ${{ github.ref == 'refs/heads/main' }}

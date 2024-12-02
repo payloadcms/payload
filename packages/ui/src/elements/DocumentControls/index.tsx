@@ -3,9 +3,9 @@ import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
   ClientUser,
-  CollectionPermission,
-  GlobalPermission,
   SanitizedCollectionConfig,
+  SanitizedCollectionPermission,
+  SanitizedGlobalPermission,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -20,6 +20,7 @@ import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'
+import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
@@ -57,7 +58,7 @@ export const DocumentControls: React.FC<{
   readonly onDuplicate?: DocumentDrawerContextType['onDuplicate']
   readonly onSave?: DocumentDrawerContextType['onSave']
   readonly onTakeOver?: () => void
-  readonly permissions: CollectionPermission | GlobalPermission | null
+  readonly permissions: null | SanitizedCollectionPermission | SanitizedGlobalPermission
   readonly readOnlyForIncomingUser?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
@@ -102,6 +103,7 @@ export const DocumentControls: React.FC<{
 
   const {
     admin: { dateFormat },
+    localization,
     routes: { admin: adminRoute },
   } = config
 
@@ -118,11 +120,9 @@ export const DocumentControls: React.FC<{
     }
   }, [data, i18n, dateFormat])
 
-  const hasCreatePermission =
-    permissions && 'create' in permissions && permissions.create?.permission
+  const hasCreatePermission = permissions && 'create' in permissions && permissions.create
 
-  const hasDeletePermission =
-    permissions && 'delete' in permissions && permissions.delete?.permission
+  const hasDeletePermission = permissions && 'delete' in permissions && permissions.delete
 
   const showDotMenu = Boolean(
     collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
@@ -260,6 +260,7 @@ export const DocumentControls: React.FC<{
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
+                {localization && <CopyLocaleData />}
                 {hasCreatePermission && (
                   <React.Fragment>
                     {!disableCreate && (

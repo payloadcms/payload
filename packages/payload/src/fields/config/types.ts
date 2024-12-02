@@ -3,7 +3,7 @@
 import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
-import type { DeepUndefinable } from 'ts-essentials'
+import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
 
 import type {
   JoinFieldClientProps,
@@ -692,7 +692,7 @@ export type CollapsibleFieldClient = {
   Pick<CollapsibleField, 'type'>
 
 type TabBase = {
-  description?: Description
+  description?: LabelFunction | StaticDescription
   fields: Field[]
   interfaceName?: string
   saveToJWT?: boolean | string
@@ -748,8 +748,14 @@ export type TabAsFieldClient = ClientTab & Pick<TabAsField, 'name' | 'type'>
 export type UIField = {
   admin: {
     components?: {
+      /**
+       * Allow any custom components to be added to the UI field. This allows
+       * the UI field to be used as a vessel for getting components rendered.
+       */
+      [key: string]: PayloadComponent | undefined
       Cell?: CustomComponent
-      Field: CustomComponent
+      // Can be optional, in case the UI field is just used as a vessel for custom components
+      Field?: CustomComponent
       /**
        * The Filter component has to be a client component
        */
@@ -857,7 +863,7 @@ type UploadAdminClient = AdminClient & Pick<UploadAdmin, 'allowCreate' | 'isSort
 
 export type PolymorphicUploadField = {
   admin?: {
-    sortOptions?: { [collectionSlug: CollectionSlug]: string }
+    sortOptions?: Partial<Record<CollectionSlug, string>>
   } & UploadAdmin
   relationTo: CollectionSlug[]
 } & SharedUploadProperties
@@ -1038,7 +1044,7 @@ type RelationshipAdminClient = AdminClient &
 
 export type PolymorphicRelationshipField = {
   admin?: {
-    sortOptions?: { [collectionSlug: CollectionSlug]: string }
+    sortOptions?: Partial<Record<CollectionSlug, string>>
   } & RelationshipAdmin
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
@@ -1180,6 +1186,70 @@ export type RadioFieldClient = {
 } & FieldBaseClient &
   Pick<RadioField, 'options' | 'type'>
 
+type BlockFields = {
+  [key: string]: any
+  blockName?: string
+  blockType?: string
+}
+
+export type BlockJSX = {
+  /**
+   * Override the default regex used to search for the start of the block in the JSX.
+   * By default, it's <BlockSlugHere
+   */
+  customEndRegex?:
+    | {
+        /**
+         * Whether the end match is optional. If true, the end match is
+         * not required to match for the transformer to be triggered.
+         * The entire text from regexpStart to the end of the document will then be matched.
+         */
+        optional?: true
+        regExp: RegExp
+      }
+    | RegExp
+  /**
+   * Override the default regex used to search for the start of the block in the JSX.
+   * By default, it's <BlockSlugHere/>
+   */
+  customStartRegex?: RegExp
+  /**
+   * By default, all spaces at the beginning and end of every line of the
+   * children (text between the open and close match) are removed.
+   * Set this to true to disable this behavior.
+   */
+  doNotTrimChildren?: boolean
+  /**
+   * Function that receives the data for a given block and returns a JSX representation of it.
+   *
+   * This is used to convert Lexical => JSX
+   */
+  export: (props: {
+    fields: BlockFields
+    lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
+  }) =>
+    | {
+        children?: string
+        props?: object
+      }
+    | false
+    | string
+  /**
+   * Function that receives the markdown string and parsed
+   * JSX props for a given matched block and returns a Lexical representation of it.
+   *
+   * This is used to convert JSX => Lexical
+   */
+  import: (props: {
+    children: string
+    closeMatch: null | RegExpMatchArray // Only available when customEndRegex is set
+    htmlToLexical?: ((props: { html: string }) => any) | null
+    markdownToLexical?: (props: { markdown: string }) => Record<string, any>
+    openMatch?: RegExpMatchArray
+    props: Record<string, any>
+  }) => BlockFields | false
+}
+
 export type Block = {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
@@ -1188,19 +1258,15 @@ export type Block = {
   _sanitized?: boolean
   admin?: {
     components?: {
-      Label?: PayloadComponent<
-        never,
-        {
-          blockKind: 'block' | 'lexicalBlock' | 'lexicalInlineBlock' | string
-          /**
-           * May contain the formData
-           */
-          formData: Record<string, any>
-        }
-      >
+      /**
+       * This will replace the entire block component, including the block header / collapsible.
+       */
+      Block?: PayloadComponent<any, any>
+      Label?: PayloadComponent<any, any>
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    jsx?: PayloadComponent
   }
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
@@ -1222,19 +1288,16 @@ export type Block = {
    * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
+  jsx?: BlockJSX
   labels?: Labels
   slug: string
 }
 
 export type ClientBlock = {
-  admin?: {
-    components?: {
-      Label?: React.ReactNode
-    }
-  } & Pick<Block['admin'], 'custom'>
+  admin?: Pick<Block['admin'], 'custom'>
   fields: ClientField[]
   labels?: LabelsClient
-} & Pick<Block, 'imageAltText' | 'imageURL' | 'slug'>
+} & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>
 
 export type BlocksField = {
   admin?: {
@@ -1333,6 +1396,46 @@ export type JoinFieldClient = {
 } & FieldBaseClient &
   Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
 
+export type FlattenedBlock = {
+  flattenedFields: FlattenedField[]
+} & Block
+
+export type FlattenedBlocksField = {
+  blocks: FlattenedBlock[]
+} & BlocksField
+
+export type FlattenedGroupField = {
+  flattenedFields: FlattenedField[]
+} & GroupField
+
+export type FlattenedArrayField = {
+  flattenedFields: FlattenedField[]
+} & ArrayField
+
+export type FlattenedTabAsField = {
+  flattenedFields: FlattenedField[]
+} & MarkRequired<TabAsField, 'name'>
+
+export type FlattenedField =
+  | CheckboxField
+  | CodeField
+  | DateField
+  | EmailField
+  | FlattenedArrayField
+  | FlattenedBlocksField
+  | FlattenedGroupField
+  | FlattenedTabAsField
+  | JoinField
+  | JSONField
+  | NumberField
+  | PointField
+  | RadioField
+  | RelationshipField
+  | RichTextField
+  | SelectField
+  | TextareaField
+  | TextField
+  | UploadField
 export type Field =
   | ArrayField
   | BlocksField

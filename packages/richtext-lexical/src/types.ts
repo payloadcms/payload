@@ -15,6 +15,7 @@ import type {
 } from './features/typesClient.js'
 import type { FeatureProviderServer } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
+import type { InitialLexicalFormState } from './utilities/buildInitialState.js'
 
 export type LexicalFieldAdminProps = {
   /**
@@ -79,10 +80,11 @@ export type LexicalRichTextAdapterProvider =
     parentIsLocalized: boolean
   }) => Promise<LexicalRichTextAdapter>
 
+export type SingleFeatureClientSchemaMap = {
+  [key: string]: ClientField[]
+}
 export type FeatureClientSchemaMap = {
-  [featureKey: string]: {
-    [key: string]: ClientField[]
-  }
+  [featureKey: string]: SingleFeatureClientSchemaMap
 }
 
 export type LexicalRichTextFieldProps = {
@@ -95,13 +97,14 @@ export type LexicalRichTextFieldProps = {
     }
   }
   featureClientSchemaMap: FeatureClientSchemaMap
-  lexicalEditorConfig: LexicalEditorConfig
+  initialLexicalFormState: InitialLexicalFormState
+  lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
 } & Pick<ServerFieldBase, 'permissions'> &
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 
 export type LexicalRichTextCellProps = DefaultCellComponentProps<
-  SerializedEditorState,
-  RichTextFieldClient<SerializedEditorState, AdapterProps, object>
+  RichTextFieldClient<SerializedEditorState, AdapterProps, object>,
+  SerializedEditorState
 >
 
 export type AdapterProps = {

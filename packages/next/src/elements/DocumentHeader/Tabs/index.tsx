@@ -1,9 +1,9 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
   Payload,
-  Permissions,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
+  SanitizedPermissions,
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -23,7 +23,7 @@ export const DocumentTabs: React.FC<{
   globalConfig: SanitizedGlobalConfig
   i18n: I18n
   payload: Payload
-  permissions: Permissions
+  permissions: SanitizedPermissions
 }> = (props) => {
   const { collectionConfig, globalConfig, i18n, payload, permissions } = props
   const { config } = payload
@@ -80,23 +80,21 @@ export const DocumentTabs: React.FC<{
                 const { path, tab } = CustomView
 
                 if (tab.Component) {
-                  return (
-                    <RenderServerComponent
-                      clientProps={{
-                        path,
-                      }}
-                      Component={tab.Component}
-                      importMap={payload.importMap}
-                      key={`tab-custom-${index}`}
-                      serverProps={{
-                        collectionConfig,
-                        globalConfig,
-                        i18n,
-                        payload,
-                        permissions,
-                      }}
-                    />
-                  )
+                  return RenderServerComponent({
+                    clientProps: {
+                      path,
+                    },
+                    Component: tab.Component,
+                    importMap: payload.importMap,
+                    key: `tab-custom-${index}`,
+                    serverProps: {
+                      collectionConfig,
+                      globalConfig,
+                      i18n,
+                      payload,
+                      permissions,
+                    },
+                  })
                 }
 
                 return (

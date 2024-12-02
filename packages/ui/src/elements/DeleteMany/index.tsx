@@ -3,20 +3,21 @@ import type { ClientCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
+import { useRouter, useSearchParams } from 'next/navigation.js'
+import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { Button } from '../Button/index.js'
-import { Pill } from '../Pill/index.js'
 import './index.scss'
+import { Pill } from '../Pill/index.js'
 
 const baseClass = 'delete-documents'
 
@@ -26,7 +27,7 @@ export type Props = {
 }
 
 export const DeleteMany: React.FC<Props> = (props) => {
-  const { collection: { slug, labels: { plural, singular } } = {} } = props
+  const { collection, collection: { slug, labels: { plural, singular } } = {} } = props
 
   const { permissions } = useAuth()
   const {
@@ -40,11 +41,11 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
-  const { stringifyParams } = useSearchParams()
+  const searchParams = useSearchParams()
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasDeletePermission = collectionPermissions?.delete?.permission
+  const hasDeletePermission = collectionPermissions?.delete
 
   const modalSlug = `delete-${slug}`
 
@@ -54,8 +55,16 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
   const handleDelete = useCallback(async () => {
     setDeleting(true)
+
+    const queryWithSearch = mergeListSearchAndWhere({
+      collectionConfig: collection,
+      search: searchParams.get('search'),
+    })
+
+    const queryString = getQueryParams(queryWithSearch)
+
     await requests
-      .delete(`${serverURL}${api}/${slug}${getQueryParams()}`, {
+      .delete(`${serverURL}${api}/${slug}${queryString}`, {
         headers: {
           'Accept-Language': i18n.language,
           'Content-Type': 'application/json',
@@ -76,21 +85,26 @@ export const DeleteMany: React.FC<Props> = (props) => {
                 label: getTranslation(successLabel, i18n),
               }),
             )
+
             if (json?.errors.length > 0) {
               toast.error(json.message, {
                 description: json.errors.map((error) => error.message).join('\n'),
               })
             }
+
             toggleAll()
+
             router.replace(
-              stringifyParams({
-                params: {
+              qs.stringify(
+                {
                   page: selectAll ? '1' : undefined,
                 },
-                replace: true,
-              }),
+                { addQueryPrefix: true },
+              ),
             )
+
             clearRouteCache()
+
             return null
           }
 
@@ -102,11 +116,12 @@ export const DeleteMany: React.FC<Props> = (props) => {
             addDefaultError()
           }
           return false
-        } catch (e) {
+        } catch (_err) {
           return addDefaultError()
         }
       })
   }, [
+    searchParams,
     addDefaultError,
     api,
     getQueryParams,
@@ -118,11 +133,11 @@ export const DeleteMany: React.FC<Props> = (props) => {
     serverURL,
     singular,
     slug,
-    stringifyParams,
     t,
     toggleAll,
     toggleModal,
     clearRouteCache,
+    collection,
   ])
 
   if (selectAll === SelectAllStatus.None || !hasDeletePermission) {

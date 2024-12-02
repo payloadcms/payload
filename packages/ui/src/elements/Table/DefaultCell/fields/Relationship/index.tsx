@@ -24,7 +24,6 @@ const baseClass = 'relationship-cell'
 const totalToShow = 3
 
 export type RelationshipCellProps = DefaultCellComponentProps<
-  any,
   JoinFieldClient | RelationshipFieldClient | UploadFieldClient
 >
 
@@ -119,8 +118,8 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
           if (previewAllowed && document) {
             fileField = (
               <FileCell
-                collectionConfig={relatedCollection}
                 cellData={label}
+                collectionConfig={relatedCollection}
                 customCellProps={customCellContext}
                 field={field}
                 rowData={document}

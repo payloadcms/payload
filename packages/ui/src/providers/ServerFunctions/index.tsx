@@ -6,14 +6,14 @@ import type {
   ServerFunctionClient,
 } from 'payload'
 
-import React, { createContext, useCallback, useEffect, useRef } from 'react'
+import React, { createContext, useCallback } from 'react'
 
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
+import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
 
 type GetFormStateClient = (
   args: {
-    doNotAbort?: boolean
     signal?: AbortSignal
   } & Omit<BuildFormStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildFormStateHandler>
@@ -28,13 +28,19 @@ type RenderDocument = (args: {
   collectionSlug: string
   disableActions?: boolean
   docID?: number | string
-  doNotAbort?: boolean
   drawerSlug?: string
   initialData?: Data
+  overrideEntityVisibility?: boolean
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   signal?: AbortSignal
-}) => Promise<{ docID: string; Document: React.ReactNode }>
+}) => Promise<{ data: Data; Document: React.ReactNode }>
+
+type CopyDataFromLocaleClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<CopyDataFromLocaleArgs, 'req'>,
+) => Promise<{ data: Data }>
 
 type GetDocumentSlots = (args: {
   collectionSlug: string
@@ -42,6 +48,7 @@ type GetDocumentSlots = (args: {
 }) => Promise<DocumentSlots>
 
 type ServerFunctionsContextType = {
+  copyDataFromLocale: CopyDataFromLocaleClient
   getDocumentSlots: GetDocumentSlots
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
@@ -69,10 +76,6 @@ export const ServerFunctionsProvider: React.FC<{
     throw new Error('ServerFunctionsProvider requires a serverFunction prop')
   }
 
-  // This is the local abort controller, to abort requests when the _provider_ itself unmounts, etc.
-  // Each callback also accept a remote signal, to abort requests when each _component_ unmounts, etc.
-  const abortControllerRef = useRef(new AbortController())
-
   const getDocumentSlots = useCallback<GetDocumentSlots>(
     async (args) =>
       await serverFunction({
@@ -84,39 +87,16 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getFormState = useCallback<GetFormStateClient>(
     async (args) => {
-      if (args?.doNotAbort) {
-        try {
-          const result = (await serverFunction({
-            name: 'form-state',
-            args,
-          })) as ReturnType<typeof buildFormStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
-
-          return result
-        } catch (_err) {
-          console.error(_err) // eslint-disable-line no-console
-        }
-
-        return { state: null }
-      }
-
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
-
-      const abortController = new AbortController()
-      abortControllerRef.current = abortController
-      const localSignal = abortController.signal
-
       const { signal: remoteSignal, ...rest } = args || {}
 
       try {
-        if (!remoteSignal?.aborted && !localSignal?.aborted) {
+        if (!remoteSignal?.aborted) {
           const result = (await serverFunction({
             name: 'form-state',
-            args: rest,
+            args: { fallbackLocale: false, ...rest },
           })) as ReturnType<typeof buildFormStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
 
-          if (!remoteSignal?.aborted && !localSignal?.aborted) {
+          if (!remoteSignal?.aborted) {
             return result
           }
         }
@@ -131,15 +111,19 @@ export const ServerFunctionsProvider: React.FC<{
 
   const getTableState = useCallback<GetTableStateClient>(
     async (args) => {
-      const { ...rest } = args || {}
+      const { signal: remoteSignal, ...rest } = args || {}
 
       try {
-        const result = (await serverFunction({
-          name: 'table-state',
-          args: rest,
-        })) as ReturnType<typeof buildTableStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
+        if (!remoteSignal?.aborted) {
+          const result = (await serverFunction({
+            name: 'table-state',
+            args: { fallbackLocale: false, ...rest },
+          })) as ReturnType<typeof buildTableStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
 
-        return result
+          if (!remoteSignal?.aborted) {
+            return result
+          }
+        }
       } catch (_err) {
         console.error(_err) // eslint-disable-line no-console
       }
@@ -151,39 +135,34 @@ export const ServerFunctionsProvider: React.FC<{
 
   const renderDocument = useCallback<RenderDocument>(
     async (args) => {
-      if (args?.doNotAbort) {
-        try {
-          const result = (await serverFunction({
-            name: 'render-document',
-            args,
-          })) as { docID: string; Document: React.ReactNode }
-
-          return result
-        } catch (_err) {
-          console.error(_err) // eslint-disable-line no-console
-          return
-        }
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
-
-      const abortController = new AbortController()
-      abortControllerRef.current = abortController
-      const localSignal = abortController.signal
-
       const { signal: remoteSignal, ...rest } = args || {}
 
       try {
-        if (!remoteSignal?.aborted && !localSignal?.aborted) {
-          const result = (await serverFunction({
-            name: 'render-document',
-            args: rest,
-          })) as { docID: string; Document: React.ReactNode }
+        const result = (await serverFunction({
+          name: 'render-document',
+          args: { fallbackLocale: false, ...rest },
+        })) as { data: Data; Document: React.ReactNode }
 
-          if (!remoteSignal?.aborted && !localSignal?.aborted) {
-            return result
-          }
+        return result
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
+  const copyDataFromLocale = useCallback<CopyDataFromLocaleClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args || {}
+
+      try {
+        const result = (await serverFunction({
+          name: 'copy-data-from-locale',
+          args: rest,
+        })) as { data: Data }
+
+        if (!remoteSignal?.aborted) {
+          return result
         }
       } catch (_err) {
         console.error(_err) // eslint-disable-line no-console
@@ -192,23 +171,10 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
-  useEffect(() => {
-    const controller = abortControllerRef.current
-
-    return () => {
-      if (controller) {
-        try {
-          // controller.abort()
-        } catch (_err) {
-          // swallow error
-        }
-      }
-    }
-  }, [])
-
   return (
     <ServerFunctionsContext.Provider
       value={{
+        copyDataFromLocale,
         getDocumentSlots,
         getFormState,
         getTableState,

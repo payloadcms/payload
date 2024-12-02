@@ -5,7 +5,7 @@ import type {
   CheckboxFieldValidation,
 } from 'payload'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
 
@@ -17,8 +17,9 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 import { CheckboxInput } from './Input.js'
 
 const baseClass = 'checkbox'
@@ -30,24 +31,18 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     id,
     checked: checkedFromProps,
     disableFormData,
+    field,
     field: {
-      name,
-      admin: {
-        className,
-        description,
-        style,
-        width,
-      } = {} as CheckboxFieldClientProps['field']['admin'],
+      admin: { className, description } = {} as CheckboxFieldClientProps['field']['admin'],
       label,
       required,
     } = {} as CheckboxFieldClientProps['field'],
     onChange: onChangeFromProps,
     partialChecked,
-    path: pathFromProps,
+    path,
     readOnly,
     validate,
   } = props
-  const path = pathFromProps ?? name
 
   const { uuid } = useForm()
 
@@ -86,6 +81,8 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
 
   const fieldID = id || generateFieldID(path, editDepth, uuid)
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -98,10 +95,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
       <RenderCustomComponent
         CustomComponent={Error}

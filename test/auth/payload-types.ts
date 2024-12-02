@@ -47,9 +47,9 @@ export interface Config {
     | (PublicUser & {
         collection: 'public-users';
       });
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -304,7 +304,6 @@ export interface UsersSelect<T extends boolean = true> {
   unnamedTabSaveToJWTString?: T;
   unnamedTabSaveToJWTFalse?: T;
   custom?: T;
-  authDebug?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;

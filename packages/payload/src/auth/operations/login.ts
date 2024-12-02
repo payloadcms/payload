@@ -13,6 +13,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
+import { getLoginOptions } from '../getLoginOptions.js'
 import isLocked from '../isLocked.js'
 import { jwtSign } from '../jwt.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
@@ -87,8 +88,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         ? data.username.toLowerCase().trim()
         : null
 
-    const canLoginWithUsername = Boolean(loginWithUsername)
-    const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
+    const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
     // cannot login with email, did not provide username
     if (!canLoginWithEmail && !sanitizedUsername) {
@@ -275,22 +275,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       req,
       showHiddenFields,
     })
-
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      user =
-        (await hook({
-          collection: args.collection?.config,
-          context: req.context,
-          doc: user,
-          req,
-        })) || user
-    }, Promise.resolve())
 
     // /////////////////////////////////////
     // afterRead - Collection

@@ -37,11 +37,7 @@ export const Account: React.FC<AdminViewProps> = async ({
   } = initPageResult
 
   const {
-    admin: {
-      components: { views: { Account: CustomAccountComponent } = {} } = {},
-      theme,
-      user: userSlug,
-    },
+    admin: { theme, user: userSlug },
     routes: { api },
     serverURL,
   } = config
@@ -98,8 +94,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       id: user.id,
       collectionConfig,
       isEditing: true,
-      payload: req.payload,
-      user,
+      req,
     })
 
     // Get all versions required for UI
@@ -107,6 +102,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       await getVersions({
         id: user.id,
         collectionConfig,
+        doc: data,
         docPermissions,
         locale: locale?.code,
         payload,
@@ -142,10 +138,11 @@ export const Account: React.FC<AdminViewProps> = async ({
             permissions={permissions}
           />
           <HydrateAuthProvider permissions={permissions} />
-          <RenderServerComponent
-            Component={CustomAccountComponent}
-            importMap={payload.importMap}
-            serverProps={{
+          {RenderServerComponent({
+            Component: config.admin?.components?.views?.account?.Component,
+            Fallback: EditView,
+            importMap: payload.importMap,
+            serverProps: {
               i18n,
               initPageResult,
               locale,
@@ -155,9 +152,8 @@ export const Account: React.FC<AdminViewProps> = async ({
               routeSegments: [],
               searchParams,
               user,
-            }}
-          />
-          <EditView />
+            },
+          })}
           <AccountClient />
         </EditDepthProvider>
       </DocumentInfoProvider>

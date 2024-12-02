@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { CollectionSlug } from 'payload'
 
@@ -16,7 +16,7 @@ export async function GET(
     }
   },
 ): Promise<Response> {
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayload({ config: configPromise })
   const token = req.cookies.get(payloadToken)?.value
   const { searchParams } = new URL(req.url)
   const path = searchParams.get('path')
@@ -67,8 +67,13 @@ export async function GET(
     // Verify the given slug exists
     try {
       const docs = await payload.find({
-        collection: collection,
+        collection,
         draft: true,
+        limit: 1,
+        // pagination: false reduces overhead if you don't need totalDocs
+        pagination: false,
+        depth: 0,
+        select: {},
         where: {
           slug: {
             equals: slug,

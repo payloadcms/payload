@@ -47,13 +47,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    path: pathFromProps,
+    path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
     validate,
   } = props
-  const path = pathFromProps ?? name
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
@@ -117,13 +116,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         schemaPath,
       })
 
-      setModified(true)
-
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, schemaPath, setModified],
+    [addFieldRow, path, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -326,11 +323,16 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!readOnly && !hasMaxRows && (
+      {!hasMaxRows && (
         <Fragment>
-          <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
+          <DrawerToggler
+            className={`${baseClass}__drawer-toggler`}
+            disabled={readOnly}
+            slug={drawerSlug}
+          >
             <Button
               buttonStyle="icon-label"
+              disabled={readOnly}
               el="span"
               icon="plus"
               iconPosition="left"

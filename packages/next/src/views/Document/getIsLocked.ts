@@ -1,18 +1,19 @@
 import type {
-  Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TypedUser,
   Where,
 } from 'payload'
 
+import { sanitizeID } from '@payloadcms/ui/shared'
+
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
   isEditing: boolean
-  payload: Payload
-  user: TypedUser
+  req: PayloadRequest
 }
 
 type Result = Promise<{
@@ -26,8 +27,7 @@ export const getIsLocked = async ({
   collectionConfig,
   globalConfig,
   isEditing,
-  payload,
-  user,
+  req,
 }: Args): Result => {
   const entityConfig = collectionConfig || globalConfig
 
@@ -50,7 +50,7 @@ export const getIsLocked = async ({
     where.and = [
       {
         'document.value': {
-          equals: id,
+          equals: sanitizeID(id),
         },
       },
       {
@@ -61,9 +61,11 @@ export const getIsLocked = async ({
     ]
   }
 
-  const { docs } = await payload.find({
+  const { docs } = await req.payload.find({
     collection: 'payload-locked-documents',
     depth: 1,
+    overrideAccess: false,
+    req,
     where,
   })
 
@@ -71,7 +73,7 @@ export const getIsLocked = async ({
     const newEditor = docs[0].user?.value
     const lastUpdateTime = new Date(docs[0].updatedAt).getTime()
 
-    if (newEditor?.id !== user.id) {
+    if (newEditor?.id !== req.user.id) {
       return {
         currentEditor: newEditor,
         isLocked: true,

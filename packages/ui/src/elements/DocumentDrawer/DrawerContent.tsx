@@ -1,7 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
@@ -10,6 +10,7 @@ import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
@@ -24,6 +25,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   onDelete: onDeleteFromProps,
   onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
+  overrideEntityVisibility = true,
   redirectAfterDelete,
   redirectAfterDuplicate,
 }) => {
@@ -35,6 +37,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     collections.find((collection) => collection.slug === collectionSlug),
   )
 
+  const documentViewAbortControllerRef = React.useRef<AbortController>(null)
+
   const { closeModal } = useModal()
   const { t } = useTranslation()
 
@@ -42,33 +46,44 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
   const [isLoading, setIsLoading] = useState(true)
+  const hasRenderedDocument = useRef(false)
 
   const getDocumentView = useCallback(
-    async (docID?: number | string, doNotAbort?: boolean) => {
-      setIsLoading(true)
+    (docID?: number | string) => {
+      abortAndIgnore(documentViewAbortControllerRef.current)
 
-      try {
-        const result = await renderDocument({
-          collectionSlug,
-          disableActions,
-          docID,
-          doNotAbort,
-          drawerSlug,
-          initialData,
-          redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
-          redirectAfterDuplicate:
-            redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
-        })
+      const controller = new AbortController()
+      documentViewAbortControllerRef.current = controller
 
-        if (result?.Document) {
-          setDocumentView(result.Document)
-          setIsLoading(false)
+      const fetchDocumentView = async () => {
+        setIsLoading(true)
+
+        try {
+          const result = await renderDocument({
+            collectionSlug,
+            disableActions,
+            docID,
+            drawerSlug,
+            initialData,
+            overrideEntityVisibility,
+            redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
+            redirectAfterDuplicate:
+              redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
+            signal: controller.signal,
+          })
+
+          if (result?.Document) {
+            setDocumentView(result.Document)
+            setIsLoading(false)
+          }
+        } catch (error) {
+          toast.error(error?.message || t('error:unspecific'))
+          closeModal(drawerSlug)
+          // toast.error(data?.errors?.[0].message || t('error:unspecific'))
         }
-      } catch (error) {
-        toast.error(error?.message || t('error:unspecific'))
-        closeModal(drawerSlug)
-        // toast.error(data?.errors?.[0].message || t('error:unspecific'))
       }
+
+      void fetchDocumentView()
     },
     [
       collectionSlug,
@@ -79,20 +94,14 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDuplicate,
       renderDocument,
       closeModal,
-      initialState,
+      overrideEntityVisibility,
       t,
     ],
   )
 
-  useEffect(() => {
-    if (!DocumentView) {
-      void getDocumentView(existingDocID, true)
-    }
-  }, [DocumentView, getDocumentView, existingDocID])
-
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      void getDocumentView(args.doc.id)
+      getDocumentView(args.doc.id)
 
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
@@ -104,9 +113,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     [onSaveFromProps, collectionConfig, getDocumentView],
   )
 
-  const onDuplicate = useCallback<DocumentDrawerProps['onSave']>(
+  const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
     (args) => {
-      void getDocumentView(args.doc.id)
+      getDocumentView(args.doc.id)
 
       if (typeof onDuplicateFromProps === 'function') {
         void onDuplicateFromProps({
@@ -133,8 +142,22 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   )
 
   const clearDoc = useCallback(() => {
-    void getDocumentView()
+    getDocumentView()
   }, [getDocumentView])
+
+  useEffect(() => {
+    if (!DocumentView && !hasRenderedDocument.current) {
+      getDocumentView(existingDocID)
+      hasRenderedDocument.current = true
+    }
+  }, [DocumentView, getDocumentView, existingDocID])
+
+  // Cleanup any pending requests when the component unmounts
+  useEffect(() => {
+    return () => {
+      abortAndIgnore(documentViewAbortControllerRef.current)
+    }
+  }, [])
 
   if (isLoading) {
     return <LoadingOverlay />

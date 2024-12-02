@@ -1,9 +1,9 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
   Payload,
-  Permissions,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
+  SanitizedPermissions,
 } from 'payload'
 
 import { Gutter, RenderTitle } from '@payloadcms/ui'
@@ -20,7 +20,7 @@ export const DocumentHeader: React.FC<{
   hideTabs?: boolean
   i18n: I18n
   payload: Payload
-  permissions: Permissions
+  permissions: SanitizedPermissions
 }> = (props) => {
   const { collectionConfig, globalConfig, hideTabs, i18n, payload, permissions } = props
 

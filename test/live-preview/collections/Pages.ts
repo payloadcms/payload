@@ -76,6 +76,16 @@ export const Pages: CollectionConfig = {
           label: 'Test',
           fields: [
             {
+              name: 'localizedTitle',
+              type: 'text',
+              localized: true,
+            },
+            {
+              name: 'relationToLocalized',
+              type: 'relationship',
+              relationTo: postsSlug,
+            },
+            {
               label: 'Rich Text — Slate',
               type: 'richText',
               name: 'richTextSlate',

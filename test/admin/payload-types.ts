@@ -27,6 +27,7 @@ export interface Config {
     customIdTab: CustomIdTab;
     customIdRow: CustomIdRow;
     'disable-duplicate': DisableDuplicate;
+    'base-list-filters': BaseListFilter;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -49,6 +50,7 @@ export interface Config {
     customIdTab: CustomIdTabSelect<false> | CustomIdTabSelect<true>;
     customIdRow: CustomIdRowSelect<false> | CustomIdRowSelect<true>;
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
+    'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -80,9 +82,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -278,8 +280,8 @@ export interface Geo {
  * via the `definition` "customIdTab".
  */
 export interface CustomIdTab {
-  id: string | null;
   title?: string | null;
+  id: string;
   description?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -290,8 +292,8 @@ export interface CustomIdTab {
  * via the `definition` "customIdRow".
  */
 export interface CustomIdRow {
-  id: string | null;
   title?: string | null;
+  id: string;
   description?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -302,6 +304,16 @@ export interface CustomIdRow {
  * via the `definition` "disable-duplicate".
  */
 export interface DisableDuplicate {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "base-list-filters".
+ */
+export interface BaseListFilter {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -377,6 +389,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'disable-duplicate';
         value: string | DisableDuplicate;
+      } | null)
+    | ({
+        relationTo: 'base-list-filters';
+        value: string | BaseListFilter;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -447,7 +463,6 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   richText?: T;
-  demoUIField?: T;
   group?:
     | T
     | {
@@ -600,6 +615,15 @@ export interface CustomIdRowSelect<T extends boolean = true> {
  * via the `definition` "disable-duplicate_select".
  */
 export interface DisableDuplicateSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "base-list-filters_select".
+ */
+export interface BaseListFiltersSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

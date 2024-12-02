@@ -1,11 +1,13 @@
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
+import type { NonNever } from 'ts-essentials'
 
 import { spawn } from 'child_process'
 import crypto from 'crypto'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import WebSocket from 'ws'
 
 import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
@@ -17,7 +19,6 @@ import type { Options as VerifyEmailOptions } from './auth/operations/local/veri
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, User } from './auth/types.js'
-import type { ImportMap } from './bin/generateImportMap/index.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -25,8 +26,6 @@ import type {
   SelectFromCollectionSlug,
   TypeWithID,
 } from './collections/config/types.js'
-export type { FieldState } from './admin/forms/Form.js'
-export type * from './admin/types.js'
 import type { Options as CountOptions } from './collections/operations/local/count.js'
 import type { Options as CreateOptions } from './collections/operations/local/create.js'
 import type {
@@ -68,6 +67,7 @@ import type { TypeWithVersion } from './versions/types.js'
 import { decrypt, encrypt } from './auth/crypto.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
+import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
@@ -77,6 +77,9 @@ import { getJobsLocalAPI } from './queues/localAPI.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
+
+export type { FieldState } from './admin/forms/Form.js'
+export type * from './admin/types.js'
 
 export interface GeneratedTypes {
   authUntyped: {
@@ -166,6 +169,16 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
 
+export type TypedUploadCollection = NonNever<{
+  [K in keyof TypedCollection]:
+    | 'filename'
+    | 'filesize'
+    | 'mimeType'
+    | 'url' extends keyof TypedCollection[K]
+    ? TypedCollection[K]
+    : never
+}>
+
 export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
 
 export type TypedCollectionJoins = ResolveCollectionJoinsType<GeneratedTypes>
@@ -179,6 +192,8 @@ export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
+
+export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
 
 type ResolveDbType<T> = 'db' extends keyof T
   ? T['db']
@@ -227,9 +242,7 @@ export class BasePayload {
 
   authStrategies: AuthStrategy[]
 
-  collections: {
-    [slug: string]: Collection
-  } = {}
+  collections: Record<CollectionSlug, Collection> = {}
 
   config: SanitizedConfig
   /**
@@ -542,7 +555,7 @@ export class BasePayload {
       !checkedDependencies
     ) {
       checkedDependencies = true
-      await checkPayloadDependencies()
+      void checkPayloadDependencies()
     }
 
     this.importMap = options.importMap
@@ -567,10 +580,13 @@ export class BasePayload {
     this.config.collections.forEach((collection) => {
       let customIDType = undefined
       const findCustomID: TraverseFieldsCallback = ({ field, next }) => {
-        if (['array', 'blocks'].includes(field.type)) {
-          next()
-          return
+        if (
+          ['array', 'blocks', 'group'].includes(field.type) ||
+          (field.type === 'tab' && 'name' in field)
+        ) {
+          return true
         }
+
         if (!fieldAffectsData(field)) {
           return
         }
@@ -709,30 +725,147 @@ const initialized = new BasePayload()
 
 export default initialized
 
-let cached = global._payload
+let cached: {
+  payload: null | Payload
+  promise: null | Promise<Payload>
+  reload: boolean | Promise<void>
+  ws: null | WebSocket
+} = global._payload
 
 if (!cached) {
-  cached = global._payload = { payload: null, promise: null }
+  cached = global._payload = { payload: null, promise: null, reload: false, ws: null }
 }
 
-export const getPayload = async (options: InitOptions): Promise<BasePayload> => {
+export const reload = async (
+  config: SanitizedConfig,
+  payload: Payload,
+  skipImportMapGeneration?: boolean,
+): Promise<void> => {
+  if (typeof payload.db.destroy === 'function') {
+    await payload.db.destroy()
+  }
+
+  payload.config = config
+
+  payload.collections = config.collections.reduce((collections, collection) => {
+    collections[collection.slug] = {
+      config: collection,
+      customIDType: payload.collections[collection.slug]?.customIDType,
+    }
+    return collections
+  }, {})
+
+  payload.globals = {
+    config: config.globals,
+  }
+
+  // TODO: support HMR for other props in the future (see payload/src/index init()) that may change on Payload singleton
+
+  // Generate types
+  if (config.typescript.autoGenerate !== false) {
+    // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
+    // see: https://github.com/vercel/next.js/issues/66723
+    void payload.bin({
+      args: ['generate:types'],
+      log: false,
+    })
+  }
+
+  // Generate component map
+  if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
+    await generateImportMap(config, {
+      log: true,
+    })
+  }
+
+  await payload.db.init()
+  if (payload.db.connect) {
+    await payload.db.connect({ hotReload: true })
+  }
+  global._payload_clientConfig = null
+  global._payload_schemaMap = null
+  global._payload_clientSchemaMap = null
+  global._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
+  global._payload_doNotCacheSchemaMap = true
+  global._payload_doNotCacheClientSchemaMap = true
+}
+
+export const getPayload = async (
+  options: Pick<InitOptions, 'config' | 'importMap'>,
+): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
 
   if (cached.payload) {
+    if (cached.reload === true) {
+      let resolve: () => void
+
+      // getPayload is called multiple times, in parallel. However, we only want to run `await reload` once. By immediately setting cached.reload to a promise,
+      // we can ensure that all subsequent calls will wait for the first reload to finish. So if we set it here, the 2nd call of getPayload
+      // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
+      cached.reload = new Promise((res) => (resolve = res))
+      const config = await options.config
+      await reload(config, cached.payload)
+
+      resolve()
+    }
+
+    if (cached.reload instanceof Promise) {
+      await cached.reload
+    }
+
+    if (options?.importMap) {
+      cached.payload.importMap = options.importMap
+    }
     return cached.payload
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   if (!cached.promise) {
+    // no need to await options.config here, as it's already awaited in the BasePayload.init
     cached.promise = new BasePayload().init(options)
   }
 
   try {
     cached.payload = await cached.promise
+
+    if (
+      !cached.ws &&
+      process.env.NODE_ENV !== 'production' &&
+      process.env.NODE_ENV !== 'test' &&
+      process.env.DISABLE_PAYLOAD_HMR !== 'true'
+    ) {
+      try {
+        const port = process.env.PORT || '3000'
+        cached.ws = new WebSocket(
+          `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
+        )
+
+        cached.ws.onmessage = (event) => {
+          if (typeof event.data === 'string') {
+            const data = JSON.parse(event.data)
+
+            if ('action' in data && data.action === 'serverComponentChanges') {
+              cached.reload = true
+            }
+          }
+        }
+
+        cached.ws.onerror = (_) => {
+          // swallow any websocket connection error
+        }
+      } catch (_) {
+        // swallow e
+      }
+    }
   } catch (e) {
     cached.promise = null
     throw e
+  }
+
+  if (options?.importMap) {
+    cached.payload.importMap = options.importMap
   }
 
   return cached.payload
@@ -764,6 +897,7 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -774,9 +908,15 @@ export type {
   IncomingAuthType,
   Permission,
   Permissions,
+  SanitizedCollectionPermission,
+  SanitizedDocumentPermissions,
+  SanitizedFieldPermissions,
+  SanitizedGlobalPermission,
+  SanitizedPermissions,
   User,
   VerifyConfig,
 } from './auth/types.js'
+
 export { generateImportMap } from './bin/generateImportMap/index.js'
 export type { ImportMap } from './bin/generateImportMap/index.js'
 
@@ -804,6 +944,7 @@ export type {
   AfterRefreshHook as CollectionAfterRefreshHook,
   AuthCollection,
   AuthOperationsFromCollectionSlug,
+  BaseListFilter,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
   BeforeLoginHook as CollectionBeforeLoginHook,
@@ -971,6 +1112,7 @@ export type {
   ArrayFieldClient,
   BaseValidateOptions,
   Block,
+  BlockJSX,
   BlocksField,
   BlocksFieldClient,
   CheckboxField,
@@ -1008,6 +1150,12 @@ export type {
   FieldWithSubFieldsClient,
   FilterOptions,
   FilterOptionsProps,
+  FlattenedArrayField,
+  FlattenedBlock,
+  FlattenedBlocksField,
+  FlattenedField,
+  FlattenedGroupField,
+  FlattenedTabAsField,
   GroupField,
   GroupFieldClient,
   HookName,
@@ -1067,6 +1215,8 @@ export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterR
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
+
+export { validations } from './fields/validations.js'
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1190,6 +1340,7 @@ export {
   pathExistsAndIsAccessible,
   pathExistsAndIsAccessibleSync,
 } from './utilities/findUp.js'
+export { flattenAllFields } from './utilities/flattenAllFields.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
@@ -1202,6 +1353,7 @@ export { isPlainObject } from './utilities/isPlainObject.js'
 export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
+export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
@@ -1211,7 +1363,7 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-export { saveVersion } from './versions/saveVersion.js'
 
+export { saveVersion } from './versions/saveVersion.js'
 export type { TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

@@ -141,8 +141,8 @@ export const updateOperation = async <
         collectionConfig: collection.config,
         overrideAccess,
         req,
-        versionFields: buildVersionCollectionFields(payload.config, collection.config),
-        where: versionsWhere,
+        versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
+        where: appendVersionToQueryKey(where),
       })
 
       const query = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({

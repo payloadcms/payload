@@ -33,10 +33,10 @@ export type SelectInputProps = {
   readonly options?: OptionObject[]
   readonly path: string
   readonly readOnly?: boolean
+  readonly required?: boolean
   readonly showError?: boolean
   readonly style?: React.CSSProperties
   readonly value?: string | string[]
-  readonly width?: React.CSSProperties['width']
 }
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
@@ -57,10 +57,10 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     options,
     path,
     readOnly,
+    required,
     showError,
     style,
     value,
-    width,
   } = props
 
   const { i18n } = useTranslation()
@@ -95,14 +95,13 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+      style={style}
     >
       <RenderCustomComponent
         CustomComponent={Label}
-        Fallback={<FieldLabel label={label} localized={localized} path={path} required={false} />}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent

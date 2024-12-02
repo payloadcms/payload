@@ -69,7 +69,10 @@ async function main() {
   await fs.writeFile(
     path.resolve(templatePath, '.env'),
     // Populate POSTGRES_URL just in case it's needed
-    `PAYLOAD_SECRET=secret\nDATABASE_URI=${databaseConnection}\nPOSTGRES_URL=${databaseConnection}`,
+    `PAYLOAD_SECRET=secret
+DATABASE_URI=${databaseConnection}
+POSTGRES_URL=${databaseConnection}
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
   )
   execSync('pnpm run build', execOpts)
 

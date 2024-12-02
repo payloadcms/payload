@@ -8,7 +8,7 @@ keywords: overview, config, configuration, documentation, Content Management Sys
 
 Payload is a _config-based_, code-first CMS and application framework. The Payload Config is central to everything that Payload does, allowing for deep configuration of your application through a simple and intuitive API. The Payload Config is a fully-typed JavaScript object that can be infinitely extended upon.
 
-Everything from your [Database](../database/overview) choice, to the appearance of the [Admin Panel](../admin/overview), is fully controlled through the Payload Config. From here you can define [Fields](../fields/overview), add [Localization](./localization), enable [Authentication](../authentication/overview), configure [Access Control](../access-control/overview), and so much more.
+Everything from your [Database](../database/overview) choice to the appearance of the [Admin Panel](../admin/overview) is fully controlled through the Payload Config. From here you can define [Fields](../fields/overview), add [Localization](./localization), enable [Authentication](../authentication/overview), configure [Access Control](../access-control/overview), and so much more.
 
 The Payload Config is a `payload.config.ts` file typically located in the root of your project:
 
@@ -29,7 +29,7 @@ The Payload Config is strongly typed and ties directly into Payload's TypeScript
 
 ## Config Options
 
-To author your Payload Config, first determine which [Database](../database/overview) you'd like to use, then use [Collections](./collections) or [Globals](./globals) to define the schema of your data.
+To author your Payload Config, first determine which [Database](../database/overview) you'd like to use, then use [Collections](./collections) or [Globals](./globals) to define the schema of your data through [Fields](../fields/overview).
 
 Here is one of the simplest possible Payload configs:
 
@@ -58,7 +58,7 @@ export default buildConfig({
 
 <Banner type="success">
   <strong>Note:</strong>
-  For a more complex example, see the [Public Demo](https://github.com/payloadcms/public-demo) source code on GitHub, or the [Templates](https://github.com/payloadcms/payload/tree/main/templates) and [Examples](https://github.com/payloadcms/payload/tree/main/examples) directories in the Payload repository.
+  For more complex examples, see the [Templates](https://github.com/payloadcms/payload/tree/main/templates) and [Examples](https://github.com/payloadcms/payload/tree/main/examples) directories in the Payload repository.
 </Banner>
 
 The following options are available:
@@ -76,6 +76,7 @@ The following options are available:
 | **`cors`**                 | Cross-origin resource sharing (CORS) is a mechanism that accept incoming requests from given domains. You can also customize the `Access-Control-Allow-Headers` header. [More details](#cors). |
 | **`localization`**         | Opt-in to translate your content into multiple locales. [More details](./localization).                                                                                                        |
 | **`logger`**               | Logger options, logger options with a destination stream, or an instantiated logger instance. [More details](https://getpino.io/#/docs/api?id=options).                                        |
+| **`loggingLevels`**        | An object to override the level to use in the logger for Payload's errors.                                                                                                                     |
 | **`graphQL`**              | Manage GraphQL-specific functionality, including custom queries and mutations, query complexity limits, etc. [More details](../graphql/overview#graphql-options).                              |
 | **`cookiePrefix`**         | A string that will be prefixed to all cookies that Payload sets.                                                                                                                               |
 | **`csrf`**                 | A whitelist array of URLs to allow Payload to accept cookies from. [More details](../authentication/overview#csrf-protection).                                                                 |

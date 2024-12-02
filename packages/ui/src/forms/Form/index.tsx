@@ -29,6 +29,7 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
 import {
   FormContext,
@@ -91,8 +92,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
-  const abortControllerRef = useRef(new AbortController())
-  const abortControllerRef2 = useRef(new AbortController())
+  const resetFormStateAbortControllerRef = useRef<AbortController>(null)
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
@@ -227,7 +227,9 @@ export const Form: React.FC<FormProps> = (props) => {
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
-        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(fields)
+        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
+          contextRef.current.fields,
+        )
 
         await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
           await priorOnChange
@@ -263,7 +265,9 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // If submit handler comes through via props, run that
       if (onSubmit) {
-        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(fields)
+        const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
+          contextRef.current.fields,
+        )
         const data = reduceFieldsToValues(serializableFields, true)
 
         if (overrides) {
@@ -319,7 +323,19 @@ export const Form: React.FC<FormProps> = (props) => {
         }
         if (res.status < 400) {
           if (typeof onSuccess === 'function') {
-            await onSuccess(json)
+            const newFormState = await onSuccess(json)
+            if (newFormState) {
+              const { newState: mergedFormState } = mergeServerFormState(
+                contextRef.current.fields || {},
+                newFormState,
+              )
+
+              dispatchFields({
+                type: 'REPLACE_STATE',
+                optimize: false,
+                state: mergedFormState,
+              })
+            }
           }
           setSubmitted(false)
           setProcessing(false)
@@ -399,7 +415,6 @@ export const Form: React.FC<FormProps> = (props) => {
       disableValidationOnSubmit,
       disabled,
       dispatchFields,
-      fields,
       handleResponse,
       method,
       onSubmit,
@@ -456,16 +471,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      if (abortControllerRef.current) {
-        try {
-          abortControllerRef.current.abort()
-        } catch (error) {
-          // swallow error
-        }
-      }
+      abortAndIgnore(resetFormStateAbortControllerRef.current)
 
-      const abortController = new AbortController()
-      abortControllerRef.current = abortController
+      const controller = new AbortController()
+      resetFormStateAbortControllerRef.current = controller
 
       const docPreferences = await getDocPreferences()
 
@@ -479,7 +488,7 @@ export const Form: React.FC<FormProps> = (props) => {
         operation,
         renderAllFields: true,
         schemaPath: collectionSlug ? collectionSlug : globalSlug,
-        signal: abortController.signal,
+        signal: controller.signal,
       })
 
       contextRef.current = { ...initContextState } as FormContextType
@@ -521,6 +530,8 @@ export const Form: React.FC<FormProps> = (props) => {
         rowIndex,
         subFieldState,
       })
+
+      setModified(true)
     },
     [dispatchFields, getDataByPath],
   )
@@ -544,31 +555,15 @@ export const Form: React.FC<FormProps> = (props) => {
         rowIndex,
         subFieldState,
       })
+
+      setModified(true)
     },
     [dispatchFields, getDataByPath],
   )
 
-  // clean on unmount
   useEffect(() => {
-    const re1 = abortControllerRef.current
-    const re2 = abortControllerRef2.current
-
     return () => {
-      if (re1) {
-        try {
-          re1.abort()
-        } catch (_err) {
-          // swallow error
-        }
-      }
-
-      if (re2) {
-        try {
-          re2.abort()
-        } catch (_err) {
-          // swallow error
-        }
-      }
+      abortAndIgnore(resetFormStateAbortControllerRef.current)
     }
   }, [])
 

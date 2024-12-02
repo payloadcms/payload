@@ -8,7 +8,7 @@ updates:
       - /.github/workflows
       - /.github/actions/* # Not working until resolved: https://github.com/dependabot/dependabot-core/issues/6345
       - /.github/actions/setup
-    target-branch: beta
+    target-branch: main
     schedule:
       interval: monthly
       timezone: America/Detroit
@@ -20,7 +20,8 @@ updates:
 
   - package-ecosystem: npm
     directory: /
-    target-branch: beta
+    target-branch: main
+    open-pull-requests-limit: 0 # Only allow security updates
     schedule:
       interval: weekly
       day: sunday
@@ -38,8 +39,6 @@ updates:
           - patch
         patterns:
           - '*'
-        exclude-patterns:
-          - 'drizzle*'
       dev-deps:
         dependency-type: development
         update-types:
@@ -47,13 +46,11 @@ updates:
           - patch
         patterns:
           - '*'
-        exclude-patterns:
-          - 'drizzle*'
 
-  # Only bump patch versions for 2.x
   - package-ecosystem: npm
     directory: /
-    target-branch: main
+    target-branch: 2.x
+    open-pull-requests-limit: 0 # Only allow security updates
     schedule:
       interval: weekly
       day: sunday
@@ -70,5 +67,3 @@ updates:
           - patch
         patterns:
           - '*'
-        exclude-patterns:
-          - 'drizzle*'

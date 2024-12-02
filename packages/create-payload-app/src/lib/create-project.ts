@@ -78,15 +78,14 @@ export async function createProject(args: {
     )
     await fse.copy(localTemplate, projectDir)
   } else if ('url' in template) {
-    let templateUrl = template.url
     if (cliArgs['--template-branch']) {
-      templateUrl = `${template.url}#${cliArgs['--template-branch']}`
-      debug(`Using template url: ${templateUrl}`)
+      template.url = `${template.url.split('#')?.[0]}#${cliArgs['--template-branch']}`
     }
+
     await downloadTemplate({
-      name: template.name,
-      branch: 'beta',
+      debug: cliArgs['--debug'],
       projectDir,
+      template,
     })
   }
 

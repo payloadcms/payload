@@ -1,5 +1,7 @@
 import type { Locale, Payload, TypedUser, TypeWithID } from 'payload'
 
+import { sanitizeID } from '@payloadcms/ui/shared'
+
 type Args = {
   collectionSlug?: string
   globalSlug?: string
@@ -10,13 +12,14 @@ type Args = {
 }
 
 export const getDocumentData = async ({
-  id,
+  id: idArg,
   collectionSlug,
   globalSlug,
   locale,
   payload,
   user,
 }: Args): Promise<null | Record<string, unknown> | TypeWithID> => {
+  const id = sanitizeID(idArg)
   let resolvedData: Record<string, unknown> | TypeWithID = null
 
   try {
@@ -26,7 +29,7 @@ export const getDocumentData = async ({
         collection: collectionSlug,
         depth: 0,
         draft: true,
-        fallbackLocale: null,
+        fallbackLocale: false,
         locale: locale?.code,
         overrideAccess: false,
         user,
@@ -38,7 +41,7 @@ export const getDocumentData = async ({
         slug: globalSlug,
         depth: 0,
         draft: true,
-        fallbackLocale: null,
+        fallbackLocale: false,
         locale: locale?.code,
         overrideAccess: false,
         user,

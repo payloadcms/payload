@@ -1,12 +1,21 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.127",
+  "version": "3.2.2",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/ui"
   },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "sideEffects": false,
   "type": "module",
   "exports": {
@@ -44,6 +53,11 @@
       "types": "./src/utilities/buildTableState.ts",
       "default": "./src/utilities/buildTableState.ts"
     },
+    "./utilities/getClientConfig": {
+      "import": "./src/utilities/getClientConfig.ts",
+      "types": "./src/utilities/getClientConfig.ts",
+      "default": "./src/utilities/getClientConfig.ts"
+    },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
@@ -53,6 +67,11 @@
       "import": "./src/forms/fieldSchemasToFormState/index.tsx",
       "types": "./src/forms/fieldSchemasToFormState/index.tsx",
       "default": "./src/forms/fieldSchemasToFormState/index.tsx"
+    },
+    "./forms/renderField": {
+      "import": "./src/forms/fieldSchemasToFormState/renderField.tsx",
+      "types": "./src/forms/fieldSchemasToFormState/renderField.tsx",
+      "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
     },
     "./scss/app.scss": "./src/scss/app.scss",
     "./assets": {
@@ -91,38 +110,36 @@
     "@payloadcms/translations": "workspace:*",
     "body-scroll-lock": "4.0.0-beta.0",
     "bson-objectid": "2.0.4",
-    "date-fns": "3.3.1",
+    "date-fns": "4.1.0",
     "dequal": "2.0.3",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
     "qs-esm": "7.0.2",
-    "react-animate-height": "2.1.2",
-    "react-datepicker": "6.9.0",
+    "react-datepicker": "7.5.0",
     "react-image-crop": "10.1.8",
-    "react-select": "5.8.0",
-    "scheduler": "0.0.0-experimental-3edc000d-20240926",
-    "sonner": "^1.5.0",
+    "react-select": "5.8.3",
+    "scheduler": "0.25.0-rc-66855b96-20241106",
+    "sonner": "^1.7.0",
     "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.24.5",
-    "@babel/core": "^7.24.5",
-    "@babel/preset-env": "^7.24.5",
-    "@babel/preset-react": "^7.24.1",
-    "@babel/preset-typescript": "^7.24.1",
+    "@babel/cli": "7.25.9",
+    "@babel/core": "7.26.0",
+    "@babel/preset-env": "7.26.0",
+    "@babel/preset-react": "7.25.9",
+    "@babel/preset-typescript": "7.26.0",
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
     "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-datepicker": "6.2.0",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
-    "esbuild": "0.23.1",
+    "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
+    "esbuild": "0.24.0",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "0.0.0-experimental-7670337-20240918",
+    "eslint-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -180,6 +197,16 @@
         "import": "./dist/fields/*/index.js",
         "types": "./dist/fields/*/index.d.ts",
         "default": "./dist/fields/*/index.js"
+      },
+      "./forms/fieldSchemasToFormState": {
+        "import": "./dist/forms/fieldSchemasToFormState/index.js",
+        "types": "./dist/forms/fieldSchemasToFormState/index.d.ts",
+        "default": "./dist/forms/fieldSchemasToFormState/index.js"
+      },
+      "./forms/renderField": {
+        "import": "./dist/forms/fieldSchemasToFormState/renderField.js",
+        "types": "./dist/forms/fieldSchemasToFormState/renderField.d.ts",
+        "default": "./dist/forms/fieldSchemasToFormState/renderField.js"
       },
       "./forms/*": {
         "import": "./dist/forms/*/index.js",

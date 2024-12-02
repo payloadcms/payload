@@ -46,6 +46,7 @@ export { Banner } from '../../elements/Banner/index.js'
 export { Button } from '../../elements/Button/index.js'
 export { Card } from '../../elements/Card/index.js'
 export { Collapsible, useCollapsible } from '../../elements/Collapsible/index.js'
+export { CopyLocaleData } from '../../elements/CopyLocaleData/index.js'
 export { CopyToClipboard } from '../../elements/CopyToClipboard/index.js'
 export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
@@ -127,6 +128,9 @@ export { ArrayField } from '../../fields/Array/index.js'
 export { BlocksField } from '../../fields/Blocks/index.js'
 export { CheckboxField, CheckboxInput } from '../../fields/Checkbox/index.js'
 export { CodeField } from '../../fields/Code/index.js'
+export { CodeEditor as CodeEditorLazy } from '../../elements/CodeEditor/index.js'
+export { default as CodeEdiftor } from '../../elements/CodeEditor/CodeEditor.js'
+
 export { CollapsibleField } from '../../fields/Collapsible/index.js'
 export { ConfirmPasswordField } from '../../fields/ConfirmPassword/index.js'
 export { DateTimeField } from '../../fields/DateTime/index.js'
@@ -144,7 +148,9 @@ export { RelationshipField } from '../../fields/Relationship/index.js'
 export { RichTextField } from '../../fields/RichText/index.js'
 export { RowField } from '../../fields/Row/index.js'
 export { SelectField, SelectInput } from '../../fields/Select/index.js'
-export { TabsField } from '../../fields/Tabs/index.js'
+export { TabsField, TabsProvider } from '../../fields/Tabs/index.js'
+export { TabComponent } from '../../fields/Tabs/Tab/index.js'
+
 export { TextField, TextInput } from '../../fields/Text/index.js'
 export { JoinField } from '../../fields/Join/index.js'
 export type { TextInputProps } from '../../fields/Text/index.js'
@@ -190,6 +196,7 @@ export { Account } from '../../graphics/Account/index.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 
 export { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'
+export { ExternalLinkIcon } from '../../graphics/ExternalLink/index.js'
 export { File } from '../../graphics/File/index.js'
 
 // icons
@@ -233,10 +240,6 @@ export {
   EntityVisibilityProvider,
   useEntityVisibility,
 } from '../../providers/EntityVisibility/index.js'
-export {
-  FieldComponentsProvider,
-  useFieldComponents,
-} from '../../providers/FieldComponents/index.js'
 export { UploadEditsProvider, useUploadEdits } from '../../providers/UploadEdits/index.js'
 export {
   ListDrawerContextProvider,
@@ -272,7 +275,12 @@ export {
   type ListViewClientProps,
   type ListViewSlots,
 } from '../../views/List/index.js'
-export type { ListPreferences } from '../../views/List/types.js'
+export type {
+  ListComponentClientProps,
+  ListComponentServerProps,
+  ListPreferences,
+} from '../../views/List/types.js'
+export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 
 export { DefaultEditView } from '../../views/Edit/index.js'
 export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'

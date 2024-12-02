@@ -5,7 +5,12 @@ import { reorderColumns } from 'helpers/e2e/reorderColumns.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, exactText, initPageConsoleErrorCatch } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -51,15 +56,45 @@ test.describe('Admin Panel', () => {
 
   test('should render initial rows within relationship table', async () => {
     await navigateToDoc(page, categoriesURL)
-    const joinField = page.locator('.field-type.join').first()
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
     const columns = await joinField.locator('.relationship-table tbody tr').count()
     expect(columns).toBe(3)
   })
 
+  test('should render join field for hidden posts', async () => {
+    await navigateToDoc(page, categoriesURL)
+    const joinField = page.locator('#field-hiddenPosts.field-type.join')
+    await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
+    const columns = await joinField.locator('.relationship-table tbody tr').count()
+    expect(columns).toBe(1)
+    const button = joinField.locator('button.doc-drawer__toggler.relationship-table__add-new')
+    await expect(button).toBeVisible()
+    await button.click()
+    const drawer = page.locator('[id^=doc-drawer_hidden-posts_1_]')
+    await expect(drawer).toBeVisible()
+    const titleField = drawer.locator('#field-title')
+    await expect(titleField).toBeVisible()
+    await titleField.fill('Test Hidden Post')
+    await drawer.locator('button[id="action-save"]').click()
+    await expect(joinField.locator('.relationship-table tbody tr')).toBeVisible()
+    const newColumns = await joinField.locator('.relationship-table tbody tr').count()
+    expect(newColumns).toBe(2)
+  })
+
+  test('should render the create page and create doc with the join field', async () => {
+    await page.goto(categoriesURL.create)
+    const nameField = page.locator('#field-name')
+    await expect(nameField).toBeVisible()
+    await nameField.fill('test category')
+    await saveDocAndAssert(page)
+  })
+
   test('should render collection type in first column of relationship table', async () => {
     await navigateToDoc(page, categoriesURL)
-    const joinField = page.locator('.field-type.join').first()
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
     const collectionTypeColumn = joinField.locator('thead tr th#heading-collection:first-child')
     const text = collectionTypeColumn
@@ -78,7 +113,7 @@ test.describe('Admin Panel', () => {
 
   test('should render drawer toggler without document link in second column of relationship table', async () => {
     await navigateToDoc(page, categoriesURL)
-    const joinField = page.locator('.field-type.join').first()
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
     const actionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
     const toggler = actionColumn.locator('button.doc-drawer__toggler')
@@ -110,7 +145,7 @@ test.describe('Admin Panel', () => {
 
   test('should sort relationship table by clicking on column headers', async () => {
     await navigateToDoc(page, categoriesURL)
-    const joinField = page.locator('.field-type.join').first()
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
     const titleColumn = joinField.locator('thead tr th#heading-title')
     const titleAscButton = titleColumn.locator('button.sort-column__asc')
@@ -130,7 +165,7 @@ test.describe('Admin Panel', () => {
 
   test('should update relationship table when new document is created', async () => {
     await navigateToDoc(page, categoriesURL)
-    const joinField = page.locator('.field-type.join').first()
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
 
     const addButton = joinField.locator('.relationship-table__actions button.doc-drawer__toggler', {
@@ -160,7 +195,7 @@ test.describe('Admin Panel', () => {
 
   test('should update relationship table when document is updated', async () => {
     await navigateToDoc(page, categoriesURL)
-    const joinField = page.locator('.field-type.join').first()
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
     const editButton = joinField.locator(
       'tbody tr:first-child td:nth-child(2) button.doc-drawer__toggler',
@@ -181,14 +216,14 @@ test.describe('Admin Panel', () => {
 
   test('should render empty relationship table when creating new document', async () => {
     await page.goto(categoriesURL.create)
-    const joinField = page.locator('.field-type.join').first()
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
     await expect(joinField.locator('.relationship-table tbody tr')).toBeHidden()
   })
 
   test('should update relationship table when new upload is created', async () => {
     await navigateToDoc(page, uploadsURL)
-    const joinField = page.locator('.field-type.join').first()
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
 
     // TODO: change this to edit the first row in the join table

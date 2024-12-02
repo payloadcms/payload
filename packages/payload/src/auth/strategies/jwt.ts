@@ -34,13 +34,13 @@ async function autoLogin({
     or: [],
   }
   if (payload.config.admin?.autoLogin.email) {
-    where.or.push({
+    where.or?.push({
       email: {
         equals: payload.config.admin?.autoLogin.email,
       },
     })
   } else if (payload.config.admin?.autoLogin.username) {
-    where.or.push({
+    where.or?.push({
       username: {
         equals: payload.config.admin?.autoLogin.username,
       },
@@ -103,7 +103,7 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
       }
       return { user: null }
     }
-  } catch (error) {
+  } catch (ignore) {
     if (headers.get('DisableAutologin') !== 'true') {
       return await autoLogin({ isGraphQL, payload })
     }

@@ -1,5 +1,5 @@
 import type { groupNavItems } from '@payloadcms/ui/shared'
-import type { ClientUser, Permissions, ServerProps, VisibleEntities } from 'payload'
+import type { ClientUser, SanitizedPermissions, ServerProps, VisibleEntities } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button, Card, Gutter, Locked } from '@payloadcms/ui'
@@ -19,7 +19,7 @@ export type DashboardProps = {
   }>
   Link: React.ComponentType<any>
   navGroups?: ReturnType<typeof groupNavItems>
-  permissions: Permissions
+  permissions: SanitizedPermissions
   visibleEntities: VisibleEntities
 } & ServerProps
 
@@ -49,11 +49,11 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
   return (
     <div className={baseClass}>
       <Gutter className={`${baseClass}__wrap`}>
-        {beforeDashboard && (
-          <RenderServerComponent
-            Component={beforeDashboard}
-            importMap={payload.importMap}
-            serverProps={{
+        {beforeDashboard &&
+          RenderServerComponent({
+            Component: beforeDashboard,
+            importMap: payload.importMap,
+            serverProps: {
               i18n,
               locale,
               params,
@@ -61,9 +61,9 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
               permissions,
               searchParams,
               user,
-            }}
-          />
-        )}
+            },
+          })}
+
         <Fragment>
           {!navGroups || navGroups?.length === 0 ? (
             <p>no nav groups....</p>
@@ -94,7 +94,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                           path: `/collections/${slug}/create`,
                         })
 
-                        hasCreatePermission = permissions?.collections?.[slug]?.create?.permission
+                        hasCreatePermission = permissions?.collections?.[slug]?.create
                       }
 
                       if (type === EntityType.global) {
@@ -168,11 +168,11 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
             })
           )}
         </Fragment>
-        {afterDashboard && (
-          <RenderServerComponent
-            Component={afterDashboard}
-            importMap={payload.importMap}
-            serverProps={{
+        {afterDashboard &&
+          RenderServerComponent({
+            Component: afterDashboard,
+            importMap: payload.importMap,
+            serverProps: {
               i18n,
               locale,
               params,
@@ -180,9 +180,8 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
               permissions,
               searchParams,
               user,
-            }}
-          />
-        )}
+            },
+          })}
       </Gutter>
     </div>
   )

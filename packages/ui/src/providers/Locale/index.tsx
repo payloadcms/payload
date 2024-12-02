@@ -2,31 +2,29 @@
 
 import type { Locale } from 'payload'
 
+import { useSearchParams } from 'next/navigation.js'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { usePreferences } from '../Preferences/index.js'
-import { useSearchParams } from '../SearchParams/index.js'
 
 const LocaleContext = createContext({} as Locale)
 
 export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const {
-    config: { localization },
+    config: { localization = false },
   } = useConfig()
 
   const { user } = useAuth()
   const defaultLocale =
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
 
-  const { searchParams } = useSearchParams()
-  const localeFromParams = searchParams?.locale
+  const searchParams = useSearchParams()
+  const localeFromParams = searchParams.get('locale')
 
-  const [localeCode, setLocaleCode] = useState<string>(
-    (localeFromParams as string) || defaultLocale,
-  )
+  const [localeCode, setLocaleCode] = useState<string>(localeFromParams || defaultLocale)
 
   const [locale, setLocale] = useState<Locale | null>(
     localization && findLocaleFromCode(localization, localeCode),

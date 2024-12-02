@@ -1,4 +1,5 @@
 import type {
+  DefaultTranslationKeys,
   DefaultTranslationsObject,
   I18nClient,
   I18nOptions,
@@ -8,7 +9,7 @@ import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
-import type { DestinationStream, pino } from 'pino'
+import type { DestinationStream, Level, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -20,7 +21,7 @@ import type {
   ServerSideEditViewProps,
   VisibleEntities,
 } from '../admin/views/types.js'
-import type { Permissions } from '../auth/index.js'
+import type { SanitizedPermissions } from '../auth/index.js'
 import type {
   AddToImportMap,
   ImportMap,
@@ -34,6 +35,7 @@ import type {
 } from '../collections/config/types.js'
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
+import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
@@ -397,7 +399,7 @@ export type ServerProps = {
   readonly locale?: Locale
   readonly params?: { [key: string]: string | string[] | undefined }
   readonly payload: Payload
-  readonly permissions?: Permissions
+  readonly permissions?: SanitizedPermissions
   readonly searchParams?: { [key: string]: string | string[] | undefined }
   readonly user?: TypedUser
   readonly visibleEntities?: VisibleEntities
@@ -443,7 +445,11 @@ export type BaseLocalizationConfig = {
    * @example `"en"`
    */
   defaultLocale: string
-  /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale` */
+  /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
+   *
+   * If false, then no requests will fallback unless a fallbackLocale is specified in the request.
+   * @default true
+   */
   fallback?: boolean
 }
 
@@ -488,7 +494,11 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
-export type LabelFunction = ({ t }: { t: TFunction }) => string
+export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = ({
+  t,
+}: {
+  t: TFunction<TTranslationKeys>
+}) => string
 
 export type StaticLabel = Record<string, string> | string
 
@@ -759,9 +769,9 @@ export type Config = {
         /** Add custom admin views */
         [key: string]: AdminViewConfig
         /** Replace the account screen */
-        Account?: AdminViewConfig
+        account?: AdminViewConfig
         /** Replace the admin homepage */
-        Dashboard?: AdminViewConfig
+        dashboard?: AdminViewConfig
       }
     }
     /** Extension point to add your custom data. Available in server and client. */
@@ -979,6 +989,28 @@ export type Config = {
    * ```
    */
   logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
+
+  /**
+   * Override the log level of errors for Payload's error handler or disable logging with `false`.
+   * Levels can be any of the following: 'trace', 'debug', 'info', 'warn', 'error', 'fatal' or false.
+   *
+   * Default levels:
+   * {
+  `*   APIError: 'error',
+  `*   AuthenticationError: 'error',
+  `*   ErrorDeletingFile: 'error',
+  `*   FileRetrievalError: 'error',
+  `*   FileUploadError: 'error',
+  `*   Forbidden: 'info',
+  `*   Locked: 'info',
+  `*   LockedAuth: 'error',
+  `*   MissingFile: 'info',
+  `*   NotFound: 'info',
+  `*   QueryError: 'error',
+  `*   ValidationError: 'info',
+   * }
+   */
+  loggingLevels?: Partial<Record<ErrorName, false | Level>>
 
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.

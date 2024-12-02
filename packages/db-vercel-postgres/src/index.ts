@@ -50,11 +50,16 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
+import path from 'path'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { Args, VercelPostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<VercelPostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -133,7 +138,9 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       createGlobal,
       createGlobalVersion,
       createJSONQuery,
-      createMigration,
+      createMigration(args) {
+        return createMigration.bind(this)({ ...args, dirname })
+      },
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,

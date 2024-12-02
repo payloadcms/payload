@@ -5,11 +5,15 @@ import { deleteHandler } from './requestHandlers/delete.js'
 import { findByIDHandler } from './requestHandlers/findOne.js'
 import { updateHandler } from './requestHandlers/update.js'
 
-const preferenceAccess: Access = ({ req }) => ({
-  'user.value': {
-    equals: req?.user?.id,
-  },
-})
+const preferenceAccess: Access = ({ req }) => {
+  if (!req.user) return false
+
+  return {
+    'user.value': {
+      equals: req?.user?.id,
+    },
+  }
+}
 
 const getPreferencesCollection = (config: Config): CollectionConfig => ({
   slug: 'payload-preferences',

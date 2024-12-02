@@ -3,8 +3,8 @@ import React from 'react'
 
 import { getHeader } from '../../_api/getHeader.js'
 import { Gutter } from '../Gutter/index.js'
-import { HeaderNav } from './Nav/index.js'
 import classes from './index.module.scss'
+import { HeaderNav } from './Nav/index.js'
 
 const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
 
@@ -18,7 +18,7 @@ export async function Header() {
           <img
             alt="Payload Logo"
             className={classes.logo}
-            src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-dark.svg"
+            src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-dark.svg"
           />
         </Link>
         <HeaderNav header={header} />

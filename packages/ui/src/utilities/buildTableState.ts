@@ -1,4 +1,3 @@
-import type { I18nClient } from '@payloadcms/translations'
 import type {
   BuildTableStateArgs,
   ClientCollectionConfig,
@@ -6,40 +5,16 @@ import type {
   ErrorResult,
   PaginatedDocs,
   SanitizedCollectionConfig,
-  SanitizedConfig,
 } from 'payload'
 
-import { dequal } from 'dequal'
-import { createClientConfig, formatErrors } from 'payload'
+import { dequal } from 'dequal/lite'
+import { formatErrors } from 'payload'
 
 import type { Column } from '../elements/Table/index.js'
 import type { ListPreferences } from '../elements/TableColumns/index.js'
 
+import { getClientConfig } from './getClientConfig.js'
 import { renderFilters, renderTable } from './renderTable.js'
-
-let cachedClientConfig = global._payload_clientConfig
-
-if (!cachedClientConfig) {
-  cachedClientConfig = global._payload_clientConfig = null
-}
-
-export const getClientConfig = (args: {
-  config: SanitizedConfig
-  i18n: I18nClient
-}): ClientConfig => {
-  const { config, i18n } = args
-
-  if (cachedClientConfig && process.env.NODE_ENV !== 'development') {
-    return cachedClientConfig
-  }
-
-  cachedClientConfig = createClientConfig({
-    config,
-    i18n,
-  })
-
-  return cachedClientConfig
-}
 
 type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
@@ -146,6 +121,7 @@ export const buildTableState = async (
   const clientConfig = getClientConfig({
     config,
     i18n,
+    importMap: payload.importMap,
   })
 
   let collectionConfig: SanitizedCollectionConfig
@@ -166,6 +142,7 @@ export const buildTableState = async (
       collection: 'payload-preferences',
       depth: 0,
       limit: 1,
+      pagination: false,
       where: {
         and: [
           {
@@ -186,34 +163,41 @@ export const buildTableState = async (
         ],
       },
     })
-    .then((res) => res.docs[0]?.value as ListPreferences)
+    .then((res) => res.docs[0] ?? { id: null, value: {} })
 
-  let newPrefs = preferencesResult
+  let newPrefs = preferencesResult.value
 
-  if (!preferencesResult || !dequal(columns, preferencesResult?.columns)) {
-    const mergedPrefs = {
-      ...(preferencesResult || {}),
-      columns,
+  if (!preferencesResult.id || !dequal(columns, preferencesResult?.columns)) {
+    const preferencesArgs = {
+      collection: 'payload-preferences',
+      data: {
+        key: preferencesKey,
+        user: {
+          collection: user.collection,
+          value: user.id,
+        },
+        value: {
+          ...(preferencesResult?.value || {}),
+          columns,
+        },
+      },
+      depth: 0,
+      req,
     }
 
-    newPrefs = await payload
-      .create({
-        collection: 'payload-preferences',
-        data: {
-          key: preferencesKey,
-          user: {
-            collection: user.collection,
-            value: user.id,
-          },
-          value: mergedPrefs,
-        },
-        req,
-      })
-      ?.then((res) => res.value as ListPreferences)
+    if (preferencesResult.id) {
+      newPrefs = await payload
+        .update({
+          ...preferencesArgs,
+          id: preferencesResult.id,
+        })
+        ?.then((res) => res.value as ListPreferences)
+    } else {
+      newPrefs = await payload.create(preferencesArgs)?.then((res) => res.value as ListPreferences)
+    }
   }
 
   const fields = collectionConfig.fields
-  const clientFields = clientCollectionConfig?.fields || []
 
   let docs = docsFromArgs
   let data: PaginatedDocs

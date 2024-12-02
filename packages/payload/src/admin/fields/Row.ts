@@ -4,6 +4,7 @@ import type { RowField, RowFieldClient } from '../../fields/config/types.js'
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -20,9 +21,10 @@ type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 
 type RowFieldBaseClientProps = {
   readonly forceRender?: boolean
-} & Pick<ServerFieldBase, 'permissions'>
+} & Omit<FieldPaths, 'path'> &
+  Pick<ServerFieldBase, 'permissions'>
 
-export type RowFieldClientProps = ClientFieldBase<RowFieldClientWithoutType> &
+export type RowFieldClientProps = Omit<ClientFieldBase<RowFieldClientWithoutType>, 'path'> &
   RowFieldBaseClientProps
 
 export type RowFieldServerProps = ServerFieldBase<RowField, RowFieldClientWithoutType>

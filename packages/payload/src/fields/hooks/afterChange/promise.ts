@@ -97,27 +97,6 @@ export const promise = async ({
 
   // Traverse subfields
   switch (field.type) {
-    case 'group': {
-      await traverseFields({
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        path: fieldPath,
-        previousDoc,
-        previousSiblingDoc: previousDoc[field.name] as JsonObject,
-        req,
-        schemaPath: fieldSchemaPath,
-        siblingData: (siblingData?.[field.name] as JsonObject) || {},
-        siblingDoc: siblingDoc[field.name] as JsonObject,
-      })
-
-      break
-    }
-
     case 'array': {
       const rows = siblingDoc[field.name]
 
@@ -185,8 +164,9 @@ export const promise = async ({
       break
     }
 
-    case 'row':
-    case 'collapsible': {
+    case 'collapsible':
+
+    case 'row': {
       await traverseFields({
         collection,
         context,
@@ -204,6 +184,66 @@ export const promise = async ({
         siblingDoc: { ...siblingDoc },
       })
 
+      break
+    }
+    case 'group': {
+      await traverseFields({
+        collection,
+        context,
+        data,
+        doc,
+        fields: field.fields,
+        global,
+        operation,
+        path: fieldPath,
+        previousDoc,
+        previousSiblingDoc: previousDoc[field.name] as JsonObject,
+        req,
+        schemaPath: fieldSchemaPath,
+        siblingData: (siblingData?.[field.name] as JsonObject) || {},
+        siblingDoc: siblingDoc[field.name] as JsonObject,
+      })
+
+      break
+    }
+
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.afterChange?.length) {
+        await editor.hooks.afterChange.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const hookedValue = await currentHook({
+            collection,
+            context,
+            data,
+            field,
+            global,
+            operation,
+            originalDoc: doc,
+            path: fieldPath,
+            previousDoc,
+            previousSiblingDoc,
+            previousValue: previousDoc[field.name],
+            req,
+            schemaPath: fieldSchemaPath,
+            siblingData,
+            value: siblingDoc[field.name],
+          })
+
+          if (hookedValue !== undefined) {
+            siblingDoc[field.name] = hookedValue
+          }
+        }, Promise.resolve())
+      }
       break
     }
 
@@ -255,46 +295,6 @@ export const promise = async ({
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
       })
-      break
-    }
-
-    case 'richText': {
-      if (!field?.editor) {
-        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-      }
-      if (typeof field?.editor === 'function') {
-        throw new Error('Attempted to access unsanitized rich text editor.')
-      }
-
-      const editor: RichTextAdapter = field?.editor
-
-      if (editor?.hooks?.afterChange?.length) {
-        await editor.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
-            collection,
-            context,
-            data,
-            field,
-            global,
-            operation,
-            originalDoc: doc,
-            path: fieldPath,
-            previousDoc,
-            previousSiblingDoc,
-            previousValue: previousDoc[field.name],
-            req,
-            schemaPath: fieldSchemaPath,
-            siblingData,
-            value: siblingDoc[field.name],
-          })
-
-          if (hookedValue !== undefined) {
-            siblingDoc[field.name] = hookedValue
-          }
-        }, Promise.resolve())
-      }
       break
     }
 

@@ -16,25 +16,25 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-vercel-postgres": "beta",
-    "@payloadcms/next": "beta",
-    "@payloadcms/payload-cloud": "beta",
-    "@payloadcms/richtext-lexical": "beta",
-    "@payloadcms/storage-vercel-blob": "beta",
+    "@payloadcms/db-vercel-postgres": "latest",
+    "@payloadcms/next": "latest",
+    "@payloadcms/payload-cloud": "latest",
+    "@payloadcms/richtext-lexical": "latest",
+    "@payloadcms/storage-vercel-blob": "latest",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
-    "next": "15.0.0",
-    "payload": "beta",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020"
+    "next": "15.0.3",
+    "payload": "latest",
+    "react": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "19.0.0-rc-66855b96-20241106"
   },
   "devDependencies": {
     "@types/node": "^22.5.4",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "eslint": "^8",
-    "eslint-config-next": "15.0.0",
-    "typescript": "5.6.3"
+    "eslint-config-next": "15.0.3",
+    "typescript": "5.7.2"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

@@ -1,12 +1,6 @@
-import {
-  deepCopyObjectSimple,
-  type Field,
-  type FieldAffectingData,
-  type SelectMode,
-  type SelectType,
-  type TabAsField,
-} from 'payload'
-import { fieldAffectsData, getSelectMode, tabHasName } from 'payload/shared'
+import type { FieldAffectingData, FlattenedField, SelectMode, SelectType } from 'payload'
+
+import { deepCopyObjectSimple, fieldAffectsData, getSelectMode } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -47,7 +41,7 @@ const traverseFields = ({
 }: {
   adapter: MongooseAdapter
   databaseSchemaPath?: string
-  fields: (Field | TabAsField)[]
+  fields: FlattenedField[]
   projection: Record<string, true>
   select: SelectType
   selectAllOnCurrentLevel?: boolean
@@ -104,41 +98,10 @@ const traverseFields = ({
     }
 
     switch (field.type) {
-      case 'collapsible':
-      case 'row':
-        traverseFields({
-          adapter,
-          databaseSchemaPath,
-          fields: field.fields,
-          projection,
-          select,
-          selectMode,
-          withinLocalizedField,
-        })
-        break
-
-      case 'tabs':
-        traverseFields({
-          adapter,
-          databaseSchemaPath,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-          projection,
-          select,
-          selectMode,
-          withinLocalizedField,
-        })
-        break
-
+      case 'array':
       case 'group':
-      case 'tab':
-      case 'array': {
-        let fieldSelect: SelectType
-
-        if (field.type === 'tab' && !tabHasName(field)) {
-          fieldSelect = select
-        } else {
-          fieldSelect = select[field.name] as SelectType
-        }
+      case 'tab': {
+        const fieldSelect = select[field.name] as SelectType
 
         if (field.type === 'array' && selectMode === 'include') {
           fieldSelect['id'] = true
@@ -147,7 +110,7 @@ const traverseFields = ({
         traverseFields({
           adapter,
           databaseSchemaPath: fieldDatabaseSchemaPath,
-          fields: field.fields,
+          fields: field.flattenedFields,
           projection,
           select: fieldSelect,
           selectMode,
@@ -168,7 +131,7 @@ const traverseFields = ({
             traverseFields({
               adapter,
               databaseSchemaPath: fieldDatabaseSchemaPath,
-              fields: block.fields,
+              fields: block.flattenedFields,
               projection,
               select: {},
               selectAllOnCurrentLevel: true,
@@ -196,7 +159,7 @@ const traverseFields = ({
           traverseFields({
             adapter,
             databaseSchemaPath: fieldDatabaseSchemaPath,
-            fields: block.fields,
+            fields: block.flattenedFields,
             projection,
             select: blocksSelect[block.slug] as SelectType,
             selectMode: blockSelectMode,
@@ -219,7 +182,7 @@ export const buildProjectionFromSelect = ({
   select,
 }: {
   adapter: MongooseAdapter
-  fields: Field[]
+  fields: FlattenedField[]
   select?: SelectType
 }): Record<string, true> | undefined => {
   if (!select) {

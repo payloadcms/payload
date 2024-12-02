@@ -60,9 +60,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -515,11 +515,8 @@ export interface RelationWithTitleSelect<T extends boolean = true> {
  */
 export interface RelationUpdatedExternallySelect<T extends boolean = true> {
   relationPrePopulate?: T;
-  prePopulate?: T;
   relationHasMany?: T;
-  prePopulateRelationHasMany?: T;
   relationToManyHasMany?: T;
-  prePopulateToMany?: T;
   updatedAt?: T;
   createdAt?: T;
 }

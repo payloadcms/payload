@@ -43,27 +43,6 @@ const afterChangeHook: CollectionAfterChangeHook = async ({ req: { payload } }) 
 
 If you want to import Payload in places where you don't have the option to access it from function arguments or `req`, you can import it and initialize it.
 
-There are two places to import Payload:
-
-**Option 1 - using HMR, within Next.js**
-
-```ts
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import config from '@payload-config'
-
-const payload = await getPayloadHMR({ config })
-```
-
-You should import Payload using the first option (`getPayloadHMR`) if you are using Payload inside of Next.js (like route handlers, server components, and similar.)
-
-This way, in Next.js development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload Config, your usage of Payload will always be in sync with your changes. In production, `getPayloadHMR` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
-
-If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js.
-
-**Option 2 - outside of Next.js**
-
-If you are using Payload outside of Next.js, for example in standalone scripts or in other frameworks, you can import Payload with no HMR functionality. Instead of using `getPayloadHMR`, you can use `getPayload`.
-
 ```ts
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -71,7 +50,11 @@ import config from '@payload-config'
 const payload = await getPayload({ config })
 ```
 
-Both options function in exactly the same way outside of one having HMR support and the other not. For more information about using Payload outside of Next.js, [click here](./outside-nextjs).
+If you're working in Next.js' development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload Config, your usage of Payload will always be in sync with your changes. In production, `getPayload` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
+
+If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js.
+
+For more information about using Payload outside of Next.js, [click here](./outside-nextjs).
 
 ## Local options available
 
@@ -97,6 +80,17 @@ You can specify more options within the Local API vs. REST or GraphQL due to the
 
 _There are more options available on an operation by operation basis outlined below._
 
+## Transactions
+
+When your database uses transactions you need to thread req through to all local operations. Postgres uses transactions and MongoDB uses transactions when you are using replica sets. Passing req without transactions is still recommended.
+
+```js
+const post = await payload.find({
+  collection: 'posts',
+  req, // passing req is recommended
+})
+```
+
 <Banner type="warning">
   <strong>Note:</strong>
   <br />
@@ -108,7 +102,7 @@ _There are more options available on an operation by operation basis outlined be
 
 The following Collection operations are available through the Local API:
 
-### Create
+### Create#collection-create
 
 ```js
 // The created Post document is returned
@@ -140,7 +134,7 @@ const post = await payload.create({
 })
 ```
 
-### Find
+### Find#collection-find
 
 ```js
 // Result will be a paginated set of Posts.
@@ -161,7 +155,7 @@ const result = await payload.find({
 })
 ```
 
-### Find by ID
+### Find by ID#collection-find-by-id
 
 ```js
 // Result will be a Post document.
@@ -177,7 +171,7 @@ const result = await payload.findByID({
 })
 ```
 
-### Count
+### Count#collection-count
 
 ```js
 // Result will be an object with:
@@ -193,7 +187,7 @@ const result = await payload.count({
 })
 ```
 
-### Update by ID
+### Update by ID#collection-update-by-id
 
 ```js
 // Result will be the updated Post document.
@@ -225,7 +219,7 @@ const result = await payload.update({
 })
 ```
 
-### Update Many
+### Update Many#collection-update-many
 
 ```js
 // Result will be an object with:
@@ -264,7 +258,7 @@ const result = await payload.update({
 })
 ```
 
-### Delete
+### Delete#collection-delete
 
 ```js
 // Result will be the now-deleted Post document.
@@ -281,7 +275,7 @@ const result = await payload.delete({
 })
 ```
 
-### Delete Many
+### Delete Many#collection-delete-many
 
 ```js
 // Result will be an object with:
@@ -400,7 +394,7 @@ const result = await payload.verifyEmail({
 
 The following Global operations are available through the Local API:
 
-### Find
+### Find#global-find
 
 ```js
 // Result will be the Header Global.
@@ -415,7 +409,7 @@ const result = await payload.findGlobal({
 })
 ```
 
-### Update
+### Update#global-update
 
 ```js
 // Result will be the updated Header Global.

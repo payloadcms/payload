@@ -1,7 +1,14 @@
-import type { SerializedListItemNode, SerializedListNode } from '@lexical/list'
-import type { SerializedHeadingNode } from '@lexical/rich-text'
 import type { LinkFields, SerializedLinkNode } from '@payloadcms/richtext-lexical'
-import type { SerializedElementNode, SerializedLexicalNode, SerializedTextNode } from 'lexical'
+import type {
+  SerializedElementNode,
+  SerializedLexicalNode,
+  SerializedTextNode,
+} from '@payloadcms/richtext-lexical/lexical'
+import type {
+  SerializedListItemNode,
+  SerializedListNode,
+} from '@payloadcms/richtext-lexical/lexical/list'
+import type { SerializedHeadingNode } from '@payloadcms/richtext-lexical/lexical/rich-text'
 
 import React, { Fragment } from 'react'
 
@@ -90,18 +97,32 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
           'children' in _node ? serializedChildrenFn(_node as SerializedElementNode) : ''
 
         switch (_node.type) {
-          case 'linebreak': {
-            return <br key={index} />
-          }
-          case 'paragraph': {
-            return <p key={index}>{serializedChildren}</p>
-          }
           case 'heading': {
             const node = _node as SerializedHeadingNode
 
             type Heading = Extract<keyof JSX.IntrinsicElements, 'h1' | 'h2' | 'h3' | 'h4' | 'h5'>
             const Tag = node?.tag as Heading
             return <Tag key={index}>{serializedChildren}</Tag>
+          }
+          case 'linebreak': {
+            return <br key={index} />
+          }
+          case 'link': {
+            const node = _node as SerializedLinkNode
+
+            const fields: LinkFields = node.fields
+
+            return (
+              <CMSLink
+                key={index}
+                newTab={Boolean(fields?.newTab)}
+                reference={fields.doc as any}
+                type={fields.linkType === 'internal' ? 'reference' : 'custom'}
+                url={fields.url}
+              >
+                {serializedChildren}
+              </CMSLink>
+            )
           }
           case 'list': {
             const node = _node as SerializedListNode
@@ -139,25 +160,11 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
               )
             }
           }
+          case 'paragraph': {
+            return <p key={index}>{serializedChildren}</p>
+          }
           case 'quote': {
             return <blockquote key={index}>{serializedChildren}</blockquote>
-          }
-          case 'link': {
-            const node = _node as SerializedLinkNode
-
-            const fields: LinkFields = node.fields
-
-            return (
-              <CMSLink
-                key={index}
-                newTab={Boolean(fields?.newTab)}
-                reference={fields.doc as any}
-                type={fields.linkType === 'internal' ? 'reference' : 'custom'}
-                url={fields.url}
-              >
-                {serializedChildren}
-              </CMSLink>
-            )
           }
 
           /* case 'block': {

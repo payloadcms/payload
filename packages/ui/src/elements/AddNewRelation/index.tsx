@@ -34,10 +34,13 @@ export const AddNewRelation: React.FC<Props> = ({
   const { permissions } = useAuth()
   const [show, setShow] = useState(false)
   const [selectedCollection, setSelectedCollection] = useState<string>()
+
   const relatedToMany = relatedCollections.length > 1
+
   const [collectionConfig, setCollectionConfig] = useState<ClientCollectionConfig>(() =>
     !relatedToMany ? relatedCollections[0] : undefined,
   )
+
   const [popupOpen, setPopupOpen] = useState(false)
   const { i18n, t } = useTranslation()
   const [showTooltip, setShowTooltip] = useState(false)
@@ -96,11 +99,11 @@ export const AddNewRelation: React.FC<Props> = ({
   useEffect(() => {
     if (permissions) {
       if (relatedCollections.length === 1) {
-        setShow(permissions.collections[relatedCollections[0]?.slug]?.create?.permission)
+        setShow(permissions.collections[relatedCollections[0]?.slug]?.create)
       } else {
         setShow(
           relatedCollections.some(
-            (collection) => permissions.collections[collection?.slug]?.create?.permission,
+            (collection) => permissions.collections[collection?.slug]?.create,
           ),
         )
       }
@@ -186,7 +189,7 @@ export const AddNewRelation: React.FC<Props> = ({
               render={({ close: closePopup }) => (
                 <PopupList.ButtonGroup>
                   {relatedCollections.map((relatedCollection) => {
-                    if (permissions.collections[relatedCollection?.slug].create.permission) {
+                    if (permissions.collections[relatedCollection?.slug].create) {
                       return (
                         <PopupList.Button
                           className={`${baseClass}__relation-button--${relatedCollection?.slug}`}
@@ -207,10 +210,9 @@ export const AddNewRelation: React.FC<Props> = ({
               )}
               size="medium"
             />
-            {collectionConfig &&
-              permissions.collections[collectionConfig?.slug]?.create?.permission && (
-                <DocumentDrawer onSave={onSave} />
-              )}
+            {collectionConfig && permissions.collections[collectionConfig?.slug]?.create && (
+              <DocumentDrawer onSave={onSave} />
+            )}
           </Fragment>
         )}
       </div>

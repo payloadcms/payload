@@ -1,42 +1,10 @@
-import type { I18nClient } from '@payloadcms/translations'
-import type {
-  ClientConfig,
-  Data,
-  DocumentPreferences,
-  FormState,
-  PayloadRequest,
-  SanitizedConfig,
-  VisibleEntities,
-} from 'payload'
+import type { Data, DocumentPreferences, FormState, PayloadRequest, VisibleEntities } from 'payload'
 
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
-import { createClientConfig, getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { getAccessResults, isEntityHidden, parseCookies } from 'payload'
 
 import { renderDocument } from './index.js'
-
-let cachedClientConfig = global._payload_clientConfig
-
-if (!cachedClientConfig) {
-  cachedClientConfig = global._payload_clientConfig = null
-}
-
-export const getClientConfig = (args: {
-  config: SanitizedConfig
-  i18n: I18nClient
-}): ClientConfig => {
-  const { config, i18n } = args
-
-  if (cachedClientConfig && process.env.NODE_ENV !== 'development') {
-    return cachedClientConfig
-  }
-
-  cachedClientConfig = createClientConfig({
-    config,
-    i18n,
-  })
-
-  return cachedClientConfig
-}
 
 type RenderDocumentResult = {
   data: any
@@ -51,6 +19,7 @@ export const renderDocumentHandler = async (args: {
   drawerSlug?: string
   initialData?: Data
   initialState?: FormState
+  overrideEntityVisibility?: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
   req: PayloadRequest
@@ -61,6 +30,7 @@ export const renderDocumentHandler = async (args: {
     docID,
     drawerSlug,
     initialData,
+    overrideEntityVisibility,
     redirectAfterDelete,
     redirectAfterDuplicate,
     req,
@@ -112,6 +82,7 @@ export const renderDocumentHandler = async (args: {
   const clientConfig = getClientConfig({
     config,
     i18n,
+    importMap: req.payload.importMap,
   })
 
   let preferences: DocumentPreferences
@@ -179,6 +150,7 @@ export const renderDocumentHandler = async (args: {
       translations: undefined, // TODO
       visibleEntities,
     },
+    overrideEntityVisibility,
     params: {
       segments: ['collections', collectionSlug, docID],
     },

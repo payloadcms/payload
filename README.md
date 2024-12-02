@@ -1,4 +1,4 @@
-<a href="https://payloadcms.com"><img width="100%" src="https://github.com/payloadcms/payload/blob/beta/packages/payload/src/assets/images/github-banner-nextjs-native.jpg" alt="Payload headless CMS Admin panel built with React" /></a>
+<a href="https://payloadcms.com"><img width="100%" src="https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/github-banner-new-logo.jpg" alt="Payload headless CMS Admin panel built with React" /></a>
 <br />
 <br />
 
@@ -7,18 +7,22 @@
   &nbsp;
   <a href="https://discord.gg/payload"><img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord&color=7289da&style=flat-square" /></a>
   &nbsp;
+  <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/dw/payload?style=flat-square" /></a>
+  &nbsp;
+  <a href="https://github.com/payloadcms/payload/graphs/contributors"><img alt="npm" src="https://img.shields.io/github/contributors-anon/payloadcms/payload?color=yellow&style=flat-square" /></a>
+  &nbsp;
   <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/v/payload?style=flat-square" /></a>
   &nbsp;
   <a href="https://twitter.com/payloadcms"><img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" /></a>
 </p>
 <hr/>
 <h4>
-<a target="_blank" href="https://payloadcms.com/docs/beta/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
+<a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
 </h4>
 <hr/>
 
 > [!IMPORTANT]
-> 🚨 <strong>We're about to release 3.0 stable.</strong> Star this repo or keep an eye on it to follow along.
+> 🎉 <strong>We've released 3.0!</strong> Star this repo or keep an eye on it to follow along.
 
 Payload is the first-ever Next.js native CMS that can install directly in your existing `/app` folder. It's the start of a new era for headless CMS.
 
@@ -36,29 +40,25 @@ Payload is the first-ever Next.js native CMS that can install directly in your e
 
 ## Quickstart
 
-Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/beta/getting-started/installation).
+Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
 
 ```text
-pnpx create-payload-app@beta
+pnpx create-payload-app@latest
 ```
 
-**If you're new to Payload, you should start with the 3.0 beta website template** (`pnpx create-payload-app@beta -t website`). It shows how to do _everything_ - including custom Rich Text blocks, on-demand revalidation, live preview, and more. It comes with a frontend built with Tailwind all in one `/app` folder.
+**If you're new to Payload, you should start with the website template** (`pnpx create-payload-app@latest -t website`). It shows how to do _everything_ - including custom Rich Text blocks, on-demand revalidation, live preview, and more. It comes with a frontend built with Tailwind all in one `/app` folder.
 
 ## One-click templates
 
 Jumpstart your next project by starting with a pre-made template. These are production-ready, end-to-end solutions designed to get you to market as fast as possible.
 
-### [🌐 Website](https://github.com/payloadcms/payload/tree/beta/templates/website)
+### [🌐 Website](https://github.com/payloadcms/payload/tree/main/templates/website)
 
 Build any kind of website, blog, or portfolio from small to enterprise. Comes with a fully functional front-end built with RSCs and Tailwind.
 
-### [🛒 E-Commerce](https://github.com/payloadcms/payload/tree/beta/templates/ecommerce)
+We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
 
-Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Comes with a beautiful, fully functional front-end complete with shopping cart, checkout, orders, and much more.
-
-We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/beta/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
-
-- [Official Templates](https://github.com/payloadcms/payload/tree/beta/templates)
+- [Official Templates](https://github.com/payloadcms/payload/tree/main/templates)
 - [Community Templates](https://github.com/topics/payload-template)
 
 ## ✨ Features
@@ -68,15 +68,15 @@ We're constantly adding more templates to our [Templates Directory](https://gith
 - Use server components to extend Payload UI
 - Query your database directly in server components, no need for REST / GraphQL
 - Fully TypeScript with automatic types for your data
-- [Auth out of the box](https://payloadcms.com/docs/beta/authentication/overview)
-- [Versions and drafts](https://payloadcms.com/docs/beta/versions/overview)
-- [Localization](https://payloadcms.com/docs/beta/configuration/localization)
-- [Block-based kayout builder](https://payloadcms.com/docs/beta/fields/blocks)
-- [Customizable React admin](https://payloadcms.com/docs/beta/admin/overview)
-- [Lexical rich text editor](https://payloadcms.com/docs/beta/fields/rich-text)
-- [Conditional field logic](https://payloadcms.com/docs/beta/fields/overview#conditional-logic)
-- Extremely granular [Access Control](https://payloadcms.com/docs/beta/access-control/overview)
-- [Document and field-level hooks](https://payloadcms.com/docs/beta/hooks/overview) for every action Payload provides
+- [Auth out of the box](https://payloadcms.com/docs/authentication/overview)
+- [Versions and drafts](https://payloadcms.com/docs/versions/overview)
+- [Localization](https://payloadcms.com/docs/configuration/localization)
+- [Block-based layout builder](https://payloadcms.com/docs/fields/blocks)
+- [Customizable React admin](https://payloadcms.com/docs/admin/overview)
+- [Lexical rich text editor](https://payloadcms.com/docs/fields/rich-text)
+- [Conditional field logic](https://payloadcms.com/docs/fields/overview#conditional-logic)
+- Extremely granular [Access Control](https://payloadcms.com/docs/access-control/overview)
+- [Document and field-level hooks](https://payloadcms.com/docs/hooks/overview) for every action Payload provides
 - Intensely fast API
 - Highly secure thanks to HTTP-only cookies, CSRF protection, and more
 
@@ -84,9 +84,9 @@ We're constantly adding more templates to our [Templates Directory](https://gith
 
 ## 🗒️ Documentation
 
-Check out the [Payload website](https://payloadcms.com/docs/beta/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
+Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
 
-Migrating from v1 to v2? Check out the [2.0 Release Notes](https://github.com/payloadcms/payload/releases/tag/v2.0.0) on how to do it.
+Migrating from v2 to v3? Check out the [3.0 Migration Guide](https://github.com/payloadcms/payload/blob/main/docs/migration-guide/overview.mdx) on how to do it.
 
 ## 🙋 Contributing
 
