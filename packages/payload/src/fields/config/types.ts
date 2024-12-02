@@ -1306,6 +1306,8 @@ export type ClientBlock = {
 export type BlocksField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
     } & Admin['components']
     initCollapsed?: boolean

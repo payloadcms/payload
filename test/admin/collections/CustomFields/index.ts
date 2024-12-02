@@ -100,5 +100,26 @@ export const CustomFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'blocksFieldWithBeforeAfterInputs',
+      type: 'blocks',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+      },
+      blocks: [
+        {
+          slug: 'blockFields',
+          fields: [
+            {
+              name: 'textField',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
