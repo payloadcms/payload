@@ -1,7 +1,7 @@
 'use client'
 import { TabsProvider } from 'packages/ui/src/fields/Tabs/provider.js'
 import { TabComponent } from 'packages/ui/src/fields/Tabs/Tab/index.js'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export type PanelTab = {
   Content: React.ReactNode
@@ -15,6 +15,10 @@ type Props = {
 export const Tabs: React.FC<Props> = (props) => {
   const { tabs } = props
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
+
+  useEffect(() => {
+    setActiveTabIndex(0)
+  }, [tabs])
 
   return (
     <TabsProvider>
@@ -35,7 +39,7 @@ export const Tabs: React.FC<Props> = (props) => {
           })}
         </div>
       </div>
-      <div className={`${baseClass}__content-wrap`}>{tabs[activeTabIndex].Content}</div>
+      <div className={`${baseClass}__content-wrap`}>{tabs[activeTabIndex]?.Content}</div>
     </TabsProvider>
   )
 }
