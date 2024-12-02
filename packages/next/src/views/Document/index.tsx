@@ -33,11 +33,14 @@ export const renderDocument = async ({
   importMap,
   initialData,
   initPageResult,
+  overrideEntityVisibility,
   params,
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
-}: AdminViewProps): Promise<{
+}: {
+  overrideEntityVisibility?: boolean
+} & AdminViewProps): Promise<{
   data: Data
   Document: React.ReactNode
 }> => {
@@ -168,7 +171,10 @@ export const renderDocument = async ({
   }
 
   if (collectionConfig) {
-    if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
+    if (
+      !visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug) &&
+      !overrideEntityVisibility
+    ) {
       throw new Error('not-found')
     }
 

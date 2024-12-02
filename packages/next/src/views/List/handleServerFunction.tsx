@@ -20,6 +20,7 @@ export const renderListHandler = async (args: {
   documentDrawerSlug: string
   drawerSlug?: string
   enableRowSelections: boolean
+  overrideEntityVisibility?: boolean
   query: ListQuery
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
@@ -32,6 +33,7 @@ export const renderListHandler = async (args: {
     disableBulkEdit,
     drawerSlug,
     enableRowSelections,
+    overrideEntityVisibility,
     query,
     redirectAfterDelete,
     redirectAfterDuplicate,
@@ -149,6 +151,7 @@ export const renderListHandler = async (args: {
       translations: undefined, // TODO
       visibleEntities,
     },
+    overrideEntityVisibility,
     params: {
       segments: ['collections', collectionSlug],
     },

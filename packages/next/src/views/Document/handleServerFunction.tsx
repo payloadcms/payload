@@ -19,6 +19,7 @@ export const renderDocumentHandler = async (args: {
   drawerSlug?: string
   initialData?: Data
   initialState?: FormState
+  overrideEntityVisibility?: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
   req: PayloadRequest
@@ -29,6 +30,7 @@ export const renderDocumentHandler = async (args: {
     docID,
     drawerSlug,
     initialData,
+    overrideEntityVisibility,
     redirectAfterDelete,
     redirectAfterDuplicate,
     req,
@@ -148,6 +150,7 @@ export const renderDocumentHandler = async (args: {
       translations: undefined, // TODO
       visibleEntities,
     },
+    overrideEntityVisibility,
     params: {
       segments: ['collections', collectionSlug, docID],
     },

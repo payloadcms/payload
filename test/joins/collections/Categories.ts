@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { categoriesSlug, postsSlug } from '../shared.js'
+import { categoriesSlug, hiddenPostsSlug, postsSlug } from '../shared.js'
 import { singularSlug } from './Singular.js'
 
 export const Categories: CollectionConfig = {
@@ -64,6 +64,12 @@ export const Categories: CollectionConfig = {
       type: 'join',
       collection: postsSlug,
       on: 'categoriesLocalized',
+    },
+    {
+      name: 'hiddenPosts',
+      type: 'join',
+      collection: hiddenPostsSlug,
+      on: 'category',
     },
     {
       name: 'group',
