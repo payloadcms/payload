@@ -1,4 +1,3 @@
-'use client'
 import { ModalToggler } from '@faceless-ui/modal'
 import Link from 'next/link'
 import React from 'react'

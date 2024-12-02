@@ -1,28 +1,24 @@
-import configPromise from '@payload-config'
+import config from '../../../payload.config'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import React from 'react'
 
+import type { Page as PageType } from '../../../payload-types'
+
 import Blocks from '../../../components/Blocks'
 
-// eslint-disable-next-line no-restricted-exports
-export default async function Page({ params: { slug = 'home' } }) {
-  const page = await getPage(slug)
-
-  if (!page) {
-    return notFound()
-  }
-
-  return (
-    <React.Fragment>
-      <Blocks blocks={page.layout} />
-    </React.Fragment>
-  )
+interface PageParams {
+  params: Promise<{
+    slug?: string
+  }>
 }
 
-export const getPage = async (slug: string) => {
-  const payload = await getPayload({ config: configPromise })
-  const pages = await payload.find({
+// eslint-disable-next-line no-restricted-exports
+export default async function Page({ params: paramsPromise }: PageParams) {
+  const { slug = 'home' } = await paramsPromise
+  const payload = await getPayload({ config })
+
+  const pageRes = await payload.find({
     collection: 'pages',
     draft: false,
     limit: 1,
@@ -34,17 +30,35 @@ export const getPage = async (slug: string) => {
     },
   })
 
-  return pages.docs[0]
+  const page = pageRes?.docs?.[0] as null | PageType
+
+  if (page === null) {
+    return notFound()
+  }
+
+  return (
+    <React.Fragment>
+      <Blocks blocks={page.layout} />
+    </React.Fragment>
+  )
 }
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const pages = await payload.find({
+  const payload = await getPayload({ config })
+  const pagesRes = await payload.find({
     collection: 'pages',
     draft: false,
-    limit: 1000,
+    limit: 100,
     overrideAccess: false,
   })
 
-  return pages.docs.map((doc) => doc.slug!)
+  const pages = pagesRes?.docs
+
+  return pages.map(({ slug }) =>
+    slug !== 'home'
+      ? {
+          slug,
+        }
+      : {},
+  )
 }

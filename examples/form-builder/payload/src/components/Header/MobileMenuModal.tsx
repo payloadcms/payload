@@ -1,4 +1,3 @@
-'use client'
 import { Modal } from '@faceless-ui/modal'
 import React from 'react'
 

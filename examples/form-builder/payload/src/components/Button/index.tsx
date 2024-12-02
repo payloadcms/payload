@@ -8,68 +8,58 @@ import classes from './index.module.scss'
 export type Props = {
   appearance?: 'default' | 'primary' | 'secondary'
   className?: string
-  disabled?: boolean
   el?: 'a' | 'button' | 'link'
+  form?: string
   href?: string
   label?: string
   newTab?: boolean | null
   onClick?: () => void
-  type?: 'button' | 'submit'
+}
+
+const elements = {
+  a: 'a',
+  button: 'button',
+  link: Link,
 }
 
 export const Button: React.FC<Props> = ({
-  type = 'button',
   appearance,
   className: classNameFromProps,
-  disabled,
-  el: elFromProps = 'link',
+  el = 'button',
+  form,
   href,
   label,
   newTab,
-  onClick,
 }) => {
-  let el = elFromProps
   const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
-  const className = [
-    classes.button,
-    classNameFromProps,
-    classes[`appearance--${appearance}`],
-    classes.button,
-  ]
+  const Element: ElementType = el
+  const className = [classNameFromProps, classes[`appearance--${appearance}`], classes.button]
     .filter(Boolean)
     .join(' ')
 
+  const elementProps = {
+    ...newTabProps,
+    className,
+    form,
+    href,
+  }
+
   const content = (
     <div className={classes.content}>
-      {/* <Chevron /> */}
       <span className={classes.label}>{label}</span>
     </div>
   )
 
-  if (onClick || type === 'submit') {
-    el = 'button'
-  }
-
-  if (el === 'link') {
-    return (
-      <Link className={className} href={href || ''} {...newTabProps} onClick={onClick}>
-        {content}
-      </Link>
-    )
-  }
-
-  const Element: ElementType = el
-
   return (
-    <Element
-      className={className}
-      href={href}
-      type={type}
-      {...newTabProps}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      {content}
+    <Element {...elementProps}>
+      <React.Fragment>
+        {el === 'link' && (
+          <Link {...newTabProps} className={elementProps.className} href={href || ''}>
+            {content}
+          </Link>
+        )}
+        {el !== 'link' && <React.Fragment>{content}</React.Fragment>}
+      </React.Fragment>
     </Element>
   )
 }

@@ -1,15 +1,16 @@
-import type { Payload } from 'payload'
+import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
 
-import { advanced } from './advanced'
-import { advancedForm } from './advancedForm'
-import { basicForm } from './basicForm'
-import { contact } from './contact'
-import { contactForm } from './contactForm'
-import { home } from './home'
-import { signUp } from './signUp'
-import { signUpForm } from './signUpForm'
+import { home } from '../seed/home'
 
-export const seed = async (payload: Payload) => {
+import { advanced } from '../seed/advanced'
+import { advancedForm } from '../seed/advancedForm'
+import { basicForm } from '../seed/basicForm'
+import { contact } from '../seed/contact'
+import { contactForm } from '../seed/contactForm'
+import { signUp } from '../seed/signUp'
+import { signUpForm } from '../seed/signUpForm'
+
+export async function up({ payload }: MigrateUpArgs): Promise<void> {
   await payload.create({
     collection: 'users',
     data: {

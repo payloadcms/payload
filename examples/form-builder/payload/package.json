@@ -7,7 +7,6 @@
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm seed && next dev",
-    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:schema": "payload-graphql generate:schema",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
@@ -31,8 +30,7 @@
     "react": "19.0.0-rc-65a56d0e-20241020",
     "react-dom": "19.0.0-rc-65a56d0e-20241020",
     "react-hook-form": "^7.41.0",
-    "react-select": "^5.8.0",
-    "sharp": "0.32.6"
+    "react-select": "^5.8.0"
   },
   "devDependencies": {
     "@payloadcms/graphql": "latest",
