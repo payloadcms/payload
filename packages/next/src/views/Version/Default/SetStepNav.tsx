@@ -41,6 +41,10 @@ export const SetStepNav: React.FC<{
       if (formattedDoc) {
         if (useAsTitle !== 'id') {
           const titleField = fields.find((f) => {
+            if (!f) {
+              return
+            }
+
             const fieldName = 'name' in f ? f.name : undefined
             return Boolean(fieldAffectsData(f) && fieldName === useAsTitle)
           })
