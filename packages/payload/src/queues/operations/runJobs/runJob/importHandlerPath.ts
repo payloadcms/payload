@@ -14,7 +14,7 @@ export async function importHandlerPath<T>(path: string): Promise<T> {
         : await eval(`import('${pathToFileURL(runnerPath).href}')`)
   } catch (e) {
     throw new Error(
-      `Error importing job queue handler module. If you're running jobs within Next.js, the handlers need to be defined explicitly and cannot be import paths. Path: ${path}. Import Error: \n${e.message}`,
+      `Error importing job queue handler module for path ${path}. This is an advanced feature that may require a sophisticated build pipeline, especially when using it in production or within Next.js, e.g. by calling opening the /api/payload-jobs/run endpoint. You will have to transpile the handler files separately and ensure they are available in the same location when the job is run. It's recommended to define your handlers as functions directly in your Payload Config, or use import paths handlers outside of Next.js. Import Error: \n${e.message}`,
     )
   }
 

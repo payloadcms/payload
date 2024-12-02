@@ -23,7 +23,7 @@ Simply add a task to the `jobs.tasks` array in your Payload config. A task consi
 | Option                      | Description                                                                      |
 | --------------------------- | -------------------------------------------------------------------------------- |
 | `slug` | Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.|
-| `handler`   | The function that should be responsible for running the job. You can either pass a string-based path to the job function file, or the job function itself. If you are using large dependencies within your job, you might prefer to pass the string path because that will avoid bundling large dependencies in your Next.js app. String path handlers are not supported within Next.js and only work when executing the jobs from outside of Next.js.         |
+| `handler`   | The function that should be responsible for running the job. You can either pass a string-based path to the job function file, or the job function itself. If you are using large dependencies within your job, you might prefer to pass the string path because that will avoid bundling large dependencies in your Next.js app. Passing a string path is an advanced feature that may require a sophisticated build pipeline in order to work.         |
 | `inputSchema` | Define the input field schema - payload will generate a type for this schema. |
 | `interfaceName` | You can use interfaceName to change the name of the interface that is generated for this task. By default, this is "Task" + the capitalized task slug. |
 | `outputSchema` | Define the output field schema - payload will generate a type for this schema. |
@@ -93,7 +93,7 @@ export default buildConfig({
 
 In addition to defining handlers as functions directly provided to your Payload config, you can also pass an _absolute path_ to where the handler is defined. If your task has large dependencies, and you are planning on executing your jobs in a separate process that has access to the filesystem, this could be a handy way to make sure that your Payload + Next.js app remains quick to compile and has minimal dependencies.
 
-Keep in mind that this is not supported if you're planning on running your jobs within Next.js, e.g. by calling opening the `/api/payload-jobs/run` endpoint. In that case, you should define your handlers as functions directly in your Payload config.
+Keep in mind that this is an advanced feature that may require a sophisticated build pipeline, especially when using it in production or within Next.js, e.g. by calling opening the `/api/payload-jobs/run` endpoint. You will have to transpile the handler files separately and ensure they are available in the same location when the job is run. It's recommended to define your handlers as functions directly in your Payload Config, or use import paths handlers outside of Next.js.
 
 In general, this is an advanced use case. Here's how this would look:
 

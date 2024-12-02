@@ -87,8 +87,8 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
    * You can either pass a string-based path to the workflow function file, or the workflow function itself.
    *
    * If you are using large dependencies within your workflow control flow, you might prefer to pass the string path
-   * because that will avoid bundling large dependencies in your Next.js app. String path handlers are not supported
-   * within Next.js and only work when executing the jobs from outside of Next.js.
+   * because that will avoid bundling large dependencies in your Next.js app. Passing a string path is an advanced feature
+   * that may require a sophisticated build pipeline in order to work.
    */
   handler:
     | string
