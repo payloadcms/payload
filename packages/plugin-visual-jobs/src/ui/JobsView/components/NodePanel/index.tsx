@@ -85,6 +85,12 @@ export const NodePanel = () => {
             <span className="value">{JSON.stringify(taskLog.output, null, 2)}</span>
           </div>
         )}
+        {taskLog.input && Object.keys(taskLog.input).length > 0 && (
+          <div className="detail-row">
+            <span className="label">Input:</span>
+            <span className="value">{JSON.stringify(taskLog.input, null, 2)}</span>
+          </div>
+        )}
         <div className="detail-row">
           <span className="label">ID:</span>
           <span className="value">{taskLog.id}</span>

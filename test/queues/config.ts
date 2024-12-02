@@ -576,14 +576,16 @@ export default buildConfigWithDefaults({
         slug: 'randomRetries',
         retries: 200,
         handler: async ({ job, inlineTask, req }) => {
-          await inlineTask('Fetch Customer Data', {
+          const { customerData } = await inlineTask('Fetch Customer Data', {
             task: ({ req }) => {
               // 20% chance to fail
               if (Math.random() < 0.2) {
                 throw new Error('Failed on purpose')
               }
               return {
-                output: {},
+                output: {
+                  customerData: 'test',
+                },
               }
             },
             retries: {
@@ -603,6 +605,9 @@ export default buildConfigWithDefaults({
             },
             retries: {
               attempts: 40,
+            },
+            input: {
+              customerData,
             },
           })
 
