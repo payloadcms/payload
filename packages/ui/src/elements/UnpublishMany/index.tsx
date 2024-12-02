@@ -1,13 +1,13 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
+import { useRouter, useSearchParams } from 'next/navigation.js'
+import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
@@ -20,6 +20,8 @@ const baseClass = 'unpublish-many'
 import type { ClientCollectionConfig } from 'payload'
 
 import { toast } from 'sonner'
+
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 
 export type UnpublishManyProps = {
   collection: ClientCollectionConfig
@@ -38,9 +40,9 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
   const { i18n, t } = useTranslation()
+  const searchParams = useSearchParams()
   const { getQueryParams, selectAll } = useSelection()
   const [submitted, setSubmitted] = useState(false)
-  const { stringifyParams } = useSearchParams()
   const router = useRouter()
   const { clearRouteCache } = useRouteCache()
 
@@ -86,11 +88,13 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
               })
             }
             router.replace(
-              stringifyParams({
-                params: {
+              qs.stringify(
+                {
+                  ...parseSearchParams(searchParams),
                   page: selectAll ? '1' : undefined,
                 },
-              }),
+                { addQueryPrefix: true },
+              ),
             )
             clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
             return null
@@ -102,26 +106,26 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
             addDefaultError()
           }
           return false
-        } catch (e) {
+        } catch (_err) {
           return addDefaultError()
         }
       })
   }, [
-    addDefaultError,
+    serverURL,
     api,
+    slug,
     getQueryParams,
     i18n,
+    toggleModal,
     modalSlug,
     plural,
-    selectAll,
-    serverURL,
     singular,
-    slug,
     t,
-    toggleModal,
     router,
+    searchParams,
+    selectAll,
     clearRouteCache,
-    stringifyParams,
+    addDefaultError,
   ])
 
   if (!versions?.drafts || selectAll === SelectAllStatus.None || !hasPermission) {

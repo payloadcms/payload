@@ -625,7 +625,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 }
                 return hasMany && Array.isArray(relationTo)
                   ? `${option.relationTo}_${option.value}`
-                  : option.value
+                  : (option.value as string)
               }}
               isLoading={isLoading}
               isMulti={hasMany}

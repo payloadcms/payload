@@ -72,5 +72,5 @@ export type SyncWithSearch = (Args: SyncWithSearchArgs) => ReturnType<Collection
 export type DeleteFromSearch = (
   Args: {
     pluginConfig: SearchPluginConfig
-  } & Omit<Parameters<CollectionAfterDeleteHook>[0], 'collection'>,
+  } & Parameters<CollectionAfterDeleteHook>[0],
 ) => ReturnType<CollectionAfterDeleteHook>

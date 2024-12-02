@@ -13,7 +13,19 @@ import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
-  collections: [Users, Pages, Posts],
+  collections: [
+    Users,
+    Pages,
+    Posts,
+    {
+      slug: 'custom-ids-1',
+      fields: [{ type: 'text', name: 'id' }],
+    },
+    {
+      slug: 'custom-ids-2',
+      fields: [{ type: 'text', name: 'id' }],
+    },
+  ],
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -44,7 +56,7 @@ export default buildConfigWithDefaults({
           slug: originalDoc.slug,
         }
       },
-      collections: ['pages', 'posts'],
+      collections: ['pages', 'posts', 'custom-ids-1', 'custom-ids-2'],
       defaultPriorities: {
         pages: 10,
         posts: ({ title }) => (title === 'Hello, world!' ? 30 : 20),

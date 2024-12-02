@@ -15,6 +15,11 @@ const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
   })
 }
 
+// Relationships are only updated when their `id` or `relationTo` changes, by comparing the old and new values
+// This needs to also happen when locale changes, except this is not not part of the API response
+// Instead, we keep track of the old locale ourselves and trigger a re-population when it changes
+let prevLocale: string | undefined
+
 export const mergeData = async <T>(args: {
   apiRoute?: string
   collectionPopulationRequestHandler?: ({
@@ -31,6 +36,7 @@ export const mergeData = async <T>(args: {
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: Partial<T>
   initialData: T
+  locale?: string
   returnNumberOfRequests?: boolean
   serverURL: string
 }): Promise<
@@ -45,6 +51,7 @@ export const mergeData = async <T>(args: {
     fieldSchema,
     incomingData,
     initialData,
+    locale,
     returnNumberOfRequests,
     serverURL,
   } = args
@@ -57,6 +64,7 @@ export const mergeData = async <T>(args: {
     externallyUpdatedRelationship,
     fieldSchema,
     incomingData,
+    localeChanged: prevLocale !== locale,
     populationsByCollection,
     result,
   })
@@ -72,7 +80,7 @@ export const mergeData = async <T>(args: {
         res = await requestHandler({
           apiPath: apiRoute || '/api',
           endpoint: encodeURI(
-            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}`,
+            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}${locale ? `&locale=${locale}` : ''}`,
           ),
           serverURL,
         }).then((res) => res.json())
@@ -91,6 +99,8 @@ export const mergeData = async <T>(args: {
       }
     }),
   )
+
+  prevLocale = locale
 
   return {
     ...result,
