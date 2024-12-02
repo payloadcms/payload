@@ -21,6 +21,7 @@ export const usePatchAnimateHeight = ({
     [],
   )
 
+  const hasInitialized = useRef(false)
   const previousOpenState = useRef(open)
   const [isAnimating, setIsAnimating] = useState(false)
   const resizeObserverRef = useRef<null | ResizeObserver>(null)
@@ -43,6 +44,15 @@ export const usePatchAnimateHeight = ({
 
     const animate = () => {
       setIsAnimating(true)
+
+      // Skip animation on the first render
+      if (!hasInitialized.current) {
+        container.style.transition = ''
+        container.style.height = open ? 'auto' : '0px'
+        hasInitialized.current = true
+        setIsAnimating(false)
+        return
+      }
 
       // Set initial state
       if (previousOpenState.current !== open) {
