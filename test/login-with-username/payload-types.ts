@@ -39,9 +39,9 @@ export interface Config {
     | (LoginWithEither & {
         collection: 'login-with-either';
       });
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {

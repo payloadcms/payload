@@ -26,6 +26,7 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { goToFirstCell, navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -172,6 +173,17 @@ describe('admin2', () => {
 
         await page.locator('.search-filter__input').fill('this is fun')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      })
+
+      test('search should persist through browser back button', async () => {
+        const url = `${postsUrl.list}?limit=10&page=1&search=post1`
+        await page.goto(url)
+        await page.waitForURL(url)
+        await expect(page.locator('#search-filter-input')).toHaveValue('post1')
+        await goToFirstCell(page, postsUrl)
+        await page.goBack()
+        await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
+        await page.waitForURL(url)
       })
 
       test('search should not persist between navigation', async () => {

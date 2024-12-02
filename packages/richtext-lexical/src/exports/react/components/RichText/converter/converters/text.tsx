@@ -1,4 +1,3 @@
-import escapeHTML from 'escape-html'
 import React from 'react'
 
 import type { SerializedTextNode } from '../../../../../../nodeTypes.js'
@@ -8,7 +7,7 @@ import { NodeFormat } from '../../../../../../lexical/utils/nodeFormat.js'
 
 export const TextJSXConverter: JSXConverters<SerializedTextNode> = {
   text: ({ node }) => {
-    let text: React.ReactNode = <React.Fragment>{escapeHTML(node.text)}</React.Fragment>
+    let text: React.ReactNode = node.text
 
     if (node.format & NodeFormat.IS_BOLD) {
       text = <strong>{text}</strong>

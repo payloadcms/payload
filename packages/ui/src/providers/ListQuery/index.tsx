@@ -1,16 +1,16 @@
 'use client'
 import type { ListQuery, PaginatedDocs, Where } from 'payload'
 
-import { useRouter } from 'next/navigation.js'
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { usePreferences } from '../Preferences/index.js'
-import { useSearchParams } from '../SearchParams/index.js'
+import { createParams } from '../SearchParams/index.js'
 
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
@@ -58,7 +58,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   'use no memo'
   const router = useRouter()
   const { setPreference } = usePreferences()
-  const { searchParams } = useSearchParams()
+  const rawSearchParams = useSearchParams()
+  const searchParams = useMemo(() => createParams(rawSearchParams), [rawSearchParams])
 
   const { onQueryChange } = useListDrawerContext()
 
