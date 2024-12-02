@@ -107,7 +107,7 @@ export async function handleTaskFailed({
     }
   }
 
-  if (taskStatus && !taskStatus.complete && taskStatus.totalTried >= maxRetries) {
+  if (!taskStatus?.complete && (taskStatus?.totalTried ?? 0) >= maxRetries) {
     state.reachedMaxRetries = true
 
     await updateJob({

@@ -65,7 +65,7 @@ export function handleWorkflowError({
 
   req.payload.logger.error({
     err: error,
-    msg: `Error running job ${jobLabel} id: ${job.id} attempt ${job.totalTried + 1}/${maxWorkflowRetries + 1}`,
+    msg: `Error running job ${jobLabel} id: ${job.id} attempt ${job.totalTried + 1}${maxWorkflowRetries !== undefined ? '/' + (maxWorkflowRetries + 1) : ''}`,
   })
 
   return {
