@@ -74,7 +74,7 @@ export const CustomFields: CollectionConfig = {
       },
     },
     {
-      name: 'customRelationshipField',
+      name: 'relationshipFieldWithBeforeAfterInputs',
       type: 'relationship',
       admin: {
         components: {
@@ -156,6 +156,34 @@ export const CustomFields: CollectionConfig = {
         {
           name: 'textTwo',
           type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'radioFieldWithBeforeAfterInputs',
+      label: {
+        en: 'Radio en',
+        es: 'Radio es',
+      },
+      type: 'radio',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+      },
+      options: [
+        {
+          label: { en: 'Value One', es: 'Value Uno' },
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+        {
+          label: 'Value Three',
+          value: 'three',
         },
       ],
     },

@@ -1173,6 +1173,8 @@ export type ArrayFieldClient = {
 export type RadioField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent<RadioFieldErrorClientComponent | RadioFieldErrorServerComponent>
       Label?: CustomComponent<RadioFieldLabelClientComponent | RadioFieldLabelServerComponent>
     } & Admin['components']
