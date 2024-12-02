@@ -73,5 +73,16 @@ export const CustomFields: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'customRelationshipField',
+      type: 'relationship',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+      },
+      relationTo: 'posts',
+    },
   ],
 }

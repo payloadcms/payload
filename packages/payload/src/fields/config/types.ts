@@ -1029,6 +1029,8 @@ type RelationshipAdmin = {
   allowCreate?: boolean
   allowEdit?: boolean
   components?: {
+    afterInput?: CustomComponent[]
+    beforeInput?: CustomComponent[]
     Error?: CustomComponent<
       RelationshipFieldErrorClientComponent | RelationshipFieldErrorServerComponent
     >
