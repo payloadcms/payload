@@ -88,6 +88,14 @@ test.describe('Admin Panel', () => {
     await page.goto(categoriesURL.create)
     const nameField = page.locator('#field-name')
     await expect(nameField).toBeVisible()
+
+    // assert that the join field is visible and is not stuck in a loading state
+    await expect(page.locator('#field-relatedPosts')).toContainText('No Posts found.')
+    await expect(page.locator('#field-relatedPosts')).not.toContainText('loading')
+
+    // assert that the create new button is not visible
+    await expect(page.locator('#field-relatedPosts > .relationship-table__add-new')).toBeHidden()
+
     await nameField.fill('test category')
     await saveDocAndAssert(page)
   })
