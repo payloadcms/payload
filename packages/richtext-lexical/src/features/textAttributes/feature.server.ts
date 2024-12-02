@@ -1,20 +1,15 @@
 import { createServerFeature } from '../../index.js'
 
 export type TextAttributesFeatureProps = {
-  /**
-   * TO-DO: see i18n patterns. The user should provide it in label
-   */
-  colors: { label: string; value: string }[]
-  /**
-   * Needed for two reasons:
-   * 1. Pasting text with color from other sources.
-   * 2. Making backwards compatible changes
-   *
-   * TO-DO: see how to implement it, because you can't send functions to the server.
-   */
-  normalizeColor?: (color: string) => string
+  [T in string]: (key: T) => string | undefined
 }
 
+/**
+ * It allows you to enable styles on text nodes in a way that is:
+ * - Safe: add, modify or delete styles without fear of getting runtime breaking changes with editorStates you stored previously.
+ * - Clipboard compatible: the setters you define will also be used when pasting text from the clipboard (by default styles are not imported when pasting).
+ * - Flexible: Do you want to accept only a specific red? You can convert similar reds of other shades to the one you support, or simply ignore them.
+ */
 export const TextAttributesFeature = createServerFeature<
   TextAttributesFeatureProps,
   TextAttributesFeatureProps,

@@ -1,6 +1,10 @@
 'use client'
 
-import { type EditorConfig, type EditorConfig as LexicalEditorConfig, TextNode } from 'lexical'
+import {
+  type EditorConfig as LexicalEditorConfig,
+  type SerializedTextNode,
+  TextNode,
+} from 'lexical'
 
 import type {
   ResolvedClientFeatureMap,
@@ -10,18 +14,33 @@ import type { LexicalFieldAdminProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
 class MyTextNode extends TextNode {
+  attributes?: Record<string, string>
+
   static clone(node: MyTextNode) {
     return new MyTextNode(node.__text, node.__key)
   }
 
   static getType() {
-    return 'asd' //TextNode.getType()
+    return 'myText' //TextNode.getType()
   }
 
-  createDOM(config: EditorConfig) {
+  createDOM(config: LexicalEditorConfig) {
     const dom = super.createDOM(config)
-    dom.style = 'background: green'
+    // add dashed underline to text with 2px of offset from the text
+    dom.style.textDecoration = 'underline'
+    dom.style.textDecorationStyle = 'dashed'
+    dom.style.textUnderlineOffset = '5px'
+
     return dom
+  }
+
+  exportJSON(): SerializedTextNode {
+    return {
+      ...super.exportJSON(),
+      type: MyTextNode.getType(),
+      // if is defined, add attributes to the JSON
+      ...(this.attributes && { attributes: this.attributes }),
+    }
   }
 }
 

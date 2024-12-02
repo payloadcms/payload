@@ -2,10 +2,13 @@ import type { CollectionConfig } from 'payload'
 
 import {
   FixedToolbarFeature,
+  InlineToolbarFeature,
   lexicalEditor,
   TextAttributesFeature,
   TextColorFeature,
+  TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
+import { BackgroundColor } from 'live-preview/app/live-preview/_components/BackgroundColor/index.js'
 
 export const postsSlug = 'posts'
 
@@ -24,13 +27,15 @@ export const PostsCollection: CollectionConfig = {
       type: 'richText',
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
+          ...defaultFeatures.filter((feature) => feature === InlineToolbarFeature()),
           FixedToolbarFeature(),
           TextAttributesFeature({
-            colors: [
-              { label: 'yellow', value: '#ffff00' },
-              { label: 'pink', value: '#ffc0cb' },
-            ],
+            color: (value) => (['blue', 'green', 'red'].includes(value) ? value : undefined),
+            backgroundColor: (value) => (['pink', 'yellow'].includes(value) ? value : undefined),
+            // colors: [
+            //   { label: 'yellow', value: '#ffff00' },
+            //   { label: 'pink', value: '#ffc0cb' },
+            // ],
             // normalizeColor: (color) => {
             //   if (color !== '#ff0000' && color !== 'green' && color !== 'blue') {
             //     return null
@@ -51,6 +56,7 @@ export const PostsCollection: CollectionConfig = {
             //   return color
             // },
           }),
+          TreeViewFeature(),
         ],
       }),
     },
