@@ -769,6 +769,7 @@ describe('Queues', () => {
   })
 
   it('can queue single tasks 150 times', async () => {
+    // TODO: Ramp up the limit from 150 to 500 or 1000, to test reliability of the database
     payload.config.jobs.deleteJobOnComplete = false
     for (let i = 0; i < 150; i++) {
       await payload.jobs.queue({
