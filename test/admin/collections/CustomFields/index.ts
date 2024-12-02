@@ -139,5 +139,25 @@ export const CustomFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'groupFieldWithBeforeAfterInputs',
+      type: 'group',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+      },
+      fields: [
+        {
+          name: 'textOne',
+          type: 'text',
+        },
+        {
+          name: 'textTwo',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }

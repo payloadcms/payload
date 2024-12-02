@@ -619,6 +619,8 @@ export type DateFieldClient = {
 export type GroupField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Label?: CustomComponent<GroupFieldLabelClientComponent | GroupFieldLabelServerComponent>
     } & Admin['components']
     hideGutter?: boolean
