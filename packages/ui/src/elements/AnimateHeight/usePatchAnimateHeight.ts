@@ -1,5 +1,3 @@
-'use client'
-
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 export const usePatchAnimateHeight = ({
@@ -16,7 +14,7 @@ export const usePatchAnimateHeight = ({
   const browserSupportsKeywordAnimation = useMemo(
     () =>
       typeof CSS !== 'undefined' && CSS && CSS.supports
-        ? Boolean(CSS.supports('interpolate-size', 'allow-keywords'))
+        ? CSS.supports('interpolate-size', 'allow-keywords')
         : false,
     [],
   )
@@ -34,47 +32,45 @@ export const usePatchAnimateHeight = ({
       return
     }
 
-    let animationFrameId: number
+    const setContainerHeight = (height: string) => {
+      container.style.height = height
+    }
 
-    const updateHeight = () => {
-      if (isAnimating && container && content) {
-        container.style.height = open ? `${content.scrollHeight}px` : '0px'
+    const handleTransitionEnd = () => {
+      if (container) {
+        container.style.transition = ''
+        container.style.height = open ? 'auto' : '0px'
+        setIsAnimating(false)
       }
     }
 
     const animate = () => {
-      setIsAnimating(true)
-
-      // Skip animation on the first render
       if (!hasInitialized.current && open) {
-        container.style.transition = ''
-        container.style.height = open ? 'auto' : '0px'
+        // Skip animation on first render
+        setContainerHeight('auto')
         setIsAnimating(false)
         return
       }
 
       hasInitialized.current = true
 
-      // Set initial state
       if (previousOpenState.current !== open) {
-        container.style.height = open ? '0px' : `${content.scrollHeight}px`
+        setContainerHeight(open ? '0px' : `${content.scrollHeight}px`)
       }
 
       // Trigger reflow
       container.offsetHeight // eslint-disable-line @typescript-eslint/no-unused-expressions
 
-      // Start animation
+      setIsAnimating(true)
       container.style.transition = `height ${duration}ms ease`
-      container.style.height = open ? `${content.scrollHeight}px` : '0px'
+      setContainerHeight(open ? `${content.scrollHeight}px` : '0px')
 
-      const transitionEndHandler = () => {
-        container.style.transition = ''
-        container.style.height = open ? 'auto' : '0px'
-        container.removeEventListener('transitionend', transitionEndHandler)
-        setIsAnimating(false)
+      const onTransitionEnd = () => {
+        handleTransitionEnd()
+        container.removeEventListener('transitionend', onTransitionEnd)
       }
 
-      container.addEventListener('transitionend', transitionEndHandler)
+      container.addEventListener('transitionend', onTransitionEnd)
     }
 
     animate()
@@ -83,19 +79,19 @@ export const usePatchAnimateHeight = ({
     // Setup ResizeObserver
     resizeObserverRef.current = new ResizeObserver(() => {
       if (isAnimating) {
-        animationFrameId = requestAnimationFrame(updateHeight)
+        container.style.height = open ? `${content.scrollHeight}px` : '0px'
       }
     })
-
     resizeObserverRef.current.observe(content)
 
     return () => {
-      container.style.transition = ''
-      container.style.height = ''
+      if (container) {
+        container.style.transition = ''
+        container.style.height = ''
+      }
       resizeObserverRef.current?.disconnect()
-      cancelAnimationFrame(animationFrameId)
     }
-  }, [open, duration, containerRef, contentRef, browserSupportsKeywordAnimation, isAnimating])
+  }, [open, duration, containerRef, contentRef, browserSupportsKeywordAnimation])
 
   return { browserSupportsKeywordAnimation }
 }
