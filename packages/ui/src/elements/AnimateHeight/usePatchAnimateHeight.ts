@@ -2,10 +2,12 @@
 import { useEffect, useMemo, useRef } from 'react'
 
 export const usePatchAnimateHeight = ({
+  children,
   containerRef,
   duration,
   open,
 }: {
+  children: React.ReactNode
   containerRef: React.RefObject<HTMLDivElement>
   duration: number
   open: boolean
@@ -64,7 +66,7 @@ export const usePatchAnimateHeight = ({
         container.style.height = ''
       }
     }
-  }, [open, duration, containerRef, browserSupportsKeywordAnimation])
+  }, [open, duration, containerRef, children, browserSupportsKeywordAnimation])
 
   return { browserSupportsKeywordAnimation }
 }

@@ -68,6 +68,7 @@ export const AnimateHeight: React.FC<{
   const containerRef = useRef<HTMLDivElement>(null)
 
   usePatchAnimateHeight({
+    children,
     containerRef,
     duration,
     open,
