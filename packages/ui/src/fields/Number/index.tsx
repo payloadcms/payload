@@ -149,6 +149,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
         />
+        {BeforeInput}
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
@@ -177,7 +178,6 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
           />
         ) : (
           <div>
-            {BeforeInput}
             <input
               disabled={readOnly}
               id={`field-${path.replace(/\./g, '__')}`}
@@ -194,9 +194,9 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
               type="number"
               value={typeof value === 'number' ? value : ''}
             />
-            {AfterInput}
           </div>
         )}
+        {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}

@@ -24,14 +24,15 @@ jobs:
             chore
             ci
             docs
+            examples
             feat
             fix
             perf
             refactor
             revert
             style
+            templates
             test
-            types
           scopes: |
             cpa
             db-\*

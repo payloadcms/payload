@@ -734,7 +734,7 @@ importers:
         specifier: 1.77.4
         version: 1.77.4
       sonner:
-        specifier: ^1.5.0
+        specifier: ^1.7.0
         version: 1.7.0(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106)
       uuid:
         specifier: 10.0.0
@@ -1543,7 +1543,7 @@ importers:
         specifier: 0.25.0-rc-66855b96-20241106
         version: 0.25.0-rc-66855b96-20241106
       sonner:
-        specifier: ^1.5.0
+        specifier: ^1.7.0
         version: 1.7.0(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106)
       ts-essentials:
         specifier: 10.0.3
