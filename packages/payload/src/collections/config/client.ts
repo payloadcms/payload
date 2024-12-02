@@ -234,7 +234,6 @@ export const createClientCollectionConfig = ({
         }
         break
 
-        break
       default:
         clientCollection[key] = collection[key]
     }

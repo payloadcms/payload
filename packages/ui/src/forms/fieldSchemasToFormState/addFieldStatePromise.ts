@@ -724,9 +724,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  const isDisabled = field?.admin && 'disabled' in field.admin && field.admin.disabled
-
-  if (requiresRender && !isDisabled && renderFieldFn) {
+  if (requiresRender && renderFieldFn) {
     const fieldState = state[path]
 
     const fieldConfig = fieldSchemaMap.get(schemaPath)

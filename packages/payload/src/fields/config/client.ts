@@ -320,9 +320,7 @@ export const createClientFields = ({
       importMap,
     })
 
-    if (clientField) {
-      clientFields.push(clientField)
-    }
+    clientFields.push(clientField)
   }
 
   const hasID = flattenTopLevelFields(fields).some((f) => fieldAffectsData(f) && f.name === 'id')

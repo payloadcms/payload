@@ -35,7 +35,7 @@ export const formatDocTitle = ({
 
       if (title) {
         const fieldConfig = collectionConfig.fields.find(
-          (f) => 'name' in f && f.name === useAsTitle,
+          (f) => f && 'name' in f && f.name === useAsTitle,
         )
 
         const isDate = fieldConfig?.type === 'date'
