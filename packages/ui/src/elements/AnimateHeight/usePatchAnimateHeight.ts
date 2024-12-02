@@ -46,13 +46,14 @@ export const usePatchAnimateHeight = ({
       setIsAnimating(true)
 
       // Skip animation on the first render
-      if (!hasInitialized.current) {
+      if (!hasInitialized.current && open) {
         container.style.transition = ''
         container.style.height = open ? 'auto' : '0px'
-        hasInitialized.current = true
         setIsAnimating(false)
         return
       }
+
+      hasInitialized.current = true
 
       // Set initial state
       if (previousOpenState.current !== open) {
