@@ -6,6 +6,7 @@ import { Panel, useNodes } from '@xyflow/react'
 
 import './index.scss'
 
+import CodeEditor from 'packages/ui/src/elements/CodeEditor/CodeEditor.js'
 import React from 'react'
 
 import { type PanelTab, Tabs } from './Tabs.js'
@@ -93,14 +94,26 @@ export const NodePanel = () => {
   if (taskLog.input && Object.keys(taskLog.input).length > 0) {
     tabs.push({
       name: 'Input',
-      Content: <pre>{JSON.stringify(taskLog.input, null, 2)}</pre>,
+      Content: (
+        <CodeEditor
+          language="json"
+          readOnly={true}
+          value={JSON.stringify(taskLog.input, null, 2)}
+        />
+      ),
     })
   }
 
   if (taskLog.output && Object.keys(taskLog.output).length > 0) {
     tabs.push({
       name: 'Output',
-      Content: <pre>{JSON.stringify(taskLog.output, null, 2)}</pre>,
+      Content: (
+        <CodeEditor
+          language="json"
+          readOnly={true}
+          value={JSON.stringify(taskLog.output, null, 2)}
+        />
+      ),
     })
   }
 
