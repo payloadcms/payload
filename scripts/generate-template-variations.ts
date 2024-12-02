@@ -198,7 +198,7 @@ async function main() {
       execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
     } else {
       log('Installing dependencies without generating lockfile')
-      execSyncSafe(`pnpm install --ignore-workspace --frozen-lockfile`, { cwd: destDir })
+      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
       await fs.rm(`${destDir}/pnpm-lock.yaml`, { force: true })
     }
 
