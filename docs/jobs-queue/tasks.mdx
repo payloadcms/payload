@@ -93,7 +93,7 @@ export default buildConfig({
 
 In addition to defining handlers as functions directly provided to your Payload config, you can also pass an _absolute path_ to where the handler is defined. If your task has large dependencies, and you are planning on executing your jobs in a separate process that has access to the filesystem, this could be a handy way to make sure that your Payload + Next.js app remains quick to compile and has minimal dependencies.
 
-Keep in mind that this is an advanced feature that may require a sophisticated build pipeline, especially when using it in production or within Next.js, e.g. by calling opening the `/api/payload-jobs/run` endpoint. You will have to transpile the handler files separately and ensure they are available in the same location when the job is run. It's recommended to define your handlers as functions directly in your Payload Config, or use import paths handlers outside of Next.js.
+Keep in mind that this is an advanced feature that may require a sophisticated build pipeline, especially when using it in production or within Next.js, e.g. by calling opening the `/api/payload-jobs/run` endpoint. You will have to transpile the handler files separately and ensure they are available in the same location when the job is run. If you're using an endpoint to execute your jobs, it's recommended to define your handlers as functions directly in your Payload Config, or use import paths handlers outside of Next.js.
 
 In general, this is an advanced use case. Here's how this would look:
 
