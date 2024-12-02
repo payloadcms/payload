@@ -193,6 +193,15 @@ async function main() {
       },
     })
 
+    if (generateLockfile) {
+      log('Generating pnpm-lock.yaml')
+      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
+    } else {
+      log('Installing dependencies without generating lockfile')
+      execSyncSafe(`pnpm install --ignore-workspace --frozen-lockfile`, { cwd: destDir })
+      await fs.rm(`${destDir}/pnpm-lock.yaml`, { force: true })
+    }
+
     // Copy in initial migration if db is postgres. This contains user and media.
     if (db === 'postgres' || db === 'vercel-postgres') {
       // Add "ci" script to package.json
@@ -214,15 +223,11 @@ async function main() {
         cwd: destDir,
         env: {
           ...process.env,
+          PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
           DATABASE_URI: 'postgres://localhost:5432/payloadtests',
         },
       })
-    }
-
-    if (generateLockfile) {
-      log('Generating pnpm-lock.yaml')
-      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
     }
 
     // TODO: Email?
@@ -302,7 +307,7 @@ function log(message: string) {
 function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1]) {
   try {
     console.log(`Executing: ${command}`)
-    execSync(command, options)
+    execSync(command, { stdio: 'inherit', ...options })
   } catch (error) {
     if (error instanceof Error) {
       const stderr = (error as any).stderr?.toString()
