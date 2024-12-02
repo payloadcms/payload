@@ -36,6 +36,10 @@ type TemplateVariations = {
   envNames?: {
     dbUri: string
   }
+  /**
+   * @default false
+   */
+  skipReadme?: boolean
   configureConfig?: boolean
   generateLockfile?: boolean
 }
@@ -92,6 +96,7 @@ async function main() {
         // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
+      skipReadme: true,
     },
     {
       name: 'payload-postgres-template',
@@ -151,6 +156,7 @@ async function main() {
     envNames,
     sharp,
     configureConfig,
+    skipReadme = false,
   } of variations) {
     header(`Generating ${name}...`)
     const destDir = path.join(templatesDir, dirname)
@@ -160,6 +166,7 @@ async function main() {
       '.next',
       '.env$',
       'pnpm-lock.yaml',
+      ...(skipReadme ? ['README.md'] : ['']),
     ])
 
     log(`Copied to ${destDir}`)
@@ -183,15 +190,17 @@ async function main() {
       })
     }
 
-    await generateReadme({
-      destDir,
-      data: {
-        name,
-        description: name, // TODO: Add descriptions
-        attributes: { db, storage },
-        ...(vercelDeployButtonLink && { vercelDeployButtonLink }),
-      },
-    })
+    if (!skipReadme) {
+      await generateReadme({
+        destDir,
+        data: {
+          name,
+          description: name, // TODO: Add descriptions
+          attributes: { db, storage },
+          ...(vercelDeployButtonLink && { vercelDeployButtonLink }),
+        },
+      })
+    }
 
     if (generateLockfile) {
       log('Generating pnpm-lock.yaml')
@@ -224,8 +233,8 @@ async function main() {
         env: {
           ...process.env,
           PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
-          BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
-          DATABASE_URI: 'postgres://localhost:5432/payloadtests',
+          BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_n7YreuxAdmDO4OBn_UwxO9LaSHeI36PxLRM3WFo2S88fEHL',
+          DATABASE_URI: 'postgresql://postgres@127.0.0.1:5432/payloadtests',
         },
       })
     }
