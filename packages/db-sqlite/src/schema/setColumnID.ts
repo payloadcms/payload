@@ -6,10 +6,11 @@ import { integer, numeric, text } from 'drizzle-orm/sqlite-core'
 import type { IDType } from '../types.js'
 
 type Args = {
+  autoIncrement: boolean
   columns: Record<string, SQLiteColumnBuilder>
   fields: FlattenedField[]
 }
-export const setColumnID = ({ columns, fields }: Args): IDType => {
+export const setColumnID = ({ autoIncrement, columns, fields }: Args): IDType => {
   const idField = fields.find((field) => field.name === 'id')
   if (idField) {
     if (idField.type === 'number') {
@@ -23,6 +24,6 @@ export const setColumnID = ({ columns, fields }: Args): IDType => {
     }
   }
 
-  columns.id = integer('id').primaryKey()
+  columns.id = integer('id').primaryKey({ autoIncrement })
   return 'integer'
 }

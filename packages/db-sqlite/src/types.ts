@@ -32,6 +32,11 @@ export type Args = {
    */
   afterSchemaInit?: SQLiteSchemaHook[]
   /**
+   * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for Primary Keys.
+   * This ensures that the same ID cannot be reused from previously deleted rows.
+   */
+  autoIncrement?: boolean
+  /**
    * Transform the schema before it's built.
    * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
@@ -111,6 +116,7 @@ type SQLiteDrizzleAdapter = Omit<
 
 export type SQLiteAdapter = {
   afterSchemaInit: SQLiteSchemaHook[]
+  autoIncrement: boolean
   beforeSchemaInit: SQLiteSchemaHook[]
   client: Client
   clientConfig: Args['client']

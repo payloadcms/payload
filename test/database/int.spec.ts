@@ -1076,4 +1076,11 @@ describe('database', () => {
 
     expect(relationBDocs.docs).toHaveLength(0)
   })
+
+  it('should enforce unique ids on db level even after delete', async () => {
+    const { id } = await payload.create({ collection: 'posts', data: { title: 'ASD' } })
+    await payload.delete({ id, collection: 'posts' })
+    const { id: id_2 } = await payload.create({ collection: 'posts', data: { title: 'ASD' } })
+    expect(id_2).not.toBe(id)
+  })
 })

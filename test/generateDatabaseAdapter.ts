@@ -52,6 +52,7 @@ export const allDatabaseAdapters = {
     client: {
       url: process.env.SQLITE_URL || 'file:./payloadtests.db',
     },
+    autoIncrement: true
   })`,
   supabase: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
