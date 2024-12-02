@@ -1,6 +1,5 @@
 'use client'
-import { TabsProvider } from 'packages/ui/src/fields/Tabs/provider.js'
-import { TabComponent } from 'packages/ui/src/fields/Tabs/Tab/index.js'
+import { TabComponent, TabsProvider } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 export type PanelTab = {
