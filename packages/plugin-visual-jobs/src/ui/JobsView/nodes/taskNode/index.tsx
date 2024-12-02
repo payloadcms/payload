@@ -27,8 +27,8 @@ export const TaskNode: React.FC<{
       >
         {data.state === 'succeeded' ? <SuccessIcon /> : <ErrorIcon />}
         <div className="taskNode__label">
-          <strong>{data.taskID}</strong>
-          <span>{data.id}</span>
+          <strong className="taskNode__taskID">{data.taskID}</strong>
+          <span className="taskNode__id">{data.id}</span>
         </div>
       </div>
 

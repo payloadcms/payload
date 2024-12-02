@@ -16,6 +16,14 @@
     display: flex;
     flex-direction: column;
   }
+
+  &__taskID {
+    font-size: 1.1rem;
+  }
+  &__id {
+    color: var(--theme-elevation-600);
+    font-size: 0.85rem;
+  }
 }
 
 .selected .taskNode {
