@@ -118,7 +118,7 @@
     "react-datepicker": "7.5.0",
     "react-image-crop": "10.1.8",
     "react-select": "5.8.3",
-    "scheduler": "0.0.0-experimental-3edc000d-20240926",
+    "scheduler": "0.25.0-rc-66855b96-20241106",
     "sonner": "^1.5.0",
     "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
