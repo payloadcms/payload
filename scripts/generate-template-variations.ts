@@ -233,8 +233,8 @@ async function main() {
         env: {
           ...process.env,
           PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
-          BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_n7YreuxAdmDO4OBn_UwxO9LaSHeI36PxLRM3WFo2S88fEHL',
-          DATABASE_URI: 'postgresql://postgres@127.0.0.1:5432/payloadtests',
+          BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
+          DATABASE_URI: 'postgres://localhost:5432/payloadtests',
         },
       })
     }
