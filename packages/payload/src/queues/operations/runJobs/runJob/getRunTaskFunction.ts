@@ -182,8 +182,20 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           throw new Error(`Task ${taskSlug} not found in workflow ${job.workflowSlug}`)
         }
       }
-      const maxRetries: number =
-        (typeof retriesConfig === 'object' ? retriesConfig?.attempts : retriesConfig) ?? 0
+      let maxRetries: number =
+        typeof retriesConfig === 'object' ? retriesConfig?.attempts : retriesConfig
+
+      if (maxRetries === undefined || maxRetries === null) {
+        // Inherit retries from workflow config, if they are undefined and the workflow config has retries configured
+        if (workflowConfig.retries !== undefined && workflowConfig.retries !== null) {
+          maxRetries =
+            typeof workflowConfig.retries === 'object'
+              ? workflowConfig.retries.attempts
+              : workflowConfig.retries
+        } else {
+          maxRetries = 0
+        }
+      }
 
       const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[taskSlug]
         ? job.taskStatus[taskSlug][taskID]

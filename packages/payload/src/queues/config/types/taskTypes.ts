@@ -62,10 +62,12 @@ export type RunTaskFunctionArgs<TTaskSlug extends keyof TypedJobs['tasks']> = {
   input?: TaskInput<TTaskSlug>
   /**
    * Specify the number of times that this task should be retried if it fails for any reason.
+   * If this is undefined, the task will either inherit the retries from the workflow or have no retries.
+   * If this is 0, the task will not be retried.
    *
-   * @default By default, tasks are not retried and `retries` is `0`.
+   * @default By default, tasks are not retried and `retries` is `undefined`.
    */
-  retries?: number | RetryConfig
+  retries?: number | RetryConfig | undefined
 }
 
 export type RunTaskFunction<TTaskSlug extends keyof TypedJobs['tasks']> = (
@@ -83,10 +85,12 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
     input?: TTaskInput
     /**
      * Specify the number of times that this task should be retried if it fails for any reason.
+     * If this is undefined, the task will either inherit the retries from the workflow or have no retries.
+     * If this is 0, the task will not be retried.
      *
-     * @default By default, tasks are not retried and `retries` is `0`.
+     * @default By default, tasks are not retried and `retries` is `undefined`.
      */
-    retries?: number | RetryConfig
+    retries?: number | RetryConfig | undefined
     // This is the same as TaskHandler, but typed out explicitly in order to improve type inference
     task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
       | {
@@ -172,10 +176,12 @@ export type TaskConfig<
   outputSchema?: Field[]
   /**
    * Specify the number of times that this step should be retried if it fails.
+   * If this is undefined, the task will either inherit the retries from the workflow or have no retries.
+   * If this is 0, the task will not be retried.
    *
-   * @default By default, tasks are not retried and `retries` is `0`.
+   * @default By default, tasks are not retried and `retries` is `undefined`.
    */
-  retries?: number | RetryConfig
+  retries?: number | RetryConfig | undefined
   /**
    * Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.
    */

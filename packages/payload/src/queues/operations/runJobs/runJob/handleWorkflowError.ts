@@ -29,9 +29,13 @@ export function handleWorkflowError({
   const maxWorkflowRetries: number =
     (typeof workflowConfig.retries === 'object'
       ? workflowConfig.retries.attempts
-      : workflowConfig.retries) ?? 0
+      : workflowConfig.retries) ?? undefined
 
-  if (job.totalTried >= maxWorkflowRetries) {
+  if (
+    maxWorkflowRetries !== undefined &&
+    maxWorkflowRetries !== null &&
+    job.totalTried >= maxWorkflowRetries
+  ) {
     hasFinalError = true
     state.reachedMaxRetries = true
   }
