@@ -28,6 +28,7 @@ export default buildConfigWithDefaults({
     {
       slug: 'global',
       fields: [{ type: 'text', name: 'text' }],
+      versions: true,
     },
   ],
   localization: {

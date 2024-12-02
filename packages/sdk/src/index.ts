@@ -1,4 +1,4 @@
-import type { ApplyDisableErrors, PaginatedDocs, SelectType } from 'payload'
+import type { ApplyDisableErrors, PaginatedDocs, SelectType, TypeWithVersion } from 'payload'
 
 import type { ForgotPasswordOptions } from './auth/forgotPassword.js'
 import type { LoginOptions, LoginResult } from './auth/login.js'
@@ -9,11 +9,19 @@ import type { CreateOptions } from './collections/create.js'
 import type { DeleteByIDOptions, DeleteManyOptions, DeleteOptions } from './collections/delete.js'
 import type { FindOptions } from './collections/find.js'
 import type { FindByIDOptions } from './collections/findByID.js'
+import type { FindVersionByIDOptions } from './collections/findVersionByID.js'
+import type { FindVersionsOptions } from './collections/findVersions.js'
+import type { RestoreVersionByIDOptions } from './collections/restoreVersion.js'
+import type { FindGlobalVersionByIDOptions } from './globals/findVersionByID.js'
+import type { FindGlobalVersionsOptions } from './globals/findVersions.js'
+import type { RestoreGlobalVersionByIDOptions } from './globals/restoreVersion.js'
 import type { UpdateGlobalOptions } from './globals/update.js'
 import type {
   AuthCollectionSlug,
   BulkOperationResult,
   CollectionSlug,
+  DataFromCollectionSlug,
+  DataFromGlobalSlug,
   GlobalSlug,
   PayloadGeneratedTypes,
   SelectFromCollectionSlug,
@@ -34,6 +42,9 @@ import { create } from './collections/create.js'
 import { deleteOperation } from './collections/delete.js'
 import { find } from './collections/find.js'
 import { findByID } from './collections/findByID.js'
+import { findVersionByID } from './collections/findVersionByID.js'
+import { findVersions } from './collections/findVersions.js'
+import { restoreVersion } from './collections/restoreVersion.js'
 import {
   update,
   type UpdateByIDOptions,
@@ -41,6 +52,9 @@ import {
   type UpdateOptions,
 } from './collections/update.js'
 import { findGlobal, type FindGlobalOptions } from './globals/findOne.js'
+import { findGlobalVersionByID } from './globals/findVersionByID.js'
+import { findGlobalVersions } from './globals/findVersions.js'
+import { restoreGlobalVersion } from './globals/restoreVersion.js'
 import { updateGlobal } from './globals/update.js'
 import { buildSearchParams } from './utilities/buildSearchParams.js'
 
@@ -199,6 +213,34 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
     return findGlobal(this, options, init)
   }
 
+  findGlobalVersionByID<TSlug extends GlobalSlug<T>, TDisableErrors extends boolean>(
+    options: FindGlobalVersionByIDOptions<T, TSlug, TDisableErrors>,
+    init?: RequestInit,
+  ): Promise<ApplyDisableErrors<TypeWithVersion<DataFromGlobalSlug<T, TSlug>>, TDisableErrors>> {
+    return findGlobalVersionByID(this, options, init)
+  }
+
+  findGlobalVersions<TSlug extends GlobalSlug<T>>(
+    options: FindGlobalVersionsOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<T, TSlug>>>> {
+    return findGlobalVersions(this, options, init)
+  }
+  findVersionByID<TSlug extends CollectionSlug<T>, TDisableErrors extends boolean>(
+    options: FindVersionByIDOptions<T, TSlug, TDisableErrors>,
+    init?: RequestInit,
+  ): Promise<
+    ApplyDisableErrors<TypeWithVersion<DataFromCollectionSlug<T, TSlug>>, TDisableErrors>
+  > {
+    return findVersionByID(this, options, init)
+  }
+
+  findVersions<TSlug extends CollectionSlug<T>>(
+    options: FindVersionsOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<T, TSlug>>>> {
+    return findVersions(this, options, init)
+  }
   forgotPassword<TSlug extends AuthCollectionSlug<T>>(
     options: ForgotPasswordOptions<T, TSlug>,
     init?: RequestInit,
@@ -273,6 +315,20 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
     init?: RequestInit,
   ): Promise<ResetPasswordResult<T, TSlug>> {
     return resetPassword(this, options, init)
+  }
+
+  restoreGlobalVersion<TSlug extends GlobalSlug<T>>(
+    options: RestoreGlobalVersionByIDOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<TypeWithVersion<DataFromGlobalSlug<T, TSlug>>> {
+    return restoreGlobalVersion(this, options, init)
+  }
+
+  restoreVersion<TSlug extends CollectionSlug<T>>(
+    options: RestoreVersionByIDOptions<T, TSlug>,
+    init?: RequestInit,
+  ): Promise<DataFromCollectionSlug<T, TSlug>> {
+    return restoreVersion(this, options, init)
   }
 
   update<TSlug extends CollectionSlug<T>, TSelect extends SelectFromCollectionSlug<T, TSlug>>(

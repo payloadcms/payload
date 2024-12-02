@@ -47,6 +47,15 @@ describe('@payloadcms/sdk', () => {
     expect(result.docs[0].id).toBe(post.id)
   })
 
+  it('should execute findVersions', async () => {
+    const result = await sdk.findVersions({
+      collection: 'posts',
+      where: { parent: { equals: post.id } },
+    })
+
+    expect(result.docs[0].parent).toBe(post.id)
+  })
+
   it('should execute findByID', async () => {
     const result = await sdk.findByID({ collection: 'posts', id: post.id })
 
@@ -62,6 +71,16 @@ describe('@payloadcms/sdk', () => {
     })
 
     expect(result).toBeNull()
+  })
+
+  it('should execute findVersionByID', async () => {
+    const {
+      docs: [version],
+    } = await payload.findVersions({ collection: 'posts', where: { parent: { equals: post.id } } })
+
+    const result = await sdk.findVersionByID({ collection: 'posts', id: version.id })
+
+    expect(result.id).toBe(version.id)
   })
 
   it('should execute create', async () => {
@@ -140,14 +159,78 @@ describe('@payloadcms/sdk', () => {
     expect(resultLocal).toBeNull()
   })
 
+  it('should execute restoreVersion', async () => {
+    const post = await payload.create({ collection: 'posts', data: { text: 'old' } })
+
+    const {
+      docs: [currentVersion],
+    } = await payload.findVersions({ collection: 'posts', where: { parent: { equals: post.id } } })
+
+    await payload.update({ collection: 'posts', id: post.id, data: { text: 'new' } })
+
+    const result = await sdk.restoreVersion({
+      collection: 'posts',
+      id: currentVersion.id,
+    })
+
+    expect(result.text).toBe('old')
+
+    const resultDB = await payload.findByID({ collection: 'posts', id: post.id })
+
+    expect(resultDB.text).toBe('old')
+  })
+
   it('should execute findGlobal', async () => {
     const result = await sdk.findGlobal({ slug: 'global' })
     expect(result.text).toBe('some-global')
   })
 
+  it('should execute findGlobalVersions', async () => {
+    const result = await sdk.findGlobalVersions({
+      slug: 'global',
+    })
+
+    expect(result.docs[0].version).toBeTruthy()
+  })
+
+  it('should execute findGlobalVersionByID', async () => {
+    const {
+      docs: [version],
+    } = await payload.findGlobalVersions({
+      slug: 'global',
+    })
+
+    const result = await sdk.findGlobalVersionByID({ id: version.id, slug: 'global' })
+
+    expect(result.id).toBe(version.id)
+  })
+
   it('should execute updateGlobal', async () => {
     const result = await sdk.updateGlobal({ slug: 'global', data: { text: 'some-updated-global' } })
     expect(result.text).toBe('some-updated-global')
+  })
+
+  it('should execute restoreGlobalVersion', async () => {
+    await payload.updateGlobal({ slug: 'global', data: { text: 'old' } })
+
+    const {
+      docs: [currentVersion],
+    } = await payload.findGlobalVersions({
+      slug: 'global',
+    })
+
+    await payload.updateGlobal({ slug: 'global', data: { text: 'new' } })
+
+    const { version: result } = await sdk.restoreGlobalVersion({
+      slug: 'global',
+      id: currentVersion.id,
+    })
+
+    expect(result.text).toBe('old')
+
+    const resultDB = await payload.findGlobal({ slug: 'global' })
+
+    expect(resultDB.text).toBe('old')
   })
 
   it('should execute login', async () => {

@@ -880,6 +880,35 @@ const result = await sdk.resetPassword({
   collection: 'users',
   data: { password: '1234567', token: resetPasswordToken },
 })
+
+// Find Versions operation
+const result = await sdk.findVersions({
+  collection: 'posts',
+  where: { parent: { equals: post.id } },
+})
+
+// Find Version by ID operation
+const result = await sdk.findVersionByID({ collection: 'posts', id: version.id })
+
+// Restore Version operation
+const result = await sdk.restoreVersion({
+  collection: 'posts',
+  id,
+})
+
+// Find Global Versions operation
+const result = await sdk.findGlobalVersions({
+  slug: 'global',
+})
+
+// Find Global Version by ID operation
+const result = await sdk.findGlobalVersionByID({ id: version.id, slug: 'global' })
+
+// Restore Global Version operation
+const result = await sdk.restoreGlobalVersion({
+  slug: 'global',
+  id
+})
 ```
 
 
