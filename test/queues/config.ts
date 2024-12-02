@@ -600,7 +600,9 @@ export default buildConfigWithDefaults({
                 throw new Error('Failed on purpose')
               }
               return {
-                output: {},
+                output: {
+                  segments: ['test1', 'test2'],
+                },
               }
             },
             retries: {

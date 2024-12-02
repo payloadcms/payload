@@ -8,6 +8,8 @@ import './index.scss'
 
 import React from 'react'
 
+import { type PanelTab, Tabs } from './Tabs.js'
+
 const ErrorDisplay = ({ error }: { error: any }) => {
   const formatStack = (stack: string) => {
     return stack.split('\n').map((line, index) => (
@@ -52,51 +54,59 @@ export const NodePanel = () => {
     return new Date(dateString).toLocaleString()
   }
 
+  const tabs: PanelTab[] = [
+    {
+      name: 'Metadata',
+      Content: (
+        <div className="task-details">
+          <div className="detail-row">
+            <span className="label">Task ID:</span>
+            <span className="value">{taskLog.taskID}</span>
+          </div>
+          <div className="detail-row">
+            <span className="label">Task Slug:</span>
+            <span className="value">{taskLog.taskSlug}</span>
+          </div>
+          <div className="detail-row">
+            <span className="label">State:</span>
+            <span className={`value state ${taskLog.state}`}>{taskLog.state}</span>
+          </div>
+          <div className="detail-row">
+            <span className="label">Executed At:</span>
+            <span className="value">{formatDate(taskLog.executedAt)}</span>
+          </div>
+          <div className="detail-row">
+            <span className="label">Completed At:</span>
+            <span className="value">{formatDate(taskLog.completedAt)}</span>
+          </div>
+
+          <div className="detail-row">
+            <span className="label">ID:</span>
+            <span className="value">{taskLog.id}</span>
+          </div>
+          {taskLog.error ? <ErrorDisplay error={taskLog.error} /> : null}
+        </div>
+      ),
+    },
+  ]
+
+  if (taskLog.input && Object.keys(taskLog.input).length > 0) {
+    tabs.push({
+      name: 'Input',
+      Content: <pre>{JSON.stringify(taskLog.input, null, 2)}</pre>,
+    })
+  }
+
+  if (taskLog.output && Object.keys(taskLog.output).length > 0) {
+    tabs.push({
+      name: 'Output',
+      Content: <pre>{JSON.stringify(taskLog.output, null, 2)}</pre>,
+    })
+  }
+
   return (
     <Panel className="nodePanel" position="top-right">
-      <h1>
-        {taskLog.taskSlug} Task: {taskLog.taskID}
-      </h1>
-      <div className="task-details">
-        <div className="detail-row">
-          <span className="label">Task ID:</span>
-          <span className="value">{taskLog.taskID}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Task Slug:</span>
-          <span className="value">{taskLog.taskSlug}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">State:</span>
-          <span className={`value state ${taskLog.state}`}>{taskLog.state}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Executed At:</span>
-          <span className="value">{formatDate(taskLog.executedAt)}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Completed At:</span>
-          <span className="value">{formatDate(taskLog.completedAt)}</span>
-        </div>
-
-        {taskLog.output && Object.keys(taskLog.output).length > 0 && (
-          <div className="detail-row">
-            <span className="label">Output:</span>
-            <span className="value">{JSON.stringify(taskLog.output, null, 2)}</span>
-          </div>
-        )}
-        {taskLog.input && Object.keys(taskLog.input).length > 0 && (
-          <div className="detail-row">
-            <span className="label">Input:</span>
-            <span className="value">{JSON.stringify(taskLog.input, null, 2)}</span>
-          </div>
-        )}
-        <div className="detail-row">
-          <span className="label">ID:</span>
-          <span className="value">{taskLog.id}</span>
-        </div>
-        {taskLog.error ? <ErrorDisplay error={taskLog.error} /> : null}
-      </div>
+      <Tabs tabs={tabs} />
     </Panel>
   )
 }

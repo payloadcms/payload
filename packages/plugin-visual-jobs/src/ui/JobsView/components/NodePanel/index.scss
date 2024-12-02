@@ -3,10 +3,19 @@
 .nodePanel {
   display: flex;
   flex-direction: column;
-  gap: base(1);
-  padding: base(2);
+  padding: base(1);
   border: 1px solid var(--theme-elevation-100);
   background: var(--theme-input-bg);
+  width: 400px;
+
+  .tabs-field__tabs::before {
+    content: none;
+  }
+
+  .tabs-field__content-wrap {
+    padding-left: 0;
+    padding-right: 0;
+  }
 
   .task-details {
     display: flex;
