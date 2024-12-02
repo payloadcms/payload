@@ -24,9 +24,10 @@ const Blocks: React.FC<{
           const { blockName, blockType, form } = block
 
           const isFormBlock = blockType === 'formBlock'
+          // eslint-disable-next-line no-empty
           {
-            /*@ts-expect-error*/
           }
+          // @ts-expect-error: Form is not defined
           const formID: string = isFormBlock && form && (typeof form === 'string' ? form : form.id)
 
           if (blockType && blockType in blockComponents) {
@@ -34,7 +35,7 @@ const Blocks: React.FC<{
 
             return (
               <VerticalPadding bottom="small" key={isFormBlock ? formID : index} top="small">
-                {/*@ts-expect-error*/}
+                {/*@ts-expect-error: Block type is dynamically determined */}
                 <Block id={toKebabCase(blockName)} {...block} />
               </VerticalPadding>
             )

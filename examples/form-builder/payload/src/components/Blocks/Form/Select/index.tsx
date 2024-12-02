@@ -1,4 +1,4 @@
-import type { SelectField } from 'payload-plugin-form-builder/dist/types'
+import type { SelectField } from '@payloadcms/plugin-form-builder/types'
 import type { Control, FieldErrorsImpl, FieldValues } from 'react-hook-form'
 
 import React from 'react'
@@ -10,14 +10,14 @@ import { Width } from '../Width'
 import classes from './index.module.scss'
 
 export const Select: React.FC<
-  SelectField & {
+  {
     control: Control<FieldValues, any>
     errors: Partial<
       FieldErrorsImpl<{
         [x: string]: any
       }>
     >
-  }
+  } & SelectField
 > = ({ name, control, errors, label, options, required, width }) => {
   return (
     <Width width={width}>
@@ -35,7 +35,7 @@ export const Select: React.FC<
               classNamePrefix="rs"
               inputId={name}
               instanceId={name}
-              onChange={(val) => onChange(val.value)}
+              onChange={(val) => onChange(val ? val.value : '')}
               options={options}
               value={options.find((s) => s.value === value)}
             />

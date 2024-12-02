@@ -1,4 +1,4 @@
-import type { CountryField } from 'payload-plugin-form-builder/dist/types'
+import type { CountryField } from '@payloadcms/plugin-form-builder/types'
 import type { Control, FieldErrorsImpl, FieldValues } from 'react-hook-form'
 
 import React from 'react'
@@ -11,14 +11,14 @@ import classes from './index.module.scss'
 import { countryOptions } from './options'
 
 export const Country: React.FC<
-  CountryField & {
+  {
     control: Control<FieldValues, any>
     errors: Partial<
       FieldErrorsImpl<{
         [x: string]: any
       }>
     >
-  }
+  } & CountryField
 > = ({ name, control, errors, label, required, width }) => {
   return (
     <Width width={width}>
@@ -36,7 +36,7 @@ export const Country: React.FC<
               classNamePrefix="rs"
               inputId={name}
               instanceId={name}
-              onChange={(val) => onChange(val.value)}
+              onChange={(val) => onChange(val ? val.value : '')}
               options={countryOptions}
               value={countryOptions.find((c) => c.value === value)}
             />

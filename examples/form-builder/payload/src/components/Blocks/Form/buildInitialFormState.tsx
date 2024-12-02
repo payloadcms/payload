@@ -1,4 +1,4 @@
-import type { FormFieldBlock } from 'payload-plugin-form-builder/dist/types'
+import type { FormFieldBlock } from '@payloadcms/plugin-form-builder/types'
 
 export const buildInitialFormState = (fields: FormFieldBlock[]) => {
   return fields.reduce((initialSchema, field) => {

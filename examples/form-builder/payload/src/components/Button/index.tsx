@@ -1,3 +1,5 @@
+import type { ElementType } from 'react'
+
 import Link from 'next/link'
 import React from 'react'
 
@@ -6,58 +8,68 @@ import classes from './index.module.scss'
 export type Props = {
   appearance?: 'default' | 'primary' | 'secondary'
   className?: string
+  disabled?: boolean
   el?: 'a' | 'button' | 'link'
-  form?: string
   href?: string
-  label: string
-  newTab?: boolean
+  label?: string
+  newTab?: boolean | null
   onClick?: () => void
-}
-
-const elements = {
-  a: 'a',
-  button: 'button',
-  link: Link,
+  type?: 'button' | 'submit'
 }
 
 export const Button: React.FC<Props> = ({
+  type = 'button',
   appearance,
   className: classNameFromProps,
-  el = 'button',
-  form,
+  disabled,
+  el: elFromProps = 'link',
   href,
   label,
   newTab,
+  onClick,
 }) => {
+  let el = elFromProps
   const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
-  const Element = elements[el]
-  const className = [classNameFromProps, classes[`appearance--${appearance}`], classes.button]
+  const className = [
+    classes.button,
+    classNameFromProps,
+    classes[`appearance--${appearance}`],
+    classes.button,
+  ]
     .filter(Boolean)
     .join(' ')
 
-  const elementProps = {
-    ...newTabProps,
-    className,
-    form,
-    href,
-  }
-
   const content = (
     <div className={classes.content}>
+      {/* <Chevron /> */}
       <span className={classes.label}>{label}</span>
     </div>
   )
 
+  if (onClick || type === 'submit') {
+    el = 'button'
+  }
+
+  if (el === 'link') {
+    return (
+      <Link className={className} href={href || ''} {...newTabProps} onClick={onClick}>
+        {content}
+      </Link>
+    )
+  }
+
+  const Element: ElementType = el
+
   return (
-    <Element {...elementProps}>
-      <React.Fragment>
-        {el === 'link' && (
-          <Link {...newTabProps} className={elementProps.className} href={href}>
-            {content}
-          </Link>
-        )}
-        {el !== 'link' && <React.Fragment>{content}</React.Fragment>}
-      </React.Fragment>
+    <Element
+      className={className}
+      href={href}
+      type={type}
+      {...newTabProps}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {content}
     </Element>
   )
 }

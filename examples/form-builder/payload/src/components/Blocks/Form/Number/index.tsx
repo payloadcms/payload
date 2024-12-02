@@ -1,4 +1,4 @@
-import type { TextField } from 'payload-plugin-form-builder/dist/types'
+import type { TextField } from '@payloadcms/plugin-form-builder/types'
 import type { FieldErrorsImpl, FieldValues, UseFormRegister } from 'react-hook-form'
 
 import React from 'react'
@@ -8,14 +8,14 @@ import { Width } from '../Width'
 import classes from './index.module.scss'
 
 export const Number: React.FC<
-  TextField & {
+  {
     errors: Partial<
       FieldErrorsImpl<{
         [x: string]: any
       }>
     >
-    register: UseFormRegister<FieldValues & any>
-  }
+    register: UseFormRegister<any & FieldValues>
+  } & TextField
 > = ({ name, errors, label, register, required: requiredFromProps, width }) => {
   return (
     <Width width={width}>

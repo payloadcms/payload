@@ -1,4 +1,4 @@
-import type { FieldHook } from 'payload/types'
+import type { FieldHook } from 'payload'
 
 const format = (val: string): string =>
   val
@@ -6,7 +6,7 @@ const format = (val: string): string =>
     .replace(/[^\w-]+/g, '')
     .toLowerCase()
 
-const formatSlug =
+export const formatSlug =
   (fallback: string): FieldHook =>
   ({ data, operation, originalDoc, value }) => {
     if (typeof value === 'string') {
@@ -23,5 +23,3 @@ const formatSlug =
 
     return value
   }
-
-export default formatSlug

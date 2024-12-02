@@ -9,6 +9,7 @@ import type {
   SerializedListNode,
 } from '@payloadcms/richtext-lexical/lexical/list'
 import type { SerializedHeadingNode } from '@payloadcms/richtext-lexical/lexical/rich-text'
+import type { JSX } from 'react'
 
 import React, { Fragment } from 'react'
 

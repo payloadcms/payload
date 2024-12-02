@@ -5,6 +5,7 @@ import React from 'react'
 
 import Blocks from '../../../components/Blocks'
 
+// eslint-disable-next-line no-restricted-exports
 export default async function Page({ params: { slug = 'home' } }) {
   const page = await getPage(slug)
 

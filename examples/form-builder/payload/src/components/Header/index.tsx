@@ -3,13 +3,15 @@ import { ModalToggler } from '@faceless-ui/modal'
 import Link from 'next/link'
 import React from 'react'
 
-import { useGlobals } from '../../providers/Globals'
+import type { MainMenu } from '../../payload-types'
+
+import { getCachedGlobal } from '../../utilities/getGlobals'
 import { Gutter } from '../Gutter'
+import { MenuIcon } from '../icons/Menu'
 import { CMSLink } from '../Link'
 import { Logo } from '../Logo'
-import { MenuIcon } from '../icons/Menu'
-import { MobileMenuModal, slug as menuModalSlug } from './MobileMenuModal'
 import classes from './index.module.scss'
+import { slug as menuModalSlug, MobileMenuModal } from './MobileMenuModal'
 
 type HeaderBarProps = {
   children?: React.ReactNode
@@ -33,10 +35,10 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
   )
 }
 
-export const Header: React.FC = () => {
-  const {
-    mainMenu: { navItems },
-  } = useGlobals()
+export async function Header() {
+  const header: MainMenu = await getCachedGlobal('main-menu', 1)()
+
+  const navItems = header?.navItems || []
 
   return (
     <React.Fragment>

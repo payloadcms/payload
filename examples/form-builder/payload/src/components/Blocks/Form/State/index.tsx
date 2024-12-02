@@ -1,4 +1,4 @@
-import type { StateField } from 'payload-plugin-form-builder/dist/types'
+import type { StateField } from '@payloadcms/plugin-form-builder/types'
 import type { Control, FieldErrorsImpl, FieldValues } from 'react-hook-form'
 
 import React from 'react'
@@ -11,14 +11,14 @@ import classes from './index.module.scss'
 import { stateOptions } from './options'
 
 export const State: React.FC<
-  StateField & {
+  {
     control: Control<FieldValues, any>
     errors: Partial<
       FieldErrorsImpl<{
         [x: string]: any
       }>
     >
-  }
+  } & StateField
 > = ({ name, control, errors, label, required, width }) => {
   return (
     <Width width={width}>
@@ -36,7 +36,7 @@ export const State: React.FC<
               classNamePrefix="rs"
               id={name}
               instanceId={name}
-              onChange={(val) => onChange(val.value)}
+              onChange={(val) => onChange(val ? val.value : '')}
               options={stateOptions}
               value={stateOptions.find((t) => t.value === value)}
             />

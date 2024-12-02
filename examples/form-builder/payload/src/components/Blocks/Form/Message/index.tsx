@@ -1,4 +1,4 @@
-import type { MessageField } from 'payload-plugin-form-builder/dist/types'
+import type { MessageField } from '@payloadcms/plugin-form-builder/types'
 
 import React from 'react'
 
@@ -8,7 +8,7 @@ import classes from './index.module.scss'
 
 export const Message: React.FC<MessageField> = ({ message }) => {
   return (
-    <Width width="100">
+    <Width width={100}>
       <RichText className={classes.message} content={message} />
     </Width>
   )

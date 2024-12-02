@@ -13,9 +13,9 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { Pages } from './_payload/collections/Pages'
-import { Users } from './_payload/collections/Users'
-import { MainMenu } from './_payload/globals/MainMenu'
+import { Pages } from './collections/Pages'
+import { Users } from './collections/Users'
+import { MainMenu } from './globals/MainMenu'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

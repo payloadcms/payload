@@ -31,6 +31,7 @@
     "react": "19.0.0-rc-65a56d0e-20241020",
     "react-dom": "19.0.0-rc-65a56d0e-20241020",
     "react-hook-form": "^7.41.0",
+    "react-select": "^5.8.0",
     "sharp": "0.32.6"
   },
   "devDependencies": {

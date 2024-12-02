@@ -3,7 +3,6 @@ import type React from 'react'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname } from 'next/navigation'
-import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
 export const CloseModalOnRouteChange: React.FC = () => {

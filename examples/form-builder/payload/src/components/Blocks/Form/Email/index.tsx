@@ -1,4 +1,4 @@
-import type { EmailField } from 'payload-plugin-form-builder/dist/types'
+import type { EmailField } from '@payloadcms/plugin-form-builder/types'
 import type { FieldErrorsImpl, FieldValues, UseFormRegister } from 'react-hook-form'
 
 import React from 'react'
@@ -8,14 +8,14 @@ import { Width } from '../Width'
 import classes from './index.module.scss'
 
 export const Email: React.FC<
-  EmailField & {
+  {
     errors: Partial<
       FieldErrorsImpl<{
         [x: string]: any
       }>
     >
-    register: UseFormRegister<FieldValues & any>
-  }
+    register: UseFormRegister<any & FieldValues>
+  } & EmailField
 > = ({ name, errors, label, register, required: requiredFromProps, width }) => {
   return (
     <Width width={width}>
