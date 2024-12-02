@@ -70,6 +70,7 @@ export async function GET(
         collection,
         draft: true,
         limit: 1,
+        // pagination: false reduces overhead if you don't need totalDocs
         pagination: false,
         depth: 0,
         select: {},
