@@ -1126,6 +1126,8 @@ export type RichTextFieldClient<
 export type ArrayField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent<ArrayFieldErrorClientComponent | ArrayFieldErrorServerComponent>
       Label?: CustomComponent<ArrayFieldLabelClientComponent | ArrayFieldLabelServerComponent>
       RowLabel?: RowLabelComponent

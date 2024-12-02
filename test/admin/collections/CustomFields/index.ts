@@ -84,5 +84,21 @@ export const CustomFields: CollectionConfig = {
       },
       relationTo: 'posts',
     },
+    {
+      name: 'arrayFieldWithBeforeAfterInputs',
+      type: 'array',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+      },
+      fields: [
+        {
+          name: 'someTextField',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }
