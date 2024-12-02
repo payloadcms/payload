@@ -660,6 +660,8 @@ export type CollapsibleField = {
   | {
       admin: {
         components: {
+          afterInput?: CustomComponent[]
+          beforeInput?: CustomComponent[]
           Label: CustomComponent<
             CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
           >
@@ -671,6 +673,8 @@ export type CollapsibleField = {
   | {
       admin?: {
         components?: {
+          afterInput?: CustomComponent[]
+          beforeInput?: CustomComponent[]
           Label?: CustomComponent<
             CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
           >

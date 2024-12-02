@@ -121,5 +121,23 @@ export const CustomFields: CollectionConfig = {
         },
       ],
     },
+    {
+      label: 'Collapsible Field With Before & After Inputs',
+      type: 'collapsible',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+        description: 'This is a collapsible field.',
+        initCollapsed: false,
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }
