@@ -70,7 +70,7 @@ export async function handleTaskFailed({
   taskStatus: null | SingleTaskStatus<string>
   updateJob: UpdateJobFunction
 }): Promise<never> {
-  req.payload.logger.error({ err: error, job, msg: 'Error running task', taskSlug })
+  req.payload.logger.error({ err: error, job, msg: `Error running task ${taskID}`, taskSlug })
 
   if (taskConfig?.onFail) {
     await taskConfig.onFail()
