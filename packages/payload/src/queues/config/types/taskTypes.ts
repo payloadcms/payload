@@ -133,7 +133,8 @@ export type TaskConfig<
    * You can either pass a string-based path to the job function file, or the job function itself.
    *
    * If you are using large dependencies within your job, you might prefer to pass the string path
-   * because that will avoid bundling large dependencies in your Next.js app.
+   * because that will avoid bundling large dependencies in your Next.js app. String path handlers are not supported
+   * within Next.js and only work when executing the jobs from outside of Next.js.
    */
   handler: string | TaskHandler<TTaskSlugOrInputOutput>
   /**
