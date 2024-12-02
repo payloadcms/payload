@@ -283,42 +283,6 @@ export const createOperation = async <
     }
 
     // /////////////////////////////////////
-    // afterRead - Fields
-    // /////////////////////////////////////
-
-    result = await afterRead({
-      collection: collectionConfig,
-      context: req.context,
-      depth,
-      doc: result,
-      draft,
-      fallbackLocale,
-      global: null,
-      locale,
-      overrideAccess,
-      populate,
-      req,
-      select,
-      showHiddenFields,
-    })
-
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
-
-    // /////////////////////////////////////
     // afterChange - Fields
     // /////////////////////////////////////
 
@@ -353,6 +317,42 @@ export const createOperation = async <
       },
       Promise.resolve(),
     )
+
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
+
+    result = await afterRead({
+      collection: collectionConfig,
+      context: req.context,
+      depth,
+      doc: result,
+      draft,
+      fallbackLocale,
+      global: null,
+      locale,
+      overrideAccess,
+      populate,
+      req,
+      select,
+      showHiddenFields,
+    })
+
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      result =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          doc: result,
+          req,
+        })) || result
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // afterOperation - Collection
