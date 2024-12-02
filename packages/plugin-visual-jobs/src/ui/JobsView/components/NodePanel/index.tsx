@@ -2,11 +2,11 @@
 
 import type { JobLog } from 'payload'
 
-import { Panel, useNodes } from '@xyflow/react'
+import { CodeEditorLazy } from '@payloadcms/ui'
 
 import './index.scss'
 
-import CodeEditor from 'packages/ui/src/elements/CodeEditor/CodeEditor.js'
+import { Panel, useNodes } from '@xyflow/react'
 import React from 'react'
 
 import { type PanelTab, Tabs } from './Tabs.js'
@@ -95,7 +95,7 @@ export const NodePanel = () => {
     tabs.push({
       name: 'Input',
       Content: (
-        <CodeEditor
+        <CodeEditorLazy
           language="json"
           readOnly={true}
           value={JSON.stringify(taskLog.input, null, 2)}
@@ -108,7 +108,7 @@ export const NodePanel = () => {
     tabs.push({
       name: 'Output',
       Content: (
-        <CodeEditor
+        <CodeEditorLazy
           language="json"
           readOnly={true}
           value={JSON.stringify(taskLog.output, null, 2)}
