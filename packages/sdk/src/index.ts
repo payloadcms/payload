@@ -56,6 +56,8 @@ import { findGlobalVersionByID } from './globals/findVersionByID.js'
 import { findGlobalVersions } from './globals/findVersions.js'
 import { restoreGlobalVersion } from './globals/restoreVersion.js'
 import { updateGlobal } from './globals/update.js'
+import { emitEvent } from './realtime/emitEvent.js'
+import { subscribe } from './realtime/subscribe.js'
 import { buildSearchParams } from './utilities/buildSearchParams.js'
 
 type Args = {
@@ -125,9 +127,21 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
   baseURL: string
 
   fetch: typeof fetch
+
+  realtime = {
+    emitEvent: (args: { data: Record<string, any>; event: string }): Promise<Response> => {
+      return emitEvent(this, args)
+    },
+    subscribe: (
+      onEvent: (args: { data: Record<string, any>; event: string }) => void,
+    ): Promise<{ response: Response; unsubscribe: () => Promise<void> }> => {
+      return subscribe(this, onEvent)
+    },
+  }
+
   constructor(args: Args) {
     this.baseURL = args.baseURL
-    this.fetch = args.fetch ?? globalThis.fetch
+    this.fetch = args.fetch ?? ((...args) => globalThis.fetch(...args))
     this.baseInit = args.baseInit ?? {}
   }
 
@@ -154,11 +168,11 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
   ): Promise<TransformCollectionWithSelect<T, TSlug, TSelect>> {
     return create(this, options, init)
   }
-
   delete<TSlug extends CollectionSlug<T>, TSelect extends SelectFromCollectionSlug<T, TSlug>>(
     options: DeleteManyOptions<T, TSlug, TSelect>,
     init?: RequestInit,
   ): Promise<BulkOperationResult<T, TSlug, TSelect>>
+
   delete<TSlug extends CollectionSlug<T>, TSelect extends SelectFromCollectionSlug<T, TSlug>>(
     options: DeleteByIDOptions<T, TSlug, TSelect>,
     init?: RequestInit,
@@ -219,13 +233,13 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
   ): Promise<ApplyDisableErrors<TypeWithVersion<DataFromGlobalSlug<T, TSlug>>, TDisableErrors>> {
     return findGlobalVersionByID(this, options, init)
   }
-
   findGlobalVersions<TSlug extends GlobalSlug<T>>(
     options: FindGlobalVersionsOptions<T, TSlug>,
     init?: RequestInit,
   ): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<T, TSlug>>>> {
     return findGlobalVersions(this, options, init)
   }
+
   findVersionByID<TSlug extends CollectionSlug<T>, TDisableErrors extends boolean>(
     options: FindVersionByIDOptions<T, TSlug, TDisableErrors>,
     init?: RequestInit,
@@ -234,13 +248,13 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
   > {
     return findVersionByID(this, options, init)
   }
-
   findVersions<TSlug extends CollectionSlug<T>>(
     options: FindVersionsOptions<T, TSlug>,
     init?: RequestInit,
   ): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<T, TSlug>>>> {
     return findVersions(this, options, init)
   }
+
   forgotPassword<TSlug extends AuthCollectionSlug<T>>(
     options: ForgotPasswordOptions<T, TSlug>,
     init?: RequestInit,

@@ -18,6 +18,7 @@ import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
+import { emitEventEndpoint, subscribeEndpoint } from '../realtime/index.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
 import { defaults } from './defaults.js'
 
@@ -170,6 +171,13 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   config.i18n = i18nConfig
+
+  if (typeof configWithDefaults.cache.getPayloadCacheCollection === 'function') {
+    configWithDefaults.collections.push(configWithDefaults.cache.getPayloadCacheCollection())
+  }
+
+  configWithDefaults.endpoints.push(subscribeEndpoint)
+  configWithDefaults.endpoints.push(emitEventEndpoint)
 
   // Need to add default jobs collection before locked documents collections
   if (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs.tasks.length > 0) {

@@ -2,6 +2,7 @@ import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
 
 import defaultAccess from '../auth/defaultAccess.js'
+import { InMemoryCache } from '../cache/in-memory.js'
 
 export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
@@ -31,6 +32,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     theme: 'all',
   },
   bin: [],
+  cache: InMemoryCache,
   collections: [],
   cookiePrefix: 'payload',
   cors: [],

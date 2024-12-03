@@ -17,6 +17,7 @@ import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/c
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
   | 'bin'
+  | 'cache'
   | 'cors'
   | 'csrf'
   | 'custom'
@@ -67,6 +68,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'graphQL',
   'jobs',
   'logger',
+  'cache',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 

@@ -28,6 +28,7 @@ import type {
   Imports,
   InternalImportMap,
 } from '../bin/generateImportMap/index.js'
+import type { PayloadCacheConstructor } from '../cache/index.js'
 import type {
   Collection,
   CollectionConfig,
@@ -38,6 +39,7 @@ import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
+import type { RealtimeEvent, SanitizedRealtimeConfig } from '../realtime/index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -847,6 +849,8 @@ export type Config = {
   }
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
+  /** Caching adapter, defaults to in-memory */
+  cache?: PayloadCacheConstructor
   /**
    * Manage the datamodel of your application
    *
@@ -1028,6 +1032,9 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
+  realtime?: {
+    events?: RealtimeEvent[]
+  }
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
     /** The route for the admin panel.
@@ -1109,6 +1116,7 @@ export type SanitizedConfig = {
     configDir: string
     rawConfig: string
   }
+  realtime: false | SanitizedRealtimeConfig
   upload: {
     /**
      * Deduped list of adapters used in the project

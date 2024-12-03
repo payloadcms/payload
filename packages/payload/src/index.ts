@@ -19,6 +19,7 @@ import type { Options as VerifyEmailOptions } from './auth/operations/local/veri
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, User } from './auth/types.js'
+import type { PayloadCache } from './cache/index.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -74,6 +75,7 @@ import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
+import { Realtime } from './realtime/index.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -242,9 +244,11 @@ export class BasePayload {
 
   authStrategies: AuthStrategy[]
 
-  collections: Record<CollectionSlug, Collection> = {}
+  cache: PayloadCache
 
+  collections: Record<CollectionSlug, Collection> = {}
   config: SanitizedConfig
+
   /**
    * @description Performs count operation
    * @param options
@@ -292,8 +296,8 @@ export class BasePayload {
     const { create } = localOperations
     return create<TSlug, TSelect>(this, options)
   }
-
   db: DatabaseAdapter
+
   decrypt = decrypt
 
   duplicate = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
@@ -305,10 +309,10 @@ export class BasePayload {
 
   email: InitializedEmailAdapter
 
-  encrypt = encrypt
-
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
+
+  encrypt = encrypt
 
   extensions: (args: {
     args: OperationArgs<any>
@@ -424,6 +428,8 @@ export class BasePayload {
     const { login } = localOperations.auth
     return login<TSlug>(this, options)
   }
+
+  realtime = new Realtime(this)
 
   resetPassword = async <TSlug extends CollectionSlug>(
     options: ResetPasswordOptions<TSlug>,
@@ -687,6 +693,8 @@ export class BasePayload {
         authenticate: JWTAuthentication,
       })
     }
+
+    this.cache = new this.config.cache(this)
 
     if (!options.disableOnInit) {
       if (typeof options.onInit === 'function') {

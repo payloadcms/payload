@@ -11,36 +11,43 @@ import { MenuGlobal } from './globals/Menu/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfigWithDefaults({
-  // ...extend config here
-  collections: [PostsCollection, MediaCollection],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+export default buildConfigWithDefaults(
+  {
+    // ...extend config here
+    collections: [PostsCollection, MediaCollection],
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+      components: {
+        providers: [`/RealtimeUsersProvider.tsx#RealtimeUsersProvider`],
+      },
+    },
+    editor: lexicalEditor({}),
+    globals: [
+      // ...add more globals here
+      MenuGlobal,
+    ],
+
+    onInit: async (payload) => {
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'example post',
+        },
+      })
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  editor: lexicalEditor({}),
-  globals: [
-    // ...add more globals here
-    MenuGlobal,
-  ],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        title: 'example post',
-      },
-    })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-})
+  { disableAutoLogin: true },
+)
