@@ -52,7 +52,6 @@ jobs:
           avatar_url: 'https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/discord-bot-logo.png'
 
   update_templates:
-    if: false # Still needs some troubleshooting
     runs-on: ubuntu-latest
     permissions:
       contents: write
