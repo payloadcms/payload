@@ -1,4 +1,4 @@
-name: post-release
+name: post-release-templates
 
 on:
   # release:
