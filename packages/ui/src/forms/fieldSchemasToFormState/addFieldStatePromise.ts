@@ -17,6 +17,7 @@ import {
   deepCopyObjectSimple,
   fieldAffectsData,
   fieldHasSubFields,
+  fieldIsHiddenFromAdmin,
   fieldIsSidebar,
   getFieldPaths,
   tabHasName,
@@ -138,11 +139,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
 
-  const isHiddenField = 'hidden' in field && field?.hidden
-  const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
-
   let fieldPermissions: SanitizedFieldPermissions = true
-  if (fieldAffectsData(field) && !(isHiddenField || disabledFromAdmin)) {
+
+  // `admin.hidden` fields should still proceed, they are rendered as `type="hidden"` and submit with the form
+  if (fieldAffectsData(field) && !fieldIsHiddenFromAdmin(field, false)) {
     fieldPermissions =
       parentPermissions === true
         ? parentPermissions
@@ -724,9 +724,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  const isDisabled = field?.admin && 'disabled' in field.admin && field.admin.disabled
-
-  if (requiresRender && !isDisabled && renderFieldFn) {
+  if (requiresRender && renderFieldFn && !fieldIsHiddenFromAdmin(field, false)) {
     const fieldState = state[path]
 
     const fieldConfig = fieldSchemaMap.get(schemaPath)

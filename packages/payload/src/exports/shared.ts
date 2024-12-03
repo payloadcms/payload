@@ -19,6 +19,7 @@ export {
   fieldIsArrayType,
   fieldIsBlockType,
   fieldIsGroupType,
+  fieldIsHiddenFromAdmin,
   fieldIsLocalized,
   fieldIsPresentationalOnly,
   fieldIsSidebar,

@@ -1693,6 +1693,17 @@ export function fieldIsSidebar<TField extends ClientField | Field | TabAsField |
   return 'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar'
 }
 
+export function fieldIsHiddenFromAdmin<
+  TField extends ClientField | Field | TabAsField | TabAsFieldClient,
+>(field: TField, checkAdminHiddenProperty = true): field is { admin: { hidden: true } } & TField {
+  return (
+    ('hidden' in field && field.hidden) ||
+    ('admin' in field && 'disabled' in field.admin && field.admin.disabled) ||
+    // in some case, `admin.hidden` fields render as `type="hidden"` and submit with the form
+    (checkAdminHiddenProperty && 'admin' in field && 'hidden' in field.admin && field.admin.hidden)
+  )
+}
+
 export function fieldAffectsData<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
 >(
