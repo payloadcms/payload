@@ -1699,8 +1699,10 @@ export function fieldIsHiddenFromAdmin<
   return (
     ('hidden' in field && field.hidden) ||
     ('admin' in field && 'disabled' in field.admin && field.admin.disabled) ||
-    // in some case, `admin.hidden` fields render as `type="hidden"` and submit with the form
-    (checkAdminHiddenProperty && 'admin' in field && 'hidden' in field.admin && field.admin.hidden)
+    // in some case, `admin.hidden` fields should render as `type="hidden"` and submit with the form
+    (checkAdminHiddenProperty === false
+      ? false
+      : 'admin' in field && 'hidden' in field.admin && field.admin.hidden)
   )
 }
 

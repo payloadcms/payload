@@ -47,7 +47,7 @@ export const renderField: RenderFieldMethod = ({
         importMap: req.payload.importMap,
       })
 
-  if (!fieldIsHiddenFromAdmin(clientField, false)) {
+  if (fieldIsHiddenFromAdmin(clientField, false)) {
     return
   }
 

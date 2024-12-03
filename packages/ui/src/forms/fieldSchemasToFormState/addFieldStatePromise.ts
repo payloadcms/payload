@@ -141,7 +141,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   let fieldPermissions: SanitizedFieldPermissions = true
 
-  // `admin.hidden` fields should still proceed, they are rendered as `type="hidden"` and submit with the form
   if (fieldAffectsData(field) && !fieldIsHiddenFromAdmin(field, false)) {
     fieldPermissions =
       parentPermissions === true
