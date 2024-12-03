@@ -59,9 +59,10 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
     >
-      {BeforeInput}
       <RelationshipTable
+        AfterInput={AfterInput}
         allowCreate={typeof docID !== 'undefined' && allowCreate}
+        BeforeInput={BeforeInput}
         disableTable={filterOptions === null}
         field={field as JoinFieldClient}
         filterOptions={filterOptions}
@@ -78,7 +79,6 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         }
         relationTo={collection}
       />
-      {AfterInput}
       <RenderCustomComponent
         CustomComponent={Description}
         Fallback={<FieldDescription description={description} path={path} />}
