@@ -32,9 +32,11 @@ export const toggleColumn = async (
     togglerSelector,
     columnContainerSelector,
     columnLabel,
+    targetState: targetStateFromArgs,
   }: {
     columnContainerSelector?: string
     columnLabel: string
+    targetState?: 'off' | 'on'
     togglerSelector?: string
   },
 ): Promise<any> => {
@@ -48,11 +50,19 @@ export const toggleColumn = async (
     el.classList.contains('column-selector__column--active'),
   )
 
+  const targetState =
+    targetStateFromArgs !== undefined ? targetStateFromArgs : isActiveBeforeClick ? 'off' : 'on'
+
   await expect(column).toBeVisible()
 
-  await column.click()
+  if (
+    (isActiveBeforeClick && targetState === 'off') ||
+    (!isActiveBeforeClick && targetState === 'on')
+  ) {
+    await column.click()
+  }
 
-  if (isActiveBeforeClick) {
+  if (targetState === 'off') {
     // no class
     await expect(column).not.toHaveClass('column-selector__column--active')
   } else {

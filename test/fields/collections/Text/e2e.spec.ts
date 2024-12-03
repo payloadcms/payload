@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { openListColumns } from 'helpers/e2e/toggleColumn.js'
+import { openListColumns, toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -180,6 +180,12 @@ describe('Text', () => {
   test('should display i18n label in cells when missing field data', async () => {
     await page.goto(url.list)
     const textCell = page.locator('.row-1 .cell-i18nText')
+
+    await toggleColumn(page, {
+      targetState: 'on',
+      columnLabel: 'Text en',
+    })
+
     await expect(textCell).toHaveText('<No Text en>')
   })
 
