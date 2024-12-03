@@ -41,7 +41,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
   })
 
   useEffect(() => {
-    if (checkboxValue) {
+    if (!checkboxValue) {
       if (targetFieldValue) {
         const formattedSlug = formatSlug(targetFieldValue)
 
