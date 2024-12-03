@@ -619,6 +619,8 @@ export type DateFieldClient = {
 export type GroupField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Label?: CustomComponent<GroupFieldLabelClientComponent | GroupFieldLabelServerComponent>
     } & Admin['components']
     hideGutter?: boolean
@@ -660,6 +662,8 @@ export type CollapsibleField = {
   | {
       admin: {
         components: {
+          afterInput?: CustomComponent[]
+          beforeInput?: CustomComponent[]
           Label: CustomComponent<
             CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
           >
@@ -671,6 +675,8 @@ export type CollapsibleField = {
   | {
       admin?: {
         components?: {
+          afterInput?: CustomComponent[]
+          beforeInput?: CustomComponent[]
           Label?: CustomComponent<
             CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
           >
@@ -1029,6 +1035,8 @@ type RelationshipAdmin = {
   allowCreate?: boolean
   allowEdit?: boolean
   components?: {
+    afterInput?: CustomComponent[]
+    beforeInput?: CustomComponent[]
     Error?: CustomComponent<
       RelationshipFieldErrorClientComponent | RelationshipFieldErrorServerComponent
     >
@@ -1124,6 +1132,8 @@ export type RichTextFieldClient<
 export type ArrayField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent<ArrayFieldErrorClientComponent | ArrayFieldErrorServerComponent>
       Label?: CustomComponent<ArrayFieldLabelClientComponent | ArrayFieldLabelServerComponent>
       RowLabel?: RowLabelComponent
@@ -1163,6 +1173,8 @@ export type ArrayFieldClient = {
 export type RadioField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent<RadioFieldErrorClientComponent | RadioFieldErrorServerComponent>
       Label?: CustomComponent<RadioFieldLabelClientComponent | RadioFieldLabelServerComponent>
     } & Admin['components']
@@ -1302,6 +1314,8 @@ export type ClientBlock = {
 export type BlocksField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
     } & Admin['components']
     initCollapsed?: boolean

@@ -51,6 +51,8 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
 
   const proposedReleaseVersion = 'v' + semver.inc(fromVersion, calculatedBump, undefined, tag)
 
+  console.log(`Generating release notes for ${fromVersion} to ${toVersion}...`)
+
   console.log({
     tag,
     recommendedBump,
@@ -61,7 +63,39 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
 
   const conventionalCommits = await getLatestCommits(fromVersion, toVersion)
 
-  type SectionKey = 'breaking' | 'feat' | 'fix' | 'perf'
+  const commitTypesForChangelog = [
+    'feat',
+    'fix',
+    'perf',
+    'refactor',
+    'docs',
+    'style',
+    'test',
+    'templates',
+    'examples',
+    'build',
+    'ci',
+    'chore',
+    'breaking',
+  ] as const
+
+  type Sections = (typeof commitTypesForChangelog)[number]
+
+  const emojiHeaderMap: Record<Sections, string> = {
+    feat: '🚀 Features',
+    fix: '🐛 Bug Fixes',
+    perf: '⚡ Performance',
+    refactor: '🛠 Refactors',
+    docs: '📚 Documentation',
+    style: '🎨 Styles',
+    test: '🧪 Tests',
+    templates: '📝 Templates',
+    examples: '📓 Examples',
+    build: '🔨 Build',
+    ci: '⚙️ CI',
+    chore: '🏡 Chores',
+    breaking: '⚠️ BREAKING CHANGES',
+  }
 
   const sections = conventionalCommits.reduce(
     (sections, c) => {
@@ -69,12 +103,16 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
         sections.breaking.push(c)
       }
 
-      if (['feat', 'fix', 'perf'].includes(c.type)) {
+      if (commitTypesForChangelog.includes(c.type as Sections)) {
+        if (!sections[c.type]) {
+          sections[c.type] = []
+        }
         sections[c.type].push(c)
       }
+
       return sections
     },
-    { feat: [], fix: [], perf: [], breaking: [] } as Record<SectionKey, GitCommit[]>,
+    {} as Record<Sections | 'breaking', GitCommit[]>,
   )
 
   // Sort commits by scope, unscoped first
@@ -96,18 +134,10 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   // Might need to swap out HEAD for the new proposed version
   let changelog = `## [${proposedReleaseVersion}](https://github.com/payloadcms/payload/compare/${fromVersion}...${proposedReleaseVersion}) (${yyyyMMdd})\n\n\n`
 
-  // Add section headers
-  if (stringifiedSections.feat.length) {
-    changelog += `### 🚀 Features\n\n${stringifiedSections.feat.join('\n')}\n\n`
-  }
-  if (stringifiedSections.perf.length) {
-    changelog += `### ⚡ Performance\n\n${stringifiedSections.perf.join('\n')}\n\n`
-  }
-  if (stringifiedSections.fix.length) {
-    changelog += `### 🐛 Bug Fixes\n\n${stringifiedSections.fix.join('\n')}\n\n`
-  }
-  if (stringifiedSections.breaking.length) {
-    changelog += `### ⚠️ BREAKING CHANGES\n\n${stringifiedSections.breaking.join('\n')}\n\n`
+  for (const section of commitTypesForChangelog) {
+    if (stringifiedSections[section]?.length) {
+      changelog += `### ${emojiHeaderMap[section]}\n\n${stringifiedSections[section].join('\n')}\n\n`
+    }
   }
 
   // Add contributors after writing to file

@@ -48,7 +48,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   const { slug = 'home' } = await paramsPromise
   const url = '/' + slug
 
-  let page: Pick<PageType, 'slug' | 'layout' | 'hero'> | null
+  let page: PageType | null
 
   page = await queryPageBySlug({
     slug,
@@ -97,11 +97,6 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
     limit: 1,
     pagination: false,
     overrideAccess: draft,
-    select: {
-      slug: true,
-      hero: true,
-      layout: true,
-    },
     where: {
       slug: {
         equals: slug,

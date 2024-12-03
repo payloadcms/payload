@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -119,13 +119,13 @@
     "@types/minimist": "1.2.2",
     "@types/nodemailer": "6.4.14",
     "@types/pluralize": "0.0.33",
-    "react-datepicker": "7.5.0",
     "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.10",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "esbuild": "0.24.0",
     "graphql-http": "^1.22.0",
+    "react-datepicker": "7.5.0",
     "rimraf": "3.0.2",
     "sharp": "0.32.6"
   },

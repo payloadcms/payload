@@ -6,7 +6,13 @@ import { v4 as uuid } from 'uuid'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
+import {
+  apiKeysSlug,
+  namedSaveToJWTValue,
+  partialDisableLocaleStrategiesSlug,
+  saveToJWTKey,
+  slug,
+} from './shared.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -172,6 +178,25 @@ export default buildConfigWithDefaults({
           },
           label: 'Auth Debug',
         },
+      ],
+    },
+    {
+      slug: partialDisableLocaleStrategiesSlug,
+      auth: {
+        disableLocalStrategy: {
+          // optionalPassword: true,
+          enableFields: true,
+        },
+      },
+      fields: [
+        // with `enableFields: true`, the following DB columns will be created:
+        // email
+        // reset_password_token
+        // reset_password_expiration
+        // salt
+        // hash
+        // login_attempts
+        // lock_until
       ],
     },
     {

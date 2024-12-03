@@ -286,7 +286,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         const { state } = await getFormState({
           id,
           collectionSlug,
-          data: json?.doc,
+          data: json?.doc || json?.result,
           docPermissions,
           docPreferences,
           globalSlug,
