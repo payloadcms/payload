@@ -35,7 +35,7 @@ export const DocumentFields: React.FC<Args> = ({
   const { hasSidebarFields, mainFields, sidebarFields } = useMemo(() => {
     return fields.reduce(
       (acc, field) => {
-        if (field && fieldIsSidebar(field)) {
+        if (fieldIsSidebar(field)) {
           acc.sidebarFields.push(field)
           acc.mainFields.push(null)
           acc.hasSidebarFields = true

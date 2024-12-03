@@ -5,29 +5,12 @@ export const postsSlug = 'posts'
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
-    // useAsTitle: 'title',
+    useAsTitle: 'title',
   },
   fields: [
     {
-      name: 'hiddenField',
+      name: 'title',
       type: 'text',
-      admin: {
-        disabled: true,
-      },
-    },
-    {
-      type: 'collapsible',
-      admin: {
-        components: {
-          Label: './CustomComponent.tsx#CustomComponent',
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
     },
   ],
   versions: {

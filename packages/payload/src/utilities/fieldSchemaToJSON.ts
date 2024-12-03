@@ -15,10 +15,6 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
   return fields.reduce((acc, field) => {
     let result = acc
 
-    if (!field) {
-      return result
-    }
-
     switch (field.type) {
       case 'array':
         acc.push({
