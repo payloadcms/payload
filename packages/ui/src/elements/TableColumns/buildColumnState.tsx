@@ -122,7 +122,7 @@ export const buildColumnState = (args: Args): Column[] => {
   const activeColumnsIndices = []
 
   const sorted: Column[] = sortedFieldMap?.reduce((acc, field, index) => {
-    if (fieldIsHiddenOrDisabled(field)) {
+    if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
       return acc
     }
 

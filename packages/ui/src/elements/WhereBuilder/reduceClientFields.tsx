@@ -3,7 +3,7 @@ import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations
 import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldIsHiddenOrDisabled, tabHasName } from 'payload/shared'
+import { fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
 
 import type { FieldCondition } from './types.js'
 
@@ -29,7 +29,7 @@ export const reduceClientFields = ({
   pathPrefix,
 }: ReduceClientFieldsArgs): FieldCondition[] => {
   return fields.reduce((reduced, field) => {
-    if (field.admin?.disableListFilter || fieldIsHiddenOrDisabled(field)) {
+    if (field.admin?.disableListFilter || (fieldIsHiddenOrDisabled(field) && !fieldIsID(field))) {
       return reduced
     }
 
