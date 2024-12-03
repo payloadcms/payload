@@ -42,7 +42,6 @@ const TextFields: CollectionConfig = {
       type: 'row',
       admin: {
         components: {
-          hidden: true,
           Field: './components/CustomField.tsx#CustomField',
         },
       },
