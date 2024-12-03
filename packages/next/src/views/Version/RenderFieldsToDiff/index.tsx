@@ -29,7 +29,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   return (
     <div className={baseClass}>
       {fields?.map((field, i) => {
-        if (fieldIsHiddenFromAdmin(field) || fieldIsID(field)) {
+        if (fieldIsID(field)) {
           return null
         }
 
