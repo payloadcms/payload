@@ -64,10 +64,10 @@ export const toggleColumn = async (
 
   if (targetState === 'off') {
     // no class
-    await expect(column).not.toHaveClass('column-selector__column--active')
+    await expect(column).not.toHaveClass(/column-selector__column--active/)
   } else {
     // has class
-    await expect(column).toHaveClass('column-selector__column--active')
+    await expect(column).toHaveClass(/column-selector__column--active/)
   }
 
   return column

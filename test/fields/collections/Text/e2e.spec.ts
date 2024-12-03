@@ -212,12 +212,13 @@ describe('Text', () => {
 
   test('should display i18n label in cells when missing field data', async () => {
     await page.goto(url.list)
-    const textCell = page.locator('.row-1 .cell-i18nText')
 
     await toggleColumn(page, {
       targetState: 'on',
       columnLabel: 'Text en',
     })
+
+    const textCell = page.locator('.row-1 .cell-i18nText')
 
     await expect(textCell).toHaveText('<No Text en>')
   })
