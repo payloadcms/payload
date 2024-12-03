@@ -9,7 +9,7 @@ import type {
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
-import type { Pool, PoolConfig } from 'pg'
+import type { Client, Pool, PoolConfig } from 'pg'
 
 export type Args = {
   /**
@@ -65,7 +65,9 @@ declare module 'payload' {
 
     beforeSchemaInit: PostgresSchemaHook[]
     beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
-    drizzle: PostgresDB
+    drizzle: {
+      $client: Client | Pool
+    } & PostgresDB
     enums: Record<string, GenericEnum>
     extensions: Record<string, boolean>
     /**

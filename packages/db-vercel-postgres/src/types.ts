@@ -7,7 +7,7 @@ import type {
   PostgresSchemaHook,
 } from '@payloadcms/drizzle/postgres'
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { VercelPool, VercelPostgresPoolConfig } from '@vercel/postgres'
+import type { VercelClient, VercelPool, VercelPostgresPoolConfig } from '@vercel/postgres'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
 
@@ -58,6 +58,9 @@ export type Args = {
 }
 
 export type VercelPostgresAdapter = {
+  drizzle: {
+    $client: VercelClient | VercelPool
+  } & PostgresDB
   pool?: VercelPool
   poolOptions?: Args['pool']
 } & BasePostgresAdapter
@@ -69,7 +72,9 @@ declare module 'payload' {
     afterSchemaInit: PostgresSchemaHook[]
     beforeSchemaInit: PostgresSchemaHook[]
     beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
-    drizzle: PostgresDB
+    drizzle: {
+      $client: VercelClient | VercelPool
+    } & PostgresDB
     enums: Record<string, GenericEnum>
     extensions: Record<string, boolean>
     extensionsFilter: Set<string>
