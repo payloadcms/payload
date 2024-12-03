@@ -14,6 +14,7 @@ import { MissingEditorProp } from 'payload'
 import {
   deepCopyObjectSimple,
   fieldIsHiddenFromAdmin,
+  fieldIsID,
   fieldIsPresentationalOnly,
 } from 'payload/shared'
 import React from 'react'
@@ -74,7 +75,7 @@ export const buildColumnState = (args: Args): Column[] => {
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
   // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
-  const idFieldIndex = sortedFieldMap?.findIndex((field) => 'name' in field && field.name === 'id')
+  const idFieldIndex = sortedFieldMap?.findIndex((field) => fieldIsID(field))
 
   if (idFieldIndex > -1) {
     const idField = sortedFieldMap.splice(idFieldIndex, 1)[0]

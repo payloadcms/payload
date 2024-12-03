@@ -1,7 +1,7 @@
 'use client'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, fieldIsID } from 'payload/shared'
 import React from 'react'
 
 import type { diffComponents as _diffComponents } from './fields/index.js'
@@ -29,7 +29,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   return (
     <div className={baseClass}>
       {fields?.map((field, i) => {
-        if ('name' in field && field.name === 'id') {
+        if (fieldIsID(field)) {
           return null
         }
 

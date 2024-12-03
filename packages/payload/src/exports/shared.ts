@@ -20,6 +20,7 @@ export {
   fieldIsBlockType,
   fieldIsGroupType,
   fieldIsHiddenFromAdmin,
+  fieldIsID,
   fieldIsLocalized,
   fieldIsPresentationalOnly,
   fieldIsSidebar,

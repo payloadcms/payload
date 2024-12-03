@@ -18,6 +18,7 @@ import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsHiddenFromAdmin,
+  fieldIsID,
   fieldIsSidebar,
   getFieldPaths,
   tabHasName,
@@ -232,7 +233,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             if (!omitParents && (!filter || filter(args))) {
               state[parentPath + '.id'] = {
                 fieldSchema: includeSchema
-                  ? field.fields.find((field) => 'name' in field && field.name === 'id')
+                  ? field.fields.find((field) => fieldIsID(field))
                   : undefined,
                 initialValue: row.id,
                 valid: true,
@@ -342,9 +343,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               if (!omitParents && (!filter || filter(args))) {
                 state[parentPath + '.id'] = {
                   fieldSchema: includeSchema
-                    ? block.fields.find(
-                        (blockField) => 'name' in blockField && blockField.name === 'id',
-                      )
+                    ? block.fields.find((blockField) => fieldIsID(blockField))
                     : undefined,
                   initialValue: row.id,
                   valid: true,
