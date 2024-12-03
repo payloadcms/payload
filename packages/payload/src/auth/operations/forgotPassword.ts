@@ -136,7 +136,9 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     }
 
     user.resetPasswordToken = token
-    user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000).toISOString() // 1 hour
+    user.resetPasswordExpiration = new Date(
+      collectionConfig.auth?.forgotPassword?.expiration || expiration || Date.now() + 3600000,
+    ).toISOString() // 1 hour
 
     user = await payload.update({
       id: user.id,
