@@ -28,7 +28,7 @@ export const renderFilters = (
 ): Map<string, React.ReactNode> =>
   fields.reduce(
     (acc, field) => {
-      if (fieldIsHiddenFromAdmin(field)) {
+      if (fieldIsHiddenFromAdmin(field) && 'name' in field && field.name !== 'id') {
         return acc
       }
 
