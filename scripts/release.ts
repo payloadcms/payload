@@ -16,7 +16,7 @@ const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
 
 async function main() {
-  const { tag = 'latest', bump = 'patch', pkg } = args
+  const { tag = 'payload-2', bump = 'patch', pkg } = args
 
   if (!semver.RELEASE_TYPES.includes(bump)) {
     abort(`Invalid bump type: ${bump}.\n\nMust be one of: ${semver.RELEASE_TYPES.join(', ')}`)
