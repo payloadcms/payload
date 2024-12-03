@@ -32,10 +32,6 @@ export const traverseFields = ({
   schemaMap,
 }: Args) => {
   for (const [index, field] of fields.entries()) {
-    if (!field) {
-      continue
-    }
-
     const { indexPath, schemaPath } = getFieldPaths({
       field,
       index,

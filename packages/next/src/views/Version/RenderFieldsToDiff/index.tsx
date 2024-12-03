@@ -29,10 +29,6 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   return (
     <div className={baseClass}>
       {fields?.map((field, i) => {
-        if (!field) {
-          return null
-        }
-
         if ('name' in field && field.name === 'id') {
           return null
         }

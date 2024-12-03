@@ -14,10 +14,6 @@ export const flattenFieldMap = <T extends ClientField | Field>(
   keepPresentationalFields?: boolean,
 ): T[] => {
   return fields?.reduce((acc, field) => {
-    if (!field) {
-      return acc
-    }
-
     if ('name' in field || (keepPresentationalFields && fieldIsPresentationalOnly(field))) {
       acc.push(field)
       return acc
