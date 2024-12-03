@@ -51,6 +51,7 @@ describe('Collections - Live Preview', () => {
         slug: 'post-1',
         title: 'Test Post',
         tenant: tenant.id,
+        localizedTitle: 'Test Post',
       },
     })
 
@@ -60,6 +61,7 @@ describe('Collections - Live Preview', () => {
         slug: 'post-2',
         title: 'Test Post 2',
         tenant: tenant.id,
+        localizedTitle: 'Test Post 2',
       },
     })
 
@@ -1133,6 +1135,54 @@ describe('Collections - Live Preview', () => {
     expect(merge2.relationshipPolyHasMany).toMatchObject([
       { value: updatedTestPost, relationTo: postsSlug },
     ])
+  })
+
+  it('— relationships - populates localized relationships', async () => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Test Post',
+        slug: 'test-post',
+        hero: {
+          type: 'highImpact',
+          media: media.id,
+        },
+        localizedTitle: 'Test Post Spanish',
+      },
+      locale: 'es',
+    })
+
+    await payload.update({
+      id: post.id,
+      locale: 'en',
+      collection: postsSlug,
+      data: {
+        localizedTitle: 'Test Post English',
+      },
+    })
+
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      relationToLocalized: post.id,
+    }
+
+    // Populate the relationships
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        relationToLocalized: post.id,
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+      collectionPopulationRequestHandler,
+      locale: 'es',
+    })
+
+    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1.relationToLocalized).toHaveProperty('localizedTitle', 'Test Post Spanish')
   })
 
   it('— rich text - merges text changes', async () => {
