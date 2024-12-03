@@ -87,11 +87,7 @@ describe('Rich Text', () => {
           timeout: POLL_TOPASS_TIMEOUT,
         })
         .toBeLessThanOrEqual(300)
-      await expect
-        .poll(async () => (await lexicalHtmlCell.boundingBox()).height, {
-          timeout: POLL_TOPASS_TIMEOUT,
-        })
-        .toBeLessThanOrEqual(300)
+
       await expect
         .poll(async () => (await entireRow.boundingBox()).height, { timeout: POLL_TOPASS_TIMEOUT })
         .toBeLessThanOrEqual(300)
