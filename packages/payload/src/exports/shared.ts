@@ -19,7 +19,7 @@ export {
   fieldIsArrayType,
   fieldIsBlockType,
   fieldIsGroupType,
-  fieldIsHiddenFromAdmin,
+  fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsLocalized,
   fieldIsPresentationalOnly,

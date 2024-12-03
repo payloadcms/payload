@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { fieldIsHiddenFromAdmin, fieldIsID } from 'payload/shared'
+import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
@@ -28,12 +28,7 @@ export const renderFilters = (
 ): Map<string, React.ReactNode> =>
   fields.reduce(
     (acc, field) => {
-      if (
-        fieldIsHiddenFromAdmin(field) &&
-        !fieldIsID(field) &&
-        'name' in field &&
-        field.name !== 'filename'
-      ) {
+      if (fieldIsHiddenOrDisabled(field)) {
         return acc
       }
 

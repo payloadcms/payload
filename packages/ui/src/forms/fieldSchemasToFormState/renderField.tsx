@@ -2,7 +2,7 @@ import type { ClientComponentProps, ClientField, FieldPaths, ServerComponentProp
 
 import { getTranslation } from '@payloadcms/translations'
 import { createClientField, MissingEditorProp } from 'payload'
-import { fieldIsHiddenFromAdmin } from 'payload/shared'
+import { fieldIsHiddenOrDisabled } from 'payload/shared'
 
 import type { RenderFieldMethod } from './types.js'
 
@@ -47,7 +47,7 @@ export const renderField: RenderFieldMethod = ({
         importMap: req.payload.importMap,
       })
 
-  if (fieldIsHiddenFromAdmin(clientField, false)) {
+  if (fieldIsHiddenOrDisabled(clientField)) {
     return
   }
 

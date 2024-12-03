@@ -13,7 +13,7 @@ import type {
 import { MissingEditorProp } from 'payload'
 import {
   deepCopyObjectSimple,
-  fieldIsHiddenFromAdmin,
+  fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsPresentationalOnly,
 } from 'payload/shared'
@@ -123,7 +123,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
   const sorted: Column[] = sortedFieldMap?.reduce((acc, field, index) => {
     if (
-      fieldIsHiddenFromAdmin(field) &&
+      fieldIsHiddenOrDisabled(field) &&
       !fieldIsID(field) &&
       'name' in field &&
       field.name !== 'filename'

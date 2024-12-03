@@ -76,7 +76,9 @@ describe('Text', () => {
       await page.goto(url.list)
       await expect(page.locator('.cell-hiddenTextField')).toBeHidden()
       await expect(page.locator('#heading-hiddenTextField')).toBeHidden()
+
       const columnContainer = await openListColumns(page, {})
+
       await expect(
         columnContainer.locator('.column-selector__column', {
           hasText: exactText('Hidden Text Field'),
@@ -94,37 +96,15 @@ describe('Text', () => {
       await expect(hiddenFieldOption).toBeHidden()
     })
 
-    test('should render hidden input for admin.hidden fields', async () => {
-      await page.goto(url.create)
-      await expect(page.locator('#field-adminHiddenTextField')).toHaveAttribute('type', 'hidden')
-      await page.goto(url.list)
-      await expect(page.locator('.cell-adminHiddenTextField')).toBeHidden()
-      await expect(page.locator('#heading-adminHiddenTextField')).toBeHidden()
-      const columnContainer = await openListColumns(page, {})
-      await expect(
-        columnContainer.locator('.column-selector__column', {
-          hasText: exactText('Admin Hidden Text Field'),
-        }),
-      ).toBeHidden()
-
-      await selectTableRow(page, 'Seeded text document')
-      await page.locator('.edit-many__toggle').click()
-      await page.locator('.field-select .rs__control').click()
-
-      const adminHiddenFieldOption = page.locator('.rs__option', {
-        hasText: exactText('Admin Hidden Text Field'),
-      })
-
-      await expect(adminHiddenFieldOption).toBeHidden()
-    })
-
     test('should not show disabled fields in the UI', async () => {
       await page.goto(url.create)
       await expect(page.locator('#field-disabledTextField')).toHaveCount(0)
       await page.goto(url.list)
       await expect(page.locator('.cell-disabledTextField')).toBeHidden()
       await expect(page.locator('#heading-disabledTextField')).toBeHidden()
+
       const columnContainer = await openListColumns(page, {})
+
       await expect(
         columnContainer.locator('.column-selector__column', {
           hasText: exactText('Disabled Text Field'),
@@ -142,6 +122,32 @@ describe('Text', () => {
       })
 
       await expect(disabledFieldOption).toBeHidden()
+    })
+
+    test('should render hidden input for admin.hidden fields', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('#field-adminHiddenTextField')).toHaveAttribute('type', 'hidden')
+      await page.goto(url.list)
+      await expect(page.locator('.cell-adminHiddenTextField').first()).toBeVisible()
+      await expect(page.locator('#heading-adminHiddenTextField')).toBeVisible()
+
+      const columnContainer = await openListColumns(page, {})
+
+      await expect(
+        columnContainer.locator('.column-selector__column', {
+          hasText: exactText('Admin Hidden Text Field'),
+        }),
+      ).toBeVisible()
+
+      await selectTableRow(page, 'Seeded text document')
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const adminHiddenFieldOption = page.locator('.rs__option', {
+        hasText: exactText('Admin Hidden Text Field'),
+      })
+
+      await expect(adminHiddenFieldOption).toBeVisible()
     })
 
     test('hidden and disabled fields should not break subsequent field paths', async () => {
@@ -212,6 +218,7 @@ describe('Text', () => {
 
   test('should display i18n label in cells when missing field data', async () => {
     await page.goto(url.list)
+    await page.waitForURL(new RegExp(`${url.list}.*\\?.*`))
 
     await toggleColumn(page, {
       targetState: 'on',

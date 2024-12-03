@@ -17,7 +17,7 @@ import {
   deepCopyObjectSimple,
   fieldAffectsData,
   fieldHasSubFields,
-  fieldIsHiddenFromAdmin,
+  fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsSidebar,
   getFieldPaths,
@@ -142,7 +142,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   let fieldPermissions: SanitizedFieldPermissions = true
 
-  if (fieldAffectsData(field) && !fieldIsHiddenFromAdmin(field, false)) {
+  if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field)) {
     fieldPermissions =
       parentPermissions === true
         ? parentPermissions
@@ -722,7 +722,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  if (requiresRender && renderFieldFn && !fieldIsHiddenFromAdmin(field, false)) {
+  if (requiresRender && renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
     const fieldState = state[path]
 
     const fieldConfig = fieldSchemaMap.get(schemaPath)

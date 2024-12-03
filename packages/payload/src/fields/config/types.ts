@@ -1715,16 +1715,12 @@ export function fieldIsID<TField extends ClientField | Field>(
   return 'name' in field && field.name === 'id'
 }
 
-export function fieldIsHiddenFromAdmin<
+export function fieldIsHiddenOrDisabled<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
->(field: TField, checkAdminHiddenProperty = true): field is { admin: { hidden: true } } & TField {
+>(field: TField): field is { admin: { hidden: true } } & TField {
   return (
     ('hidden' in field && field.hidden) ||
-    ('admin' in field && 'disabled' in field.admin && field.admin.disabled) ||
-    // in some case, `admin.hidden` fields should render as `type="hidden"` and submit with the form
-    (checkAdminHiddenProperty === false
-      ? false
-      : 'admin' in field && 'hidden' in field.admin && field.admin.hidden)
+    ('admin' in field && 'disabled' in field.admin && field.admin.disabled)
   )
 }
 

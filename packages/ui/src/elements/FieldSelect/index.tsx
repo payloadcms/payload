@@ -1,7 +1,7 @@
 'use client'
 import type { ClientField, FieldWithPath, FormState } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsHiddenFromAdmin } from 'payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldIsHiddenOrDisabled } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -69,7 +69,7 @@ const reduceFields = ({
       (fieldAffectsData(field) || field.type === 'ui') &&
       (field.admin.disableBulkEdit ||
         field.unique ||
-        fieldIsHiddenFromAdmin(field) ||
+        fieldIsHiddenOrDisabled(field) ||
         ('readOnly' in field && field.readOnly))
     ) {
       return fieldsToUse
