@@ -14,6 +14,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  selectTableRow,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -81,6 +82,16 @@ describe('Text', () => {
           hasText: exactText('Hidden Text Field'),
         }),
       ).toBeHidden()
+
+      await selectTableRow(page, 'Seeded text document')
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const hiddenFieldOption = page.locator('.rs__option', {
+        hasText: exactText('Hidden Text Field'),
+      })
+
+      await expect(hiddenFieldOption).toBeHidden()
     })
 
     test('should render hidden input for admin.hidden fields', async () => {
@@ -95,6 +106,16 @@ describe('Text', () => {
           hasText: exactText('Admin Hidden Text Field'),
         }),
       ).toBeHidden()
+
+      await selectTableRow(page, 'Seeded text document')
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const adminHiddenFieldOption = page.locator('.rs__option', {
+        hasText: exactText('Admin Hidden Text Field'),
+      })
+
+      await expect(adminHiddenFieldOption).toBeHidden()
     })
 
     test('should not show disabled fields in the UI', async () => {
@@ -109,6 +130,18 @@ describe('Text', () => {
           hasText: exactText('Disabled Text Field'),
         }),
       ).toBeHidden()
+
+      await selectTableRow(page, 'Seeded text document')
+
+      await page.locator('.edit-many__toggle').click()
+
+      await page.locator('.field-select .rs__control').click()
+
+      const disabledFieldOption = page.locator('.rs__option', {
+        hasText: exactText('Disabled Text Field'),
+      })
+
+      await expect(disabledFieldOption).toBeHidden()
     })
 
     test('hidden and disabled fields should not break subsequent field paths', async () => {
