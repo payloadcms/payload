@@ -1,6 +1,6 @@
 'use client'
 
-import { getFieldPaths } from 'payload/shared'
+import { fieldIsHiddenFromAdmin, getFieldPaths } from 'payload/shared'
 import React from 'react'
 
 import type { RenderFieldsProps } from './types.js'
@@ -45,7 +45,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
         {fields.map((field, i) => {
           // For sidebar fields in the main fields array, `field` will be `null`, and visa versa
           // This is to keep the order of the fields consistent and maintain the correct index paths for the main fields (i)
-          if (!field || field?.hidden || field?.admin?.disabled) {
+          if (!field || fieldIsHiddenFromAdmin(field, false)) {
             return null
           }
 

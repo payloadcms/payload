@@ -11,7 +11,11 @@ import type {
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { deepCopyObjectSimple, fieldIsPresentationalOnly } from 'payload/shared'
+import {
+  deepCopyObjectSimple,
+  fieldIsHiddenFromAdmin,
+  fieldIsPresentationalOnly,
+} from 'payload/shared'
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
@@ -117,7 +121,7 @@ export const buildColumnState = (args: Args): Column[] => {
   const activeColumnsIndices = []
 
   const sorted: Column[] = sortedFieldMap?.reduce((acc, field, index) => {
-    if (field.hidden || field?.admin?.hidden || field?.admin?.disabled) {
+    if (fieldIsHiddenFromAdmin(field)) {
       return acc
     }
 
