@@ -4,15 +4,13 @@ import { expect } from '@playwright/test'
 
 import { exactText } from '../../helpers.js'
 
-export const toggleColumn = async (
+export const openListColumns = async (
   page: Page,
   {
     togglerSelector = '.list-controls__toggle-columns',
     columnContainerSelector = '.list-controls__columns',
-    columnLabel,
   }: {
     columnContainerSelector?: string
-    columnLabel: string
     togglerSelector?: string
   },
 ): Promise<any> => {
@@ -24,6 +22,23 @@ export const toggleColumn = async (
   }
 
   await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
+
+  return columnContainer
+}
+
+export const toggleColumn = async (
+  page: Page,
+  {
+    togglerSelector,
+    columnContainerSelector,
+    columnLabel,
+  }: {
+    columnContainerSelector?: string
+    columnLabel: string
+    togglerSelector?: string
+  },
+): Promise<any> => {
+  const columnContainer = await openListColumns(page, { togglerSelector, columnContainerSelector })
 
   const column = columnContainer.locator(`.column-selector .column-selector__column`, {
     hasText: exactText(columnLabel),

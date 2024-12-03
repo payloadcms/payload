@@ -117,6 +117,10 @@ export const buildColumnState = (args: Args): Column[] => {
   const activeColumnsIndices = []
 
   const sorted: Column[] = sortedFieldMap?.reduce((acc, field, index) => {
+    if (field.hidden || field?.admin?.hidden || field?.admin?.disabled) {
+      return acc
+    }
+
     const _field = _sortedFieldMap.find(
       (f) => 'name' in field && 'name' in f && f.name === field.name,
     )

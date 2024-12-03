@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { openListColumns } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -71,16 +72,43 @@ describe('Text', () => {
     test('should not render top-level hidden fields in the UI', async () => {
       await page.goto(url.create)
       await expect(page.locator('#field-hiddenTextField')).toBeHidden()
+      await page.goto(url.list)
+      await expect(page.locator('.cell-hiddenTextField')).toBeHidden()
+      await expect(page.locator('#heading-hiddenTextField')).toBeHidden()
+      const columnContainer = await openListColumns(page, {})
+      await expect(
+        columnContainer.locator('.column-selector__column', {
+          hasText: exactText('Hidden Text Field'),
+        }),
+      ).toBeHidden()
     })
 
     test('should render hidden input for admin.hidden fields', async () => {
       await page.goto(url.create)
       await expect(page.locator('#field-adminHiddenTextField')).toHaveAttribute('type', 'hidden')
+      await page.goto(url.list)
+      await expect(page.locator('.cell-adminHiddenTextField')).toBeHidden()
+      await expect(page.locator('#heading-adminHiddenTextField')).toBeHidden()
+      const columnContainer = await openListColumns(page, {})
+      await expect(
+        columnContainer.locator('.column-selector__column', {
+          hasText: exactText('Admin Hidden Text Field'),
+        }),
+      ).toBeHidden()
     })
 
     test('should not show disabled fields in the UI', async () => {
       await page.goto(url.create)
       await expect(page.locator('#field-disabledTextField')).toHaveCount(0)
+      await page.goto(url.list)
+      await expect(page.locator('.cell-disabledTextField')).toBeHidden()
+      await expect(page.locator('#heading-disabledTextField')).toBeHidden()
+      const columnContainer = await openListColumns(page, {})
+      await expect(
+        columnContainer.locator('.column-selector__column', {
+          hasText: exactText('Disabled Text Field'),
+        }),
+      ).toBeHidden()
     })
 
     test('hidden and disabled fields should not break subsequent field paths', async () => {

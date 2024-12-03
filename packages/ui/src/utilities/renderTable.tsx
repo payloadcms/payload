@@ -26,6 +26,14 @@ export const renderFilters = (
 ): Map<string, React.ReactNode> =>
   fields.reduce(
     (acc, field) => {
+      if (
+        ('hidden' in field && field?.hidden) ||
+        (field?.admin && 'hidden' in field.admin && field?.admin.hidden) ||
+        (field?.admin && 'disabled' in field.admin && field?.admin?.disabled)
+      ) {
+        return acc
+      }
+
       if ('name' in field && field.admin?.components?.Filter) {
         acc.set(
           field.name,

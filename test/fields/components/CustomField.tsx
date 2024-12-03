@@ -3,5 +3,9 @@ import type { TextFieldServerComponent } from 'payload'
 import React from 'react'
 
 export const CustomField: TextFieldServerComponent = ({ schemaPath }) => {
-  return <p id="custom-field-schema-path">{schemaPath}</p>
+  return (
+    <div id="custom-field-schema-path" style={{ display: 'none' }}>
+      {schemaPath}
+    </div>
+  )
 }
