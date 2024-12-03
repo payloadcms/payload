@@ -47,6 +47,11 @@ export const Categories: CollectionConfig = {
       name: 'relatedPosts',
       label: 'Related Posts',
       type: 'join',
+      admin: {
+        components: {
+          Description: '/components/CustomDescription/index.js#FieldDescriptionComponent',
+        },
+      },
       collection: postsSlug,
       defaultSort: '-title',
       defaultLimit: 5,
@@ -57,6 +62,9 @@ export const Categories: CollectionConfig = {
       name: 'hasManyPosts',
       type: 'join',
       collection: postsSlug,
+      admin: {
+        description: 'Static Description',
+      },
       on: 'categories',
     },
     {

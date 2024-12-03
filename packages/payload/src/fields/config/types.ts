@@ -1358,6 +1358,8 @@ export type JoinField = {
   admin?: {
     allowCreate?: boolean
     components?: {
+      AfterInput?: CustomComponent[]
+      BeforeInput?: CustomComponent[]
       Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
       Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
     } & Admin['components']

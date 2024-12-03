@@ -96,6 +96,14 @@ test.describe('Admin Panel', () => {
     // assert that the create new button is not visible
     await expect(page.locator('#field-relatedPosts > .relationship-table__add-new')).toBeHidden()
 
+    // assert that the admin.description is visible
+    await expect(page.locator('.field-description-hasManyPosts')).toHaveText('Static Description')
+
+    //assert that the admin.components.Description is visible
+    await expect(page.locator('.field-description-relatedPosts')).toHaveText(
+      'Component description: relatedPosts',
+    )
+
     await nameField.fill('test category')
     await saveDocAndAssert(page)
   })
