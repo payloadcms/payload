@@ -45,7 +45,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
         {fields.map((field, i) => {
           // For sidebar fields in the main fields array, `field` will be `null`, and visa versa
           // This is to keep the order of the fields consistent and maintain the correct index paths for the main fields (i)
-          if (!field || field?.admin?.disabled) {
+          if (!field || field?.hidden || field?.admin?.disabled) {
             return null
           }
 

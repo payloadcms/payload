@@ -45,6 +45,13 @@ export const renderField: RenderFieldMethod = ({
         importMap: req.payload.importMap,
       })
 
+  if (
+    ('hidden' in fieldConfig && fieldConfig?.hidden) ||
+    (fieldConfig?.admin && 'disabled' in fieldConfig.admin && fieldConfig?.admin?.disabled)
+  ) {
+    return
+  }
+
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},
     field: clientField,

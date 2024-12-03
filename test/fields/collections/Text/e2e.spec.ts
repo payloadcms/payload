@@ -67,6 +67,28 @@ describe('Text', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  describe('hidden and disabled fields', () => {
+    test('should not render top-level hidden fields in the UI', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('#field-hiddenTextField')).toBeHidden()
+    })
+
+    test('should render hidden input for admin.hidden fields', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('#field-adminHiddenTextField')).toHaveAttribute('type', 'hidden')
+    })
+
+    test('should not show disabled fields in the UI', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('#field-disabledTextField')).toHaveCount(0)
+    })
+
+    test('hidden and disabled fields should not break subsequent field paths', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('#custom-field-schema-path')).toHaveText('text-fields._index-4')
+    })
+  })
+
   test('should display field in list view', async () => {
     await page.goto(url.list)
     const textCell = page.locator('.row-1 .cell-text')
