@@ -49,6 +49,8 @@ export const Categories: CollectionConfig = {
       type: 'join',
       admin: {
         components: {
+          afterInput: ['/components/AfterInput.js#AfterInput'],
+          beforeInput: ['/components/BeforeInput.js#BeforeInput'],
           Description: '/components/CustomDescription/index.js#FieldDescriptionComponent',
         },
       },

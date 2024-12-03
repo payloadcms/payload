@@ -35,7 +35,9 @@ import { RelationshipTablePagination } from './Pagination.js'
 const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
+  readonly AfterInput?: React.ReactNode
   readonly allowCreate?: boolean
+  readonly BeforeInput?: React.ReactNode
   readonly disableTable?: boolean
   readonly field: JoinFieldClient
   readonly filterOptions?: Where
@@ -47,7 +49,9 @@ type RelationshipTableComponentProps = {
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
+    AfterInput,
     allowCreate = true,
+    BeforeInput,
     disableTable = false,
     filterOptions,
     initialData: initialDataFromProps,
@@ -197,6 +201,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           </Pill>
         </div>
       </div>
+      {BeforeInput}
       {isLoadingTable ? (
         <p>{t('general:loading')}</p>
       ) : (
@@ -257,6 +262,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           )}
         </Fragment>
       )}
+      {AfterInput}
       <DocumentDrawer initialData={initialDrawerData} onSave={onDrawerCreate} />
     </div>
   )
