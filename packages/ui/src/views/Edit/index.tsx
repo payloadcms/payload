@@ -233,7 +233,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         }
       }
     },
-    [setCurrentEditor, setDocumentIsLocked, user.id],
+    [setCurrentEditor, setDocumentIsLocked, user?.id],
   )
 
   const onSave = useCallback(
