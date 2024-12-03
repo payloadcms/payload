@@ -26,10 +26,7 @@ export function CopyButton({ code }: { code: string }) {
         }}
       >
         <p>{text}</p>
-
-        <div className="w-6 h-6 dark:invert">
-          <CopyIcon />
-        </div>
+        <CopyIcon />
       </Button>
     </div>
   )
