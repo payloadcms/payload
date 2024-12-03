@@ -16,6 +16,7 @@ export const acceptedLanguages = [
   'he',
   'hr',
   'hu',
+  'is',
   'it',
   'ja',
   'ko',
