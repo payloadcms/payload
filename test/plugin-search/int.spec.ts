@@ -237,6 +237,46 @@ describe('@payloadcms/plugin-search', () => {
     expect(deletedResults).toHaveLength(0)
   })
 
+  it('should clear the proper search document when having the same doc.value but different doc.relationTo', async () => {
+    const custom_id_1 = await payload.create({
+      collection: 'custom-ids-1',
+      data: { id: 'custom_id' },
+    })
+
+    await payload.create({
+      collection: 'custom-ids-2',
+      data: { id: 'custom_id' },
+    })
+
+    await wait(200)
+
+    const {
+      docs: [docBefore],
+    } = await payload.find({
+      collection: 'search',
+      where: { 'doc.value': { equals: 'custom_id' } },
+      limit: 1,
+      sort: 'createdAt',
+    })
+
+    expect(docBefore.doc.relationTo).toBe('custom-ids-1')
+
+    await payload.delete({ collection: 'custom-ids-1', id: custom_id_1.id })
+
+    await wait(200)
+
+    const {
+      docs: [docAfter],
+    } = await payload.find({
+      collection: 'search',
+      where: { 'doc.value': { equals: 'custom_id' } },
+      limit: 1,
+      sort: 'createdAt',
+    })
+
+    expect(docAfter.doc.relationTo).toBe('custom-ids-2')
+  })
+
   it('should sync localized data', async () => {
     const createdDoc = await payload.create({
       collection: 'posts',

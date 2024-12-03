@@ -153,21 +153,6 @@ export interface BlocksField {
         blockType: 'blockInsideBlock';
       }[]
     | null;
-  nonLocalizedBlocksField?:
-    | {
-        array?:
-          | {
-              link?: {
-                label?: string | null;
-              };
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockInsideBlock';
-      }[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -772,26 +757,6 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
                           blockName?: T;
                         };
                   };
-              array?:
-                | T
-                | {
-                    link?:
-                      | T
-                      | {
-                          label?: T;
-                        };
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-      };
-  nonLocalizedBlocksField?:
-    | T
-    | {
-        blockInsideBlock?:
-          | T
-          | {
               array?:
                 | T
                 | {

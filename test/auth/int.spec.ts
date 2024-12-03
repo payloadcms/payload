@@ -1,4 +1,4 @@
-import type { Payload, User } from 'payload'
+import type { FieldAffectingData, Payload, User } from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
@@ -9,7 +9,13 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
+import {
+  apiKeysSlug,
+  namedSaveToJWTValue,
+  partialDisableLocaleStrategiesSlug,
+  saveToJWTKey,
+  slug,
+} from './shared.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -706,6 +712,70 @@ describe('Auth', () => {
 
       expect(response.status).toBe(403)
       expect(data.token).toBeUndefined()
+    })
+  })
+
+  describe('disableLocalStrategy', () => {
+    it('should allow create of a user with disableLocalStrategy', async () => {
+      const email = 'test@example.com'
+      const user = await payload.create({
+        collection: partialDisableLocaleStrategiesSlug,
+        data: {
+          email,
+          // password is not required
+        },
+      })
+      expect(user.email).toStrictEqual(email)
+    })
+
+    it('should retain fields when auth.disableLocalStrategy.enableFields is true', () => {
+      const authFields = payload.collections[partialDisableLocaleStrategiesSlug].config.fields
+        // eslint-disable-next-line jest/no-conditional-in-test
+        .filter((field) => 'name' in field && field.name)
+        .map((field) => (field as FieldAffectingData).name)
+
+      expect(authFields).toMatchObject([
+        'updatedAt',
+        'createdAt',
+        'email',
+        'resetPasswordToken',
+        'resetPasswordExpiration',
+        'salt',
+        'hash',
+        'loginAttempts',
+        'lockUntil',
+      ])
+    })
+
+    it('should prevent login of user with disableLocalStrategy.', async () => {
+      await payload.create({
+        collection: partialDisableLocaleStrategiesSlug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await expect(async () => {
+        await payload.login({
+          collection: partialDisableLocaleStrategiesSlug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        })
+      }).rejects.toThrow('You are not allowed to perform this action.')
+    })
+
+    it('rest - should prevent login', async () => {
+      const response = await restClient.POST(`/${partialDisableLocaleStrategiesSlug}/login`, {
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
+
+      expect(response.status).toBe(403)
     })
   })
 

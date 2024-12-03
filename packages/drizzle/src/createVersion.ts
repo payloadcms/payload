@@ -66,6 +66,7 @@ export async function createVersion<T extends TypeWithID>(
         SET latest = false
         WHERE ${table.id} != ${result.id}
           AND ${table.parent} = ${parent}
+          AND ${table.updatedAt} < ${result.updatedAt}
       `,
     })
   }

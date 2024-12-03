@@ -345,6 +345,7 @@ export interface FieldsAndTopAccess {
   secret?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -954,6 +955,7 @@ export interface FieldsAndTopAccessSelect<T extends boolean = true> {
   secret?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

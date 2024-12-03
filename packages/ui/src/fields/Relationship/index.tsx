@@ -100,7 +100,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   )
 
   const {
-    customComponents: { Description, Error, Label } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     filterOptions,
     initialValue,
     setValue,
@@ -603,6 +603,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
         />
+        {BeforeInput}
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
@@ -625,7 +626,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 }
                 return hasMany && Array.isArray(relationTo)
                   ? `${option.relationTo}_${option.value}`
-                  : option.value
+                  : (option.value as string)
               }}
               isLoading={isLoading}
               isMulti={hasMany}
@@ -707,6 +708,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
+        {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}

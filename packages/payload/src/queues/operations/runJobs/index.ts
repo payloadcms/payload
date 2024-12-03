@@ -171,7 +171,8 @@ export const runJobs = async ({
       workflowHandler = await importHandlerPath<typeof workflowHandler>(workflowConfig.handler)
 
       if (!workflowHandler) {
-        const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${job.workflowSlug}.`
+        const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
+        const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
         req.payload.logger.error(errorMessage)
 
         await updateJob({

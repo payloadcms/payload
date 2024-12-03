@@ -206,7 +206,16 @@ export interface IncomingAuthType {
   /**
    * Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.
    */
-  disableLocalStrategy?: true
+  disableLocalStrategy?:
+    | {
+        /**
+         * Include auth fields on the collection even though the local strategy is disabled.
+         * Useful when you do not want the database or types to vary depending on the auth configuration.
+         */
+        enableFields?: true
+        optionalPassword?: true
+      }
+    | true
   /**
    * Customize the way that the forgotPassword operation functions.
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
