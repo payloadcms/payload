@@ -34,7 +34,7 @@ export class TextNode extends LexicalTextNode {
       Object.entries(this.__classes).forEach(([classPrefix, classSufix]) => {
         if (typeof classSufix === 'string') {
           dom.classList.add(`${classPrefix}-${classSufix}`)
-        } else {
+        } else if (typeof classSufix === 'boolean' && classSufix) {
           dom.classList.add(classPrefix)
         }
       })
@@ -45,7 +45,7 @@ export class TextNode extends LexicalTextNode {
 
   exportJSON(): SerializedTextNode {
     const classes = Object.fromEntries(
-      Object.entries(this.__classes).filter(([_, value]) => value !== undefined),
+      Object.entries(this.__classes).filter(([_, value]) => value !== undefined || value === false),
     )
     return {
       ...super.exportJSON(),
