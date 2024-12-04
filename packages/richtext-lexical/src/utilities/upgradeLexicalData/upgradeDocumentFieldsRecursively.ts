@@ -6,7 +6,7 @@ import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } fro
 
 import type { LexicalRichTextAdapter } from '../../types.js'
 
-import { getEnabledNodes } from '../../lexical/nodes/index.js'
+import { getEnabledNodes } from '../../lexical/nodes/utils.js'
 
 type NestedRichTextFieldsArgs = {
   data: Record<string, unknown>

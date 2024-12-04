@@ -15,7 +15,7 @@ import {
   useEditorConfigContext,
 } from './config/client/EditorConfigProvider.js'
 import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
-import { getEnabledNodes } from './nodes/index.js'
+import { getEnabledNodes } from './nodes/utils.js'
 
 export type LexicalProviderProps = {
   composerKey: string

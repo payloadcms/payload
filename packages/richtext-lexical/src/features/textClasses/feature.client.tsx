@@ -5,7 +5,7 @@ import { $getSelection, $isRangeSelection } from 'lexical'
 import type { ToolbarDropdownGroup, ToolbarGroup } from '../toolbars/types.js'
 import type { TextClassesFeatureProps } from './feature.server.js'
 
-import { $mutateSelectedTextNodes } from '../../lexical/nodes/index.js'
+import { $mutateSelectedTextNodes } from '../../lexical/nodes/utils.js'
 import { TextColorIcon } from '../../lexical/ui/icons/TextColor/index.js'
 import { createClientFeature } from '../../utilities/createClientFeature.js'
 

@@ -940,7 +940,7 @@ export type {
   SanitizedServerEditorConfig,
   ServerEditorConfig,
 } from './lexical/config/types.js'
-export { getEnabledNodes, getEnabledNodesFromServerNodes } from './lexical/nodes/index.js'
+export { getEnabledNodes, getEnabledNodesFromServerNodes } from './lexical/nodes/utils.js'
 export type { AdapterProps }
 
 export type {

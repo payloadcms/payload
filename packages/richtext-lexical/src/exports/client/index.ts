@@ -90,7 +90,7 @@ export {
 
 export { ENABLE_SLASH_MENU_COMMAND } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.js'
 
-export { getEnabledNodes } from '../../lexical/nodes/index.js'
+export { getEnabledNodes } from '../../lexical/nodes/utils.js'
 
 export {
   $createUploadNode,
