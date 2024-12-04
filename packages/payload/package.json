@@ -123,7 +123,7 @@
     "@types/ws": "^8.5.10",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "0.23.1",
+    "esbuild": "0.24.0",
     "graphql-http": "^1.22.0",
     "react-datepicker": "7.5.0",
     "rimraf": "3.0.2",

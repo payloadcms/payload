@@ -68,7 +68,7 @@
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/to-snake-case": "1.0.0",
-    "esbuild": "0.23.1",
+    "esbuild": "0.24.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {

@@ -52,7 +52,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^13.1.6",
+    "@next/eslint-plugin-next": "^15.0.3",
     "@payloadcms/eslint-config": "^1.1.1",
     "@tailwindcss/typography": "^0.5.13",
     "@types/escape-html": "^1.0.2",
