@@ -75,28 +75,24 @@ export const createClientField = ({
 }): ClientField => {
   const clientField: ClientField = {} as ClientField
 
-  const isHidden = 'hidden' in incomingField && incomingField?.hidden
-  const disabledFromAdmin =
-    incomingField?.admin && 'disabled' in incomingField.admin && incomingField.admin.disabled
-
-  if (fieldAffectsData(incomingField) && (isHidden || disabledFromAdmin)) {
-    return null
-  }
-
   for (const key in incomingField) {
     if (serverOnlyFieldProperties.includes(key as any)) {
       continue
     }
+
     switch (key) {
       case 'admin':
         if (!incomingField.admin) {
           break
         }
+
         clientField.admin = {} as AdminClient
+
         for (const adminKey in incomingField.admin) {
           if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {
             continue
           }
+
           switch (adminKey) {
             case 'description':
               if ('description' in incomingField.admin) {
@@ -107,16 +103,20 @@ export const createClientField = ({
               }
 
               break
+
             default:
               clientField.admin[adminKey] = incomingField.admin[adminKey]
           }
         }
+
         break
+
       case 'blocks':
       case 'fields':
       case 'tabs':
         // Skip - we handle sub-fields in the switch below
         break
+
       case 'label':
         //@ts-expect-error - would need to type narrow
         if (typeof incomingField.label === 'function') {
@@ -126,7 +126,9 @@ export const createClientField = ({
           //@ts-expect-error - would need to type narrow
           clientField.label = incomingField.label
         }
+
         break
+
       default:
         clientField[key] = incomingField[key]
     }
@@ -243,6 +245,7 @@ export const createClientField = ({
 
       break
     }
+
     case 'richText': {
       if (!incomingField?.editor) {
         throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
@@ -269,6 +272,7 @@ export const createClientField = ({
             if (serverOnlyFieldProperties.includes(key as any)) {
               continue
             }
+
             if (key === 'fields') {
               clientTab.fields = createClientFields({
                 defaultIDType,
@@ -320,9 +324,7 @@ export const createClientFields = ({
       importMap,
     })
 
-    if (clientField) {
-      clientFields.push(clientField)
-    }
+    clientFields.push(clientField)
   }
 
   const hasID = flattenTopLevelFields(fields).some((f) => fieldAffectsData(f) && f.name === 'id')

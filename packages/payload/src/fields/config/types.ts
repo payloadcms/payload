@@ -1709,6 +1709,21 @@ export function fieldIsSidebar<TField extends ClientField | Field | TabAsField |
   return 'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar'
 }
 
+export function fieldIsID<TField extends ClientField | Field>(
+  field: TField,
+): field is { name: 'id' } & TField {
+  return 'name' in field && field.name === 'id'
+}
+
+export function fieldIsHiddenOrDisabled<
+  TField extends ClientField | Field | TabAsField | TabAsFieldClient,
+>(field: TField): field is { admin: { hidden: true } } & TField {
+  return (
+    ('hidden' in field && field.hidden) ||
+    ('admin' in field && 'disabled' in field.admin && field.admin.disabled)
+  )
+}
+
 export function fieldAffectsData<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
 >(
