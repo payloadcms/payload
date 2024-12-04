@@ -50,6 +50,7 @@ describe('fields', () => {
 
     await ensureCompilationIsDone({ page, serverURL })
   })
+
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,

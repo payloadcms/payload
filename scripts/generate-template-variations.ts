@@ -129,6 +129,7 @@ async function main() {
       name: 'blank',
       dirname: 'blank',
       db: 'mongodb',
+      generateLockfile: true,
       storage: 'localDisk',
       sharp: true,
       // The blank template is used as a base for create-payload-app functionality,
@@ -187,6 +188,7 @@ async function main() {
       await writeEnvExample({
         destDir,
         envNames,
+        dbType: db,
       })
     }
 
@@ -234,7 +236,7 @@ async function main() {
           ...process.env,
           PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
-          DATABASE_URI: 'postgres://localhost:5432/payloadtests',
+          DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/payloadtests',
         },
       })
     }
@@ -287,22 +289,35 @@ ${description}
 async function writeEnvExample({
   destDir,
   envNames,
+  dbType,
 }: {
   destDir: string
   envNames?: TemplateVariations['envNames']
+  dbType: DbType
 }) {
   const envExamplePath = path.join(destDir, '.env.example')
   const envFileContents = await fs.readFile(envExamplePath, 'utf8')
+
   const fileContents = envFileContents
     .split('\n')
     .filter((e) => e)
-    .map((l) =>
-      envNames?.dbUri && l.startsWith('DATABASE_URI')
-        ? l.replace('DATABASE_URI', envNames.dbUri)
-        : l,
-    )
+    .map((l) => {
+      if (l.startsWith('DATABASE_URI')) {
+        // Use db-appropriate connection string
+        if (dbType.includes('postgres')) {
+          l = 'DATABASE_URI=postgresql://127.0.0.1:5432/payloadtests'
+        }
+
+        // Replace DATABASE_URI with the correct env name if set
+        if (envNames?.dbUri) {
+          l = l.replace('DATABASE_URI', envNames.dbUri)
+        }
+      }
+      return l
+    })
     .join('\n')
 
+  console.log(`Writing to ${envExamplePath}`)
   await fs.writeFile(envExamplePath, fileContents)
 }
 
