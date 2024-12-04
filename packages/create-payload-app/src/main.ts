@@ -13,13 +13,12 @@ import { createProject } from './lib/create-project.js'
 import { generateSecret } from './lib/generate-secret.js'
 import { getPackageManager } from './lib/get-package-manager.js'
 import { getNextAppDetails, initNext } from './lib/init-next.js'
+import { manageEnvFiles } from './lib/manage-env-files.js'
 import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
-import { updateEnvExampleFile } from './lib/update-env-example-file.js'
 import { updatePayloadInProject } from './lib/update-payload-in-project.js'
-import { writeEnvFile } from './lib/write-env-file.js'
 import { debug, error, info } from './utils/log.js'
 import {
   feedbackOutro,
@@ -182,15 +181,7 @@ export class Main {
           },
         })
 
-        await updateEnvExampleFile({
-          cliArgs: this.args,
-          databaseType: dbDetails.type,
-          databaseUri: dbDetails.dbUri,
-          payloadSecret: generateSecret(),
-          projectDir,
-        })
-
-        await writeEnvFile({
+        await manageEnvFiles({
           cliArgs: this.args,
           databaseType: dbDetails.type,
           databaseUri: dbDetails.dbUri,
@@ -249,15 +240,7 @@ export class Main {
             template,
           })
 
-          await updateEnvExampleFile({
-            cliArgs: this.args,
-            databaseType: dbDetails.type,
-            databaseUri: dbDetails.dbUri,
-            payloadSecret,
-            projectDir,
-          })
-
-          await writeEnvFile({
+          await manageEnvFiles({
             cliArgs: this.args,
             databaseType: dbDetails.type,
             databaseUri: dbDetails.dbUri,
