@@ -31,7 +31,6 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
-  const { code: locale } = useLocale()
 
   const {
     localization,
@@ -54,7 +53,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       return
     }
 
-    const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
+    const search = `?locale=${code}&depth=0&fallback-locale=null&draft=true`
     let action
     let method = 'POST'
 
@@ -77,7 +76,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id, forceDisable])
+  }, [submit, collectionSlug, globalSlug, serverURL, api, code, id, forceDisable])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -121,6 +120,28 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit],
   )
 
+  const publishAll =
+    localization && localization.defaultLocalePublishOption !== 'active' ? true : false
+
+  const activeLocale =
+    localization &&
+    localization?.locales.find((locale) =>
+      typeof locale === 'string' ? locale === code : locale.code === code,
+    )
+
+  const activeLocaleLabel =
+    typeof activeLocale.label === 'string'
+      ? activeLocale.label
+      : (activeLocale.label?.[code] ?? undefined)
+
+  const defaultPublish = publishAll ? publish : () => publishSpecificLocale(activeLocale.code)
+  const defaultLabel = publishAll ? label : t('version:publishIn', { locale: activeLocaleLabel })
+
+  const secondaryPublish = publishAll ? () => publishSpecificLocale(activeLocale.code) : publish
+  const secondaryLabel = publishAll
+    ? t('version:publishIn', { locale: activeLocaleLabel })
+    : t('version:publishAllLocales')
+
   if (!hasPublishPermission) {
     return null
   }
@@ -129,36 +150,20 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     <FormSubmit
       buttonId="action-save"
       disabled={!canPublish}
-      onClick={publish}
+      onClick={defaultPublish}
       size="medium"
       SubMenuPopupContent={
         localization
-          ? ({ close }) =>
-              localization.locales.map((locale) => {
-                const formattedLabel =
-                  typeof locale.label === 'string'
-                    ? locale.label
-                    : locale.label && locale.label[i18n?.language]
-
-                const isActive = typeof locale === 'string' ? locale === code : locale.code === code
-
-                if (isActive) {
-                  return (
-                    <PopupList.ButtonGroup key={locale.code}>
-                      <PopupList.Button
-                        onClick={() => [publishSpecificLocale(locale.code), close()]}
-                      >
-                        {t('version:publishIn', { locale: formattedLabel || locale.code })}
-                      </PopupList.Button>
-                    </PopupList.ButtonGroup>
-                  )
-                }
-              })
+          ? () => (
+              <PopupList.ButtonGroup>
+                <PopupList.Button onClick={secondaryPublish}>{secondaryLabel}</PopupList.Button>
+              </PopupList.ButtonGroup>
+            )
           : undefined
       }
       type="button"
     >
-      {label}
+      {localization ? defaultLabel : label}
     </FormSubmit>
   )
 }
