@@ -3,7 +3,6 @@ import { seed } from '@/endpoints/seed'
 import config from '@payload-config'
 import { headers } from 'next/headers'
 
-const payloadToken = 'payload-token'
 export const maxDuration = 60 // This function can run for a maximum of 60 seconds
 
 export async function POST(
