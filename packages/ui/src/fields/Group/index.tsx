@@ -80,6 +80,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
                     Fallback={
                       <h3 className={`${baseClass}__title`}>
                         <FieldLabel
+                          as="span"
                           label={getTranslation(label, i18n)}
                           localized={false}
                           path={path}

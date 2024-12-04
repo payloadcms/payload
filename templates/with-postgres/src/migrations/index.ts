@@ -1,9 +1,9 @@
-import * as migration_20241117_173403_initial from './20241117_173403_initial'
+import * as migration_20241204_154138_initial from './20241204_154138_initial'
 
 export const migrations = [
   {
-    up: migration_20241117_173403_initial.up,
-    down: migration_20241117_173403_initial.down,
-    name: '20241117_173403_initial',
+    up: migration_20241204_154138_initial.up,
+    down: migration_20241204_154138_initial.down,
+    name: '20241204_154138_initial',
   },
 ]
