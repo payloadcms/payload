@@ -1,7 +1,15 @@
 import { createServerFeature } from '../../index.js'
 
-export type TextAttributesFeatureProps = {
-  [T in string]: (key: T) => string | undefined
+type TextClassSetting = {
+  childComponent: string
+  classPrefix: string
+  classSuffixes: string[]
+  toolbarFixed?: boolean
+  toolbarInline?: boolean
+}
+
+export type TextClassesFeatureProps = {
+  settings: TextClassSetting[]
 }
 
 /**
@@ -10,16 +18,16 @@ export type TextAttributesFeatureProps = {
  * - Clipboard compatible: the setters you define will also be used when pasting text from the clipboard (by default styles are not imported when pasting).
  * - Flexible: Do you want to accept only a specific red? You can convert similar reds of other shades to the one you support, or simply ignore them.
  */
-export const TextAttributesFeature = createServerFeature<
-  TextAttributesFeatureProps,
-  TextAttributesFeatureProps,
-  TextAttributesFeatureProps
+export const TextClassesFeature = createServerFeature<
+  TextClassesFeatureProps,
+  TextClassesFeatureProps,
+  TextClassesFeatureProps
 >({
   feature: ({ props }) => {
     return {
-      ClientFeature: '@payloadcms/richtext-lexical/client#TextAttributesFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#TextClassesFeatureClient',
       clientFeatureProps: props,
     }
   },
-  key: 'textAttributes',
+  key: 'TextClasses',
 })

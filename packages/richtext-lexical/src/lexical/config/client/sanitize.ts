@@ -14,7 +14,7 @@ import type { LexicalFieldAdminProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
 class MyTextNode extends TextNode {
-  attributes?: Record<string, string>
+  attributes?: Record<string, boolean | null | number | string>
 
   static clone(node: MyTextNode) {
     return new MyTextNode(node.__text, node.__key)
@@ -34,6 +34,10 @@ class MyTextNode extends TextNode {
     return dom
   }
 
+  // static importJSON(serializedNode: SerializedTextNode): TextNode {
+  //   return
+  // }
+
   exportJSON(): SerializedTextNode {
     return {
       ...super.exportJSON(),
@@ -51,7 +55,7 @@ export const sanitizeClientFeatures = (
     enabledFeatures: [],
     enabledFormats: [],
     markdownTransformers: [],
-    nodes: [MyTextNode, { replace: TextNode, with: (node) => new MyTextNode(node.__text) }],
+    nodes: [],
     plugins: [],
     providers: [],
     slashMenu: {

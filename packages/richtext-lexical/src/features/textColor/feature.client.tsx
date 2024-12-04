@@ -2,6 +2,7 @@
 
 import { $patchStyleText } from '@lexical/selection'
 import { $isTableSelection } from '@lexical/table'
+import { useTheme } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { ToolbarDropdownGroup, ToolbarGroup } from '../toolbars/types.js'
@@ -28,7 +29,9 @@ const toolbarGroups = (colors: TextColorFeatureProps['colors']): ToolbarGroup[] 
           if (!$isRangeSelection(selection)) {
             return
           }
-          $patchStyleText(selection, { color: color.value })
+          $patchStyleText(selection, {
+            // color: theme === 'dark' ? color.inDarkMode : color.inLightMode,
+          })
         })
       },
       order: 1,
