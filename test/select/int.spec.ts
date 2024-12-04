@@ -86,6 +86,36 @@ describe('Select', () => {
         })
       })
 
+      it('should select only select', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            select: true,
+          },
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          select: post.select,
+        })
+      })
+
+      it('should select only hasMany select', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            selectMany: true,
+          },
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          selectMany: post.selectMany,
+        })
+      })
+
       it('should select number and text', async () => {
         const res = await payload.findByID({
           collection: 'posts',
@@ -367,6 +397,38 @@ describe('Select', () => {
         expect(res).toStrictEqual(expected)
       })
 
+      it('should exclude select', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            select: false,
+          },
+        })
+
+        const expected = { ...post }
+
+        delete expected['select']
+
+        expect(res).toStrictEqual(expected)
+      })
+
+      it('should exclude hasMany select', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            selectMany: false,
+          },
+        })
+
+        const expected = { ...post }
+
+        delete expected['selectMany']
+
+        expect(res).toStrictEqual(expected)
+      })
+
       it('should exclude number and text', async () => {
         const res = await payload.findByID({
           collection: 'posts',
@@ -570,6 +632,36 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           number: post.number,
+        })
+      })
+
+      it('should select only select', async () => {
+        const res = await payload.findByID({
+          collection: 'localized-posts',
+          id: postId,
+          select: {
+            select: true,
+          },
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          select: post.select,
+        })
+      })
+
+      it('should select only hasMany select', async () => {
+        const res = await payload.findByID({
+          collection: 'localized-posts',
+          id: postId,
+          select: {
+            selectMany: true,
+          },
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          selectMany: post.selectMany,
         })
       })
 
@@ -873,6 +965,38 @@ describe('Select', () => {
         const expected = { ...post }
 
         delete expected['number']
+
+        expect(res).toStrictEqual(expected)
+      })
+
+      it('should exclude select', async () => {
+        const res = await payload.findByID({
+          collection: 'localized-posts',
+          id: postId,
+          select: {
+            select: false,
+          },
+        })
+
+        const expected = { ...post }
+
+        delete expected['select']
+
+        expect(res).toStrictEqual(expected)
+      })
+
+      it('should exclude hasMany select', async () => {
+        const res = await payload.findByID({
+          collection: 'localized-posts',
+          id: postId,
+          select: {
+            selectMany: false,
+          },
+        })
+
+        const expected = { ...post }
+
+        delete expected['selectMany']
 
         expect(res).toStrictEqual(expected)
       })
@@ -1963,6 +2087,8 @@ function createPost() {
     data: {
       number: 1,
       text: 'text',
+      select: 'a',
+      selectMany: ['a'],
       group: {
         number: 1,
         text: 'text',
@@ -2002,6 +2128,8 @@ function createLocalizedPost() {
     data: {
       number: 1,
       text: 'text',
+      select: 'a',
+      selectMany: ['a'],
       group: {
         number: 1,
         text: 'text',

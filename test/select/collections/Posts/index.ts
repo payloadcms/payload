@@ -15,6 +15,17 @@ export const PostsCollection: CollectionConfig = {
       type: 'number',
     },
     {
+      name: 'select',
+      type: 'select',
+      options: ['a', 'b'],
+    },
+    {
+      name: 'selectMany',
+      type: 'select',
+      options: ['a', 'b'],
+      hasMany: true,
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [

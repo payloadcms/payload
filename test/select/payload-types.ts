@@ -79,6 +79,8 @@ export interface Post {
   id: string;
   text?: string | null;
   number?: number | null;
+  select?: ('a' | 'b') | null;
+  selectMany?: ('a' | 'b')[] | null;
   group?: {
     text?: string | null;
     number?: number | null;
@@ -125,6 +127,8 @@ export interface LocalizedPost {
   id: string;
   text?: string | null;
   number?: number | null;
+  select?: ('a' | 'b') | null;
+  selectMany?: ('a' | 'b')[] | null;
   group?: {
     text?: string | null;
     number?: number | null;
@@ -424,6 +428,8 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  select?: T;
+  selectMany?: T;
   group?:
     | T
     | {
@@ -475,6 +481,8 @@ export interface PostsSelect<T extends boolean = true> {
 export interface LocalizedPostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  select?: T;
+  selectMany?: T;
   group?:
     | T
     | {
