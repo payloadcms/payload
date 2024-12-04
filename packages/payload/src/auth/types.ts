@@ -221,6 +221,7 @@ export interface IncomingAuthType {
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
    */
   forgotPassword?: {
+    expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
@@ -279,6 +280,7 @@ export type VerifyConfig = {
 export interface Auth
   extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
   forgotPassword?: {
+    expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
