@@ -15,6 +15,7 @@ import type {
 } from '@/payload-types'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
+import { cn } from '@/utilities/cn'
 
 type NodeTypes =
   | DefaultNodeTypes
@@ -39,10 +40,26 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
   },
 })
 
-export default function RichText(
-  props: {
-    data: SerializedEditorState
-  } & React.HTMLAttributes<HTMLDivElement>,
-) {
-  return <RichTextWithoutBlocks converters={jsxConverters} {...props} />
+type Props = {
+  data: SerializedEditorState
+  enableGutter?: boolean
+  enableProse?: boolean
+} & React.HTMLAttributes<HTMLDivElement>
+
+export default function RichText(props: Props) {
+  const { className, enableProse = true, enableGutter = true, ...rest } = props
+  return (
+    <RichTextWithoutBlocks
+      converters={jsxConverters}
+      className={cn(
+        {
+          'container ': enableGutter,
+          'max-w-none': !enableGutter,
+          'mx-auto prose dark:prose-invert ': enableProse,
+        },
+        className,
+      )}
+      {...rest}
+    />
+  )
 }

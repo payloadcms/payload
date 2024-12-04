@@ -17,7 +17,7 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
 
   return (
     <div className={clsx('container', className)}>
-      {introContent && <RichText data={introContent} />}
+      {introContent && <RichText data={introContent} enableGutter={false} />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-stretch">
         {docs?.map((doc, index) => {
