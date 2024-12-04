@@ -309,6 +309,22 @@ export interface Page {
     | null;
   slug: string;
   additional?: string | null;
+  array?:
+    | {
+        title?: string | null;
+        other?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        title?: string | null;
+        other?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'some';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -657,6 +673,25 @@ export interface PagesSelect<T extends boolean = true> {
       };
   slug?: T;
   additional?: T;
+  array?:
+    | T
+    | {
+        title?: T;
+        other?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        some?:
+          | T
+          | {
+              title?: T;
+              other?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
