@@ -284,7 +284,7 @@ jobs:
           max_attempts: 5
           timeout_minutes: 15
           command: pnpm test:int
-          on_retry_command: pnpm add -g globby && pnpm add -g chalk && pnpm clean:all && pnpm install --no-frozen-lockfile
+          on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile
 
   tests-e2e:
     runs-on: ubuntu-latest
@@ -386,7 +386,7 @@ jobs:
           max_attempts: 5
           timeout_minutes: 20
           command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
-          on_retry_command: pnpm add -g globby && pnpm add -g chalk && pnpm clean:all && pnpm install --no-frozen-lockfile
+          on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile && pnpm build:all
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
           NEXT_TELEMETRY_DISABLED: 1
