@@ -42,7 +42,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
 
-  const { customComponents: { Description, Label } = {} } = useField({
+  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {} } = useField({
     path,
   })
 
@@ -120,6 +120,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         id={`field-${fieldPreferencesKey}`}
         style={styles}
       >
+        {BeforeInput}
         <CollapsibleElement
           className={`${baseClass}__collapsible`}
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
@@ -142,6 +143,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
             readOnly={readOnly}
           />
         </CollapsibleElement>
+        {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}

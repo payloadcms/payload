@@ -20,8 +20,8 @@ export async function generateStaticParams() {
     collection: 'posts',
     draft: false,
     limit: 1000,
-    pagination: false,
     overrideAccess: false,
+    pagination: false,
     select: {
       slug: true,
     },

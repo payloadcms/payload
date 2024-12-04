@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -119,7 +119,7 @@
     "react-image-crop": "10.1.8",
     "react-select": "5.8.3",
     "scheduler": "0.25.0-rc-66855b96-20241106",
-    "sonner": "^1.5.0",
+    "sonner": "^1.7.0",
     "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
     "uuid": "10.0.0"

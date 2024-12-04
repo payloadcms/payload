@@ -40,7 +40,8 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
-  const { customComponents: { Description, Label } = {}, errorPaths } = useField({ path })
+  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, errorPaths } =
+    useField({ path })
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
@@ -94,6 +95,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
             )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
+          {BeforeInput}
           <RenderFields
             fields={fields}
             margins="small"
@@ -105,6 +107,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           />
         </div>
       </GroupProvider>
+      {AfterInput}
     </div>
   )
 }

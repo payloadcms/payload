@@ -590,6 +590,7 @@ export class BasePayload {
         if (!fieldAffectsData(field)) {
           return
         }
+
         if (field.name === 'id') {
           customIDType = field.type
           return true
