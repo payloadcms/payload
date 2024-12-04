@@ -1,15 +1,14 @@
 name: post-release-templates
 
 on:
-  # release:
-  #   types:
-  #     - published
+  release:
+    types:
+      - published
   workflow_dispatch:
     inputs:
       tag:
         description: 'Release tag to process (optional)'
         required: true
-        # default: ''
 
 env:
   NODE_VERSION: 22.6.0
@@ -23,6 +22,10 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payloadtests
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,6 +51,7 @@ jobs:
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
+          echo "DATABASE_URI=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
 
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.11.0
@@ -76,33 +80,20 @@ jobs:
           set -ex
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          export BRANCH_NAME=chore/templates-${{ steps.determine_tag.outputs.release_tag }}
-          git checkout -b $BRANCH_NAME
-          git add -A
 
-          # If no files have changed, exit early with success
-          git diff --cached --quiet --exit-code && exit 0
+          git diff --name-only
 
-          git commit -m "chore(templates): bump lockfiles after ${{ steps.determine_tag.outputs.release_tag }}"
-          git push origin $BRANCH_NAME
-          echo "committed=true" >> "$GITHUB_OUTPUT"
+          export BRANCH_NAME=templates/bump-${{ steps.determine_tag.outputs.release_tag }}
           echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
-
-      - name: Debug Branches
-        run: |
-          echo "Target Commitish: ${{ github.event.release.target_commitish }}"
-          echo "Branch: ${{ steps.commit.outputs.branch }}"
-          echo "Ref: ${{ github.ref }}"
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
-        if: steps.commit.outputs.committed == 'true'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           labels: 'area: templates'
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
-          commit-message: 'Automated update after release'
+          commit-message: 'templates: bump templates for ${{ steps.determine_tag.outputs.release_tag }}'
           branch: ${{ steps.commit.outputs.branch }}
-          base: ${{ github.event_name != 'workflow_dispatch' && github.event.release.target_commitish || github.ref }}
-          title: 'chore(templates): bump lockfiles after ${{ steps.determine_tag.outputs.release_tag }}'
-          body: 'Automated bump of template lockfiles after release ${{ steps.determine_tag.outputs.release_tag }}'
+          base: main
+          title: 'templates: bump for ${{ steps.determine_tag.outputs.release_tag }}'
+          body: 'Automated bump of templates for ${{ steps.determine_tag.outputs.release_tag }}'
