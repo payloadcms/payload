@@ -49,7 +49,7 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
 
   // Support relative URLs by prepending the origin, if necessary
   if (url && url.startsWith('/')) {
-    url = `${initPageResult.req.origin}${url}`
+    url = `${initPageResult.req.protocol}//${initPageResult.req.host}${url}`
   }
 
   return <LivePreviewClient breakpoints={breakpoints} initialData={doc} url={url} />
