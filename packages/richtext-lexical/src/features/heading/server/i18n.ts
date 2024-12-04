@@ -41,7 +41,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Címsor {{headingLevel}}',
   },
   is: {
-    label: 'Titilstærð {{headingLevel}}',
+    label: 'Fyrirsögn {{headingLevel}}',
   },
   it: {
     label: 'Intestazione {{headingLevel}}',
