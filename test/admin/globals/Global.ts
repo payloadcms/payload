@@ -18,7 +18,6 @@ export const Global: GlobalConfig = {
       },
     },
     group: 'Group',
-    preview: () => 'https://payloadcms.com',
   },
   fields: [
     {

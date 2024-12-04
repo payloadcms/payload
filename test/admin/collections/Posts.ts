@@ -57,7 +57,7 @@ export const Posts: CollectionConfig = {
         title: 'This is a custom OG title for posts',
       },
     },
-    preview: () => 'https://payloadcms.com',
+    preview: () => '/',
     useAsTitle: 'title',
   },
   fields: [
