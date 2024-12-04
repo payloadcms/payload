@@ -183,6 +183,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
           button={<ChevronIcon />}
           buttonSize={size}
           className={disabled ? `${baseClass}--popup-disabled` : ''}
+          disabled={disabled}
           horizontalAlign="right"
           noBackground
           render={({ close }) => SubMenuPopupContent({ close: () => close() })}
