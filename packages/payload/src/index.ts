@@ -741,6 +741,7 @@ export const reload = async (
   config: SanitizedConfig,
   payload: Payload,
   skipImportMapGeneration?: boolean,
+  skipTypesGeneration?: boolean,
 ): Promise<void> => {
   if (typeof payload.db.destroy === 'function') {
     await payload.db.destroy()
@@ -763,7 +764,7 @@ export const reload = async (
   // TODO: support HMR for other props in the future (see payload/src/index init()) that may change on Payload singleton
 
   // Generate types
-  if (config.typescript.autoGenerate !== false) {
+  if (skipTypesGeneration !== true && config.typescript.autoGenerate !== false) {
     // We cannot run it directly here, as generate-types imports json-schema-to-typescript, which breaks on turbopack.
     // see: https://github.com/vercel/next.js/issues/66723
     void payload.bin({
@@ -791,9 +792,26 @@ export const reload = async (
   global._payload_doNotCacheClientSchemaMap = true
 }
 
-export const getPayload = async (
-  options: Pick<InitOptions, 'config' | 'importMap'>,
-): Promise<Payload> => {
+export type GetPayloadOptions = {
+  /**
+   * @default false
+   */
+  disableHMR?: boolean
+  /**
+   * Customize the reload behavior when HMR runs
+   */
+  reload?: {
+    /**
+     * @default false
+     */
+    skipImportMapGeneration?: boolean
+    /**
+     * @default false
+     */
+    skipTypesGeneration?: boolean
+  }
+} & Pick<InitOptions, 'config' | 'importMap'>
+export const getPayload = async (options: GetPayloadOptions): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
@@ -807,7 +825,12 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload)
+      await reload(
+        config,
+        cached.payload,
+        options?.reload?.skipImportMapGeneration,
+        options?.reload?.skipTypesGeneration,
+      )
 
       resolve()
     }
@@ -835,7 +858,8 @@ export const getPayload = async (
       !cached.ws &&
       process.env.NODE_ENV !== 'production' &&
       process.env.NODE_ENV !== 'test' &&
-      process.env.DISABLE_PAYLOAD_HMR !== 'true'
+      process.env.DISABLE_PAYLOAD_HMR !== 'true' &&
+      options?.disableHMR !== true
     ) {
       try {
         const port = process.env.PORT || '3000'
