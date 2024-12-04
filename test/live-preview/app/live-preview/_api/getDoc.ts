@@ -35,5 +35,5 @@ export const getDoc = async <T>(args: {
     console.log('Error getting doc', err)
   }
 
-  throw new Error('Error getting doc')
+  throw new Error('No doc found')
 }
