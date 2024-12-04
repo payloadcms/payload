@@ -81,7 +81,7 @@ export const i18n: Partial<GenericLanguages> = {
   },
   is: {
     alignCenterLabel: 'Stilla fyrir miðju',
-    alignJustifyLabel: 'Stilla rétt upp',
+    alignJustifyLabel: 'Full jöfnun',
     alignLeftLabel: 'Stilla til vinstri',
     alignRightLabel: 'Stilla til hægri',
   },
