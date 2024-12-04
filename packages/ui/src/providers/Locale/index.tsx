@@ -27,9 +27,10 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 
   const [localeCode, setLocaleCode] = useState<string>(defaultLocale)
 
-  const locale: Locale | null = React.useMemo(() => {
+  const locale: Locale = React.useMemo(() => {
     if (!localization) {
-      return null
+      // TODO: return null V4
+      return {} as Locale
     }
 
     return (
@@ -64,6 +65,18 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 }
 
 /**
+ * @deprecated
  * A hook that returns the current locale object.
+ *
+ * V4 BREAKING CHANGE: The `useLocale` hook will return null || Locale object.
+ *
+ * V3 usage:
+ * const { code } = useLocale()
+ *
+ * V4 usage will be:
+ * const locale = useLocale()
+ *
+ * Reason:
+ * Currently it returns false || Locale object. But the types say it should return null || Locale object.
  */
 export const useLocale = (): Locale => useContext(LocaleContext)
