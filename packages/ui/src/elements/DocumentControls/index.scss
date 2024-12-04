@@ -207,7 +207,6 @@
 
       &__controls {
         padding-left: var(--gutter-h);
-        overflow: auto;
 
         // do not show scrollbar because the parent container has a static height
         // this container has a gradient overlay as visual indication of `overflow: scroll`
