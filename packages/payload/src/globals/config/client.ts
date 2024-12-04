@@ -102,6 +102,10 @@ export const createClientGlobalConfig = ({
           importMap,
         })
         break
+      case 'label':
+        clientGlobal.label =
+          typeof global.label === 'function' ? global.label({ t: i18n.t }) : global.label
+        break
       default: {
         clientGlobal[key] = global[key]
         break
