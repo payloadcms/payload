@@ -1,10 +1,8 @@
 'use client'
 
-import {
-  type EditorConfig as LexicalEditorConfig,
-  type SerializedTextNode,
-  TextNode,
-} from 'lexical'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical'
+
+import { TextNode as LexicalTextNode } from 'lexical'
 
 import type {
   ResolvedClientFeatureMap,
@@ -13,40 +11,7 @@ import type {
 import type { LexicalFieldAdminProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
-class MyTextNode extends TextNode {
-  attributes?: Record<string, boolean | null | number | string>
-
-  static clone(node: MyTextNode) {
-    return new MyTextNode(node.__text, node.__key)
-  }
-
-  static getType() {
-    return 'myText' //TextNode.getType()
-  }
-
-  createDOM(config: LexicalEditorConfig) {
-    const dom = super.createDOM(config)
-    // add dashed underline to text with 2px of offset from the text
-    dom.style.textDecoration = 'underline'
-    dom.style.textDecorationStyle = 'dashed'
-    dom.style.textUnderlineOffset = '5px'
-
-    return dom
-  }
-
-  // static importJSON(serializedNode: SerializedTextNode): TextNode {
-  //   return
-  // }
-
-  exportJSON(): SerializedTextNode {
-    return {
-      ...super.exportJSON(),
-      type: MyTextNode.getType(),
-      // if is defined, add attributes to the JSON
-      ...(this.attributes && { attributes: this.attributes }),
-    }
-  }
-}
+import { TextNode } from '../../nodes/TextNode.js'
 
 export const sanitizeClientFeatures = (
   features: ResolvedClientFeatureMap,
@@ -55,7 +20,10 @@ export const sanitizeClientFeatures = (
     enabledFeatures: [],
     enabledFormats: [],
     markdownTransformers: [],
-    nodes: [],
+    nodes: [
+      TextNode,
+      { replace: LexicalTextNode, with: (node) => new TextNode(node.__text), withKlass: TextNode },
+    ],
     plugins: [],
     providers: [],
     slashMenu: {
