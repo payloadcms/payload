@@ -36,7 +36,7 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
     },
   ]
 
-  const url =
+  let url =
     typeof livePreviewConfig?.url === 'function'
       ? await livePreviewConfig.url({
           collectionConfig,
@@ -46,6 +46,11 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
           payload: initPageResult.req.payload,
         })
       : livePreviewConfig?.url
+
+  // Support relative URLs by prepending the origin, if necessary
+  if (url && url.startsWith('/')) {
+    url = `${initPageResult.req.origin}${url}`
+  }
 
   return <LivePreviewClient breakpoints={breakpoints} initialData={doc} url={url} />
 }
