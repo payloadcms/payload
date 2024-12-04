@@ -12,7 +12,7 @@ export const is: GenericTranslationsObject = {
     charactersTooMany: '{{characters}} stafir of margir',
     checksPassing: '{{current}}/{{max}} yfirferðir standast',
     good: 'Flott',
-    imageAutoGenerationTip: 'Með því að stofna sjálfkrafa mun forsíðumyndin "hero" vera sótt',
+    imageAutoGenerationTip: 'Mynd verður sjálfkrafa sótt sem hetjumynd',
     lengthTipDescription:
       'Stafalengd skal vera á milli {{minLength}} og {{maxLength}} stafir. Fyrir hjálp við að skrifa gæða meta lýsingar, sjá nánar hér ',
     lengthTipTitle:
