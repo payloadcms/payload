@@ -5,6 +5,7 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
   TextClassesFeature,
+  TextColorFeature,
   TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
 
@@ -27,19 +28,16 @@ export const PostsCollection: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures.filter((feature) => feature === InlineToolbarFeature()),
           FixedToolbarFeature(),
-          TextClassesFeature({
-            settings: [
-              {
-                classPrefix: 'color',
-                classSuffixes: ['blue', 'green', 'red'],
-                toolbarInline: false,
-                childComponent: './TextColorIcon',
-              },
-              {
-                classPrefix: 'bg-color',
-                classSuffixes: ['pink', 'yellow'],
-                childComponent: './BackgroundColorIcon',
-              },
+          TextColorFeature({
+            colors: [
+              { label: 'Red', classSuffix: 'red' },
+              { label: 'Green', classSuffix: 'green' },
+              { label: 'Blue', classSuffix: 'blue' },
+            ],
+            bgColors: [
+              { label: 'Red', classSuffix: 'red' },
+              { label: 'Green', classSuffix: 'green' },
+              { label: 'Blue', classSuffix: 'blue' },
             ],
           }),
           // TextColorFeature({
