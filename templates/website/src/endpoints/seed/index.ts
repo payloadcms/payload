@@ -37,10 +37,7 @@ export const seed = async ({
   // as well as the collections and globals
   // this is because while `yarn seed` drops the database
   // the custom `/api/seed` endpoint does not
-
-  payload.logger.info(`— Clearing media...`)
   payload.logger.info(`— Clearing collections and globals...`)
-
   // clear the database
   await Promise.all(
     globals.map((global) =>
@@ -57,31 +54,16 @@ export const seed = async ({
     ),
   )
 
-  await Promise.all(
-    collections.map((collection) =>
-      payload.delete({
-        collection: collection,
-        where: {
-          id: {
-            exists: true,
-          },
-        },
-        depth: 0,
-        context: {
-          disableRevalidate: true,
-        },
-      }),
-    ),
-  )
-
-  const pages = await payload.delete({
-    collection: 'pages',
-    where: {},
-    context: {
-      disableRevalidate: true,
-    },
-    depth: 0,
-  })
+  for (const collection of collections) {
+    await payload.delete({
+      collection: collection,
+      where: {},
+      depth: 0,
+      context: {
+        disableRevalidate: true,
+      },
+    })
+  }
 
   payload.logger.info(`— Seeding demo author and user...`)
 
@@ -217,7 +199,6 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    select: { content: false },
     data: JSON.parse(
       JSON.stringify({ ...post1, categories: [technologyCategory.id] })
         .replace(/"\{\{IMAGE_1\}\}"/g, String(image1ID))
@@ -232,7 +213,6 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    select: { content: false },
     data: JSON.parse(
       JSON.stringify({ ...post2, categories: [newsCategory.id] })
         .replace(/"\{\{IMAGE_1\}\}"/g, String(image2ID))
@@ -247,7 +227,6 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    select: { content: false },
     data: JSON.parse(
       JSON.stringify({ ...post3, categories: [financeCategory.id] })
         .replace(/"\{\{IMAGE_1\}\}"/g, String(image3ID))
@@ -284,7 +263,6 @@ export const seed = async ({
   const contactForm = await payload.create({
     collection: 'forms',
     depth: 0,
-    select: { title: true },
     data: JSON.parse(JSON.stringify(contactFormData)),
   })
 
