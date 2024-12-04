@@ -7,6 +7,7 @@ import React from 'react'
 export const LabelComponent: PayloadClientReactComponent<Block['admin']['components']['Label']> = (
   props,
 ) => {
+  console.log('!! props', props)
   const { formData } = props
-  return <div>{formData?.key}</div>
+  return <div>Hello world --{formData?.key}</div>
 }
