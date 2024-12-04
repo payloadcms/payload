@@ -160,7 +160,19 @@ Follow the docs to configure any one of these storage providers. For local devel
 This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment
 variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed.
 
+In your Next.js config, set the `output` property `standalone`.
+
+```js
+// next.config.js
+const nextConfig = {
+  output: 'standalone',
+}
+```
+
+Dockerfile
+
 ```dockerfile
+# Dockerfile
 # From https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 
 FROM node:18-alpine AS base
