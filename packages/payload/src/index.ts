@@ -807,7 +807,7 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload, process.env.PAYLOAD_NEXT_INTEGRATION !== 'true')
+      await reload(config, cached.payload, !options.importMap)
 
       resolve()
     }
