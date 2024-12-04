@@ -38,6 +38,9 @@ export const PageClient: React.FC<{
       />
       <Gutter>
         <div id={renderedPageTitleID}>{`For Testing: ${data.title}`}</div>
+        <div id={renderedPageTitleID}>
+          {`For Testing (Localized): ${typeof data.relationToLocalized === 'string' ? data.relationToLocalized : data.relationToLocalized?.localizedTitle}`}
+        </div>
       </Gutter>
     </React.Fragment>
   )

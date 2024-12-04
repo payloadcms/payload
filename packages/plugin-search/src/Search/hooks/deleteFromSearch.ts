@@ -1,6 +1,7 @@
 import type { DeleteFromSearch } from '../../types.js'
 
 export const deleteFromSearch: DeleteFromSearch = async ({
+  collection,
   doc,
   pluginConfig,
   req: { payload },
@@ -13,8 +14,11 @@ export const deleteFromSearch: DeleteFromSearch = async ({
       depth: 0,
       req,
       where: {
-        'doc.value': {
-          equals: doc.id,
+        doc: {
+          equals: {
+            relationTo: collection.slug,
+            value: doc.id,
+          },
         },
       },
     })

@@ -56,10 +56,17 @@ export const runJob = async ({
       workflowConfig,
     })
 
+    const errorJSON = hasFinalError
+      ? {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+        }
+      : undefined
     // Tasks update the job if they error - but in case there is an unhandled error (e.g. in the workflow itself, not in a task)
     // we need to ensure the job is updated to reflect the error
     await updateJob({
-      error: hasFinalError ? err : undefined,
+      error: errorJSON,
       hasError: hasFinalError, // If reached max retries => final error. If hasError is true this job will not be retried
       processing: false,
       totalTried: (job.totalTried ?? 0) + 1,

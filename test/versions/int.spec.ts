@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import path from 'path'
 import { ValidationError } from 'payload'
@@ -484,6 +484,57 @@ describe('Versions', () => {
       })
     })
 
+    it('should restore published version with correct data', async () => {
+      // create a post
+      const originalPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'description',
+          title: 'v1',
+          _status: 'published',
+        },
+      })
+
+      // update the post
+      await payload.update({
+        collection: draftCollectionSlug,
+        draft: true,
+        id: originalPost.id,
+        data: {
+          title: 'v2',
+          _status: 'published',
+        },
+      })
+
+      // get the version id of the original draft
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: {
+            equals: originalPost.id,
+          },
+        },
+      })
+
+      // restore the version
+      const versionToRestore = versions.docs[versions.docs.length - 1]
+      const restoredVersion = await payload.restoreVersion({
+        id: versionToRestore.id,
+        collection: draftCollectionSlug,
+      })
+
+      // get the latest draft
+      const latestDraft = await payload.findByID({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        draft: true,
+      })
+
+      // assert it has the original post content
+      expect(latestDraft.title).toStrictEqual('v1')
+      expect(restoredVersion.title).toStrictEqual('v1')
+    })
+
     describe('Update', () => {
       it('should allow a draft to be patched', async () => {
         const originalTitle = 'Here is a published post'
@@ -829,6 +880,62 @@ describe('Versions', () => {
 
         // correctly retains 2 documents in the actual collection
         expect(docs.totalDocs).toStrictEqual(2)
+      })
+    })
+
+    describe('Race conditions', () => {
+      it('should keep latest true with parallel writes', async () => {
+        const doc = await payload.create({
+          collection: 'draft-posts',
+          data: {
+            description: 'A',
+            title: 'A',
+          },
+        })
+
+        for (let i = 0; i < 200; i++) {
+          payload.logger.info(`try ${i}`)
+          const writeAmount = 3
+
+          const promises = Array.from({ length: writeAmount }, async (_, i) => {
+            return new Promise((resolve) => {
+              // Add latency so updates aren't immediate after each other but still in parallel
+              setTimeout(() => {
+                payload
+                  .update({
+                    id: doc.id,
+                    collection: 'draft-posts',
+                    data: {},
+                    draft: true,
+                  })
+                  .then(resolve)
+                  .catch(resolve)
+              }, i * 5)
+            })
+          })
+
+          await Promise.all(promises)
+
+          const { docs } = await payload.findVersions({
+            collection: 'draft-posts',
+            where: {
+              and: [
+                {
+                  parent: {
+                    equals: doc.id,
+                  },
+                },
+                {
+                  latest: {
+                    equals: true,
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(docs[0]).toBeDefined()
+        }
       })
     })
   })

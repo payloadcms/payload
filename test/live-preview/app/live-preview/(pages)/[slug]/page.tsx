@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-exports */
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
@@ -32,10 +33,11 @@ export default async function Page({ params: paramsPromise }: Args) {
 
 export async function generateStaticParams() {
   process.env.PAYLOAD_DROP_DATABASE = 'false'
+
   try {
     const pages = await getDocs<Page>('pages')
     return pages?.map(({ slug }) => slug)
-  } catch (error) {
+  } catch (_err) {
     return []
   }
 }

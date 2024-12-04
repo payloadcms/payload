@@ -17,6 +17,8 @@ import {
   deepCopyObjectSimple,
   fieldAffectsData,
   fieldHasSubFields,
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
   fieldIsSidebar,
   getFieldPaths,
   tabHasName,
@@ -138,11 +140,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
 
-  const isHiddenField = 'hidden' in field && field?.hidden
-  const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
-
   let fieldPermissions: SanitizedFieldPermissions = true
-  if (fieldAffectsData(field) && !(isHiddenField || disabledFromAdmin)) {
+
+  if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field)) {
     fieldPermissions =
       parentPermissions === true
         ? parentPermissions
@@ -233,7 +233,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             if (!omitParents && (!filter || filter(args))) {
               state[parentPath + '.id'] = {
                 fieldSchema: includeSchema
-                  ? field.fields.find((field) => 'name' in field && field.name === 'id')
+                  ? field.fields.find((field) => fieldIsID(field))
                   : undefined,
                 initialValue: row.id,
                 valid: true,
@@ -343,9 +343,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               if (!omitParents && (!filter || filter(args))) {
                 state[parentPath + '.id'] = {
                   fieldSchema: includeSchema
-                    ? block.fields.find(
-                        (blockField) => 'name' in blockField && blockField.name === 'id',
-                      )
+                    ? block.fields.find((blockField) => fieldIsID(blockField))
                     : undefined,
                   initialValue: row.id,
                   valid: true,
@@ -724,9 +722,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  const isDisabled = field?.admin && 'disabled' in field.admin && field.admin.disabled
-
-  if (requiresRender && !isDisabled && renderFieldFn) {
+  if (requiresRender && renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
     const fieldState = state[path]
 
     const fieldConfig = fieldSchemaMap.get(schemaPath)

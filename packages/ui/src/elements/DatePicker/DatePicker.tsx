@@ -1,5 +1,5 @@
 'use client'
-import type { ReactDatePickerProps } from 'react-datepicker'
+import type { DatePickerProps } from 'react-datepicker'
 
 import React from 'react'
 import ReactDatePickerDefaultImport, { registerLocale, setDefaultLocale } from 'react-datepicker'
@@ -11,9 +11,9 @@ import type { Props } from './types.js'
 import { CalendarIcon } from '../../icons/Calendar/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { getFormattedLocale } from './getFormattedLocale.js'
 import './library.scss'
 import './index.scss'
+import { getFormattedLocale } from './getFormattedLocale.js'
 
 const baseClass = 'date-time-picker'
 
@@ -55,7 +55,10 @@ const DatePicker: React.FC<Props> = (props) => {
     }
   }
 
-  const onChange = (incomingDate: Date) => {
+  const onChange: Extract<
+    DatePickerProps,
+    { selectsMultiple?: never; selectsRange?: never }
+  >['onChange'] = (incomingDate) => {
     const newDate = incomingDate
     if (newDate instanceof Date && ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
       const tzOffset = incomingDate.getTimezoneOffset() / 60
@@ -66,7 +69,10 @@ const DatePicker: React.FC<Props> = (props) => {
     }
   }
 
-  const dateTimePickerProps: ReactDatePickerProps = {
+  const dateTimePickerProps: Extract<
+    DatePickerProps,
+    { selectsMultiple?: never; selectsRange?: never }
+  > = {
     customInputRef: 'ref',
     dateFormat,
     disabled: readOnly,
@@ -84,7 +90,10 @@ const DatePicker: React.FC<Props> = (props) => {
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
     timeFormat,
     timeIntervals,
-    ...overrides,
+    ...(overrides as Extract<
+      DatePickerProps,
+      { selectsMultiple?: never; selectsRange?: never } // to satisfy TypeScript. Overrides can enable selectsMultiple or selectsRange but then it's up to the user to ensure they pass in the correct onChange
+    >),
   }
 
   const classes = [baseClass, `${baseClass}__appearance--${pickerAppearance}`]

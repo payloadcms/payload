@@ -10,6 +10,7 @@ import type { User } from '../types.js'
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { AuthenticationError, LockedAuth, ValidationError } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { Forbidden } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
@@ -39,6 +40,10 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> => {
   let args = incomingArgs
+
+  if (args.collection.config.auth.disableLocalStrategy) {
+    throw new Forbidden(args.req.t)
+  }
 
   try {
     // /////////////////////////////////////
@@ -275,22 +280,6 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       req,
       showHiddenFields,
     })
-
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      user =
-        (await hook({
-          collection: args.collection?.config,
-          context: req.context,
-          doc: user,
-          req,
-        })) || user
-    }, Promise.resolve())
 
     // /////////////////////////////////////
     // afterRead - Collection

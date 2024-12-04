@@ -54,6 +54,8 @@ _\* An asterisk denotes that a property is required._
 
 The `url` property is a string that points to your front-end application. This value is used as the `src` attribute of the iframe rendering your front-end. Once loaded, the Admin Panel will communicate directly with your app through `window.postMessage` events.
 
+This can be an absolute URL or a relative path. If you are using a relative path, Payload will resolve it relative to the application's origin URL. This is useful for Vercel preview deployments, for example, where URLs are not known ahead of time.
+
 To set the URL, use the `admin.livePreview.url` property in your [Payload Config](../configuration/overview):
 
 ```ts

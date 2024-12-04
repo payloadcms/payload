@@ -43,6 +43,8 @@ export interface Config {
       UpdatePost: MyUpdatePostType;
       UpdatePostStep2: TaskUpdatePostStep2;
       CreateSimple: TaskCreateSimple;
+      CreateSimpleRetriesUndefined: TaskCreateSimpleRetriesUndefined;
+      CreateSimpleRetries0: TaskCreateSimpleRetries0;
       CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
       ExternalTask: TaskExternalTask;
       inline: {
@@ -56,6 +58,11 @@ export interface Config {
       retriesTest: WorkflowRetriesTest;
       retriesRollbackTest: WorkflowRetriesRollbackTest;
       retriesWorkflowLevelTest: WorkflowRetriesWorkflowLevelTest;
+      workflowNoRetriesSet: WorkflowWorkflowNoRetriesSet;
+      workflowRetries0: WorkflowWorkflowRetries0;
+      workflowAndTasksRetriesUndefined: WorkflowWorkflowAndTasksRetriesUndefined;
+      workflowRetries2TasksRetriesUndefined: WorkflowWorkflowRetries2TasksRetriesUndefined;
+      workflowRetries2TasksRetries0: WorkflowWorkflowRetries2TasksRetries0;
       inlineTaskTest: WorkflowInlineTaskTest;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
@@ -179,6 +186,8 @@ export interface PayloadJob {
           | 'UpdatePost'
           | 'UpdatePostStep2'
           | 'CreateSimple'
+          | 'CreateSimpleRetriesUndefined'
+          | 'CreateSimpleRetries0'
           | 'CreateSimpleWithDuplicateMessage'
           | 'ExternalTask';
         taskID: string;
@@ -220,6 +229,11 @@ export interface PayloadJob {
         | 'retriesTest'
         | 'retriesRollbackTest'
         | 'retriesWorkflowLevelTest'
+        | 'workflowNoRetriesSet'
+        | 'workflowRetries0'
+        | 'workflowAndTasksRetriesUndefined'
+        | 'workflowRetries2TasksRetriesUndefined'
+        | 'workflowRetries2TasksRetries0'
         | 'inlineTaskTest'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
@@ -231,6 +245,8 @@ export interface PayloadJob {
         | 'UpdatePost'
         | 'UpdatePostStep2'
         | 'CreateSimple'
+        | 'CreateSimpleRetriesUndefined'
+        | 'CreateSimpleRetries0'
         | 'CreateSimpleWithDuplicateMessage'
         | 'ExternalTask'
       )
@@ -445,6 +461,32 @@ export interface TaskCreateSimple {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleRetriesUndefined".
+ */
+export interface TaskCreateSimpleRetriesUndefined {
+  input: {
+    message: string;
+    shouldFail?: boolean | null;
+  };
+  output: {
+    simpleID: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleRetries0".
+ */
+export interface TaskCreateSimpleRetries0 {
+  input: {
+    message: string;
+    shouldFail?: boolean | null;
+  };
+  output: {
+    simpleID: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskCreateSimpleWithDuplicateMessage".
  */
 export interface TaskCreateSimpleWithDuplicateMessage {
@@ -511,6 +553,51 @@ export interface WorkflowRetriesRollbackTest {
  * via the `definition` "WorkflowRetriesWorkflowLevelTest".
  */
 export interface WorkflowRetriesWorkflowLevelTest {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowNoRetriesSet".
+ */
+export interface WorkflowWorkflowNoRetriesSet {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowRetries0".
+ */
+export interface WorkflowWorkflowRetries0 {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowAndTasksRetriesUndefined".
+ */
+export interface WorkflowWorkflowAndTasksRetriesUndefined {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowRetries2TasksRetriesUndefined".
+ */
+export interface WorkflowWorkflowRetries2TasksRetriesUndefined {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowRetries2TasksRetries0".
+ */
+export interface WorkflowWorkflowRetries2TasksRetries0 {
   input: {
     message: string;
   };

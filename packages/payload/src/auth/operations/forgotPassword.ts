@@ -11,6 +11,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'
+import { Forbidden } from '../../index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -43,14 +44,17 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       ? data.username.toLowerCase().trim()
       : null
 
+  let args = incomingArgs
+
+  if (incomingArgs.collection.config.auth.disableLocalStrategy) {
+    throw new Forbidden(incomingArgs.req.t)
+  }
   if (!sanitizedEmail && !sanitizedUsername) {
     throw new APIError(
       `Missing ${loginWithUsername ? 'username' : 'email'}.`,
       httpStatus.BAD_REQUEST,
     )
   }
-
-  let args = incomingArgs
 
   try {
     const shouldCommit = await initTransaction(args.req)
@@ -74,7 +78,6 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
 
     const {
       collection: { config: collectionConfig },
-      data,
       disableEmail,
       expiration,
       req: {
@@ -133,7 +136,9 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     }
 
     user.resetPasswordToken = token
-    user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000).toISOString() // 1 hour
+    user.resetPasswordExpiration = new Date(
+      collectionConfig.auth?.forgotPassword?.expiration || expiration || Date.now() + 3600000,
+    ).toISOString() // 1 hour
 
     user = await payload.update({
       id: user.id,

@@ -590,6 +590,7 @@ export class BasePayload {
         if (!fieldAffectsData(field)) {
           return
         }
+
         if (field.name === 'id') {
           customIDType = field.type
           return true
@@ -806,7 +807,7 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload)
+      await reload(config, cached.payload, !options.importMap)
 
       resolve()
     }
@@ -814,7 +815,6 @@ export const getPayload = async (
     if (cached.reload instanceof Promise) {
       await cached.reload
     }
-
     if (options?.importMap) {
       cached.payload.importMap = options.importMap
     }
@@ -838,6 +838,7 @@ export const getPayload = async (
     ) {
       try {
         const port = process.env.PORT || '3000'
+
         cached.ws = new WebSocket(
           `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
         )
@@ -1215,6 +1216,8 @@ export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterR
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
+
+export { validations } from './fields/validations.js'
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
