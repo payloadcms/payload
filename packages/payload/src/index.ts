@@ -773,11 +773,7 @@ export const reload = async (
   }
 
   // Generate component map
-  if (
-    skipImportMapGeneration !== true &&
-    config.admin?.importMap?.autoGenerate !== false &&
-    process.env.PAYLOAD_NEXT_INTEGRATION === 'true'
-  ) {
+  if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
     await generateImportMap(config, {
       log: true,
     })
@@ -819,7 +815,6 @@ export const getPayload = async (
     if (cached.reload instanceof Promise) {
       await cached.reload
     }
-
     if (options?.importMap) {
       cached.payload.importMap = options.importMap
     }
