@@ -21,7 +21,7 @@ export const is: GenericTranslationsObject = {
     noImage: 'Engin mynd',
     preview: 'Forskoða',
     previewDescription:
-      'Nákvæmar niðurstöður geta verið mismunandi eftir efni og mikilvægi leitar.',
+      'Nákvæmar niðurstöður geta verið mismunandi eftir samspili efnis og leitarskilyrða.',
     tooLong: 'Of langt',
     tooShort: 'Of stutt',
   },
