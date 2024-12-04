@@ -485,6 +485,7 @@ export const Form: React.FC<FormProps> = (props) => {
         docPermissions,
         docPreferences,
         globalSlug,
+        locale,
         operation,
         renderAllFields: true,
         schemaPath: collectionSlug ? collectionSlug : globalSlug,
@@ -504,6 +505,7 @@ export const Form: React.FC<FormProps> = (props) => {
       getFormState,
       docPermissions,
       getDocPreferences,
+      locale,
     ],
   )
 
