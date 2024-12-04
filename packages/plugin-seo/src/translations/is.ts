@@ -5,7 +5,7 @@ export const is: GenericTranslationsObject = {
   'plugin-seo': {
     almostThere: 'Nánast komið',
     autoGenerate: 'Stofna sjálfkrafa',
-    bestPractices: 'bestu starfsvenjur',
+    bestPractices: 'bestu venjur',
     characterCount: '{{current}}/{{minLength}}-{{maxLength}} stafir, ',
     charactersLeftOver: '{{characters}} eftir',
     charactersToGo: '{{characters}} stafir þangað til',
