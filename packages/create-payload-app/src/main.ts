@@ -17,6 +17,7 @@ import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
+import { updateEnvExampleFile } from './lib/update-env-example-file.js'
 import { updatePayloadInProject } from './lib/update-payload-in-project.js'
 import { writeEnvFile } from './lib/write-env-file.js'
 import { debug, error, info } from './utils/log.js'
@@ -181,6 +182,14 @@ export class Main {
           },
         })
 
+        await updateEnvExampleFile({
+          cliArgs: this.args,
+          databaseType: dbDetails.type,
+          databaseUri: dbDetails.dbUri,
+          payloadSecret: generateSecret(),
+          projectDir,
+        })
+
         await writeEnvFile({
           cliArgs: this.args,
           databaseType: dbDetails.type,
@@ -230,6 +239,7 @@ export class Main {
         case 'starter': {
           const dbDetails = await selectDb(this.args, projectName)
           const payloadSecret = generateSecret()
+
           await createProject({
             cliArgs: this.args,
             dbDetails,
@@ -238,6 +248,15 @@ export class Main {
             projectName,
             template,
           })
+
+          await updateEnvExampleFile({
+            cliArgs: this.args,
+            databaseType: dbDetails.type,
+            databaseUri: dbDetails.dbUri,
+            payloadSecret,
+            projectDir,
+          })
+
           await writeEnvFile({
             cliArgs: this.args,
             databaseType: dbDetails.type,
@@ -246,6 +265,7 @@ export class Main {
             projectDir,
             template,
           })
+
           break
         }
       }
