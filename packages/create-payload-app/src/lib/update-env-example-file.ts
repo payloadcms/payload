@@ -47,7 +47,6 @@ export async function updateEnvExampleFile(args: {
           key === 'DATABASE_URI' ||
           key === 'POSTGRES_URL'
         ) {
-          // Replace database URI based on selected type
           if (databaseType === 'vercel-postgres' || databaseType === 'postgres') {
             newValue = databaseUri
           } else if (databaseType === 'mongodb') {
