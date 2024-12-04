@@ -221,6 +221,10 @@ export interface IncomingAuthType {
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
    */
   forgotPassword?: {
+    /**
+     * The number of milliseconds that the forgot password token should be valid for.
+     * @default 3600000 // 1 hour
+     */
     expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
