@@ -1,9 +1,11 @@
-import type { EditorConfig, SerializedTextNode } from 'lexical'
+import type { EditorConfig, SerializedTextNode as SerializedLexicalTextNode } from 'lexical'
 
 import { TextNode as LexicalTextNode } from 'lexical'
 
-type MutableClasses = { [classSuffix: string]: string }
-type ReadOnlyClasses = { readonly [classSuffix: string]: string }
+type MutableClasses = { [classSuffix: string]: boolean | string }
+type ReadOnlyClasses = { readonly [classSuffix: string]: boolean | string }
+
+type SerializedTextNode = { classes?: ReadOnlyClasses } & SerializedLexicalTextNode
 
 export class TextNode extends LexicalTextNode {
   /** Don't use this directly, use `this.getClasses()` and `this.mutateClasses()` instead */
@@ -20,15 +22,21 @@ export class TextNode extends LexicalTextNode {
   }
 
   static importJSON(serializedNode: SerializedTextNode): TextNode {
-    return new TextNode(serializedNode.text)
+    const textNode = new TextNode(serializedNode.text)
+    textNode.__classes = serializedNode.classes || {}
+    return textNode
   }
 
   createDOM(config: EditorConfig) {
     const dom = super.createDOM(config)
     // add classes to the text node
     if (this.__classes) {
-      Object.entries(this.__classes).forEach(([classSuffix, className]) => {
-        dom.classList.add(`${classSuffix}-${className}`)
+      Object.entries(this.__classes).forEach(([classPrefix, classSufix]) => {
+        if (typeof classSufix === 'string') {
+          dom.classList.add(`${classPrefix}-${classSufix}`)
+        } else {
+          dom.classList.add(classPrefix)
+        }
       })
     }
 
@@ -36,11 +44,13 @@ export class TextNode extends LexicalTextNode {
   }
 
   exportJSON(): SerializedTextNode {
+    const classes = Object.fromEntries(
+      Object.entries(this.__classes).filter(([_, value]) => value !== undefined),
+    )
     return {
       ...super.exportJSON(),
       type: TextNode.getType(),
-      // if is defined, add classes to the JSON
-      ...(this.__classes && { classes: this.__classes }),
+      ...(Object.keys(classes).keys.length > 0 && { classes: this.__classes }),
     }
   }
 
