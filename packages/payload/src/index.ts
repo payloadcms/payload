@@ -773,7 +773,11 @@ export const reload = async (
   }
 
   // Generate component map
-  if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
+  if (
+    skipImportMapGeneration !== true &&
+    config.admin?.importMap?.autoGenerate !== false &&
+    process.env.PAYLOAD_NEXT_INTEGRATION === 'true'
+  ) {
     await generateImportMap(config, {
       log: true,
     })
@@ -807,7 +811,7 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload)
+      await reload(config, cached.payload, process.env.PAYLOAD_NEXT_INTEGRATION !== 'true')
 
       resolve()
     }
@@ -839,6 +843,7 @@ export const getPayload = async (
     ) {
       try {
         const port = process.env.PORT || '3000'
+
         cached.ws = new WebSocket(
           `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
         )

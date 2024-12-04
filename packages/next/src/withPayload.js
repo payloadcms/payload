@@ -6,6 +6,8 @@
 export const withPayload = (nextConfig = {}) => {
   const env = nextConfig?.env || {}
 
+  env.PAYLOAD_NEXT_INTEGRATION = 'true'
+
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
       'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This will slow down page transitions and may cause stale data to load within the Admin panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
