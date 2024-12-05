@@ -94,5 +94,9 @@ jobs:
           commit-message: 'templates: bump templates for ${{ steps.determine_tag.outputs.release_tag }}'
           branch: ${{ steps.commit.outputs.branch }}
           base: main
+          assignees: ${{ github.actor }}
           title: 'templates: bump for ${{ steps.determine_tag.outputs.release_tag }}'
-          body: 'Automated bump of templates for ${{ steps.determine_tag.outputs.release_tag }}'
+          body: |
+            🤖 Automated bump of templates for ${{ steps.determine_tag.outputs.release_tag }}
+
+            Triggered by user: @${{ github.actor }}
