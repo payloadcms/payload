@@ -38,6 +38,7 @@ export const seed = async ({
   // this is because while `yarn seed` drops the database
   // the custom `/api/seed` endpoint does not
   payload.logger.info(`— Clearing collections and globals...`)
+
   // clear the database
   await Promise.all(
     globals.map((global) =>
@@ -54,16 +55,9 @@ export const seed = async ({
     ),
   )
 
-  for (const collection of collections) {
-    await payload.delete({
-      collection: collection,
-      where: {},
-      depth: 0,
-      context: {
-        disableRevalidate: true,
-      },
-    })
-  }
+  await Promise.all(
+    collections.map((collection) => payload.db.deleteMany({ collection, req, where: {} })),
+  )
 
   payload.logger.info(`— Seeding demo author and user...`)
 
@@ -78,6 +72,7 @@ export const seed = async ({
   })
 
   payload.logger.info(`— Seeding media...`)
+
   const [image1Buffer, image2Buffer, image3Buffer, hero1Buffer] = await Promise.all([
     fetchFileByURL(
       'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post1.webp',
@@ -102,6 +97,9 @@ export const seed = async ({
     technologyCategory,
     newsCategory,
     financeCategory,
+    designCategory,
+    softwareCategory,
+    engineeringCategory,
   ] = await Promise.all([
     payload.create({
       collection: 'users',
@@ -152,29 +150,29 @@ export const seed = async ({
         title: 'Finance',
       },
     }),
+    payload.create({
+      collection: 'categories',
+      data: {
+        title: 'Design',
+      },
+    }),
+
+    payload.create({
+      collection: 'categories',
+      data: {
+        title: 'Software',
+      },
+    }),
+
+    payload.create({
+      collection: 'categories',
+      data: {
+        title: 'Engineering',
+      },
+    }),
   ])
+
   let demoAuthorID: number | string = demoAuthor.id
-
-  await payload.create({
-    collection: 'categories',
-    data: {
-      title: 'Design',
-    },
-  })
-
-  await payload.create({
-    collection: 'categories',
-    data: {
-      title: 'Software',
-    },
-  })
-
-  await payload.create({
-    collection: 'categories',
-    data: {
-      title: 'Engineering',
-    },
-  })
 
   let image1ID: number | string = image1Doc.id
   let image2ID: number | string = image2Doc.id
@@ -236,27 +234,29 @@ export const seed = async ({
   })
 
   // update each post with related posts
-  await payload.update({
-    id: post1Doc.id,
-    collection: 'posts',
-    data: {
-      relatedPosts: [post2Doc.id, post3Doc.id],
-    },
-  })
-  await payload.update({
-    id: post2Doc.id,
-    collection: 'posts',
-    data: {
-      relatedPosts: [post1Doc.id, post3Doc.id],
-    },
-  })
-  await payload.update({
-    id: post3Doc.id,
-    collection: 'posts',
-    data: {
-      relatedPosts: [post1Doc.id, post2Doc.id],
-    },
-  })
+  await Promise.all([
+    payload.update({
+      id: post1Doc.id,
+      collection: 'posts',
+      data: {
+        relatedPosts: [post2Doc.id, post3Doc.id],
+      },
+    }),
+    payload.update({
+      id: post2Doc.id,
+      collection: 'posts',
+      data: {
+        relatedPosts: [post1Doc.id, post3Doc.id],
+      },
+    }),
+    payload.update({
+      id: post3Doc.id,
+      collection: 'posts',
+      data: {
+        relatedPosts: [post1Doc.id, post2Doc.id],
+      },
+    }),
+  ])
 
   payload.logger.info(`— Seeding contact form...`)
 
