@@ -1781,15 +1781,64 @@ describe('Select', () => {
   describe('populate / defaultPopulate', () => {
     let homePage: Page
     let aboutPage: Page
-    let expectedHomePage: { id: number | string; slug: string }
+    let expectedHomePage: {
+      array: [
+        {
+          id: string
+          title: string
+        },
+      ]
+      blocks: [
+        {
+          blockType: string
+          id: string
+          title: string
+        },
+      ]
+      id: number | string
+      slug: string
+    }
     let expectedHomePageOverride: { additional: string; id: number | string }
     beforeAll(async () => {
       homePage = await payload.create({
         depth: 0,
         collection: 'pages',
-        data: { content: [], slug: 'home', additional: 'additional-data' },
+        data: {
+          content: [],
+          slug: 'home',
+          array: [
+            {
+              title: 'some-title',
+              other: 'other',
+            },
+          ],
+          blocks: [
+            {
+              blockType: 'some',
+              other: 'other',
+              title: 'some-title',
+            },
+          ],
+          additional: 'additional-data',
+        },
       })
-      expectedHomePage = { id: homePage.id, slug: homePage.slug }
+      expectedHomePage = {
+        id: homePage.id,
+        slug: homePage.slug,
+        array: [
+          {
+            id: homePage.array[0].id,
+            title: homePage.array[0].title,
+          },
+        ],
+        blocks: [
+          {
+            blockType: homePage.blocks[0].blockType,
+            id: homePage.blocks[0].id,
+            title: homePage.blocks[0].title,
+          },
+        ],
+      }
       expectedHomePageOverride = { id: homePage.id, additional: homePage.additional }
       aboutPage = await payload.create({
         depth: 0,
