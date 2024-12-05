@@ -96,6 +96,7 @@ export const NodePanel = () => {
           <CodeEditorLazy
             key="input"
             language="json"
+            minHeight={168}
             readOnly={true}
             value={JSON.stringify(taskLog.input, null, 2)}
           />
@@ -110,6 +111,7 @@ export const NodePanel = () => {
           <CodeEditorLazy
             key="output"
             language="json"
+            minHeight={168}
             readOnly={true}
             value={JSON.stringify(taskLog.output, null, 2)}
           />
