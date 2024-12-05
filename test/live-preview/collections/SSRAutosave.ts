@@ -29,6 +29,7 @@ export const SSRAutosave: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
+    preview: (doc) => `/live-preview/ssr-autosave/${doc?.slug}`,
   },
   fields: [
     {

@@ -9,11 +9,13 @@
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'partial-disable-locale-strategies': PartialDisableLocaleStrategyAuthOperations;
     'api-keys': ApiKeyAuthOperations;
     'public-users': PublicUserAuthOperations;
   };
   collections: {
     users: User;
+    'partial-disable-locale-strategies': PartialDisableLocaleStrategy;
     'api-keys': ApiKey;
     'public-users': PublicUser;
     relationsCollection: RelationsCollection;
@@ -24,6 +26,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    'partial-disable-locale-strategies': PartialDisableLocaleStrategiesSelect<false> | PartialDisableLocaleStrategiesSelect<true>;
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     relationsCollection: RelationsCollectionSelect<false> | RelationsCollectionSelect<true>;
@@ -32,7 +35,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {};
   globalsSelect: {};
@@ -40,6 +43,9 @@ export interface Config {
   user:
     | (User & {
         collection: 'users';
+      })
+    | (PartialDisableLocaleStrategy & {
+        collection: 'partial-disable-locale-strategies';
       })
     | (ApiKey & {
         collection: 'api-keys';
@@ -53,6 +59,24 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PartialDisableLocaleStrategyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -111,7 +135,7 @@ export interface PublicUserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   adminOnlyField?: string | null;
   roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   namedSaveToJWT?: string | null;
@@ -148,10 +172,27 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partial-disable-locale-strategies".
+ */
+export interface PartialDisableLocaleStrategy {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "api-keys".
  */
 export interface ApiKey {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -163,7 +204,7 @@ export interface ApiKey {
  * via the `definition` "public-users".
  */
 export interface PublicUser {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -182,8 +223,8 @@ export interface PublicUser {
  * via the `definition` "relationsCollection".
  */
 export interface RelationsCollection {
-  id: string;
-  rel?: (string | null) | User;
+  id: number;
+  rel?: (number | null) | User;
   text?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -193,37 +234,45 @@ export interface RelationsCollection {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'partial-disable-locale-strategies';
+        value: number | PartialDisableLocaleStrategy;
       } | null)
     | ({
         relationTo: 'api-keys';
-        value: string | ApiKey;
+        value: number | ApiKey;
       } | null)
     | ({
         relationTo: 'public-users';
-        value: string | PublicUser;
+        value: number | PublicUser;
       } | null)
     | ({
         relationTo: 'relationsCollection';
-        value: string | RelationsCollection;
+        value: number | RelationsCollection;
       } | null);
   globalSlug?: string | null;
   user:
     | {
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
+      }
+    | {
+        relationTo: 'partial-disable-locale-strategies';
+        value: number | PartialDisableLocaleStrategy;
       }
     | {
         relationTo: 'api-keys';
-        value: string | ApiKey;
+        value: number | ApiKey;
       }
     | {
         relationTo: 'public-users';
-        value: string | PublicUser;
+        value: number | PublicUser;
       };
   updatedAt: string;
   createdAt: string;
@@ -233,19 +282,23 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user:
     | {
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
+      }
+    | {
+        relationTo: 'partial-disable-locale-strategies';
+        value: number | PartialDisableLocaleStrategy;
       }
     | {
         relationTo: 'api-keys';
-        value: string | ApiKey;
+        value: number | ApiKey;
       }
     | {
         relationTo: 'public-users';
-        value: string | PublicUser;
+        value: number | PublicUser;
       };
   key?: string | null;
   value?:
@@ -265,7 +318,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -309,6 +362,21 @@ export interface UsersSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partial-disable-locale-strategies_select".
+ */
+export interface PartialDisableLocaleStrategiesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;

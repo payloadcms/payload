@@ -100,6 +100,7 @@ export const buildTableState = async (
       if (!canAccessAdmin) {
         throw new Error('Unauthorized')
       }
+
       // Match the user collection to the global admin config
     } else if (adminUserSlug !== incomingUserSlug) {
       throw new Error('Unauthorized')

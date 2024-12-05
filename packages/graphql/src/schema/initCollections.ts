@@ -126,12 +126,20 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
 
     const mutationInputFields = [...fields]
 
-    if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
+    if (
+      collectionConfig.auth &&
+      (!collectionConfig.auth.disableLocalStrategy ||
+        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.optionalPassword))
+    ) {
       mutationInputFields.push({
         name: 'password',
         type: 'text',
         label: 'Password',
-        required: true,
+        required: !(
+          typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.optionalPassword
+        ),
       })
     }
 

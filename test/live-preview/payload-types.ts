@@ -48,7 +48,7 @@ export interface Config {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'es';
   user: User & {
     collection: 'users';
   };
@@ -215,6 +215,8 @@ export interface Page {
           }
       )[]
     | null;
+  localizedTitle?: string | null;
+  relationToLocalized?: (string | null) | Post;
   richTextSlate?:
     | {
         [k: string]: unknown;
@@ -446,6 +448,7 @@ export interface Post {
       )[]
     | null;
   relatedPosts?: (string | Post)[] | null;
+  localizedTitle?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -913,6 +916,8 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  localizedTitle?: T;
+  relationToLocalized?: T;
   richTextSlate?: T;
   richTextLexical?: T;
   relationshipAsUpload?: T;
@@ -1037,6 +1042,7 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   relatedPosts?: T;
+  localizedTitle?: T;
   meta?:
     | T
     | {

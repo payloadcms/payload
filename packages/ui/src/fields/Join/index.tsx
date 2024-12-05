@@ -5,9 +5,11 @@ import type { JoinFieldClient, JoinFieldClientComponent, PaginatedDocs, Where } 
 import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../index.js'
 
@@ -15,7 +17,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
     field: {
-      admin: { allowCreate },
+      admin: { allowCreate, description },
       collection,
       label,
       localized,
@@ -27,7 +29,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   const { id: docID } = useDocumentInfo()
 
-  const { customComponents: { AfterInput, BeforeInput, Label } = {}, value } =
+  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, value } =
     useField<PaginatedDocs>({
       path,
     })
@@ -57,9 +59,10 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
     >
-      {BeforeInput}
       <RelationshipTable
+        AfterInput={AfterInput}
         allowCreate={typeof docID !== 'undefined' && allowCreate}
+        BeforeInput={BeforeInput}
         disableTable={filterOptions === null}
         field={field as JoinFieldClient}
         filterOptions={filterOptions}
@@ -76,7 +79,10 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         }
         relationTo={collection}
       />
-      {AfterInput}
+      <RenderCustomComponent
+        CustomComponent={Description}
+        Fallback={<FieldDescription description={description} path={path} />}
+      />
     </div>
   )
 }

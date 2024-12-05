@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.2.1",
+  "version": "3.4.0",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -365,11 +365,11 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.24.5",
-    "@babel/core": "^7.24.5",
-    "@babel/preset-env": "^7.24.5",
-    "@babel/preset-react": "^7.24.1",
-    "@babel/preset-typescript": "^7.24.1",
+    "@babel/cli": "7.25.9",
+    "@babel/core": "7.26.0",
+    "@babel/preset-env": "7.26.0",
+    "@babel/preset-react": "7.25.9",
+    "@babel/preset-typescript": "7.26.0",
     "@lexical/eslint-plugin": "0.20.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
@@ -377,13 +377,13 @@
     "@types/node": "22.5.4",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
-    "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
+    "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "babel-plugin-transform-remove-imports": "^1.8.0",
-    "esbuild": "0.23.1",
+    "esbuild": "0.24.0",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-a7bf2bd-20241110",
+    "eslint-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "1.15.0"
+    "swc-plugin-transform-remove-imports": "2.0.0"
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0-beta.2",
