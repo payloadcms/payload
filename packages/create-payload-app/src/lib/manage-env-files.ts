@@ -63,8 +63,7 @@ export async function manageEnvFiles(args: {
   const envPath = path.join(projectDir, '.env')
 
   try {
-    let updatedExampleContents = ''
-    let updatedEnvContents = ''
+    let updatedExampleContents: string
 
     if (template?.type === 'starter') {
       if (!fs.existsSync(envExamplePath)) {
@@ -87,7 +86,7 @@ export async function manageEnvFiles(args: {
     }
 
     const existingEnvContents = fs.existsSync(envPath) ? await fs.readFile(envPath, 'utf8') : ''
-    updatedEnvContents = existingEnvContents
+    const updatedEnvContents = existingEnvContents
       ? `${existingEnvContents}\n# Added by Payload\n${updatedExampleContents}`
       : `# Added by Payload\n${updatedExampleContents}`
 
