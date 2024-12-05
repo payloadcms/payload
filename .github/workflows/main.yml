@@ -162,7 +162,7 @@ jobs:
 
   tests-unit:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
@@ -194,7 +194,7 @@ jobs:
 
   tests-int:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: int-${{ matrix.database }}
     strategy:
@@ -297,7 +297,7 @@ jobs:
 
   tests-e2e:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: e2e-${{ matrix.suite }}
     strategy:
@@ -503,7 +503,7 @@ jobs:
 
   tests-type-generation:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
