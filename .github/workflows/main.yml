@@ -28,6 +28,7 @@ jobs:
       pull-requests: read
     outputs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
+      needs_tests: ${{ steps.filter.outputs.needs_tests }}
       templates: ${{ steps.filter.outputs.templates }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
@@ -48,11 +49,18 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
+            needs_tests:
+              - '.github/workflows/**'
+              - 'packages/**'
+              - 'test/**'
+              - 'pnpm-lock.yaml'
+              - 'package.json'
             templates:
               - 'templates/**'
       - name: Log all filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
+          echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
   lint:
@@ -155,7 +163,7 @@ jobs:
   tests-unit:
     runs-on: ubuntu-latest
     needs: build
-
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -187,6 +195,7 @@ jobs:
   tests-int:
     runs-on: ubuntu-latest
     needs: build
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: int-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -289,6 +298,7 @@ jobs:
   tests-e2e:
     runs-on: ubuntu-latest
     needs: build
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: e2e-${{ matrix.suite }}
     strategy:
       fail-fast: false
@@ -494,7 +504,7 @@ jobs:
   tests-type-generation:
     runs-on: ubuntu-latest
     needs: build
-
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
