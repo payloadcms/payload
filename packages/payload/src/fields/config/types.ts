@@ -1410,7 +1410,10 @@ export type JoinField = {
 export type JoinFieldClient = {
   admin?: AdminClient & Pick<JoinField['admin'], 'allowCreate' | 'disableBulkEdit' | 'readOnly'>
 } & FieldBaseClient &
-  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
+  Pick<
+    JoinField,
+    'collection' | 'defaultLimit' | 'defaultSort' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'
+  >
 
 export type FlattenedBlock = {
   flattenedFields: FlattenedField[]
