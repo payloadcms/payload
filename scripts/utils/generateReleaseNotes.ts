@@ -112,7 +112,7 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
 
       return sections
     },
-    {} as Record<Sections | 'breaking', GitCommit[]>,
+    {} as Record<'breaking' | Sections, GitCommit[]>,
   )
 
   // Sort commits by scope, unscoped first

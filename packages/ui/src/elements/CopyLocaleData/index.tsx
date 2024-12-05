@@ -1,6 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -16,8 +17,8 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { DrawerHeader } from '../BulkUpload/Header/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
-import { PopupList } from '../Popup/index.js'
 import './index.scss'
+import { PopupList } from '../Popup/index.js'
 
 const baseClass = 'copy-locale-data'
 
@@ -32,7 +33,7 @@ export const CopyLocaleData: React.FC = () => {
   } = useConfig()
   const { code } = useLocale()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const modified = useFormModified()
   const { toggleModal } = useModal()
   const { copyDataFromLocale } = useServerFunctions()
@@ -47,7 +48,7 @@ export const CopyLocaleData: React.FC = () => {
 
   const getLocaleLabel = (code: string) => {
     const locale = localization && localization.locales.find((l) => l.code === code)
-    return locale && locale.label ? locale.label : code
+    return locale && locale.label ? getTranslation(locale.label, i18n) : code
   }
 
   const [copying, setCopying] = React.useState(false)
@@ -57,7 +58,6 @@ export const CopyLocaleData: React.FC = () => {
 
   React.useEffect(() => {
     if (fromLocale !== code) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setFromLocale(code)
     }
   }, [code, fromLocale])

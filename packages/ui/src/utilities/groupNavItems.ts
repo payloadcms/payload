@@ -42,6 +42,14 @@ export function groupNavItems(
       if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read) {
         const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
 
+        const labelOrFunction =
+          'labels' in entityToGroup.entity
+            ? entityToGroup.entity.labels.plural
+            : entityToGroup.entity.label
+
+        const label =
+          typeof labelOrFunction === 'function' ? labelOrFunction({ t: i18n.t }) : labelOrFunction
+
         if (entityToGroup.entity.admin.group) {
           const existingGroup = groups.find(
             (group) => getTranslation(group.label, i18n) === translatedGroup,
@@ -57,12 +65,7 @@ export function groupNavItems(
           matchedGroup.entities.push({
             slug: entityToGroup.entity.slug,
             type: entityToGroup.type,
-            label:
-              'labels' in entityToGroup.entity
-                ? typeof entityToGroup.entity.labels.plural === 'function'
-                  ? entityToGroup.entity.labels.plural({ t: i18n.t })
-                  : entityToGroup.entity.labels.plural
-                : entityToGroup.entity.label,
+            label,
           })
         } else {
           const defaultGroup = groups.find((group) => {
@@ -71,12 +74,7 @@ export function groupNavItems(
           defaultGroup.entities.push({
             slug: entityToGroup.entity.slug,
             type: entityToGroup.type,
-            label:
-              'labels' in entityToGroup.entity
-                ? typeof entityToGroup.entity.labels.plural === 'function'
-                  ? entityToGroup.entity.labels.plural({ t: i18n.t })
-                  : entityToGroup.entity.labels.plural
-                : entityToGroup.entity.label,
+            label,
           })
         }
       }

@@ -19,6 +19,8 @@ export {
   fieldIsArrayType,
   fieldIsBlockType,
   fieldIsGroupType,
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
   fieldIsLocalized,
   fieldIsPresentationalOnly,
   fieldIsSidebar,

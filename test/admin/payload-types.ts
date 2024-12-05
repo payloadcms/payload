@@ -218,6 +218,27 @@ export interface CustomField {
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
+  relationshipFieldWithBeforeAfterInputs?: (string | null) | Post;
+  arrayFieldWithBeforeAfterInputs?:
+    | {
+        someTextField?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksFieldWithBeforeAfterInputs?:
+    | {
+        textField?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockFields';
+      }[]
+    | null;
+  text?: string | null;
+  groupFieldWithBeforeAfterInputs?: {
+    textOne?: string | null;
+    textTwo?: string | null;
+  };
+  radioFieldWithBeforeAfterInputs?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -538,6 +559,32 @@ export interface CustomFieldsSelect<T extends boolean = true> {
   descriptionAsFunction?: T;
   descriptionAsComponent?: T;
   customSelectField?: T;
+  relationshipFieldWithBeforeAfterInputs?: T;
+  arrayFieldWithBeforeAfterInputs?:
+    | T
+    | {
+        someTextField?: T;
+        id?: T;
+      };
+  blocksFieldWithBeforeAfterInputs?:
+    | T
+    | {
+        blockFields?:
+          | T
+          | {
+              textField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  text?: T;
+  groupFieldWithBeforeAfterInputs?:
+    | T
+    | {
+        textOne?: T;
+        textTwo?: T;
+      };
+  radioFieldWithBeforeAfterInputs?: T;
   updatedAt?: T;
   createdAt?: T;
 }

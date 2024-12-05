@@ -27,11 +27,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
-import './index.scss'
 import { findOptionsByValue } from './findOptionsByValue.js'
 import { optionsReducer } from './optionsReducer.js'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
+import './index.scss'
 
 const maxResultsPerRequest = 10
 
@@ -310,7 +310,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
-
   useIgnoredEffect(
     () => {
       const relationMap = createRelationMap({

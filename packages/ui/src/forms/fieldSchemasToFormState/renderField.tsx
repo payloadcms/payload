@@ -2,10 +2,12 @@ import type { ClientComponentProps, ClientField, FieldPaths, ServerComponentProp
 
 import { getTranslation } from '@payloadcms/translations'
 import { createClientField, MissingEditorProp } from 'payload'
+import { fieldIsHiddenOrDisabled } from 'payload/shared'
 
 import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- need this to reference already existing bundle. Otherwise, bundle size increases., payload/no-imports-from-exports-dir
 import { FieldDescription } from '../../exports/client/index.js'
 
@@ -44,6 +46,10 @@ export const renderField: RenderFieldMethod = ({
         i18n: req.i18n,
         importMap: req.payload.importMap,
       })
+
+  if (fieldIsHiddenOrDisabled(clientField)) {
+    return
+  }
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     customComponents: fieldState?.customComponents || {},

@@ -1,14 +1,14 @@
 {
   "name": "payload-3-custom-server",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon",
     "build": "next build && tsc --project tsconfig.server.json",
-    "start": "cross-env NODE_ENV=production node dist/server.js",
+    "dev": "nodemon",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload"
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_ENV=production node dist/server.js"
   },
-  "type": "module",
   "dependencies": {
     "@payloadcms/db-mongodb": "latest",
     "@payloadcms/next": "latest",

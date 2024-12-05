@@ -869,6 +869,9 @@ export interface BlockField {
 export interface TextField {
   id: string;
   text: string;
+  hiddenTextField?: string | null;
+  adminHiddenTextField?: string | null;
+  disabledTextField?: string | null;
   localizedText?: string | null;
   i18nText?: string | null;
   defaultString?: string | null;
@@ -3234,6 +3237,9 @@ export interface TabsFieldsSelect<T extends boolean = true> {
  */
 export interface TextFieldsSelect<T extends boolean = true> {
   text?: T;
+  hiddenTextField?: T;
+  adminHiddenTextField?: T;
+  disabledTextField?: T;
   localizedText?: T;
   i18nText?: T;
   defaultString?: T;
