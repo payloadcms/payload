@@ -3,7 +3,7 @@ import type { SelectType } from 'payload'
 /**
  * Sanitizes REST select query to SelectType
  */
-export const sanitizeSelect = (unsanitizedSelect: unknown): SelectType | undefined => {
+export const sanitizeSelectParam = (unsanitizedSelect: unknown): SelectType | undefined => {
   if (unsanitizedSelect && typeof unsanitizedSelect === 'object') {
     for (const k in unsanitizedSelect) {
       if (unsanitizedSelect[k] === 'true') {
@@ -11,7 +11,7 @@ export const sanitizeSelect = (unsanitizedSelect: unknown): SelectType | undefin
       } else if (unsanitizedSelect[k] === 'false') {
         unsanitizedSelect[k] = false
       } else if (typeof unsanitizedSelect[k] === 'object') {
-        sanitizeSelect(unsanitizedSelect[k])
+        sanitizeSelectParam(unsanitizedSelect[k])
       }
     }
   }

@@ -7,8 +7,8 @@ import { isNumber } from 'payload/shared'
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
-import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
+import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
+import { sanitizeSelectParam } from '../utilities/sanitizeSelectParam.js'
 
 export const findVersions: CollectionRouteHandler = async ({ collection, req }) => {
   const { depth, limit, page, populate, select, sort, where } = req.query as {
@@ -26,9 +26,9 @@ export const findVersions: CollectionRouteHandler = async ({ collection, req }) 
     depth: isNumber(depth) ? Number(depth) : undefined,
     limit: isNumber(limit) ? Number(limit) : undefined,
     page: isNumber(page) ? Number(page) : undefined,
-    populate: sanitizePopulate(populate),
+    populate: sanitizePopulateParam(populate),
     req,
-    select: sanitizeSelect(select),
+    select: sanitizeSelectParam(select),
     sort: typeof sort === 'string' ? sort.split(',') : undefined,
     where,
   })

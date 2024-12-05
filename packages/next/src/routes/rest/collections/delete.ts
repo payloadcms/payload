@@ -8,8 +8,8 @@ import { isNumber } from 'payload/shared'
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
-import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
+import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
+import { sanitizeSelectParam } from '../utilities/sanitizeSelectParam.js'
 
 export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => {
   const { depth, overrideLock, populate, select, where } = req.query as {
@@ -24,9 +24,9 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     overrideLock: Boolean(overrideLock === 'true'),
-    populate: sanitizePopulate(populate),
+    populate: sanitizePopulateParam(populate),
     req,
-    select: sanitizeSelect(select),
+    select: sanitizeSelectParam(select),
     where,
   })
 

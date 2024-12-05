@@ -5,8 +5,8 @@ import { isNumber } from 'payload/shared'
 import type { GlobalRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
-import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
+import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
+import { sanitizeSelectParam } from '../utilities/sanitizeSelectParam.js'
 
 export const findVersionByID: GlobalRouteHandlerWithID = async ({ id, globalConfig, req }) => {
   const { searchParams } = req
@@ -16,9 +16,9 @@ export const findVersionByID: GlobalRouteHandlerWithID = async ({ id, globalConf
     id,
     depth: isNumber(depth) ? Number(depth) : undefined,
     globalConfig,
-    populate: sanitizePopulate(req.query.populate),
+    populate: sanitizePopulateParam(req.query.populate),
     req,
-    select: sanitizeSelect(req.query.select),
+    select: sanitizeSelectParam(req.query.select),
   })
 
   return Response.json(result, {
