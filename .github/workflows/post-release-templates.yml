@@ -83,13 +83,13 @@ jobs:
 
           git diff --name-only
 
-          export BRANCH_NAME=templates/bump-${{ steps.determine_tag.outputs.release_tag }}
+          export BRANCH_NAME=templates/bump-${{ steps.determine_tag.outputs.release_tag }}-$(date +%s)
           echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN_POST_RELEASE_TEMPLATES }}
           labels: 'area: templates'
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           commit-message: 'templates: bump templates for ${{ steps.determine_tag.outputs.release_tag }}'
