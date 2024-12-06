@@ -2,7 +2,7 @@ import type { Document, Payload, Where } from '../../types/index.js'
 import type { PreferenceRequest } from '../types.js'
 
 import { NotFound } from '../../errors/NotFound.js'
-import { UnauthorizedError } from '../../errors/UnauthorizedError.jss'
+import { UnauthorizedError } from '../../errors/UnauthorizedError.js'
 import { createLocalReq } from '../../utilities/createLocalReq.js'
 
 export async function deleteOperation(
