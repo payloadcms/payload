@@ -23,7 +23,7 @@ env:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pull-requests: read
     outputs:
@@ -64,7 +64,7 @@ jobs:
   lint:
     if: >
       github.event_name == 'pull_request' && !contains(github.event.pull_request.title, 'no-lint') && !contains(github.event.pull_request.title, 'skip-lint')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -83,7 +83,7 @@ jobs:
   build:
     needs: changes
     if: ${{ needs.changes.outputs.needs_build == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -106,7 +106,7 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
   tests-unit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
@@ -133,7 +133,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8096
 
   tests-int:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: int-${{ matrix.database }}
@@ -233,7 +233,7 @@ jobs:
           on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile
 
   tests-e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: e2e-${{ matrix.suite }}
@@ -350,7 +350,7 @@ jobs:
 
   # Build listed templates with packed local packages
   build-templates:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     strategy:
       matrix:
@@ -429,7 +429,7 @@ jobs:
           pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }} $POSTGRES_URL
 
   tests-type-generation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
@@ -459,7 +459,7 @@ jobs:
   all-green:
     name: All Green
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - lint
       - build
@@ -473,7 +473,7 @@ jobs:
 
   publish-canary:
     name: Publish Canary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
     needs:
       - all-green
