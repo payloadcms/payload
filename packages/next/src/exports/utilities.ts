@@ -1,7 +1,4 @@
 // NOTICE: Server-only utilities, do not import anything client-side here.
-export { sanitizeJoinParams } from '../routes/rest/utilities/sanitizeJoinParams.js'
-export { sanitizePopulateParam } from '../routes/rest/utilities/sanitizePopulateParam.js'
-export { sanitizeSelectParam } from '../routes/rest/utilities/sanitizeSelectParam.js'
 export { addDataAndFileToRequest } from '../utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from '../utilities/addLocalesToRequest.js'
 export { createPayloadRequest } from '../utilities/createPayloadRequest.js'
