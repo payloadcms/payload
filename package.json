@@ -91,6 +91,7 @@
     "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
+    "test:types": "tstyche --target '>=5.7'",
     "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
@@ -165,6 +166,7 @@
     "sort-package-json": "^2.10.0",
     "swc-plugin-transform-remove-imports": "2.0.0",
     "tempy": "1.0.1",
+    "tstyche": "^3.1.1",
     "tsx": "4.19.2",
     "turbo": "^2.1.3",
     "typescript": "5.7.2"

@@ -1,0 +1,3 @@
+{
+  "testFileMatch": ["**/types.spec.ts"]
+}

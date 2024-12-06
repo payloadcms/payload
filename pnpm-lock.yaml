@@ -196,6 +196,9 @@ importers:
       tempy:
         specifier: 1.0.1
         version: 1.0.1
+      tstyche:
+        specifier: ^3.1.1
+        version: 3.1.1(typescript@5.7.2)
       tsx:
         specifier: 4.19.2
         version: 4.19.2
@@ -9786,6 +9789,16 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  tstyche@3.1.1:
+    resolution: {integrity: sha512-GB1GEApaoYHPREwbFuzx0D/dY3ohZdZ7tNbZJNjxoe3Xv1ibR6c+D8agOou6dYK3pOiSl1peaHCpbu9N40WQiw==}
+    engines: {node: '>=18.19'}
+    hasBin: true
+    peerDependencies:
+      typescript: 5.7.2
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   tsx@4.19.2:
     resolution: {integrity: sha512-pOUl6Vo2LUq/bSa8S5q7b91cgNSjctn9ugq/+Mvow99qW6x/UZYwzxy/3NmqoT66eHYfCVvFvACC58UBPFf28g==}
@@ -19983,6 +19996,10 @@ snapshots:
   tslib@1.14.1: {}
 
   tslib@2.8.1: {}
+
+  tstyche@3.1.1(typescript@5.7.2):
+    optionalDependencies:
+      typescript: 5.7.2
 
   tsx@4.19.2:
     dependencies:
