@@ -41,11 +41,11 @@ export async function GET(
     }
 
     if (!token) {
-      new Response('You are not allowed to preview this page', { status: 403 })
+      return new Response('You are not allowed to preview this page', { status: 403 })
     }
 
     if (!path.startsWith('/')) {
-      new Response('This endpoint can only be used for internal previews', { status: 500 })
+      return new Response('This endpoint can only be used for internal previews', { status: 500 })
     }
 
     let user
