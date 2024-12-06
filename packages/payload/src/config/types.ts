@@ -1001,6 +1001,7 @@ export type Config = {
   `*   ErrorDeletingFile: 'error',
   `*   FileRetrievalError: 'error',
   `*   FileUploadError: 'error',
+  `*   ReachedMaxCallDepth: 'error',
   `*   Forbidden: 'info',
   `*   Locked: 'info',
   `*   LockedAuth: 'error',
@@ -1011,6 +1012,14 @@ export type Config = {
    * }
    */
   loggingLevels?: Partial<Record<ErrorName, false | Level>>
+
+  /**
+   * The maximum allowed call depth for Local API operations. This setting helps prevent against hooks that lead to infinity loops.
+   * Pass `false` to disable it.
+   *
+   * @default 30
+   */
+  maxCallDepth?: false | number
 
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
