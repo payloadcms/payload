@@ -1088,6 +1088,26 @@ export type Config = {
      * to generate the TypeScript interfaces.
      */
     schema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+
+    /**
+     * This option allows you to have much better result types for relationship fields, depending on `depth`.
+     * @example:
+     * ```ts
+     *  const post = await payload.findByID({
+     *     collection: 'posts',
+     *     depth: 1,
+     *     id,
+     *  })
+     *  post.category
+     * ```
+     * Here, without this option `post.category` type will be `string | Category`
+     * which isn't exactly right, since we passed `depth: 1`. With this option - `Category`.
+     * The same if you'd pass `depth: 0`, the result type will be `string`.
+     *
+     * This option is opt in because it may break existing types. In next major version in may be enabled by default.
+     * @default false
+     */
+    typeSafeDepth?: boolean
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.

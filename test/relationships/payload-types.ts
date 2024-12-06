@@ -70,6 +70,15 @@ export interface Config {
     tasks: unknown;
     workflows: unknown;
   };
+  depth: {
+    allowed: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+    /**
+     * @minItems 11
+     * @maxItems 11
+     */
+    decremented: [null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    default: 2;
+  };
 }
 export interface UserAuthOperations {
   forgotPassword: {
@@ -115,6 +124,7 @@ export interface Post {
   filteredRelation?: (string | null) | Relation;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'posts';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -126,6 +136,7 @@ export interface Relation {
   disableRelation: boolean;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'relation';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -137,6 +148,7 @@ export interface StrictAccess {
   disableRelation: boolean;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'strict-access';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -148,6 +160,7 @@ export interface Chained {
   relation?: (string | null) | Chained;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'chained';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -158,6 +171,7 @@ export interface CustomId {
   name?: string | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'custom-id';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -168,6 +182,7 @@ export interface CustomIdNumber {
   name?: string | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'custom-id-number';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -179,6 +194,7 @@ export interface PostsLocalized {
   relationField?: (string | null) | Relation;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'postsLocalized';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -190,6 +206,7 @@ export interface Screening {
   movie?: (string | null) | Movie;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'screenings';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -201,6 +218,7 @@ export interface Movie {
   director?: (string | null) | Director;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'movies';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -212,6 +230,7 @@ export interface Director {
   movies?: (string | Movie)[] | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'directors';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -224,6 +243,7 @@ export interface MovieReview {
   visibility: 'followers' | 'public';
   updatedAt: string;
   createdAt: string;
+  __collection?: 'movieReviews';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -241,6 +261,7 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+  __collection?: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -254,6 +275,7 @@ export interface PolymorphicRelationship {
   } | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'polymorphic-relationships';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -265,6 +287,7 @@ export interface Tree {
   parent?: (string | null) | Tree;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'tree';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -280,6 +303,7 @@ export interface Page {
     | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'pages';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -290,6 +314,7 @@ export interface RelsToPage {
   page?: (string | null) | Page;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'rels-to-pages';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -312,6 +337,7 @@ export interface RelsToPagesAndCustomTextId {
       } | null);
   updatedAt: string;
   createdAt: string;
+  __collection?: 'rels-to-pages-and-custom-text-ids';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -333,6 +359,7 @@ export interface ObjectWrite {
     | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'object-writes';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -420,6 +447,7 @@ export interface PayloadLockedDocument {
   };
   updatedAt: string;
   createdAt: string;
+  __collection?: 'payload-locked-documents';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -443,6 +471,7 @@ export interface PayloadPreference {
     | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'payload-preferences';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -454,6 +483,7 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'payload-migrations';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

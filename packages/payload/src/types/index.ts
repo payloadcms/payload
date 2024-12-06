@@ -1,5 +1,6 @@
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
+import type { Prettify } from 'ts-essentials'
 import type { URL } from 'url'
 
 import type {
@@ -9,8 +10,10 @@ import type {
 } from '../collections/config/types.js'
 import type payload from '../index.js'
 import type {
+  AllowedDepth,
   CollectionSlug,
   DataFromGlobalSlug,
+  DecrementDepth,
   GlobalSlug,
   RequestContext,
   TypedCollectionJoins,
@@ -226,3 +229,67 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+type C = null | string
+
+type ExcludeID<T> = Exclude<T, number | string>
+
+type ExcludeObject<T> = Exclude<T, object>
+
+type HasCollectionType<T> = keyof NonNullable<T> extends '__collection' ? true : false
+
+type TypeIsPolymorphicRelationship<T> =
+  T extends Record<string, unknown>
+    ? T['relationTo'] extends string
+      ? '__collection' extends keyof ExcludeID<T['value']>
+        ? true
+        : false
+      : false
+    : false
+
+type ApplyDepthOnRelationship<T, Depth extends AllowedDepth> = 0 extends Depth
+  ? ExcludeObject<T>
+  : // @ts-expect-error preserve T | null
+    ApplyDepth<ExcludeID<T>, DecrementDepth<Depth>>
+
+type ApplyDepthOnPolyRelationship<T, Depth extends AllowedDepth> = Prettify<{
+  // @ts-expect-error index checked in TypeIsPolymorphicRelationship
+  relationTo: NonNullable<T>['relationTo']
+  value: 0 extends Depth
+    ? // @ts-expect-error index checked in TypeIsPolymorphicRelationship
+      ExcludeObject<NonNullable<T>['value']>
+    : // @ts-expect-error index checked in TypeIsPolymorphicRelationship
+      ApplyDepth<ExcludeID<NonNullable<T>['value']>, DecrementDepth<Depth>>
+}>
+
+type ApplyDepthProcessKey<T, Depth extends AllowedDepth> =
+  // DISABLED if Depth is number (e.g types with typescript.typeSafeDepth aren't generated)
+  number extends Depth
+    ? T
+    : // HAS ONE
+      HasCollectionType<T> extends true
+      ? ApplyDepthOnRelationship<T, Depth>
+      : T extends any[]
+        ? // HAS MANY
+          HasCollectionType<NonNullable<T>[number]> extends true
+          ? ApplyDepthOnRelationship<NonNullable<T>[number], Depth>[]
+          : // HAS MANY POLY
+            T extends (infer U)[]
+            ? TypeIsPolymorphicRelationship<U> extends true
+              ? (U extends Record<string, unknown> ? ApplyDepthOnPolyRelationship<U, Depth> : U)[]
+              : // JUST ARRAY / BLOCKS
+                (U extends Record<string, unknown> ? Prettify<ApplyDepth<U, Depth>> : U)[]
+            : T
+        : // HAS ONE POLY
+          TypeIsPolymorphicRelationship<T> extends true
+          ? T extends Record<string, unknown>
+            ? ApplyDepthOnPolyRelationship<T, Depth>
+            : T
+          : // OBJECT (NAMED TAB OR GROUP)
+            T extends Record<string, unknown>
+            ? Prettify<ApplyDepth<T, Depth>>
+            : T
+
+export type ApplyDepth<T extends object, Depth extends AllowedDepth> = {
+  [K in keyof T as K]: ApplyDepthProcessKey<T[K], Depth>
+}
