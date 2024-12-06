@@ -1,6 +1,6 @@
-import type { JoinQuery } from 'payload'
+import type { JoinQuery } from '../types/index.js'
 
-import { isNumber } from 'payload/shared'
+import { isNumber } from './isNumber.js'
 
 /**
  * Convert request JoinQuery object from strings to numbers

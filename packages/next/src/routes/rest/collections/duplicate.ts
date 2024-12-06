@@ -1,14 +1,12 @@
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
-import { duplicateOperation } from 'payload'
+import { duplicateOperation, sanitizePopulateParam, sanitizeSelectParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
-import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../utilities/sanitizeSelectParam.js'
 
 export const duplicate: CollectionRouteHandlerWithID = async ({
   id: incomingID,

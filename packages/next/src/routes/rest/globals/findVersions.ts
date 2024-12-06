@@ -1,14 +1,12 @@
 import type { Where } from 'payload'
 
 import httpStatus from 'http-status'
-import { findVersionsOperationGlobal } from 'payload'
+import { findVersionsOperationGlobal, sanitizePopulateParam, sanitizeSelectParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { GlobalRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../utilities/sanitizeSelectParam.js'
 
 export const findVersions: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { depth, limit, page, populate, select, sort, where } = req.query as {

@@ -1,16 +1,18 @@
 import type { JoinQuery } from 'payload'
 
 import httpStatus from 'http-status'
-import { findByIDOperation } from 'payload'
+import {
+  findByIDOperation,
+  sanitizeJoinParams,
+  sanitizePopulateParam,
+  sanitizeSelectParam,
+} from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
-import { sanitizeJoinParams } from '../utilities/sanitizeJoinParams.js'
-import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../utilities/sanitizeSelectParam.js'
 
 export const findByID: CollectionRouteHandlerWithID = async ({
   id: incomingID,

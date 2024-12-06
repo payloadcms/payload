@@ -1,13 +1,11 @@
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
-import { createOperation } from 'payload'
+import { createOperation, sanitizePopulateParam, sanitizeSelectParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../utilities/sanitizeSelectParam.js'
 
 export const create: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req

@@ -1,12 +1,10 @@
 import httpStatus from 'http-status'
-import { updateOperationGlobal } from 'payload'
+import { sanitizePopulateParam, sanitizeSelectParam, updateOperationGlobal } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { GlobalRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../utilities/sanitizeSelectParam.js'
 
 export const update: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { searchParams } = req

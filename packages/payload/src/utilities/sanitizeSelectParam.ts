@@ -1,4 +1,4 @@
-import type { SelectType } from 'payload'
+import type { SelectType } from '../types/index.js'
 
 /**
  * Sanitizes REST select query to SelectType

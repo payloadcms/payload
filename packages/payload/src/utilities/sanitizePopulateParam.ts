@@ -1,4 +1,4 @@
-import type { PopulateType } from 'payload'
+import type { PopulateType } from '../types/index.js'
 
 import { sanitizeSelectParam } from './sanitizeSelectParam.js'
 

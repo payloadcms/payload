@@ -1,16 +1,17 @@
 import type { JoinQuery, Where } from 'payload'
 
 import httpStatus from 'http-status'
-import { findOperation } from 'payload'
+import {
+  findOperation,
+  sanitizeJoinParams,
+  sanitizePopulateParam,
+  sanitizeSelectParam,
+} from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizeJoinParams } from '../utilities/sanitizeJoinParams.js'
-import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../utilities/sanitizeSelectParam.js'
-
 export const find: CollectionRouteHandler = async ({ collection, req }) => {
   const { depth, draft, joins, limit, page, populate, select, sort, where } = req.query as {
     depth?: string

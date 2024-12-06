@@ -1,12 +1,11 @@
 import httpStatus from 'http-status'
-import { restoreVersionOperation } from 'payload'
+import { restoreVersionOperation, sanitizePopulateParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
-import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
 
 export const restoreVersion: CollectionRouteHandlerWithID = async ({
   id: incomingID,

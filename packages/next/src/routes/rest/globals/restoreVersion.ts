@@ -1,11 +1,10 @@
 import httpStatus from 'http-status'
-import { restoreVersionOperationGlobal } from 'payload'
+import { restoreVersionOperationGlobal, sanitizePopulateParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { GlobalRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulateParam } from '../utilities/sanitizePopulateParam.js'
 
 export const restoreVersion: GlobalRouteHandlerWithID = async ({ id, globalConfig, req }) => {
   const { searchParams } = req
