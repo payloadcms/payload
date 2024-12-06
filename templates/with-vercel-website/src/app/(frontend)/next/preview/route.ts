@@ -1,9 +1,8 @@
-import jwt from 'jsonwebtoken'
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
-import { CollectionSlug } from 'payload'
+import type { CollectionSlug, PayloadRequest } from 'payload'
 
 const payloadToken = 'payload-token'
 
@@ -40,10 +39,6 @@ export async function GET(
       return new Response('No path provided', { status: 404 })
     }
 
-    if (!token) {
-      return new Response('You are not allowed to preview this page', { status: 403 })
-    }
-
     if (!path.startsWith('/')) {
       return new Response('This endpoint can only be used for internal previews', { status: 500 })
     }
@@ -51,9 +46,14 @@ export async function GET(
     let user
 
     try {
-      user = jwt.verify(token, payload.secret)
+      user = await payload.auth({
+        req: req as unknown as PayloadRequest,
+        headers: req.headers,
+      })
     } catch (error) {
+      console.log({ token, payloadSecret: payload.secret })
       payload.logger.error({ err: error }, 'Error verifying token for live preview')
+      return new Response('You are not allowed to preview this page', { status: 403 })
     }
 
     const draft = await draftMode()

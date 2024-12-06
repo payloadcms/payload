@@ -22,7 +22,6 @@
     "dotenv": "^8.2.0",
     "escape-html": "^1.0.3",
     "graphql": "^16.9.0",
-    "jsonwebtoken": "9.0.2",
     "next": "^15.0.0",
     "payload": "latest",
     "payload-admin-bar": "^1.0.6",
