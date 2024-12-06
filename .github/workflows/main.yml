@@ -68,36 +68,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
-
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
-            pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - run: pnpm install
       - name: Lint staged
         run: |
           git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...${GITHUB_SHA}
@@ -111,36 +88,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
-
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
-            pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - run: pnpm install
       - run: pnpm run build:all
         env:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
@@ -156,20 +110,16 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v4
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -221,22 +171,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Restore build
+        uses: actions/cache@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - run: pnpm install
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -329,20 +278,16 @@ jobs:
     env:
       SUITE_NAME: ${{ matrix.suite }}
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v4
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -436,20 +381,16 @@ jobs:
       POSTGRES_DB: payloadtests
 
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v4
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
@@ -492,20 +433,16 @@ jobs:
     needs: [changes, build]
     if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v4
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
