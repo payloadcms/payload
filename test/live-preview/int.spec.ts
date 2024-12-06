@@ -40,7 +40,7 @@ describe('Collections - Live Preview', () => {
   let media: Media
 
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ; ({ payload, restClient } = await initPayloadInt(dirname))
 
     tenant = await payload.create({
       collection: tenantsSlug,
@@ -943,6 +943,49 @@ describe('Collections - Live Preview', () => {
     expect(merge2.richTextLexical.root.children[2].type).toEqual('paragraph')
     expect(merge2.richTextLexical.root.children[3].type).toEqual('upload')
     expect(merge2.richTextLexical.root.children[3].value).toMatchObject(media)
+  })
+
+  it('— relationships - populates in block within Lexical rich text editor', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        richTextLexical: {
+          root: {
+            type: 'root',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [
+              {
+                format: '',
+                type: 'block',
+                version: 1,
+                fields: {
+                  id: 123,
+                  media: media.id,
+                  blockType: 'mediaBlock',
+                },
+              },
+            ],
+            direction: null,
+          },
+        },
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+      requestHandler,
+    })
+
+    expect(merge1.richTextLexical.root.children).toHaveLength(1)
+    expect(merge1.richTextLexical.root.children[0].type).toEqual('block')
+    expect(merge1.richTextLexical.root.children[0].fields.media).toMatchObject(media)
   })
 
   it('— relationships - does not re-populate existing rich text relationships', async () => {
