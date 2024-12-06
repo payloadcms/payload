@@ -376,7 +376,8 @@ export class BasePayload {
     return findVersions<TSlug>(this, options)
   }
 
-  findPreferenceByKey = async (args: PreferenceRequest) => localOperations.findPreferenceByKey(args)
+  findPreferenceByKey = async (args: PreferenceRequest) =>
+    localOperations.findPreferenceByKey(this, args)
 
   /**
    * @description Find version by ID
@@ -489,7 +490,8 @@ export class BasePayload {
     return update<TSlug, TSelect>(this, options)
   }
 
-  updatePreference = async (args: PreferenceUpdateRequest) => localOperations.updatePreference(args)
+  updatePreference = async (args: PreferenceUpdateRequest) =>
+    localOperations.updatePreference(this, args)
 
   validationRules: (args: OperationArgs<any>) => ValidationRule[]
 

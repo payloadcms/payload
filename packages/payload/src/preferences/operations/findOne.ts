@@ -1,18 +1,26 @@
-import type { TypedCollection } from '../../index.js'
-import type { Where } from '../../types/index.js'
+import type { Payload, Where } from '../../types/index.js'
 import type { PreferenceRequest } from '../types.js'
 
-export async function findOne(args: PreferenceRequest): Promise<TypedCollection['_preference']> {
-  const {
-    key,
-    req: { payload },
-    req,
-    user,
-  } = args
+import { createLocalReq, type TypedCollection } from '../../index.js'
+
+export async function findOne(
+  payload: Payload,
+  args: PreferenceRequest,
+): Promise<TypedCollection['_preference']> {
+  const { key, req: reqFromArgs, user } = args
 
   if (!user) {
     return null
   }
+
+  const req =
+    reqFromArgs ||
+    (await createLocalReq(
+      {
+        user,
+      },
+      payload,
+    ))
 
   const where: Where = {
     and: [
