@@ -77,6 +77,12 @@ export interface Array {
         id?: string | null;
       }[]
     | null;
+  group: {
+    defaultValueField?: string | null;
+    requiredField: string;
+  };
+  defaultValueField?: string | null;
+  requiredField: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -173,6 +179,14 @@ export interface ArraysSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  group?:
+    | T
+    | {
+        defaultValueField?: T;
+        requiredField?: T;
+      };
+  defaultValueField?: T;
+  requiredField?: T;
   updatedAt?: T;
   createdAt?: T;
 }

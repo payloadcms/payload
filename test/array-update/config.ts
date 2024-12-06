@@ -49,6 +49,32 @@ export default buildConfigWithDefaults({
             },
           ],
         },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'defaultValueField',
+              type: 'text',
+              defaultValue: 'testing',
+            },
+            {
+              name: 'requiredField',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+        {
+          name: 'defaultValueField',
+          type: 'text',
+          defaultValue: 'testing',
+        },
+        {
+          name: 'requiredField',
+          type: 'text',
+          required: true,
+        },
       ],
     },
   ],

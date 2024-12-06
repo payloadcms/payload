@@ -327,6 +327,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'UPDATE': {
+      // TODO: action can be undefined throwing errors when typing in the form
       const newField = Object.entries(action).reduce(
         (field, [key, value]) => {
           if (

@@ -47,6 +47,14 @@ const Submit: React.FC<{
     void submit({
       action,
       method: 'PATCH',
+      // TODO: one option is to create a function that returns undefined for fields that are not selected
+      overrides: {
+        arrayOfFields: undefined,
+        defaultValueField: undefined,
+        // this could be wrong and causing the issue with fieldReducer
+        'group.defaultValueField': undefined,
+        // requiredField: 'some value',
+      },
       skipValidation: true,
     })
   }, [action, submit])
@@ -138,32 +146,32 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const drawerSlug = `edit-${slug}`
 
-  React.useEffect(() => {
-    const controller = new AbortController()
-
-    if (!hasInitializedState.current) {
-      const getInitialState = async () => {
-        const { state: result } = await getFormState({
-          collectionSlug: slug,
-          data: {},
-          docPermissions: collectionPermissions,
-          docPreferences: null,
-          operation: 'update',
-          schemaPath: slug,
-          signal: controller.signal,
-        })
-
-        setInitialState(result)
-        hasInitializedState.current = true
-      }
-
-      void getInitialState()
-    }
-
-    return () => {
-      abortAndIgnore(controller)
-    }
-  }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
+  // React.useEffect(() => {
+  //   const controller = new AbortController()
+  //
+  //   if (!hasInitializedState.current) {
+  //     const getInitialState = async () => {
+  //       const { state: result } = await getFormState({
+  //         collectionSlug: slug,
+  //         data: {},
+  //         docPermissions: collectionPermissions,
+  //         docPreferences: null,
+  //         operation: 'update',
+  //         schemaPath: slug,
+  //         signal: controller.signal,
+  //       })
+  //
+  //       setInitialState(result)
+  //       hasInitializedState.current = true
+  //     }
+  //
+  //     void getInitialState()
+  //   }
+  //
+  //   return () => {
+  //     abortAndIgnore(controller)
+  //   }
+  // }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
@@ -176,15 +184,18 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         collectionSlug: slug,
         docPermissions: collectionPermissions,
         docPreferences: null,
+        fields: selected,
         formState: prevFormState,
         operation: 'update',
         schemaPath: slug,
         signal: controller.signal,
       })
 
+      console.log(state)
+
       return state
     },
-    [slug, getFormState, collectionPermissions],
+    [getFormState, slug, collectionPermissions, selected],
   )
 
   useEffect(() => {
