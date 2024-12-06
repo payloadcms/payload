@@ -1,3 +1,5 @@
+import escapeHTML from 'escape-html'
+
 import type { HTMLConverter } from '../types'
 
 import { replaceDoubleCurlys } from '../../replaceDoubleCurlys'
@@ -22,7 +24,7 @@ export const LinkHTMLConverter: HTMLConverter<any> = {
       node.fields.linkType === 'custom' ? node.fields.url : node.fields.doc?.value?.id
 
     if (submissionData) {
-      href = replaceDoubleCurlys(href, submissionData)
+      href = escapeHTML(replaceDoubleCurlys(href, submissionData))
     }
 
     return `<a href="${href}"${target}${rel}>${childrenText}</a>`
