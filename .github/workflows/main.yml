@@ -157,7 +157,7 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Types Tests
-        run: pnpm test:types
+        run: pnpm test:types --target '>=5.7'
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
