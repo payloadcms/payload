@@ -20,7 +20,6 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { getServerSideURL } from '@/utilities/getURL'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -46,7 +45,7 @@ export const Pages: CollectionConfig<'pages'> = {
           collection: 'pages',
         })
 
-        return `${getServerSideURL()}${path}`
+        return path
       },
     },
     preview: (data) => {
@@ -55,7 +54,7 @@ export const Pages: CollectionConfig<'pages'> = {
         collection: 'pages',
       })
 
-      return `${getServerSideURL()}${path}`
+      return path
     },
     useAsTitle: 'title',
   },
