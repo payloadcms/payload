@@ -106,12 +106,15 @@ export const createClientCollectionConfig = ({
     if (serverOnlyCollectionProperties.includes(key as any)) {
       continue
     }
+
     switch (key) {
       case 'admin':
         if (!collection.admin) {
           break
         }
+
         clientCollection.admin = {} as ClientCollectionConfig['admin']
+
         for (const adminKey in collection.admin) {
           if (serverOnlyCollectionAdminProperties.includes(adminKey as any)) {
             continue
