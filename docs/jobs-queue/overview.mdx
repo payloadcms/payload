@@ -42,7 +42,7 @@ Examples:
 
 **Offloading complex operations**
 
-You may run into the need to perform computationally expensive functions which might slow down your main Payload API server(s). The Jobs Queue allows you to offload these tasks a separate compute resource rather than slowing down the server(s) that run your Payload APIs. With Payload Task definitions, you can even keep large dependencies out of your main Next.js bundle by dynamically importing them only when they are used. This keeps your Next.js + Payload compilation fast and ensures large dependencies do not get bundled into your Payload production build.
+You may run into the need to perform computationally expensive functions which might slow down your main Payload API server(s). The Jobs Queue allows you to offload these tasks to a separate compute resource rather than slowing down the server(s) that run your Payload APIs. With Payload Task definitions, you can even keep large dependencies out of your main Next.js bundle by dynamically importing them only when they are used. This keeps your Next.js + Payload compilation fast and ensures large dependencies do not get bundled into your Payload production build.
 
 Examples:
 
