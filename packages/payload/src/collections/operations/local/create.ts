@@ -1,5 +1,13 @@
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
+  AllowedDepth,
+  CollectionSlug,
+  DefaultDepth,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDepth,
   Document,
   PayloadRequest,
   PopulateType,
@@ -17,14 +25,18 @@ import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
   data: RequiredDataFromCollectionSlug<TSlug>
-  depth?: number
+  depth?: TDepth
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
@@ -45,10 +57,11 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
 export default async function createLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TDepth>,
+): Promise<ApplyDepth<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>> {
   const {
     collection: collectionSlug,
     data,

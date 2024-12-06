@@ -67,6 +67,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   typescript: {
     autoGenerate: true,
     outputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
+    typeSafeDepth: false,
   },
   upload: {},
 }

@@ -3,7 +3,7 @@ import type { DeepPartial } from 'ts-essentials'
 import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { AllowedDepth, CollectionSlug, DefaultDepth } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
@@ -56,9 +56,10 @@ export type Arguments<TSlug extends CollectionSlug> = {
 export const updateOperation = async <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   incomingArgs: Arguments<TSlug>,
-): Promise<BulkOperationResult<TSlug, TSelect>> => {
+): Promise<BulkOperationResult<TSlug, TSelect, TDepth>> => {
   let args = incomingArgs
 
   try {
@@ -460,7 +461,7 @@ export const updateOperation = async <
       await commitTransaction(req)
     }
 
-    return result
+    return result as BulkOperationResult<TSlug, TSelect, TDepth>
   } catch (error: unknown) {
     await killTransaction(args.req)
     throw error

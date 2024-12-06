@@ -5,16 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type {
-  ChainedRelation,
-  CustomIdNumberRelation,
-  CustomIdRelation,
-  Director,
-  Page,
-  Post,
-  PostsLocalized,
-  Relation,
-} from './payload-types.js'
+import type { Director, Post, PostsLocalized, Relation } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
