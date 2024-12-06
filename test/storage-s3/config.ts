@@ -40,6 +40,12 @@ export default buildConfigWithDefaults({
       collections: {
         [mediaSlug]: true,
         [mediaWithPrefixSlug]: {
+          generateFileURL: ({ filename }) => {
+            if (filename === null) {
+              return null
+            }
+            return `https://example.com/${prefix}/${filename}`
+          },
           prefix,
         },
       },

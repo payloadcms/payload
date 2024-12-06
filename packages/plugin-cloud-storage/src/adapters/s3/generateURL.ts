@@ -12,5 +12,8 @@ interface Args {
 export const getGenerateURL =
   ({ bucket, config: { endpoint } }: Args): GenerateURL =>
   ({ filename, prefix = '' }) => {
+    if (filename == null) {
+      return null
+    }
     return `${endpoint}/${bucket}/${path.posix.join(prefix, filename)}`
   }
