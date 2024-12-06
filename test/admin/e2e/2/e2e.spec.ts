@@ -26,6 +26,8 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { goToFirstCell, navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -171,6 +173,17 @@ describe('admin2', () => {
 
         await page.locator('.search-filter__input').fill('this is fun')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      })
+
+      test('search should persist through browser back button', async () => {
+        const url = `${postsUrl.list}?limit=10&page=1&search=post1`
+        await page.goto(url)
+        await page.waitForURL(url)
+        await expect(page.locator('#search-filter-input')).toHaveValue('post1')
+        await goToFirstCell(page, postsUrl)
+        await page.goBack()
+        await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
+        await page.waitForURL(url)
       })
 
       test('search should not persist between navigation', async () => {
@@ -727,6 +740,26 @@ describe('admin2', () => {
 
         await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
         await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
+      })
+
+      test('should sort with existing filters', async () => {
+        await page.goto(postsUrl.list)
+        const column = await toggleColumn(page, { columnLabel: 'ID' })
+        await expect(column).not.toHaveClass('column-selector__column--active')
+        await page.locator('#heading-id').waitFor({ state: 'detached' })
+        await page.locator('#heading-title button.sort-column__asc').click()
+        await page.waitForURL(/sort=title/)
+
+        const columnAfterSort = page.locator(
+          `.list-controls__columns .column-selector .column-selector__column`,
+          {
+            hasText: exactText('ID'),
+          },
+        )
+
+        await expect(columnAfterSort).not.toHaveClass('column-selector__column--active')
+        await expect(page.locator('#heading-id')).toBeHidden()
+        await expect(page.locator('.cell-id')).toHaveCount(0)
       })
     })
 

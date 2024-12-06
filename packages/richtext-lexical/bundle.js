@@ -81,7 +81,6 @@ async function build() {
       'react',
       'react-dom',
       'next',
-      'react-animate-height',
       'crypto',
       'lodash',
       'ui',

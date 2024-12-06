@@ -1,16 +1,16 @@
 'use client'
-import type { ListQuery, PaginatedDocs, Where } from 'payload'
+import type { ListQuery, PaginatedDocs, Sort, Where } from 'payload'
 
-import { useRouter } from 'next/navigation.js'
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { usePreferences } from '../Preferences/index.js'
-import { useSearchParams } from '../SearchParams/index.js'
 
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
@@ -27,7 +27,7 @@ export type ListQueryProps = {
   readonly collectionSlug: string
   readonly data: PaginatedDocs
   readonly defaultLimit?: number
-  readonly defaultSort?: string
+  readonly defaultSort?: Sort
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: (query: ListQuery) => void
   readonly preferenceKey?: string
@@ -36,7 +36,7 @@ export type ListQueryProps = {
 export type ListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
-  defaultSort?: string
+  defaultSort?: Sort
   query: ListQuery
   refineListData: (args: ListQuery) => Promise<void>
 } & ContextHandlers
@@ -58,7 +58,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   'use no memo'
   const router = useRouter()
   const { setPreference } = usePreferences()
-  const { searchParams } = useSearchParams()
+  const rawSearchParams = useSearchParams()
+  const searchParams = useMemo(() => parseSearchParams(rawSearchParams), [rawSearchParams])
 
   const { onQueryChange } = useListDrawerContext()
 
@@ -98,14 +99,17 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
 
       if (updatePreferences && preferenceKey) {
-        await setPreference(preferenceKey, updatedPreferences)
+        await setPreference(preferenceKey, updatedPreferences, true)
       }
 
       const newQuery: ListQuery = {
-        limit: 'limit' in query ? query.limit : (currentQuery?.limit as string),
+        limit:
+          'limit' in query
+            ? query.limit
+            : ((currentQuery?.limit as string) ?? String(defaultLimit)),
         page: pageQuery as string,
         search: 'search' in query ? query.search : (currentQuery?.search as string),
-        sort: 'sort' in query ? query.sort : (currentQuery?.sort as string),
+        sort: 'sort' in query ? query.sort : ((currentQuery?.sort as string) ?? defaultSort),
         where: 'where' in query ? query.where : (currentQuery?.where as Where),
       }
 
@@ -151,7 +155,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const handleSearchChange = useCallback(
     async (arg: string) => {
       const search = arg === '' ? undefined : arg
-
       await refineListData({ search })
     },
     [refineListData],
@@ -185,7 +188,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         shouldUpdateQueryString = true
       }
 
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setCurrentQuery(currentQuery)
 
       if (shouldUpdateQueryString) {

@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     posts: Post;
     categories: Category;
+    'hidden-posts': HiddenPost;
     uploads: Upload;
     versions: Version;
     'categories-versions': CategoriesVersion;
@@ -34,6 +35,7 @@ export interface Config {
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
       filtered: 'posts';
+      hiddenPosts: 'hidden-posts';
       singulars: 'singular';
     };
     uploads: {
@@ -53,6 +55,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    'hidden-posts': HiddenPostsSelect<false> | HiddenPostsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
     'categories-versions': CategoriesVersionsSelect<false> | CategoriesVersionsSelect<true>;
@@ -159,6 +162,10 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  hiddenPosts?: {
+    docs?: (string | HiddenPost)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   group?: {
     relatedPosts?: {
       docs?: (string | Post)[] | null;
@@ -177,6 +184,17 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-posts".
+ */
+export interface HiddenPost {
+  id: string;
+  title?: string | null;
+  category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -305,6 +323,10 @@ export interface PayloadLockedDocument {
         value: string | Category;
       } | null)
     | ({
+        relationTo: 'hidden-posts';
+        value: string | HiddenPost;
+      } | null)
+    | ({
         relationTo: 'uploads';
         value: string | Upload;
       } | null)
@@ -412,6 +434,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   relatedPosts?: T;
   hasManyPosts?: T;
   hasManyPostsLocalized?: T;
+  hiddenPosts?: T;
   group?:
     | T
     | {
@@ -420,6 +443,16 @@ export interface CategoriesSelect<T extends boolean = true> {
       };
   singulars?: T;
   filtered?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-posts_select".
+ */
+export interface HiddenPostsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
   updatedAt?: T;
   createdAt?: T;
 }

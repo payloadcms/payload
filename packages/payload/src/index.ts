@@ -562,7 +562,7 @@ export class BasePayload {
       !checkedDependencies
     ) {
       checkedDependencies = true
-      await checkPayloadDependencies()
+      void checkPayloadDependencies()
     }
 
     this.importMap = options.importMap
@@ -597,6 +597,7 @@ export class BasePayload {
         if (!fieldAffectsData(field)) {
           return
         }
+
         if (field.name === 'id') {
           customIDType = field.type
           return true
@@ -789,6 +790,12 @@ export const reload = async (
   if (payload.db.connect) {
     await payload.db.connect({ hotReload: true })
   }
+  global._payload_clientConfig = null
+  global._payload_schemaMap = null
+  global._payload_clientSchemaMap = null
+  global._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
+  global._payload_doNotCacheSchemaMap = true
+  global._payload_doNotCacheClientSchemaMap = true
 }
 
 export const getPayload = async (
@@ -807,7 +814,7 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload)
+      await reload(config, cached.payload, !options.importMap)
 
       resolve()
     }
@@ -815,7 +822,6 @@ export const getPayload = async (
     if (cached.reload instanceof Promise) {
       await cached.reload
     }
-
     if (options?.importMap) {
       cached.payload.importMap = options.importMap
     }
@@ -839,6 +845,7 @@ export const getPayload = async (
     ) {
       try {
         const port = process.env.PORT || '3000'
+
         cached.ws = new WebSocket(
           `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
         )
@@ -1216,6 +1223,8 @@ export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterR
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
+
+export { validations } from './fields/validations.js'
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,

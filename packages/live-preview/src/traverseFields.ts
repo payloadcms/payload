@@ -8,6 +8,7 @@ export const traverseFields = <T>(args: {
   externallyUpdatedRelationship?: UpdatedDocument
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
+  localeChanged: boolean
   populationsByCollection: PopulationsByCollection
   result: T
 }): void => {
@@ -15,6 +16,7 @@ export const traverseFields = <T>(args: {
     externallyUpdatedRelationship,
     fieldSchema: fieldSchemas,
     incomingData,
+    localeChanged,
     populationsByCollection,
     result,
   } = args
@@ -47,6 +49,7 @@ export const traverseFields = <T>(args: {
                 externallyUpdatedRelationship,
                 fieldSchema: fieldSchema.fields,
                 incomingData: incomingRow,
+                localeChanged,
                 populationsByCollection,
                 result: result[fieldName][i],
               })
@@ -80,6 +83,7 @@ export const traverseFields = <T>(args: {
                 externallyUpdatedRelationship,
                 fieldSchema: incomingBlockJSON.fields,
                 incomingData: incomingBlock,
+                localeChanged,
                 populationsByCollection,
                 result: result[fieldName][i],
               })
@@ -103,6 +107,7 @@ export const traverseFields = <T>(args: {
             externallyUpdatedRelationship,
             fieldSchema: fieldSchema.fields,
             incomingData: incomingData[fieldName] || {},
+            localeChanged,
             populationsByCollection,
             result: result[fieldName],
           })
@@ -135,11 +140,12 @@ export const traverseFields = <T>(args: {
                 const newRelation = incomingRelation.relationTo
 
                 const hasChanged = newID !== oldID || newRelation !== oldRelation
+
                 const hasUpdated =
                   newRelation === externallyUpdatedRelationship?.entitySlug &&
                   newID === externallyUpdatedRelationship?.id
 
-                if (hasChanged || hasUpdated) {
+                if (hasChanged || hasUpdated || localeChanged) {
                   if (!populationsByCollection[newRelation]) {
                     populationsByCollection[newRelation] = []
                   }
@@ -153,11 +159,12 @@ export const traverseFields = <T>(args: {
               } else {
                 // Handle `hasMany` monomorphic
                 const hasChanged = incomingRelation !== result[fieldName][i]?.id
+
                 const hasUpdated =
                   fieldSchema.relationTo === externallyUpdatedRelationship?.entitySlug &&
                   incomingRelation === externallyUpdatedRelationship?.id
 
-                if (hasChanged || hasUpdated) {
+                if (hasChanged || hasUpdated || localeChanged) {
                   if (!populationsByCollection[fieldSchema.relationTo]) {
                     populationsByCollection[fieldSchema.relationTo] = []
                   }
@@ -207,13 +214,14 @@ export const traverseFields = <T>(args: {
               const oldRelation = hasOldValue ? result[fieldName].relationTo : ''
 
               const hasChanged = newID !== oldID || newRelation !== oldRelation
+
               const hasUpdated =
                 newRelation === externallyUpdatedRelationship?.entitySlug &&
                 newID === externallyUpdatedRelationship?.id
 
               // if the new value/relation is different from the old value/relation
               // populate the new value, otherwise leave it alone
-              if (hasChanged || hasUpdated) {
+              if (hasChanged || hasUpdated || localeChanged) {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
@@ -245,13 +253,14 @@ export const traverseFields = <T>(args: {
                 result[fieldName]
 
               const hasChanged = newID !== oldID
+
               const hasUpdated =
                 fieldSchema.relationTo === externallyUpdatedRelationship?.entitySlug &&
                 newID === externallyUpdatedRelationship?.id
 
               // if the new value is different from the old value
               // populate the new value, otherwise leave it alone
-              if (hasChanged || hasUpdated) {
+              if (hasChanged || hasUpdated || localeChanged) {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {

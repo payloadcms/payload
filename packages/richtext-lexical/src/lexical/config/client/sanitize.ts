@@ -14,6 +14,7 @@ export const sanitizeClientFeatures = (
 ): SanitizedClientFeatures => {
   const sanitized: SanitizedClientFeatures = {
     enabledFeatures: [],
+    enabledFormats: [],
     markdownTransformers: [],
     nodes: [],
     plugins: [],
@@ -37,6 +38,10 @@ export const sanitizeClientFeatures = (
   features.forEach((feature) => {
     if (feature.providers?.length) {
       sanitized.providers = sanitized.providers.concat(feature.providers)
+    }
+
+    if (feature.enableFormats?.length) {
+      sanitized.enabledFormats.push(...feature.enableFormats)
     }
 
     if (feature.nodes?.length) {

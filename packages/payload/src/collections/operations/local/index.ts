@@ -1,5 +1,5 @@
+import * as auth from '../../../auth/operations/local/index.js'
 /* eslint-disable no-restricted-exports */
-import auth from '../../../auth/operations/local/index.js'
 import { findOne as findPreferenceByKey } from '../../../preferences/operations/findOne.js'
 import { update as updatePreference } from '../../../preferences/operations/update.js'
 import count from './count.js'

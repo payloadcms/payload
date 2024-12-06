@@ -34,6 +34,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
     hasGenerateTitleFn,
     path,
+    readOnly,
   } = props || {}
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
@@ -127,6 +128,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
+                disabled={readOnly}
                 onClick={() => {
                   void regenerateTitle()
                 }}
@@ -174,6 +176,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
           Error={errorMessage}
           onChange={setValue}
           path={path}
+          readOnly={readOnly}
           required={required}
           showError={showError}
           style={{

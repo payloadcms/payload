@@ -47,4 +47,4 @@ async function localResetPassword<T extends CollectionSlug>(
   return result
 }
 
-export default localResetPassword
+export const resetPassword = localResetPassword

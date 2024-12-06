@@ -1,18 +1,13 @@
 import type { I18nClient } from '@payloadcms/translations'
 
-import {
-  type ClientField,
-  createClientFields,
-  deepCopyObjectSimple,
-  type FieldSchemaMap,
-  type Payload,
-} from 'payload'
+import { type ClientFieldSchemaMap, type FieldSchemaMap, type Payload } from 'payload'
 import { getFromImportMap } from 'payload/shared'
 
 import type { FeatureProviderProviderClient } from '../features/typesClient.js'
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type { FeatureClientSchemaMap, LexicalRichTextFieldProps } from '../types.js'
 type Args = {
+  clientFieldSchemaMap: ClientFieldSchemaMap
   fieldSchemaMap: FieldSchemaMap
   i18n: I18nClient
   path: string
@@ -26,9 +21,6 @@ export function initLexicalFeatures(args: Args): {
   featureClientSchemaMap: FeatureClientSchemaMap
 } {
   const clientFeatures: LexicalRichTextFieldProps['clientFeatures'] = {}
-
-  const fieldSchemaMap = Object.fromEntries(new Map(args.fieldSchemaMap))
-  //&const value = deepCopyObjectSimple(args.fieldState.value)
 
   // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
   const resolvedFeatureMapArray = Array.from(
@@ -84,64 +76,14 @@ export function initLexicalFeatures(args: Args): {
         featureKey,
       ].join('.')
 
-      const featurePath = [...args.path.split('.'), 'lexical_internal_feature', featureKey].join(
-        '.',
-      )
-
-      // Like args.fieldSchemaMap, we only want to include the sub-fields of the current feature
-      const featureSchemaMap: typeof fieldSchemaMap = {}
-      for (const key in fieldSchemaMap) {
-        const state = fieldSchemaMap[key]
-
-        if (key.startsWith(featureSchemaPath)) {
-          featureSchemaMap[key] = state
-        }
-      }
-
       featureClientSchemaMap[featureKey] = {}
 
-      for (const key in featureSchemaMap) {
-        const state = featureSchemaMap[key]
-
-        const clientFields = createClientFields({
-          clientFields: ('fields' in state
-            ? deepCopyObjectSimple(state.fields)
-            : [deepCopyObjectSimple(state)]) as ClientField[],
-          defaultIDType: args.payload.config.db.defaultIDType,
-          disableAddingID: true,
-          fields: 'fields' in state ? state.fields : [state],
-          i18n: args.i18n,
-          importMap: args.payload.importMap,
-        })
-        featureClientSchemaMap[featureKey][key] = clientFields
-      }
-
-      /*
-      This is for providing an initial form state. Right now we only want to provide the clientfields though
-      const schemaMap: {
-        [key: string]: FieldState
-      } = {}
-
-      const lexicalDeepIterate = (editorState) => {
-        console.log('STATE', editorState)
-
-        if (
-          editorState &&
-          typeof editorState === 'object' &&
-          'children' in editorState &&
-          Array.isArray(editorState.children)
-        ) {
-          for (const childKey in editorState.children) {
-            const childState = editorState.children[childKey]
-
-            if (childState && typeof childState === 'object') {
-              lexicalDeepIterate(childState)
-            }
-          }
+      // Like args.fieldSchemaMap, we only want to include the sub-fields of the current feature
+      for (const [key, entry] of args.clientFieldSchemaMap.entries()) {
+        if (key.startsWith(featureSchemaPath)) {
+          featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
         }
       }
-
-      lexicalDeepIterate(value.root)*/
     }
   }
   return {

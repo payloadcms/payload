@@ -96,7 +96,9 @@ export const findByIDOperation = async <
       return null
     }
 
-    const where = combineQueries({ id: { equals: id } }, accessResult)
+    const where = { id: { equals: id } }
+
+    const fullWhere = combineQueries(where, accessResult)
 
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
@@ -113,16 +115,18 @@ export const findByIDOperation = async <
         transactionID: req.transactionID,
       } as PayloadRequest,
       select,
-      where,
+      where: fullWhere,
     }
 
-    await validateQueryPaths({
-      collectionConfig,
-      overrideAccess,
-      req,
-      where,
-    })
-
+    // execute only if there's a custom ID and potentially overwriten access on id
+    if (req.payload.collections[collectionConfig.slug].customIDType) {
+      await validateQueryPaths({
+        collectionConfig,
+        overrideAccess,
+        req,
+        where,
+      })
+    }
     // /////////////////////////////////////
     // Find by ID
     // /////////////////////////////////////

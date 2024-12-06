@@ -1,4 +1,5 @@
 import type {
+  ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field,
@@ -11,6 +12,7 @@ import type {
 } from 'payload'
 
 export type RenderFieldArgs = {
+  clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug: string
   data: Data
   fieldConfig: Field
