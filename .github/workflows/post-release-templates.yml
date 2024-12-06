@@ -60,7 +60,7 @@ jobs:
       - name: Determine Release Tag
         id: determine_tag
         run: |
-          if [ "${{ github.event.release.tag_name }}" != "" ]; then
+          if [ "${{ github.event_name }}" == "release" ]; then
             echo "Using tag from release event: ${{ github.event.release.tag_name }}"
             echo "release_tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
           else
