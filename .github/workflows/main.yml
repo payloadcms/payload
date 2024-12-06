@@ -36,8 +36,6 @@ jobs:
         run: sudo ethtool -K eth0 tx off rx off
 
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -69,8 +67,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -114,8 +110,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
 
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -227,8 +221,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
