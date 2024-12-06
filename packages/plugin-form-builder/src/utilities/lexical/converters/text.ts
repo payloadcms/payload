@@ -1,5 +1,3 @@
-import escapeHTML from 'escape-html'
-
 import type { HTMLConverter } from '../types'
 
 import { replaceDoubleCurlys } from '../../replaceDoubleCurlys'
@@ -10,7 +8,7 @@ export const TextHTMLConverter: HTMLConverter<any> = {
     let text = node.text
 
     if (submissionData) {
-      text = escapeHTML(replaceDoubleCurlys(text, submissionData))
+      text = replaceDoubleCurlys(text, submissionData)
     }
 
     if (node.format & NodeFormat.IS_BOLD) {
