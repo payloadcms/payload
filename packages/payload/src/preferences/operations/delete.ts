@@ -1,16 +1,24 @@
-import type { Document, Where } from '../../types/index.js'
+import type { Document, Payload, Where } from '../../types/index.js'
 import type { PreferenceRequest } from '../types.js'
 
 import { NotFound } from '../../errors/NotFound.js'
-import { UnauthorizedError } from '../../errors/UnathorizedError.js'
+import { UnauthorizedError } from '../../errors/UnauthorizedError.jss'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
 
-export async function deleteOperation(args: PreferenceRequest): Promise<Document> {
-  const {
-    key,
-    req: { payload },
-    req,
-    user,
-  } = args
+export async function deleteOperation(
+  payload: Payload,
+  args: PreferenceRequest,
+): Promise<Document> {
+  const { key, req: reqFromArgs, user } = args
+
+  const req =
+    reqFromArgs ||
+    (await createLocalReq(
+      {
+        user,
+      },
+      payload,
+    ))
 
   if (!user) {
     throw new UnauthorizedError(req.t)
@@ -33,5 +41,6 @@ export async function deleteOperation(args: PreferenceRequest): Promise<Document
   if (result) {
     return result
   }
+
   throw new NotFound(req.t)
 }
