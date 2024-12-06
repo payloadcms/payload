@@ -27,5 +27,9 @@
     &--size-large {
       padding: base(0.8);
     }
+
+    &--disabled {
+      cursor: not-allowed;
+    }
   }
 }
