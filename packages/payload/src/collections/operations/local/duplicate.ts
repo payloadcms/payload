@@ -1,7 +1,7 @@
 import type { AllowedDepth, CollectionSlug, DefaultDepth, TypedLocale } from '../../..//index.js'
 import type { Payload, RequestContext } from '../../../index.js'
 import type {
-  ApplyDepth,
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -45,7 +45,7 @@ export async function duplicate<
 >(
   payload: Payload,
   options: Options<TSlug, TSelect, TDepth>,
-): Promise<ApplyDepth<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>> {
+): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>> {
   const {
     id,
     collection: collectionSlug,

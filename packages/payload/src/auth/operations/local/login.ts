@@ -7,7 +7,7 @@ import type {
   Payload,
   RequestContext,
 } from '../../../index.js'
-import type { ApplyDepth, PayloadRequest } from '../../../types/index.js'
+import type { ApplyDepthInternal, PayloadRequest } from '../../../types/index.js'
 import type { Result } from '../login.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -32,7 +32,7 @@ export async function localLogin<
 >(
   payload: Payload,
   options: Options<TSlug, TDepth>,
-): Promise<{ user: ApplyDepth<DataFromCollectionSlug<TSlug>, TDepth> } & Result> {
+): Promise<{ user: ApplyDepthInternal<DataFromCollectionSlug<TSlug>, TDepth> } & Result> {
   const {
     collection: collectionSlug,
     data,

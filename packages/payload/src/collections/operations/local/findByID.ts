@@ -10,7 +10,7 @@ import type {
   TypedLocale,
 } from '../../../index.js'
 import type {
-  ApplyDepth,
+  ApplyDepthInternal,
   ApplyDisableErrors,
   Document,
   PayloadRequest,
@@ -61,7 +61,7 @@ export default async function findByIDLocal<
   options: Options<TSlug, TDisableErrors, TSelect>,
 ): Promise<
   ApplyDisableErrors<
-    ApplyDepth<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>,
+    ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>,
     TDisableErrors
   >
 > {

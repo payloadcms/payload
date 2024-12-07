@@ -7,7 +7,7 @@ import type {
   TypedLocale,
 } from '../../../index.js'
 import type {
-  ApplyDepth,
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -47,7 +47,7 @@ export default async function findOneLocal<
 >(
   payload: Payload,
   options: Options<TSlug, TSelect>,
-): Promise<ApplyDepth<TransformGlobalWithSelect<TSlug, TSelect>, TDepth>> {
+): Promise<ApplyDepthInternal<TransformGlobalWithSelect<TSlug, TSelect>, TDepth>> {
   const {
     slug: globalSlug,
     depth,

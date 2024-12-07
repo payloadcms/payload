@@ -9,7 +9,7 @@ import type {
   TypedLocale,
 } from '../../../index.js'
 import type {
-  ApplyDepth,
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -62,7 +62,9 @@ export async function findLocal<
 >(
   payload: Payload,
   options: Options<TSlug, TSelect, TDepth>,
-): Promise<PaginatedDocs<ApplyDepth<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>>> {
+): Promise<
+  PaginatedDocs<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>>
+> {
   const {
     collection: collectionSlug,
     currentDepth,

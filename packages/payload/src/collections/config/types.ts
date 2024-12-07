@@ -50,7 +50,7 @@ import type {
   TypedLocale,
 } from '../../index.js'
 import type {
-  ApplyDepth,
+  ApplyDepthInternal,
   PayloadRequest,
   SelectType,
   Sort,
@@ -567,10 +567,10 @@ export type Collection = {
 
 export type BulkOperationResult<
   TSlug extends CollectionSlug,
-  TSelect extends SelectType,
+  TSelect extends SelectType = SelectType,
   TDepth extends AllowedDepth = DefaultDepth,
 > = {
-  docs: ApplyDepth<TransformCollectionWithSelect<TSlug, TSelect>[], TDepth>
+  docs: ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>[], TDepth>
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
     message: string

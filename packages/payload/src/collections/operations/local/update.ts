@@ -9,7 +9,7 @@ import type {
   TypedLocale,
 } from '../../../index.js'
 import type {
-  ApplyDepth,
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -93,7 +93,7 @@ async function updateLocal<
 >(
   payload: Payload,
   options: ByIDOptions<TSlug, TSelect>,
-): Promise<ApplyDepth<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>>
+): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>>
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
@@ -110,7 +110,7 @@ async function updateLocal<
   payload: Payload,
   options: Options<TSlug, TSelect>,
 ): Promise<
-  | ApplyDepth<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>
+  | ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>
   | BulkOperationResult<TSlug, TSelect, TDepth>
 >
 async function updateLocal<
@@ -121,7 +121,7 @@ async function updateLocal<
   payload: Payload,
   options: Options<TSlug, TSelect>,
 ): Promise<
-  | ApplyDepth<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>
+  | ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>
   | BulkOperationResult<TSlug, TSelect, TDepth>
 > {
   const {

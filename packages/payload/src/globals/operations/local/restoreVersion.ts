@@ -7,7 +7,12 @@ import type {
   RequestContext,
   TypedLocale,
 } from '../../../index.js'
-import type { ApplyDepth, Document, PayloadRequest, PopulateType } from '../../../types/index.js'
+import type {
+  ApplyDepthInternal,
+  Document,
+  PayloadRequest,
+  PopulateType,
+} from '../../../types/index.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -34,7 +39,7 @@ export default async function restoreVersionLocal<
 >(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<ApplyDepth<DataFromGlobalSlug<TSlug>, TDepth>> {
+): Promise<ApplyDepthInternal<DataFromGlobalSlug<TSlug>, TDepth>> {
   const { id, slug: globalSlug, depth, overrideAccess = true, populate, showHiddenFields } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
