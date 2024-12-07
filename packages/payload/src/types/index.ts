@@ -230,8 +230,6 @@ export type TransformGlobalWithSelect<
 
 export type PopulateType = Partial<TypedCollectionSelect>
 
-type C = null | string
-
 type ExcludeID<T> = Exclude<T, number | string>
 
 type ExcludeObject<T> = Exclude<T, object>
@@ -263,33 +261,42 @@ type ApplyDepthOnPolyRelationship<T, Depth extends AllowedDepth> = Prettify<{
 }>
 
 type ApplyDepthProcessKey<T, Depth extends AllowedDepth> =
-  // DISABLED if AllowedDepth is number (e.g types with typescript.typeSafeDepth aren't generated)
-  number extends AllowedDepth
-    ? T
-    : // HAS ONE
-      HasCollectionType<T> extends true
-      ? ApplyDepthOnRelationship<T, Depth>
-      : T extends any[]
-        ? // HAS MANY
-          HasCollectionType<NonNullable<T>[number]> extends true
-          ? ApplyDepthOnRelationship<NonNullable<T>[number], Depth>[]
-          : // HAS MANY POLY
-            T extends (infer U)[]
-            ? TypeIsPolymorphicRelationship<U> extends true
-              ? (U extends Record<string, unknown> ? ApplyDepthOnPolyRelationship<U, Depth> : U)[]
-              : // JUST ARRAY / BLOCKS
-                (U extends Record<string, unknown> ? Prettify<ApplyDepth<U, Depth>> : U)[]
-            : T
-        : // HAS ONE POLY
-          TypeIsPolymorphicRelationship<T> extends true
-          ? T extends Record<string, unknown>
-            ? ApplyDepthOnPolyRelationship<T, Depth>
-            : T
-          : // OBJECT (NAMED TAB OR GROUP)
-            T extends Record<string, unknown>
-            ? Prettify<ApplyDepth<T, Depth>>
-            : T
+  // HAS ONE
+  HasCollectionType<T> extends true
+    ? ApplyDepthOnRelationship<T, Depth>
+    : T extends any[]
+      ? // HAS MANY
+        HasCollectionType<NonNullable<T>[number]> extends true
+        ? ApplyDepthOnRelationship<NonNullable<T>[number], Depth>[]
+        : // HAS MANY POLY
+          T extends (infer U)[]
+          ? TypeIsPolymorphicRelationship<U> extends true
+            ? (U extends Record<string, unknown> ? ApplyDepthOnPolyRelationship<U, Depth> : U)[]
+            : // JUST ARRAY / BLOCKS
+              (U extends Record<string, unknown> ? Prettify<ApplyDepth<U, Depth>> : U)[]
+          : T
+      : // HAS ONE POLY
+        TypeIsPolymorphicRelationship<T> extends true
+        ? T extends Record<string, unknown>
+          ? ApplyDepthOnPolyRelationship<T, Depth>
+          : T
+        : // OBJECT (NAMED TAB OR GROUP)
+          T extends Record<string, unknown>
+          ? Prettify<ApplyDepth<T, Depth>>
+          : T
 
 export type ApplyDepth<T extends object, Depth extends AllowedDepth> = {
   [K in keyof T as K]: ApplyDepthProcessKey<T[K], Depth>
 }
+
+/**
+ * Use this type to support both, `typescript.typeSafeDepth` enabled and disabled.
+ * This is not needed to use in an actual project, since you either have it enabled or disabled, use `ApplyDepth` directly.
+ * Having this wrapper is preferred over doing this check directly in `ApplyDepth` to:
+ * * Preserve hover type output of `payload.find()` to `PaginatedDocs<Post>` instead of `PaginatedDocs<ApplyDepth<Post>>`
+ * * With enabled, make hover type output of `payload.find({ depth: 0 })` to `PaginatedDocs<ApplyDepth<Post, 0>>` instead of `PaginatedDocs<{ id : number, ///}>`
+ */
+export type ApplyDepthInternal<
+  T extends object,
+  Depth extends AllowedDepth,
+> = number extends AllowedDepth ? T : ApplyDepth<T, Depth>

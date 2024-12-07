@@ -9,7 +9,7 @@ import type {
   TypedLocale,
 } from '../../../index.js'
 import type {
-  ApplyDepth,
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -48,7 +48,7 @@ export default async function findVersionsLocal<
 >(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<PaginatedDocs<TypeWithVersion<ApplyDepth<DataFromGlobalSlug<TSlug>, TDepth>>>> {
+): Promise<PaginatedDocs<TypeWithVersion<ApplyDepthInternal<DataFromGlobalSlug<TSlug>, TDepth>>>> {
   const {
     slug: globalSlug,
     depth,
