@@ -11,6 +11,7 @@ type DateFNSKeys =
   | 'cs'
   | 'da'
   | 'de'
+  | 'el'
   | 'en-US'
   | 'es'
   | 'fa-IR'

@@ -19,6 +19,9 @@ export const i18n: Partial<GenericLanguages> = {
   de: {
     label: 'Trennlinie',
   },
+  el: {
+    label: 'Οριζόντιος Χάρακας',
+  },
   en: {
     label: 'Horizontal Rule',
   },

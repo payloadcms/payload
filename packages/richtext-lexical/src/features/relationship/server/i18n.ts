@@ -19,6 +19,9 @@ export const i18n: Partial<GenericLanguages> = {
   de: {
     label: 'Beziehung',
   },
+  el: {
+    label: 'Σχέση',
+  },
   en: {
     label: 'Relationship',
   },

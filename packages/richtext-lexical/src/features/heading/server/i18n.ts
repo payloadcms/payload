@@ -19,6 +19,9 @@ export const i18n: Partial<GenericLanguages> = {
   de: {
     label: 'Überschrift {{headingLevel}}',
   },
+  el: {
+    label: 'Κεφαλίδα {{headingLevel}}',
+  },
   en: {
     label: 'Heading {{headingLevel}}',
   },

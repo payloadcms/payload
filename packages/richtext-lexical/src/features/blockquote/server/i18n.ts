@@ -19,6 +19,9 @@ export const i18n: Partial<GenericLanguages> = {
   de: {
     label: 'Blockzitat',
   },
+  el: {
+    label: 'Παράθεση',
+  },
   en: {
     label: 'Blockquote',
   },

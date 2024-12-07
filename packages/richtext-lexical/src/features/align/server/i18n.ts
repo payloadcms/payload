@@ -37,6 +37,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Linksbündig',
     alignRightLabel: 'Rechtsbündig',
   },
+  el: {
+    alignCenterLabel: 'Στοίχιση Κέντρο',
+    alignJustifyLabel: 'Πλήρης Στοίχιση',
+    alignLeftLabel: 'Στοίχιση αριστερά',
+    alignRightLabel: 'Στοίχιση δεξιά',
+  },
   en: {
     alignCenterLabel: 'Align Center',
     alignJustifyLabel: 'Align Justify',

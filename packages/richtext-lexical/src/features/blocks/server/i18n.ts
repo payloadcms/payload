@@ -55,6 +55,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Blöcke',
   },
+  el: {
+    inlineBlocks: {
+      create: 'Δημιουργία {{label}}',
+      edit: 'Επεξεργασία {{label}}',
+      label: 'Ενσωματωμένα μπλοκ',
+      remove: 'Αφαίρεση {{label}}',
+    },
+    label: 'Μπλοκ',
+  },
   en: {
     inlineBlocks: {
       create: 'Create {{label}}',

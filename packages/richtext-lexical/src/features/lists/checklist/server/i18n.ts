@@ -19,6 +19,9 @@ export const i18n: Partial<GenericLanguages> = {
   de: {
     label: 'Checkliste',
   },
+  el: {
+    label: 'Λίστα ελέγχου',
+  },
   en: {
     label: 'Check List',
   },

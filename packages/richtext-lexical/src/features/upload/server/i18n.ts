@@ -19,6 +19,9 @@ export const i18n: Partial<GenericLanguages> = {
   de: {
     label: 'Datei',
   },
+  el: {
+    label: 'Μεταφόρτωση',
+  },
   en: {
     label: 'Upload',
   },

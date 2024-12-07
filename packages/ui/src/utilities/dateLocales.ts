@@ -3,6 +3,7 @@ import { az } from 'date-fns/locale/az'
 import { bg } from 'date-fns/locale/bg'
 import { cs } from 'date-fns/locale/cs'
 import { de } from 'date-fns/locale/de'
+import { el } from 'date-fns/locale/el'
 import { enUS } from 'date-fns/locale/en-US'
 import { es } from 'date-fns/locale/es'
 import { faIR } from 'date-fns/locale/fa-IR'
@@ -31,6 +32,7 @@ export const dateLocales = {
   bg,
   cs,
   de,
+  el,
   enUS,
   es,
   fa: faIR,
