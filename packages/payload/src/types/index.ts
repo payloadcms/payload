@@ -263,8 +263,8 @@ type ApplyDepthOnPolyRelationship<T, Depth extends AllowedDepth> = Prettify<{
 }>
 
 type ApplyDepthProcessKey<T, Depth extends AllowedDepth> =
-  // DISABLED if Depth is number (e.g types with typescript.typeSafeDepth aren't generated)
-  number extends Depth
+  // DISABLED if AllowedDepth is number (e.g types with typescript.typeSafeDepth aren't generated)
+  number extends AllowedDepth
     ? T
     : // HAS ONE
       HasCollectionType<T> extends true
