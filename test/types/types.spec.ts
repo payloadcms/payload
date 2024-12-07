@@ -354,6 +354,12 @@ describe('Types testing', () => {
     expect(getType<ApplyDepth<Join, 2>>()).type.toBe<JoinDepth2>()
   })
 
+  test('payload.find respects default depth', () => {
+    expect(payload.find({ collection: 'relationships' })).type.toBe<
+      Promise<PaginatedDocs<ApplyDepth<Relationship, 0>>>
+    >()
+  })
+
   test('payload.find respects depth', () => {
     expect(payload.find({ collection: 'relationships', depth: 2 })).type.toBe<
       Promise<PaginatedDocs<ApplyDepth<Relationship, 2>>>
@@ -362,6 +368,12 @@ describe('Types testing', () => {
 
   test('payload.findByID respects depth', () => {
     expect(payload.findByID({ id: '', collection: 'relationships', depth: 2 })).type.toBe<
+      Promise<ApplyDepth<Relationship, 2>>
+    >()
+  })
+
+  test('payload.create respects depth', () => {
+    expect(payload.create({ collection: 'relationships', data: {} as any, depth: 2 })).type.toBe<
       Promise<ApplyDepth<Relationship, 2>>
     >()
   })
