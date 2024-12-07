@@ -64,7 +64,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     interval = versionsConfig.drafts.autosave.interval
   }
 
-  const [queue, setQueue] = useState<(() => Promise<void>)[]>([])
+  const [currentAutosave, setCurrentAutosave] = useState<(() => Promise<void>) | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
   const [saving, setSaving] = useState(false)
@@ -91,31 +91,28 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   // can always retrieve the most to date locale
   localeRef.current = locale
 
-  // Function to process the queue
-  const processQueue = useCallback(async () => {
-    if (isProcessing || queue.length === 0) {
+  const processCurrentAutosave = useCallback(async () => {
+    if (!currentAutosave || isProcessing) {
       return
     }
 
     setIsProcessing(true)
-    const currentTask = queue[0]
 
     try {
-      await currentTask()
+      await currentAutosave()
     } catch (error) {
       console.error('Error autosaving:', error)
     } finally {
-      setQueue((prevQueue) => prevQueue.slice(1))
+      setCurrentAutosave(null)
       setIsProcessing(false)
     }
-  }, [isProcessing, queue])
+  }, [currentAutosave, isProcessing])
 
-  // Process the queue whenever it changes
   useEffect(() => {
     if (!isProcessing) {
-      void processQueue()
+      void processCurrentAutosave()
     }
-  }, [queue, isProcessing, processQueue])
+  }, [currentAutosave, isProcessing, processCurrentAutosave])
 
   // When debounced fields change, autosave
   useIgnoredEffect(
@@ -258,7 +255,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
         }
       }
 
-      setQueue((prevQueue) => [...prevQueue, autosave])
+      setCurrentAutosave(() => autosave)
 
       return () => {
         if (autosaveTimeout) {
