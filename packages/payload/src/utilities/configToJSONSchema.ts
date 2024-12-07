@@ -1020,8 +1020,30 @@ export function configToJSONSchema(
       },
       required: ['allowed', 'default', 'decremented'],
     }
-    ;(jsonSchema.required as string[]).push('depth')
+  } else {
+    jsonSchema.properties.depth = {
+      type: 'object',
+      additionalProperties: false,
+      description: 'typescript.typeSafeDepth is not enabled',
+      properties: {
+        allowed: {
+          type: 'number',
+        },
+        decremented: {
+          type: 'array',
+          items: {
+            type: 'number',
+          },
+        },
+        default: {
+          type: 'number',
+        },
+      },
+      required: ['allowed', 'default', 'decremented'],
+    }
   }
+
+  ;(jsonSchema.required as string[]).push('depth')
 
   if (config?.typescript?.schema?.length) {
     for (const schema of config.typescript.schema) {

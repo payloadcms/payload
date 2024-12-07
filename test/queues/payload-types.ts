@@ -68,6 +68,14 @@ export interface Config {
       retriesBackoffTest: WorkflowRetriesBackoffTest;
     };
   };
+  /**
+   * typescript.typeSafeDepth is not enabled
+   */
+  depth: {
+    allowed: number;
+    decremented: number[];
+    default: number;
+  };
 }
 export interface UserAuthOperations {
   forgotPassword: {
