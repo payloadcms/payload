@@ -39,6 +39,7 @@ export default buildConfig({
 | `client` \*           | [Client connection options](https://orm.drizzle.team/docs/get-started-sqlite#turso) that will be passed to `createClient` from `@libsql/client`.                                 |
 | `push`                | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
 | `migrationDir`        | Customize the directory that migrations are stored.                                                                                                                              |
+| `idType`              | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                              |
 | `logger`              | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                           |
 | `transactionOptions`  | A SQLiteTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                   |
 | `localesSuffix`       | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                 |
@@ -157,7 +158,7 @@ sqliteAdapter({
 })
 ```
 
-Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection. 
+Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection.
 
 
 ### afterSchemaInit
