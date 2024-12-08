@@ -93,7 +93,7 @@
     "ci-info": "^4.0.0",
     "console-table-printer": "2.12.1",
     "croner": "9.0.0",
-    "dataloader": "2.2.2",
+    "dataloader": "2.2.3",
     "deepmerge": "4.3.1",
     "file-type": "19.3.0",
     "get-tsconfig": "4.8.1",
