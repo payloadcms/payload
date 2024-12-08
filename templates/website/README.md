@@ -51,7 +51,6 @@ git clone -n --depth=1 --filter=tree:0 https://github.com/payloadcms/payload my-
 ### Development
 
 1. First [clone the repo](#clone) if you have not done so already
-1. `cd my-project && cp .env.example .env` to copy the example environment variables
 1. `pnpm install && pnpm dev` to install dependencies and start the dev server
 1. open `http://localhost:3000` to open the app in your browser
 
