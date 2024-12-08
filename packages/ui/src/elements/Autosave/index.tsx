@@ -3,7 +3,7 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { versionDefaults } from 'payload/shared'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import {
@@ -64,6 +64,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     interval = versionsConfig.drafts.autosave.interval
   }
 
+  const [currentAutosave, setCurrentAutosave] = useState<(() => Promise<void>) | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+
   const [saving, setSaving] = useState(false)
   const debouncedFields = useDebounce(fields, interval)
   const modified = useDebounce(formModified, interval)
@@ -88,6 +91,29 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   // can always retrieve the most to date locale
   localeRef.current = locale
 
+  const processCurrentAutosave = useCallback(async () => {
+    if (!currentAutosave || isProcessing) {
+      return
+    }
+
+    setIsProcessing(true)
+
+    try {
+      await currentAutosave()
+    } catch (error) {
+      console.error('Error autosaving:', error)
+    } finally {
+      setCurrentAutosave(null)
+      setIsProcessing(false)
+    }
+  }, [currentAutosave, isProcessing])
+
+  useEffect(() => {
+    if (!isProcessing) {
+      void processCurrentAutosave()
+    }
+  }, [currentAutosave, isProcessing, processCurrentAutosave])
+
   // When debounced fields change, autosave
   useIgnoredEffect(
     () => {
@@ -97,7 +123,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       let startTimestamp = undefined
       let endTimestamp = undefined
 
-      const autosave = () => {
+      const autosave = async () => {
         if (modified) {
           startTimestamp = new Date().getTime()
 
@@ -129,7 +155,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                 submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
               if (!skipSubmission) {
-                void fetch(url, {
+                await fetch(url, {
                   body: JSON.stringify(data),
                   credentials: 'include',
                   headers: {
@@ -229,7 +255,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
         }
       }
 
-      void autosave()
+      setCurrentAutosave(() => autosave)
 
       return () => {
         if (autosaveTimeout) {
