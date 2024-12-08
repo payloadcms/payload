@@ -40,23 +40,22 @@ export const renderDocumentSlots: (args: {
     })
   }
 
-  const descriptionFromConfig =
-    collectionConfig?.admin?.description || globalConfig?.admin?.description
+  const globalDescriptionFromConfig = globalConfig?.admin?.description
 
-  const staticDescription: StaticDescription =
-    typeof descriptionFromConfig === 'function'
-      ? descriptionFromConfig({ t: req.i18n.t })
-      : descriptionFromConfig
+  const staticGlobalDescription: StaticDescription =
+    typeof globalDescriptionFromConfig === 'function'
+      ? globalDescriptionFromConfig({ t: req.i18n.t })
+      : globalDescriptionFromConfig
 
   const CustomDescription =
-    collectionConfig?.admin?.components?.Description ||
+    collectionConfig?.admin?.components?.edit?.Description ||
     globalConfig?.admin?.components?.elements?.Description
 
-  const hasDescription = CustomDescription || staticDescription
+  const hasDescription = CustomDescription || staticGlobalDescription
 
   if (hasDescription) {
     components.Description = RenderServerComponent({
-      clientProps: { description: staticDescription },
+      clientProps: staticGlobalDescription ? { description: staticGlobalDescription } : {},
       Component: CustomDescription,
       Fallback: ViewDescription,
       importMap: req.payload.importMap,
