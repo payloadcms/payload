@@ -95,6 +95,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       createExtensions,
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
+      disableUsePgForLocalDatabase: args.disableUsePgForLocalDatabase ?? false,
       drizzle: undefined,
       enums: {},
       extensions,
