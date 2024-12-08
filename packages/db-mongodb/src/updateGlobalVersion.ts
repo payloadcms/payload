@@ -1,5 +1,3 @@
-import type { QueryOptions } from 'mongoose'
-
 import {
   buildVersionGlobalFields,
   type PayloadRequest,
@@ -9,9 +7,9 @@ import {
 
 import type { MongooseAdapter } from './index.js'
 
+import { getSession } from './getSession.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
+import { transform } from './utilities/transform.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: MongooseAdapter,
@@ -28,44 +26,49 @@ export async function updateGlobalVersion<T extends TypeWithID>(
 ) {
   const VersionModel = this.versions[globalSlug]
   const whereToUse = where || { id: { equals: id } }
+  const fields = buildVersionGlobalFields(
+    this.payload.config,
+    this.payload.config.globals.find((global) => global.slug === globalSlug),
+    true,
+  )
 
-  const currentGlobal = this.payload.config.globals.find((global) => global.slug === globalSlug)
-  const fields = buildVersionGlobalFields(this.payload.config, currentGlobal)
-
-  const options: QueryOptions = {
-    ...optionsArgs,
-    ...(await withSession(this, req)),
-    lean: true,
-    new: true,
-    projection: buildProjectionFromSelect({
-      adapter: this,
-      fields: buildVersionGlobalFields(this.payload.config, currentGlobal, true),
-      select,
-    }),
-  }
+  const session = await getSession(this, req)
 
   const query = await VersionModel.buildQuery({
     locale,
     payload: this.payload,
+    session,
     where: whereToUse,
   })
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
+  transform({
+    adapter: this,
     data: versionData,
     fields,
+    operation: 'update',
   })
 
-  const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
+  const doc: any = await VersionModel.collection.findOneAndUpdate(
+    query,
+    { $set: versionData },
+    {
+      ...optionsArgs,
+      projection: buildProjectionFromSelect({
+        adapter: this,
+        fields,
+        select,
+      }),
+      returnDocument: 'after',
+      session,
+    },
+  )
 
-  const result = JSON.parse(JSON.stringify(doc))
+  transform({
+    adapter: this,
+    data: doc,
+    fields,
+    operation: 'read',
+  })
 
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
-  return result
+  return doc
 }

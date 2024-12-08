@@ -1,14 +1,9 @@
-import {
-  buildVersionGlobalFields,
-  type CreateGlobalVersion,
-  type Document,
-  type PayloadRequest,
-} from 'payload'
+import { buildVersionGlobalFields, type CreateGlobalVersion, type PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
+import { getSession } from './getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: MongooseAdapter,
@@ -25,34 +20,41 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   },
 ) {
   const VersionModel = this.versions[globalSlug]
-  const options = await withSession(this, req)
+  const session = await getSession(this, req)
 
-  const data = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data: {
-      autosave,
-      createdAt,
-      latest: true,
-      parent,
-      publishedLocale,
-      snapshot,
-      updatedAt,
-      version: versionData,
-    },
-    fields: buildVersionGlobalFields(
-      this.payload.config,
-      this.payload.config.globals.find((global) => global.slug === globalSlug),
-    ),
+  const data = {
+    autosave,
+    createdAt,
+    latest: true,
+    parent,
+    publishedLocale,
+    snapshot,
+    updatedAt,
+    version: versionData,
+  }
+
+  const fields = buildVersionGlobalFields(
+    this.payload.config,
+    this.payload.config.globals.find((global) => global.slug === globalSlug),
+    true,
+  )
+
+  transform({
+    adapter: this,
+    data,
+    fields,
+    operation: 'create',
   })
 
-  const [doc] = await VersionModel.create([data], options, req)
+  const { insertedId } = await VersionModel.collection.insertOne(data, { session })
+  ;(data as any)._id = insertedId
 
-  await VersionModel.updateMany(
+  await VersionModel.collection.updateMany(
     {
       $and: [
         {
           _id: {
-            $ne: doc._id,
+            $ne: insertedId,
           },
         },
         {
@@ -68,16 +70,15 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
       ],
     },
     { $unset: { latest: 1 } },
-    options,
+    { session },
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
-  const verificationToken = doc._verificationToken
+  transform({
+    adapter: this,
+    data,
+    fields,
+    operation: 'read',
+  })
 
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
-  return result
+  return data as any
 }
