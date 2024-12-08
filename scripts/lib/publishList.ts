@@ -28,6 +28,9 @@ export const packagePublishList = [
   'email-nodemailer',
   'email-resend',
 
+  // SDK,
+  'sdk',
+
   // Storage
   'storage-s3',
   'storage-azure',
