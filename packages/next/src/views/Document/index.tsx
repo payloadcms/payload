@@ -1,12 +1,17 @@
 import type { AdminViewProps, Data, PayloadComponent, ServerSideEditViewProps } from 'payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  HydrateAuthProvider,
+  ShimmerEffect,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { isRedirectError } from 'next/dist/client/components/redirect.js'
 import { notFound, redirect } from 'next/navigation.js'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 import type { ViewFromConfig } from './getViewsFromConfig.js'
@@ -377,10 +382,21 @@ export const renderDocument = async ({
   }
 }
 
-export const Document: React.FC<AdminViewProps> = async (args) => {
+const DocumentWithData: React.FC<AdminViewProps> = async (args) => {
+  const { Document: RenderedDocument } = await renderDocument(args)
+  return RenderedDocument
+}
+
+export const Document: React.FC<AdminViewProps> = (args) => {
   try {
-    const { Document: RenderedDocument } = await renderDocument(args)
-    return RenderedDocument
+    return (
+      <Suspense
+        fallback={<ShimmerEffect height="100%" />}
+        key={`document-view-${args?.initPageResult?.collectionConfig?.slug ?? args?.initPageResult?.globalConfig?.slug}`}
+      >
+        <DocumentWithData {...args} />
+      </Suspense>
+    )
   } catch (error) {
     if (isRedirectError(error)) {
       throw error
