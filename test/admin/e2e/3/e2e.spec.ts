@@ -516,6 +516,85 @@ describe('admin3', () => {
       await expect(page.locator('.row-3 .cell-title')).toContainText(updatedPostTitle)
     })
 
+    test('should not override un-edited values in bulk edit if it has a defaultValue', async () => {
+      await deleteAllPosts()
+      const post1Title = 'Post'
+      const postData = {
+        title: 'Post',
+        arrayOfFields: [
+          {
+            optional: 'some optional array field',
+            innerArrayOfFields: [
+              {
+                innerOptional: 'some inner optional array field',
+              },
+            ],
+          },
+        ],
+        group: {
+          defaultValueField: 'not the group default value',
+          title: 'some title',
+        },
+        defaultValueField: 'not the default value',
+      }
+      const updatedPostTitle = `${post1Title} (Updated)`
+      await Promise.all([createPost(postData)])
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const titleOption = page.locator('.field-select .rs__option', {
+        hasText: exactText('Title'),
+      })
+
+      await expect(titleOption).toBeVisible()
+      await titleOption.click()
+      const titleInput = page.locator('#field-title')
+      await expect(titleInput).toBeVisible()
+      await titleInput.fill(updatedPostTitle)
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Updated 1 Post successfully.',
+      )
+
+      await page.locator('.list-controls__toggle-columns').click()
+      await expect(page.locator('.column-selector')).toBeVisible()
+      await page
+        .locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Number'),
+        })
+        .click()
+      await page
+        .locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Description'),
+        })
+        .click()
+      await page
+        .locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Demo UI Field'),
+        })
+        .click()
+      await page
+        .locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Array Of Fields'),
+        })
+        .click()
+      await page
+        .locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Default Value Field'),
+        })
+        .click()
+      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
+      await expect(page.locator('.table .row-1 .cell-arrayOfFields')).toContainText(
+        '1 Array Of Field',
+      )
+      await expect(page.locator('.table .row-1 .cell-defaultValueField')).toContainText(
+        'not the default value',
+      )
+    })
+
     test('should bulk update with filters and across pages', async () => {
       // First, delete all posts created by the seed
       await deleteAllPosts()

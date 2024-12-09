@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, FormState } from 'payload'
+import type { ClientCollectionConfig, FieldWithPathClient, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -36,10 +36,25 @@ export type EditManyProps = {
   readonly collection: ClientCollectionConfig
 }
 
+const sanitizeUnselectedFields = (formState: FormState, selected: FieldWithPathClient[]) => {
+  const filteredData = selected.reduce((acc, field) => {
+    const foundState = formState?.[field.path]
+
+    if (foundState) {
+      acc[field.path] = formState?.[field.path]?.value
+    }
+
+    return acc
+  }, {} as FormData)
+
+  return filteredData
+}
+
 const Submit: React.FC<{
   readonly action: string
   readonly disabled: boolean
-}> = ({ action, disabled }) => {
+  readonly selected?: FieldWithPathClient[]
+}> = ({ action, disabled, selected }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -47,17 +62,10 @@ const Submit: React.FC<{
     void submit({
       action,
       method: 'PATCH',
-      // TODO: one option is to create a function that returns undefined for fields that are not selected
-      overrides: {
-        arrayOfFields: undefined,
-        defaultValueField: undefined,
-        // this could be wrong and causing the issue with fieldReducer
-        'group.defaultValueField': undefined,
-        // requiredField: 'some value',
-      },
+      overrides: (formState) => sanitizeUnselectedFields(formState, selected),
       skipValidation: true,
     })
-  }, [action, submit])
+  }, [action, submit, selected])
 
   return (
     <FormSubmit className={`${baseClass}__save`} disabled={disabled} onClick={save}>
@@ -133,7 +141,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
-  const [selected, setSelected] = useState([])
+  const [selected, setSelected] = useState<FieldWithPathClient[]>([])
   const searchParams = useSearchParams()
   const router = useRouter()
   const [initialState, setInitialState] = useState<FormState>()
@@ -146,32 +154,32 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const drawerSlug = `edit-${slug}`
 
-  // React.useEffect(() => {
-  //   const controller = new AbortController()
-  //
-  //   if (!hasInitializedState.current) {
-  //     const getInitialState = async () => {
-  //       const { state: result } = await getFormState({
-  //         collectionSlug: slug,
-  //         data: {},
-  //         docPermissions: collectionPermissions,
-  //         docPreferences: null,
-  //         operation: 'update',
-  //         schemaPath: slug,
-  //         signal: controller.signal,
-  //       })
-  //
-  //       setInitialState(result)
-  //       hasInitializedState.current = true
-  //     }
-  //
-  //     void getInitialState()
-  //   }
-  //
-  //   return () => {
-  //     abortAndIgnore(controller)
-  //   }
-  // }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
+  React.useEffect(() => {
+    const controller = new AbortController()
+
+    if (!hasInitializedState.current) {
+      const getInitialState = async () => {
+        const { state: result } = await getFormState({
+          collectionSlug: slug,
+          data: {},
+          docPermissions: collectionPermissions,
+          docPreferences: null,
+          operation: 'update',
+          schemaPath: slug,
+          signal: controller.signal,
+        })
+
+        setInitialState(result)
+        hasInitializedState.current = true
+      }
+
+      void getInitialState()
+    }
+
+    return () => {
+      abortAndIgnore(controller)
+    }
+  }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
@@ -184,18 +192,15 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         collectionSlug: slug,
         docPermissions: collectionPermissions,
         docPreferences: null,
-        fields: selected,
         formState: prevFormState,
         operation: 'update',
         schemaPath: slug,
         signal: controller.signal,
       })
 
-      console.log(state)
-
       return state
     },
-    [getFormState, slug, collectionPermissions, selected],
+    [getFormState, slug, collectionPermissions],
   )
 
   useEffect(() => {
@@ -310,6 +315,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                             <Submit
                               action={`${serverURL}${apiRoute}/${slug}${queryString}`}
                               disabled={selected.length === 0}
+                              selected={selected}
                             />
                           )}
                         </div>

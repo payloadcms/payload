@@ -104,14 +104,47 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
+      name: 'arrayOfFields',
+      type: 'array',
+      admin: {
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: 'optional',
+          type: 'text',
+        },
+        {
+          name: 'innerArrayOfFields',
+          type: 'array',
+          fields: [
+            {
+              name: 'innerOptional',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [
+        {
+          name: 'defaultValueField',
+          type: 'text',
+          defaultValue: 'testing',
+        },
         {
           name: 'title',
           type: 'text',
         },
       ],
+    },
+    {
+      name: 'defaultValueField',
+      type: 'text',
+      defaultValue: 'testing',
     },
     {
       name: 'relationship',
