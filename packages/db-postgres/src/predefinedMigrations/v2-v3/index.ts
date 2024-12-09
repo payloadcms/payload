@@ -43,7 +43,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const dir = payload.db.migrationDir
 
   // get the drizzle migrateUpSQL from drizzle using the last schema
-  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/api')
+  const { generateDrizzleJson, generateMigration, upPgSnapshot } = require('drizzle-kit/api')
   const drizzleJsonAfter = generateDrizzleJson(adapter.schema)
 
   // Get the previous migration snapshot
@@ -59,9 +59,13 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     )
   }
 
-  const drizzleJsonBefore = JSON.parse(
+  let drizzleJsonBefore = JSON.parse(
     fs.readFileSync(`${dir}/${previousSnapshot}`, 'utf8'),
   ) as DrizzleSnapshotJSON
+
+  if (drizzleJsonBefore.version < drizzleJsonAfter.version) {
+    drizzleJsonBefore = upPgSnapshot(drizzleJsonBefore)
+  }
 
   const generatedSQL = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
 
