@@ -535,6 +535,12 @@ describe('admin3', () => {
           defaultValueField: 'not the group default value',
           title: 'some title',
         },
+        someBlock: [
+          {
+            textFieldForBlock: 'some text for block text',
+            blockType: 'textBlock',
+          },
+        ],
         defaultValueField: 'not the default value',
       }
       const updatedPostTitle = `${post1Title} (Updated)`
@@ -559,40 +565,17 @@ describe('admin3', () => {
         'Updated 1 Post successfully.',
       )
 
-      await page.locator('.list-controls__toggle-columns').click()
-      await expect(page.locator('.column-selector')).toBeVisible()
-      await page
-        .locator(`.column-selector .column-selector__column`, {
-          hasText: exactText('Number'),
-        })
-        .click()
-      await page
-        .locator(`.column-selector .column-selector__column`, {
-          hasText: exactText('Description'),
-        })
-        .click()
-      await page
-        .locator(`.column-selector .column-selector__column`, {
-          hasText: exactText('Demo UI Field'),
-        })
-        .click()
-      await page
-        .locator(`.column-selector .column-selector__column`, {
-          hasText: exactText('Array Of Fields'),
-        })
-        .click()
-      await page
-        .locator(`.column-selector .column-selector__column`, {
-          hasText: exactText('Default Value Field'),
-        })
-        .click()
-      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
-      await expect(page.locator('.table .row-1 .cell-arrayOfFields')).toContainText(
-        '1 Array Of Field',
-      )
-      await expect(page.locator('.table .row-1 .cell-defaultValueField')).toContainText(
-        'not the default value',
-      )
+      const updatedPost = await payload.find({
+        collection: 'posts',
+        limit: 1,
+      })
+
+      expect(updatedPost.docs[0].title).toBe(updatedPostTitle)
+      expect(updatedPost.docs[0].arrayOfFields.length).toBe(1)
+      expect(updatedPost.docs[0].arrayOfFields[0].optional).toBe('some optional array field')
+      expect(updatedPost.docs[0].arrayOfFields[0].innerArrayOfFields.length).toBe(1)
+      expect(updatedPost.docs[0].someBlock[0].textFieldForBlock).toBe('some text for block text')
+      expect(updatedPost.docs[0].defaultValueField).toBe('not the default value')
     })
 
     test('should bulk update with filters and across pages', async () => {

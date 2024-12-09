@@ -154,6 +154,14 @@ export interface Post {
     defaultValueField?: string | null;
     title?: string | null;
   };
+  someBlock?:
+    | {
+        textFieldForBlock?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlock';
+      }[]
+    | null;
   defaultValueField?: string | null;
   relationship?: (string | null) | Post;
   customCell?: string | null;
@@ -515,6 +523,17 @@ export interface PostsSelect<T extends boolean = true> {
     | {
         defaultValueField?: T;
         title?: T;
+      };
+  someBlock?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              textFieldForBlock?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   defaultValueField?: T;
   relationship?: T;

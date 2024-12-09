@@ -142,6 +142,21 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
+      name: 'someBlock',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'textBlock',
+          fields: [
+            {
+              name: 'textFieldForBlock',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'defaultValueField',
       type: 'text',
       defaultValue: 'testing',
