@@ -120,7 +120,7 @@ The preview function receives two arguments:
 If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
 
 ```ts
- preview: (doc, { req }) => `${req.protocol}//${req.host}/${doc.slug}`
+preview: (doc, { req }) => `${req.protocol}//${req.host}/${doc.slug}` // highlight-line
 ```
 
 <Banner type="success">
