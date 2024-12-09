@@ -80,6 +80,8 @@
     "script:gen-templates": "pnpm runts ./scripts/generate-template-variations.ts",
     "script:list-published": "pnpm runts scripts/lib/getPackageRegistryVersions.ts",
     "script:pack": "pnpm runts scripts/pack-all-to-dest.ts",
+    "template:blank": "cd templates/blank && cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install && cp .env .env.example || true && pnpm dev",
+    "template:website": "cd templates/website && cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install && cp .env .env.example || true && pnpm dev",
     "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env NODE_OPTIONS=\" --no-deprecation\" jest --config=jest.components.config.js",
