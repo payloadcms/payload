@@ -74,7 +74,11 @@ const Submit: React.FC<{
   )
 }
 
-const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+const PublishButton: React.FC<{
+  action: string
+  disabled: boolean
+  readonly selected?: FieldWithPathClient[]
+}> = ({ action, disabled, selected }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -82,12 +86,13 @@ const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action
     void submit({
       action,
       method: 'PATCH',
-      overrides: {
+      overrides: (formState) => ({
+        ...sanitizeUnselectedFields(formState, selected),
         _status: 'published',
-      },
+      }),
       skipValidation: true,
     })
-  }, [action, submit])
+  }, [action, submit, selected])
 
   return (
     <FormSubmit className={`${baseClass}__publish`} disabled={disabled} onClick={save}>
@@ -96,7 +101,11 @@ const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action
   )
 }
 
-const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+const SaveDraftButton: React.FC<{
+  action: string
+  disabled: boolean
+  readonly selected?: FieldWithPathClient[]
+}> = ({ action, disabled, selected }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -104,12 +113,13 @@ const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ acti
     void submit({
       action,
       method: 'PATCH',
-      overrides: {
+      overrides: (formState) => ({
+        ...sanitizeUnselectedFields(formState, selected),
         _status: 'draft',
-      },
+      }),
       skipValidation: true,
     })
-  }, [action, submit])
+  }, [action, submit, selected])
 
   return (
     <FormSubmit
@@ -305,10 +315,12 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                               <SaveDraftButton
                                 action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
                                 disabled={selected.length === 0}
+                                selected={selected}
                               />
                               <PublishButton
                                 action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
                                 disabled={selected.length === 0}
+                                selected={selected}
                               />
                             </React.Fragment>
                           ) : (
