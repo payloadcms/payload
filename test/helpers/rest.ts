@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Where } from 'payload'
+import type { CollectionSlug, TypedUser, Where } from 'payload'
 import type { Config } from 'payload'
 import type { PaginatedDocs } from 'payload'
 
@@ -119,6 +119,8 @@ export class RESTClient {
   private token: string
 
   serverURL: string
+
+  public user: TypedUser
 
   constructor(config: Config, args: Args) {
     this.config = config
@@ -254,7 +256,9 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/${slug}${whereQuery}`, options)
     const { status } = response
     const result = await response.json()
-    if (result.errors) throw new Error(result.errors[0].message)
+    if (result.errors) {
+      throw new Error(result.errors[0].message)
+    }
     return { result, status }
   }
 
@@ -310,7 +314,9 @@ export class RESTClient {
       method: 'POST',
     })
 
-    let { token } = await response.json()
+    const { user } = await response.json()
+
+    let token = user.token
 
     // If the token is not in the response body, then we can extract it from the cookies
     if (!token) {
@@ -319,6 +325,7 @@ export class RESTClient {
       token = tokenMatchResult?.groups?.token
     }
 
+    this.user = user
     this.token = token
 
     return token
@@ -403,5 +410,23 @@ export class RESTClient {
     const { status } = response
     const json = await response.json()
     return { docs: json.docs, errors: json.errors, status }
+  }
+
+  async upsert<T = any>(args: CreateArgs<T>): Promise<DocResponse<T>> {
+    const options = {
+      body: JSON.stringify(args.data),
+      headers: { ...headers },
+      method: 'PUT',
+    }
+
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`
+    }
+
+    const slug = args.slug || this.defaultSlug
+    const response = await fetch(`${this.serverURL}/api/${slug}`, options)
+    const { status } = response
+    const { doc } = await response.json()
+    return { doc, status }
   }
 }

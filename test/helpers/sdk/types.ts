@@ -34,6 +34,7 @@ export type FetchOptions = {
     | 'sendEmail'
     | 'update'
     | 'updateGlobal'
+    | 'upsert'
   reduceJSON?: <R>(json: any) => R
 }
 
@@ -101,6 +102,22 @@ export type UpdateArgs<
   TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
   TSlug extends keyof TGeneratedTypes['collections'],
 > = UpdateByIDArgs<TGeneratedTypes, TSlug> | UpdateManyArgs<TGeneratedTypes, TSlug>
+
+export type UpsertArgs<
+  TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
+  TSlug extends keyof TGeneratedTypes['collections'],
+> = {
+  collection: TSlug
+  data: DeepPartial<TGeneratedTypes['collections'][TSlug]>
+  depth?: number
+  draft?: boolean
+  fallbackLocale?: string
+  locale?: string
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+  user?: TypeWithID
+  where?: Where
+} & BaseArgs
 
 export type UpdateGlobalArgs<
   TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,

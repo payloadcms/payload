@@ -203,6 +203,48 @@ describe('Text', () => {
     ).toBeVisible()
   })
 
+  test('should respect admin.disableListColumn despite preferences', async () => {
+    // update prefs with a disabled column
+    console.log(client.user)
+    // set the preferences to have the column enabled
+    const prefsRes = await payload.upsert({
+      collection: 'payload-preferences',
+      depth: 0,
+      where: {
+        and: [
+          { key: { equals: 'text-fields-list' } },
+          { 'user.value': { equals: client.user.id } },
+          { 'user.relationTo': { equals: client.user.collection } },
+        ],
+      },
+      data: {
+        key: 'text-fields-list',
+        user: {
+          relationTo: client.user.collection,
+          value: client.user.id,
+        },
+        value: {
+          columns: [
+            {
+              accessor: 'disableListColumnText',
+              active: true,
+            },
+          ],
+        },
+      },
+    })
+
+    console.log('existingPrefs', prefsRes)
+
+    await page.goto(url.list)
+    await openListColumns(page, {})
+    await expect(
+      page.locator(`.column-selector .column-selector__column`, {
+        hasText: exactText('Disable List Column Text'),
+      }),
+    ).toBeHidden()
+  })
+
   test('should hide field in filter when admin.disableListFilter is true', async () => {
     await page.goto(url.list)
     await page.locator('.list-controls__toggle-where').click()

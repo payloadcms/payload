@@ -9,6 +9,7 @@ import type {
   LoginArgs,
   UpdateArgs,
   UpdateGlobalArgs,
+  UpsertArgs,
 } from './types.js'
 
 type Args = {
@@ -123,6 +124,17 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
   }: UpdateGlobalArgs<TGeneratedTypes, T>) => {
     return this.fetch<TGeneratedTypes['collections'][T]>({
       operation: 'updateGlobal',
+      args,
+      jwt,
+    })
+  }
+
+  upsert = async <T extends keyof TGeneratedTypes['collections']>({
+    jwt,
+    ...args
+  }: UpsertArgs<TGeneratedTypes, T>) => {
+    return this.fetch<TGeneratedTypes['collections'][T]>({
+      operation: 'upsert',
       args,
       jwt,
     })
