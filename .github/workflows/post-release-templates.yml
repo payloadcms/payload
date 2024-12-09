@@ -5,10 +5,6 @@ on:
     types:
       - published
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Release tag to process (optional)'
-        required: true
 
 env:
   NODE_VERSION: 22.6.0
@@ -18,7 +14,7 @@ env:
 
 jobs:
   update_templates:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       pull-requests: write
@@ -29,6 +25,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed for tags
+
       - name: Setup
         uses: ./.github/actions/setup
         with:
@@ -64,12 +63,15 @@ jobs:
       - name: Determine Release Tag
         id: determine_tag
         run: |
-          if [ "${{ github.event.inputs.tag }}" != "" ]; then
-            echo "Using tag from input: ${{ github.event.inputs.tag }}"
-            echo "release_tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
-          else
+          if [ "${{ github.event_name }}" == "release" ]; then
             echo "Using tag from release event: ${{ github.event.release.tag_name }}"
             echo "release_tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            # pull latest tag from github, must match any version except v2. Should match v3, v4, v99, etc.
+            echo "Fetching latest tag from github..."
+            LATEST_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude 'v2*')
+            echo "Latest tag: $LATEST_TAG"
+            echo "release_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Commit and push changes
@@ -95,5 +97,9 @@ jobs:
           commit-message: 'templates: bump templates for ${{ steps.determine_tag.outputs.release_tag }}'
           branch: ${{ steps.commit.outputs.branch }}
           base: main
+          assignees: ${{ github.actor }}
           title: 'templates: bump for ${{ steps.determine_tag.outputs.release_tag }}'
-          body: 'Automated bump of templates for ${{ steps.determine_tag.outputs.release_tag }}'
+          body: |
+            🤖 Automated bump of templates for ${{ steps.determine_tag.outputs.release_tag }}
+
+            Triggered by user: @${{ github.actor }}

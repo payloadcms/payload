@@ -94,6 +94,8 @@ describe('plugin', () => {
 
         const existingTransport = nodemailer.createTransport({
           name: 'existing-transport',
+          // eslint-disable-next-line @typescript-eslint/require-await
+          verify: async (): Promise<true> => true,
           // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-misused-promises
           send: async (mail) => {
             // eslint-disable-next-line no-console

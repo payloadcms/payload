@@ -11,7 +11,7 @@ export const preview: CollectionRouteHandlerWithID = async ({ id, collection, re
   const { searchParams } = req
   const depth = searchParams.get('depth')
 
-  const result = await findByIDOperation({
+  const doc = await findByIDOperation({
     id,
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
@@ -29,16 +29,11 @@ export const preview: CollectionRouteHandlerWithID = async ({ id, collection, re
 
   if (typeof generatePreviewURL === 'function') {
     try {
-      previewURL = await generatePreviewURL(result, {
+      previewURL = await generatePreviewURL(doc, {
         locale: req.locale,
         req,
         token,
       })
-
-      // Support relative URLs by prepending the origin, if necessary
-      if (previewURL && previewURL.startsWith('/')) {
-        previewURL = `${req.protocol}//${req.host}${previewURL}`
-      }
     } catch (err) {
       return routeError({
         collection,

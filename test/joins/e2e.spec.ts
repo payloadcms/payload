@@ -5,6 +5,9 @@ import { reorderColumns } from 'helpers/e2e/reorderColumns.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config } from './payload-types.js'
+
 import {
   ensureCompilationIsDone,
   exactText,
@@ -20,6 +23,9 @@ import { categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+let payload: PayloadTestSDK<Config>
+let serverURL: string
+
 test.describe('Admin Panel', () => {
   let page: Page
   let categoriesURL: AdminUrlUtil
@@ -28,8 +34,9 @@ test.describe('Admin Panel', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    const { payload, serverURL } = await initPayloadE2ENoConfig({ dirname })
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
+      dirname,
+    }))
     postsURL = new AdminUrlUtil(serverURL, postsSlug)
     categoriesURL = new AdminUrlUtil(serverURL, categoriesSlug)
     uploadsURL = new AdminUrlUtil(serverURL, uploadsSlug)
@@ -59,8 +66,44 @@ test.describe('Admin Panel', () => {
     const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
     await expect(joinField.locator('.relationship-table table')).toBeVisible()
-    const columns = await joinField.locator('.relationship-table tbody tr').count()
-    expect(columns).toBe(3)
+    const rows = joinField.locator('.relationship-table tbody tr')
+    await expect(rows).toHaveCount(3)
+  })
+
+  test('should apply defaultLimit and defaultSort on relationship table', async () => {
+    const result = await payload.find({
+      collection: categoriesSlug,
+      limit: 1,
+    })
+    const category = result.docs[0]
+    // seed additional posts to test defaultLimit (5)
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'a',
+        category: category.id,
+      },
+    })
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'b',
+        category: category.id,
+      },
+    })
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'z',
+        category: category.id,
+      },
+    })
+    await navigateToDoc(page, categoriesURL)
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
+    await expect(joinField.locator('.row-1 > .cell-title')).toContainText('z')
+    await expect(joinField.locator('.paginator > .clickable-arrow--right')).toBeVisible()
+    const rows = joinField.locator('.relationship-table tbody tr')
+    await expect(rows).toHaveCount(5)
   })
 
   test('should render join field for hidden posts', async () => {

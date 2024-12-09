@@ -12,7 +12,7 @@ permissions:
 jobs:
   main:
     name: lint-pr-title
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: amannn/action-semantic-pull-request@v5
         id: lint_pr_title
@@ -107,7 +107,7 @@ jobs:
 
   label-pr-on-open:
     name: label-pr-on-open
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event.action == 'opened'
     steps:
       - name: Tag with 2.x branch with v2
