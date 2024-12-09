@@ -34,6 +34,11 @@ export const preview: CollectionRouteHandlerWithID = async ({ id, collection, re
         req,
         token,
       })
+
+      // Support relative URLs by prepending the origin, if necessary
+      if (previewURL && previewURL.startsWith('/')) {
+        previewURL = `${req.protocol}//${req.host}${previewURL}`
+      }
     } catch (err) {
       return routeError({
         collection,

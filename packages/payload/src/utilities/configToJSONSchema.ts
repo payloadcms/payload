@@ -617,7 +617,13 @@ export function entityToJSONSchema(
     })
   }
 
-  if ('auth' in entity && entity.auth && !entity.auth?.disableLocalStrategy) {
+  if (
+    'auth' in entity &&
+    entity.auth &&
+    (!entity.auth?.disableLocalStrategy ||
+      (typeof entity.auth?.disableLocalStrategy === 'object' &&
+        entity.auth.disableLocalStrategy.enableFields))
+  ) {
     entity.flattenedFields.push({
       name: 'password',
       type: 'text',

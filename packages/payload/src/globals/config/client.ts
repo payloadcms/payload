@@ -10,14 +10,16 @@ import type { Payload } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from './types.js'
 
 import { type ClientField, createClientFields } from '../../fields/config/client.js'
-import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 
 export type ServerOnlyGlobalProperties = keyof Pick<
   SanitizedGlobalConfig,
   'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'flattenedFields' | 'hooks'
 >
 
-export type ServerOnlyGlobalAdminProperties = keyof Pick<SanitizedGlobalConfig['admin'], 'hidden'>
+export type ServerOnlyGlobalAdminProperties = keyof Pick<
+  SanitizedGlobalConfig['admin'],
+  'components' | 'hidden'
+>
 
 export type ClientGlobalConfig = {
   admin: {
@@ -40,7 +42,10 @@ const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
   // `admin` is handled separately
 ]
 
-const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = ['hidden']
+const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = [
+  'hidden',
+  'components',
+]
 
 export const createClientGlobalConfig = ({
   defaultIDType,
@@ -53,44 +58,59 @@ export const createClientGlobalConfig = ({
   i18n: I18nClient
   importMap: ImportMap
 }): ClientGlobalConfig => {
-  const clientGlobal = deepCopyObjectSimple(global, true) as unknown as ClientGlobalConfig
+  const clientGlobal = {} as ClientGlobalConfig
 
-  clientGlobal.fields = createClientFields({
-    clientFields: clientGlobal?.fields || [],
-    defaultIDType,
-    fields: global.fields,
-    i18n,
-    importMap,
-  })
-
-  serverOnlyProperties.forEach((key) => {
-    if (key in clientGlobal) {
-      delete clientGlobal[key]
+  for (const key in global) {
+    if (serverOnlyProperties.includes(key as any)) {
+      continue
     }
-  })
-
-  if (!clientGlobal.admin) {
-    clientGlobal.admin = {} as ClientGlobalConfig['admin']
-  }
-
-  serverOnlyGlobalAdminProperties.forEach((key) => {
-    if (key in clientGlobal.admin) {
-      delete clientGlobal.admin[key]
+    switch (key) {
+      case 'admin':
+        if (!global.admin) {
+          break
+        }
+        clientGlobal.admin = {} as ClientGlobalConfig['admin']
+        for (const adminKey in global.admin) {
+          if (serverOnlyGlobalAdminProperties.includes(adminKey as any)) {
+            continue
+          }
+          switch (adminKey) {
+            case 'livePreview':
+              if (!global.admin.livePreview) {
+                break
+              }
+              clientGlobal.admin.livePreview = {}
+              if (global.admin.livePreview.breakpoints) {
+                clientGlobal.admin.livePreview.breakpoints = global.admin.livePreview.breakpoints
+              }
+              break
+            case 'preview':
+              if (global.admin.preview) {
+                clientGlobal.admin.preview = true
+              }
+              break
+            default:
+              clientGlobal.admin[adminKey] = global.admin[adminKey]
+          }
+        }
+        break
+      case 'fields':
+        clientGlobal.fields = createClientFields({
+          defaultIDType,
+          fields: global.fields,
+          i18n,
+          importMap,
+        })
+        break
+      case 'label':
+        clientGlobal.label =
+          typeof global.label === 'function' ? global.label({ t: i18n.t }) : global.label
+        break
+      default: {
+        clientGlobal[key] = global[key]
+        break
+      }
     }
-  })
-
-  if (global.admin.preview) {
-    clientGlobal.admin.preview = true
-  }
-
-  clientGlobal.admin.components = null
-
-  if (
-    'livePreview' in clientGlobal.admin &&
-    clientGlobal.admin.livePreview &&
-    'url' in clientGlobal.admin.livePreview
-  ) {
-    delete clientGlobal.admin.livePreview.url
   }
 
   return clientGlobal

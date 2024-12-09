@@ -23,6 +23,7 @@ type ListViewArgs = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections: boolean
+  overrideEntityVisibility?: boolean
   query: ListQuery
 } & AdminViewProps
 
@@ -39,6 +40,7 @@ export const renderListView = async (
     drawerSlug,
     enableRowSelections,
     initPageResult,
+    overrideEntityVisibility,
     params,
     query: queryFromArgs,
     searchParams,
@@ -111,7 +113,7 @@ export const renderListView = async (
   } = config
 
   if (collectionConfig) {
-    if (!visibleEntities.collections.includes(collectionSlug)) {
+    if (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) {
       throw new Error('not-found')
     }
 

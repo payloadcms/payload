@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { categoriesSlug, postsSlug } from '../shared.js'
+import { categoriesSlug, hiddenPostsSlug, postsSlug } from '../shared.js'
 import { singularSlug } from './Singular.js'
 
 export const Categories: CollectionConfig = {
@@ -47,6 +47,13 @@ export const Categories: CollectionConfig = {
       name: 'relatedPosts',
       label: 'Related Posts',
       type: 'join',
+      admin: {
+        components: {
+          afterInput: ['/components/AfterInput.js#AfterInput'],
+          beforeInput: ['/components/BeforeInput.js#BeforeInput'],
+          Description: '/components/CustomDescription/index.js#FieldDescriptionComponent',
+        },
+      },
       collection: postsSlug,
       defaultSort: '-title',
       defaultLimit: 5,
@@ -57,6 +64,9 @@ export const Categories: CollectionConfig = {
       name: 'hasManyPosts',
       type: 'join',
       collection: postsSlug,
+      admin: {
+        description: 'Static Description',
+      },
       on: 'categories',
     },
     {
@@ -64,6 +74,12 @@ export const Categories: CollectionConfig = {
       type: 'join',
       collection: postsSlug,
       on: 'categoriesLocalized',
+    },
+    {
+      name: 'hiddenPosts',
+      type: 'join',
+      collection: hiddenPostsSlug,
+      on: 'category',
     },
     {
       name: 'group',

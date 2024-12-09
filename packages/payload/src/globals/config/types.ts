@@ -14,8 +14,10 @@ import type {
   EntityDescription,
   EntityDescriptionComponent,
   GeneratePreviewURL,
+  LabelFunction,
   LivePreviewConfig,
   MetaConfig,
+  StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
@@ -165,7 +167,7 @@ export type GlobalConfig = {
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
   }
-  label?: Record<string, string> | string
+  label?: LabelFunction | StaticLabel
   /**
    * Enables / Disables the ability to lock documents while editing
    * @default true

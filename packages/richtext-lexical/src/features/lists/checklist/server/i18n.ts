@@ -68,10 +68,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Listă de verificare',
   },
   rs: {
-    label: 'Lista provere',
+    label: 'Контролна листа',
   },
   'rs-latin': {
-    label: 'Lista provere',
+    label: 'Kontrolna lista',
   },
   ru: {
     label: 'Список Проверки',

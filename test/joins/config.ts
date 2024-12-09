@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
+import { HiddenPosts } from './collections/HiddenPosts.js'
 import { Posts } from './collections/Posts.js'
 import { Singular } from './collections/Singular.js'
 import { Uploads } from './collections/Uploads.js'
@@ -21,9 +22,15 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     Posts,
     Categories,
+    HiddenPosts,
     Uploads,
     Versions,
     CategoriesVersions,

@@ -206,12 +206,26 @@ export interface IncomingAuthType {
   /**
    * Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.
    */
-  disableLocalStrategy?: true
+  disableLocalStrategy?:
+    | {
+        /**
+         * Include auth fields on the collection even though the local strategy is disabled.
+         * Useful when you do not want the database or types to vary depending on the auth configuration.
+         */
+        enableFields?: true
+        optionalPassword?: true
+      }
+    | true
   /**
    * Customize the way that the forgotPassword operation functions.
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
    */
   forgotPassword?: {
+    /**
+     * The number of milliseconds that the forgot password token should be valid for.
+     * @default 3600000 // 1 hour
+     */
+    expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
@@ -270,6 +284,7 @@ export type VerifyConfig = {
 export interface Auth
   extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
   forgotPassword?: {
+    expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }

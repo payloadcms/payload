@@ -6,7 +6,6 @@ const CustomIDs: CollectionConfig = {
   slug: customIDSlug,
   admin: {
     defaultColumns: ['id', 'title', 'createdAt'],
-    preview: () => 'https://payloadcms.com',
     useAsTitle: 'id',
   },
   fields: [

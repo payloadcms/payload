@@ -31,6 +31,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
+  const { code: localeCode } = useLocale()
 
   const {
     localization,
@@ -38,8 +39,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     serverURL,
   } = config
 
-  const { i18n, t } = useTranslation()
-  const { code } = useLocale()
+  const { t } = useTranslation()
   const label = labelProp || t('version:publishChanges')
 
   const hasNewerVersions = unpublishedVersionCount > 0
@@ -53,7 +53,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       return
     }
 
-    const search = `?locale=${code}&depth=0&fallback-locale=null&draft=true`
+    const search = `?locale=${localeCode}&depth=0&fallback-locale=null&draft=true`
     let action
     let method = 'POST'
 
@@ -76,7 +76,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, code, id, forceDisable])
+  }, [submit, collectionSlug, globalSlug, serverURL, api, localeCode, id, forceDisable])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -126,13 +126,13 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   const activeLocale =
     localization &&
     localization?.locales.find((locale) =>
-      typeof locale === 'string' ? locale === code : locale.code === code,
+      typeof locale === 'string' ? locale === localeCode : locale.code === localeCode,
     )
 
   const activeLocaleLabel =
     typeof activeLocale.label === 'string'
       ? activeLocale.label
-      : (activeLocale.label?.[code] ?? undefined)
+      : (activeLocale.label?.[localeCode] ?? undefined)
 
   const defaultPublish = publishAll ? publish : () => publishSpecificLocale(activeLocale.code)
   const defaultLabel = publishAll ? label : t('version:publishIn', { locale: activeLocaleLabel })

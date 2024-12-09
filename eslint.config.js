@@ -42,6 +42,7 @@ export const rootEslintConfig = [
       'test/live-preview/next-app',
       'packages/**/*.spec.ts',
       'templates/**',
+      'examples/**',
     ],
   },
   {

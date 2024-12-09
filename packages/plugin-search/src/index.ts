@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Config } from 'payload'
 
-import type { SearchPluginConfig } from './types.js'
+import type { SearchPluginConfig, SearchPluginConfigWithLocales } from './types.js'
 
 import { deleteFromSearch } from './Search/hooks/deleteFromSearch.js'
 import { syncWithSearch } from './Search/hooks/syncWithSearch.js'
@@ -23,9 +23,24 @@ export const searchPlugin =
     incomingPluginConfig.localize = shouldLocalize
 
     if (collections) {
-      const pluginConfig: SearchPluginConfig = {
+      const locales = config.localization
+        ? config.localization.locales.map((localeConfig) =>
+            typeof localeConfig === 'string' ? localeConfig : localeConfig.code,
+          )
+        : []
+
+      const labels = Object.fromEntries(
+        collections
+          .filter(({ slug }) => incomingPluginConfig.collections?.includes(slug))
+          .map((collection) => [collection.slug, collection.labels]),
+      )
+
+      const pluginConfig: SearchPluginConfigWithLocales = {
         // write any config defaults here
         deleteDrafts: true,
+        labels,
+        locales,
+        reindexBatchSize: incomingPluginConfig?.reindexBatchSize || 50,
         syncDrafts: false,
         ...incomingPluginConfig,
       }

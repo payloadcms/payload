@@ -1,11 +1,12 @@
 'use client'
 import type { ClientUser, Where } from 'payload'
 
+import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useLocale } from '../Locale/index.js'
-import { useSearchParams } from '../SearchParams/index.js'
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',
@@ -51,7 +52,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None)
   const [count, setCount] = useState(0)
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
 
   const toggleAll = useCallback(
     (allAvailable = false) => {
@@ -110,7 +111,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       let where: Where
 
       if (selectAll === SelectAllStatus.AllAvailable) {
-        const params = searchParams?.where as Where
+        const params = parseSearchParams(searchParams)?.where as Where
 
         where = params || {
           id: { not_equals: '' },
@@ -166,13 +167,10 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     }
 
     if (all && selected.size === docs.length) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.AllInPage)
     } else if (some) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.Some)
     } else {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSelectAll(SelectAllStatus.None)
     }
   }, [selectAll, selected, totalDocs, docs])
@@ -190,7 +188,6 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       }
     }
 
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
 

@@ -75,7 +75,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
   }) as ClientCollectionConfig
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
-  const { getPreference, setPreference } = usePreferences()
+  const { getPreference } = usePreferences()
 
   const [tableColumns, setTableColumns] = React.useState(columnState)
   const tableStateControllerRef = React.useRef<AbortController>(null)

@@ -120,7 +120,7 @@ You can also pass a function to dynamically set the `label` of your breadcrumb.
 
 ```ts
 // payload.config.ts
-nestedDocs({
+nestedDocsPlugin({
   //...
   generateLabel: (_, doc) => doc.title, // NOTE: 'title' is a hypothetical field
 })
@@ -141,7 +141,7 @@ that point, like `/about-us/company/our-team`.
 
 ```ts
 // payload.config.ts
-nestedDocs({
+nestedDocsPlugin({
   //...
   generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''), // NOTE: 'slug' is a hypothetical field
 })

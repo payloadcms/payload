@@ -1,4 +1,5 @@
 import type {
+  DefaultTranslationKeys,
   DefaultTranslationsObject,
   I18nClient,
   I18nOptions,
@@ -501,7 +502,11 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
-export type LabelFunction = ({ t }: { t: TFunction }) => string
+export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = ({
+  t,
+}: {
+  t: TFunction<TTranslationKeys>
+}) => string
 
 export type StaticLabel = Record<string, string> | string
 

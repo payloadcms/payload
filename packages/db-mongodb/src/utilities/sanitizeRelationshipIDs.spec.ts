@@ -191,6 +191,20 @@ const config = {
               fields: relsFields,
               localized: true,
             },
+            {
+              label: 'another',
+              fields: [
+                {
+                  type: 'tabs',
+                  tabs: [
+                    {
+                      name: 'nestedTab',
+                      fields: relsFields,
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         },
       ],
@@ -330,6 +344,7 @@ describe('sanitizeRelationshipIDs', () => {
         en: { ...relsData },
         es: { ...relsData },
       },
+      nestedTab: { ...relsData },
     }
     const flattenValuesBefore = Object.values(flattenRelationshipValues(data))
 

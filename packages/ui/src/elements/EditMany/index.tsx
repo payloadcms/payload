@@ -3,7 +3,8 @@ import type { ClientCollectionConfig, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
+import { useRouter, useSearchParams } from 'next/navigation.js'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
@@ -19,14 +20,14 @@ import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { OperationContext } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
-import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import './index.scss'
+import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 
 const baseClass = 'edit-many'
@@ -125,7 +126,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
   const [selected, setSelected] = useState([])
-  const { searchParams, stringifyParams } = useSearchParams()
+  const searchParams = useSearchParams()
   const router = useRouter()
   const [initialState, setInitialState] = useState<FormState>()
   const hasInitializedState = React.useRef(false)
@@ -195,7 +196,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const queryString = useMemo(() => {
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
-      search: searchParams?.search as string,
+      search: searchParams.get('search'),
     })
 
     return getQueryParams(queryWithSearch)
@@ -203,9 +204,13 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const onSuccess = () => {
     router.replace(
-      stringifyParams({
-        params: { page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined },
-      }),
+      qs.stringify(
+        {
+          ...parseSearchParams(searchParams),
+          page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined,
+        },
+        { addQueryPrefix: true },
+      ),
     )
     clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
     closeModal(drawerSlug)

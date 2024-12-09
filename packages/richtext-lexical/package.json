@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.1.0",
+  "version": "3.5.0",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -30,6 +30,11 @@
       "types": "./src/exports/client/index.ts",
       "default": "./src/exports/client/index.ts"
     },
+    "./react": {
+      "import": "./src/exports/react/index.ts",
+      "types": "./src/exports/react/index.ts",
+      "default": "./src/exports/react/index.ts"
+    },
     "./rsc": {
       "import": "./src/exports/server/rsc.ts",
       "types": "./src/exports/server/rsc.ts",
@@ -49,6 +54,11 @@
       "import": "./src/lexical-proxy/@lexical-headless.ts",
       "types": "./src/lexical-proxy/@lexical-headless.ts",
       "default": "./src/lexical-proxy/@lexical-headless.ts"
+    },
+    "./lexical/html": {
+      "import": "./src/lexical-proxy/@lexical-html.ts",
+      "types": "./src/lexical-proxy/@lexical-html.ts",
+      "default": "./src/lexical-proxy/@lexical-html.ts"
     },
     "./lexical/link": {
       "import": "./src/lexical-proxy/@lexical-link.ts",
@@ -337,6 +347,7 @@
   },
   "dependencies": {
     "@lexical/headless": "0.20.0",
+    "@lexical/html": "0.20.0",
     "@lexical/link": "0.20.0",
     "@lexical/list": "0.20.0",
     "@lexical/mark": "0.20.0",
@@ -355,35 +366,36 @@
     "mdast-util-from-markdown": "2.0.2",
     "mdast-util-mdx-jsx": "3.1.3",
     "micromark-extension-mdx-jsx": "3.0.1",
-    "react-error-boundary": "4.0.13",
+    "react-error-boundary": "4.1.2",
     "ts-essentials": "10.0.3",
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.24.5",
-    "@babel/core": "^7.24.5",
-    "@babel/preset-env": "^7.24.5",
-    "@babel/preset-react": "^7.24.1",
-    "@babel/preset-typescript": "^7.24.1",
+    "@babel/cli": "7.25.9",
+    "@babel/core": "7.26.0",
+    "@babel/preset-env": "7.26.0",
+    "@babel/preset-react": "7.25.9",
+    "@babel/preset-typescript": "7.26.0",
     "@lexical/eslint-plugin": "0.20.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
     "@types/node": "22.5.4",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
-    "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
+    "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "babel-plugin-transform-remove-imports": "^1.8.0",
-    "esbuild": "0.23.1",
+    "esbuild": "0.24.0",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-a7bf2bd-20241110",
+    "eslint-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "1.15.0"
+    "swc-plugin-transform-remove-imports": "2.0.0"
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0-beta.2",
     "@faceless-ui/scroll-info": "2.0.0-beta.0",
     "@lexical/headless": "0.20.0",
+    "@lexical/html": "0.20.0",
     "@lexical/link": "0.20.0",
     "@lexical/list": "0.20.0",
     "@lexical/mark": "0.20.0",
@@ -413,6 +425,11 @@
         "types": "./dist/exports/client/index.d.ts",
         "default": "./dist/exports/client/index.js"
       },
+      "./react": {
+        "import": "./dist/exports/react/index.js",
+        "types": "./dist/exports/react/index.d.ts",
+        "default": "./dist/exports/react/index.js"
+      },
       "./rsc": {
         "import": "./dist/exports/server/rsc.js",
         "types": "./dist/exports/server/rsc.d.ts",
@@ -432,6 +449,11 @@
         "import": "./dist/lexical-proxy/@lexical-headless.js",
         "types": "./dist/lexical-proxy/@lexical-headless.d.ts",
         "default": "./dist/lexical-proxy/@lexical-headless.js"
+      },
+      "./lexical/html": {
+        "import": "./dist/lexical-proxy/@lexical-html.js",
+        "types": "./dist/lexical-proxy/@lexical-html.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-html.js"
       },
       "./lexical/link": {
         "import": "./dist/lexical-proxy/@lexical-link.js",
@@ -692,9 +714,5 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }
