@@ -44,6 +44,10 @@ export async function generateTypes(
         },
         unreachableDefinitions: true,
       }))
+
+    payloadModuleAugmentation = addSelectGenericsToGeneratedTypes({
+      compiledGeneratedTypes: payloadModuleAugmentation,
+    })
   }
 
   const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n${payloadModuleAugmentation}}`
