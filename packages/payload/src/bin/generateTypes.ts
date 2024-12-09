@@ -1,3 +1,5 @@
+import type { JSONSchema4 } from 'json-schema'
+
 import fs from 'fs'
 import { compile } from 'json-schema-to-typescript'
 
@@ -22,8 +24,30 @@ export async function generateTypes(
 
   const jsonSchema = configToJSONSchema(config, config.db.defaultIDType)
 
-  const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n}`
-  const declareWithTSIgnoreError = `declare module 'payload' {\n  // @ts-ignore \n  export interface GeneratedTypes extends Config {}\n}`
+  /**
+   * Handle `Payload` module augmentation
+   */
+
+  let payloadModuleAugmentation = ''
+
+  if (config.typescript?.payloadSchema?.length) {
+    let jsonSchemaPayload: JSONSchema4 = {}
+    for (const schema of config.typescript.payloadSchema) {
+      jsonSchemaPayload = schema({ jsonSchema: jsonSchemaPayload })
+    }
+    payloadModuleAugmentation =
+      '\n\n' +
+      (await compile(jsonSchemaPayload, 'BasePayload', {
+        bannerComment: '',
+        style: {
+          singleQuote: true,
+        },
+        unreachableDefinitions: true,
+      }))
+  }
+
+  const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n${payloadModuleAugmentation}}`
+  const declareWithTSIgnoreError = `declare module 'payload' {\n  // @ts-ignore \n  export interface GeneratedTypes extends Config {}\n${payloadModuleAugmentation}}`
 
   let compiled = await compile(jsonSchema, 'Config', {
     bannerComment:

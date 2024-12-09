@@ -1089,6 +1089,10 @@ export type Config = {
     outputFile?: string
 
     /**
+     * Allows you to specify schemas that will be used to generate the TypeScript interfaces to extend the `Payload` class
+     */
+    payloadSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+    /**
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
      * to generate the TypeScript interfaces.
      */
