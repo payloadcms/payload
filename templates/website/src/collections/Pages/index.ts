@@ -48,14 +48,12 @@ export const Pages: CollectionConfig<'pages'> = {
         return path
       },
     },
-    preview: (data) => {
-      const path = generatePreviewPath({
+    preview: (data, { req }) =>
+      generatePreviewPath({
         slug: typeof data?.slug === 'string' ? data.slug : '',
         collection: 'pages',
-      })
-
-      return path
-    },
+        req,
+      }),
     useAsTitle: 'title',
   },
   fields: [
