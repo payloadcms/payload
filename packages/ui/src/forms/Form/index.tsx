@@ -296,7 +296,7 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       const formData = contextRef.current.createFormData(overrides, {
-        spread: Boolean(typeof overridesFromArgs !== 'function'),
+        mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
       })
 
       try {
@@ -452,7 +452,7 @@ export const Form: React.FC<FormProps> = (props) => {
     [],
   )
 
-  const createFormData = useCallback<CreateFormData>((overrides, { spread = true }) => {
+  const createFormData = useCallback<CreateFormData>((overrides, { mergeOverrideData = true }) => {
     let data = reduceFieldsToValues(contextRef.current.fields, true)
 
     const file = data?.file
@@ -461,7 +461,7 @@ export const Form: React.FC<FormProps> = (props) => {
       delete data.file
     }
 
-    if (spread) {
+    if (mergeOverrideData) {
       data = {
         ...data,
         ...overrides,

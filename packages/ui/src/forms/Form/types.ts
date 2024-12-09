@@ -72,7 +72,11 @@ export type Submit = (
 export type ValidateForm = () => Promise<boolean>
 export type CreateFormData = (
   overrides?: Record<string, unknown>,
-  options?: { spread?: boolean },
+  /**
+   * If mergeOverrideData true, the data will be merged with the existing data in the form state.
+   * @default true
+   */
+  options?: { mergeOverrideData?: boolean },
 ) => FormData
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
