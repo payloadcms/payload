@@ -1,4 +1,3 @@
-import type { TransactionPg } from '@payloadcms/drizzle/types'
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { Payload, PayloadRequest } from 'payload'
 
@@ -8,7 +7,8 @@ import { createRequire } from 'module'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { TransactionPg } from '../../../types.js'
+import type { BasePostgresAdapter } from '../../types.js'
 import type { PathsToQuery } from './types.js'
 
 import { groupUpSQLStatements } from './groupUpSQLStatements.js'
@@ -38,7 +38,7 @@ type Args = {
  * @param req
  */
 export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
-  const adapter = payload.db as unknown as PostgresAdapter
+  const adapter = payload.db as unknown as BasePostgresAdapter
   const db = adapter.sessions[await req.transactionID].db as TransactionPg
   const dir = payload.db.migrationDir
 
