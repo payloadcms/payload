@@ -619,6 +619,8 @@ export type DateFieldClient = {
 export type GroupField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Label?: CustomComponent<GroupFieldLabelClientComponent | GroupFieldLabelServerComponent>
     } & Admin['components']
     hideGutter?: boolean
@@ -660,6 +662,8 @@ export type CollapsibleField = {
   | {
       admin: {
         components: {
+          afterInput?: CustomComponent[]
+          beforeInput?: CustomComponent[]
           Label: CustomComponent<
             CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
           >
@@ -671,6 +675,8 @@ export type CollapsibleField = {
   | {
       admin?: {
         components?: {
+          afterInput?: CustomComponent[]
+          beforeInput?: CustomComponent[]
           Label?: CustomComponent<
             CollapsibleFieldLabelClientComponent | CollapsibleFieldLabelServerComponent
           >
@@ -1029,6 +1035,8 @@ type RelationshipAdmin = {
   allowCreate?: boolean
   allowEdit?: boolean
   components?: {
+    afterInput?: CustomComponent[]
+    beforeInput?: CustomComponent[]
     Error?: CustomComponent<
       RelationshipFieldErrorClientComponent | RelationshipFieldErrorServerComponent
     >
@@ -1124,6 +1132,8 @@ export type RichTextFieldClient<
 export type ArrayField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent<ArrayFieldErrorClientComponent | ArrayFieldErrorServerComponent>
       Label?: CustomComponent<ArrayFieldLabelClientComponent | ArrayFieldLabelServerComponent>
       RowLabel?: RowLabelComponent
@@ -1163,6 +1173,8 @@ export type ArrayFieldClient = {
 export type RadioField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent<RadioFieldErrorClientComponent | RadioFieldErrorServerComponent>
       Label?: CustomComponent<RadioFieldLabelClientComponent | RadioFieldLabelServerComponent>
     } & Admin['components']
@@ -1302,6 +1314,8 @@ export type ClientBlock = {
 export type BlocksField = {
   admin?: {
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
     } & Admin['components']
     initCollapsed?: boolean
@@ -1358,6 +1372,8 @@ export type JoinField = {
   admin?: {
     allowCreate?: boolean
     components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
       Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
       Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
     } & Admin['components']
@@ -1394,7 +1410,10 @@ export type JoinField = {
 export type JoinFieldClient = {
   admin?: AdminClient & Pick<JoinField['admin'], 'allowCreate' | 'disableBulkEdit' | 'readOnly'>
 } & FieldBaseClient &
-  Pick<JoinField, 'collection' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'>
+  Pick<
+    JoinField,
+    'collection' | 'defaultLimit' | 'defaultSort' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'
+  >
 
 export type FlattenedBlock = {
   flattenedFields: FlattenedField[]
@@ -1691,6 +1710,21 @@ export function fieldIsSidebar<TField extends ClientField | Field | TabAsField |
   field: TField,
 ): field is { admin: { position: 'sidebar' } } & TField {
   return 'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar'
+}
+
+export function fieldIsID<TField extends ClientField | Field>(
+  field: TField,
+): field is { name: 'id' } & TField {
+  return 'name' in field && field.name === 'id'
+}
+
+export function fieldIsHiddenOrDisabled<
+  TField extends ClientField | Field | TabAsField | TabAsFieldClient,
+>(field: TField): field is { admin: { hidden: true } } & TField {
+  return (
+    ('hidden' in field && field.hidden) ||
+    ('admin' in field && 'disabled' in field.admin && field.admin.disabled)
+  )
 }
 
 export function fieldAffectsData<

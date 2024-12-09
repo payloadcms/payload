@@ -35,7 +35,9 @@ import { RelationshipTablePagination } from './Pagination.js'
 const baseClass = 'relationship-table'
 
 type RelationshipTableComponentProps = {
+  readonly AfterInput?: React.ReactNode
   readonly allowCreate?: boolean
+  readonly BeforeInput?: React.ReactNode
   readonly disableTable?: boolean
   readonly field: JoinFieldClient
   readonly filterOptions?: Where
@@ -47,8 +49,11 @@ type RelationshipTableComponentProps = {
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
+    AfterInput,
     allowCreate = true,
+    BeforeInput,
     disableTable = false,
+    field,
     filterOptions,
     initialData: initialDataFromProps,
     initialDrawerData,
@@ -91,7 +96,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     () => getEntityConfig({ collectionSlug: relationTo }) as ClientCollectionConfig,
   )
 
-  const [isLoadingTable, setIsLoadingTable] = useState(true)
+  const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
   const [data, setData] = useState<PaginatedDocs>(initialData)
   const [columnState, setColumnState] = useState<Column[]>()
 
@@ -100,6 +105,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const renderTable = useCallback(
     async (docs?: PaginatedDocs['docs']) => {
       const newQuery: ListQuery = {
+        limit: String(field.defaultLimit || collectionConfig.admin.pagination.defaultLimit),
+        sort: field.defaultSort || collectionConfig.defaultSort,
         ...(query || {}),
         where: { ...(query?.where || {}) },
       }
@@ -126,7 +133,16 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       setColumnState(newColumnState)
       setIsLoadingTable(false)
     },
-    [getTableState, relationTo, filterOptions, query],
+    [
+      query,
+      field.defaultLimit,
+      field.defaultSort,
+      collectionConfig.admin.pagination.defaultLimit,
+      collectionConfig.defaultSort,
+      filterOptions,
+      getTableState,
+      relationTo,
+    ],
   )
 
   useIgnoredEffect(
@@ -197,6 +213,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           </Pill>
         </div>
       </div>
+      {BeforeInput}
       {isLoadingTable ? (
         <p>{t('general:loading')}</p>
       ) : (
@@ -222,7 +239,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
               <ListQueryProvider
                 collectionSlug={relationTo}
                 data={data}
-                defaultLimit={collectionConfig?.admin?.pagination?.defaultLimit}
+                defaultLimit={
+                  field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
+                }
                 modifySearchParams={false}
                 onQueryChange={setQuery}
                 preferenceKey={preferenceKey}
@@ -257,6 +276,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           )}
         </Fragment>
       )}
+      {AfterInput}
       <DocumentDrawer initialData={initialDrawerData} onSave={onDrawerCreate} />
     </div>
   )

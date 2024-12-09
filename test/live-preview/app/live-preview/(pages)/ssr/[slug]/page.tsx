@@ -46,7 +46,7 @@ export async function generateStaticParams() {
   try {
     const ssrPages = await getDocs<Page>(ssrPagesSlug)
     return ssrPages?.map(({ slug }) => slug)
-  } catch (error) {
+  } catch (_err) {
     return []
   }
 }

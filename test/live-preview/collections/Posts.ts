@@ -18,6 +18,7 @@ export const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
+    preview: (doc) => `/live-preview/posts/${doc?.slug}`,
   },
   fields: [
     {

@@ -108,12 +108,20 @@ export const Posts: CollectionConfig = {
 }
 ```
 
+The `preview` property resolves to a string that points to your front-end application with additional URL parameters. This can be an absolute URL or a relative path.
+
 The preview function receives two arguments:
 
 | Argument | Description |
 | --- | --- |
 | **`doc`** | The Document being edited. |
-| **`ctx`** | An object containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT. |
+| **`ctx`** | An object containing `locale`, `token`, and `req` properties. The `token` is the currently logged-in user's JWT. |
+
+If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
+
+```ts
+preview: (doc, { req }) => `${req.protocol}//${req.host}/${doc.slug}` // highlight-line
+```
 
 <Banner type="success">
   <strong>Note:</strong>

@@ -22,3 +22,5 @@ export const desktopBreakpoint = {
 }
 
 export const renderedPageTitleID = 'rendered-page-title'
+
+export const localizedPageTitleID = 'localized-page-title'

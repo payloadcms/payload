@@ -8,6 +8,7 @@ import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
+import { Forbidden } from '../../index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -44,6 +45,9 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
       args.data.username.toLowerCase().trim()) ||
     null
 
+  if (collectionConfig.auth.disableLocalStrategy) {
+    throw new Forbidden(req.t)
+  }
   if (!sanitizedEmail && !sanitizedUsername) {
     throw new APIError(
       `Missing ${collectionConfig.auth.loginWithUsername ? 'username' : 'email'}.`,

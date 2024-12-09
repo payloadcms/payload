@@ -11,7 +11,12 @@ import type {
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { deepCopyObjectSimple, fieldIsPresentationalOnly } from 'payload/shared'
+import {
+  deepCopyObjectSimple,
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
+  fieldIsPresentationalOnly,
+} from 'payload/shared'
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
@@ -70,7 +75,7 @@ export const buildColumnState = (args: Args): Column[] => {
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
   // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
-  const idFieldIndex = sortedFieldMap?.findIndex((field) => 'name' in field && field.name === 'id')
+  const idFieldIndex = sortedFieldMap?.findIndex((field) => fieldIsID(field))
 
   if (idFieldIndex > -1) {
     const idField = sortedFieldMap.splice(idFieldIndex, 1)[0]
@@ -117,6 +122,10 @@ export const buildColumnState = (args: Args): Column[] => {
   const activeColumnsIndices = []
 
   const sorted: Column[] = sortedFieldMap?.reduce((acc, field, index) => {
+    if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
+      return acc
+    }
+
     const _field = _sortedFieldMap.find(
       (f) => 'name' in field && 'name' in f && f.name === field.name,
     )

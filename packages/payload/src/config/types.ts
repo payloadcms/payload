@@ -148,7 +148,12 @@ export type LivePreviewConfig = {
         data: Record<string, any>
         globalConfig?: SanitizedGlobalConfig
         locale: Locale
+        /**
+         * @deprecated
+         * Use `req.payload` instead. This will be removed in the next major version.
+         */
         payload: Payload
+        req: PayloadRequest
       }) => Promise<string> | string)
     | string
 }

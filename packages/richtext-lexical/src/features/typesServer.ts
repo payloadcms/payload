@@ -176,6 +176,7 @@ export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {
   operation: 'create' | 'delete' | 'read' | 'update'
   /** The value of the node before any changes. Not available in afterRead hooks */
   originalNode: T
+  previousNode: T
 }
 export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
@@ -199,6 +200,8 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
    * The original node with locales (not modified by any hooks).
    */
   originalNodeWithLocales?: T
+  previousNode: T
+
   skipValidation: boolean
 }
 

@@ -8,6 +8,7 @@ import type {
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
+import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
@@ -17,6 +18,7 @@ import { RenderServerComponent } from '../elements/RenderServerComponent/index.j
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, Table } from '../exports/client/index.js'
 
@@ -26,6 +28,10 @@ export const renderFilters = (
 ): Map<string, React.ReactNode> =>
   fields.reduce(
     (acc, field) => {
+      if (fieldIsHiddenOrDisabled(field)) {
+        return acc
+      }
+
       if ('name' in field && field.admin?.components?.Filter) {
         acc.set(
           field.name,
