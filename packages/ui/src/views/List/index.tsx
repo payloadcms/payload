@@ -4,7 +4,7 @@ import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
-import { useRouter } from 'next/navigation.js'
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
 
@@ -37,6 +37,7 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { ListHeader } from './ListHeader/index.js'
 import './index.scss'
 
@@ -99,7 +100,12 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const { user } = useAuth()
 
-  const { getEntityConfig } = useConfig()
+  const {
+    config: {
+      routes: { admin: adminRoute },
+    },
+    getEntityConfig,
+  } = useConfig()
   const router = useRouter()
 
   const {
@@ -129,6 +135,8 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const { setStepNav } = useStepNav()
 
+  const searchParams = useSearchParams()
+
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
@@ -156,11 +164,13 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     if (drawerDepth <= 1) {
       setStepNav([
         {
-          label: labels?.plural,
+          label: getTranslation(labels?.plural, i18n),
+          query: searchParams.toString(),
+          url: formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` }),
         },
       ])
     }
-  }, [setStepNav, labels, drawerDepth])
+  }, [setStepNav, collectionSlug, searchParams, labels, drawerDepth])
 
   return (
     <Fragment>

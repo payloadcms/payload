@@ -2,6 +2,7 @@ import type { LabelFunction, StaticLabel } from 'payload'
 
 export type StepNavItem = {
   label: LabelFunction | StaticLabel
+  query?: string
   url?: string
 }
 
