@@ -43,6 +43,11 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
           data: doc,
           globalConfig,
           locale,
+          req,
+          /**
+           * @deprecated
+           * Use `req.payload` instead. This will be removed in the next major version.
+           */
           payload: initPageResult.req.payload,
         })
       : livePreviewConfig?.url

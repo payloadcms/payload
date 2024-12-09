@@ -149,6 +149,7 @@ export type LivePreviewConfig = {
         globalConfig?: SanitizedGlobalConfig
         locale: Locale
         payload: Payload
+        req: PayloadRequest
       }) => Promise<string> | string)
     | string
 }
