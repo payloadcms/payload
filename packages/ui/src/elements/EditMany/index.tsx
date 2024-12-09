@@ -77,7 +77,7 @@ const Submit: React.FC<{
 const PublishButton: React.FC<{
   action: string
   disabled: boolean
-  readonly selected?: FieldWithPathClient[]
+  selected?: FieldWithPathClient[]
 }> = ({ action, disabled, selected }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
@@ -104,7 +104,7 @@ const PublishButton: React.FC<{
 const SaveDraftButton: React.FC<{
   action: string
   disabled: boolean
-  readonly selected?: FieldWithPathClient[]
+  selected?: FieldWithPathClient[]
 }> = ({ action, disabled, selected }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
