@@ -18,6 +18,8 @@ All Payload API routes are mounted and prefixed to your config's `routes.api` UR
 - [depth](../queries/depth) - automatically populates relationships and uploads
 - [locale](/docs/configuration/localization#retrieving-localized-docs) - retrieves document(s) in a specific locale
 - [fallback-locale](/docs/configuration/localization#retrieving-localized-docs) - specifies a fallback locale if no locale value exists
+- [select](../queries/select) - specifies which fields to include to the result
+- [populate](../queries/select#populate) - specifies which fields to include to the result from populated documents
 
 ## Collections
 
@@ -499,7 +501,7 @@ Globals cannot be created or deleted, so there are only two REST endpoints opene
 
 ## Preferences
 
-In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/overview#preferences) for data specific to the authenticated user.
+In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/preferences) for data specific to the authenticated user.
 
 <RestExamples
   data={[
@@ -591,7 +593,7 @@ Each endpoint object needs to have:
 Example:
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 // a collection of 'orders' with an additional route for tracking details, reachable at /api/orders/:id/tracking
 export const Orders: CollectionConfig = {

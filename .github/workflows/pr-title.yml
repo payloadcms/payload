@@ -1,11 +1,10 @@
 name: pr-title
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - edited
-      - synchronize
 
 permissions:
   pull-requests: write
@@ -13,7 +12,7 @@ permissions:
 jobs:
   main:
     name: lint-pr-title
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: amannn/action-semantic-pull-request@v5
         id: lint_pr_title
@@ -25,14 +24,15 @@ jobs:
             chore
             ci
             docs
+            examples
             feat
             fix
             perf
             refactor
             revert
             style
+            templates
             test
-            types
           scopes: |
             cpa
             db-\*
@@ -47,6 +47,7 @@ jobs:
             live-preview
             live-preview-react
             next
+            payload-cloud
             plugin-cloud
             plugin-cloud-storage
             plugin-form-builder
@@ -106,16 +107,11 @@ jobs:
 
   label-pr-on-open:
     name: label-pr-on-open
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event.action == 'opened'
     steps:
-      - name: Tag with main branch with v2
-        if: github.event.pull_request.base.ref == 'main'
+      - name: Tag with 2.x branch with v2
+        if: github.event.pull_request.base.ref == '2.x'
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: v2
-      - name: Tag with beta branch with v3
-        if: github.event.pull_request.base.ref == 'beta'
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: v3

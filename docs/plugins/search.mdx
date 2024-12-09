@@ -33,6 +33,7 @@ This plugin is a great way to implement a fast, immersive search experience such
 - Allows you to query search results using first-party Payload APIs
 - Allows you to query documents without triggering any of their underlying hooks
 - Allows you to easily prioritize search results by collection or document
+- Allows you to reindex search results by collection on demand
 
 ## Installation
 
@@ -80,6 +81,10 @@ export default config
 #### `collections`
 
 The `collections` property is an array of collection slugs to enable syncing to search. Enabled collections receive a `beforeChange` and `afterDelete` hook that creates, updates, and deletes its respective search record as it changes over time.
+
+#### `localize`
+
+By default, the search plugin will add `localization: true` to the `title` field of the newly added `search` collection if you have localization enabled. If you would like to disable this behavior, you can set this to `false`.
 
 #### `defaultPriorities`
 
@@ -130,7 +135,7 @@ Note that the `fields` property is a function that receives an object with a `de
 
 #### `beforeSync`
 
-Before creating or updating a search record, the `beforeSync` function runs. This is an [afterChange](<[afterChange](https://payloadcms.com/docs/hooks/globals#afterchange)>) hook that allows you to modify the data or provide fallbacks before its search record is created or updated.
+Before creating or updating a search record, the `beforeSync` function runs. This is an [afterChange](https://payloadcms.com/docs/hooks/globals#afterchange) hook that allows you to modify the data or provide fallbacks before its search record is created or updated.
 
 ```ts
 // payload.config.ts
@@ -139,7 +144,8 @@ Before creating or updating a search record, the `beforeSync` function runs. Thi
   searchPlugin({
     beforeSync: ({ originalDoc, searchDoc }) => ({
       ...searchDoc,
-      // Modify your docs in any way here, this can be async
+      // - Modify your docs in any way here, this can be async
+      // - You also need to add the `excerpt` field in the `searchOverrides` config
       excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
     }),
   }),
@@ -153,6 +159,14 @@ When `syncDrafts` is true, draft documents will be synced to search. This is fal
 #### `deleteDrafts`
 
 If true, will delete documents from search whose status changes to draft. This is true by default. You must have [Payload Drafts](https://payloadcms.com/docs/versions/drafts) enabled for this to apply.
+
+#### `reindexBatchSize`
+
+A number that, when specified, will be used as the value to determine how many search documents to fetch for reindexing at a time in each batch. If not set, this will default to `50`.
+
+### Collection reindexing
+
+Collection reindexing allows you to recreate search documents from your search-enabled collections on demand. This is useful if you have existing documents that don't already have search indexes, commonly when adding `plugin-search` to an existing project. To get started, navigate to your search collection and click the pill in the top right actions slot of the list view labelled `Reindex`. This will open a popup with options to select one of your search-enabled collections, or all, for reindexing.
 
 ## TypeScript
 

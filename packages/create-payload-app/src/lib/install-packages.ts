@@ -15,19 +15,19 @@ export async function installPackages(args: {
   let stderr = ''
 
   switch (packageManager) {
-    case 'npm': {
-      ;({ exitCode, stderr } = await execa('npm', ['install', '--save', ...packagesToInstall], {
-        cwd: projectDir,
-      }))
-      break
-    }
-    case 'yarn':
+    case 'bun':
     case 'pnpm':
-    case 'bun': {
+    case 'yarn': {
       if (packageManager === 'bun') {
         warning('Bun support is untested.')
       }
       ;({ exitCode, stderr } = await execa(packageManager, ['add', ...packagesToInstall], {
+        cwd: projectDir,
+      }))
+      break
+    }
+    case 'npm': {
+      ;({ exitCode, stderr } = await execa('npm', ['install', '--save', ...packagesToInstall], {
         cwd: projectDir,
       }))
       break

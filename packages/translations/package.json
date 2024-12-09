@@ -1,12 +1,21 @@
 {
   "name": "@payloadcms/translations",
-  "version": "3.0.0-beta.116",
+  "version": "3.5.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/translations"
   },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -45,16 +54,16 @@
     "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys/run.ts"
   },
   "dependencies": {
-    "date-fns": "3.3.1"
+    "date-fns": "4.1.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@swc/core": "1.7.10",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@swc/core": "1.9.3",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
     "dotenv": "16.4.5",
     "prettier": "3.3.3",
-    "typescript": "5.6.2"
+    "typescript": "5.7.2"
   },
   "publishConfig": {
     "exports": {
@@ -81,9 +90,5 @@
     },
     "main": "./dist/exports/index.js",
     "types": "./dist/exports/index.d.ts"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

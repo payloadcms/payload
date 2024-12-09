@@ -42,6 +42,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
                       adminRoute,
                       path: accountRoute,
                     })}
+                    prefetch={false}
                   >
                     {children}
                   </Link>
@@ -68,6 +69,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
           adminRoute,
           path: loginRoute,
         })}
+        prefetch={false}
       >
         {i18n.t('authentication:backToLogin')}
       </Link>

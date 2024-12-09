@@ -1,8 +1,9 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { JsonObject, Payload } from '../../../index.js'
-import type { PayloadRequest, Where } from '../../../types/index.js'
+import type { PayloadRequest, SelectType, Where } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
+import { getLoginOptions } from '../../getLoginOptions.js'
 import { generatePasswordSaltHash } from './generatePasswordSaltHash.js'
 
 type Args = {
@@ -11,6 +12,7 @@ type Args = {
   password: string
   payload: Payload
   req: PayloadRequest
+  select?: SelectType
 }
 
 export const registerLocalStrategy = async ({
@@ -19,12 +21,15 @@ export const registerLocalStrategy = async ({
   password,
   payload,
   req,
+  select,
 }: Args): Promise<Record<string, unknown>> => {
   const loginWithUsername = collection?.auth?.loginWithUsername
 
+  const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
+
   let whereConstraint: Where
 
-  if (!loginWithUsername) {
+  if (!canLoginWithUsername) {
     whereConstraint = {
       email: {
         equals: doc.email,
@@ -35,8 +40,8 @@ export const registerLocalStrategy = async ({
       or: [],
     }
 
-    if (doc.email) {
-      whereConstraint.or.push({
+    if (canLoginWithEmail && doc.email) {
+      whereConstraint.or?.push({
         email: {
           equals: doc.email,
         },
@@ -44,7 +49,7 @@ export const registerLocalStrategy = async ({
     }
 
     if (doc.username) {
-      whereConstraint.or.push({
+      whereConstraint.or?.push({
         username: {
           equals: doc.username,
         },
@@ -65,12 +70,12 @@ export const registerLocalStrategy = async ({
     throw new ValidationError({
       collection: collection.slug,
       errors: [
-        loginWithUsername
+        canLoginWithUsername
           ? {
-              field: 'username',
               message: req.t('error:usernameAlreadyRegistered'),
+              path: 'username',
             }
-          : { field: 'email', message: req.t('error:userEmailAlreadyRegistered') },
+          : { message: req.t('error:userEmailAlreadyRegistered'), path: 'email' },
       ],
     })
   }
@@ -90,5 +95,6 @@ export const registerLocalStrategy = async ({
       salt,
     },
     req,
+    select,
   })
 }

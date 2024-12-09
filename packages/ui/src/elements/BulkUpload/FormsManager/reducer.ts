@@ -35,18 +35,6 @@ type Action =
 
 export function formsManagementReducer(state: State, action: Action): State {
   switch (action.type) {
-    case 'REPLACE': {
-      return {
-        ...state,
-        ...action.state,
-      }
-    }
-    case 'SET_ACTIVE_INDEX': {
-      return {
-        ...state,
-        activeIndex: action.index,
-      }
-    }
     case 'ADD_FORMS': {
       const newForms: State['forms'] = []
       for (let i = 0; i < action.files.length; i++) {
@@ -87,6 +75,18 @@ export function formsManagementReducer(state: State, action: Action): State {
         activeIndex: affectedByShift ? boundedActiveIndex : state.activeIndex,
         forms: remainingFormStates,
         totalErrorCount: state.totalErrorCount - removedForm.errorCount,
+      }
+    }
+    case 'REPLACE': {
+      return {
+        ...state,
+        ...action.state,
+      }
+    }
+    case 'SET_ACTIVE_INDEX': {
+      return {
+        ...state,
+        activeIndex: action.index,
       }
     }
     case 'UPDATE_ERROR_COUNT': {

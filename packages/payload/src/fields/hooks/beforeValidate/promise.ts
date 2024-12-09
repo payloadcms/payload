@@ -1,7 +1,8 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
-import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, JsonValue, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -21,6 +22,7 @@ type Args<T> = {
    */
   doc: T
   field: Field | TabAsField
+  fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
   operation: 'create' | 'update'
@@ -49,6 +51,7 @@ export const promise = async <T>({
   data,
   doc,
   field,
+  fieldIndex,
   global,
   operation,
   overrideAccess,
@@ -58,11 +61,15 @@ export const promise = async <T>({
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
-  const { path: fieldPath, schemaPath: fieldSchemaPath } = getFieldPaths({
+  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
     field,
-    parentPath,
-    parentSchemaPath,
+    index: fieldIndex,
+    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
+    parentPath: parentPath.join('.'),
+    parentSchemaPath: parentSchemaPath.join('.'),
   })
+  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
+  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
 
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
@@ -83,6 +90,30 @@ export const promise = async <T>({
 
     // Sanitize incoming data
     switch (field.type) {
+      case 'array':
+      case 'blocks': {
+        // Handle cases of arrays being intentionally set to 0
+        if (siblingData[field.name] === '0' || siblingData[field.name] === 0) {
+          siblingData[field.name] = []
+        }
+
+        break
+      }
+
+      case 'checkbox': {
+        if (siblingData[field.name] === 'true') {
+          siblingData[field.name] = true
+        }
+        if (siblingData[field.name] === 'false') {
+          siblingData[field.name] = false
+        }
+        if (siblingData[field.name] === '') {
+          siblingData[field.name] = false
+        }
+
+        break
+      }
+
       case 'number': {
         if (typeof siblingData[field.name] === 'string') {
           const value = siblingData[field.name] as string
@@ -107,35 +138,6 @@ export const promise = async <T>({
 
         break
       }
-
-      case 'checkbox': {
-        if (siblingData[field.name] === 'true') {
-          siblingData[field.name] = true
-        }
-        if (siblingData[field.name] === 'false') {
-          siblingData[field.name] = false
-        }
-        if (siblingData[field.name] === '') {
-          siblingData[field.name] = false
-        }
-
-        break
-      }
-
-      case 'richText': {
-        if (typeof siblingData[field.name] === 'string') {
-          try {
-            const richTextJSON = JSON.parse(siblingData[field.name] as string)
-            siblingData[field.name] = richTextJSON
-          } catch {
-            // Disregard this data as it is not valid.
-            // Will be reported to user by field validation
-          }
-        }
-
-        break
-      }
-
       case 'relationship':
       case 'upload': {
         if (
@@ -159,6 +161,15 @@ export const promise = async <T>({
               const relatedCollection = req.payload.config.collections.find(
                 (collection) => collection.slug === relatedDoc.relationTo,
               )
+
+              if (
+                typeof relatedDoc.value === 'object' &&
+                relatedDoc.value &&
+                'id' in relatedDoc.value
+              ) {
+                relatedDoc.value = relatedDoc.value.id
+              }
+
               if (relatedCollection?.fields) {
                 const relationshipIDField = relatedCollection.fields.find(
                   (collectionField) =>
@@ -177,6 +188,11 @@ export const promise = async <T>({
             const relatedCollection = req.payload.config.collections.find(
               (collection) => collection.slug === value.relationTo,
             )
+
+            if (typeof value.value === 'object' && value.value && 'id' in value.value) {
+              value.value = (value.value as TypeWithID).id
+            }
+
             if (relatedCollection?.fields) {
               const relationshipIDField = relatedCollection.fields.find(
                 (collectionField) =>
@@ -194,6 +210,10 @@ export const promise = async <T>({
                 (collection) => collection.slug === field.relationTo,
               )
 
+              if (typeof relatedDoc === 'object' && relatedDoc && 'id' in relatedDoc) {
+                value[i] = relatedDoc.id
+              }
+
               if (relatedCollection?.fields) {
                 const relationshipIDField = relatedCollection.fields.find(
                   (collectionField) =>
@@ -210,6 +230,10 @@ export const promise = async <T>({
               (collection) => collection.slug === field.relationTo,
             )
 
+            if (typeof value === 'object' && value && 'id' in value) {
+              siblingData[field.name] = value.id
+            }
+
             if (relatedCollection?.fields) {
               const relationshipIDField = relatedCollection.fields.find(
                 (collectionField) =>
@@ -223,12 +247,15 @@ export const promise = async <T>({
         }
         break
       }
-
-      case 'array':
-      case 'blocks': {
-        // Handle cases of arrays being intentionally set to 0
-        if (siblingData[field.name] === '0' || siblingData[field.name] === 0) {
-          siblingData[field.name] = []
+      case 'richText': {
+        if (typeof siblingData[field.name] === 'string') {
+          try {
+            const richTextJSON = JSON.parse(siblingData[field.name] as string)
+            siblingData[field.name] = richTextJSON
+          } catch {
+            // Disregard this data as it is not valid.
+            // Will be reported to user by field validation
+          }
         }
 
         break
@@ -298,37 +325,6 @@ export const promise = async <T>({
 
   // Traverse subfields
   switch (field.type) {
-    case 'group': {
-      if (typeof siblingData[field.name] !== 'object') {
-        siblingData[field.name] = {}
-      }
-      if (typeof siblingDoc[field.name] !== 'object') {
-        siblingDoc[field.name] = {}
-      }
-
-      const groupData = siblingData[field.name] as Record<string, unknown>
-      const groupDoc = siblingDoc[field.name] as Record<string, unknown>
-
-      await traverseFields({
-        id,
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        overrideAccess,
-        path: fieldPath,
-        req,
-        schemaPath: fieldSchemaPath,
-        siblingData: groupData as JsonObject,
-        siblingDoc: groupDoc as JsonObject,
-      })
-
-      break
-    }
-
     case 'array': {
       const rows = siblingData[field.name]
 
@@ -398,8 +394,8 @@ export const promise = async <T>({
       break
     }
 
-    case 'row':
-    case 'collapsible': {
+    case 'collapsible':
+    case 'row': {
       await traverseFields({
         id,
         collection,
@@ -417,6 +413,76 @@ export const promise = async <T>({
         siblingDoc,
       })
 
+      break
+    }
+    case 'group': {
+      if (typeof siblingData[field.name] !== 'object') {
+        siblingData[field.name] = {}
+      }
+      if (typeof siblingDoc[field.name] !== 'object') {
+        siblingDoc[field.name] = {}
+      }
+
+      const groupData = siblingData[field.name] as Record<string, unknown>
+      const groupDoc = siblingDoc[field.name] as Record<string, unknown>
+
+      await traverseFields({
+        id,
+        collection,
+        context,
+        data,
+        doc,
+        fields: field.fields,
+        global,
+        operation,
+        overrideAccess,
+        path: fieldPath,
+        req,
+        schemaPath: fieldSchemaPath,
+        siblingData: groupData as JsonObject,
+        siblingDoc: groupDoc as JsonObject,
+      })
+
+      break
+    }
+
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.beforeValidate?.length) {
+        await editor.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const hookedValue = await currentHook({
+            collection,
+            context,
+            data,
+            field,
+            global,
+            operation,
+            originalDoc: doc,
+            overrideAccess,
+            path: fieldPath,
+            previousSiblingDoc: siblingDoc,
+            previousValue: siblingData[field.name],
+            req,
+            schemaPath: fieldSchemaPath,
+            siblingData,
+            value: siblingData[field.name],
+          })
+
+          if (hookedValue !== undefined) {
+            siblingData[field.name] = hookedValue
+          }
+        }, Promise.resolve())
+      }
       break
     }
 
@@ -476,46 +542,6 @@ export const promise = async <T>({
         siblingDoc,
       })
 
-      break
-    }
-
-    case 'richText': {
-      if (!field?.editor) {
-        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-      }
-      if (typeof field?.editor === 'function') {
-        throw new Error('Attempted to access unsanitized rich text editor.')
-      }
-
-      const editor: RichTextAdapter = field?.editor
-
-      if (editor?.hooks?.beforeValidate?.length) {
-        await editor.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
-            collection,
-            context,
-            data,
-            field,
-            global,
-            operation,
-            originalDoc: doc,
-            overrideAccess,
-            path: fieldPath,
-            previousSiblingDoc: siblingDoc,
-            previousValue: siblingData[field.name],
-            req,
-            schemaPath: fieldSchemaPath,
-            siblingData,
-            value: siblingData[field.name],
-          })
-
-          if (hookedValue !== undefined) {
-            siblingData[field.name] = hookedValue
-          }
-        }, Promise.resolve())
-      }
       break
     }
 

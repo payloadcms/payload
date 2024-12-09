@@ -1,6 +1,6 @@
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
-import { duplicateOperation } from 'payload'
+import { duplicateOperation, sanitizePopulateParam, sanitizeSelectParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
@@ -29,7 +29,9 @@ export const duplicate: CollectionRouteHandlerWithID = async ({
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
+    populate: sanitizePopulateParam(req.query.populate),
     req,
+    select: sanitizeSelectParam(req.query.select),
   })
 
   const message = req.t('general:successfullyDuplicated', {

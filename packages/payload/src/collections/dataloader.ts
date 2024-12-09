@@ -2,7 +2,7 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequest, SelectType } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 
 import { isValidID } from '../utilities/isValidID.js'
@@ -55,6 +55,7 @@ const batchAndLoadDocs =
         overrideAccess,
         showHiddenFields,
         draft,
+        select,
       ] = JSON.parse(key)
 
       const batchKeyArray = [
@@ -67,6 +68,7 @@ const batchAndLoadDocs =
         overrideAccess,
         showHiddenFields,
         draft,
+        select,
       ]
 
       const batchKey = JSON.stringify(batchKeyArray)
@@ -103,6 +105,7 @@ const batchAndLoadDocs =
         overrideAccess,
         showHiddenFields,
         draft,
+        select,
       ] = JSON.parse(batchKey)
 
       req.transactionID = transactionID
@@ -118,6 +121,7 @@ const batchAndLoadDocs =
         overrideAccess: Boolean(overrideAccess),
         pagination: false,
         req,
+        select,
         showHiddenFields: Boolean(showHiddenFields),
         where: {
           id: {
@@ -139,6 +143,7 @@ const batchAndLoadDocs =
           fallbackLocale,
           locale,
           overrideAccess,
+          select,
           showHiddenFields,
           transactionID: req.transactionID,
         })
@@ -167,6 +172,7 @@ type CreateCacheKeyArgs = {
   fallbackLocale: string
   locale: string
   overrideAccess: boolean
+  select?: SelectType
   showHiddenFields: boolean
   transactionID: number | Promise<number | string> | string
 }
@@ -179,6 +185,7 @@ export const createDataloaderCacheKey = ({
   fallbackLocale,
   locale,
   overrideAccess,
+  select,
   showHiddenFields,
   transactionID,
 }: CreateCacheKeyArgs): string =>
@@ -193,4 +200,5 @@ export const createDataloaderCacheKey = ({
     overrideAccess,
     showHiddenFields,
     draft,
+    select,
   ])

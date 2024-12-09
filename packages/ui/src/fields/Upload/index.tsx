@@ -2,12 +2,13 @@
 
 import type { UploadFieldClientProps } from 'payload'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import './index.scss'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { UploadInput } from './Input.js'
 
 export { UploadInput } from './Input.js'
@@ -17,19 +18,20 @@ export const baseClass = 'upload'
 
 export function UploadComponent(props: UploadFieldClientProps) {
   const {
+    field,
     field: {
-      _path,
-      admin: { className, isSortable, readOnly: readOnlyFromAdmin, style, width } = {},
+      admin: { allowCreate, className, description, isSortable } = {},
       hasMany,
+      label,
+      localized,
       maxRows,
       relationTo,
       required,
     },
-    field,
-    readOnly: readOnlyFromTopLevelProps,
+    path,
+    readOnly,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { config } = useConfig()
 
@@ -41,45 +43,46 @@ export function UploadComponent(props: UploadFieldClientProps) {
     },
     [validate, required],
   )
+
   const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     filterOptions,
-    formInitializing,
-    formProcessing,
-    path,
-    readOnly: readOnlyFromField,
     setValue,
     showError,
     value,
   } = useField<string | string[]>({
-    path: _path,
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromField || formProcessing || formInitializing
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <UploadInput
+      AfterInput={AfterInput}
+      allowCreate={allowCreate !== false}
       api={config.routes.api}
+      BeforeInput={BeforeInput}
       className={className}
-      Description={field?.admin?.components?.Description}
-      description={field?.admin?.description}
-      Error={field?.admin?.components?.Error}
-      field={field}
+      Description={Description}
+      description={description}
+      Error={Error}
       filterOptions={filterOptions}
       hasMany={hasMany}
       isSortable={isSortable}
-      Label={field?.admin?.components?.Label}
+      label={label}
+      Label={Label}
+      localized={localized}
       maxRows={maxRows}
       onChange={setValue}
       path={path}
-      readOnly={disabled}
+      readOnly={readOnly}
       relationTo={relationTo}
       required={required}
       serverURL={config.serverURL}
       showError={showError}
-      style={style}
+      style={styles}
       value={value}
-      width={width}
     />
   )
 }

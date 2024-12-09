@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef } from
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { deepMergeSimple } from '../../utilities/deepMerge.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 
@@ -90,6 +91,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
 
       let newValue = value
       const currentPreference = await getPreference(key)
+
       // handle value objects where multiple values can be set under one key
       if (
         typeof value === 'object' &&
@@ -97,7 +99,9 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         typeof newValue === 'object'
       ) {
         // merge the value with any existing preference for the key
-        newValue = { ...(currentPreference || {}), ...value }
+        if (currentPreference) {
+          newValue = deepMergeSimple(currentPreference, newValue)
+        }
 
         if (dequal(newValue, currentPreference)) {
           return

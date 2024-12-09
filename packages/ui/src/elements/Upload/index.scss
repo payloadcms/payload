@@ -147,11 +147,5 @@
         display: none;
       }
     }
-
-    @include small-break {
-      &__dropzoneContent {
-        display: none;
-      }
-    }
   }
 }

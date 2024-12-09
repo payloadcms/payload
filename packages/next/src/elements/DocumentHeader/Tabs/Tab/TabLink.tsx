@@ -1,10 +1,9 @@
 'use client'
 import type { SanitizedConfig } from 'payload'
 
-import { useSearchParams } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
-import { useParams, usePathname } from 'next/navigation.js'
+import { useParams, usePathname, useSearchParams } from 'next/navigation.js'
 import React from 'react'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
@@ -30,12 +29,9 @@ export const DocumentTabLink: React.FC<{
   const pathname = usePathname()
   const params = useParams()
 
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
 
-  const locale =
-    'locale' in searchParams && typeof searchParams.locale === 'string'
-      ? searchParams.locale
-      : undefined
+  const locale = searchParams.get('locale')
 
   const [entityType, entitySlug, segmentThree, segmentFour, ...rest] = params.segments || []
   const isCollection = entityType === 'collections'
@@ -67,6 +63,7 @@ export const DocumentTabLink: React.FC<{
       <Link
         className={`${baseClass}__link`}
         href={!isActive || href !== pathname ? hrefWithLocale : ''}
+        prefetch={false}
         {...(newTab && { rel: 'noopener noreferrer', target: '_blank' })}
         tabIndex={isActive ? -1 : 0}
       >

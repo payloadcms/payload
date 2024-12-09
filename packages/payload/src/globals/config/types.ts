@@ -14,16 +14,20 @@ import type {
   EntityDescription,
   EntityDescriptionComponent,
   GeneratePreviewURL,
+  LabelFunction,
   LivePreviewConfig,
   MetaConfig,
+  StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
-import type { Field } from '../../fields/config/types.js'
-import type { GlobalSlug, TypedGlobal } from '../../index.js'
-import type { PayloadRequest, RequestContext, Where } from '../../types/index.js'
+import type { Field, FlattenedField } from '../../fields/config/types.js'
+import type { GlobalSlug, RequestContext, TypedGlobal, TypedGlobalSelect } from '../../index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
+
+export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
 export type BeforeValidateHook = (args: {
   context: RequestContext
@@ -163,7 +167,7 @@ export type GlobalConfig = {
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
   }
-  label?: Record<string, string> | string
+  label?: LabelFunction | StaticLabel
   /**
    * Enables / Disables the ability to lock documents while editing
    * @default true
@@ -187,9 +191,17 @@ export type GlobalConfig = {
 }
 
 export interface SanitizedGlobalConfig
-  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'versions'> {
+  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
   endpoints: Endpoint[] | false
+
   fields: Field[]
+
+  /**
+   * Fields in the database schema structure
+   * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
+   */
+  flattenedFields: FlattenedField[]
+  slug: GlobalSlug
   versions: SanitizedGlobalVersions
 }
 

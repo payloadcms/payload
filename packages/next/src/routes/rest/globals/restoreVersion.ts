@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { restoreVersionOperationGlobal } from 'payload'
+import { restoreVersionOperationGlobal, sanitizePopulateParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { GlobalRouteHandlerWithID } from '../types.js'
@@ -16,6 +16,7 @@ export const restoreVersion: GlobalRouteHandlerWithID = async ({ id, globalConfi
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true' ? true : undefined,
     globalConfig,
+    populate: sanitizePopulateParam(req.query.populate),
     req,
   })
 

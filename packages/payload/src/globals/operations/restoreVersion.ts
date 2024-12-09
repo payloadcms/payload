@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, PopulateType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -16,6 +16,7 @@ export type Arguments = {
   globalConfig: SanitizedGlobalConfig
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   showHiddenFields?: boolean
 }
@@ -29,6 +30,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     draft,
     globalConfig,
     overrideAccess,
+    populate,
     req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
@@ -131,6 +133,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       global: globalConfig,
       locale,
       overrideAccess,
+      populate,
       req,
       showHiddenFields,
     })

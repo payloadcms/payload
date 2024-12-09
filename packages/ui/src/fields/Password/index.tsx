@@ -2,7 +2,7 @@
 import type { PasswordFieldValidation, PayloadRequest } from 'payload'
 
 import { password } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { PasswordFieldProps } from './types.js'
 
@@ -11,32 +11,28 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { isFieldRTL } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { isFieldRTL } from '../shared/index.js'
 import { PasswordInput } from './input.js'
 
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
     autoComplete,
-    errorProps,
     field,
     field: {
-      name,
-      _path: pathFromProps,
       admin: {
         className,
-        description,
         disabled: disabledFromProps,
         placeholder,
         rtl,
-        style,
-        width,
       } = {} as PasswordFieldProps['field']['admin'],
       label,
+      localized,
       required,
     } = {} as PasswordFieldProps['field'],
     inputRef,
-    labelProps,
+    path,
     validate,
   } = props
 
@@ -68,8 +64,15 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     [validate, config, t, required],
   )
 
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromProps || name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    formInitializing,
+    formProcessing,
+    setValue,
+    showError,
+    value,
+  } = useField({
+    path,
     validate: memoizedValidate,
   })
 
@@ -82,20 +85,20 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     localizationConfig: config.localization || undefined,
   })
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <PasswordInput
-      afterInput={field?.admin?.components?.afterInput}
+      AfterInput={AfterInput}
       autoComplete={autoComplete}
-      beforeInput={field?.admin?.components?.beforeInput}
+      BeforeInput={BeforeInput}
       className={className}
-      Description={field?.admin?.components?.Description}
-      description={description}
-      Error={field?.admin?.components?.Error}
-      errorProps={errorProps}
+      Description={Description}
+      Error={Error}
       inputRef={inputRef}
-      Label={field?.admin?.components?.Label}
+      Label={Label}
       label={label}
-      labelProps={labelProps}
+      localized={localized}
       onChange={(e) => {
         setValue(e.target.value)
       }}
@@ -105,9 +108,8 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       required={required}
       rtl={renderRTL}
       showError={showError}
-      style={style}
+      style={styles}
       value={(value as string) || ''}
-      width={width}
     />
   )
 }

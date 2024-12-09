@@ -6,7 +6,7 @@ desc: Email Verification allows users to verify their email address before they'
 keywords: authentication, email, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-[Authentication](./overview) ties directly into the [Email](../email) functionality that Payload provides. This allows you to send emails to users for verification, password resets, and more. While Payload provides default email templates for these actions, you can customize them to fit your brand.
+[Authentication](./overview) ties directly into the [Email](../email/overview) functionality that Payload provides. This allows you to send emails to users for verification, password resets, and more. While Payload provides default email templates for these actions, you can customize them to fit your brand.
 
 ## Email Verification
 
@@ -15,7 +15,7 @@ Email Verification forces users to prove they have access to the email address t
 To enable Email Verification, use the `auth.verify` property on your [Collection Config](../configuration/collections):
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
@@ -34,15 +34,15 @@ The following options are available:
 
 | Option               | Description                                                                                                                                                                                                                         |
 |----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`generateEmailHTML`** | Allows for overriding the HTML within emails that are sent to users indicating how to validate their account. [More details](#generateEmailHTML). |
-| **`generateEmailSubject`** | Allows for overriding the subject of the email that is sent to users indicating how to validate their account. [More details](#generateEmailSubject). |
+| **`generateEmailHTML`** | Allows for overriding the HTML within emails that are sent to users indicating how to validate their account. [More details](#generateemailhtml). |
+| **`generateEmailSubject`** | Allows for overriding the subject of the email that is sent to users indicating how to validate their account. [More details](#generateemailsubject). |
 
 #### generateEmailHTML
 
 Function that accepts one argument, containing `{ req, token, user }`, that allows for overriding the HTML within emails that are sent to users indicating how to validate their account. The function should return a string that supports HTML, which can optionally be a full HTML email.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
@@ -74,7 +74,7 @@ export const Customers: CollectionConfig = {
 Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function argument are the same but you can only return a string - not HTML.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
@@ -95,7 +95,7 @@ export const Customers: CollectionConfig = {
 You can customize how the Forgot Password workflow operates with the following options on the `auth.forgotPassword` property:
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
@@ -111,6 +111,7 @@ The following options are available:
 
 | Option               | Description                                                                                                                                                                                                                         |
 |----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`expiration`** | Configure how long password reset tokens remain valid, specified in milliseconds. |
 | **`generateEmailHTML`** | Allows for overriding the HTML within emails that are sent to users attempting to reset their password. [More details](#generateEmailHTML). |
 | **`generateEmailSubject`** | Allows for overriding the subject of the email that is sent to users attempting to reset their password. [More details](#generateEmailSubject). |
 
@@ -119,7 +120,7 @@ The following options are available:
 This function allows for overriding the HTML within emails that are sent to users attempting to reset their password. The function should return a string that supports HTML, which can be a full HTML email.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...
@@ -179,7 +180,7 @@ The following arguments are passed to the `generateEmailHTML` function:
 Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function argument are the same but you can only return a string - not HTML.
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   // ...

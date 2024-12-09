@@ -16,24 +16,26 @@ export const find: Find = async function find(
     page = 1,
     pagination,
     req = {} as PayloadRequest,
+    select,
     sort: sortArg,
     where,
   },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort
+  const sort = sortArg !== undefined && sortArg !== null ? sortArg : collectionConfig.defaultSort
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
   return findMany({
     adapter: this,
-    fields: collectionConfig.fields,
+    fields: collectionConfig.flattenedFields,
     joins,
     limit,
     locale,
     page,
     pagination,
     req,
+    select,
     sort,
     tableName,
     where,

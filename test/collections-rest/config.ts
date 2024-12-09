@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { APIError, type CollectionConfig } from 'payload'
+import { APIError, type CollectionConfig, type Endpoint } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -18,6 +18,8 @@ const openAccess = {
   read: () => true,
   update: () => true,
 }
+
+export const methods: Endpoint['method'][] = ['get', 'delete', 'patch', 'post', 'put']
 
 const collectionWithName = (collectionSlug: string): CollectionConfig => {
   return {
@@ -38,6 +40,8 @@ export const pointSlug = 'point'
 export const customIdSlug = 'custom-id'
 export const customIdNumberSlug = 'custom-id-number'
 export const errorOnHookSlug = 'error-on-hooks'
+
+export const endpointsSlug = 'endpoints'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -257,11 +261,20 @@ export default buildConfigWithDefaults({
         ],
       },
     },
+    {
+      slug: endpointsSlug,
+      fields: [],
+      endpoints: methods.map((method) => ({
+        method,
+        handler: () => new Response(`${method} response`),
+        path: `/${method}-test`,
+      })),
+    },
   ],
   endpoints: [
     {
-      handler: async ({ req }) => {
-        await req.payload.sendEmail({
+      handler: async ({ payload }) => {
+        await payload.sendEmail({
           from: 'dev@payloadcms.com',
           html: 'This is a test email.',
           subject: 'Test Email',
@@ -296,6 +309,11 @@ export default buildConfigWithDefaults({
       method: 'get',
       path: '/api-error-here',
     },
+    ...methods.map((method) => ({
+      method,
+      handler: () => new Response(`${method} response`),
+      path: `/${method}-test`,
+    })),
   ],
   onInit: async (payload) => {
     await payload.create({

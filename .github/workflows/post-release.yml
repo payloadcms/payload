@@ -5,16 +5,24 @@ on:
     types:
       - published
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to process (optional)'
+        required: false
+        default: ''
+
+env:
+  NODE_VERSION: 22.6.0
+  PNPM_VERSION: 9.7.1
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
 jobs:
   post_release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          # Only needed if debugging on a branch other than default
-          # ref: ${{ github.event.release.target_commitish || github.ref }}
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
         env:
@@ -28,3 +36,17 @@ jobs:
 
           comment-template: |
             🚀 This is included in version {release_link}
+
+  github-releases-to-discord:
+    runs-on: ubuntu-24.04
+    if: ${{ github.event_name != 'workflow_dispatch' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Github Releases To Discord
+        uses: SethCohen/github-releases-to-discord@v1.16.2
+        with:
+          webhook_url: ${{ secrets.DISCORD_RELEASES_WEBHOOK_URL }}
+          color: '16777215'
+          username: 'Payload Releases'
+          avatar_url: 'https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/discord-bot-logo.png'

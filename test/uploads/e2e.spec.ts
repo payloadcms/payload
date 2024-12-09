@@ -6,7 +6,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config, Media } from './payload-types.js'
+import type { Config, Media, Relation } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -17,6 +17,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -36,7 +37,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
@@ -56,14 +57,10 @@ let customFileNameURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
-  let pngDoc: Media
-  let audioDoc: Media
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
-    await client.login()
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     animatedTypeMediaURL = new AdminUrlUtil(serverURL, animatedTypeMedia)
@@ -82,29 +79,31 @@ describe('uploads', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
+  })
 
-    const findPNG = await payload.find({
-      collection: mediaSlug,
-      depth: 0,
-      pagination: false,
-      where: {
-        mimeType: {
-          equals: 'image/png',
-        },
-      },
+  beforeEach(async () => {
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'uploadsTest',
     })
 
-    pngDoc = findPNG.docs[0] as unknown as Media
-
-    const findAudio = await payload.find({
-      collection: audioSlug,
-      depth: 0,
-      pagination: false,
-    })
-
-    audioDoc = findAudio.docs[0] as unknown as Media
+    if (client) {
+      await client.logout()
+    }
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  test('should show upload filename in upload collection list', async () => {
+    await page.goto(mediaURL.list)
+    const audioUpload = page.locator('tr.row-1 .cell-filename')
+    await expect(audioUpload).toHaveText('audio.mp3')
+
+    const imageUpload = page.locator('tr.row-2 .cell-filename')
+    await expect(imageUpload).toHaveText('image.png')
   })
 
   test('should see upload filename in relation list', async () => {
@@ -121,13 +120,38 @@ describe('uploads', () => {
     await expect(field).toContainText('image')
   })
 
-  test('should show upload filename in upload collection list', async () => {
-    await page.goto(mediaURL.list)
-    const audioUpload = page.locator('tr.row-1 .cell-filename')
-    await expect(audioUpload).toHaveText('audio.mp3')
+  test('should update upload field after editing relationship in document drawer', async () => {
+    const relationDoc = (
+      await payload.find({
+        collection: relationSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
 
-    const imageUpload = page.locator('tr.row-2 .cell-filename')
-    await expect(imageUpload).toHaveText('image.png')
+    await page.goto(relationURL.edit(relationDoc.id))
+    await page.waitForURL(relationURL.edit(relationDoc.id))
+
+    const filename = page.locator('.upload-relationship-details__filename a').nth(0)
+    await expect(filename).toContainText('image.png')
+
+    await page.locator('.upload-relationship-details__edit').nth(0).click()
+    await page.locator('.file-details__remove').click()
+
+    const fileChooserPromise = page.waitForEvent('filechooser')
+    await page.getByText('Select a file').click()
+    const fileChooser = await fileChooserPromise
+    await wait(1000)
+    await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
+
+    await page.locator('button#action-save').nth(1).click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await wait(1000)
+
+    await page.locator('.doc-drawer__header-close').click()
+
+    await expect(filename).toContainText('test-image.png')
   })
 
   test('should create file upload', async () => {
@@ -193,6 +217,19 @@ describe('uploads', () => {
   })
 
   test('should show resized images', async () => {
+    const pngDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          mimeType: {
+            equals: 'image/png',
+          },
+        },
+      })
+    ).docs[0]
+
     await page.goto(mediaURL.edit(pngDoc.id))
 
     await page.locator('.file-field__previewSizes').click()
@@ -304,6 +341,14 @@ describe('uploads', () => {
   })
 
   test('should restrict mimetype based on filterOptions', async () => {
+    const audioDoc = (
+      await payload.find({
+        collection: audioSlug,
+        depth: 0,
+        pagination: false,
+      })
+    ).docs[0]
+
     await page.goto(audioURL.edit(audioDoc.id))
     await page.waitForURL(audioURL.edit(audioDoc.id))
 
@@ -311,19 +356,19 @@ describe('uploads', () => {
     await wait(500) // flake workaround
     await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '#field-audio  .upload__listToggler')
+    await openDocDrawer(page, '#field-audio .upload__listToggler')
 
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
 
     await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
-    await expect(page.locator('[id^=doc-drawer_media_2_]')).toBeVisible()
+    await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
 
     // upload an image and try to select it
     await page
-      .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
+      .locator('[id^=doc-drawer_media_1_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))
-    await page.locator('[id^=doc-drawer_media_2_] button#action-save').click()
+    await page.locator('[id^=doc-drawer_media_1_] button#action-save').click()
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'successfully',
     )
@@ -339,6 +384,14 @@ describe('uploads', () => {
   })
 
   test('should restrict uploads in drawer based on filterOptions', async () => {
+    const audioDoc = (
+      await payload.find({
+        collection: audioSlug,
+        depth: 0,
+        pagination: false,
+      })
+    ).docs[0]
+
     await page.goto(audioURL.edit(audioDoc.id))
     await page.waitForURL(audioURL.edit(audioDoc.id))
 
@@ -366,7 +419,6 @@ describe('uploads', () => {
   })
 
   test('should render adminThumbnail when using a function', async () => {
-    await page.reload() // Flakey test, it likely has to do with the test that comes before it. Trace viewer is not helpful when it fails.
     await page.goto(adminThumbnailFunctionURL.list)
     await page.waitForURL(adminThumbnailFunctionURL.list)
 

@@ -84,6 +84,22 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: relationSlug,
         },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  name: 'relationField',
+                  type: 'relationship',
+                  relationTo: relationSlug,
+                },
+              ],
+            },
+          ],
+        },
         // Relationship w/ default access
         {
           name: 'defaultAccessRelation',
@@ -322,6 +338,33 @@ export default buildConfigWithDefaults({
           name: 'rel',
           type: 'relationship',
           relationTo: ['pages', 'custom-id', 'custom-id-number'],
+        },
+      ],
+    },
+    {
+      slug: 'object-writes',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'movies',
+          name: 'one',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'movies',
+          name: 'many',
+          hasMany: true,
+        },
+        {
+          type: 'relationship',
+          relationTo: ['movies'],
+          name: 'onePoly',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['movies'],
+          name: 'manyPoly',
+          hasMany: true,
         },
       ],
     },

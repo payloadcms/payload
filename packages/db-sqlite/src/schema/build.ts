@@ -8,7 +8,7 @@ import type {
   SQLiteTableWithColumns,
   UniqueConstraintBuilder,
 } from 'drizzle-orm/sqlite-core'
-import type { Field, SanitizedJoins } from 'payload'
+import type { FlattenedField } from 'payload'
 
 import { buildIndexName, createTableName } from '@payloadcms/drizzle'
 import { relations, sql } from 'drizzle-orm'
@@ -60,8 +60,7 @@ type Args = {
   disableNotNull: boolean
   disableRelsTableUnique?: boolean
   disableUnique: boolean
-  fields: Field[]
-  joins?: SanitizedJoins
+  fields: FlattenedField[]
   locales?: [string, ...string[]]
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap
@@ -95,7 +94,6 @@ export const buildTable = ({
   disableRelsTableUnique,
   disableUnique = false,
   fields,
-  joins,
   locales,
   rootRelationships,
   rootRelationsToBuild,
@@ -144,7 +142,6 @@ export const buildTable = ({
     disableUnique,
     fields,
     indexes,
-    joins,
     locales,
     localesColumns,
     localesIndexes,

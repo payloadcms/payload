@@ -13,6 +13,8 @@ import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized
 import { NestedArray } from './collections/NestedArray/index.js'
 import { NestedFields } from './collections/NestedFields/index.js'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
+import { NoLocalizedFieldsCollection } from './collections/NoLocalizedFields/index.js'
+import { RichTextCollection } from './collections/RichText/index.js'
 import { Tab } from './collections/Tab/index.js'
 import {
   blocksWithLocalizedSameName,
@@ -54,6 +56,7 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [
+    RichTextCollection,
     BlocksCollection,
     NestedArray,
     NestedFields,
@@ -119,6 +122,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    NoLocalizedFieldsCollection,
     ArrayCollection,
     {
       fields: [
@@ -392,6 +396,16 @@ export default buildConfigWithDefaults({
       ],
       slug: 'global-array',
     },
+    {
+      fields: [
+        {
+          name: 'text',
+          localized: true,
+          type: 'text',
+        },
+      ],
+      slug: 'global-text',
+    },
   ],
   localization: {
     defaultLocale,
@@ -426,21 +440,6 @@ export default buildConfigWithDefaults({
   },
   onInit: async (payload) => {
     const collection = localizedPostsSlug
-
-    console.log('SEED BEGIN')
-
-    if (payload.db.name === 'mongoose') {
-      await new Promise((resolve, reject) => {
-        payload.db?.collections[localizedPostsSlug]?.ensureIndexes(function (err) {
-          if (err) {
-            reject(err)
-          }
-          resolve(true)
-        })
-      })
-    }
-
-    console.log('INDEXES CREATED')
 
     await payload.create({
       collection,

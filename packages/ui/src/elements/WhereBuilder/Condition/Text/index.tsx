@@ -10,6 +10,7 @@ const baseClass = 'condition-value-text'
 
 export const Text: React.FC<Props> = ({ disabled, onChange, value }) => {
   const { t } = useTranslation()
+
   return (
     <input
       className={baseClass}

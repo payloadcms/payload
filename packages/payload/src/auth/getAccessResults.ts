@@ -1,7 +1,8 @@
 import type { AllOperations, PayloadRequest } from '../types/index.js'
-import type { Permissions } from './types.js'
+import type { Permissions, SanitizedPermissions } from './types.js'
 
 import { getEntityPolicies } from '../utilities/getEntityPolicies.js'
+import { sanitizePermissions } from '../utilities/sanitizePermissions.js'
 
 type GetAccessResultsArgs = {
   locale?: string
@@ -10,7 +11,7 @@ type GetAccessResultsArgs = {
 export async function getAccessResults({
   locale,
   req,
-}: GetAccessResultsArgs): Promise<Permissions> {
+}: GetAccessResultsArgs): Promise<SanitizedPermissions> {
   const results = {} as Permissions
   const { payload, user } = req
 
@@ -20,7 +21,7 @@ export async function getAccessResults({
       ? payload.config.collections.find((collection) => collection.slug === user.collection)
       : null
 
-  if (userCollectionConfig && payload.config.admin.user === user.collection) {
+  if (userCollectionConfig && payload.config.admin.user === user?.collection) {
     results.canAccessAdmin = userCollectionConfig.access.admin
       ? await userCollectionConfig.access.admin({ req })
       : isLoggedIn
@@ -80,5 +81,5 @@ export async function getAccessResults({
     }),
   )
 
-  return results
+  return sanitizePermissions(results)
 }

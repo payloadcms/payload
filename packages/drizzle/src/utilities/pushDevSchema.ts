@@ -1,5 +1,6 @@
 import prompts from 'prompts'
 
+import type { BasePostgresAdapter } from '../postgres/types.js'
 import type { DrizzleAdapter } from '../types.js'
 
 /**
@@ -11,11 +12,17 @@ import type { DrizzleAdapter } from '../types.js'
 export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   const { pushSchema } = adapter.requireDrizzleKit()
 
+  const { extensions = {}, tablesFilter } = adapter as BasePostgresAdapter
+
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, warnings } = await pushSchema(
     adapter.schema,
     adapter.drizzle,
     adapter.schemaName ? [adapter.schemaName] : undefined,
+    tablesFilter,
+    // Drizzle extensionsFilter supports only postgis for now
+    // https://github.com/drizzle-team/drizzle-orm/blob/83daf2d5cf023112de878bc2249ee2c41a2a5b1b/drizzle-kit/src/cli/validations/cli.ts#L26
+    extensions.postgis ? ['postgis'] : undefined,
   )
 
   if (warnings.length) {

@@ -2,8 +2,8 @@ import type { Data, FormState } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
-import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
 import type { Props as DrawerProps } from '../Drawer/types.js'
+import type { DocumentDrawerContextProps } from './Provider.js'
 
 export type DocumentDrawerProps = {
   readonly AfterFields?: React.ReactNode
@@ -13,12 +13,11 @@ export type DocumentDrawerProps = {
   readonly id?: null | number | string
   readonly initialData?: Data
   readonly initialState?: FormState
-  readonly onDelete?: DocumentInfoContext['onDelete']
-  readonly onDuplicate?: DocumentInfoContext['onDuplicate']
-  readonly onSave?: DocumentInfoContext['onSave']
+  readonly overrideEntityVisibility?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
-} & Pick<DrawerProps, 'Header'>
+} & Pick<DocumentDrawerContextProps, 'onDelete' | 'onDuplicate' | 'onSave'> &
+  Pick<DrawerProps, 'Header'>
 
 export type DocumentTogglerProps = {
   readonly children?: React.ReactNode
@@ -27,9 +26,14 @@ export type DocumentTogglerProps = {
   readonly disabled?: boolean
   readonly drawerSlug?: string
   readonly id?: string
+  readonly onClick?: () => void
 } & Readonly<HTMLAttributes<HTMLButtonElement>>
 
-export type UseDocumentDrawer = (args: { collectionSlug: string; id?: number | string }) => [
+export type UseDocumentDrawer = (args: {
+  collectionSlug: string
+  id?: number | string
+  overrideEntityVisibility?: boolean
+}) => [
   React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer
   React.FC<Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>>, // toggler
   {

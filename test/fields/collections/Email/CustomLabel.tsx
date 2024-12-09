@@ -2,16 +2,11 @@
 
 import type { EmailFieldClientComponent } from 'payload'
 
-import { useFieldProps } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomLabel: EmailFieldClientComponent = ({ field }) => {
-  const { path: pathFromContext } = useFieldProps()
-
-  const path = pathFromContext ?? field?._schemaPath // pathFromContext will be undefined in list view
-
+export const CustomLabel: EmailFieldClientComponent = ({ path }) => {
   return (
-    <label className="custom-label" htmlFor={`field-${path.replace(/\./g, '__')}`}>
+    <label className="custom-label" htmlFor={`field-${path?.replace(/\./g, '__')}`}>
       #label
     </label>
   )

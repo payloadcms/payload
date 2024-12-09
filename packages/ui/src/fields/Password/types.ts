@@ -1,10 +1,5 @@
 import type {
   FieldBaseClient,
-  FieldDescriptionClientProps,
-  FieldErrorClientProps,
-  FieldLabelClientProps,
-  FormFieldBase,
-  MappedComponent,
   PasswordFieldValidation,
   StaticDescription,
   TextFieldClient,
@@ -15,28 +10,44 @@ import type { MarkOptional } from 'ts-essentials'
 
 export type PasswordFieldProps = {
   readonly autoComplete?: string
-  readonly descriptionProps?: FieldDescriptionClientProps<MarkOptional<TextFieldClient, 'type'>>
-  readonly errorProps?: FieldErrorClientProps<MarkOptional<TextFieldClient, 'type'>>
   readonly field: MarkOptional<TextFieldClient, 'type'>
+  /**
+   * @default ''
+   */
+  readonly indexPath?: string
   readonly inputRef?: React.RefObject<HTMLInputElement>
-  readonly labelProps?: FieldLabelClientProps<MarkOptional<TextFieldClient, 'type'>>
+  /**
+   * @default ''
+   */
+  readonly parentPath?: string
+  /**
+   * @default ''
+   */
+  readonly parentSchemaPath?: string
+  /**
+   * @default field.name
+   */
+  readonly path: string
+  /**
+   * @default field.name
+   */
+  readonly schemaPath?: string
   readonly validate?: PasswordFieldValidation
-} & FormFieldBase
+}
 
 export type PasswordInputProps = {
-  readonly afterInput?: MappedComponent[]
+  readonly AfterInput?: React.ReactNode
   readonly autoComplete?: string
-  readonly beforeInput?: MappedComponent[]
+  readonly BeforeInput?: React.ReactNode
   readonly className?: string
-  readonly Description?: MappedComponent
   readonly description?: StaticDescription
-  readonly Error?: MappedComponent
-  readonly errorProps: FieldErrorClientProps<MarkOptional<TextFieldClient, 'type'>>
+  readonly Description?: React.ReactNode
+  readonly Error?: React.ReactNode
   readonly field?: MarkOptional<TextFieldClient, 'type'>
   readonly inputRef?: React.RefObject<HTMLInputElement>
-  readonly Label?: MappedComponent
+  readonly Label?: React.ReactNode
   readonly label: FieldBaseClient['label']
-  readonly labelProps: FieldLabelClientProps<MarkOptional<TextFieldClient, 'type'>>
+  readonly localized?: boolean
   readonly onChange?: (e: ChangeEvent<HTMLInputElement>) => void
   readonly onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   readonly path: string

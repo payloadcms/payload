@@ -69,8 +69,7 @@ export const init: Init = async function init(this: SQLiteAdapter) {
       adapter: this,
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
-      fields: collection.fields,
-      joins: collection.joins,
+      fields: collection.flattenedFields,
       locales,
       tableName,
       timestamps: collection.timestamps,
@@ -81,7 +80,7 @@ export const init: Init = async function init(this: SQLiteAdapter) {
       const versionsTableName = this.tableNameMap.get(
         `_${toSnakeCase(collection.slug)}${this.versionsSuffix}`,
       )
-      const versionFields = buildVersionCollectionFields(config, collection)
+      const versionFields = buildVersionCollectionFields(config, collection, true)
 
       buildTable({
         adapter: this,
@@ -106,7 +105,7 @@ export const init: Init = async function init(this: SQLiteAdapter) {
       adapter: this,
       disableNotNull: !!global?.versions?.drafts,
       disableUnique: false,
-      fields: global.fields,
+      fields: global.flattenedFields,
       locales,
       tableName,
       timestamps: false,
@@ -121,7 +120,7 @@ export const init: Init = async function init(this: SQLiteAdapter) {
         versionsCustomName: true,
       })
       const config = this.payload.config
-      const versionFields = buildVersionGlobalFields(config, global)
+      const versionFields = buildVersionGlobalFields(config, global, true)
 
       buildTable({
         adapter: this,

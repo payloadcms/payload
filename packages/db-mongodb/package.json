@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "3.0.0-beta.116",
+  "version": "3.5.0",
   "description": "The officially supported MongoDB database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -10,19 +10,30 @@
   },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./migration-utils": {
+      "import": "./src/exports/migration-utils.ts",
+      "types": "./src/exports/migration-utils.ts",
+      "default": "./src/exports/migration-utils.ts"
     }
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "files": [
     "dist",
-    "mock.js",
     "predefinedMigrations"
   ],
   "scripts": {
@@ -35,18 +46,17 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "bson-objectid": "2.0.4",
     "http-status": "1.6.2",
-    "mongoose": "6.12.3",
-    "mongoose-aggregate-paginate-v2": "1.0.6",
-    "mongoose-paginate-v2": "1.7.22",
+    "mongoose": "8.8.3",
+    "mongoose-aggregate-paginate-v2": "1.1.2",
+    "mongoose-paginate-v2": "1.8.5",
     "prompts": "2.4.2",
     "uuid": "10.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/mongoose-aggregate-paginate-v2": "1.0.6",
-    "mongodb": "4.17.1",
+    "@types/mongoose-aggregate-paginate-v2": "1.0.12",
+    "mongodb": "6.10.0",
     "mongodb-memory-server": "^9",
     "payload": "workspace:*"
   },
@@ -59,6 +69,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./migration-utils": {
+        "import": "./dist/exports/migration-utils.js",
+        "types": "./dist/exports/migration-utils.d.ts",
+        "default": "./dist/exports/migration-utils.js"
       }
     },
     "main": "./dist/index.js",
