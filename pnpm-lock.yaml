@@ -1376,6 +1376,22 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/sdk:
+    dependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+      qs-esm:
+        specifier: 7.0.2
+        version: 7.0.2
+      ts-essentials:
+        specifier: 10.0.3
+        version: 10.0.3(typescript@5.7.2)
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+
   packages/storage-azure:
     dependencies:
       '@azure/abort-controller':
@@ -1685,6 +1701,9 @@ importers:
       '@payloadcms/richtext-slate':
         specifier: workspace:*
         version: link:../packages/richtext-slate
+      '@payloadcms/sdk':
+        specifier: workspace:*
+        version: link:../packages/sdk
       '@payloadcms/storage-azure':
         specifier: workspace:*
         version: link:../packages/storage-azure
