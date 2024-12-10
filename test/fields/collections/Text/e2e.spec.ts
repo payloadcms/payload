@@ -232,10 +232,15 @@ describe('Text', () => {
 
     await openListFilters(page, {})
 
-    const initialField = page.locator('.condition__field')
-    await expect(initialField.locator('.rs__single-value')).toBeHidden()
-    await expect(initialField.locator('.rs__placeholder')).toHaveText('Select a value')
-    await expect(initialField).toBeDisabled()
+    const condition = page.locator('.condition__field')
+    await expect(condition).toBeDisabled()
+    await expect(condition.locator('.rs__single-value')).toHaveText('Disable List Filter Text')
+    await page.locator('button.condition__actions-add').click()
+    const condition2 = page.locator('.condition__field').nth(1)
+    await condition2.click()
+    await expect(
+      condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
+    ).toBeHidden()
   })
 
   test('should respect admin.disableListColumn despite preferences', async () => {
