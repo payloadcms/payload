@@ -1,0 +1,69 @@
+---
+title: Collapsible Field
+label: Collapsible
+order: 60
+desc: With the Collapsible field, you can place fields within a collapsible layout component that can be collapsed / expanded.
+keywords: row, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner>
+  The Collapsible field is presentational-only and only affects the Admin panel. By using it, you
+  can place fields within a nice layout component that can be collapsed / expanded.
+</Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/collapsible.png"
+  srcDark="https://payloadcms.com/images/docs/fields/collapsible-dark.png"
+  alt="Shows a Collapsible field in the Payload admin panel"
+  caption="Admin panel screenshot of a Collapsible field"
+/>
+
+### Config
+
+| Option          | Description                                                                                                                                                                  |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`label`** \*  | A label to render within the header of the collapsible component. This can be a string, function or react component. Function/components receive `({ data, path })` as args. |
+| **`fields`** \* | Array of field types to nest within this Collapsible.                                                                                                                        |
+| **`admin`**     | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                    |
+| **`custom`**    | Extension point for adding custom data (e.g. for plugins)                                                                                                                    |
+
+_\* An asterisk denotes that a property is required._
+
+### Admin Config
+
+In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
+
+| Option              | Description                     |
+| ------------------- | ------------------------------- |
+| **`initCollapsed`** | Set the initial collapsed state |
+
+### Example
+
+`collections/ExampleCollection.ts`
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      label: ({ data }) => data?.title || 'Untitled',
+      type: 'collapsible', // required
+      fields: [
+        // required
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'someTextField',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+  ],
+}
+```

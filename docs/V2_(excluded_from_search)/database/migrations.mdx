@@ -1,0 +1,125 @@
+---
+title: Migrations
+label: Migrations
+order: 20
+keywords: database, migrations, ddl, sql, mongodb, postgres, documentation, Content Management System, cms, headless, typescript, node, react, express
+desc: Payload features first-party database migrations all done in TypeScript.
+---
+
+Payload exposes a full suite of migration controls available for your use. Migration commands are accessible via
+the `npm run payload` command in your project directory.
+
+Ensure you have an npm script called "payload" in your `package.json` file.
+
+```json
+{
+  "scripts": {
+    "payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload"
+  }
+}
+```
+
+<Banner>
+  Note that you need to run Payload migrations through the package manager that you are using, because Payload should not be globally installed on your system.
+</Banner>
+
+### Migration file contents
+
+Payload stores all created migrations in a folder that you can specify. By default, migrations are stored
+in `./src/migrations`.
+
+A migration file has two exports - an `up` function, which is called when a migration is executed, and a `down` function
+that will be called if for some reason the migration fails to complete successfully. The `up` function should contain
+all changes that you attempt to make within the migration, and the `down` should ideally revert any changes you make.
+
+For an added level of safety, migrations should leverage Payload [transactions](/docs/database/transactions). Migration
+functions should make use of the `req` by adding it to the arguments of your payload local API calls such
+as `payload.create` and database adapter methods like `payload.db.create`.
+
+Here is an example migration file:
+
+```ts
+import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/your-db-adapter'
+
+export async function up ({ payload, req }: MigrateUpArgs): Promise<void> {
+  // Perform changes to your database here.
+  // You have access to `payload` as an argument, and
+  // everything is done in TypeScript.
+};
+
+export async function down ({ payload, req }: MigrateDownArgs): Promise<void> {
+  // Do whatever you need to revert changes if the `up` function fails
+};
+```
+
+### Migrations Directory
+
+Each DB adapter has an optional property `migrationDir` where you can override where you want your migrations to be
+stored/read. If this is not specified, Payload will check the default and possibly make a best effort to find your
+migrations directory by searching in common locations ie. `./src/migrations`, `./dist/migrations`, `./migrations`, etc.
+
+All database adapters should implement similar migration patterns, but there will be small differences based on the
+adapter and its specific needs. Below is a list of all migration commands that should be supported by your database
+adapter.
+
+## Commands
+
+### Migrate
+
+The `migrate` command will run any migrations that have not yet been run.
+
+```text
+npm run payload migrate
+```
+
+### Create
+
+Create a new migration file in the migrations directory. You can optionally name the migration that will be created. By
+default, migrations will be named using a timestamp.
+
+```text
+npm run payload migrate:create optional-name-here
+```
+
+### Status
+
+The `migrate:status` command will check the status of migrations and output a table of which migrations have been run,
+and which migrations have not yet run.
+
+`payload migrate:status`
+
+```text
+npm run payload migrate:status
+```
+
+### Down
+
+Roll back the last batch of migrations.
+
+```text
+npm run payload migrate:down
+```
+
+### Refresh
+
+Roll back all migrations that have been run, and run them again.
+
+```text
+npm run payload migrate:refresh
+```
+
+### Reset
+
+Roll back all migrations.
+
+```text
+npm run payload migrate:reset
+```
+
+### Fresh
+
+Drops all entities from the database and re-runs all migrations from scratch.
+
+```text
+npm run payload migrate:fresh
+```

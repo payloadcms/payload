@@ -1,0 +1,56 @@
+---
+title: Checkbox Field
+label: Checkbox
+order: 40
+desc: Checkbox field types allow the developer to save a boolean value in the database. Learn how to use Checkbox fields, see examples and options.
+keywords: checkbox, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner>The Checkbox field type saves a boolean in the database.</Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/checkbox.png"
+  srcDark="https://payloadcms.com/images/docs/fields/checkbox-dark.png"
+  alt="Checkbox field with text field in Payload admin panel"
+  caption="Admin panel screenshot of Checkbox field with Text field below"
+/>
+
+### Config
+
+| Option             | Description                                                                                                                                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
+| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
+| **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
+| **`index`**        | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
+| **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
+| **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
+| **`hidden`**       | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                    |
+| **`defaultValue`** | Provide data to be used for this field's default value, will default to false if field is also `required`. [More](/docs/fields/overview#default-values)                                             |
+| **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
+| **`required`**     | Require this field to have a value.                                                                                                                                                                 |
+| **`admin`**        | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                                            |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
+
+_\* An asterisk denotes that a property is required._
+
+### Example
+
+`collections/ExampleCollection.ts`
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'enableCoolStuff', // required
+      type: 'checkbox', // required
+      label: 'Click me to see fanciness',
+      defaultValue: false,
+    },
+  ],
+}
+```

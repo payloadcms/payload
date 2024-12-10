@@ -1,0 +1,141 @@
+---
+title: Context
+label: Context
+order: 50
+desc: Context allows you to pass in extra data that can be shared between hooks
+keywords: hooks, context, payload context, payloadcontext, data, extra data, shared data, shared, extra
+---
+
+The `context` object in hooks is used to share data across different hooks. The persists throughout the entire lifecycle of a request and is available within every hook. This allows you to add logic to your hooks based on the request state by setting properties to `req.context` and using them elsewhere.
+
+## When to use Context
+
+Context gives you a way forward on otherwise difficult problems such as:
+
+1. **Passing data between hooks**: Needing data in multiple hooks from a 3rd party API, it could be retrieved and used in `beforeChange` and later used again in an `afterChange` hook without having to fetch it twice.
+2. **Preventing infinite loops**: Calling `payload.update()` on the same document that triggered an `afterChange` hook will create an infinite loop, control the flow by assigning a no-op condition to context
+3. **Passing data to local API**: Setting values on the `req.context` and pass it to `payload.create()` you can provide additional data to hooks without adding extraneous fields.
+4. **Passing data between hooks and middleware or custom endpoints**: Hooks could set context across multiple collections and then be used in a final `postMiddleware`.
+
+## How to Use Context
+
+Let's see examples on how context can be used in the first two scenarios mentioned above:
+
+### Passing data between hooks
+
+To pass data between hooks, you can assign values to context in an earlier hook in the lifecycle of a request and expect it the context in a later hook.
+
+For example:
+
+```ts
+const Customer: CollectionConfig = {
+  slug: 'customers',
+  hooks: {
+    beforeChange: [
+      async ({ context, data }) => {
+        // assign the customerData to context for use later
+        context.customerData = await fetchCustomerData(data.customerID)
+        return {
+          ...data,
+          // some data we use here
+          name: context.customerData.name,
+        }
+      },
+    ],
+    afterChange: [
+      async ({ context, doc, req }) => {
+        // use context.customerData without needing to fetch it again
+        if (context.customerData.contacted === false) {
+          createTodo('Call Customer', context.customerData)
+        }
+      },
+    ],
+  },
+  fields: [
+    /* ... */
+  ],
+}
+```
+
+### Preventing infinite loops
+
+Let's say you have an `afterChange` hook, and you want to do a calculation inside the hook (as the document ID needed for the calculation is available in the `afterChange` hook, but not in the `beforeChange` hook). Once that's done, you want to update the document with the result of the calculation.
+
+Bad example:
+
+```ts
+const Customer: CollectionConfig = {
+  slug: 'customers',
+  hooks: {
+    afterChange: [
+      async ({ doc }) => {
+        await payload.update({
+          // DANGER: updating the same slug as the collection in an afterChange will create an infinite loop!
+          collection: 'customers',
+          id: doc.id,
+          data: {
+            ...(await fetchCustomerData(data.customerID)),
+          },
+        })
+      },
+    ],
+  },
+  fields: [
+    /* ... */
+  ],
+}
+```
+
+Instead of the above, we need to tell the `afterChange` hook to not run again if it performs the update (and thus not update itself again). We can solve that with context.
+
+Fixed example:
+
+```ts
+const MyCollection: CollectionConfig = {
+  slug: 'slug',
+  hooks: {
+    afterChange: [
+      async ({ context, doc }) => {
+        // return if flag was previously set
+        if (context.triggerAfterChange === false) {
+          return
+        }
+        await payload.update({
+          collection: contextHooksSlug,
+          id: doc.id,
+          data: {
+            ...(await fetchCustomerData(data.customerID)),
+          },
+          context: {
+            // set a flag to prevent from running again
+            triggerAfterChange: false,
+          },
+        })
+      },
+    ],
+  },
+  fields: [
+    /* ... */
+  ],
+}
+```
+
+## Typing context
+
+The default typescript interface for `context` is `{ [key: string]: unknown }`. If you prefer a more strict typing in your project or when authoring plugins for others, you can override this using the `declare` syntax.
+
+This is known as "type augmentation" - a TypeScript feature which allows us to add types to existing objects. Simply put this in any .ts or .d.ts file:
+
+```ts
+import { RequestContext as OriginalRequestContext } from 'payload'
+
+declare module 'payload' {
+  // Create a new interface that merges your additional fields with the original one
+  export interface RequestContext extends OriginalRequestContext {
+    myObject?: string
+    // ...
+  }
+}
+```
+
+This will add a the property `myObject` with a type of string to every context object. Make sure to follow this example correctly, as type augmentation can mess up your types if you do it wrong.

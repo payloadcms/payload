@@ -1,0 +1,294 @@
+---
+title: Building Your Own Plugin
+label: Build Your Own
+order: 50
+desc: Starting to build your own plugin? Find everything you need and learn best practices with the Payload plugin template.
+keywords: plugins, template, config, configuration, extensions, custom, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Building your own plugin is easy, and if you&apos;re already familiar with Payload then you&apos;ll have everything you need to get started. You can either start from scratch or use the Payload plugin template to get up and running quickly.
+
+<Banner type="success">
+  To use the template, run `npx create-payload-app@latest -t plugin -n my-new-plugin` directly in your terminal or [clone the template directly from GitHub](https://github.com/payloadcms/payload-plugin-template).
+</Banner>
+
+Our plugin template includes everything you need to build a full life-cycle plugin:
+
+* Example files and functions for extending the payload config
+* A local dev environment to develop the plugin
+* Test suite with integrated GitHub workflow
+
+By abstracting your code into a plugin, you&apos;ll be able to reuse your feature across multiple projects and make it available for other developers to use.
+
+### Plugins Recap
+
+Here is a brief recap of how to integrate plugins with Payload, to learn more head back to the [plugin overview page](https://payloadcms.com/docs/plugins/overview).
+
+
+#### How to install a plugin
+
+To install any plugin, simply add it to your Payload config in the plugins array.
+
+```
+import samplePlugin from 'sample-plugin';
+
+const config = buildConfig({
+  plugins: [
+    // Add plugins here
+    samplePlugin({
+		enabled: true,
+    }),
+  ],
+});
+
+export default config;
+```
+
+
+#### Initialization
+
+The initialization process goes in the following order:
+
+1. Incoming config is validated
+2. Plugins execute
+3. Default options are integrated
+4. Sanitization cleans and validates data
+5. Final config gets initialized
+
+
+### Plugin Template
+
+In the [Payload plugin template](https://github.com/payloadcms/payload-plugin-template), you will see a common file structure that is used across plugins:
+
+1. root folder - general configuration
+2. /src folder - everything related to the plugin
+3. /dev folder - sanitized test project for development
+
+
+#### Root
+
+In the root folder, you will see various files related to the configuration of the plugin. We set up our environment in a similar manner in Payload core and across other projects. The only two files you need to modify are:
+
+* **README**.md - This contains instructions on how to use the template. When you are ready, update this to contain instructions on how to use your Plugin.
+* **package**.json - Contains necessary scripts and dependencies. Overwrite the metadata in this file to describe your Plugin.
+
+
+#### Dev
+
+The purpose of the **dev** folder is to provide a sanitized local Payload project. so you can run and test your plugin while you are actively developing it.
+
+Do **not** store any of the plugin functionality in this folder - it is purely an environment to _assist_ you with developing the plugin.
+
+If you&apos;re starting from scratch, you can easily setup a dev environment like this:
+
+```
+mkdir dev
+cd dev
+npx create-payload-app@latest
+```
+
+If you&apos;re using the plugin template, the dev folder is built out for you and the `samplePlugin` has already been installed in `dev/payload.config()`.
+
+```
+  plugins: [
+    // when you rename the plugin or add options, make sure to update it here
+    samplePlugin({
+      enabled: false,
+    })
+  ]
+```
+
+You can add to the `dev/payload.config` and build out the dev project as needed to test your plugin.
+
+When you&apos;re ready to start development, navigate into this folder with `cd dev`
+
+And then start the project with `yarn dev` and pull up `http://localhost:3000` in your browser.
+
+
+### Testing
+
+Another benefit of the dev folder is that you have the perfect environment established for testing.
+
+A good test suite is essential to ensure quality and stability in your plugin. Payload typically uses [Jest](https://jestjs.io/); a popular testing framework, widely used for testing JavaScript and particularly for applications built with React.
+
+Jest organizes tests into test suites and cases. We recommend creating tests based on the expected behavior of your plugin from start to finish. Read more about tests in the [Jest documentation.](https://jestjs.io/)
+
+The plugin template provides a stubbed out test suite at `dev/plugin.spec.ts` which is ready to go - just add in your own test conditions and you&apos;re all set!
+
+```
+import payload from 'payload'
+
+describe('Plugin tests', () => {
+  // Example test to check for seeded data
+  it('seeds data accordingly', async () => {
+    const newCollectionQuery = await payload.find({
+      collection: 'newCollection',
+      sort: 'createdAt',
+    })
+
+    newCollection = newCollectionQuery.docs
+
+    expect(newCollectionQuery.totalDocs).toEqual(1)
+  })
+})
+```
+
+
+### Seeding data
+
+For development and testing, you will likely need some data to work with. You can streamline this process by seeding and dropping your database - instead of manually entering data.
+
+In the plugin template, you can navigate to `dev/src/server.ts` and see an example seed function.
+
+```
+if (process.env.PAYLOAD_SEED === 'true') {
+    await seed(payload)
+}
+```
+
+A sample seed function has been created for you at `dev/src/seed`, update this file with additional data as needed.
+
+```
+export const seed = async (payload: Payload): Promise<void> => {
+  payload.logger.info('Seeding data...')
+
+  await payload.create({
+    collection: 'new-collection',
+    data: {
+      title: 'Seeded title',
+    },
+  })
+
+  // Add additional seed data here
+}
+
+```
+
+
+#### Src
+
+Now that we have our environment setup and dev project ready to go - it&apos;s time to build the plugin!
+
+
+**index.ts**
+
+First up, the `src/index.ts` file - this is where the plugin should be imported from. It is best practice not to build the plugin directly in this file, instead we use this to export the plugin and types from their respective files.
+
+
+**Plugin.ts**
+
+To reiterate, the essence of a payload plugin is simply to extend the Payload config - and that is exactly what we are doing in this file.
+
+```
+export const samplePlugin =
+  (pluginOptions: PluginTypes) =>
+  (incomingConfig: Config): Config => {
+    let config = { ...incomingConfig }
+
+   // do something cool with the config here
+
+    return config
+ }
+```
+
+1. First, you need to receive the existing Payload config along with any plugin options.
+2. Then set the variable `config` to be equal to a copy of the existing config.
+3. From here, you can extend the config however you like!
+4. Finally, return the config and you&apos;re all set.
+
+
+### Spread Syntax
+
+[Spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) (or the spread operator) is a feature in JavaScript that uses the dot notation **(...)** to spread elements from arrays, strings, or objects into various contexts.
+
+We are going to use spread syntax to allow us to add data to existing arrays without losing the existing data. It is crucial to spread the existing data correctly, else this can cause adverse behavior and conflicts with Payload config and other plugins.
+
+Let&apos;s say you want to build a plugin that adds a new collection:
+
+```
+config.collections = [
+  ...(config.collections || []),
+ newCollection,
+  // Add additional collections here
+]
+```
+
+First, you need to spread the `config.collections` to ensure that we don&apos;t lose the existing collections. Then you can add any additional collections, just as you would in a regular payload config.
+
+This same logic is applied to other properties like admin, globals, hooks:
+
+```
+config.globals = [
+  ...(config.globals || []),
+  // Add additional globals here
+]
+
+config.hooks = {
+  ...(config.hooks || {}),
+  // Add additional hooks here
+}
+```
+
+Some properties will be slightly different to extend, for instance the `onInit` property:
+
+```
+config.onInit = async payload => {
+  if (incomingConfig.onInit) await incomingConfig.onInit(payload)
+
+  // Add additional onInit code by using the onInitExtension function
+  onInitExtension(pluginOptions, payload)
+}
+```
+
+If you wish to add to the `onInit`, you must include the async/await. We don&apos;t use spread syntax in this case, instead you must await the existing `onInit` before running additional functionality.
+
+In the template, we have stubbed out a basic `onInitExtension` file that you can use, if not needed feel free to delete it.
+
+
+### Webpack
+
+If any of your files use server only packages such as fs, stripe, nodemailer, etc, they will need to be removed from the browser bundle. To do that, you can [alias the file imports with webpack](https://payloadcms.com/docs/admin/excluding-server-code#aliasing-server-only-modules).
+
+When files are bundled for the browser, the import paths are essentially crawled to determine what files to include in the bundle. To prevent the server only files from making it into the bundle, we can alias their import paths to a file that can be included in the browser. This will short-circuit the import path crawling and ensure browser only code is bundled.
+
+Webpack is another part of the Payload config that can be a little more tricky to extend. To help here, the template includes a helper function `extendWebpackConfig()` which takes care of spreading the existing webpack, so you can just add your new stuff:
+
+```
+config.admin = {
+  ...(config.admin || {}),
+  // Add your aliases to the helper function below
+  webpack: extendWebpackConfig(incomingConfig)
+}
+```
+
+### Types
+
+If your plugin has options, you should define and provide types for these options in a separate file which gets exported from the main `index.ts`.
+
+```
+export interface PluginTypes {
+  /**
+   * Enable or disable plugin
+   * @default false
+   */
+  enabled?: boolean
+}
+
+```
+
+If possible, include [JSDoc comments](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html#types-1) to describe the options and their types. This allows a developer to see details about the options in their editor.
+
+### Best practices
+
+In addition to the setup covered above, here are other best practices to follow:
+
+##### Providing an enable / disable option:
+For a better user experience, provide a way to disable the plugin without uninstalling it. This is especially important if your plugin adds additional webpack aliases, this will allow you to still let the webpack run to prevent errors.
+##### Include tests in your GitHub CI workflow:
+If you&apos;ve configured tests for your package, integrate them into your workflow to run the tests each time you commit to the plugin repository. Learn more about [how to configure tests into your GitHub CI workflow.](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs)
+##### Publish your finished plugin to NPM:
+The best way to share and allow others to use your plugin once it is complete is to publish an NPM package. This process is straightforward and well documented, find out more about [creating and publishing a NPM package here](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/).
+##### Add payload-plugin topic tag:
+Apply the tag **payload-plugin** to your GitHub repository. This will boost the visibility of your plugin and ensure it gets listed with [existing payload plugins](https://github.com/topics/payload-plugin).
+##### Use [Semantic Versioning](https://semver.org/) (SemVer):
+With the SemVer system you release version numbers that reflect the nature of changes (major, minor, patch). Ensure all major versions reference their Payload compatibility.

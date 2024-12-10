@@ -1,0 +1,56 @@
+---
+title: Using the Payload Auth Middleware
+label: Using the Middleware
+order: 40
+desc: Make full use of Payload's built-in authentication with your own custom Express endpoints by adding Payload's authentication middleware.
+keywords: authentication, middleware, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Because Payload uses your existing Express server, you are free to add whatever logic you need to your app through endpoints of your own. However, Payload does not add its middleware to your Express app itself—instead, it scopes all of its middleware to Payload-specific routers.
+
+This approach has a ton of benefits - it's great for isolation of concerns and limiting scope, but it also means that your additional routes won't have access to Payload's user authentication.
+
+<Banner type="success">
+  You can make full use of Payload's built-in authentication within your own custom Express
+  endpoints by adding Payload's authentication middleware.
+</Banner>
+
+<Banner type="warning">
+  Payload must be initialized before the `payload.authenticate` middleware can be used. This is done
+  by calling `payload.init()` prior to adding the middleware.
+</Banner>
+
+Example in `server.js`:
+
+```ts
+import express from 'express'
+import payload from 'payload'
+
+const app = express()
+
+const start = async () => {
+  await payload.init({
+    secret: 'PAYLOAD_SECRET_KEY',
+    express: app,
+  })
+
+  const router = express.Router()
+
+  // Note: Payload must be initialized before the `payload.authenticate` middleware can be used
+  router.use(payload.authenticate) // highlight-line
+
+  router.get('/', (req, res) => {
+    if (req.user) {
+      return res.send(`Authenticated successfully as ${req.user.email}.`)
+    }
+
+    return res.send('Not authenticated')
+  })
+
+  app.use('/some-route-here', router)
+
+  app.listen(3000)
+}
+
+start()
+```

@@ -1,0 +1,186 @@
+---
+title: Collection Access Control
+label: Collections
+order: 20
+desc: With Collection-level Access Control you can define which users can create, read, update or delete Collections.
+keywords: collections, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+You can define Collection-level Access Control within each Collection's `access` property. All Access Control functions accept one `args` argument.
+
+## Available Controls
+
+| Function                | Allows/Denies Access                         |
+| ----------------------- | -------------------------------------------- |
+| **[`create`](#create)** | Used in the `create` operation               |
+| **[`read`](#read)**     | Used in the `find` and `findByID` operations |
+| **[`update`](#update)** | Used in the `update` operation               |
+| **[`delete`](#delete)** | Used in the `delete` operation               |
+
+#### Auth-enabled Controls
+
+If a Collection supports [`Authentication`](/docs/authentication/overview), the following Access Controls become available:
+
+| Function                | Allows/Denies Access                                           |
+| ----------------------- | -------------------------------------------------------------- |
+| **[`admin`](#admin)**   | Used to restrict access to the Payload Admin panel             |
+| **[`unlock`](#unlock)** | Used to restrict which users can access the `unlock` operation |
+
+**Example Collection config:**
+
+```ts
+import { CollectionConfig } from 'payload/types';
+
+export const Posts: CollectionConfig = {
+  slug: "posts",
+  // highlight-start
+  access: {
+    create: ({ req: { user } }) => { ... },
+    read: ({ req: { user } }) => { ... },
+    update: ({ req: { user } }) => { ... },
+    delete: ({ req: { user } }) => { ... },
+    admin: ({ req: { user } }) => { ... },
+  },
+  // highlight-end
+};
+```
+
+### Create
+
+Returns a boolean which allows/denies access to the `create` request.
+
+**Available argument properties:**
+
+| Option     | Description                                                                |
+| ---------- | -------------------------------------------------------------------------- |
+| **`req`**  | The Express `request` object containing the currently authenticated `user` |
+| **`data`** | The data passed to create the document with.                               |
+
+**Example:**
+
+```ts
+const PublicUsers = {
+  slug: 'public-users',
+  access: {
+    // highlight-start
+    // allow guest users to self-registration
+    create: () => true,
+    // highlight-end
+    ...
+  },
+  fields: [ ... ],
+}
+```
+
+### Read
+
+Read access functions can return a boolean result or optionally return a [query constraint](/docs/queries/overview) which limits the documents that are returned to only those that match the constraint you provide. This can be helpful to restrict users' access to only certain documents however you specify.
+
+**Available argument properties:**
+
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
+| **`id`**  | `id` of document requested, if within `findByID`                           |
+
+**Example:**
+
+```ts
+import { Access } from 'payload/config'
+
+const canReadPage: Access = ({ req: { user } }) => {
+  // allow authenticated users
+  if (user) {
+    return true
+  }
+  // using a query constraint, guest users can access when a field named 'isPublic' is set to true
+  return {
+    // assumes we have a checkbox field named 'isPublic'
+    isPublic: {
+      equals: true,
+    },
+  }
+}
+```
+
+### Update
+
+Update access functions can return a boolean result or optionally return a [query constraint](/docs/queries/overview) to limit the document(s) that can be updated by the currently authenticated user. For example, returning a `query` from the `update` Access Control is helpful in cases where you would like to restrict a user to only being able to update the documents containing a `createdBy` relationship field equal to the user's ID.
+
+**Available argument properties:**
+
+| Option     | Description                                                                |
+| ---------- | -------------------------------------------------------------------------- |
+| **`req`**  | The Express `request` object containing the currently authenticated `user` |
+| **`id`**   | `id` of document requested to update                                       |
+| **`data`** | The data passed to update the document with                                |
+
+**Example:**
+
+```ts
+import { Access } from 'payload/config'
+
+const canUpdateUser: Access = ({ req: { user }, id }) => {
+  // allow users with a role of 'admin'
+  if (user.roles && user.roles.some((role) => role === 'admin')) {
+    return true
+  }
+  // allow any other users to update only oneself
+  return user.id === id
+}
+```
+
+### Delete
+
+Similarly to the Update function, returns a boolean or a [query constraint](/docs/queries/overview) to limit which documents can be deleted by which users.
+
+**Available argument properties:**
+
+| Option    | Description                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
+| **`id`**  | `id` of document requested to delete                                                                |
+
+**Example:**
+
+```ts
+import { Access } from 'payload/config'
+
+const canDeleteCustomer: Access = async ({ req, id }) => {
+  if (!id) {
+    // allow the admin UI to show controls to delete since it is indeterminate without the id
+    return true
+  }
+  // query another collection using the id
+  const result = await req.payload.find({
+    collection: 'contracts',
+    limit: 0,
+    depth: 0,
+    where: {
+      customer: { equals: id },
+    },
+  })
+
+  return result.totalDocs === 0
+}
+```
+
+### Admin
+
+If the Collection is [used to access the Payload Admin panel](/docs/admin/overview#the-admin-user-collection), the `Admin` Access Control function determines whether or not the currently logged in user can access the admin UI.
+
+**Available argument properties:**
+
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |
+
+### Unlock
+
+Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/config#options).
+
+**Available argument properties:**
+
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| **`req`** | The Express `request` object containing the currently authenticated `user` |

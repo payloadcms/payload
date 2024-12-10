@@ -1,0 +1,75 @@
+---
+title: Autosave
+label: Autosave
+order: 30
+desc: Using Payload's Draft functionality, you can configure your collections and globals to autosave changes as drafts, and publish only you're ready.
+keywords: version history, revisions, audit log, draft, publish, autosave, Content Management System, cms, headless, javascript, node, react, expresss
+---
+
+Extending on Payload's [Draft](/docs/versions/drafts) functionality, you can configure your collections and globals to autosave changes as drafts, and publish only you're ready. The Admin UI will automatically adapt to autosaving progress at an interval that you define, and will store all autosaved changes as a new Draft version. Never lose your work - and publish changes to the live document only when you're ready.
+
+<Banner type="warning">
+  Autosave relies on Versions and Drafts being enabled in order to function.
+</Banner>
+
+![Autosave Enabled](/images/docs/autosave-enabled.png)
+_If Autosave is enabled, drafts will be created automatically as the document is modified and the Admin UI adds an indicator describing when the document was last saved to the top right of the sidebar._
+
+### Options
+
+Collections and Globals both support the same options for configuring autosave. You can either set `versions.drafts.autosave` to `true`, or pass an object to configure autosave properties.
+
+| Drafts Autosave Options | Description                                                                                                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `interval`              | Define an `interval` in milliseconds to automatically save progress while documents are edited. Document updates are "debounced" at this interval. Defaults to `800`. |
+
+**Example config with versions, drafts, and autosave enabled:**
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  access: {
+    read: ({ req }) => {
+      // If there is a user logged in,
+      // let them retrieve all documents
+      if (req.user) return true
+
+      // If there is no user,
+      // restrict the documents that are returned
+      // to only those where `_status` is equal to `published`
+      return {
+        _status: {
+          equals: 'published',
+        },
+      }
+    },
+  },
+  versions: {
+    drafts: {
+      autosave: true,
+
+      // Alternatively, you can specify an `interval`:
+      // autosave: {
+      //   interval: 1500,
+      // },
+    },
+  },
+  //.. the rest of the Pages config here
+}
+```
+
+### Autosave API
+
+When `autosave` is enabled, all `update` operations within Payload expose a new argument called `autosave`. When set to `true`, Payload will treat the incoming draft update as an `autosave`. This is primarily used by the Admin UI, but there may be some cases where you are building an app for your users and wish to implement `autosave` in your own app. To do so, use the `autosave` argument in your `update` operations.
+
+#### How autosaves are stored
+
+If we created a new version for each autosave, you'd quickly find a ton of autosaves that clutter up your `_versions` collection within the database. That would be messy quick because `autosave` is typically set to save a document at ~800ms intervals.
+
+<Banner type="success">
+  Instead of creating a new version each time a document is autosaved, Payload smartly only creates{' '}
+  <strong>one</strong> autosave version, and then updates that specific version with each autosave
+  performed. This makes sure that your versions remain nice and tidy.
+</Banner>

@@ -1,0 +1,81 @@
+---
+title: Field-level Access Control
+label: Fields
+order: 30
+desc: Field-level Access Control is specified within a field's config, and allows you to define which users can create, read or update Fields.
+keywords: fields, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Field Access Control is specified with functions inside a field's config. All field-level Controls return a boolean value to allow or deny access for the specified operation. No field-level Access Controls support returning query constraints. All Access Control functions accept one `args` argument.
+
+## Available Controls
+
+| Function                | Purpose                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| **[`create`](#create)** | Allows or denies the ability to set a field's value when creating a new document |
+| **[`read`](#read)**     | Allows or denies the ability to read a field's value                             |
+| **[`update`](#update)** | Allows or denies the ability to update a field's value                           |
+
+**Example Collection config:**
+
+```ts
+import { CollectionConfig } from 'payload/types';
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      // highlight-start
+      access: {
+        create: ({ req: { user } }) => { ... },
+        read: ({ req: { user } }) => { ... },
+        update: ({ req: { user } }) => { ... },
+      },
+      // highlight-end
+    };
+  ],
+};
+```
+
+### Create
+
+Returns a boolean which allows or denies the ability to set a field's value when creating a new document. If `false` is returned, any passed values will be discarded.
+
+**Available argument properties:**
+
+| Option            | Description                                                                |
+| ----------------- | -------------------------------------------------------------------------- |
+| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`data`**        | The full data passed to create the document.                               |
+| **`siblingData`** | Immediately adjacent field data passed to create the document.             |
+
+### Read
+
+Returns a boolean which allows or denies the ability to read a field's value. If `false`, the entire property is omitted from the resulting document.
+
+**Available argument properties:**
+
+| Option            | Description                                                                |
+| ----------------- | -------------------------------------------------------------------------- |
+| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`id`**          | `id` of the document being read                                            |
+| **`doc`**         | The full document data.                                                    |
+| **`siblingData`** | Immediately adjacent field data of the document being read.                |
+
+### Update
+
+Returns a boolean which allows or denies the ability to update a field's value. If `false` is returned, any passed values will be discarded.
+
+If `false` is returned and you attempt to update the field's value, the operation will **not** throw an error however the field will be omitted from the update operation and the value will remain unchanged.
+
+**Available argument properties:**
+
+| Option            | Description                                                                |
+| ----------------- | -------------------------------------------------------------------------- |
+| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`id`**          | `id` of the document being updated                                         |
+| **`data`**        | The full data passed to update the document.                               |
+| **`siblingData`** | Immediately adjacent field data passed to update the document with.        |
+| **`doc`**         | The full document data, before the update is applied.                      |

@@ -1,0 +1,128 @@
+---
+title: Global Hooks
+label: Globals
+order: 40
+desc: Hooks can be added to any Global and allow you to validate data, flatten locales, hide protected fields, remove fields and more.
+keywords: hooks, globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Globals feature the ability to define the following hooks:
+
+- [beforeValidate](#beforevalidate)
+- [beforeChange](#beforechange)
+- [afterChange](#afterchange)
+- [beforeRead](#beforeread)
+- [afterRead](#afterread)
+
+## Config
+
+All Global Hook properties accept arrays of synchronous or asynchronous functions. Each Hook type receives specific arguments and has the ability to modify specific outputs.
+
+`globals/example-hooks.js`
+
+```ts
+import { GlobalConfig } from 'payload/types';
+
+const ExampleHooks: GlobalConfig = {
+  slug: 'header',
+  fields: [
+    { name: 'title', type: 'text'},
+  ]
+  hooks: {
+    beforeValidate: [(args) => {...}],
+    beforeChange: [(args) => {...}],
+    beforeRead: [(args) => {...}],
+    afterChange: [(args) => {...}],
+    afterRead: [(args) => {...}],
+  }
+}
+```
+
+### beforeValidate
+
+Runs before the `update` operation. This hook allows you to add or format data before the incoming data is validated.
+
+```ts
+import { GlobalBeforeValidateHook } from 'payload/types'
+
+const beforeValidateHook: GlobalBeforeValidateHook = async ({
+  data, // incoming data to update or create with
+  req, // full express request
+  originalDoc, // original document
+}) => {
+  return data // Return data to update the document with
+}
+```
+
+### beforeChange
+
+Immediately following validation, `beforeChange` hooks will run within the `update` operation. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
+
+```ts
+import { GlobalBeforeChangeHook } from 'payload/types'
+
+const beforeChangeHook: GlobalBeforeChangeHook = async ({
+  data, // incoming data to update or create with
+  req, // full express request
+  originalDoc, // original document
+}) => {
+  return data // Return data to update the document with
+}
+```
+
+### afterChange
+
+After a global is updated, the `afterChange` hook runs. Use this hook to purge caches of your applications, sync site data to CRMs, and more.
+
+```ts
+import { GlobalAfterChangeHook } from 'payload/types'
+
+const afterChangeHook: GlobalAfterChangeHook = async ({
+  doc, // full document data
+  previousDoc, // document data before updating the global
+  req, // full express request
+}) => {
+  return data
+}
+```
+
+### beforeRead
+
+Runs before `findOne` global operation is transformed for output by `afterRead`. This hook fires before hidden fields are removed and before localized fields are flattened into the requested locale. Using this Hook will provide you with all locales and all hidden fields via the `doc` argument.
+
+```ts
+import { GlobalBeforeReadHook } from 'payload/types'
+
+const beforeReadHook: GlobalBeforeReadHook = async ({
+  doc, // full document data
+  req, // full express request
+}) => {...}
+```
+
+### afterRead
+
+Runs as the last step before a global is returned. Flattens locales, hides protected fields, and removes fields that users do not have access to.
+
+```ts
+import { GlobalAfterReadHook } from 'payload/types'
+
+const afterReadHook: GlobalAfterReadHook = async ({
+  doc, // full document data
+  req, // full express request
+  findMany, // boolean to denote if this hook is running against finding one, or finding many (useful in versions)
+}) => {...}
+```
+
+## TypeScript
+
+Payload exports a type for each Global hook which can be accessed as follows:
+
+```ts
+import type {
+  GlobalBeforeValidateHook,
+  GlobalBeforeChangeHook,
+  GlobalAfterChangeHook,
+  GlobalBeforeReadHook,
+  GlobalAfterReadHook,
+} from 'payload/types'
+```

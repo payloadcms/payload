@@ -1,0 +1,161 @@
+---
+title: Vite
+label: Vite
+order: 90
+desc: NEEDS TO BE WRITTEN
+---
+
+<Banner type="info">
+  The Vite bundler is currently in beta. If you would like to help us test this package, we'd love to hear from you if you find any [bugs or issues](https://github.com/payloadcms/payload/issues/)!
+</Banner>
+
+Payload has a Vite bundler that you can install and bundle the Admin Panel with. This is an alternative to the [Webpack](/docs/admin/webpack) bundler and might give some performance boosts to your development workflow.
+
+To use Vite as your bundler, first you need to install the package:
+
+```bash
+yarn add @payloadcms/bundler-vite
+```
+
+Then you will need to add the [bundler](/docs/admin/bundlers) to your Payload config:
+
+```ts
+import { buildConfig } from '@payloadcms/config'
+import { viteBundler } from '@payloadcms/bundler-vite'
+
+export default buildConfig({
+  collections: [],
+  admin: {
+    bundler: viteBundler(),
+  }
+})
+```
+
+Vite works fundamentally differently than Webpack. In development mode, it will first pre-bundle any of your dependencies that are CommonJS-only, and then it'll leverage ESM directly in your browser for a better HMR experience.
+
+It then uses Rollup to create production builds of your admin UI. With Vite, you should see a decent performance boost—especially after your first cold start. However, that first cold start might take a few more seconds.
+
+<Banner type="warning">
+  In most cases, Vite should work out of the box. But existing Payload plugins may need to make compatibility changes to support Vite.
+</Banner>
+
+This is because Vite aliases work fundamentally differently than Webpack aliases, and Payload relies on aliasing server-only code out of the Payload config to ensure that the bundled admin JS works within your browser.
+
+Here are the main differences between how Vite aliases work and how Webpack aliases work.
+
+**Vite aliases do not work with absolute paths.**
+
+In Vite, alias keys must <strong>exactly match</strong> a import paths. If you have 2 files that import the same server-only module, but have different import paths, you would need to add 2 aliases to support both import paths.
+
+```ts
+// File A
+import serverOnlyModule from '../server-only-module'
+
+// File B
+import serverOnlyModule from '../../server-only-module'
+
+// payload.config.ts
+// You would need to add 2 aliases to support both import paths
+export const buildConfig({
+  collections: [],
+  admin: {
+    bundler: viteBundler(),
+    vite: (incomingViteConfig) => {
+      const existingAliases = incomingViteConfig?.resolve?.alias || {};
+      let aliasArray: { find: string | RegExp; replacement: string; }[] = [];
+
+      // Pass the existing Vite aliases
+      if (Array.isArray(existingAliases)) {
+        aliasArray = existingAliases;
+      } else {
+        aliasArray = Object.values(existingAliases);
+      }
+
+      // Add your own aliases using the find and replacement keys
+      aliasArray.push({
+        find: '../server-only-module',
+        replacement: path.resolve(__dirname, './path/to/browser-safe-module.js')
+        find: '../../server-only-module',
+        replacement: path.resolve(__dirname, './path/to/browser-safe-module.js')
+      });
+
+      return {
+        ...incomingViteConfig,
+        resolve: {
+          ...(incomingViteConfig?.resolve || {}),
+          alias: aliasArray,
+        }
+      };
+    },
+  }
+})
+```
+
+**Vite aliases do not get applied to pre-bundled dependencies.**
+
+This especially affects plugins, as plugins will be pre-bundled by Vite using `esbuild`. To get around this and support Vite, plugin authors need to configure an alias to their plugin at the top level, so that the alias will work accordingly.
+
+Here's an example. Say your plugin is called `payload-plugin-cool`. It's imported as follows:
+
+```ts
+import { myCoolPlugin } from 'payload-plugin-cool'
+```
+
+That plugin should create an alias to support Vite as follows:
+
+```ts
+{
+  // aliases go here
+  find: 'payload-plugin-cool',
+  replacement: path.resolve(__dirname, './my-admin-plugin.js')
+}
+
+```
+
+This will effectively alias the entire plugin and work with Vite. If the plugin requires admin-specific code, then the `./my-admin-plugin.js` alias target file should reflect any changes necessary to the admin UI that the main server-side plugin performs.
+
+### Extending the Vite config
+
+The Payload config supports a new property for plugins to be able to extend the Vite config specifically. That property exists on the main Payload config under `admin.vite`. You can check out the [Vite docs](https://vitejs.dev/config/shared-options.html) for more information on what you can do with the Vite config.
+
+It's a function that takes a Vite config, and returns an updated Vite config. Here's an example:
+
+```ts
+export const buildConfig({
+  collections: [],
+  admin: {
+    bundler: viteBundler(),
+    vite: (incomingViteConfig) => {
+      const existingAliases = incomingViteConfig?.resolve?.alias || {};
+      let aliasArray: { find: string | RegExp; replacement: string; }[] = [];
+
+      // Pass the existing Vite aliases
+      if (Array.isArray(existingAliases)) {
+        aliasArray = existingAliases;
+      } else {
+        aliasArray = Object.values(existingAliases);
+      }
+
+      // Add your own aliases using the find and replacement keys
+      aliasArray.push({
+        find: '../server-only-module',
+        replacement: path.resolve(__dirname, './path/to/browser-safe-module.js')
+      });
+
+      return {
+        ...incomingViteConfig,
+        resolve: {
+          ...(incomingViteConfig?.resolve || {}),
+          alias: aliasArray,
+        }
+      };
+    },
+  }
+})
+```
+
+Learn more about [aliasing server-only modules](https://payloadcms.com/docs/admin/excluding-server-code#aliasing-server-only-modules).
+
+Even though there is a new property for Vite configs specifically, we have implemented some "compatibility" between Webpack and Vite out-of-the-box.
+
+If your config specifies Webpack aliases, we attempt to leverage them automatically within the Vite config. They are merged into the Vite alias configuration seamlessly and may work out-of-the-box.

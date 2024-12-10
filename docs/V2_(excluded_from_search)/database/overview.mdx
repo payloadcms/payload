@@ -1,0 +1,174 @@
+---
+title: Database
+label: Overview
+order: 10
+keywords: database, mongodb, postgres, documentation, Content Management System, cms, headless, typescript, node, react, express
+desc: With Payload, you bring your own database and own your data. You have full control.
+---
+
+Payload interacts with your database via the database adapter that you choose. Right now, Payload officially supports two database adapters:
+
+1. [MongoDB](/docs/database/mongodb) w/ [Mongoose](https://mongoosejs.com/)
+1. [Postgres](/docs/database/postgres) w/ [Drizzle](https://drizzle.team/)
+
+We will be adding support for SQLite and MySQL in the near future using Drizzle ORM.
+
+To use a specific database adapter, you need to install it and configure it according to its own specifications. Visit the documentation for your applicable database adapter to learn more.
+
+## Selecting a database
+
+There are several factors to consider when choosing which database technology and hosting option is right for your project and workload. Payload can theoretically support any database, but it's up to you to decide which database to use.
+
+#### When to use MongoDB
+
+If your project has a lot of dynamic fields, and you are comfortable with allowing Payload to enforce data integrity across your documents, MongoDB is a great choice. With it, your Payload documents are stored as _one_ document in your database—no matter if you have localization enabled, how many block or array fields you have, etc. This means that the shape of your data in your database will very closely reflect your field schema, and there is minimal complexity involved in storing or retrieving your data.
+
+You should prefer MongoDB if:
+
+- You prefer simplicity within your database
+- You don't want to deal with keeping production / staging databases in sync via [DDL changes](https://en.wikipedia.org/wiki/Data_definition_language)
+- Most (or everything) in your project is localized
+- You leverage a lot of array fields, block fields, or `hasMany` select fields and similar
+
+#### When to use a relational DB
+
+Many projects might call for more rigid database architecture where the shape of your data is strongly enforced at the database level. For example, if you know the shape of your data and it's relatively "flat", and you don't anticipate it to change often, your workload might suit relational databases like Postgres very well.
+
+You should prefer a relational DB like Postgres if:
+
+- You are comfortable with migration workflows
+- You require enforced data consistency at the database level
+- You have a lot of relationships between collections and require relationships to be enforced
+
+#### Differences in Payload features
+
+It's important to note that almost everything Payload does is available in all of our officially supported database adapters, including localization, arrays, blocks, etc. 
+
+The only thing that is not supported in Postgres yet is the [Point field](/docs/fields/point), but that should be added soon. 
+
+It's up to you to choose which database you would like to use.
+
+## Configuration
+
+To configure the database for your Payload application, an adapter can be assigned to `config.db`. This property is required within your Payload config. 
+
+Here's an example:
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Here is where you pass your database adapter
+  // and the adapter will require options specific to itself
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URI,
+    }
+  }),
+})
+```
+
+## Collection Operations
+
+To configure Collection database operations in your Payload application, your Collection config has methods that can override default database operations for that Collection.
+
+The override methods receive arguments useful for augmenting operations such as Field data, the collection slug, and the req.
+
+Here is an example:
+```ts
+import type { CollectionConfig } from 'payload/types'
+
+export const Collection: CollectionConfig => {
+  return {
+    slug: 'collection-db-operations',
+    db: {
+      // Create a document in a custom db
+      create: async ({ collection, data, req }) => {
+        const doc = await fetch(`https://example.com/api/${collection}/create`, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            'x-app-user': `payload_${req.payload.user}`,
+            'Content-Type': 'application/json'
+          }
+        }).then(response => response.json())
+        
+        return doc
+      },
+
+      // Delete a document in a custom db
+      deleteOne: async ({ collection, data, req }) => {
+        const docs = await fetch(`https://example.com/api/${collection}/delete/${data.id}`, {
+          method: 'DELETE',
+          headers: {
+            'x-app-user': `payload_${req.payload.user}`
+          }
+        }).then(response => response.json())
+        
+        return docs
+      },
+
+      // Delete many documents in a custom db
+      deleteMany: async ({ collection, data, req }) => {
+        const docs = await fetch(`https://example.com/api/${collection}/delete`, {
+          method: 'DELETE'
+          headers: {
+            'x-app-user': `payload_${req.payload.user}`
+          }
+          body: JSON.stringify(data),
+        }).then(response => response.json())
+        
+        return docs
+      },
+
+      // Find documents in a custom db
+      find: async ({ collection, data, req, where, limit }) => {
+        const docs = await fetch(`https://example.com/api/${collection}/find`, {
+          headers: {
+            'x-app-user': `payload_${req.payload.user}`
+          }
+          body: JSON.stringify({data, where, limit}),
+        }).then(response => response.json())
+        
+        return { docs }
+      },
+
+      // Find one document in a custom db
+      findOne: async ({ collection, data, req }) => {
+        const doc = await fetch(`https://example.com/api/${collection}/find/${data.id}`, {
+          headers: {
+            'x-app-user': `payload_${req.payload.user}`
+          }
+        }).then(response => response.json())
+        
+        return doc
+      },
+
+      // Update one document in an custom db
+      updateOne: async ({ collection, data, req }) => {
+        const doc = await fetch(`https://example.com/api/${collection}/update/${data.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+          headers: {
+            'x-app-user': `payload_${req.payload.user}`,
+            'Content-Type': 'application/json'
+          }
+        }).then(response => response.json())
+        
+        return { ...doc, updated: true }
+      },
+    },
+    fields: [
+      {
+        name: 'name',
+        type: 'text',
+      },
+    ],
+  }
+}
+
+```

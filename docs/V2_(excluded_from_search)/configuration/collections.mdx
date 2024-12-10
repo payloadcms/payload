@@ -1,0 +1,236 @@
+---
+title: Collection Configs
+label: Collections
+order: 20
+desc: Structure your Collections for your needs by defining fields, adding slugs and labels, establishing access control, tying in hooks, setting timestamps and more.
+keywords: collections, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Payload Collections are defined through configs of their own, and you can define as many as your application needs. Each
+Collection will scaffold a new collection automatically in your database of choice, based on fields that you define.
+
+It's often best practice to write your Collections in separate files and then import them into the main Payload config.
+
+## Options
+
+| Option            | Description                                                                                                                                                                                                              |
+|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`slug`** \*     | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                          |
+| **`fields`** \*   | Array of field types that will determine the structure and functionality of the data stored within this Collection. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
+| **`labels`**      | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                           |
+| **`admin`**       | Admin-specific configuration. See below for [more detail](#admin-options).                                                                                                                                               |
+| **`hooks`**       | Entry points to "tie in" to Collection actions at specific points. [More](/docs/hooks/overview#collection-hooks)                                                                                                         |
+| **`access`**      | Provide access control functions to define exactly who should be able to do what with Documents in this Collection. [More](/docs/access-control/overview/#collections)                                                   |
+| **`auth`**        | Specify options if you would like this Collection to feature authentication. For more, consult the [Authentication](/docs/authentication/config) documentation.                                                          |
+| **`upload`**      | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](/docs/upload/overview) documentation.                                                                         |
+| **`timestamps`**  | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                       |
+| **`versions`**    | Set to true to enable default options, or configure with object properties. [More](/docs/versions/overview#collection-config)                                                                                            |
+| **`endpoints`**   | Add custom routes to the REST API. Set to `false` to disable routes. [More](/docs/rest-api/overview#custom-endpoints)                                                                                                    |
+| **`graphQL`**     | An object with `singularName` and `pluralName` strings used in schema generation. Auto-generated from slug if not defined. Set to `false` to disable GraphQL.                                                            |
+| **`typescript`**  | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                      |
+| **`defaultSort`** | Pass a top-level field to sort by default in the collection List view. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                               |
+| **`custom`**      | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                |
+| **`dbName`**      | Custom table or collection name depending on the database adapter. Auto-generated from slug if not defined.                                                                                                              |
+| **`db`**          | Set custom database operations for this Collection. [More](/docs/database/overview#collection-operations)                                                                                                                |
+
+_\* An asterisk denotes that a property is required._
+
+#### Simple collection example
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const Orders: CollectionConfig = {
+  slug: 'orders',
+  fields: [
+    {
+      name: 'total',
+      type: 'number',
+      required: true,
+    },
+    {
+      name: 'placedBy',
+      type: 'relationship',
+      relationTo: 'customers',
+      required: true,
+    },
+  ],
+}
+```
+
+#### More collection config examples
+
+You can find an assortment
+of [example collection configs](https://github.com/payloadcms/public-demo/tree/master/src/payload/collections) in the
+Public
+Demo source code on GitHub.
+
+### Admin options
+
+You can customize the way that the Admin panel behaves on a collection-by-collection basis by defining the `admin`
+property on a collection's config.
+
+| Option                       | Description                                                                                                                                                                                           |
+|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `group`                      | Text used as a label for grouping collection and global links together in the navigation.                                                                                                             |
+| `hidden`                     | Set to true or a function, called with the current user, returning true to exclude this collection from navigation and admin routing.                                                                 |
+| `hooks`                      | Admin-specific hooks for this collection. [More](#admin-hooks)                                                                                                                                        |
+| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title.                                                |
+| `description`                | Text or React component to display below the Collection label in the List view to give editors more information.                                                                                      |
+| `defaultColumns`             | Array of field names that correspond to which columns to show by default in this collection's List view.                                                                                              |
+| `disableDuplicate `          | Disables the "Duplicate" button while editing documents within this collection.                                                                                                                       |
+| `hideAPIURL`                 | Hides the "API URL" meta field while editing documents within this collection.                                                                                                                        |
+| `enableRichTextLink`         | The [Rich Text](/docs/fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.         |
+| `enableRichTextRelationship` | The [Rich Text](/docs/fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default. |
+| `preview`                    | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview).                                                                                                |
+| `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).                                                                              |
+| `components`                 | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections)                                                                                       |
+| `listSearchableFields`       | Specify which fields should be searched in the List search view. [More](#list-searchable-fields)                                                                                                      |
+| **`pagination`**             | Set pagination-specific options for this collection. [More](#pagination)                                                                                                                              |
+
+### Preview
+
+Collection `admin` options can accept a `preview` function that will be used to generate a link pointing to the frontend
+of your app to preview data.
+
+If the function is specified, a Preview button will automatically appear in the corresponding collection's Edit view.
+Clicking the Preview button will link to the URL that is generated by the function.
+
+**The preview function accepts two arguments:**
+
+1. The document being edited
+1. An `options` object, containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT.
+
+**Example collection with preview function:**
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'slug',
+      type: 'text',
+      required: true,
+    },
+  ],
+  admin: {
+    preview: (doc, { locale }) => {
+      if (doc?.slug) {
+        return `https://bigbird.com/preview/posts/${doc.slug}?locale=${locale}`
+      }
+
+      return null
+    },
+  },
+}
+```
+
+### Pagination
+
+Here are a few options that you can specify options for pagination on a collection-by-collection basis:
+
+| Option         | Description                                                                                         |
+|----------------|-----------------------------------------------------------------------------------------------------|
+| `defaultLimit` | Integer that specifies the default per-page limit that should be used. Defaults to 10.              |
+| `limits`       | Provide an array of integers to use as per-page options for admins to choose from in the List view. |
+
+### Access control
+
+You can specify extremely granular access control (what users can do with documents in a collection) on a collection by
+collection basis. To learn more, go to the [Access Control](/docs/access-control/overview) docs.
+
+### Hooks
+
+Hooks are a powerful way to extend collection functionality and execute your own logic, and can be defined on a
+collection by collection basis. To learn more, go to the [Hooks](/docs/hooks/overview) documentation.
+
+### Field types
+
+Collections support all field types that Payload has to offer—including simple fields like text and checkboxes all the
+way to more complicated layout-building field groups like Blocks. [Click here](/docs/fields/overview) to learn more
+about field types.
+
+### List Searchable Fields
+
+In the List view, there is a "search" box that allows you to quickly find a document with a search. By default, it
+searches on the ID field. If you have `admin.useAsTitle` defined, the list search will use that field. However, you can
+define more than one field to search to make it easier on your admin editors to find the data they need.
+
+For example, let's say you have a Posts collection with `title`, `metaDescription`, and `tags` fields - and you want all
+three of those fields to be searchable in the List view. You can simply
+add `admin.listSearchableFields: ['title', 'metaDescription', 'tags']` - and the admin UI will automatically search on
+those three fields plus the ID field.
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  If you are adding <strong>listSearchableFields</strong>, make sure you index each of these fields
+  so your admin queries can remain performant.
+</Banner>
+
+### Admin Hooks
+
+In addition to collection hooks themselves, Payload provides for admin UI-specific hooks that you can leverage.
+
+**`beforeDuplicate`**
+
+The `beforeDuplicate` hook is an async function that accepts an object containing the data to duplicate, as well as the
+locale of the doc to duplicate. Within this hook, you can modify the data to be duplicated, which is useful in cases
+where you have unique fields that need to be incremented or similar, as well as if you want to automatically modify a
+document's `title`.
+
+Example:
+
+```ts
+import { BeforeDuplicate, CollectionConfig } from 'payload/types'
+// Your auto-generated Page type
+import { Page } from '../payload-types.ts'
+
+const beforeDuplicate: BeforeDuplicate<Page> = ({ data }) => {
+  return {
+    ...data,
+    title: `${data.title} Copy`,
+    uniqueField: data.uniqueField ? `${data.uniqueField}-copy` : '',
+  }
+}
+
+export const Page: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    hooks: {
+      beforeDuplicate,
+    },
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+    {
+      name: 'uniqueField',
+      type: 'text',
+      unique: true,
+    },
+  ],
+}
+```
+
+### TypeScript
+
+You can import collection types as follows:
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+// This is the type used for incoming collection configs.
+// Only the bare minimum properties are marked as required.
+```
+
+```ts
+import { SanitizedCollectionConfig } from 'payload/types'
+
+// This is the type used after an incoming collection config is fully sanitized.
+// Generally, this is only used internally by Payload.
+```

@@ -1,0 +1,333 @@
+---
+title: Fields Overview
+label: Overview
+order: 10
+desc: Fields are the building blocks of Payload, find out how to add or remove a field, change field type, add hooks, define access control and validation.
+keywords: overview, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner type="info">
+  Fields are the building blocks of Payload. Collections and Globals both use Fields to define the
+  shape of the data that they store. Payload offers a wide variety of field types - both simple and
+  complex.
+</Banner>
+
+Fields are defined as an array on Collections and Globals via the `fields` key. They define the shape of the data that will be stored as well as automatically construct the corresponding Admin UI.
+
+The required `type` property on a field determines what values it can accept, how it is presented in the API, and how the field will be rendered in the admin interface.
+
+**Simple collection with two fields:**
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const Page: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'myField',
+      type: 'text', // highlight-line
+    },
+    {
+      name: 'otherField',
+      type: 'checkbox', // highlight-line
+    },
+  ],
+}
+```
+
+### Field types
+
+- [Array](/docs/fields/array) - for repeating content, supports nested fields
+- [Blocks](/docs/fields/blocks) - block-based fields, allowing powerful layout creation
+- [Checkbox](/docs/fields/checkbox) - boolean true / false checkbox
+- [Code](/docs/fields/code) - code editor that saves a string to the database
+- [Collapsible](/docs/fields/collapsible) - used for admin layout, nest fields within a collapsible component
+- [Date](/docs/fields/date) - date / time field that saves a timestamp
+- [Email](/docs/fields/email) - validates the entry is a properly formatted email
+- [Group](/docs/fields/group) - nest fields within an object
+- [JSON](/docs/fields/json) - saves actual JSON in the database
+- [Number](/docs/fields/number) - field that enforces that its value be a number
+- [Point](/docs/fields/point) - geometric coordinates for location data
+- [Radio](/docs/fields/radio) - radio button group, allowing only one value to be selected
+- [Relationship](/docs/fields/relationship) - assign relationships to other collections
+- [Rich Text](/docs/fields/rich-text) - fully extensible Rich Text editor
+- [Row](/docs/fields/row) - used for admin field layout, no effect on data shape
+- [Select](/docs/fields/select) - dropdown / picklist style value selector
+- [Tabs](/docs/fields/tabs) - used for admin layout, nest fields within tabs
+- [Text](/docs/fields/text) - simple text input
+- [Textarea](/docs/fields/textarea) - allows a bit larger of a text editor
+- [Upload](/docs/fields/upload) - allows local file and image upload
+- [UI](/docs/fields/ui) - inject your own custom components and do whatever you need
+
+### Field-level hooks
+
+One of the most powerful parts about Payload is its ability for you to define field-level hooks that can control the logic of your fields to a fine-grained level. for more information about how to define field hooks, [click here](/docs/hooks/overview#field-hooks).
+
+### Field-level access control
+
+In addition to being able to define access control on a document-level, you can define extremely granular permissions on a field by field level. For more information about field-level access control, [click here](/docs/access-control/overview#fields).
+
+### Field names
+
+All fields require a `name` property. This is the key that will be used to store and retrieve the field's value in the database. This property must be unique within the Collection, Global, or nested group that it is defined in.
+
+Payload reserves various field names for internal use. Using reserved field names will result in your field being sanitized from the config.
+
+The following field names are forbidden and cannot be used:
+
+  - `__v`
+  - `salt`
+  - `hash`
+  - `file`
+
+### Validation
+
+Field validation is enforced automatically based on the field type and other properties such as `required` or `min` and `max` value constraints on certain field types. This default behavior can be replaced by providing your own validate function for any field. It will be used on both the frontend and the backend, so it should not rely on any Node-specific packages. The validation function can be either synchronous or asynchronous and expects to return either `true` or a string error message to display in both API responses and within the Admin panel.
+
+There are two arguments available to custom validation functions.
+
+1. The value which is currently assigned to the field
+2. An optional object with dynamic properties for more complex validation having the following:
+
+| Property      | Description                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `data`        | An object of the full collection or global document.                                                                     |
+| `siblingData` | An object of the document data limited to fields within the same parent to the field.                                    |
+| `operation`   | Will be "create" or "update" depending on the UI action or API call.                                                     |
+| `id`          | The value of the collection `id`, will be `undefined` on create request.                                                 |
+| `t`           | The function for translating text, [more](/docs/configuration/i18n).                                                     |
+| `user`        | The currently authenticated user object.                                                                                 |
+| `payload`     | If the `validate` function is being executed on the server, Payload will be exposed for easily running local operations. |
+
+Example:
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const Orders: CollectionConfig = {
+  slug: 'orders',
+  fields: [
+    {
+      name: 'customerNumber',
+      type: 'text',
+      validate: async (val, { operation }) => {
+        if (operation !== 'create') {
+          // skip validation on update
+          return true
+        }
+        const response = await fetch(`https://your-api.com/customers/${val}`)
+        if (response.ok) {
+          return true
+        }
+
+        return 'The customer number provided does not match any customers within our records.'
+      },
+    },
+  ],
+}
+```
+
+When supplying a field `validate` function, Payload will use yours in place of the default. To make use of the default field validation in your custom logic you can import, call and return the result as needed.
+
+For example:
+
+```ts
+import { text } from 'payload/fields/validations'
+
+const field: Field = {
+  name: 'notBad',
+  type: 'text',
+  validate: (val, args) => {
+    if (val === 'bad') {
+      return 'This cannot be "bad"'
+    }
+    // highlight-start
+    return text(val, args)
+    // highlight-end
+  },
+}
+```
+
+### Customizable ID
+
+Collections ID fields are generated automatically by default. An explicit `id` field can be declared in the `fields` array to override this behavior.
+Users are then required to provide a custom ID value when creating a record through the Admin UI or API.
+Valid ID types are `number` and `text`.
+When using the text value, remember that it shouldn't contain the / (slash) sign, as the API will read it separately and this can result in unexpected behavior.
+
+Example:
+
+```ts
+{
+  fields: [
+    {
+      name: 'id',
+      type: 'number',
+    },
+  ],
+}
+```
+
+### Admin config
+
+In addition to each field's base configuration, you can define specific traits and properties for fields that only have effect on how they are rendered in the Admin panel. The following properties are available for all fields within the `admin` property:
+
+| Option              | Description                                                                                                                                                                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `condition`         | You can programmatically show / hide fields based on what other fields are doing. [Click here](#conditional-logic) for more info.                                                                                                |
+| `components`        | All field components can be completely and easily swapped out for custom components that you define. [Click here](#custom-components) for more info.                                                                             |
+| `description`       | Helper text to display with the field to provide more information for the editor user. [Click here](#description) for more info.                                                                                                 |
+| `position`          | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                        |
+| `width`             | Restrict the width of a field. you can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
+| `style`             | Attach raw CSS style properties to the root DOM element of a field.                                                                                                                                                              |
+| `className`         | Attach a CSS class name to the root DOM element of a field.                                                                                                                                                                      |
+| `readOnly`          | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                            |
+| `disabled`          | If a field is `disabled`, it is completely omitted from the Admin panel.                                                                                                                                                         |
+| `disableBulkEdit`   | Set `disableBulkEdit` to `true` to prevent fields from appearing in the select options when making edits for multiple documents.                                                                                                 |
+| `disableListColumn` | Set `disableListColumn` to `true` to prevent fields from appearing in the list view column selector.                                                                                                                             |
+| `disableListFilter` | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
+| `hidden`            | Setting a field's `hidden` property on its `admin` config will transform it into a `hidden` input type. Its value will still submit with the Admin panel's requests, but the field itself will not be visible to editors.        |
+
+### Custom components
+
+All Payload fields support the ability to swap in your own React components with ease. For more information, including examples, [click here](/docs/admin/components#fields).
+
+### Conditional logic
+
+You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes three arguments:
+
+- `data` - the entire document's data that is currently being edited
+- `siblingData` - only the fields that are direct siblings to the field with the condition
+- `{ user }` - the final argument is an object containing the currently authenticated user
+
+The `condition` function should return a boolean that will control if the field should be displayed or not.
+
+**Example:**
+
+```ts
+{
+  fields: [
+    {
+      name: 'enableGreeting',
+      type: 'checkbox',
+      defaultValue: false,
+    },
+    {
+      name: 'greeting',
+      type: 'text',
+      admin: {
+        // highlight-start
+        condition: (data, siblingData, { user }) => {
+          if (data.enableGreeting) {
+            return true
+          } else {
+            return false
+          }
+        },
+        // highlight-end
+      },
+    },
+  ]
+}
+```
+
+### Default values
+
+Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior. Values assigned during a create request on the server are added before validation occurs.
+
+Functions are called with an optional argument object containing:
+
+- `user` - the authenticated user object
+- `locale` - the currently selected locale string
+
+Here is an example of a defaultValue function that uses both:
+
+```ts
+const translation: {
+  en: 'Written by'
+  es: 'Escrito por'
+}
+
+const field = {
+  name: 'attribution',
+  type: 'text',
+  // highlight-start
+  defaultValue: ({ user, locale }) => `${translation[locale]} ${user.name}`,
+  // highlight-end
+}
+```
+
+<Banner type="success">
+  You can use async defaultValue functions to fill fields with data from API requests.
+</Banner>
+
+### Description
+
+A description can be configured in three ways.
+
+- As a string
+- As a function which returns a string
+- As a React component
+
+Functions are called with an optional argument object with the following shape, and React components are rendered with the following props:
+
+- `path` - the path of the field
+- `value` - the current value of the field
+
+As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide realtime feedback as the user interacts with the form.
+
+**Function Example:**
+
+```ts
+{
+  fields: [
+    {
+      name: 'message',
+      type: 'text',
+      maxLength: 20,
+      admin: {
+        description: ({ path, value }) =>
+          `${typeof value === 'string' ? 20 - value.length : '20'} characters left (field: ${path})`,
+      },
+    },
+  ]
+}
+```
+
+This example will display the number of characters allowed as the user types.
+
+**Component Example:**
+
+```ts
+{
+  fields: [
+    {
+      name: 'message',
+      type: 'text',
+      maxLength: 20,
+      admin: {
+        description:
+          ({ path, value }) => (
+            <div>
+              Character count:
+              {' '}
+              { value?.length || 0 }
+               (field: {path})
+            </div>
+          )
+      }
+    }
+  ]
+}
+```
+
+This component will count the number of characters entered, as well as display the path of the field.
+
+### TypeScript
+
+You can import the internal Payload `Field` type as well as other common field types as follows:
+
+```ts
+import type { Field } from 'payload/types'
+```

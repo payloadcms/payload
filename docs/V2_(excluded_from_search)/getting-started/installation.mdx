@@ -1,0 +1,155 @@
+---
+title: Installation
+label: Installation
+order: 30
+desc: To quickly get started with Payload, simply run npx create-payload-app or install from scratch.
+keywords: documentation, getting started, guide, Content Management System, cms, headless, javascript, node, react, express
+---
+
+#### Software Requirements
+
+Payload requires the following software:
+
+- Any JavaScript package manager (Yarn, NPM, or pnpm)
+- Node.js version 16+
+- Any [compatible database](/docs/database/overview) (MongoDB or Postgres)
+
+<Banner type="warning">
+  Before proceeding any further, please ensure that you have the above requirements met.
+</Banner>
+
+## Quickstart with create-payload-app
+
+To quickly scaffold a new Payload app in the fastest way possible, you can use [create-payload-app](https://npmjs.com/package/create-payload-app). To do so, run the following command:
+
+```
+npx create-payload-app@latest
+```
+
+Then just follow the prompts! You'll get set up with a new folder and a functioning Payload app inside.
+
+## Adding to an existing app
+
+Adding Payload to either a new or existing TypeScript + Express app is super straightforward. To add to an existing app, just run `npm install --save --legacy-peer-deps payload`.
+
+From there, the first step is writing a baseline config. Create a new `payload.config.ts` in your project's `/src` directory (or whatever your root TS dir is). The simplest config contains the following:
+
+```js
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  // By default, Payload will boot up normally
+  // and you will be provided with a base `User` collection.
+  // But, here is where you define how you'd like Payload to work!
+})
+```
+
+Write the above code into your newly created config file. This baseline config will automatically provide you with a default `User` collection. For more information about users and authentication, including how to provide your own user config, jump to the [Authentication](/docs/authentication/config) section.
+
+Although this is just the bare minimum config, there are _many_ more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/overview).
+
+### Server
+
+Now that you've got a baseline Payload config, it's time to initialize Payload. It requires an Express server that you provide, so if you're not familiar with how to set up a baseline Express server, please read up on exactly what Express is and why to use it. Express' own [Documentation](https://expressjs.com/en/starter/hello-world.html) is a good place to start. Otherwise, follow along below for how to build your own Express server to use with Payload.
+
+1. Run `npm install --save --legacy-peer-deps express` if you have not done so already
+1. Create a new `server.ts` file in the root directory of your app
+1. Add the following code to `server.ts`:
+
+```ts
+import express from 'express'
+
+const app = express()
+
+app.listen(3000, async () => {
+  console.log(
+    "Express is now listening for incoming connections on port 3000."
+  )
+})
+```
+
+This server doesn't do anything just yet. But, after you have this in place, we can initialize Payload via its asynchronous `init()` method, which accepts a small set of arguments to tell it how to operate.
+
+To initialize Payload, update your `server.ts` file to reflect the following code:
+
+```ts
+import express from 'express'
+import payload from 'payload'
+
+require('dotenv').config()
+const app = express()
+
+const start = async () => {
+  await payload.init({
+    secret: process.env.PAYLOAD_SECRET,
+    express: app,
+  })
+
+  app.listen(3000, async () => {
+    console.log(
+      "Express is now listening for incoming connections on port 3000."
+    )
+  })
+}
+
+start()
+```
+
+A quick reminder: in this configuration, we're making use of environmental variables, `process.env.PAYLOAD_SECRET`. Often, it's smart to store these values in an `.env` file at the root of your directory and set different values for each of your environments (local, stage, prod, etc). The `dotenv` package is very handy and works well alongside of Payload. A typical `.env` file will look like this:
+
+```
+DATABASE_URI=mongodb://127.0.0.1/your-payload-app
+PAYLOAD_SECRET=your-payload-secret
+```
+
+Here is a list of all properties available to pass through `payload.init`:
+
+##### secret
+**Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess.
+
+Payload uses this secret key to generate secure user tokens (JWT). Behind the scenes, we do not use your secret key to encrypt directly - instead, we first take the secret key and create an encrypted string using the SHA-256 hash function. Then, we reduce the encrypted string to its first 32 characters. This final value is what Payload uses for encryption.
+
+##### config
+
+Allows you to pass your config directly to the onInit function. The config passed here should match the payload.config file.
+
+##### disableOnInit
+
+A boolean that disables running your `onInit` function when Payload starts up.
+
+##### disableDBConnect
+
+A boolean that disables the database connection when Payload starts up.
+
+##### email
+
+An object used to configure SMTP. [Read more](/docs/email/overview).
+
+##### express
+This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
+
+##### local
+
+A boolean that when set to `true` tells Payload to start in local-only mode which will bypass setting up API routes. When set to `true`, `express` is not required. This is useful when running scripts that need to use Payload's [local-api](/docs/local-api/overview).
+
+##### loggerDestination
+
+Specify destination stream for the built-in Pino logger that Payload uses for internal logging. See [Pino Docs](https://getpino.io/#/docs/api?id=pino-destination) for more info on what is available.
+
+##### loggerOptions
+
+Specify options for the built-in Pino logger that Payload uses for internal logging. See [Pino Docs](https://getpino.io/#/docs/api?id=options) for more info on what is available.
+
+##### onInit
+
+A function that is called immediately following startup that receives the Payload instance as it's only argument.
+
+### Test it out
+
+After you've gotten this far, it's time to boot up Payload. Start your project in your application's folder to get going.
+
+After it starts, you can go to `http://localhost:3000/admin` to create your first Payload user!
+
+### Docker
+
+Looking to deploy Payload with Docker? New projects with `create-payload-app` come with a Dockerfile and docker-compose.yml file ready to go. Examples of these files can be seen in our [Deployment docs](/docs/production/deployment#docker).

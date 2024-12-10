@@ -1,0 +1,86 @@
+---
+title: Access Control
+label: Overview
+order: 10
+desc: Payload makes it simple to define and manage access control. By declaring roles, you can set permissions and restrict what your users can interact with.
+keywords: overview, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Access control within Payload is extremely powerful while remaining easy and intuitive to manage. Declaring who should have access to what documents is no more complex than writing a simple JavaScript function that either returns a `boolean` or a [`query`](/docs/queries/overview) constraint to restrict which documents users can interact with.
+
+<YouTube id="DoPLyXG26Dg" title="Overview of Payload Access Control" />
+
+**Example use cases:**
+
+- Allowing anyone `read` access to all `Post`s
+- Only allowing public access to `Post`s where a `status` field is equal to `published`
+- Giving only `User`s with a `role` field equal to `admin` the ability to delete `Page`(s)
+- Allowing anyone to create `ContactSubmission`s, but only logged in users to `read`, `update` or `delete` them
+- Restricting a `User` to only be able to see their own `Order`(s), but no others
+- Allowing `User`s that belong to a certain `Organization` to access only that `Organization`'s `Resource`s
+
+### Default Settings
+
+**By default, all Collections and Globals require that a user is logged in to be able to interact in any way.** The default Access Control function evaluates the `user` from the Express `req` and returns `true` if a user is logged in, and `false` if not.
+
+**Default Access function:**
+
+```ts
+const defaultPayloadAccess = ({ req: { user } }) => {
+  // Return `true` if a user is found
+  // and `false` if it is undefined or null
+  return Boolean(user)
+}
+```
+
+<Banner type="success">
+  <strong>Note:</strong>
+  <br />
+  In the Local API, all Access Control functions are skipped by default, allowing your server to do
+  whatever it needs. But, you can opt back in by setting the option
+  {' '}
+  <strong>
+    overrideAccess
+  </strong>
+  {' '}
+  to <strong>false</strong>.
+</Banner>
+
+### Access Control Types
+
+You can manage access within Payload on three different levels:
+
+- [Collections](/docs/access-control/collections)
+- [Fields](/docs/access-control/fields)
+- [Globals](/docs/access-control/globals)
+
+### When Access Control is Executed
+
+<Banner type="success">
+  <strong>Note:</strong>
+  <br />
+  Access control functions are utilized in two places. It's important to understand how and when
+  your access control is executed.
+</Banner>
+
+#### As you execute operations
+
+When you perform Payload operations like `create`, `read`, `update`, and `delete`, your access control functions will be executed before any changes or operations are completed.
+
+#### Within the Admin UI
+
+The Payload Admin UI responds dynamically to the access control that you define. For example, if you restrict editing a `ExampleCollection` to only users that feature a `role` of `admin`, the Payload Admin UI will **hide** the `ExampleCollection` from the Admin UI entirely. This is super powerful and allows you to control who can do what with your Admin UI.
+
+To accomplish this, Payload ships with an `Access` operation, which is executed when a user logs into the Admin UI. Payload will execute each one of your access control functions, across all collections, globals, and fields, at the top level and return a response that contains a reflection of what the currently authenticated user can do with your application.
+
+### Argument Availability
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  <br />
+  When your access control functions are executed via the <strong>access</strong> operation, the{' '}
+  <strong>id</strong> and <strong>data</strong> arguments will be <strong>undefined</strong>,
+  because Payload is executing your functions without referencing a specific document.
+</Banner>
+
+If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your access control is being executed via the `access` operation, to determine solely what the user can do within the Admin UI.

@@ -1,0 +1,157 @@
+---
+title: Live Preview
+label: Overview
+order: 10
+desc: With Live Preview you can render your front-end application directly within the Admin panel. Your changes take effect as you type. No save needed.
+keywords: live preview, preview, live, iframe, iframe preview, visual editing, design
+---
+
+**With Live Preview you can render your front-end application directly within the Admin panel. As you type, your changes take effect in real-time. No need to save a draft or publish your changes.**
+
+Live Preview works by rendering an iframe on the page that loads your front-end application. The Admin panel communicates with your app through [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) events. These events are emitted every time a change is made to the document. Your app then listens for these events and re-renders itself with the data it receives.
+
+{/* IMAGE OF LIVE PREVIEW HERE */}
+
+<Banner type="warning">
+  Live Preview is currently in beta. You may use this feature in production, but please be aware that it is subject to change and may not be fully stable for all use cases. If you encounter any issues, please [report them](https://github.com/payloadcms/payload/issues/new?assignees=jacobsfletch&labels=possible-bug&projects=&title=Live%20Preview&template=1.bug_report.yml) with as much detail as possible.
+</Banner>
+
+## Setup
+
+Setting up Live Preview is easy. You first need to enable it through the `admin.livePreview` property of your Payload config. It takes the following options:
+
+| Path                  | Description                                                                                                                                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`url`** \*          | String, or function that returns a string, pointing to your front-end application. This value is used as the iframe `src`. [More details](#url).                                              |
+| **`breakpoints`**     | Array of breakpoints to be used as “device sizes” in the preview window. Each item appears as an option in the toolbar. [More details](#breakpoints).                                         |
+| **`collections`**     | Array of collection slugs to enable Live Preview on.                                                                                                                                          |
+| **`globals`**         | Array of global slugs to enable Live Preview on.                                                                                                                                              |
+
+_\* An asterisk denotes that a property is required._
+
+Here is a basic example of enabling Live Preview on a `pages` collection:
+
+```ts
+// payload.config.ts
+{
+  // ...
+  admin: {
+    // ...
+    livePreview: {
+      url: 'http://localhost:3000', // The URL to your front-end, this can also be a function (see below)
+      collections: ['pages'], // The collections to enable Live Preview on (globals are also possible)
+    },
+  }
+}
+```
+
+Alternatively, you can define the <code>admin.livePreview</code> property on individual collection and global configs. Settings defined here will be merged into the top-level as overrides (if applicable).
+
+```ts
+// Collection.ts
+{
+  // ...
+  admin: {
+    // ...
+    livePreview: {
+      url: 'http://localhost:3000',
+    },
+  }
+}
+```
+
+Once configured, a new "Live Preview" tab will appear at the top of enabled documents. Navigating to this tab opens the preview window and loads your front-end application.
+
+### URL
+
+The `url` property is a string that points to your front-end application. This value is used as the `src` attribute of the iframe rendering your front-end.
+
+You can also pass a function in order to dynamically format URLs. This function is called with the following arguments:
+
+| Path                  | Description                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`data`**            | The data of the document being edited. This includes changes that have not yet been saved.                                                                                                  |
+| **`documentInfo`**    | Information about the document being edited like collection slug. [More details](../admin/hooks#usedocumentinfo).                                                                           |
+| **`locale`**          | The locale currently being edited (if applicable). [More details](../configuration/localization).                                                                         |
+
+Here is an example of using a function that returns a dynamic URL:
+
+```ts
+// payload.config.ts
+{
+  // ...
+  admin: {
+    // ...
+    livePreview: {
+      url: ({
+        data,
+        documentInfo,
+        locale
+      }) => `${data.tenant.url}${ // Multi-tenant top-level domain
+        documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
+      }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
+      collections: ['pages'],
+    },
+  }
+}
+```
+
+### Breakpoints
+
+The breakpoints property is an array of objects which are used as “device sizes” in the preview window. Each item will render as an option in the toolbar. When selected, the preview window will resize to the exact dimensions specified in that breakpoint. Each breakpoint takes the following properties:
+
+| Path                  | Description                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`label`** \*        | The label to display in the drop-down. This is what the user will see.                                                                                                                      |
+| **`name`** \*         | The name of the breakpoint.                                                                                                                                                                 |
+| **`width`** \*        | The width of the breakpoint. This is used to set the width of the iframe.                                                                                                                   |
+| **`height`** \*       | The height of the breakpoint. This is used to set the height of the iframe.                                                                                                                 |
+
+_\* An asterisk denotes that a property is required._
+
+Here is an example of defining breakpoints:
+
+```ts
+// payload.config.ts
+{
+  // ...
+  admin: {
+    // ...
+    livePreview: {
+      url: 'http://localhost:3000',
+      breakpoints: [
+        {
+          label: 'Mobile',
+          name: 'mobile',
+          width: 375,
+          height: 667,
+        },
+        {
+          label: 'Tablet',
+          name: 'tablet',
+          width: 768,
+          height: 1024,
+        },
+        {
+          label: 'Desktop',
+          name: 'desktop',
+          width: 1440,
+          height: 900,
+        },
+      ],
+    },
+  }
+}
+```
+
+{/* IMAGE OF TOOLBAR HERE */}
+
+The "Responsive" option is always available in the drop-down and requires no additional configuration. This is the default breakpoint that will be used on initial load. This option styles the iframe with a width and height of `100%` so that it fills the screen at its maximum size and automatically resizes as the window changes size.
+
+You may also explicitly resize the Live Preview by using the corresponding inputs in the toolbar. This will temporarily override the breakpoint selection to "Custom" until a predefined breakpoint is selected once again.
+
+If you prefer to freely resize the Live Preview without the use of breakpoints, you can open it in a new window by clicking the button in the toolbar. This will close the iframe and open a new window which can be resized as you wish. Closing it will automatically re-open the iframe.
+
+## Example
+
+For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview/payload).

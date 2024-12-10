@@ -52,5 +52,8 @@
   "jestrunner.jestCommand": "pnpm exec cross-env NODE_OPTIONS=\"--no-deprecation\" node 'node_modules/jest/bin/jest.js'",
   "jestrunner.debugOptions": {
     "runtimeArgs": ["--no-deprecation"]
+  },
+  "search.exclude": {
+    "**/docs/V2_(excluded_from_search)/**": true
   }
 }

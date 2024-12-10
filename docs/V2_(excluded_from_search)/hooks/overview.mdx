@@ -1,0 +1,47 @@
+---
+title: Hooks Overview
+label: Overview
+order: 10
+desc: Hooks allow you to add your own logic to Payload, including integrating with third-party APIs, adding auto-generated data, or modifying Payload's base functionality.
+keywords: hooks, overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner type="info">
+  Hooks are powerful ways to tie into existing Payload actions in order to add your own logic like
+  integrating with third-party APIs, adding auto-generated data, or modifying Payload's base
+  functionality.
+</Banner>
+
+**With Hooks, you can transform Payload from a traditional CMS into a fully-fledged application framework.**
+
+Example uses:
+
+- Integrate user profiles with a third-party CRM such as Salesforce or Hubspot
+- Send a copy of uploaded files to Amazon S3 or similar
+- Automatically add `lastModifiedBy` data to a document to track who changed what over time
+- Encrypt a field's data when it's saved and decrypt it when it's read
+- Send emails when `ContactSubmission`s are created from a public website
+- Integrate with a payment provider like Stripe to automatically process payments when an `Order` is created
+- Securely recalculate order prices on the backend to ensure that the total price for `Order`s that users submit is accurate and valid
+- Generate and store a `lastLoggedIn` date on a user by adding an `afterLogin` hook
+- Add extra data to documents before they are read such as "average scores" or similar data that needs to be calculated on the fly
+
+There are many more use cases for Hooks and the sky is the limit.
+
+#### Async vs. synchronous
+
+All hooks can be written as either synchronous or asynchronous functions. If the Hook should modify data before a document is updated or created, and it relies on asynchronous actions such as fetching data from a third party, it might make sense to define your Hook as an asynchronous function, so you can be sure that your Hook completes before the operation's lifecycle continues. Async hooks are run in series - so if you have two async hooks defined, the second hook will wait for the first to complete before it starts.
+
+If your Hook simply performs a side-effect, such as updating a CRM, it might be okay to define it synchronously, so the Payload operation does not have to wait for your hook to complete.
+
+#### Server-only execution
+
+Payload Hooks are only triggered on the server. You can safely [remove your hooks](/docs/admin/excluding-server-code#aliasing-server-only-modules) from your Admin panel's client-side code by customizing the Webpack config, which not only keeps your Admin bundles' filesize small but also ensures that any server-side only code does not cause problems within browser environments.
+
+## Hook Types
+
+You can specify hooks in the following contexts:
+
+- [Collection Hooks](/docs/hooks/collections)
+- [Field Hooks](/docs/hooks/fields)
+- [Global Hooks](/docs/hooks/globals)

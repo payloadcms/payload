@@ -1,0 +1,51 @@
+---
+title: Customizing CSS & SCSS
+label: Customizing CSS
+order: 40
+desc: Customize your Payload admin panel further by adding your own CSS or SCSS style sheet to the configuration, powerful theme and design options are waiting for you.
+keywords: admin, css, scss, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+### Adding your own CSS / SCSS
+
+You can add your own CSS by providing your base Payload config with a path to your own CSS or SCSS. Customize the styling of any part of the Payload dashboard as necessary.
+
+To do so, provide your base Payload config with a path to your own stylesheet. It can be either a CSS or SCSS file.
+
+**Example in payload.config.js:**
+
+```ts
+import { buildConfig } from 'payload/config'
+import path from 'path'
+
+const config = buildConfig({
+  admin: {
+    css: path.resolve(__dirname, 'relative/path/to/stylesheet.scss'),
+  },
+})
+```
+
+### Overriding built-in styles
+
+To make it as easy as possible for you to override our styles, Payload uses [BEM naming conventions](http://getbem.com/) for all CSS within the Admin UI. If you provide your own CSS, you can override any built-in styles easily.
+
+In addition to adding your own style definitions, you can also override Payload's built-in CSS variables. We use as much as possible behind the scenes, and you can override any of them that you'd like to.
+
+You can find the built-in Payload CSS variables within [`./src/admin/scss/app.scss`](https://github.com/payloadcms/payload/blob/main/packages/payload/src/admin/scss/app.scss) and [`./src/admin/scss/colors.scss`](https://github.com/payloadcms/payload/blob/main/packages/payload/src/admin/scss/colors.scss). The following variables are defined and can be overridden:
+
+- Breakpoints
+- Base color shades (white to black by default)
+- Success / warning / error color shades
+- Theme-specific colors (background, input background, text color, etc.)
+- Elevation colors (used to determine how "bright" something should be when compared to the background)
+- Fonts
+- Horizontal gutter
+
+#### Dark mode
+
+<Banner type="warning">
+  If you're overriding colors or theme elevations, make sure to consider how your changes will
+  affect dark mode.
+</Banner>
+
+By default, Payload automatically overrides all `--theme-elevation`s and inverts all success / warning / error shades to suit dark mode. We also update some base theme variables like `--theme-bg`, `--theme-text`, etc.

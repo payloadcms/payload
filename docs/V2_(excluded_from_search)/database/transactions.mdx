@@ -1,0 +1,104 @@
+---
+title: Transactions
+label: Transactions
+order: 30
+keywords: database, transactions, sql, mongodb, postgres, documentation, Content Management System, cms, headless, typescript, node, react, express
+desc: Database transactions are fully supported within Payload.
+---
+
+Database transactions allow your application to make a series of database changes in an all-or-nothing commit. Consider an HTTP request that creates a new **Order** and has an `afterChange` hook to update the stock count of related **Items**. If an error occurs when updating an **Item** and an HTTP error is returned to the user, you would not want the new **Order** to be persisted or any other items to be changed either. This kind of interaction with the database is handled seamlessly with transactions.
+
+By default, Payload will use transactions for all operations, as long as it is supported by the configured database. Database changes are contained within all Payload operations and any errors thrown will result in all changes being rolled back without being committed. When transactions are not supported by the database, Payload will continue to operate as expected without them.
+
+<Banner type="info">
+  <strong>Note:</strong>
+  <br />
+  MongoDB requires a connection to a replicaset in order to make use of transactions.
+</Banner>
+
+The initial request made to Payload will begin a new transaction and attach it to the `req.transactionID`. If you have a `hook` that interacts with the database, you can opt-in to using the same transaction by passing the `req` in the arguments. For example:
+
+```ts
+const afterChange: CollectionAfterChangeHook = async ({ req }) => {
+  // because req.transactionID is assigned from Payload and passed through,
+  // my-slug will only persist if the entire request is successful
+  await req.payload.create({
+    req,
+    collection: 'my-slug',
+    data: {
+      some: 'data',
+    },
+  })
+}
+```
+
+### Async Hooks with Transactions
+
+Since Payload hooks can be async and be written to not await the result, it is possible to have an incorrect success response returned on a request that is rolled back. If you have a hook where you do not `await` the result, then you should **not** pass the `req.transactionID`.
+
+```ts
+const afterChange: CollectionAfterChangeHook = async ({ req }) => {
+  // WARNING: an async call made with the same req, but NOT awaited,
+  // may fail resulting in an OK response being returned with response data that is not committed
+  const dangerouslyIgnoreAsync = req.payload.create({
+    req,
+    collection: 'my-slug',
+    data: {
+      some: 'other data',
+    },
+  })
+
+  // Should this call fail, it will not rollback other changes
+  // because the req (and its transactionID) is not passed through
+  const safelyIgnoredAsync = req.payload.create({
+    collection: 'my-slug',
+    data: {
+      some: 'other data',
+    },
+  })
+}
+```
+
+### Direct Transaction Access
+
+When writing your own scripts or custom endpoints, you may wish to have direct control over transactions. This is useful for interacting with your database in something like a background job, outside the normal request-response flow.
+
+The following functions can be used for managing transactions:
+
+`payload.db.beginTransaction` - Starts a new session and returns a transaction ID for use in other Payload Local API calls. Note that if your database does not support transactions, this will return `null`.\
+`payload.db.commitTransaction` - Takes the identifier for the transaction, finalizes any changes.\
+`payload.db.rollbackTransaction` - Takes the identifier for the transaction, discards any changes.
+
+You can then use the transaction ID with Payload's local API by passing it inside the `PayloadRequest` object.
+
+Here is an example for a "background job" function, which utilizes the direct transaction API to make sure it either succeeds completely or gets rolled back in case of an error.
+
+```ts
+async function allOrNothingJob() {
+    const req = {} as PayloadRequest;
+    req.transactionID = await payload.db.beginTransaction();
+    try {
+      await payload.create({
+        req, // use our manual transaction
+        collection: 'my-slug',
+        data: {
+          some: 'data'
+        }
+      });
+
+      await payload.create({
+        req, // use our manual transaction
+        collection: 'something-else',
+        data: {
+          some: 'data'
+        }
+      });
+      console.log('Everything done.');
+      if (req.transactionID) await payload.db.commitTransaction(req.transactionID);
+    } catch (e) {
+      console.error('Oh no, something went wrong!');
+      if (req.transactionID) await payload.db.rollbackTransaction(req.transactionID);
+    }
+
+}
+```

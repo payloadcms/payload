@@ -1,0 +1,547 @@
+---
+title: Local API
+label: Overview
+order: 10
+desc: The Payload Local API allows you to interact with your database and execute the same operations that are available through REST and GraphQL within Node, directly on your server.
+keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+The Payload Local API gives you the ability to execute the same operations that are available through REST and GraphQL
+within Node, directly on your server. Here, you don't need to deal with server latency or network speed whatsoever and
+can interact directly with your database.
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  <br />
+  The Local API is incredibly powerful when used with server-side rendering app frameworks like
+  NextJS. With other headless CMS, you need to request your data from third-party servers which can
+  add significant loading time to your server-rendered pages. With Payload, you don't have to leave
+  your server to gather the data you need. It can be incredibly fast and is definitely a game
+  changer.
+</Banner>
+
+Here are some common examples of how you can use the Local API:
+
+- Seeding data via Node seed scripts that you write and maintain
+- Opening custom Express routes which feature additional functionality but still rely on Payload
+- Within access control and hook functions
+
+### Accessing payload
+
+You can gain access to the currently running `payload` object via two ways:
+
+##### Importing it
+
+You can import or require `payload` into your own files after it's been initialized, but you need to make sure that
+your `import` / `require` statements come **after** you call `payload.init()`—otherwise Payload won't have been
+initialized yet. That might be obvious. To us, it's usually not.
+
+Example:
+
+```ts
+import payload from 'payload'
+import { CollectionAfterChangeHook } from 'payload/types'
+
+const afterChangeHook: CollectionAfterChangeHook = async () => {
+  const posts = await payload.find({
+    collection: 'posts',
+  })
+}
+```
+
+##### Accessing from the `req`
+
+Payload is available anywhere you have access to the Express `req` - including within your access control and hook
+functions.
+
+Example:
+
+```ts
+const afterChangeHook: CollectionAfterChangeHook = async ({ req: { payload } }) => {
+  const posts = await payload.find({
+    collection: 'posts',
+  })
+}
+```
+
+### Local options available
+
+You can specify more options within the Local API vs. REST or GraphQL due to the server-only context that they are
+executed in.
+
+| Local Option       | Description                                                                                                                                                                                                                                                                                                                                                           |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `collection`       | Required for Collection operations. Specifies the Collection slug to operate against.                                                                                                                                                                                                                                                                                 |
+| `data`             | The data to use within the operation. Required for `create`, `update`.                                                                                                                                                                                                                                                                                                |
+| `depth`            | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields.                                                                                                                                                                                                                                                             |
+| `locale`           | Specify [locale](/docs/configuration/localization) for any returned documents.                                                                                                                                                                                                                                                                                        |
+| `fallbackLocale`   | Specify a [fallback locale](/docs/configuration/localization) to use for any returned documents.                                                                                                                                                                                                                                                                      |
+| `overrideAccess`   | Skip access control. By default, this property is set to true within all Local API operations.                                                                                                                                                                                                                                                                        |
+| `user`             | If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.                                                                                                                                                                                                                                                                 |
+| `showHiddenFields` | Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.                                                                                                                                                                                                                                                  |
+| `pagination`       | Set to false to return all documents and avoid querying for document counts.                                                                                                                                                                                                                                                                                          |
+| `context`          | [Context](/docs/hooks/context), which will then be passed to `context` and `req.context`, which can be read by hooks. Useful if you want to pass additional information to the hooks which shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook to determine if it should run or not. |
+
+_There are more options available on an operation by operation basis outlined below._
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  By default, all access control checks are disabled in the Local API, but you can re-enable them if
+  you'd like, as well as pass a specific user to run the operation with.
+</Banner>
+
+## Collections
+
+The following Collection operations are available through the Local API:
+
+#### Create
+
+```js
+// The created Post document is returned
+const post = await payload.create({
+  collection: 'posts', // required
+  data: {
+    // required
+    title: 'sure',
+    description: 'maybe',
+  },
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUserDoc,
+  overrideAccess: true,
+  showHiddenFields: false,
+
+  // If creating verification-enabled auth doc,
+  // you can optionally disable the email that is auto-sent
+  disableVerificationEmail: true,
+
+  // If your collection supports uploads, you can upload
+  // a file directly through the Local API by providing
+  // its full, absolute file path.
+  filePath: path.resolve(__dirname, './path-to-image.jpg'),
+
+  // Alternatively, you can directly pass a File,
+  // if file is provided, filePath will be omitted
+  file: uploadedFile,
+})
+```
+
+#### Find
+
+```js
+// Result will be a paginated set of Posts.
+// See /docs/queries/pagination for more.
+const result = await payload.find({
+  collection: 'posts', // required
+  depth: 2,
+  page: 1,
+  limit: 10,
+  pagination: false, // If you want to disable pagination count, etc.
+  where: {}, // pass a `where` query here
+  sort: '-title',
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Find by ID
+
+```js
+// Result will be a Post document.
+const result = await payload.findByID({
+  collection: 'posts', // required
+  id: '507f1f77bcf86cd799439011', // required
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Count
+
+```js
+// Result will be an object with:
+// {
+//   totalDocs: 10, // count of the documents satisfies query
+// }
+const result = await payload.count({
+  collection: 'posts', // required
+  locale: 'en',
+  where: {}, // pass a `where` query here
+  user: dummyUser,
+  overrideAccess: false,
+})
+```
+
+#### Update by ID
+
+```js
+// Result will be the updated Post document.
+const result = await payload.update({
+  collection: 'posts', // required
+  id: '507f1f77bcf86cd799439011', // required
+  data: {
+    // required
+    title: 'sure',
+    description: 'maybe',
+  },
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+
+  // If your collection supports uploads, you can upload
+  // a file directly through the Local API by providing
+  // its full, absolute file path.
+  filePath: path.resolve(__dirname, './path-to-image.jpg'),
+
+  // If you are uploading a file and would like to replace
+  // the existing file instead of generating a new filename,
+  // you can set the following property to `true`
+  overwriteExistingFiles: true,
+})
+```
+
+#### Update Many
+
+```js
+// Result will be an object with:
+// {
+//   docs: [], // each document that was updated
+//   errors: [], // each error also includes the id of the document
+// }
+const result = await payload.update({
+  collection: 'posts', // required
+  where: {
+    // required
+    fieldName: { equals: 'value' },
+  },
+  data: {
+    // required
+    title: 'sure',
+    description: 'maybe',
+  },
+  depth: 0,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+
+  // If your collection supports uploads, you can upload
+  // a file directly through the Local API by providing
+  // its full, absolute file path.
+  filePath: path.resolve(__dirname, './path-to-image.jpg'),
+
+  // If you are uploading a file and would like to replace
+  // the existing file instead of generating a new filename,
+  // you can set the following property to `true`
+  overwriteExistingFiles: true,
+})
+```
+
+#### Delete
+
+```js
+// Result will be the now-deleted Post document.
+const result = await payload.delete({
+  collection: 'posts', // required
+  id: '507f1f77bcf86cd799439011', // required
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Delete Many
+
+```js
+// Result will be an object with:
+// {
+//   docs: [], // each document that is now deleted
+//   errors: [], // any errors that occurred, including the id of the errored on document
+// }
+const result = await payload.delete({
+  collection: 'posts', // required
+  where: {
+    // required
+    fieldName: { equals: 'value' },
+  },
+  depth: 0,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+## Auth Operations
+
+If a collection has [`Authentication`](/docs/authentication/overview) enabled, additional Local API operations will be
+available:
+
+#### Login
+
+```js
+// result will be formatted as follows:
+// {
+//   token: 'o38jf0q34jfij43f3f...', // JWT used for auth
+//   user: { ... } // the user document that just logged in
+//   exp: 1609619861 // the UNIX timestamp when the JWT will expire
+// }
+
+const result = await payload.login({
+  collection: 'users', // required
+  data: {
+    // required
+    email: 'dev@payloadcms.com',
+    password: 'rip',
+  },
+  req: req, // pass an Express `req` which will be provided to all hooks
+  res: res, // used to automatically set an HTTP-only auth cookie
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Forgot Password
+
+```js
+// Returned token will allow for a password reset
+const token = await payload.forgotPassword({
+  collection: 'users', // required
+  data: {
+    // required
+    email: 'dev@payloadcms.com',
+  },
+  req: req, // pass an Express `req` which will be provided to all hooks
+})
+```
+
+#### Reset Password
+
+```js
+// Result will be formatted as follows:
+// {
+//   token: 'o38jf0q34jfij43f3f...', // JWT used for auth
+//   user: { ... } // the user document that just logged in
+// }
+const result = await payload.resetPassword({
+  collection: 'users', // required
+  data: {
+    // required
+    password: req.body.password, // the new password to set
+    token: 'afh3o2jf2p3f...', // the token generated from the forgotPassword operation
+  },
+  req: req, // pass an Express `req` which will be provided to all hooks
+  res: res, // used to automatically set an HTTP-only auth cookie
+})
+```
+
+#### Unlock
+
+```js
+// Returned result will be a boolean representing success or failure
+const result = await payload.unlock({
+  collection: 'users', // required
+  data: {
+    // required
+    email: 'dev@payloadcms.com',
+  },
+  req: req, // pass an Express `req` which will be provided to all hooks
+  overrideAccess: true,
+})
+```
+
+#### Verify
+
+```js
+// Returned result will be a boolean representing success or failure
+const result = await payload.verifyEmail({
+  collection: 'users', // required
+  token: 'afh3o2jf2p3f...', // the token saved on the user as `_verificationToken`
+})
+```
+
+## Globals
+
+The following Global operations are available through the Local API:
+
+#### Find
+
+```js
+// Result will be the Header Global.
+const result = await payload.findGlobal({
+  slug: 'header', // required
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+#### Update
+
+```js
+// Result will be the updated Header Global.
+const result = await payload.updateGlobal({
+  slug: 'header', // required
+  data: {
+    // required
+    nav: [
+      {
+        url: 'https://google.com',
+      },
+      {
+        url: 'https://payloadcms.com',
+      },
+    ],
+  },
+  depth: 2,
+  locale: 'en',
+  fallbackLocale: false,
+  user: dummyUser,
+  overrideAccess: false,
+  showHiddenFields: true,
+})
+```
+
+## Next.js Conflict with Local API
+
+There is a known issue when using the Local API with Next.js version `13.4.13` and higher. Next.js executes within a
+separate child process, and Payload has not been initalized yet in these instances. That means that unless you
+explicitly initialize Payload within your operation, it will not be running and return no data / an empty object.
+
+As a workaround, we recommend leveraging the following pattern to determine and ensure Payload is initalized:
+
+```
+import dotenv from 'dotenv'
+import path from 'path'
+import type { Payload } from 'payload'
+import payload from 'payload'
+import type { InitOptions } from 'payload/config'
+import { seed as seedData } from './seed'
+
+dotenv.config({
+  path: path.resolve(__dirname, '../.env'),
+})
+
+let cached = (global as any).payload
+
+if (!cached) {
+  cached = (global as any).payload = { client: null, promise: null }
+}
+
+interface Args {
+  initOptions?: Partial<InitOptions>
+  seed?: boolean
+}
+
+export const getPayloadClient = async ({ initOptions, seed }: Args = {}): Promise<Payload> => {
+  if (!process.env.DATABASE_URI) {
+    throw new Error('DATABASE_URI environment variable is missing')
+  }
+  if (!process.env.PAYLOAD_SECRET) {
+    throw new Error('PAYLOAD_SECRET environment variable is missing')
+  }
+  if (cached.client) {
+    return cached.client
+  }
+  if (!cached.promise) {
+    cached.promise = payload.init({
+      mongoURL: process.env.DATABASE_URI,
+      secret: process.env.PAYLOAD_SECRET,
+      local: initOptions?.express ? false : true,
+      ...(initOptions || {}),
+    })
+  }
+  try {
+    process.env.PAYLOAD_DROP_DATABASE = seed ? 'true' : 'false'
+    cached.client = await cached.promise
+    if (seed) {
+      payload.logger.info('---- SEEDING DATABASE ----')
+      await seedData(payload)
+    }
+  } catch (e: unknown) {
+    cached.promise = null
+    throw e
+  }
+  return cached.client
+}
+```
+
+To checkout how this works in a project, take a look at
+our [custom server example](https://github.com/payloadcms/payload/blob/master/examples/custom-server/src/getPayload.ts).
+
+## Example Script using Local API
+
+The Local API is especially useful for running scripts
+
+```ts
+import payload from 'payload'
+import path from 'path'
+import dotenv from 'dotenv'
+
+dotenv.config({
+  path: path.resolve(__dirname, '../.env'),
+})
+
+const { PAYLOAD_SECRET } = process.env
+
+const doAction = async (): Promise<void> => {
+  await payload.init({
+    secret: PAYLOAD_SECRET,
+    local: true, // Enables local mode, doesn't spin up a server or frontend
+  })
+
+  // Perform any Local API operations here
+  await payload.find({
+    collection: 'posts',
+    // where: {} // optional
+  })
+
+  await payload.create({
+    collection: 'posts',
+    data: {},
+  })
+}
+
+doAction()
+```
+
+## TypeScript
+
+Local API calls will automatically infer your [generated types](/docs/typescript/generating-types).
+
+Here is an example of usage:
+
+```ts
+// Properly inferred as `Post` type
+const post = await payload.create({
+  collection: 'posts',
+
+  // Data will now be typed as Post and give you type hints
+  data: {
+    title: 'my title',
+    description: 'my description',
+  },
+})
+```

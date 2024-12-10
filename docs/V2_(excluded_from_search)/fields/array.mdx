@@ -1,0 +1,114 @@
+---
+title: Array Field
+label: Array
+order: 20
+desc: Array fields are intended for sets of repeating fields, that you define. Learn how to use array fields, see examples and options.
+keywords: array, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner>
+  The Array field type is used when you need to have a set of "repeating" fields. It stores an array
+  of objects containing the fields that you define. Its uses can be simple or highly complex.
+</Banner>
+
+<LightDarkImage
+srcLight="https://payloadcms.com/images/docs/fields/array.png"
+srcDark="https://payloadcms.com/images/docs/fields/array-dark.png"
+alt="Array field with two Rows in Payload admin panel"
+caption="Admin panel screenshot of an Array field with two Rows"
+/>
+
+**Example uses:**
+
+- A "slider" with an image ([upload field](/docs/fields/upload)) and a caption ([text field](/docs/fields/text))
+- Navigational structures where editors can specify nav items containing
+  pages ([relationship field](/docs/fields/relationship)), an "open in new tab" [checkbox field](/docs/fields/checkbox)
+- Event agenda "timeslots" where you need to specify start & end time ([date field](/docs/fields/date)),
+  label ([text field](/docs/fields/text)), and Learn More page [relationship](/docs/fields/relationship)
+
+### Config
+
+| Option              | Description                                                                                                                                                                                                                                                                        |
+|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`name`** \*       | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
+| **`label`**         | Text used as the heading in the Admin panel or an object with keys for each language. Auto-generated from name if not defined.                                                                                                                                                     |
+| **`fields`** \*     | Array of field types to correspond to each row of the Array.                                                                                                                                                                                                                       |
+| **`validate`**      | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                                                                                                       |
+| **`minRows`**       | A number for the fewest allowed items during validation when a value is present.                                                                                                                                                                                                   |
+| **`maxRows`**       | A number for the most allowed items during validation when a value is present.                                                                                                                                                                                                     |
+| **`saveToJWT`**     | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                                                                                                      |
+| **`hooks`**         | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                                                                                                         |
+| **`access`**        | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                                                                                                            |
+| **`hidden`**        | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                                                                                                   |
+| **`defaultValue`**  | Provide an array of row data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                                                                               |
+| **`localized`**     | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. If enabled, a separate, localized set of all data within this Array will be kept, so there is no need to specify each nested field as `localized`. |
+| **`required`**      | Require this field to have a value.                                                                                                                                                                                                                                                |
+| **`labels`**        | Customize the row labels appearing in the Admin dashboard.                                                                                                                                                                                                                         |
+| **`admin`**         | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                                                                                                          |
+| **`custom`**        | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                          |
+| **`interfaceName`** | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                                                                |
+| **`dbName`**        | Custom table name for the field when using SQL database adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                                                                                                                                    |
+
+_\* An asterisk denotes that a property is required._
+
+### Admin Config
+
+In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following
+properties:
+
+| Option                    | Description                                                                                                          |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------|
+| **`initCollapsed`**       | Set the initial collapsed state                                                                                      |
+| **`isSortable`**          | Disable array order sorting by setting this value to `false`                                                               |
+| **`components.RowLabel`** | Function or React component to be rendered as the label on the array row. Receives `({ data, index, path })` as args |
+
+### Example
+
+`collections/ExampleCollection.ts`
+
+```ts
+import { CollectionConfig } from 'payload/types'
+import { RowLabelArgs } from 'payload/dist/admin/components/forms/RowLabel/types'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'slider', // required
+      type: 'array', // required
+      label: 'Image Slider',
+      minRows: 2,
+      maxRows: 10,
+      interfaceName: 'CardSlider', // optional
+      labels: {
+        singular: 'Slide',
+        plural: 'Slides',
+      },
+      fields: [
+        // required
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+        },
+        {
+          name: 'caption',
+          type: 'text',
+        },
+      ],
+      admin: {
+        components: {
+          RowLabel: ({ data, index }: RowLabelArgs) => {
+            return data?.title || `Slide ${String(index).padStart(2, '0')}`
+          },
+        },
+      },
+    },
+  ],
+}
+```

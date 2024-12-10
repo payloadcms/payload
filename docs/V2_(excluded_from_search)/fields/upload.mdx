@@ -1,0 +1,119 @@
+---
+title: Upload Field
+label: Upload
+order: 210
+desc: Upload fields will allow a file to be uploaded, only from a collection supporting Uploads. Learn how to use Upload fields, see examples and options.
+keywords: upload, images media, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner>
+  The Upload field allows for the selection of a Document from a collection supporting Uploads, and
+  formats the selection as a thumbnail in the Admin panel.
+</Banner>
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  <br />
+  To use this field, you need to have a Collection configured to allow Uploads. For more
+  information, [click here](/docs/upload/overview) to read about how to enable Uploads on a
+  collection by collection basis.
+</Banner>
+
+<LightDarkImage
+srcLight="https://payloadcms.com/images/docs/fields/upload.png"
+srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
+alt="Shows an upload field in the Payload admin panel"
+caption="Admin panel screenshot of an Upload field"
+/>
+
+**Example uses:**
+
+- To provide a `Page` with a featured image
+- To allow for a `Product` to deliver a downloadable asset like PDF or MP3
+- To give a layout building block the ability to feature a background image
+
+### Config
+
+| Option               | Description                                                                                                                                                                 |
+|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`name`** \*        | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
+| **`*relationTo`** \* | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>        |
+| **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-upload-options).                                                                   |
+| **`maxDepth`**       | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth)                                              |
+| **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                     |
+| **`unique`**         | Enforce that each entry in the Collection has a unique value for this field.                                                                                                |
+| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                |
+| **`index`**          | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                               |
+| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                  |
+| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                     |
+| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                            |
+| **`defaultValue`**   | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
+| **`displayPreview`** | Enable displaying preview of the uploaded file. Overrides related Collection's `displayPreview` option. [More](/docs/upload/overview#collection-upload-options).            |
+| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
+| **`required`**       | Require this field to have a value.                                                                                                                                         |
+| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                    |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
+
+_\* An asterisk denotes that a property is required._
+
+### Example
+
+`collections/ExampleCollection.ts`
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'backgroundImage', // required
+      type: 'upload', // required
+      relationTo: 'media', // required
+      required: true,
+    },
+  ],
+}
+```
+
+### Filtering upload options
+
+Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both
+for validating input and filtering available uploads in the UI.
+
+The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to
+prevent all, or a `Where` query. When using a function, it will be
+called with an argument object with the following properties:
+
+| Property      | Description                                                                          |
+|---------------|--------------------------------------------------------------------------------------|
+| `relationTo`  | The `relationTo` to filter against (as defined on the field)                         |
+| `data`        | An object of the full collection or global document currently being edited           |
+| `siblingData` | An object of the document data limited to fields within the same parent to the field |
+| `id`          | The value of the collection `id`, will be `undefined` on create request              |
+| `user`        | The currently authenticated user object                                              |
+
+**Example:**
+
+```ts
+const uploadField = {
+  name: 'image',
+  type: 'upload',
+  relationTo: 'media',
+  filterOptions: {
+    mimeType: { contains: 'image' },
+  },
+}
+```
+
+You can learn more about writing queries [here](/docs/queries/overview).
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  When an upload field has both <strong>filterOptions</strong> and a custom{' '}
+  <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong>{' '}
+  unless you call the default upload field validation function imported from{' '}
+  <strong>payload/fields/validations</strong> in your validate function.
+</Banner>

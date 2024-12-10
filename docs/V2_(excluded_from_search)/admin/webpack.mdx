@@ -1,0 +1,67 @@
+---
+title: Webpack
+label: Webpack
+order: 80
+desc: The Payload admin panel uses Webpack 5 and supports many common functionalities such as SCSS and Typescript out of the box to give you more freedom.
+keywords: admin, webpack, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Payload has a Webpack (v5) bundler that you can build the Admin panel with. For now, we recommended using it because it is stable. If you are feeling a bit more adventurous you can give the [Vite](/docs/admin/vite) bundler a shot.
+
+Out of the box, the Webpack bundler supports common functionalities such as SCSS and Typescript, but there are many cases where you may need to add support for additional functionalities.
+
+#### Installation
+
+```bash
+yarn add @payloadcms/bundler-webpack
+```
+
+#### Import the bundler
+
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload/config'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+
+export default buildConfig({
+  // highlight-start
+  admin: {
+    bundler: webpackBundler()
+  },
+  // highlight-end
+})
+```
+
+### Extending Webpack
+
+If you need to extend the Webpack config, you can do so by passing a function to the `admin.webpack` property on your Payload config.
+The function will receive the Webpack config as an argument and should return the modified config.
+
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload/config'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+
+export default buildConfig({
+  admin: {
+    bundler: webpackBundler()
+    // highlight-start
+    webpack: (config) => {
+      // full control of the Webpack config
+
+      return config
+    },
+    // highlight-end
+  },
+})
+```
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  <br />
+  If changes to your Webpack aliases are not surfacing, they might be
+  [cached](https://webpack.js.org/configuration/cache/) in `node_modules/.cache/webpack`. Try
+  deleting that folder and restarting your server.
+</Banner>

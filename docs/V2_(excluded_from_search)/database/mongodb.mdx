@@ -1,0 +1,103 @@
+---
+title: MongoDB
+label: MongoDB
+order: 40
+desc: Payload has supported MongoDB natively since we started. The flexible nature of MongoDB lends itself well to Payload's powerful fields.
+keywords: MongoDB, documentation, typescript, Content Management System, cms, headless, javascript, node, react, express
+---
+
+To use Payload with MongoDB, install the package `@payloadcms/db-mongodb`. It will come with everything you need to
+store your Payload data in MongoDB.
+
+Then from there, pass it to your Payload config as follows:
+
+```ts
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Configure the Mongoose adapter here
+  db: mongooseAdapter({
+    // Mongoose-specific arguments go here.
+    // URL is required.
+    url: process.env.DATABASE_URI,
+  }),
+})
+```
+
+### Options
+
+| Option               | Description                                                                                                                                                                                                                                                                                                  |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `autoPluralization`  | Tell Mongoose to auto-pluralize any collection names if it encounters any singular words used as collection `slug`s.                                                                                                                                                                                         |
+| `schemaOptions`      | Customize schema options for all Mongoose schemas created internally.                                                                                                                                                                                                                                        |
+| `jsonParse`          | Set to false to disable the automatic JSON stringify/parse of data queried by MongoDB. For example, if you have data not tracked by Payload such as `Date` fields and similar, you can use this option to ensure that existing `Date` properties remain as `Date` and not strings.                           |
+| `collections`        | Options on a collection-by-collection basis. [More](#collections-options)                                                                                                                                                                                                                                    |
+| `globals`            | Options for the Globals collection created by Payload. [More](#globals-options)                                                                                                                                                                                                                              |
+| `connectOptions`     | Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.                                                        |
+| `disableIndexHints`  | Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination, as it increases the speed of the count function used in that query. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false                |
+| `migrationDir`       | Customize the directory that migrations are stored.                                                                                                                                                                                                                                                          |
+| `transactionOptions` | An object with configuration properties used in [transactions](https://www.mongodb.com/docs/manual/core/transactions/) or `false` which will disable the use of transactions.                                                                                                                                |
+| `collation`          | Enable language-specific string comparison with customizable options. Available on MongoDB 3.4+. Defaults locale to "en". Example: `{ strength: 3 }`. For a full list of collation options and their definitions, see the [MongoDB documentation](https://www.mongodb.com/docs/manual/reference/collation/). |
+
+### Access to Mongoose models
+
+After Payload is initialized, this adapter exposes all of your Mongoose models and they are available for you to work
+with directly.
+
+You can access Mongoose models as follows:
+
+- Collection models - `payload.db.collections[myCollectionSlug]`
+- Globals model - `payload.db.globals`
+- Versions model (both collections and globals) - `payload.db.versions[myEntitySlug]`
+
+### Collections Options
+
+You can configure the way the MongoDB adapter works on a collection-by-collection basis, including customizing Mongoose `schemaOptions` for each collection schema created.
+
+Example:
+
+```ts
+const db = mongooseAdapter({
+  url: 'your-url-here',
+  collections: {
+    users: {
+      //
+      schemaOptions: {
+        strict: false,
+      }
+    }
+  }
+})
+```
+
+### Global Options
+
+Payload automatically creates a single `globals` collection that correspond with any Payload globals that you define. When you initialize the `mongooseAdapter`, you can specify settings here for your globals in a similar manner to how you can for collections above. Right now, the only property available is `schemaOptions` but more may be added in the future.
+
+### Preserving externally managed data
+
+You can use Payload in conjunction with an existing MongoDB database, where you might have some fields "tracked" in Payload via corresponding field configs, and other fields completely unknown to Payload.
+
+If you have external field data in existing MongoDB collections which you'd like to use in combination with Payload, and you don't want to lose those external fields, you can configure Payload to "preserve" that data while it makes updates to your existing documents.
+
+To do this, the first step is to configure Mongoose's `strict` property, which tells Mongoose to write all data that it receives (and not disregard any data that it does not know about).
+
+The second step is to disable Payload's automatic JSON parsing of documents it receives from MongoDB.
+
+Here's an example for how to configure your Mongoose adapter to preserve external collection fields that are not tracked by Payload:
+
+```ts
+mongooseAdapter({
+  url: process.env.DATABASE_URI,
+  // Disable the JSON parsing that Payload performs
+  jsonParse: false,
+  // Disable strict mode for Mongoose
+  schemaOptions: {
+    strict: false,
+  },
+})
+```

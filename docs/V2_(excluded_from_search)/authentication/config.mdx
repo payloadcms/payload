@@ -1,0 +1,292 @@
+---
+title: Authentication Config
+label: Config
+order: 20
+desc: Enable and customize options in the Authentication config for features including Forgot Password, Login Attempts, API key usage and more.
+keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Payload's Authentication is extremely powerful and gives you everything you need when you go to build a new app or site in a secure and responsible manner.
+
+To enable Authentication on a collection, define an `auth` property and set it to either `true` or to an object containing the options below.
+
+## Options
+
+| Option                     | Description                                                                                                                                                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`useAPIKey`**            | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More](/docs/authentication/config#api-keys)                                                                       |
+| **`tokenExpiration`**      | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                                     |
+| **`maxLoginAttempts`**     | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                                       |
+| **`lockTime`**             | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                          |
+| **`depth`**                | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the express `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance. |
+| **`cookies`**              | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users.                                                                                                                                               |
+| **`forgotPassword`**       | Customize the way that the `forgotPassword` operation functions. [More](/docs/authentication/config#forgot-password)                                                                                                                |
+| **`verify`**               | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More](/docs/authentication/config#email-verification)                                  |
+| **`disableLocalStrategy`** | Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.                                                                                     |
+| **`strategies`**           | Advanced - an array of PassportJS authentication strategies to extend this collection's authentication with. [More](/docs/authentication/config#strategies)                                                                         |
+
+### API keys
+
+To integrate with third-party APIs or services, you might need the ability to generate API keys that can be used to identify as a certain user within Payload.
+
+In Payload, users are essentially documents within a collection. Just like you can authenticate as a user with an email and password, which is considered as our default local auth strategy, you can also authenticate as a user with an API key. API keys are generated on a user-by-user basis, similar to email and passwords, and are meant to represent a single user.
+
+For example, if you have a third-party service or external app that needs to be able to perform protected actions at its discretion, you have two options:
+
+1. Create a user for the third-party app, and log in each time to receive a token before you attempt to access any protected actions
+1. Enable API key support for the Collection, where you can generate a non-expiring API key per user in the collection. This is particularly useful as you can create a "user" that reflects an integration with a specific external service and assign a "role" or specific access only needed by that service/integration. Alternatively, you could create a "super admin" user and assign an API key to that user so that any requests made with that API key are considered as being made by that super user.
+
+Technically, both of these options will work for third-party integrations but the second option with API key is simpler, because it reduces the amount of work that your integrations need to do to be authenticated properly.
+
+To enable API keys on a collection, set the `useAPIKey` auth option to `true`. From there, a new interface will appear in the Admin panel for each document within the collection that allows you to generate an API key for each user in the Collection.
+
+<Banner type="success">
+  User API keys are encrypted within the database, meaning that if your database is compromised,
+  your API keys will not be.
+</Banner>
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  If you change your `PAYLOAD_SECRET`, you will need to regenerate your API keys.
+  <br />
+  The secret key is used to encrypt the API keys, so if you change the secret, existing API keys will no longer be valid.
+</Banner>
+
+#### Authenticating via API Key
+
+To authenticate REST or GraphQL API requests using an API key, set the `Authorization` header. The header is case-sensitive and needs the slug of the `auth.useAPIKey` enabled collection, then " API-Key ", followed by the `apiKey` that has been assigned. Payload's built-in middleware will then assign the user document to `req.user` and handle requests with the proper access control. By doing this, Payload recognizes the request being made as a request by the user associated with that API key.
+
+**For example, using Fetch:**
+
+```ts
+import User from '../collections/User'
+
+const response = await fetch('http://localhost:3000/api/pages', {
+  headers: {
+    Authorization: `${User.slug} API-Key ${YOUR_API_KEY}`,
+  },
+})
+```
+
+Payload ensures that the same, uniform access control is used across all authentication strategies. This enables you to utilize your existing access control configurations with both API keys and the standard email/password authentication. This consistency can aid in maintaining granular control over your API keys.
+
+#### API Key _Only_ Authentication
+
+If you want to use API keys as the only authentication method for a collection, you can disable the default local strategy by setting `disableLocalStrategy` to `true` on the collection's `auth` property. This will disable the ability to authenticate with email and password, and will only allow for authentication via API key.
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const Customers: CollectionConfig = {
+  slug: 'customers',
+  auth: {
+    useAPIKey: true,
+    disableLocalStrategy: true,
+  },
+}
+```
+
+### Forgot Password
+
+You can customize how the Forgot Password workflow operates with the following options on the `auth.forgotPassword` property:
+
+**`generateEmailHTML`**
+
+Function that accepts one argument, containing `{ req, token, user }`, that allows for overriding the HTML within emails that are sent to users attempting to reset their password. The function should return a string that supports HTML, which can be a full HTML email.
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  <br />
+  HTML templating can be used to create custom email templates, inline CSS automatically, and more.
+  You can make a reusable function that standardizes all email sent from Payload, which makes
+  sending custom emails more DRY. Payload doesn't ship with an HTML templating engine, so you are
+  free to choose your own.
+</Banner>
+
+Example:
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const Customers: CollectionConfig = {
+  slug: 'customers',
+  auth: {
+    forgotPassword: {
+      // highlight-start
+      generateEmailHTML: ({ req, token, user }) => {
+        // Use the token provided to allow your user to reset their password
+        const resetPasswordURL = `https://yourfrontend.com/reset-password?token=${token}`
+
+        return `
+          <!doctype html>
+          <html>
+            <body>
+              <h1>Here is my custom email template!</h1>
+              <p>Hello, ${user.email}!</p>
+              <p>Click below to reset your password.</p>
+              <p>
+                <a href="${resetPasswordURL}">${resetPasswordURL}</a>
+              </p>
+            </body>
+          </html>
+        `
+      },
+      // highlight-end
+    },
+  },
+}
+```
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  <br />
+  If you specify a different URL to send your users to for resetting their password, such as a page
+  on the frontend of your app or similar, you need to handle making the call to the Payload REST or
+  GraphQL reset-password operation yourself on your frontend, using the token that was provided for
+  you. Above, it was passed via query parameter.
+</Banner>
+
+**`generateEmailSubject`**
+
+Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function argument are the same but you can only return a string - not HTML.
+
+Example:
+
+```ts
+{
+  slug: 'customers',
+  auth: {
+    forgotPassword: {
+      // highlight-start
+      generateEmailSubject: ({ req, user }) => {
+        return `Hey ${user.email}, reset your password!`;
+      }
+      // highlight-end
+    }
+  }
+}
+```
+
+### Email Verification
+
+If you'd like to require email verification before a user can successfully log in, you can enable it by passing `true` or an `options` object to `auth.verify`. The following options are available:
+
+**`generateEmailHTML`**
+
+Function that accepts one argument, containing `{ req, token, user }`, that allows for overriding the HTML within emails that are sent to users indicating how to validate their account. The function should return a string that supports HTML, which can optionally be a full HTML email.
+
+Example:
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const Customers: CollectionConfig = {
+  slug: 'customers',
+  auth: {
+    verify: {
+      // highlight-start
+      generateEmailHTML: ({ req, token, user }) => {
+        // Use the token provided to allow your user to verify their account
+        const url = `https://yourfrontend.com/verify?token=${token}`
+
+        return `Hey ${user.email}, verify your email by clicking here: ${url}`
+      },
+      // highlight-end
+    },
+  },
+}
+```
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  <br />
+  If you specify a different URL to send your users to for email verification, such as a page on the
+  frontend of your app or similar, you need to handle making the call to the Payload REST or GraphQL
+  verification operation yourself on your frontend, using the token that was provided for you.
+  Above, it was passed via query parameter.
+</Banner>
+
+**`generateEmailSubject`**
+
+Similarly to the above `generateEmailHTML`, you can also customize the subject of the email. The function argument are the same but you can only return a string - not HTML.
+
+Example:
+
+```ts
+{
+  slug: 'customers',
+  auth: {
+    verify: {
+      // highlight-start
+      generateEmailSubject: ({ req, user }) => {
+        return `Hey ${user.email}, reset your password!`;
+      }
+      // highlight-end
+    }
+  }
+}
+```
+
+### Strategies
+
+As of Payload `1.0.0`, you can add additional authentication strategies to Payload easily by passing them to your collection's `auth.strategies` array.
+
+Behind the scenes, Payload uses PassportJS to power its local authentication strategy, so most strategies listed on the PassportJS website will work seamlessly. Combined with adding custom components to the admin panel's `Login` view, you can create advanced authentication strategies directly within Payload.
+
+<Banner type="warning">
+  This is an advanced feature, so only attempt this if you are an experienced developer. Otherwise,
+  just let Payload's built-in authentication handle user auth for you.
+</Banner>
+
+The `strategies` property is an array that takes objects with the following properties:
+
+**`strategy`**
+
+This property can accept a Passport strategy directly, or you can pass a function that takes a `payload` argument, and returns a Passport strategy.
+
+**`name`**
+
+If you pass a strategy to the `strategy` property directly, the `name` property is optional and allows you to override the strategy's built-in name.
+
+However, if you pass a function to `strategy`, `name` is a required property.
+
+In either case, Payload will prefix the strategy name with the collection `slug` that the strategy is passed to.
+
+### Admin autologin
+
+For testing and demo purposes you may want to skip forcing the admin user to login in order to access the panel.
+The `admin.autologin` property is used to configure the how visitors are handled when accessing the admin panel.
+The default is that all users will have to login and this should not be enabled for environments where data needs to protected.
+
+#### autoLogin Options
+
+| Option            | Description                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------- |
+| **`email`**       | The email address of the user to login as                                                                       |
+| **`password`**    | The password of the user to login as                                                                            |
+| **`prefillOnly`** | If set to true, the login credentials will be prefilled but the user will still need to click the login button. |
+
+The recommended way to use this feature is behind an environment variable to ensure it is disabled when in production.
+
+**Example:**
+
+```ts
+export default buildConfig({
+  admin: {
+    user: 'users',
+    // highlight-start
+    autoLogin:
+      process.env.PAYLOAD_PUBLIC_ENABLE_AUTOLOGIN === 'true'
+        ? {
+            email: 'test@example.com',
+            password: 'test',
+            prefillOnly: true,
+          }
+        : false,
+    // highlight-end
+  },
+  collections: [
+    /** */
+  ],
+})
+```

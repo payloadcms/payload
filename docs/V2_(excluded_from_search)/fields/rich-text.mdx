@@ -1,0 +1,70 @@
+---
+title: Rich Text Field
+label: Rich Text
+order: 140
+desc: The Rich Text field allows dynamic content to be written through the Admin Panel. Learn how to use Rich Text fields, see examples and options.
+keywords: rich text, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner>
+  The Rich Text field is a powerful way to allow editors to write dynamic content. The content is
+  saved as JSON in the database and can be converted into any format, including HTML, that you need.
+</Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/richtext.png"
+  srcDark="https://payloadcms.com/images/docs/fields/richtext-dark.png"
+  alt="Shows a Rich Text field in the Payload admin panel"
+  caption="Admin panel screenshot of a Rich Text field"
+/>
+
+Payload's rich text field is built on an "adapter pattern" which lets you specify which rich text editor you'd like to use. 
+
+Right now, Payload is officially supporting two rich text editors:
+
+1. [SlateJS](/docs/rich-text/slate) - stable, backwards-compatible with 1.0
+2. [Lexical](/docs/rich-text/lexical) - beta, where things will be moving
+
+<Banner type="success">
+  <strong>Consistent with Payload's goal of making you learn as little of Payload as possible, customizing and using the Rich Text Editor does not involve learning how to develop for a <em>Payload</em> rich text editor.</strong> Instead, you can invest your time and effort into learning the underlying open-source tools that will allow you to apply your learnings elsewhere as well.
+</Banner>
+
+### Config
+
+| Option             | Description                                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                  |
+| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                 |
+| **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)            |
+| **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.           |
+| **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                              |
+| **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
+| **`hidden`**       | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.        |
+| **`defaultValue`** | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                    |
+| **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                         |
+| **`required`**     | Require this field to have a value.                                                                                                                     |
+| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                               |
+| **`editor`**       | Override the rich text editor specified in your base configuration for this field.                                                                      |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                               |
+
+_\* An asterisk denotes that a property is required._
+
+### Admin config
+
+In addition to the default [field admin config](/docs/fields/overview#admin-config), the Rich Text editor allows for the following admin properties:
+
+**`placeholder`**
+
+Set this property to define a placeholder string in the text input.
+
+**`hideGutter`**
+
+Set this property to `true` to hide this field's gutter within the admin panel. The field gutter is rendered as a vertical line and padding, but often if this field is nested within a Group, Block, or Array, you may want to hide the gutter.
+
+**`rtl`**
+
+Override the default text direction of the Admin panel for this field. Set to `true` to force right-to-left text direction.
+
+### Editor-specific options
+
+For a ton more editor-specific options, including how to build custom rich text elements directly into your editor, take a look at either the [Slate docs](/docs/rich-text/slate) or the [Lexical docs](/docs/rich-text/lexical) depending on which editor you're using.

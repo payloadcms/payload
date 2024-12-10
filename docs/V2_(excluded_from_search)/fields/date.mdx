@@ -1,0 +1,116 @@
+---
+title: Date Field
+label: Date
+order: 70
+desc: The Date field type stores a Date in the database. Learn how to use and customize the Date field, see examples and options.
+keywords: date, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+<Banner>
+  The Date field type saves a Date in the database and provides the Admin panel with a customizable
+  time picker interface.
+</Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/date.png"
+  srcDark="https://payloadcms.com/images/docs/fields/date-dark.png"
+  alt="Shows a Date field in the Payload admin panel"
+  caption="Admin panel screenshot of a Date field"
+/>
+
+This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepicker) for the Admin panel component.
+
+### Config
+
+| Option             | Description                                                                                                                                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
+| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
+| **`index`**        | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
+| **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
+| **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
+| **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
+| **`hidden`**       | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                    |
+| **`defaultValue`** | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                |
+| **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
+| **`required`**     | Require this field to have a value.                                                                                                                                                                 |
+| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                           |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
+
+_\* An asterisk denotes that a property is required._
+
+### Admin Config
+
+In addition to the default [field admin config](/docs/fields/overview#admin-config), you can customize the following fields that will adjust how the component displays in the admin panel via the `date` property.
+
+| Property                       | Description                                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------- |
+| **`placeholder`**              | Placeholder text for the field.                                                             |
+| **`date`**                     | Pass options to customize date field appearance.                                            |
+| **`date.displayFormat`**       | Format date to be shown in field **cell**.                                                  |
+| **`date.pickerAppearance`** \* | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`. |
+| **`date.monthsToShow`** \*     | Number of months to display max is 2. Defaults to 1.                                        |
+| **`date.minDate`** \*          | Min date value to allow.                                                                    |
+| **`date.maxDate`** \*          | Max date value to allow.                                                                    |
+| **`date.minTime`** \*          | Min time value to allow.                                                                    |
+| **`date.maxTime`** \*          | Max date value to allow.                                                                    |
+| **`date.overrides`** \*        | Pass any valid props directly to the [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md)     |
+| **`date.timeIntervals`** \*    | Time intervals to display. Defaults to 30 minutes.                                          |
+| **`date.timeFormat`** \*       | Determines time format. Defaults to `'h:mm aa'`.                                            |
+
+_\* This property is passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md). ._
+
+#### Display Format and Picker Appearance
+
+These properties only affect how the date is displayed in the UI. The full date is always stored in the format `YYYY-MM-DDTHH:mm:ss.SSSZ` (e.g. `1999-01-01T8:00:00.000+05:00`).
+
+`displayFormat` determines how the date is presented in the field **cell**, you can pass any valid (unicode date format)[https://date-fns.org/v2.29.3/docs/format].
+
+`pickerAppearance` sets the appearance of the **react datepicker**, the options available are `dayAndTime`, `dayOnly`, `timeOnly`, and `monthOnly`. By default, the datepicker will display `dayOnly`.
+
+When only `pickerAppearance` is set, an equivalent format will be rendered in the date field cell. To overwrite this format, set `displayFormat`.
+
+### Example
+
+`collections/ExampleCollection.ts`
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'dateOnly',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'd MMM yyy',
+        },
+      },
+    },
+    {
+      name: 'timeOnly',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'timeOnly',
+          displayFormat: 'h:mm:ss a',
+        },
+      },
+    },
+    {
+      name: 'monthOnly',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'monthOnly',
+          displayFormat: 'MMMM yyyy',
+        },
+      },
+    },
+  ],
+}
+```

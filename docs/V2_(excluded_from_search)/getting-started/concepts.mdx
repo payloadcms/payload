@@ -1,0 +1,164 @@
+---
+title: Payload Concepts
+label: Concepts
+order: 20
+desc: Payload is based around a small and intuitive set of concepts. Key concepts include collections, globals, fields and more.
+keywords: documentation, getting started, guide, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Payload is based around a small and intuitive set of concepts. Before starting to work with Payload, it's a good idea to familiarize yourself with the following:
+
+### Config
+
+<Banner type="info">The Payload config is where you configure everything that Payload does.</Banner>
+
+By default, the Payload config lives in the root folder of your code and is named `payload.config.js` (`payload.config.ts` if you're using TypeScript), but you can customize its name and where you store it. You can write full functions and even full React components right into your config.
+
+### Collections
+
+<Banner type="info">
+  A Collection represents a type of content that Payload will store and can contain many documents.
+</Banner>
+
+Collections define the shape of your data as well as all functionalities attached to that data. They will contain one or many "documents", all corresponding with the same fields and functionalities that you define.
+
+They can represent anything you can store in a database - for example - pages, posts, users, people, orders, categories, events, customers, transactions, and anything else your app needs.
+
+### Globals
+
+<Banner type="info">
+  A Global is a "one-off" piece of content that is perfect for storing navigational structures,
+  themes, top-level meta data, and more.
+</Banner>
+
+Globals are in many ways similar to Collections, but there is only ever **one** instance of a Global, whereas Collections can contain many documents.
+
+### Fields
+
+<Banner type="info">
+  Fields are the building blocks of Payload. Collections and Globals both use Fields to define the
+  shape of the data that they store.
+</Banner>
+
+Payload comes with [many different field types](../fields/overview) that give you a ton of flexibility while designing your API. Each Field type has its own potential properties that allow you to customize how they work.
+
+### Hooks
+
+<Banner type="info">
+  Hooks are where you can "tie in" to existing Payload actions to perform your own additional logic
+  or modify how Payload operates altogether.
+</Banner>
+
+Hooks are an extremely powerful concept and are central to extending and customizing your app. Payload provides a wide variety of hooks which you can utilize. For example, imagine if you'd like to send an email every time a document is created in your Orders collection. To do so, you can add an `afterChange` hook function to your Orders collection that receives the Order data and allows you to send an email accordingly.
+
+There are many more potential reasons to use Hooks. For more, visit the [Hooks documentation](/docs/hooks/overview).
+
+### Access Control
+
+<Banner type="info">
+  Access Control refers to Payload's system of defining who can do what to your API.
+</Banner>
+
+Access Control is extremely powerful but easy and intuitive to manage. You can easily define your own full-blown RBAC (role-based access control) or any other access control pattern that your scenario requires. No conventions or structure is forced on you whatsoever.
+
+For more, visit the [Access Control documentation](/docs/access-control/overview).
+
+### Depth
+
+<Banner type="info">
+  "Depth" gives you control over how many levels down related documents should be automatically
+  populated when retrieved.
+</Banner>
+
+You can specify population `depth` via query parameter in the REST API and by an option in the local API. _Depth has no effect in the GraphQL API, because there, depth is based on the shape of your queries._
+It is also possible to limit the depth for specific `relation` and `upload` fields using the `maxDepth` property in your configuration.
+**For example, let's look at the following Collections:** `departments`, `users`, `posts`
+
+```
+// type: 'relationship' fields are equal to 1 depth level
+
+{
+	slug: 'posts',
+	fields: [
+		{
+			name: 'title',
+			type: 'text',
+		},
+		{
+			name: 'author',
+			label: 'Post Author',
+			type: 'relationship',
+			relationTo: 'users',
+		}
+	]
+}
+
+{
+	slug: 'users',
+	fields: [
+		{
+			name: 'email',
+			type: 'email',
+		},
+		{
+			name: 'department'
+			type: 'relationship',
+			relationTo: 'departments'
+		}
+	]
+}
+
+{
+	slug: 'departments',
+	fields: [
+		{
+			name: 'name'
+			type: 'text',
+		}
+	]
+}
+```
+
+If you were to query the Posts endpoint at, say, `http://localhost:3000/api/posts?depth=1`, you will retrieve Posts with populations one level deep. This depth parameter can be thought of as N, where N is the number of levels you want to populate. To populate one level further, you would simply specify N+1 as the depth. A returned result may look like the following:
+
+```
+// ?depth=1
+
+{
+  id: '5ae8f9bde69e394e717c8832',
+  title: 'This post sucks',
+  author: {
+    id: '5f7dd05cd50d4005f8bcab17',
+    email: 'spiderman@superheroes.gov',
+    department: '5e3ca05cd50d4005f8bdab15'
+  }
+}
+```
+
+Notice how the `post.author` is fully populated, but `post.author.department` is left as a document ID? That's because the User collection counted as the first level of `depth` and got populated—but then prevented any further populations from taking place.
+
+To populate `post.author.department` in it's entirety you could specify `?depth=2` or _higher_.
+
+```
+// ?depth=2
+
+{
+  id: '5ae8f9bde69e394e717c8832',
+  title: 'This post sucks',
+  author: {
+    id: '5f7dd05cd50d4005f8bcab17',
+    email: 'spiderman@superheroes.gov',
+    department: {
+      id: '5e3ca05cd50d4005f8bdab15',
+      name: 'Marvel'
+    }
+  }
+}
+```
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  When access control on collections prevents relationship fields from populating, the API response
+  will contain the relationship id instead of the full document.
+</Banner>

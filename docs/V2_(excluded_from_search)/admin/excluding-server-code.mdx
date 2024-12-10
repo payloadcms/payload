@@ -1,0 +1,206 @@
+---
+title: Excluding server-only code from admin UI
+label: Excluding server code
+order: 70
+desc: Learn how to exclude server-only code from the Payload Admin UI bundle
+---
+
+Because the Admin Panel browser bundle includes your Payload Config file, files using server-only modules need to be excluded.
+It's common for your config to rely on server only modules to perform logic in access control functions, hooks, and other contexts.
+
+Any file that imports a server-only module such as `fs`, `stripe`, `authorizenet`, `nodemailer`, etc. **cannot** be included in the browser bundle.
+
+#### Example Scenario
+
+Say we have a collection called `Subscriptions` that has a `beforeChange` hook that creates a Stripe subscription whenever a Subscription document is created in Payload.
+
+**Collection config**:
+
+```ts
+// collections/Subscriptions/index.ts
+
+import { CollectionConfig } from 'payload/types'
+import createStripeSubscription from './hooks/createStripeSubscription'
+
+export const Subscription: CollectionConfig = {
+  slug: 'subscriptions',
+  hooks: {
+    beforeChange: [createStripeSubscription],
+  },
+  fields: [
+    {
+      name: 'stripeSubscriptionID',
+      type: 'text',
+      required: true,
+    },
+  ],
+}
+```
+
+**Collection hook**:
+
+```ts
+// collections/Subscriptions/hooks/createStripeSubscription.ts
+
+// highlight-start
+import Stripe from 'stripe' // <-- server-only module
+// highlight-end
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+
+export const createStripeSubscription = async ({ data, operation }) => {
+  if (operation === 'create') {
+    const dataWithStripeID = { ...data }
+
+    // use Stripe to create a Stripe subscription
+    const subscription = await stripe.subscriptions.create({
+      // Configure the subscription accordingly
+    })
+
+    // Automatically add the Stripe subscription ID
+    // to the data that will be saved to this Subscription doc
+    dataWithStripeID.stripeSubscriptionID = subscription.id
+
+    return dataWithStripeID
+  }
+
+  return data
+}
+```
+
+<Banner type="error">
+  <strong>Warning:</strong>
+  <br />
+  The above code is NOT production-ready and should not be referenced to create Stripe
+  subscriptions. Although creating a beforeChange hook is a completely valid spot to do things like
+  create subscriptions, the code above is incomplete and insecure, meant for explanation purposes
+  only.
+</Banner>
+
+**As-is, this collection will prevent your Admin panel from bundling or loading correctly, because Stripe relies on some Node-only packages.**
+
+#### How to fix this
+
+You need to make sure that you use `alias`es to tell your bundler to import "safe" files vs. attempting to import any server-side code that you need to get rid of. Depending on your bundler (Webpack, Vite, etc.) the steps involved may be slightly different.
+
+The basic idea is to create a file that exports an empty object, and then alias import paths of any files that import server-only modules to that empty object file.
+
+This way when your bundler goes to import a file that contains server-only modules, it will instead import the empty object file, which will not break the browser bundle.
+
+### Aliasing server-only modules
+
+To remove files that contain server-only modules from your bundle, you can use an `alias`.
+
+In the Subscriptions config file above, we are importing the hook like so:
+
+```ts
+// collections/Subscriptions/index.ts
+
+import createStripeSubscription from './hooks/createStripeSubscription'
+```
+
+By default the browser bundle will now include all the code from that file and any files down the tree. We know that the file imports `stripe`.
+
+To fix this, we need to alias the `createStripeSubscription` file to a different file that can safely be included in the browser bundle.
+
+First, we will create a mock file to replace the server-only file when bundling:
+```js
+// mocks/modules.js
+
+export default {}
+
+/**
+ * NOTE: if you are destructuring an import
+ * the mock file will need to export matching
+ * variables as the destructured object.
+ *
+ * export const namedExport = {}
+ */
+```
+
+Aliasing with [Webpack](/docs/admin/webpack) can be done by:
+
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload/config'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+
+import { Subscriptions } from './collections/Subscriptions'
+
+const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
+const fullFilePath = path.resolve(
+  __dirname,
+  'collections/Subscriptions/hooks/createStripeSubscription'
+)
+
+export default buildConfig({
+  collections: [Subscriptions],
+  admin: {
+    bundler: webpackBundler(),
+    webpack: (config) => {
+      return {
+        ...config,
+        resolve: {
+          ...config.resolve,
+          // highlight-start
+          alias: {
+            ...config.resolve.alias,
+            [fullFilePath]: mockModulePath,
+          },
+          // highlight-end
+        },
+      }
+    },
+  },
+})
+```
+
+Aliasing with [Vite](/docs/admin/vite) can be done by:
+
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload/config'
+import { viteBundler } from '@payloadcms/bundler-vite'
+
+import { Subscriptions } from './collections/Subscriptions'
+
+const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
+
+export default buildConfig({
+  collections: [Subscriptions],
+  admin: {
+    bundler: viteBundler(),
+    vite: (incomingViteConfig) => {
+      const existingAliases = incomingViteConfig?.resolve?.alias || {};
+      let aliasArray: { find: string | RegExp; replacement: string; }[] = [];
+
+      // Pass the existing Vite aliases
+      if (Array.isArray(existingAliases)) {
+        aliasArray = existingAliases;
+      } else {
+        aliasArray = Object.values(existingAliases);
+      }
+
+
+      // highlight-start
+      // Add your own aliases using the find and replacement keys
+      // remember, vite aliases are exact-match only
+      aliasArray.push({
+        find: '../server-only-module',
+        replacement: path.resolve(__dirname, './path/to/browser-safe-module.js')
+      });
+      // highlight-end
+
+      return {
+        ...incomingViteConfig,
+        resolve: {
+          ...(incomingViteConfig?.resolve || {}),
+          alias: aliasArray,
+        }
+      };
+    },
+  },
+})
+```
