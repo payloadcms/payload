@@ -1,9 +1,11 @@
 import type { Page } from '@playwright/test'
+import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -234,6 +236,32 @@ describe('Text', () => {
     await expect(initialField.locator('.rs__single-value')).toBeHidden()
     await expect(initialField.locator('.rs__placeholder')).toHaveText('Select a value')
     await expect(initialField).toBeDisabled()
+  })
+
+  test('should respect admin.disableListColumn despite preferences', async () => {
+    await upsertPrefs<Config, GeneratedTypes<any>>({
+      payload,
+      user: client.user,
+      value: {
+        columns: [
+          {
+            accessor: 'disableListColumnText',
+            active: true,
+          },
+        ],
+      },
+    })
+
+    await page.goto(url.list)
+    await openListColumns(page, {})
+    await expect(
+      page.locator(`.column-selector .column-selector__column`, {
+        hasText: exactText('Disable List Column Text'),
+      }),
+    ).toBeHidden()
+
+    await expect(page.locator('#heading-disableListColumnText')).toBeHidden()
+    await expect(page.locator('table .row-1 .cell-disableListColumnText')).toBeHidden()
   })
 
   test('should hide field in filter when admin.disableListFilter is true', async () => {
