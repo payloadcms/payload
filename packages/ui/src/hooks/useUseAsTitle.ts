@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, ClientField } from 'payload'
 
-import { flattenFields } from 'payload/shared'
+import { flattenTopLevelFields } from 'payload/shared'
 
 export const useUseTitleField = (collection: ClientCollectionConfig): ClientField => {
   const {
@@ -9,7 +9,7 @@ export const useUseTitleField = (collection: ClientCollectionConfig): ClientFiel
     fields,
   } = collection
 
-  const topLevelFields = flattenFields(fields) as ClientField[]
+  const topLevelFields = flattenTopLevelFields(fields) as ClientField[]
 
   return topLevelFields?.find((field) => 'name' in field && field.name === useAsTitle)
 }

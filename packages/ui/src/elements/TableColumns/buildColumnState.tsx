@@ -17,7 +17,7 @@ import {
   fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsPresentationalOnly,
-  flattenFields,
+  flattenTopLevelFields,
 } from 'payload/shared'
 import React from 'react'
 
@@ -69,12 +69,15 @@ export const buildColumnState = (args: Args): Column[] => {
   } = args
 
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenFields(
+  let sortedFieldMap = flattenTopLevelFields(
     filterFields(clientCollectionConfig.fields),
     true,
   ) as ClientField[]
 
-  let _sortedFieldMap = flattenFields(filterFields(collectionConfig.fields), true) as Field[] // TODO: think of a way to avoid this additional flatten
+  let _sortedFieldMap = flattenTopLevelFields(
+    filterFields(collectionConfig.fields),
+    true,
+  ) as Field[] // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field

@@ -57,7 +57,8 @@ export {
 } from '../utilities/deepMerge.js'
 
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
-export { default as flattenFields } from '../utilities/flattenTopLevelFields.js'
+export { flattenAllFields } from '../utilities/flattenAllFields.js'
+export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getSelectMode } from '../utilities/getSelectMode.js'

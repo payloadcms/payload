@@ -8,7 +8,7 @@ import {
   type Payload,
   type SanitizedCollectionConfig,
 } from 'payload'
-import { fieldIsHiddenOrDisabled, flattenFields } from 'payload/shared'
+import { fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
@@ -80,7 +80,7 @@ export const renderTable = ({
   // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
   const columns = columnsFromArgs
     ? columnsFromArgs?.filter((column) =>
-        flattenFields(clientCollectionConfig.fields, true)?.some(
+        flattenTopLevelFields(clientCollectionConfig.fields, true)?.some(
           (field) => 'name' in field && field.name === column.accessor,
         ),
       )
