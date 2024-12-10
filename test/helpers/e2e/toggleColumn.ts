@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
-import { wait } from 'payload/shared'
 
 import { exactText } from '../../helpers.js'
 

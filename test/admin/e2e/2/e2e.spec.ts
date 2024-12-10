@@ -27,7 +27,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { goToFirstCell, navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
-import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { openListColumns, toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -206,21 +206,16 @@ describe('admin2', () => {
       test('should toggle columns', async () => {
         const columnCountLocator = 'table > thead > tr > th'
         await createPost()
-        await page.locator('.list-controls__toggle-columns').click()
+        await openListColumns(page, {})
         const numberOfColumns = await page.locator(columnCountLocator).count()
         await expect(page.locator('.column-selector')).toBeVisible()
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
-
-        const idButton = page.locator(`.column-selector .column-selector__column`, {
-          hasText: exactText('ID'),
-        })
-
-        await idButton.click()
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
         await page.locator('#heading-id').waitFor({ state: 'detached' })
         await page.locator('.cell-id').first().waitFor({ state: 'detached' })
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
-        await idButton.click()
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'on' })
         await expect(page.locator('.cell-id').first()).toBeVisible()
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
@@ -744,8 +739,7 @@ describe('admin2', () => {
 
       test('should sort with existing filters', async () => {
         await page.goto(postsUrl.list)
-        const column = await toggleColumn(page, { columnLabel: 'ID' })
-        await expect(column).not.toHaveClass('column-selector__column--active')
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
         await page.locator('#heading-id').waitFor({ state: 'detached' })
         await page.locator('#heading-title button.sort-column__asc').click()
         await page.waitForURL(/sort=title/)
