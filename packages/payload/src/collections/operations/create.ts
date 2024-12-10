@@ -151,7 +151,7 @@ export const createOperation = async <
       collection,
       config,
       data,
-      operation: 'create',
+      operation: duplicateFromId ? 'duplicate' : 'create',
       originalDoc: duplicatedFromDoc,
       overwriteExistingFiles,
       req,

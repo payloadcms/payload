@@ -25,7 +25,7 @@ type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
-  operation: 'create' | 'update'
+  operation: 'create' | 'duplicate' | 'update'
   originalDoc?: T
   /** pass forceDisable to not overwrite existing files even if they already exist in `data` */
   overwriteExistingFiles?: 'forceDisable' | boolean
@@ -78,8 +78,10 @@ export const generateFileData = async <T>({
 
   const staticPath = staticDir
 
-  if (!file && uploadEdits && data) {
-    const { filename, url } = data as FileData
+  const incomingFileData = operation === 'duplicate' ? originalDoc : data
+
+  if (!file && uploadEdits && incomingFileData) {
+    const { filename, url } = incomingFileData as FileData
 
     try {
       if (url && url.startsWith('/') && !disableLocalStorage) {
@@ -91,7 +93,7 @@ export const generateFileData = async <T>({
         }
       } else if (filename && url) {
         file = await getExternalFile({
-          data: data as FileData,
+          data: incomingFileData as FileData,
           req,
           uploadConfig: collectionConfig.upload,
         })
@@ -104,7 +106,7 @@ export const generateFileData = async <T>({
     }
   }
 
-  if (overwriteExistingFiles === 'forceDisable') {
+  if (operation === 'duplicate' || overwriteExistingFiles === 'forceDisable') {
     overwriteExistingFiles = false
   }
 
@@ -362,7 +364,7 @@ export const generateFileData = async <T>({
  */
 function parseUploadEditsFromReqOrIncomingData(args: {
   data: unknown
-  operation: 'create' | 'update'
+  operation: 'create' | 'duplicate' | 'update'
   originalDoc: unknown
   req: PayloadRequest
 }): UploadEdits {
@@ -381,16 +383,19 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   const incomingData = data as FileData
   const origDoc = originalDoc as FileData
 
-  // If no change in focal point, return undefined.
-  // This prevents a refocal operation triggered from admin, because it always sends the focal point.
-  if (
-    origDoc &&
-    'focalX' in origDoc &&
-    'focalY' in origDoc &&
-    incomingData.focalX === origDoc.focalX &&
-    incomingData.focalY === origDoc.focalY
-  ) {
-    return undefined
+  if (origDoc && 'focalX' in origDoc && 'focalY' in origDoc) {
+    // If no change in focal point, return undefined.
+    // This prevents a refocal operation triggered from admin, because it always sends the focal point.
+    if (incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
+      return undefined
+    }
+
+    if (operation === 'duplicate') {
+      uploadEdits.focalPoint = {
+        x: incomingData?.focalX || origDoc.focalX,
+        y: incomingData?.focalY || origDoc.focalX,
+      }
+    }
   }
 
   if (incomingData?.focalX && incomingData?.focalY) {
@@ -408,5 +413,6 @@ function parseUploadEditsFromReqOrIncomingData(args: {
       y: 50,
     }
   }
+
   return uploadEdits
 }
