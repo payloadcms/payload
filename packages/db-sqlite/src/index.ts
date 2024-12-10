@@ -124,6 +124,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       createGlobalVersion,
       createJSONQuery,
       createMigration: buildCreateMigration({
+        executeMethod: 'run',
         filename,
         sanitizeStatements({ sqlExecute, statements }) {
           return statements

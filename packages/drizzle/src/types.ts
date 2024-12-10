@@ -14,13 +14,7 @@ import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-post
 import type { PgColumn, PgTable, PgTransaction } from 'drizzle-orm/pg-core'
 import type { SQLiteColumn, SQLiteTable, SQLiteTransaction } from 'drizzle-orm/sqlite-core'
 import type { Result } from 'drizzle-orm/sqlite-core/session'
-import type {
-  BaseDatabaseAdapter,
-  MigrationData,
-  MigrationTemplateArgs,
-  Payload,
-  PayloadRequest,
-} from 'payload'
+import type { BaseDatabaseAdapter, MigrationData, Payload, PayloadRequest } from 'payload'
 
 import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
 

@@ -91,6 +91,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       createDatabase,
       createExtensions,
       createMigration: buildCreateMigration({
+        executeMethod: 'execute',
         filename,
         sanitizeStatements({ sqlExecute, statements }) {
           return `${sqlExecute}\n ${statements.join('\n')}\`)`

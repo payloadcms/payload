@@ -57,6 +57,30 @@ you need to do is pass the `req` object to any [local API](/docs/local-api/overv
 after your `up` or `down` function runs. If the migration errors at any point or fails to commit, it is caught and the
 transaction gets aborted. This way no change is made to the database if the migration fails.
 
+### Using database directly with the transaction
+
+Additionally, you can bypass Payload's layer entirely and perform operations directly on your underlying database within the active transaction
+
+### MongoDB:
+```ts
+export async function up({ session, payload, req }: MigrateUpArgs): Promise<void> {
+  const posts = await payload.db.collections.posts.collection.find({ session }).toArray()
+}
+```
+### Postgres:
+```ts
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  const { rows: posts } = await db.execute(sql`SELECT * from posts`)
+}
+```
+
+### SQLite:
+```ts
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  const { rows: posts } = await db.run(sql`SELECT * from posts`)
+}
+```
+
 ## Migrations Directory
 
 Each DB adapter has an optional property `migrationDir` where you can override where you want your migrations to be

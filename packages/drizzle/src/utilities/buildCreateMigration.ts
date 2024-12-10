@@ -11,9 +11,11 @@ import type { DrizzleAdapter } from '../types.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
 
 export const buildCreateMigration = ({
+  executeMethod,
   filename,
   sanitizeStatements,
 }: {
+  executeMethod: string
   filename: string
   sanitizeStatements: (args: { sqlExecute: string; statements: string[] }) => string
 }): CreateMigration => {
@@ -77,7 +79,7 @@ export const buildCreateMigration = ({
 
       const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
       const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
-      const sqlExecute = 'await payload.db.drizzle.execute(sql`'
+      const sqlExecute = `await db.${executeMethod}(` + 'sql`'
 
       if (sqlStatementsUp?.length) {
         upSQL = sanitizeStatements({ sqlExecute, statements: sqlStatementsUp })

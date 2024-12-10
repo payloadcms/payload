@@ -191,5 +191,58 @@ export type PostgresDrizzleAdapter = Omit<
 
 export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
 
-export type MigrateUpArgs = { payload: Payload; req: PayloadRequest }
-export type MigrateDownArgs = { payload: Payload; req: PayloadRequest }
+export type MigrateUpArgs = {
+  /**
+   * The Postgres Drizzle instance that you can use to execute SQL directly within the current transaction.
+   * @example
+   * ```ts
+   * export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+   *   const { rows: posts } = await db.execute(sql`SELECT * FROM posts`)
+   * }
+   * ```
+   */
+  db: PostgresDB
+  /**
+   * The Payload instance that you can use to execute Local API methods
+   * To use the current transaction you must pass `req` to arguments
+   * @example
+   * ```ts
+   * export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+   *   const posts = await payload.find({ collection: 'posts', req })
+   * }
+   * ```
+   */
+  payload: Payload
+  /**
+   * The `PayloadRequest` object that contains the current transaction
+   */
+  req: PayloadRequest
+}
+
+export type MigrateDownArgs = {
+  /**
+   * The Postgres Drizzle instance that you can use to execute SQL directly within the current transaction.
+   * @example
+   * ```ts
+   * export async function down({ db, payload, req }: MigrateUpArgs): Promise<void> {
+   *   const { rows: posts } = await db.execute(sql`SELECT * FROM posts`)
+   * }
+   * ```
+   */
+  db: PostgresDB
+  /**
+   * The Payload instance that you can use to execute Local API methods
+   * To use the current transaction you must pass `req` to arguments
+   * @example
+   * ```ts
+   * export async function down({ db, payload, req }: MigrateUpArgs): Promise<void> {
+   *   const posts = await payload.find({ collection: 'posts', req })
+   * }
+   * ```
+   */
+  payload: Payload
+  /**
+   * The `PayloadRequest` object that contains the current transaction
+   */
+  req: PayloadRequest
+}

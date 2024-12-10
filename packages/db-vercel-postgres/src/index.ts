@@ -135,6 +135,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       createGlobalVersion,
       createJSONQuery,
       createMigration: buildCreateMigration({
+        executeMethod: 'execute',
         filename,
         sanitizeStatements({ sqlExecute, statements }) {
           return `${sqlExecute}\n ${statements.join('\n')}\`)`
