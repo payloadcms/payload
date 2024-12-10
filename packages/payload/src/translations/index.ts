@@ -21,6 +21,7 @@ import ro from './ro.json'
 import rs from './rs.json'
 import rsLatin from './rs-latin.json'
 import ru from './ru.json'
+import sl from './sl.json'
 import sv from './sv.json'
 import th from './th.json'
 import tr from './tr.json'
@@ -53,6 +54,7 @@ export default {
   rs,
   rsLatin,
   ru,
+  sl,
   sv,
   th,
   tr,

@@ -48,6 +48,11 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField | UploadFi
               relationTo: field.relationTo,
               value: cell,
             })
+          } else if (typeof cell.id !== 'undefined' && typeof field.relationTo === 'string') {
+            formattedValues.push({
+              relationTo: field.relationTo,
+              value: cell.id,
+            })
           }
         })
       getRelationships(formattedValues)

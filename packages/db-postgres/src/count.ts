@@ -1,7 +1,7 @@
 import type { Count } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { sql, count as sqlCount } from 'drizzle-orm'
+import { count as sqlCount } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { ChainedMethods } from './find/chainMethods'
@@ -51,11 +51,7 @@ export const count: Count = async function count(
     methods: selectCountMethods,
     query: db
       .select({
-        count:
-          selectCountMethods.length > 0
-            ? sql<number>`count
-          (DISTINCT ${this.tables[tableName].id})`
-            : sqlCount(),
+        count: sqlCount(),
       })
       .from(table)
       .where(where),

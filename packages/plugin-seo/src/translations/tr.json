@@ -1,0 +1,23 @@
+{
+    "$schema": "./translation-schema.json",
+    "plugin-seo": {
+      "autoGenerate": "Otomatik oluştur",
+      "imageAutoGenerationTip": "Otomatik oluşturma, seçilen ana görseli alacaktır.",
+      "bestPractices": "en iyi uygulamalar",
+      "lengthTipTitle": "{{minLength}} ile {{maxLength}} karakter arasında olmalıdır. Kaliteli meta başlıkları yazmak için yardım almak isterseniz, bkz. ",
+      "lengthTipDescription": "{{minLength}} ile {{maxLength}} karakter arasında olmalıdır. Kaliteli meta açıklamaları yazmak için yardım almak isterseniz, bkz. ",
+      "good": "İyi",
+      "tooLong": "Çok uzun",
+      "tooShort": "Çok kısa",
+      "almostThere": "Neredeyse tamam",
+      "characterCount": "{{current}}/{{minLength}}-{{maxLength}} karakter, ",
+      "charactersToGo": "{{characters}} karakter kaldı",
+      "charactersLeftOver": "{{characters}} karakter kaldı",
+      "charactersTooMany": "{{characters}} karakter fazla",
+      "noImage": "Görsel yok",
+      "checksPassing": "{{current}}/{{max}} kontrol geçiyor",
+      "preview": "Önizleme",
+      "previewDescription": "Kesin sonuç listeleri içeriğe ve arama alaka düzeyine bağlı olarak değişebilir."
+    }
+  }
+  

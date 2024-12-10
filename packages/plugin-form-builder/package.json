@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/plugin-form-builder",
   "description": "Form builder plugin for Payload CMS",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "homepage:": "https://payloadcms.com",
   "repository": {
     "type": "git",
