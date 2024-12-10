@@ -63,7 +63,7 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      await executeAccess({ req }, collectionConfig.access.unlock)
+      await executeAccess({ locale, req }, collectionConfig.access.unlock)
     }
 
     // /////////////////////////////////////

@@ -100,7 +100,7 @@ export const duplicateOperation = async <
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id, req }, collectionConfig.access.read)
+      ? await executeAccess({ id, locale: localeArg, req }, collectionConfig.access.read)
       : true
     const hasWherePolicy = hasWhereAccessResult(accessResults)
 
@@ -180,7 +180,10 @@ export const duplicateOperation = async <
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      await executeAccess({ data: originalDoc, req }, collectionConfig.access.create)
+      await executeAccess(
+        { data: originalDoc, locale: localeArg, req },
+        collectionConfig.access.create,
+      )
     }
 
     // /////////////////////////////////////

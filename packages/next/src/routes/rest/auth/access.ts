@@ -13,6 +13,7 @@ export const access: BaseRouteHandler = async ({ req }) => {
 
   try {
     const results = await accessOperation({
+      locale: req.locale,
       req,
     })
 

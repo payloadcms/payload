@@ -85,7 +85,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id, req }, collectionConfig.access.delete)
+      ? await executeAccess({ id, locale, req }, collectionConfig.access.delete)
       : true
     const hasWhereAccess = hasWhereAccessResult(accessResults)
 

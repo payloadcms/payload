@@ -46,7 +46,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     let accessResult: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, globalConfig.access.read)
+      accessResult = await executeAccess({ locale, req }, globalConfig.access.read)
     }
 
     // /////////////////////////////////////

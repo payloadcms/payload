@@ -88,6 +88,7 @@ export const updateOperation = async <
       ? await executeAccess(
           {
             data,
+            locale,
             req,
           },
           globalConfig.access.update,
