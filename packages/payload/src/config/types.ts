@@ -842,6 +842,12 @@ export type Config = {
       unauthorized?: string
     }
     /**
+     * Suppresses React hydration mismatch warnings during the hydration of the <html> tag.
+     * Useful in scenarios where the server-rendered HTML might intentionally differ from the client-rendered DOM.
+     * @default false
+     */
+    suppressHydrationWarning?: boolean
+    /**
      * Restrict the Admin Panel theme to use only one of your choice
      *
      * @default 'all' // The theme can be configured by users
