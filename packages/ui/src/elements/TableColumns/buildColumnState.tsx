@@ -34,6 +34,7 @@ import {
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
+import { filterFields } from './filterFields.js'
 
 type Args = {
   beforeRows?: Column[]
@@ -68,8 +69,12 @@ export const buildColumnState = (args: Args): Column[] => {
   } = args
 
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenFields(clientCollectionConfig.fields, true) as ClientField[]
-  let _sortedFieldMap = flattenFields(collectionConfig.fields, true) as Field[] // TODO: think of a way to avoid this additional flatten
+  let sortedFieldMap = flattenFields(
+    filterFields(clientCollectionConfig.fields),
+    true,
+  ) as ClientField[]
+
+  let _sortedFieldMap = flattenFields(filterFields(collectionConfig.fields), true) as Field[] // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
