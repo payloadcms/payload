@@ -131,6 +131,9 @@ const post = await payload.create({
   // Alternatively, you can directly pass a File,
   // if file is provided, filePath will be omitted
   file: uploadedFile,
+
+  // If you want to create a document that is a duplicate of another document
+  duplicateFromID: 'document-id-to-duplicate',
 })
 ```
 
