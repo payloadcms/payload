@@ -47,6 +47,7 @@ export const RscEntryLexicalField: React.FC<
         id: args.id,
         clientFieldSchemaMap: args.clientFieldSchemaMap,
         collectionSlug: args.collectionSlug,
+        documentData: args.data,
         field,
         fieldSchemaMap: args.fieldSchemaMap,
         lexicalFieldSchemaPath: schemaPath,
