@@ -367,6 +367,11 @@ export const traverseFields = ({
           ? adapter.tables[currentTableName].parent
           : adapter.tables[currentTableName].id
 
+        // TODO: when the field `on` has an array we need to build the query to join on the target array table.
+        //  remove debugging breakpoint placeholder
+        if (field.name === 'arrayPosts') {
+          console.log('hi')
+        }
         // Handle hasMany _rels table
         if (field.hasMany) {
           const joinRelsCollectionTableName = `${joinCollectionTableName}${adapter.relationshipsSuffix}`
