@@ -383,7 +383,13 @@ function parseUploadEditsFromReqOrIncomingData(args: {
 
   // If no change in focal point, return undefined.
   // This prevents a refocal operation triggered from admin, because it always sends the focal point.
-  if (origDoc && incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
+  if (
+    origDoc &&
+    'focalX' in origDoc &&
+    'focalY' in origDoc &&
+    incomingData.focalX === origDoc.focalX &&
+    incomingData.focalY === origDoc.focalY
+  ) {
     return undefined
   }
 
