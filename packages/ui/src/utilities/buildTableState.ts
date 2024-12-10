@@ -13,6 +13,7 @@ import { formatErrors } from 'payload'
 import type { Column } from '../elements/Table/index.js'
 import type { ListPreferences } from '../elements/TableColumns/index.js'
 
+import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getClientConfig } from './getClientConfig.js'
 import { renderFilters, renderTable } from './renderTable.js'
 
@@ -198,8 +199,6 @@ export const buildTableState = async (
     }
   }
 
-  const fields = collectionConfig.fields
-
   let docs = docsFromArgs
   let data: PaginatedDocs
 
@@ -217,6 +216,8 @@ export const buildTableState = async (
 
     docs = data.docs
   }
+
+  const fields = filterFields(collectionConfig.fields)
 
   const { columnState, Table } = renderTable({
     collectionConfig: clientCollectionConfig,

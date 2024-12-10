@@ -70,8 +70,8 @@ export const buildColumnState = (args: Args): Column[] => {
   const clientFields = collectionConfig.fields
 
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenFieldMap(filterFields(clientFields))
-  let _sortedFieldMap = flattenFieldMap(filterFields(fields)) // TODO: think of a way to avoid this additional flatten
+  let sortedFieldMap = flattenFieldMap(filterFields(clientFields)) // Filter fields to remove hidden fields, etc., `fields` is already filtered
+  let _sortedFieldMap = flattenFieldMap(fields) // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field

@@ -16,7 +16,6 @@ import type { ColumnPreferences } from '../providers/ListQuery/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
-import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
@@ -78,14 +77,12 @@ export const renderTable = ({
   columnState: Column[]
   Table: React.ReactNode
 } => {
-  const filteredFields = filterFields(fields)
-
   // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
   const columns = columnsFromArgs
     ? columnsFromArgs?.filter((column) =>
-        filteredFields?.some((field) => 'name' in field && field.name === column.accessor),
+        fields?.some((field) => 'name' in field && field.name === column.accessor),
       )
-    : getInitialColumns(filteredFields, useAsTitle, collectionConfig?.admin?.defaultColumns)
+    : getInitialColumns(fields, useAsTitle, collectionConfig?.admin?.defaultColumns)
 
   const columnState = buildColumnState({
     beforeRows: renderRowTypes

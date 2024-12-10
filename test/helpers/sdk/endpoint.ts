@@ -10,7 +10,7 @@ export const handler: PayloadHandler = async (req) => {
 
   const operation = data?.operation ? String(data.operation) : undefined
 
-  if (data?.operation && payload?.[operation]) {
+  if (data?.operation && typeof payload[operation] === 'function') {
     try {
       const result = await payload[operation]({
         ...(typeof data.args === 'object' ? data.args : {}),
