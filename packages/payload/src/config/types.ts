@@ -842,7 +842,7 @@ export type Config = {
       unauthorized?: string
     }
     /**
-     * Suppresses React hydration mismatch warnings during the hydration of the <html> tag.
+     * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.
      * Useful in scenarios where the server-rendered HTML might intentionally differ from the client-rendered DOM.
      * @default false
      */
