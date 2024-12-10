@@ -37,6 +37,7 @@ export type FormProps = {
     errorToast: (value: string) => void,
   ) => void
   initialState?: FormState
+  isDocumentForm?: boolean
   isInitializing?: boolean
   log?: boolean
   onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
