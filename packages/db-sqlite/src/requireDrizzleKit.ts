@@ -1,16 +1,19 @@
 import type { RequireDrizzleKit } from '@payloadcms/drizzle/types'
 
-import {
-  generateSQLiteDrizzleJson,
-  generateSQLiteMigration,
-  pushSQLiteSchema,
-} from 'drizzle-kit/api'
+import { createRequire } from 'module'
 
-export const requireDrizzleKit: RequireDrizzleKit = () => ({
-  // @ts-expect-error
-  generateDrizzleJson: generateSQLiteDrizzleJson,
-  // @ts-expect-error
-  generateMigration: generateSQLiteMigration,
-  // @ts-expect-error
-  pushSchema: pushSQLiteSchema,
-})
+const require = createRequire(import.meta.url)
+
+export const requireDrizzleKit: RequireDrizzleKit = () => {
+  const {
+    generateSQLiteDrizzleJson,
+    generateSQLiteMigration,
+    pushSQLiteSchema,
+  } = require('drizzle-kit/api')
+
+  return {
+    generateDrizzleJson: generateSQLiteDrizzleJson,
+    generateMigration: generateSQLiteMigration,
+    pushSchema: pushSQLiteSchema,
+  }
+}

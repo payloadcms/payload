@@ -58,7 +58,7 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export { sql } from 'drizzle-orm'
 
-const filename = fileURLToPath(import.meta.filename)
+const filename = fileURLToPath(import.meta.url)
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   const postgresIDType = args.idType || 'serial'
