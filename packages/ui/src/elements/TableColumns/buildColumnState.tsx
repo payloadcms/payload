@@ -33,6 +33,7 @@ import {
 } from '../../exports/client/index.js'
 import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
+import { filterFields } from './filterFields.js'
 
 type Args = {
   beforeRows?: Column[]
@@ -69,8 +70,8 @@ export const buildColumnState = (args: Args): Column[] => {
   const clientFields = collectionConfig.fields
 
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenFieldMap(clientFields)
-  let _sortedFieldMap = flattenFieldMap(fields) // TODO: think of a way to avoid this additional flatten
+  let sortedFieldMap = flattenFieldMap(filterFields(clientFields))
+  let _sortedFieldMap = flattenFieldMap(filterFields(fields)) // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field

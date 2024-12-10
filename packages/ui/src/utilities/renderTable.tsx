@@ -47,15 +47,6 @@ export const renderFilters = (
     new Map() as Map<string, React.ReactNode>,
   )
 
-const filterColumnsFromArgs = (
-  filterFields: Field[],
-  columns: ColumnPreferences,
-): ColumnPreferences => {
-  return columns.filter((column) =>
-    filterFields.some((field) => 'name' in field && field.name === column.accessor),
-  )
-}
-
 export const renderTable = ({
   collectionConfig,
   columnPreferences,

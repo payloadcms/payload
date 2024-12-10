@@ -85,8 +85,6 @@ export const buildTableState = async (
     tableAppearance,
   } = args
 
-  console.log('columns', columns)
-
   const incomingUserSlug = user?.collection
 
   const adminUserSlug = config.admin.user
