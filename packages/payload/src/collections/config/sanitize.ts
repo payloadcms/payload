@@ -195,6 +195,10 @@ export const sanitizeCollection = async (
       sanitized.auth.loginWithUsername = false
     }
 
+    if (!collection?.admin?.useAsTitle) {
+      sanitized.admin.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
+    }
+
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
 
