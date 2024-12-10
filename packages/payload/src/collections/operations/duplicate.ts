@@ -9,7 +9,7 @@ import { type Arguments as CreateArguments, createOperation } from './create.js'
 export type Arguments<TSlug extends CollectionSlug> = {
   data?: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   id: number | string
-} & Omit<CreateArguments<TSlug>, 'data' | 'duplicateFromId'>
+} & Omit<CreateArguments<TSlug>, 'data' | 'duplicateFromID'>
 
 export const duplicateOperation = async <
   TSlug extends CollectionSlug,
@@ -21,6 +21,6 @@ export const duplicateOperation = async <
   return createOperation({
     ...args,
     data: incomingArgs?.data || {},
-    duplicateFromId: id,
+    duplicateFromID: id,
   })
 }

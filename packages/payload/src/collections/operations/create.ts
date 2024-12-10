@@ -13,6 +13,7 @@ import type {
   BeforeOperationHook,
   BeforeValidateHook,
   Collection,
+  DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../config/types.js'
@@ -44,7 +45,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
-  duplicateFromId?: number | string
+  duplicateFromID?: DataFromCollectionSlug<TSlug>['id']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
@@ -99,7 +100,7 @@ export const createOperation = async <
       depth,
       disableVerificationEmail,
       draft = false,
-      duplicateFromId,
+      duplicateFromID,
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
@@ -121,9 +122,9 @@ export const createOperation = async <
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
 
-    if (duplicateFromId) {
+    if (duplicateFromID) {
       const duplicateResult = await getDuplicateDocumentData({
-        id: duplicateFromId,
+        id: duplicateFromID,
         collectionConfig,
         draftArg: shouldSaveDraft,
         overrideAccess,
@@ -151,7 +152,8 @@ export const createOperation = async <
       collection,
       config,
       data,
-      operation: duplicateFromId ? 'duplicate' : 'create',
+      isDuplicating: Boolean(duplicateFromID),
+      operation: 'create',
       originalDoc: duplicatedFromDoc,
       overwriteExistingFiles,
       req,

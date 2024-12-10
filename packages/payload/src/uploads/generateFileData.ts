@@ -25,10 +25,10 @@ type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
-  operation: 'create' | 'duplicate' | 'update'
+  isDuplicating?: boolean
+  operation: 'create' | 'update'
   originalDoc?: T
-  /** pass forceDisable to not overwrite existing files even if they already exist in `data` */
-  overwriteExistingFiles?: 'forceDisable' | boolean
+  overwriteExistingFiles?: boolean
   req: PayloadRequest
   throwOnMissingFile?: boolean
 }
@@ -41,6 +41,7 @@ type Result<T> = Promise<{
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
+  isDuplicating,
   operation,
   originalDoc,
   overwriteExistingFiles,
@@ -78,7 +79,7 @@ export const generateFileData = async <T>({
 
   const staticPath = staticDir
 
-  const incomingFileData = operation === 'duplicate' ? originalDoc : data
+  const incomingFileData = isDuplicating ? originalDoc : data
 
   if (!file && uploadEdits && incomingFileData) {
     const { filename, url } = incomingFileData as FileData
@@ -88,25 +89,21 @@ export const generateFileData = async <T>({
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
-        if (overwriteExistingFiles !== 'forceDisable') {
-          overwriteExistingFiles = true
-        }
+        overwriteExistingFiles = true
       } else if (filename && url) {
         file = await getExternalFile({
           data: incomingFileData as FileData,
           req,
           uploadConfig: collectionConfig.upload,
         })
-        if (overwriteExistingFiles !== 'forceDisable') {
-          overwriteExistingFiles = true
-        }
+        overwriteExistingFiles = true
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
     }
   }
 
-  if (operation === 'duplicate' || overwriteExistingFiles === 'forceDisable') {
+  if (isDuplicating) {
     overwriteExistingFiles = false
   }
 
@@ -364,11 +361,12 @@ export const generateFileData = async <T>({
  */
 function parseUploadEditsFromReqOrIncomingData(args: {
   data: unknown
-  operation: 'create' | 'duplicate' | 'update'
+  isDuplicating?: boolean
+  operation: 'create' | 'update'
   originalDoc: unknown
   req: PayloadRequest
 }): UploadEdits {
-  const { data, operation, originalDoc, req } = args
+  const { data, isDuplicating, operation, originalDoc, req } = args
 
   // Get intended focal point change from query string or incoming data
   const uploadEdits =
@@ -390,7 +388,7 @@ function parseUploadEditsFromReqOrIncomingData(args: {
       return undefined
     }
 
-    if (operation === 'duplicate') {
+    if (isDuplicating) {
       uploadEdits.focalPoint = {
         x: incomingData?.focalX || origDoc.focalX,
         y: incomingData?.focalY || origDoc.focalX,
