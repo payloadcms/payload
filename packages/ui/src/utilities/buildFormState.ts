@@ -103,6 +103,7 @@ export const buildFormState = async (
     docPermissions,
     docPreferences,
     formState,
+    fullFormStateOverride,
     globalSlug,
     operation,
     renderAllFields,
@@ -164,6 +165,11 @@ export const buildFormState = async (
     data = reduceFieldsToValues(formState, true)
   }
 
+  let fullDataOverride = undefined
+  if (fullFormStateOverride) {
+    fullDataOverride = reduceFieldsToValues(fullFormStateOverride, true)
+  }
+
   /**
    * When building state for sub schemas we need to adjust:
    * - `fields`
@@ -186,6 +192,7 @@ export const buildFormState = async (
     data,
     fields,
     fieldSchemaMap: schemaMap,
+    fullDataOverride,
     operation,
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
