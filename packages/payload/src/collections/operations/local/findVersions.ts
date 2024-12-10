@@ -1,6 +1,14 @@
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
+  AllowedDepth,
+  CollectionSlug,
+  DefaultDepth,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -15,13 +23,13 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionsOperation } from '../findVersions.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type Options<TSlug extends CollectionSlug, TDepth extends AllowedDepth = DefaultDepth> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
-  depth?: number
+  depth?: TDepth
   draft?: boolean
   fallbackLocale?: false | TypedLocale
   limit?: number
@@ -37,10 +45,15 @@ export type Options<TSlug extends CollectionSlug> = {
   where?: Where
 }
 
-export default async function findVersionsLocal<TSlug extends CollectionSlug>(
+export default async function findVersionsLocal<
+  TSlug extends CollectionSlug,
+  TDepth extends AllowedDepth = DefaultDepth,
+>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<TSlug>>>> {
+): Promise<
+  PaginatedDocs<TypeWithVersion<ApplyDepthInternal<DataFromCollectionSlug<TSlug>, TDepth>>>
+> {
   const {
     collection: collectionSlug,
     depth,

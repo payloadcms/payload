@@ -1,7 +1,15 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
+  AllowedDepth,
+  CollectionSlug,
+  DefaultDepth,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -22,7 +30,11 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 import { updateByIDOperation } from '../updateByID.js'
 
-export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type BaseOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   autosave?: boolean
   collection: TSlug
   /**
@@ -30,7 +42,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   context?: RequestContext
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
-  depth?: number
+  depth?: TDepth
   disableTransaction?: boolean
   draft?: boolean
   fallbackLocale?: false | TypedLocale
@@ -51,54 +63,67 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
 export type ByIDOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 > = {
   id: number | string
   limit?: never
   where?: never
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect, TDepth>
 
 export type ManyOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 > = {
   id?: never
   limit?: number
   where: Where
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect, TDepth>
 
 export type Options<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-> = ByIDOptions<TSlug, TSelect> | ManyOptions<TSlug, TSelect>
+  TDepth extends AllowedDepth = DefaultDepth,
+> = ByIDOptions<TSlug, TSelect, TDepth> | ManyOptions<TSlug, TSelect, TDepth>
 
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
   options: ByIDOptions<TSlug, TSelect>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>>
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
   options: ManyOptions<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect>>
+): Promise<BulkOperationResult<TSlug, TSelect, TDepth>>
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>>
+): Promise<
+  | ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>
+  | BulkOperationResult<TSlug, TSelect, TDepth>
+>
 async function updateLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect>,
-): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
+): Promise<
+  | ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>
+  | BulkOperationResult<TSlug, TSelect, TDepth>
+> {
   const {
     id,
     autosave,
@@ -155,7 +180,7 @@ async function updateLocal<
   if (options.id) {
     return updateByIDOperation<TSlug, TSelect>(args)
   }
-  return updateOperation<TSlug, TSelect>(args)
+  return updateOperation<TSlug, TSelect, TDepth>(args)
 }
 
 export default updateLocal

@@ -94,3 +94,19 @@ To set a max depth for a field, use the `maxDepth` property in your field config
   ]
 }
 ```
+
+## Type safe relationship types with depth
+
+The `typescript.typeSafeDepth` config option allows you to have better result types with relationships for your operations.
+For example:
+```ts
+const post = await payload.findByID({
+  collection: 'posts',
+  id,
+  depth: 1
+})
+
+const category = post.category
+```
+You may notice that `post.category` is typed as `Category | string` (or `Category | number` with number IDs) which isn't quite right since we passed `depth: 1`.
+With `typescript.typeSafeDepth: true` this type will be resolved as just `Category` and in case of `depth: 0` - `string`.

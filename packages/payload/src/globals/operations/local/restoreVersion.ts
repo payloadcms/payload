@@ -1,15 +1,27 @@
 /* eslint-disable no-restricted-exports */
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, PopulateType } from '../../../types/index.js'
+import type {
+  AllowedDepth,
+  DefaultDepth,
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDepthInternal,
+  Document,
+  PayloadRequest,
+  PopulateType,
+} from '../../../types/index.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
-export type Options<TSlug extends GlobalSlug> = {
+export type Options<TSlug extends GlobalSlug, TDepth extends AllowedDepth = DefaultDepth> = {
   context?: RequestContext
-  depth?: number
+  depth?: TDepth
   fallbackLocale?: false | TypedLocale
   id: string
   locale?: TypedLocale
@@ -21,10 +33,13 @@ export type Options<TSlug extends GlobalSlug> = {
   user?: Document
 }
 
-export default async function restoreVersionLocal<TSlug extends GlobalSlug>(
+export default async function restoreVersionLocal<
+  TSlug extends GlobalSlug,
+  TDepth extends AllowedDepth = DefaultDepth,
+>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<DataFromGlobalSlug<TSlug>> {
+): Promise<ApplyDepthInternal<DataFromGlobalSlug<TSlug>, TDepth>> {
   const { id, slug: globalSlug, depth, overrideAccess = true, populate, showHiddenFields } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
