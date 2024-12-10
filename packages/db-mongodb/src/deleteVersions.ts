@@ -1,3 +1,5 @@
+import type { DeleteOptions } from 'mongodb'
+import type { QueryOptions } from 'mongoose'
 import type { DeleteVersions, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -9,7 +11,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
   { collection, locale, req = {} as PayloadRequest, where },
 ) {
   const VersionsModel = this.versions[collection]
-  const options = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     lean: true,
   }
@@ -17,8 +19,9 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
   const query = await VersionsModel.buildQuery({
     locale,
     payload: this.payload,
+    session: options.session,
     where,
   })
 
-  await VersionsModel.deleteMany(query, options)
+  await VersionsModel.deleteMany(query, options as DeleteOptions)
 }

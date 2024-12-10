@@ -41,9 +41,7 @@ export const init: Init = function init(this: MongooseAdapter) {
         }),
       )
 
-      if (Object.keys(collection.joins).length > 0) {
-        versionSchema.plugin(mongooseAggregatePaginate)
-      }
+      versionSchema.plugin(mongooseAggregatePaginate)
 
       const versionCollectionName =
         this.autoPluralization === true && !collection.dbName ? undefined : versionModelName
