@@ -1,89 +1,134 @@
-import type { CollectionConfig } from '../collections/config/types'
-import type { Config } from '../config/types'
-import type { Field } from '../fields/config/types'
-import type { IncomingUploadType } from './types'
+import type { CollectionConfig } from '../collections/config/types.js'
+import type { Config } from '../config/types.js'
+import type { Field } from '../fields/config/types.js'
+import type { UploadConfig } from './types.js'
 
-import { extractTranslations } from '../translations/extractTranslations'
-import { mimeTypeValidator } from './mimeTypeValidator'
+import { mimeTypeValidator } from './mimeTypeValidator.js'
 
-const labels = extractTranslations([
-  'upload:width',
-  'upload:height',
-  'upload:fileSize',
-  'upload:fileName',
-  'upload:sizes',
-])
+type GenerateURLArgs = {
+  collectionSlug: string
+  config: Config
+  filename?: string
+}
+const generateURL = ({ collectionSlug, config, filename }: GenerateURLArgs) => {
+  if (filename) {
+    return `${config.serverURL || ''}${config.routes.api || ''}/${collectionSlug}/file/${filename}`
+  }
+  return undefined
+}
 
 type Options = {
   collection: CollectionConfig
   config: Config
 }
 
-const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
-  const uploadOptions: IncomingUploadType =
-    typeof collection.upload === 'object' ? collection.upload : {}
+export const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
+  const uploadOptions: UploadConfig = typeof collection.upload === 'object' ? collection.upload : {}
 
   const mimeType: Field = {
     name: 'mimeType',
+    type: 'text',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: 'MIME Type',
-    type: 'text',
   }
 
-  const url: Field = {
-    name: 'url',
+  const thumbnailURL: Field = {
+    name: 'thumbnailURL',
+    type: 'text',
     admin: {
       hidden: true,
       readOnly: true,
     },
-    label: 'URL',
-    type: 'text',
+    hooks: {
+      afterRead: [
+        ({ originalDoc }) => {
+          const adminThumbnail =
+            typeof collection.upload !== 'boolean' ? collection.upload?.adminThumbnail : undefined
+
+          if (typeof adminThumbnail === 'function') {
+            return adminThumbnail({ doc: originalDoc })
+          }
+
+          if (
+            typeof adminThumbnail === 'string' &&
+            'sizes' in originalDoc &&
+            originalDoc.sizes?.[adminThumbnail]?.filename
+          ) {
+            return generateURL({
+              collectionSlug: collection.slug,
+              config,
+              filename: originalDoc.sizes?.[adminThumbnail].filename as string,
+            })
+          }
+
+          return null
+        },
+      ],
+    },
+    label: 'Thumbnail URL',
   }
 
   const width: Field = {
     name: 'width',
+    type: 'number',
     admin: {
       hidden: true,
       readOnly: true,
     },
-    label: labels['upload:width'],
-    type: 'number',
+    label: ({ t }) => t('upload:width'),
   }
 
   const height: Field = {
     name: 'height',
+    type: 'number',
     admin: {
       hidden: true,
       readOnly: true,
     },
-    label: labels['upload:height'],
-    type: 'number',
+    label: ({ t }) => t('upload:height'),
   }
 
   const filesize: Field = {
     name: 'filesize',
+    type: 'number',
     admin: {
       hidden: true,
       readOnly: true,
     },
-    label: labels['upload:fileSize'],
-    type: 'number',
+    label: ({ t }) => t('upload:fileSize'),
   }
 
   const filename: Field = {
     name: 'filename',
+    type: 'text',
     admin: {
       disableBulkEdit: true,
       hidden: true,
       readOnly: true,
     },
     index: true,
-    label: labels['upload:fileName'],
+    label: ({ t }) => t('upload:fileName'),
+  }
+
+  // Only set unique: true if the collection does not have a compound index
+  if (
+    collection.upload === true ||
+    (typeof collection.upload === 'object' && !collection.upload.filenameCompoundIndex)
+  ) {
+    filename.unique = true
+  }
+
+  const url: Field = {
+    name: 'url',
     type: 'text',
-    unique: true,
+    admin: {
+      hidden: true,
+      readOnly: true,
+    },
+    label: 'URL',
   }
 
   let uploadFields: Field[] = [
@@ -91,25 +136,46 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
       ...url,
       hooks: {
         afterRead: [
-          ({ data }) => {
-            if (data?.filename) {
-              if (uploadOptions.staticURL.startsWith('/')) {
-                return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`
-              }
-              return `${uploadOptions.staticURL}/${data.filename}`
+          ({ data, value }) => {
+            if (value && !data.filename) {
+              return value
             }
 
-            return undefined
+            return generateURL({
+              collectionSlug: collection.slug,
+              config,
+              filename: data?.filename,
+            })
           },
         ],
       },
     },
+    thumbnailURL,
     filename,
     mimeType,
     filesize,
     width,
     height,
   ]
+
+  // Add focal point fields if not disabled
+  if (
+    uploadOptions.focalPoint !== false ||
+    uploadOptions.imageSizes ||
+    uploadOptions.resizeOptions
+  ) {
+    uploadFields = uploadFields.concat(
+      ['focalX', 'focalY'].map((name) => {
+        return {
+          name,
+          type: 'number',
+          admin: {
+            hidden: true,
+          },
+        }
+      }),
+    )
+  }
 
   if (uploadOptions.mimeTypes) {
     mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes)
@@ -119,11 +185,13 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     uploadFields = uploadFields.concat([
       {
         name: 'sizes',
+        type: 'group',
         admin: {
           hidden: true,
         },
         fields: uploadOptions.imageSizes.map((size) => ({
           name: size.name,
+          type: 'group',
           admin: {
             hidden: true,
           },
@@ -132,14 +200,15 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
               ...url,
               hooks: {
                 afterRead: [
-                  ({ data }) => {
+                  ({ data, value }) => {
+                    if (value && size.height && size.width && !data.filename) {
+                      return value
+                    }
+
                     const sizeFilename = data?.sizes?.[size.name]?.filename
 
                     if (sizeFilename) {
-                      if (uploadOptions.staticURL.startsWith('/')) {
-                        return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`
-                      }
-                      return `${uploadOptions.staticURL}/${sizeFilename}`
+                      return `${config.serverURL}${config.routes.api}/${collection.slug}/file/${sizeFilename}`
                     }
 
                     return null
@@ -157,14 +226,10 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
             },
           ],
           label: size.name,
-          type: 'group',
         })),
-        label: labels['upload:Sizes'],
-        type: 'group',
+        label: ({ t }) => t('upload:sizes'),
       },
     ])
   }
   return uploadFields
 }
-
-export default getBaseUploadFields

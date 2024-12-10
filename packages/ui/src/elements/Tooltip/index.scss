@@ -1,0 +1,101 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .tooltip {
+    --caret-size: 6px;
+
+    opacity: 0;
+    background-color: var(--theme-elevation-800);
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    padding: base(0.2) base(0.4);
+    color: var(--theme-elevation-0);
+    line-height: base(0.75);
+    font-weight: normal;
+    white-space: nowrap;
+    border-radius: 2px;
+    visibility: hidden;
+
+    &::after {
+      content: ' ';
+      display: block;
+      position: absolute;
+      transform: translate3d(-50%, 100%, 0);
+      width: 0;
+      height: 0;
+      border-left: var(--caret-size) solid transparent;
+      border-right: var(--caret-size) solid transparent;
+    }
+
+    &--show {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+      cursor: default;
+    }
+
+    &--caret-center {
+      &::after {
+        left: 50%;
+      }
+    }
+
+    &--caret-left {
+      &::after {
+        left: calc(var(--base) * 0.5);
+      }
+    }
+
+    &--caret-right {
+      &::after {
+        right: calc(var(--base) * 0.5);
+      }
+    }
+
+    &--position-top {
+      top: calc(var(--base) * -1.25);
+      transform: translate3d(-50%, calc(var(--caret-size) * -1), 0);
+
+      &::after {
+        bottom: 1px;
+        border-top: var(--caret-size) solid var(--theme-elevation-800);
+      }
+    }
+
+    &--position-bottom {
+      bottom: calc(var(--base) * -1.25);
+      transform: translate3d(-50%, var(--caret-size), 0);
+
+      &::after {
+        bottom: calc(100% + var(--caret-size) - 1px);
+        border-bottom: var(--caret-size) solid var(--theme-elevation-800);
+      }
+    }
+
+    .tooltip-content {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+
+    @include mid-break {
+      display: none;
+    }
+  }
+
+  html[data-theme='light'] {
+    .tooltip:not(.field-error) {
+      background-color: var(--theme-elevation-100);
+      color: var(--theme-elevation-1000);
+    }
+
+    .tooltip--position-top:not(.field-error):after {
+      border-top-color: var(--theme-elevation-100);
+    }
+
+    .tooltip--position-bottom:not(.field-error):after {
+      border-bottom-color: var(--theme-elevation-100);
+    }
+  }
+}

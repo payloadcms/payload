@@ -1,50 +1,98 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "0.2.0",
+  "version": "3.5.0",
   "description": "The officially supported Postgres database adapter for Payload",
-  "repository": "https://github.com/payloadcms/payload",
-  "license": "MIT",
   "homepage": "https://payloadcms.com",
-  "author": {
-    "email": "info@payloadcms.com",
-    "name": "Payload",
-    "url": "https://payloadcms.com"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/db-postgres"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm build"
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "import": "./src/types.ts",
+      "types": "./src/types.ts",
+      "default": "./src/types.ts"
+    },
+    "./migration-utils": {
+      "import": "./src/exports/migration-utils.ts",
+      "types": "./src/exports/migration-utils.ts",
+      "default": "./src/exports/migration-utils.ts"
+    }
   },
-  "dependencies": {
-    "@libsql/client": "^0.3.1",
-    "console-table-printer": "2.11.2",
-    "drizzle-kit": "0.19.13-e99bac1",
-    "drizzle-orm": "0.28.5",
-    "pg": "8.11.3",
-    "prompts": "2.4.2",
-    "to-snake-case": "1.0.0",
-    "uuid": "9.0.0"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@types/pg": "8.10.2",
-    "@types/to-snake-case": "1.0.0",
-    "payload": "workspace:*"
-  },
-  "peerDependencies": {
-    "payload": "^2.0.0"
-  },
-  "publishConfig": {
-    "main": "./dist/index.js",
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
-  },
+  "main": "./src/index.ts",
+  "types": "./src/types.ts",
   "files": [
     "dist",
     "mock.js"
-  ]
+  ],
+  "scripts": {
+    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo  && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm renamePredefinedMigrations",
+    "build:esbuild": "echo skipping esbuild",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepack": "pnpm clean && pnpm turbo build",
+    "prepublishOnly": "pnpm clean && pnpm turbo build --filter=./",
+    "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
+  },
+  "dependencies": {
+    "@payloadcms/drizzle": "workspace:*",
+    "@types/pg": "8.10.2",
+    "console-table-printer": "2.12.1",
+    "drizzle-kit": "0.28.0",
+    "drizzle-orm": "0.36.1",
+    "pg": "8.11.3",
+    "prompts": "2.4.2",
+    "to-snake-case": "1.0.0",
+    "uuid": "10.0.0"
+  },
+  "devDependencies": {
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/to-snake-case": "1.0.0",
+    "esbuild": "0.24.0",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./types": {
+        "import": "./dist/types.js",
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      },
+      "./migration-utils": {
+        "import": "./dist/exports/migration-utils.js",
+        "types": "./dist/exports/migration-utils.d.ts",
+        "default": "./dist/exports/migration-utils.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  }
 }

@@ -1,7 +1,9 @@
-import type { Block } from '../../../../packages/payload/src/fields/config/types'
+import type { Block } from 'payload'
 
-import { invertBackground } from '../../fields/invertBackground'
-import linkGroup from '../../fields/linkGroup'
+import { slateEditor } from '@payloadcms/richtext-slate'
+
+import { invertBackground } from '../../fields/invertBackground.js'
+import linkGroup from '../../fields/linkGroup.js'
 
 export const CallToAction: Block = {
   slug: 'cta',
@@ -15,6 +17,7 @@ export const CallToAction: Block = {
       name: 'richText',
       label: 'Rich Text',
       type: 'richText',
+      editor: slateEditor({}),
     },
     linkGroup({
       appearances: ['primary', 'secondary'],

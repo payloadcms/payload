@@ -1,11 +1,10 @@
-import type { GroupField, TextField } from 'payload/types'
-import type { CollectionConfig, Field } from 'payload/types'
+import type { CollectionConfig, Field, GroupField, TextField } from 'payload'
 
 import path from 'path'
 
-import type { GenerateFileURL, GeneratedAdapter } from '../types'
+import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
-import { getAfterReadHook } from '../hooks/afterRead'
+import { getAfterReadHook } from '../hooks/afterRead.js'
 
 interface Args {
   adapter: GeneratedAdapter
@@ -22,26 +21,26 @@ export const getFields = ({
   generateFileURL,
   prefix,
 }: Args): Field[] => {
-  const baseURLField: Field = {
+  const baseURLField: TextField = {
     name: 'url',
+    type: 'text',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: 'URL',
-    type: 'text',
   }
 
-  const basePrefixField: Field = {
+  const basePrefixField: TextField = {
     name: 'prefix',
+    type: 'text',
     admin: {
       hidden: true,
       readOnly: true,
     },
-    type: 'text',
   }
 
-  const fields = [...collection.fields]
+  const fields = [...collection.fields, ...(adapter.fields || [])]
 
   // Inject a hook into all URL fields to generate URLs
 
@@ -68,7 +67,7 @@ export const getFields = ({
         ...(existingURLField?.hooks?.afterRead || []),
       ],
     },
-  })
+  } as TextField)
 
   if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
     let existingSizesFieldIndex = -1
@@ -89,6 +88,7 @@ export const getFields = ({
     const sizesField: Field = {
       ...(existingSizesField || {}),
       name: 'sizes',
+      type: 'group',
       admin: {
         hidden: true,
       },
@@ -104,9 +104,11 @@ export const getFields = ({
         return {
           ...existingSizeField,
           name: size.name,
+          type: 'group',
           fields: [
+            ...(adapter.fields || []),
             {
-              ...(existingSizeURLField || {}),
+              ...(existingSizeURLField || ({} as any)),
               ...baseURLField,
               hooks: {
                 afterRead: [
@@ -122,10 +124,8 @@ export const getFields = ({
               },
             },
           ],
-          type: 'group',
         }
       }),
-      type: 'group',
     }
 
     fields.push(sizesField)
@@ -151,7 +151,7 @@ export const getFields = ({
       ...basePrefixField,
       ...(existingPrefixField || {}),
       defaultValue: path.posix.join(prefix),
-    })
+    } as TextField)
   }
 
   return fields

@@ -1,54 +1,51 @@
-import type { CollectionConfig, Field } from 'payload/types'
+import type { CollectionConfig, Field } from 'payload'
 
-import type { SanitizedStripeConfig } from '../types'
-
-import { LinkToDoc } from '../ui/LinkToDoc'
+import type { SanitizedStripePluginConfig } from '../types.js'
 
 interface Args {
   collection: CollectionConfig
-  stripeConfig: SanitizedStripeConfig
+  pluginConfig: SanitizedStripePluginConfig
   syncConfig: {
     stripeResourceType: string
   }
 }
 
-export const getFields = ({ collection, stripeConfig, syncConfig }: Args): Field[] => {
+export const getFields = ({ collection, pluginConfig, syncConfig }: Args): Field[] => {
   const stripeIDField: Field = {
     name: 'stripeID',
+    type: 'text',
     admin: {
       position: 'sidebar',
       readOnly: true,
     },
     label: 'Stripe ID',
     saveToJWT: true,
-    type: 'text',
   }
 
   const skipSyncField: Field = {
     name: 'skipSync',
+    type: 'checkbox',
     admin: {
       position: 'sidebar',
       readOnly: true,
     },
     label: 'Skip Sync',
-    type: 'checkbox',
   }
 
   const docUrlField: Field = {
     name: 'docUrl',
+    type: 'ui',
     admin: {
       components: {
-        Field: (args) =>
-          LinkToDoc({
-            ...args,
-            isTestKey: stripeConfig.isTestKey,
-            nameOfIDField: 'stripeID',
-            stripeResourceType: syncConfig.stripeResourceType,
-          }),
+        Field: '@payloadcms/plugin-stripe/client#LinkToDoc',
+      },
+      custom: {
+        isTestKey: pluginConfig.isTestKey,
+        nameOfIDField: 'stripeID',
+        stripeResourceType: syncConfig.stripeResourceType,
       },
       position: 'sidebar',
     },
-    type: 'ui',
   }
 
   const fields = [...collection.fields, stripeIDField, skipSyncField, docUrlField]

@@ -1,4 +1,4 @@
-import type { CodeField } from '../../payload-types'
+import type { CodeField } from '../../payload-types.js'
 
 export const codeDoc: Partial<CodeField> = {
   css: `@import url(https://fonts.googleapis.com/css?family=Questrial);

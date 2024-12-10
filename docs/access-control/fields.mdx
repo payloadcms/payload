@@ -1,25 +1,39 @@
 ---
 title: Field-level Access Control
 label: Fields
-order: 30
+order: 40
 desc: Field-level Access Control is specified within a field's config, and allows you to define which users can create, read or update Fields.
-keywords: fields, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: fields, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Field Access Control is specified with functions inside a field's config. All field-level Controls return a boolean value to allow or deny access for the specified operation. No field-level Access Controls support returning query constraints. All Access Control functions accept one `args` argument.
+Field Access Control is [Access Control](../overview) used to restrict access to specific [Fields](../fields/overview) within a Document.
 
-## Available Controls
-
-| Function                | Purpose                                                                          |
-| ----------------------- | -------------------------------------------------------------------------------- |
-| **[`create`](#create)** | Allows or denies the ability to set a field's value when creating a new document |
-| **[`read`](#read)**     | Allows or denies the ability to read a field's value                             |
-| **[`update`](#update)** | Allows or denies the ability to update a field's value                           |
-
-**Example Collection config:**
+To add Access Control to a Field, use the `access` property in your [Field Config](../fields/overview):
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import type { Field } from 'payload';
+
+export const FieldWithAccessControl: Field = {
+  // ...
+  access: { // highlight-line
+    // ...
+  },
+}
+```
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  Field Access Controls does not support returning [Query](../queries/overview) constraints like [Collection Access Control](./collections) does.
+</Banner>
+
+## Config Options
+
+Access Control is specific to the operation of the request.
+
+To add Access Control to a Field, use the `access` property in the [Field Config](../fields/overview):
+
+```ts
+import type { CollectionConfig } from 'payload';
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -39,6 +53,14 @@ export const Posts: CollectionConfig = {
 };
 ```
 
+The following options are available:
+
+| Function                | Purpose                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| **`create`** | Allows or denies the ability to set a field's value when creating a new document. [More details](#create). |
+| **`read`**     | Allows or denies the ability to read a field's value. [More details](#read).       |
+| **`update`** | Allows or denies the ability to update a field's value [More details](#update).    |
+
 ### Create
 
 Returns a boolean which allows or denies the ability to set a field's value when creating a new document. If `false` is returned, any passed values will be discarded.
@@ -47,7 +69,7 @@ Returns a boolean which allows or denies the ability to set a field's value when
 
 | Option            | Description                                                                |
 | ----------------- | -------------------------------------------------------------------------- |
-| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
 | **`data`**        | The full data passed to create the document.                               |
 | **`siblingData`** | Immediately adjacent field data passed to create the document.             |
 
@@ -59,7 +81,7 @@ Returns a boolean which allows or denies the ability to read a field's value. If
 
 | Option            | Description                                                                |
 | ----------------- | -------------------------------------------------------------------------- |
-| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
 | **`id`**          | `id` of the document being read                                            |
 | **`doc`**         | The full document data.                                                    |
 | **`siblingData`** | Immediately adjacent field data of the document being read.                |
@@ -74,7 +96,7 @@ If `false` is returned and you attempt to update the field's value, the operatio
 
 | Option            | Description                                                                |
 | ----------------- | -------------------------------------------------------------------------- |
-| **`req`**         | The Express `request` object containing the currently authenticated `user` |
+| **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
 | **`id`**          | `id` of the document being updated                                         |
 | **`data`**        | The full data passed to update the document.                               |
 | **`siblingData`** | Immediately adjacent field data passed to update the document with.        |

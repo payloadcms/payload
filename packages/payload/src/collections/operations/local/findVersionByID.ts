@@ -1,17 +1,14 @@
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Document } from '../../../types'
-import type { TypeWithVersion } from '../../../versions/types'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
+import type { TypeWithVersion } from '../../../versions/types.js'
+import type { DataFromCollectionSlug } from '../../config/types.js'
 
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import { getDataLoader } from '../../dataloader'
-import findVersionByID from '../findVersionByID'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { findVersionByIDOperation } from '../findVersionByID.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type Options<TSlug extends CollectionSlug> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
@@ -19,37 +16,33 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: false | TypedLocale
   id: string
-  locale?: string
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
   user?: Document
 }
 
-export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['collections']>(
+export default async function findVersionByIDLocal<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<TypeWithVersion<GeneratedTypes['collections'][T]>> {
+  options: Options<TSlug>,
+): Promise<TypeWithVersion<DataFromCollectionSlug<TSlug>>> {
   const {
     id,
     collection: collectionSlug,
-    context,
     depth,
     disableErrors = false,
-    fallbackLocale,
-    locale = null,
     overrideAccess = true,
-    req = {} as PayloadRequest,
+    populate,
+    select,
     showHiddenFields,
   } = options
-  setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -59,32 +52,15 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     )
   }
 
-  let fallbackLocaleToUse = defaultLocale
-
-  if (typeof req.fallbackLocale !== 'undefined') {
-    fallbackLocaleToUse = req.fallbackLocale
-  }
-
-  if (typeof fallbackLocale !== 'undefined') {
-    fallbackLocaleToUse = fallbackLocale
-  }
-
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.locale = locale ?? req?.locale ?? defaultLocale
-  req.fallbackLocale = fallbackLocaleToUse
-  req.i18n = i18nInit(payload.config.i18n)
-  req.payload = payload
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
-  return findVersionByID({
+  return findVersionByIDOperation({
     id,
     collection,
     depth,
     disableErrors,
     overrideAccess,
-    req,
+    populate,
+    req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
   })
 }

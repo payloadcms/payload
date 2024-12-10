@@ -3,99 +3,105 @@ title: Plugins
 label: Overview
 order: 10
 desc: Plugins provide a great way to modularize Payload functionalities into easy-to-use enhancements and extensions of your Payload apps.
-keywords: plugins, config, configuration, extensions, custom, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: plugins, config, configuration, extensions, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload comes with a built-in Plugins infrastructure that allows developers to build their own modular and easily reusable sets of functionality.
+Payload Plugins take full advantage of the modularity of the [Payload Config](../configuration/overview), allowing developers developers to easily inject custom—sometimes complex—functionality into Payload apps from a very small touch-point. This is especially useful is sharing your work across multiple projects or with the greater Payload community.
+
+There are many [Official Plugins](#official-plugins) available that solve for some of the most common uses cases, such as the [Form Builder Plugin](./form-builder) or [SEO Plugin](./seo). There are also [Community Plugins](#community-plugins) available, maintained entirely by contributing members. To extend Payload's functionality in some other way, you can easily [build your own plugin](./build-your-own).
+
+To configure Plugins, use the `plugins` property in your [Payload Config](../configuration/overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  // highlight-start
+  plugins: [
+    // Add Plugins here
+  ],
+  // highlight-end
+})
+```
+
+Writing Plugins is no more complex than writing regular JavaScript. If you know the basic concept of [callback functions](https://developer.mozilla.org/en-US/docs/Glossary/Callback_function) or how [spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) works, and are up to speed with Payload concepts, then writing a plugin will be a breeze.
 
 <Banner type="success">
-  Because we rely on a simple config-based structure, Payload plugins simply take in a user's
-  existing config and return a modified config with new fields, hooks, collections, admin views, or
+  Because we rely on a simple config-based structure, Payload Plugins simply take in an
+  existing config and returns a _modified_ config with new fields, hooks, collections, admin views, or
   anything else you can think of.
 </Banner>
-
-Writing plugins is no more complex than writing regular JavaScript. If you know how [spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) works and are up to speed with Payload concepts, writing a plugin will be a breeze.
 
 **Example use cases:**
 
 - Automatically sync data from a specific collection to HubSpot or a similar CRM when data is added or changes
 - Add password-protection functionality to certain documents
 - Add a full e-commerce backend to any Payload app
-- Add custom reporting views to Payload's admin panel
+- Add custom reporting views to Payload's Admin Panel
 - Encrypt specific collections' data
 - Add a full form builder implementation
 - Integrate all `upload`-enabled collections with a third-party file host like S3 or Cloudinary
 - Add custom endpoints or GraphQL queries / mutations with any type of custom functionality that you can think of
 
-### How to install plugins
+## Official Plugins
 
-The base Payload config allows for a `plugins` property which takes an `array` of [`Plugins`](https://github.com/payloadcms/payload/blob/main/packages/payload/src/config/types.ts).
+Payload maintains a set of Official Plugins that solve for some of the common use cases. These plugins are maintained by the Payload team and its contributors and are guaranteed to be stable and up-to-date.
 
-```js
-import { buildConfig } from 'payload/config'
-// note: these plugins are not real (yet?)
-import addLastModified from 'payload-add-last-modified'
-import passwordProtect from 'payload-password-protect'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { postgresAdapter } from '@payloadcms/db-postgres'
+- [Form Builder](./form-builder)
+- [Nested Docs](./nested-docs)
+- [Redirects](./redirects)
+- [Search](./search)
+- [Sentry](./sentry)
+- [SEO](./seo)
+- [Stripe](./stripe)
 
-import { viteBundler } from '@payloadcms/bundler-vite'
-import { webpackBundler } from '@payloadcms/bundler-webpack'
+You can also [build your own plugin](./build-your-own) to easily extend Payload's functionality in some other way. Once your plugin is ready, consider [sharing it with the community](#community-plugins).
 
+Plugins are changing every day, so be sure to check back often to see what new plugins may have been added. If you have a specific plugin you would like to see, please feel free to start a new [Discussion](https://github.com/payloadcms/payload/discussions).
 
-const config = buildConfig({
-  bundler: webpackBundler() // or viteBundler(),
-  collections: [
-    {
-      slug: 'pages',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'content',
-          type: 'richText',
-          required: true,
-        },
-      ],
-    },
-  ],
-  db: mongooseAdapter({}) // or postgresAdapter({})
-  plugins: [
-    // Many plugins require options to be passed.
-    // In the following example, we call the function
-    // and pass it options accordingly
-    passwordProtect(['pages']),
+<Banner type="warning">
+  For a complete list of Official Plugins, visit the [Packages Directory](https://github.com/payloadcms/payload/tree/main/packages) of the [Payload Monorepo](https://github.com/payloadcms/payload).
+</Banner>
 
-    // This plugin takes no options and just
-    // needs to be passed directly
-    addLastModified,
+## Community Plugins
 
-    // ..
-    // To understand how to use the plugins you're interested in,
-    // consult their corresponding documentation
-  ],
-})
+Community Plugins are those that are maintained entirely by outside contributors. They are a great way to share your work across the ecosystem for others to use. You can discover Community Plugins by browsing the `payload-plugin` topic on [GitHub](https://github.com/topics/payload-plugin).
 
-export default config
-```
+Some plugins have become so widely used that they are adopted as an [Official Plugin](#official-plugins), such as the [Lexical Plugin](https://github.com/AlessioGr/payload-plugin-lexical). If you have a plugin that you think should be an Official Plugin, please feel free to start a new [Discussion](https://github.com/payloadcms/payload/discussions).
 
-#### When Plugins are initialized
+<Banner type="warning">
+  For maintainers building plugins for others to use, please add the `payload-plugin` topic on [GitHub](https://github.com/topics/payload-plugin) to help others find it.
+</Banner>
 
-Payload Plugins are executed _after_ the incoming config is validated, but before it is sanitized and had default options merged in.
+## Example
 
-After all plugins are executed, the full config with all plugins will be sanitized.
-
-## Simple example
-
-Here is an example for how to automatically add a `lastModifiedBy` field to all Payload collections using a Plugin written in TypeScript.
+The base [Payload Config](../configuration/overview) allows for a `plugins` property which takes an `array` of [Plugin Configs](./build-your-own).
 
 ```ts
-import { Config, Plugin } from 'payload/config'
+import { buildConfig } from 'payload'
+import { addLastModified } from './addLastModified.ts'
 
-const addLastModified: Plugin = (incomingConfig: Config): Config => {
+const config = buildConfig({
+  // ...
+  // highlight-start
+  plugins: [
+    addLastModified,
+  ],
+  // highlight-end
+})
+```
+
+<Banner type="warning">
+  Payload Plugins are executed _after_ the incoming config is validated, but before it is sanitized and has had default options merged in. After all plugins are executed, the full config with all plugins will be sanitized.
+</Banner>
+
+Here is an example what the `addLastModified` plugin from above might look like. It adds a `lastModifiedBy` field to all Payload collections. For full details, see [how to build your own plugin](./build-your-own).
+
+```ts
+import { Config, Plugin } from 'payload'
+
+export const addLastModified: Plugin = (incomingConfig: Config): Config => {
   // Find all incoming auth-enabled collections
   // so we can create a lastModifiedBy relationship field
   // to all auth collections
@@ -138,12 +144,9 @@ const addLastModified: Plugin = (incomingConfig: Config): Config => {
 
   return config
 }
-
-export default addLastModified
 ```
 
-### Available Plugins
-
-You can discover existing plugins by browsing the `payload-plugin` topic on [GitHub](https://github.com/topics/payload-plugin).
-
-For maintainers building plugins for others to use, please add the topic to help others find it. If you would like one to be built by the core Payload team, [open a Feature Request](https://github.com/payloadcms/payload/discussions) in our GitHub Discussions board. We would be happy to review your code and maybe feature you and your plugin where appropriate.
+<Banner type="success">
+  <strong>Reminder:</strong>
+  See [how to build your own plugin](./build-your-own) for a more in-depth explication on how create your own Payload Plugin.
+</Banner>

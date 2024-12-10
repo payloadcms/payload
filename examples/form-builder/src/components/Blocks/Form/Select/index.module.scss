@@ -1,0 +1,123 @@
+@use '../shared.scss';
+
+.select {
+  position: relative;
+  margin-bottom: var(--base);
+}
+
+.label {
+  margin-bottom: 10px;
+  display: block;
+}
+
+.reactSelect {
+  display: flex;
+
+  :global {
+    div.rs__control {
+      @include shared.formInput;
+      height: auto;
+    }
+
+    .rs__input-container {
+      color: var(--color-black);
+    }
+
+    .rs__value-container {
+      padding: 0;
+      > * {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+    }
+
+    .rs__single-value {
+      color: var(--color-black);
+    }
+
+    .rs__indicators {
+      position: absolute;
+      top: calc(var(--base) * 0.9);
+      right: calc(var(--base) * 0.9);
+      .arrow {
+        transform: rotate(90deg);
+      }
+    }
+
+    .rs__indicator {
+      padding: 0px 4px;
+      cursor: pointer;
+
+      svg path {
+        fill: var(--color-dark-gray);
+      }
+
+      &:hover {
+        svg path {
+          fill: var(--color-dark-gray);
+        }
+      }
+    }
+
+    .rs__indicator-separator {
+      display: none;
+    }
+
+    .rs__menu {
+      color: var(--color-black);
+      background-color: var(--color-white);
+      z-index: 2;
+      border-radius: 0;
+      box-shadow: 0 4px 11px hsl(0deg 0% 0% / 10%);
+    }
+
+    .rs__menu-list {
+      padding: calc(var(--base) / 4) 0;
+    }
+
+    .rs__group-heading {
+      margin-bottom: calc(var(--base) / 2);
+    }
+
+    .rs__option {
+      font-size: 1rem;
+      padding: calc(var(--base) / 2) var(--base);
+
+      &--is-focused {
+        background-color: var(--color-light-gray);
+        color: var(--color-black);
+      }
+
+      &--is-selected {
+        background-color: var(--color-light-gray);
+        color: var(--color-black);
+      }
+    }
+
+    .rs__multi-value {
+      padding: 0;
+      background: var(--color-light-gray);
+    }
+
+    .rs__multi-value__label {
+      max-width: 150px;
+      color: var(--color-black);
+      padding: calc(var(--base) / 8) calc(var(--base) / 4);
+    }
+
+    .rs__multi-value__remove {
+      cursor: pointer;
+
+      &:hover {
+        color: var(--color-black);
+        background: var(--color-light-gray);
+      }
+    }
+
+    .rs__clear-indicator {
+      cursor: pointer;
+    }
+  }
+}

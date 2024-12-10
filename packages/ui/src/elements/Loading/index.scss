@@ -1,0 +1,138 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .loading-overlay {
+    isolation: isolate;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    pointer-events: none;
+    z-index: calc(var(--z-status) + 1);
+    transition-property: left, width;
+    transition: 250ms ease;
+
+    &.loading-overlay--entering {
+      opacity: 1;
+      animation: fade-in ease;
+      pointer-events: all;
+    }
+
+    &.loading-overlay--exiting {
+      opacity: 0;
+      animation: fade-out ease;
+    }
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--theme-elevation-0);
+      opacity: 0.85;
+      z-index: -1;
+    }
+
+    &__bars {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      gap: 7px;
+      align-items: center;
+    }
+
+    &__bar {
+      width: 2px;
+      background-color: currentColor;
+      height: 15px;
+
+      &:nth-child(1) {
+        transform: translateY(0);
+        animation: animate-bar--odd 1.25s infinite;
+      }
+
+      &:nth-child(2) {
+        transform: translateY(-2px);
+        animation: animate-bar--even 1.25s infinite;
+      }
+
+      &:nth-child(3) {
+        transform: translateY(0);
+        animation: animate-bar--odd 1.25s infinite;
+      }
+
+      &:nth-child(4) {
+        transform: translateY(-2px);
+        animation: animate-bar--even 1.25s infinite;
+      }
+
+      &:nth-child(5) {
+        transform: translateY(0);
+        animation: animate-bar--odd 1.25s infinite;
+      }
+    }
+
+    &__text {
+      margin-top: base(0.75);
+      text-transform: uppercase;
+      font-family: var(--font-body);
+      font-size: base(0.65);
+      letter-spacing: 3px;
+    }
+  }
+
+  @keyframes animate-bar--even {
+    0% {
+      transform: translateY(2px);
+    }
+
+    50% {
+      transform: translateY(-2px);
+    }
+
+    100% {
+      transform: translateY(2px);
+    }
+  }
+
+  @keyframes animate-bar--odd {
+    0% {
+      transform: translateY(-2px);
+    }
+
+    50% {
+      transform: translateY(2px);
+    }
+
+    100% {
+      transform: translateY(-2px);
+    }
+  }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    0% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+}

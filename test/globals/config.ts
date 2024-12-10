@@ -1,10 +1,16 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 
 export const slug = 'global'
 export const arraySlug = 'array'
 
 export const accessControlSlug = 'access-control'
+
+export const defaultValueSlug = 'default-value'
 
 export const englishLocale = 'en'
 export const spanishLocale = 'es'
@@ -17,13 +23,13 @@ const access = {
 }
 
 export default buildConfigWithDefaults({
-  localization: {
-    locales: [englishLocale, spanishLocale],
-    defaultLocale: englishLocale,
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   globals: [
     {
-      slug,
       access,
       fields: [
         {
@@ -35,26 +41,47 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      slug,
     },
     {
-      slug: arraySlug,
       access,
       fields: [
         {
           name: 'array',
-          type: 'array',
-          localized: true,
           fields: [
             {
               name: 'text',
               type: 'text',
             },
           ],
+          localized: true,
+          type: 'array',
         },
       ],
+      slug: arraySlug,
     },
     {
-      slug: accessControlSlug,
+      fields: [
+        {
+          name: 'text',
+          defaultValue: 'test',
+          type: 'text',
+        },
+        {
+          name: 'group',
+          fields: [
+            {
+              name: 'text',
+              defaultValue: 'test',
+              type: 'text',
+            },
+          ],
+          type: 'group',
+        },
+      ],
+      slug: defaultValueSlug,
+    },
+    {
       access: {
         read: ({ req: { user } }) => {
           if (user) {
@@ -71,22 +98,27 @@ export default buildConfigWithDefaults({
       fields: [
         {
           name: 'title',
-          type: 'text',
           required: true,
+          type: 'text',
         },
         {
           name: 'enabled',
           type: 'checkbox',
         },
       ],
+      slug: accessControlSlug,
     },
     {
-      slug: 'without-graphql',
       access,
-      graphQL: false,
       fields: [],
+      graphQL: false,
+      slug: 'without-graphql',
     },
   ],
+  localization: {
+    defaultLocale: englishLocale,
+    locales: [englishLocale, spanishLocale],
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -97,10 +129,13 @@ export default buildConfigWithDefaults({
     })
 
     await payload.updateGlobal({
-      slug: accessControlSlug,
       data: {
         title: 'hello',
       },
+      slug: accessControlSlug,
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { noApiViewCollectionSlug } from '../slugs'
+import { noApiViewCollectionSlug } from '../slugs.js'
 
 export const CollectionNoApiView: CollectionConfig = {
   slug: noApiViewCollectionSlug,

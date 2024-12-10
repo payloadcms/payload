@@ -1,79 +1,101 @@
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Document, Where } from '../../../types'
-import type { BulkOperationResult } from '../../config/types'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+  Where,
+} from '../../../types/index.js'
+import type { BulkOperationResult, SelectFromCollectionSlug } from '../../config/types.js'
 
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import { getDataLoader } from '../../dataloader'
-import deleteOperation from '../delete'
-import deleteByID from '../deleteByID'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { deleteOperation } from '../delete.js'
+import { deleteByIDOperation } from '../deleteByID.js'
 
-export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
   depth?: number
-  fallbackLocale?: string
-  locale?: string
+  disableTransaction?: boolean
+  fallbackLocale?: false | TypedLocale
+  locale?: TypedLocale
   overrideAccess?: boolean
+  overrideLock?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
   user?: Document
 }
 
-export type ByIDOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
+export type ByIDOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+> = {
   id: number | string
   where?: never
-}
+} & BaseOptions<TSlug, TSelect>
 
-export type ManyOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
+export type ManyOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+> = {
   id?: never
   where: Where
-}
+} & BaseOptions<TSlug, TSelect>
 
-export type Options<TSlug extends keyof GeneratedTypes['collections']> =
-  | ByIDOptions<TSlug>
-  | ManyOptions<TSlug>
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+> = ByIDOptions<TSlug, TSelect> | ManyOptions<TSlug, TSelect>
 
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function deleteLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: ByIDOptions<TSlug>,
-): Promise<GeneratedTypes['collections'][TSlug]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  options: ByIDOptions<TSlug, TSelect>,
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+async function deleteLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: ManyOptions<TSlug>,
-): Promise<BulkOperationResult<TSlug>>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  options: ManyOptions<TSlug, TSelect>,
+): Promise<BulkOperationResult<TSlug, TSelect>>
+async function deleteLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  options: Options<TSlug, TSelect>,
+): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>>
+async function deleteLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
+  options: Options<TSlug, TSelect>,
+): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
   const {
     id,
     collection: collectionSlug,
-    context,
     depth,
-    fallbackLocale,
-    locale = null,
+    disableTransaction,
     overrideAccess = true,
-    req: incomingReq,
+    overrideLock,
+    populate,
+    select,
     showHiddenFields,
-    user,
     where,
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -81,34 +103,24 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
-  const req = {
-    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
-    i18n: i18nInit(payload.config.i18n),
-    locale: locale ?? defaultLocale,
-    payload,
-    payloadAPI: 'local',
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req, context)
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
   const args = {
     id,
     collection,
     depth,
+    disableTransaction,
     overrideAccess,
-    req,
+    overrideLock,
+    populate,
+    req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
     where,
   }
 
   if (options.id) {
-    return deleteByID<TSlug>(args)
+    return deleteByIDOperation<TSlug, TSelect>(args)
   }
-  return deleteOperation<TSlug>(args)
+  return deleteOperation<TSlug, TSelect>(args)
 }
 
 export default deleteLocal

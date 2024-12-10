@@ -1,31 +1,42 @@
-import type { NextFunction, Response } from 'express'
-
 import httpStatus from 'http-status'
 
-import type { GeneratedTypes } from '../../'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadHandler } from '../../config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
 
-import formatSuccessResponse from '../../express/responses/formatSuccess'
-import update from '../operations/update'
+import { update } from '../operations/update.js'
 
-export default async function updateHandler(
-  req: PayloadRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<Response<GeneratedTypes['collections']['_preference']> | void> {
+export const updateHandler: PayloadHandler = async (incomingReq) => {
+  // We cannot import the addDataAndFileToRequest utility here from the 'next' package because of dependency issues
+  // However that utility should be used where possible instead of manually appending the data
+  let data
+
   try {
-    const doc = await update({
-      key: req.params.key,
-      req,
-      user: req.user,
-      value: req.body.value || req.body,
-    })
-
-    return res.status(httpStatus.OK).json({
-      ...formatSuccessResponse(req.t('general:updatedSuccessfully'), 'message'),
-      doc,
-    })
+    data = await incomingReq.json()
   } catch (error) {
-    return next(error)
+    data = {}
   }
+
+  const reqWithData: PayloadRequest = incomingReq
+
+  if (data) {
+    reqWithData.data = data
+    reqWithData.json = () => Promise.resolve(data)
+  }
+
+  const doc = await update({
+    key: reqWithData.routeParams?.key as string,
+    req: reqWithData,
+    user: reqWithData?.user,
+    value: reqWithData.data.value || reqWithData.data,
+  })
+
+  return Response.json(
+    {
+      doc,
+      message: reqWithData.t('general:updatedSuccessfully'),
+    },
+    {
+      status: httpStatus.OK,
+    },
+  )
 }

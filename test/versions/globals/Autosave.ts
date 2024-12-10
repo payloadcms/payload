@@ -1,19 +1,9 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from 'payload'
 
-import { autoSaveGlobalSlug } from '../slugs'
+import { autoSaveGlobalSlug } from '../slugs.js'
 
 const AutosaveGlobal: GlobalConfig = {
   slug: autoSaveGlobalSlug,
-  label: 'Autosave Global',
-  admin: {
-    preview: () => 'https://payloadcms.com',
-  },
-  versions: {
-    max: 20,
-    drafts: {
-      autosave: true,
-    },
-  },
   access: {
     read: ({ req: { user } }) => {
       if (user) {
@@ -40,10 +30,17 @@ const AutosaveGlobal: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
-      required: true,
       localized: true,
+      required: true,
     },
   ],
+  label: 'Autosave Global',
+  versions: {
+    drafts: {
+      autosave: true,
+    },
+    max: 20,
+  },
 }
 
 export default AutosaveGlobal

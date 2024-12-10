@@ -3,20 +3,23 @@ title: REST API
 label: Overview
 order: 10
 desc: Payload generates a fully functional REST API from your Collection and Global configs.
-keywords: rest, api, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: rest, api, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 <Banner>
   A fully functional REST API is automatically generated from your Collection and Global configs.
 </Banner>
 
+The REST API is a fully functional HTTP client that allows you to interact with your Documents in a RESTful manner. It supports all CRUD operations and is equipped with automatic pagination, depth, and sorting.
 All Payload API routes are mounted and prefixed to your config's `routes.api` URL segment (default: `/api`).
 
 **REST query parameters:**
 
-- [depth](/docs/getting-started/concepts#depth) - automatically populates relationships and uploads
+- [depth](../queries/depth) - automatically populates relationships and uploads
 - [locale](/docs/configuration/localization#retrieving-localized-docs) - retrieves document(s) in a specific locale
 - [fallback-locale](/docs/configuration/localization#retrieving-localized-docs) - specifies a fallback locale if no locale value exists
+- [select](../queries/select) - specifies which fields to include to the result
+- [populate](../queries/select#populate) - specifies which fields to include to the result from populated documents
 
 ## Collections
 
@@ -87,6 +90,19 @@ Note: Collection slugs must be formatted in kebab-case
           slug: "home",
           createdAt: "2023-04-27T11:27:32.419Z",
           updatedAt: "2023-04-27T11:27:32.419Z",
+        },
+      },
+    },
+    {
+      operation: "Count",
+      method: "GET",
+      path: "/api/{collection-slug}/count",
+      description: "Count the documents",
+      example: {
+        slug: "count",
+        req: true,
+        res: {
+         totalDocs: 10
         },
       },
     },
@@ -485,7 +501,7 @@ Globals cannot be created or deleted, so there are only two REST endpoints opene
 
 ## Preferences
 
-In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/overview#preferences) for data specific to the authenticated user.
+In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/preferences) for data specific to the authenticated user.
 
 <RestExamples
   data={[
@@ -557,7 +573,12 @@ In addition to the dynamically generated endpoints above Payload also has REST e
 
 ## Custom Endpoints
 
-Additional REST API endpoints can be added to your application by providing an array of `endpoints` in various places within a Payload config. Custom endpoints are useful for adding additional middleware on existing routes or for building custom functionality into Payload apps and plugins. Endpoints can be added at the top of the Payload config, `collections`, and `globals` and accessed respective of the api and slugs you have configured.
+Additional REST API endpoints can be added to your application by providing an array of `endpoints` in various places within a Payload Config. Custom endpoints are useful for adding additional middleware on existing routes or for building custom functionality into Payload apps and plugins. Endpoints can be added at the top of the Payload Config, `collections`, and `globals` and accessed respective of the api and slugs you have configured.
+
+<Banner type="warning">
+  Custom endpoints are not authenticated by default. You are responsible for securing your own endpoints.
+</Banner>
+
 
 Each endpoint object needs to have:
 
@@ -565,14 +586,14 @@ Each endpoint object needs to have:
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                                                       |
 | **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                                             |
-| **`handler`** | A function or array of functions to be called with **req**, **res** and **next** arguments. [Express](https://expressjs.com/en/guide/routing.html#route-handlers)                                                                                          |
-| **`root`**    | When `true`, defines the endpoint on the root Express app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload config, endpoints defined on `collections` or `globals` cannot be root. |
+| **`handler`** | A function or array of functions to be called with **req**, **res** and **next** arguments. [Next.js](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)                                                                                          |
+| **`root`**    | When `true`, defines the endpoint on the root Next.js app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload Config, endpoints defined on `collections` or `globals` cannot be root. |
 | **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                  |
 
 Example:
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 // a collection of 'orders' with an additional route for tracking details, reachable at /api/orders/:id/tracking
 export const Orders: CollectionConfig = {
@@ -585,15 +606,53 @@ export const Orders: CollectionConfig = {
     {
       path: '/:id/tracking',
       method: 'get',
-      handler: async (req, res, next) => {
-        const tracking = await getTrackingInfo(req.params.id)
-        if (tracking) {
-          res.status(200).send({ tracking })
-        } else {
-          res.status(404).send({ error: 'not found' })
+      handler: async (req) => {
+        const tracking = await getTrackingInfo(req.routeParams.id)
+
+        if (!tracking) {
+          return Response.json({ error: 'not found' }, { status: 404})
         }
+
+        return Response.json({
+          message: `Hello ${req.routeParams.name as string} @ ${req.routeParams.group as string}`,
+        })
       },
     },
+    {
+      path: '/:id/tracking',
+      method: 'post',
+      handler: async (req) => {
+        // `data` is not automatically appended to the request
+        // if you would like to read the body of the request
+        // you can use `data = await req.json()`
+        const data = await req.json()
+        await req.payload.update({
+          collection: 'tracking',
+          data: {
+            // data to update the document with
+          }
+        })
+        return Response.json({
+          message: 'successfully updated tracking info'
+        })
+      }
+    },
+    {
+      path: '/:id/forbidden',
+      method: 'post',
+      handler: async (req) => {
+        // this is an example of an authenticated endpoint
+        if (!req.user) {
+          return Response.json({ error: 'forbidden' }, { status: 403 })
+        }
+
+        // do something
+
+        return Response.json({
+          message: 'successfully updated tracking info'
+        })
+      }
+    }
   ],
   // highlight-end
 }
@@ -601,7 +660,95 @@ export const Orders: CollectionConfig = {
 
 <Banner>
   <strong>Note:</strong>
-  <br />
-  **req** will have the **payload** object and can be used inside your endpoint handlers for making
-  calls like req.payload.find() that will make use of access control and hooks.
+  **req** will have the **payload** object and can be used inside your endpoint handlers for making calls like req.payload.find() that will make use of [Access Control](../access-control/overview) and [Hooks](../hooks/overview).
 </Banner>
+
+#### Helpful tips
+`req.data`
+
+Data is not automatically appended to the request. You can read the body data by calling `await req.json()`.
+
+Or you could use our helper function that mutates the request and appends data and file if found.
+
+```ts
+import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+
+// custom endpoint example
+{
+  path: '/:id/tracking',
+  method: 'post',
+  handler: async (req) => {
+    await addDataAndFileToRequest(req)
+    await req.payload.update({
+      collection: 'tracking',
+      data: {
+        // data to update the document with
+      }
+    })
+    return Response.json({
+      message: 'successfully updated tracking info'
+    })
+  }
+}
+```
+
+`req.locale` & `req.fallbackLocale`
+
+The locale and the fallback locale are not automatically appended to custom endpoint requests. If you would like to add them you can use this helper function.
+
+```ts
+import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
+
+// custom endpoint example
+{
+  path: '/:id/tracking',
+  method: 'post',
+  handler: async (req) => {
+    await addLocalesToRequestFromData(req)
+    // you now can access req.locale & req.fallbackLocale
+    return Response.json({ message: 'success' })
+  }
+}
+```
+
+## Method Override for GET Requests
+
+Payload supports a method override feature that allows you to send GET requests using the HTTP POST method. This can be particularly useful in scenarios when the query string in a regular GET request is too long.
+
+### How to Use
+
+To use this feature, include the `X-HTTP-Method-Override` header set to `GET` in your POST request. The parameters should be sent in the body of the request with the `Content-Type` set to `application/x-www-form-urlencoded`.
+
+### Example
+
+Here is an example of how to use the method override to perform a GET request:
+
+#### Using Method Override (POST)
+
+```ts
+const res = await fetch(`${api}/${collectionSlug}`, {
+  method: 'POST',
+  credentials: 'include',
+  headers: {
+    'Accept-Language': i18n.language,
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'X-HTTP-Method-Override': 'GET',
+  },
+  body: qs.stringify({
+    depth: 1,
+    locale: 'en',
+  }),
+})
+```
+
+#### Equivalent Regular GET Request
+
+```ts
+const res = await fetch(`${api}/${collectionSlug}?depth=1&locale=en`, {
+  method: 'GET',
+  credentials: 'include',
+  headers: {
+    'Accept-Language': i18n.language,
+  },
+})
+```

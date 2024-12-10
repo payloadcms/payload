@@ -3,18 +3,19 @@ title: Installation
 label: Installation
 order: 30
 desc: To quickly get started with Payload, simply run npx create-payload-app or install from scratch.
-keywords: documentation, getting started, guide, Content Management System, cms, headless, javascript, node, react, express
+keywords: documentation, getting started, guide, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-#### Software Requirements
+## Software Requirements
 
 Payload requires the following software:
 
-- Any JavaScript package manager (Yarn, NPM, or pnpm)
-- Node.js version 16+
-- Any [compatible database](/docs/database/overview) (MongoDB or Postgres)
+- Any JavaScript package manager (pnpm, npm, or yarn - pnpm is preferred)
+- Node.js version 20.9.0+
+- Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
 <Banner type="warning">
+  <strong>Important:</strong>
   Before proceeding any further, please ensure that you have the above requirements met.
 </Banner>
 
@@ -23,133 +24,163 @@ Payload requires the following software:
 To quickly scaffold a new Payload app in the fastest way possible, you can use [create-payload-app](https://npmjs.com/package/create-payload-app). To do so, run the following command:
 
 ```
-npx create-payload-app@latest
+npx create-payload-app
 ```
 
-Then just follow the prompts! You'll get set up with a new folder and a functioning Payload app inside.
+Then just follow the prompts! You'll get set up with a new folder and a functioning Payload app inside. You can then start [configuring your application](../configuration/overview).
 
 ## Adding to an existing app
 
-Adding Payload to either a new or existing TypeScript + Express app is super straightforward. To add to an existing app, just run `npm install --save --legacy-peer-deps payload`.
+Adding Payload to an existing Next.js app is super straightforward. You can either run the `npx create-payload-app` command inside your Next.js project's folder, or manually install Payload by following the steps below.
 
-From there, the first step is writing a baseline config. Create a new `payload.config.ts` in your project's `/src` directory (or whatever your root TS dir is). The simplest config contains the following:
+If you don't have a Next.js app already, but you still want to start a project from a blank Next.js app, you can create a new Next.js app using `npx create-next-app` - and then just follow the steps below to install Payload.
 
-```js
-import { buildConfig } from 'payload/config'
+<Banner type="info">
+  <strong>Note:</strong> Next.js version 15 or higher is required for Payload.
+</Banner>
 
-export default buildConfig({
-  // By default, Payload will boot up normally
-  // and you will be provided with a base `User` collection.
-  // But, here is where you define how you'd like Payload to work!
-})
+#### 1. Install the relevant packages
+
+First, you'll want to add the required Payload packages to your project and can do so by running the command below:
+
+```bash
+pnpm i payload @payloadcms/next @payloadcms/richtext-lexical sharp graphql
 ```
 
-Write the above code into your newly created config file. This baseline config will automatically provide you with a default `User` collection. For more information about users and authentication, including how to provide your own user config, jump to the [Authentication](/docs/authentication/config) section.
+<Banner type="warning">
+  <strong>Note:</strong>
+  Swap out `pnpm` for your package manager. If you are using npm, you might need to install using legacy peer deps: `npm i --legacy-peer-deps`.
+</Banner>
+
+Next, install a [Database Adapter](/docs/database/overview). Payload requires a Database Adapter to establish a database connection. Payload works with all types of databases, but the most common are MongoDB and Postgres.
+
+To install a Database Adapter, you can run **one** of the following commands:
+
+- To install the [MongoDB Adapter](../database/mongodb), run:
+    ```bash
+    pnpm i @payloadcms/db-mongodb
+    ```
+
+- To install the [Postgres Adapter](../database/postgres), run:
+    ```bash
+    pnpm i @payloadcms/db-postgres
+    ```
+
+<Banner type="success">
+  <strong>Note:</strong>
+  New [Database Adapters](/docs/database/overview) are becoming available every day. Check the docs for the most up-to-date list of what's available.
+</Banner>
+
+#### 2. Copy Payload files into your Next.js app folder
+
+Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/main/templates/blank/src/app/(payload)) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
+
+```plaintext
+app/
+├─ (payload)/
+├── // Payload files
+├─ (my-app)/
+├── // Your app files
+```
+
+_For an exact reference of the `(payload)` directory, see [Project Structure](../admin/overview#project-structure)._
+
+<Banner type="warning">
+  You may need to copy all of your existing frontend files, including your existing root layout, into its own newly created [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups), i.e. `(my-app)`.
+</Banner>
+
+The files that Payload needs to have in your `/app` folder do not regenerate, and will never change. Once you slot them in, you never have to revisit them. They are not meant to be edited and simply import Payload dependencies from `@payloadcms/next` for the REST / GraphQL API and Admin Panel.
+
+You can name the `(my-app)` folder anything you want. The name does not matter and will just be used to clarify your directory structure for yourself. Common names might be `(frontend)`, `(app)`, or similar. [More details](../admin/overview).
+
+#### 3. Add the Payload Plugin to your Next.js config
+
+Payload has a Next.js plugin that it uses to ensure compatibility with some of the packages Payload relies on, like `mongodb` or `drizzle-kit`.
+
+To add the Payload Plugin, use `withPayload` in your `next.config.js`:
+
+```js
+import { withPayload } from '@payloadcms/next/withPayload'
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Your Next.js config here
+  experimental: {
+    reactCompiler: false
+  }
+}
+
+// Make sure you wrap your `nextConfig`
+// with the `withPayload` plugin
+export default withPayload(nextConfig) // highlight-line
+```
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  Payload is a fully ESM project, and that means the `withPayload` function is an ECMAScript module.
+</Banner>
+
+To import the Payload Plugin, you need to make sure your `next.config` file is set up to use ESM.
+
+You can do this in one of two ways:
+
+1. Set your own project to use ESM, by adding `"type": "module"` to your `package.json` file
+2. Give your Next.js config the `.mjs` file extension
+
+In either case, all `require`s and `export`s in your `next.config` file will need to be converted to `import` / `export` if they are not set up that way already.
+
+#### 4. Create a Payload Config and add it to your TypeScript config
+
+Finally, you need to create a [Payload Config](../configuration/overview). Generally the Payload Config is located at the root of your repository, or next to your `/app` folder, and is named `payload.config.ts`.
+
+Here's what Payload needs at a bare minimum:
+
+```ts
+import sharp from 'sharp'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // If you'd like to use Rich Text, pass your editor here
+  editor: lexicalEditor(),
+
+  // Define and configure your collections in this array
+  collections: [],
+
+  // Your Payload secret - should be a complex and secure string, unguessable
+  secret: process.env.PAYLOAD_SECRET || '',
+  // Whichever Database Adapter you're using should go here
+  // Mongoose is shown as an example, but you can also use Postgres
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI || '',
+  }),
+  // If you want to resize images, crop, set focal point, etc.
+  // make sure to install it and pass it to the config.
+  // This is optional - if you don't need to do these things,
+  // you don't need it!
+  sharp,
+})
+```
 
 Although this is just the bare minimum config, there are _many_ more options that you can control here. To reference the full config and all of its options, [click here](/docs/configuration/overview).
 
-### Server
+Once you have a Payload Config, update your `tsconfig` to include a `path` that points to it:
 
-Now that you've got a baseline Payload config, it's time to initialize Payload. It requires an Express server that you provide, so if you're not familiar with how to set up a baseline Express server, please read up on exactly what Express is and why to use it. Express' own [Documentation](https://expressjs.com/en/starter/hello-world.html) is a good place to start. Otherwise, follow along below for how to build your own Express server to use with Payload.
-
-1. Run `npm install --save --legacy-peer-deps express` if you have not done so already
-1. Create a new `server.ts` file in the root directory of your app
-1. Add the following code to `server.ts`:
-
-```ts
-import express from 'express'
-
-const app = express()
-
-app.listen(3000, async () => {
-  console.log(
-    "Express is now listening for incoming connections on port 3000."
-  )
-})
-```
-
-This server doesn't do anything just yet. But, after you have this in place, we can initialize Payload via its asynchronous `init()` method, which accepts a small set of arguments to tell it how to operate.
-
-To initialize Payload, update your `server.ts` file to reflect the following code:
-
-```ts
-import express from 'express'
-import payload from 'payload'
-
-require('dotenv').config()
-const app = express()
-
-const start = async () => {
-  await payload.init({
-    secret: process.env.PAYLOAD_SECRET,
-    express: app,
-  })
-
-  app.listen(3000, async () => {
-    console.log(
-      "Express is now listening for incoming connections on port 3000."
-    )
-  })
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@payload-config": [
+        "./payload.config.ts"
+      ]
+    }
+  },
 }
-
-start()
 ```
 
-A quick reminder: in this configuration, we're making use of environmental variables, `process.env.PAYLOAD_SECRET`. Often, it's smart to store these values in an `.env` file at the root of your directory and set different values for each of your environments (local, stage, prod, etc). The `dotenv` package is very handy and works well alongside of Payload. A typical `.env` file will look like this:
+#### 5. Fire it up!
 
-```
-DATABASE_URI=mongodb://127.0.0.1/your-payload-app
-PAYLOAD_SECRET=your-payload-secret
-```
-
-Here is a list of all properties available to pass through `payload.init`:
-
-##### secret
-**Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess.
-
-Payload uses this secret key to generate secure user tokens (JWT). Behind the scenes, we do not use your secret key to encrypt directly - instead, we first take the secret key and create an encrypted string using the SHA-256 hash function. Then, we reduce the encrypted string to its first 32 characters. This final value is what Payload uses for encryption.
-
-##### config
-
-Allows you to pass your config directly to the onInit function. The config passed here should match the payload.config file.
-
-##### disableOnInit
-
-A boolean that disables running your `onInit` function when Payload starts up.
-
-##### disableDBConnect
-
-A boolean that disables the database connection when Payload starts up.
-
-##### email
-
-An object used to configure SMTP. [Read more](/docs/email/overview).
-
-##### express
-This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
-
-##### local
-
-A boolean that when set to `true` tells Payload to start in local-only mode which will bypass setting up API routes. When set to `true`, `express` is not required. This is useful when running scripts that need to use Payload's [local-api](/docs/local-api/overview).
-
-##### loggerDestination
-
-Specify destination stream for the built-in Pino logger that Payload uses for internal logging. See [Pino Docs](https://getpino.io/#/docs/api?id=pino-destination) for more info on what is available.
-
-##### loggerOptions
-
-Specify options for the built-in Pino logger that Payload uses for internal logging. See [Pino Docs](https://getpino.io/#/docs/api?id=options) for more info on what is available.
-
-##### onInit
-
-A function that is called immediately following startup that receives the Payload instance as it's only argument.
-
-### Test it out
-
-After you've gotten this far, it's time to boot up Payload. Start your project in your application's folder to get going.
+After you've reached this point, it's time to boot up Payload. Start your project in your application's folder to get going. By default, the Next.js dev script is `pnpm dev` (or `npm run dev` if using npm).
 
 After it starts, you can go to `http://localhost:3000/admin` to create your first Payload user!
-
-### Docker
-
-Looking to deploy Payload with Docker? New projects with `create-payload-app` come with a Dockerfile and docker-compose.yml file ready to go. Examples of these files can be seen in our [Deployment docs](/docs/production/deployment#docker).

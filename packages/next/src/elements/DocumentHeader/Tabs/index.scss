@@ -1,0 +1,54 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .doc-tabs {
+    display: flex;
+
+    &__tabs {
+      display: flex;
+      gap: calc(var(--base) / 2);
+      list-style: none;
+      align-items: center;
+      margin: 0;
+      padding-left: 0;
+    }
+
+    @include mid-break {
+      width: 100%;
+      padding: 0;
+      overflow: auto;
+
+      // this container has a gradient overlay as visual indication of `overflow: scroll`
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      &::after {
+        content: '';
+        display: block;
+        position: sticky;
+        right: 0;
+        width: calc(var(--base) * 2);
+        height: calc(var(--base) * 2);
+        background: linear-gradient(to right, transparent, var(--theme-bg));
+        flex-shrink: 0;
+        z-index: 1111;
+        pointer-events: none;
+      }
+
+      &__tabs {
+        padding: 0;
+      }
+    }
+
+    @include small-break {
+      &__tabs-container {
+        margin-right: var(--gutter-h);
+      }
+
+      &__tabs {
+        gap: var(--gutter-h);
+      }
+    }
+  }
+}

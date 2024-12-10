@@ -2,24 +2,49 @@
 title: Database
 label: Overview
 order: 10
-keywords: database, mongodb, postgres, documentation, Content Management System, cms, headless, typescript, node, react, express
+keywords: database, mongodb, postgres, documentation, Content Management System, cms, headless, typescript, node, react, nextjs
 desc: With Payload, you bring your own database and own your data. You have full control.
 ---
 
-Payload interacts with your database via the database adapter that you choose. Right now, Payload officially supports two database adapters:
+Payload is database agnostic, meaning you can use any type of database behind Payload's familiar APIs. Payload is designed to interact with your database through a Database Adapter, which is a thin layer that translates Payload's internal data structures into your database's native data structures.
 
-1. [MongoDB](/docs/database/mongodb) w/ [Mongoose](https://mongoosejs.com/)
-1. [Postgres](/docs/database/postgres) w/ [Drizzle](https://drizzle.team/)
+Currently, Payload officially supports the following Database Adapters:
 
-We will be adding support for SQLite and MySQL in the near future using Drizzle ORM.
+- [MongoDB](/docs/database/mongodb) with [Mongoose](https://mongoosejs.com/)
+- [Postgres](/docs/database/postgres) with [Drizzle](https://drizzle.team/)
+- [SQLite](/docs/database/sqlite) with [Drizzle](https://drizzle.team/)
 
-To use a specific database adapter, you need to install it and configure it according to its own specifications. Visit the documentation for your applicable database adapter to learn more.
+To configure a Database Adapter, use the `db` property in your [Payload Config](../configuration/overview):
 
-## Selecting a database
+```ts
+import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  // ...
+  // highlight-start
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI,
+  }),
+  // highlight-end
+})
+```
+
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  The Database Adapter is an external dependency and must be installed in your project separately from Payload. You can find the installation instructions for each Database Adapter in their respective documentation.
+</Banner>
+
+## Selecting a Database
 
 There are several factors to consider when choosing which database technology and hosting option is right for your project and workload. Payload can theoretically support any database, but it's up to you to decide which database to use.
 
-#### When to use MongoDB
+There are two main categories of databases to choose from:
+
+- [Non-Relational Databases](#non-relational-databases)
+- [Relational Databases](#relational-databases)
+
+### Non-Relational Databases
 
 If your project has a lot of dynamic fields, and you are comfortable with allowing Payload to enforce data integrity across your documents, MongoDB is a great choice. With it, your Payload documents are stored as _one_ document in your database—no matter if you have localization enabled, how many block or array fields you have, etc. This means that the shape of your data in your database will very closely reflect your field schema, and there is minimal complexity involved in storing or retrieving your data.
 
@@ -27,47 +52,21 @@ You should prefer MongoDB if:
 
 - You prefer simplicity within your database
 - You don't want to deal with keeping production / staging databases in sync via [DDL changes](https://en.wikipedia.org/wiki/Data_definition_language)
-- Most (or everything) in your project is localized
-- You leverage a lot of array fields, block fields, or `hasMany` select fields and similar
+- Most (or everything) in your project is [Localized](../configuration/localization)
+- You leverage a lot of [Arrays](../fields/array), [Blocks](../fields/blocks), or `hasMany` [Select](../fields/select) fields
 
-#### When to use a relational DB
+### Relational Databases
 
 Many projects might call for more rigid database architecture where the shape of your data is strongly enforced at the database level. For example, if you know the shape of your data and it's relatively "flat", and you don't anticipate it to change often, your workload might suit relational databases like Postgres very well.
 
-You should prefer a relational DB like Postgres if:
+You should prefer a relational DB like Postgres or SQLite if:
 
-- You are comfortable with migration workflows
+- You are comfortable with [Migrations](./migrations)
 - You require enforced data consistency at the database level
 - You have a lot of relationships between collections and require relationships to be enforced
 
-#### Differences in Payload features
+## Payload Differences
 
-It's important to note that almost everything Payload does is available in all of our officially supported database adapters, including localization, arrays, blocks, etc. 
+It's important to note that nearly every Payload feature is available in all of our officially supported Database Adapters, including [Localization](../configuration/localization), [Arrays](../fields/array), [Blocks](../fields/blocks), etc. The only thing that is not supported in SQLite yet is the [Point Field](/docs/fields/point), but that should be added soon.
 
-The only thing that is not supported in Postgres yet is the [Point field](/docs/fields/point), but that should be added soon. 
-
-It's up to you to choose which database you would like to use.
-
-## Configuration
-
-To configure the database for your Payload application, an adapter can be assigned to `config.db`. This property is required within your Payload config. 
-
-Here's an example:
-
-```ts
-import { postgresAdapter } from '@payloadcms/db-postgres'
-
-export default buildConfig({
-  // Your config goes here
-  collections: [
-    // Collections go here
-  ],
-  // Here is where you pass your database adapter
-  // and the adapter will require options specific to itself
-  db: postgresAdapter({
-    pool: {
-      connectionString: process.env.DATABASE_URI,
-    }
-  }),
-})
-```
+It's up to you to choose which database you would like to use based on the requirements of your project. Payload has no opinion on which database you should ultimately choose.

@@ -1,51 +1,41 @@
-import type { Response } from 'express'
+import type { Config } from 'payload'
 
-import express from 'express'
-
-import type { Config } from '../../../packages/payload/src/config/types'
-import type { PayloadRequest } from '../../../packages/payload/src/express/types'
-
-import { applicationEndpoint, rootEndpoint } from '../shared'
+import { applicationEndpoint, rootEndpoint } from '../shared.js'
 
 export const endpoints: Config['endpoints'] = [
   {
-    path: `/${applicationEndpoint}`,
+    handler: (req) => {
+      return Response.json(req.body)
+    },
     method: 'post',
-    handler: (req: PayloadRequest, res: Response): void => {
-      res.json(req.body)
-    },
-  },
-  {
     path: `/${applicationEndpoint}`,
-    method: 'get',
-    handler: (req: PayloadRequest, res: Response): void => {
-      res.json({ message: 'Hello, world!' })
-    },
   },
   {
+    handler: () => {
+      return Response.json({ message: 'Hello, world!' })
+    },
+    method: 'get',
+    path: `/${applicationEndpoint}`,
+  },
+  {
+    handler: (req) => {
+      return Response.json({ message: req.t('general:updatedSuccessfully') })
+    },
+    method: 'get',
     path: `/${applicationEndpoint}/i18n`,
-    method: 'get',
-    handler: (req: PayloadRequest, res: Response): void => {
-      res.json({ message: req.t('general:backToDashboard') })
-    },
   },
   {
-    path: `/${rootEndpoint}`,
-    method: 'get',
-    root: true,
-    handler: (req: PayloadRequest, res: Response): void => {
-      res.json({ message: 'Hello, world!' })
+    handler: () => {
+      return Response.json({ message: 'Hello, world!' })
     },
+    method: 'get',
+    path: `/${rootEndpoint}`,
   },
   {
-    path: `/${rootEndpoint}`,
+    handler: (req) => {
+      return Response.json(req.body)
+    },
     method: 'post',
-    root: true,
-    handler: [
-      express.json({ type: 'application/json' }),
-      (req: PayloadRequest, res: Response): void => {
-        res.json(req.body)
-      },
-    ],
+    path: `/${rootEndpoint}`,
   },
 ]

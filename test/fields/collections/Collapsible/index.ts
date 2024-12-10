@@ -1,7 +1,7 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { collapsibleFieldsSlug } from '../../slugs'
-import { CollapsibleLabelComponent } from './LabelComponent'
+import { collapsibleFieldsSlug } from '../../slugs.js'
+import { getCustomLabel } from './CustomLabel/getCustomLabel.js'
 
 const CollapsibleFields: CollectionConfig = {
   slug: collapsibleFieldsSlug,
@@ -55,8 +55,7 @@ const CollapsibleFields: CollectionConfig = {
           type: 'text',
         },
         {
-          // TODO: change group name, to not be a duplicate of the above collapsible
-          name: 'group',
+          name: 'group2',
           type: 'group',
           fields: [
             {
@@ -78,11 +77,17 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
     {
-      label: ({ data }) => data.functionTitleField || 'Custom Collapsible Label',
       type: 'collapsible',
       admin: {
         description: 'Collapsible label rendered from a function.',
         initCollapsed: true,
+        components: {
+          Label: getCustomLabel({
+            path: 'functionTitleField',
+            fallback: 'Custom Collapsible Label',
+            style: {},
+          }),
+        },
       },
       fields: [
         {
@@ -92,10 +97,12 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
     {
-      label: ({ data }) => data?.componentTitleField || 'Untitled',
       type: 'collapsible',
       admin: {
         description: 'Collapsible label rendered as a react component.',
+        components: {
+          Label: getCustomLabel({ path: 'componentTitleField', style: {} }),
+        },
       },
       fields: [
         {
@@ -104,7 +111,15 @@ const CollapsibleFields: CollectionConfig = {
         },
         {
           type: 'collapsible',
-          label: ({ data }) => data?.nestedTitle || 'Nested Collapsible',
+          admin: {
+            components: {
+              Label: getCustomLabel({
+                path: 'nestedTitle',
+                fallback: 'Nested Collapsible',
+                style: {},
+              }),
+            },
+          },
           fields: [
             {
               type: 'text',
@@ -119,8 +134,12 @@ const CollapsibleFields: CollectionConfig = {
       type: 'array',
       fields: [
         {
-          label: CollapsibleLabelComponent,
           type: 'collapsible',
+          admin: {
+            components: {
+              Label: '/collections/Collapsible/NestedCustomLabel/index.js#NestedCustomLabel',
+            },
+          },
           fields: [
             {
               name: 'innerCollapsible',

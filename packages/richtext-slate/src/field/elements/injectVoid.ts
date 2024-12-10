@@ -2,9 +2,9 @@ import type { Element } from 'slate'
 
 import { Editor, Transforms } from 'slate'
 
-import type { ElementNode } from '../../types'
+import type { ElementNode } from '../../types.js'
 
-import { isLastSelectedElementEmpty } from './isLastSelectedElementEmpty'
+import { isLastSelectedElementEmpty } from './isLastSelectedElementEmpty.js'
 
 export const injectVoidElement = (editor: Editor, element: Element): void => {
   const lastSelectedElementIsEmpty = isLastSelectedElementEmpty(editor)

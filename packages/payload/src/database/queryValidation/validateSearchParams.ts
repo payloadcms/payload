@@ -1,18 +1,19 @@
-import type { SanitizedCollectionConfig } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
-import type { Field } from '../../fields/config/types'
-import type { SanitizedGlobalConfig } from '../../globals/config/types'
-import type { EntityPolicies, PathToQuery } from './types'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { FlattenedField } from '../../fields/config/types.js'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { EntityPolicies, PathToQuery } from './types.js'
 
-import { fieldAffectsData } from '../../fields/config/types'
-import { getEntityPolicies } from '../../utilities/getEntityPolicies'
-import { getLocalizedPaths } from '../getLocalizedPaths'
-import { validateQueryPaths } from './validateQueryPaths'
+import { fieldAffectsData, fieldIsVirtual } from '../../fields/config/types.js'
+import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
+import isolateObjectProperty from '../../utilities/isolateObjectProperty.js'
+import { getLocalizedPaths } from '../getLocalizedPaths.js'
+import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
   errors: { path: string }[]
-  fields: Field[]
+  fields: FlattenedField[]
   globalConfig?: SanitizedGlobalConfig
   operator: string
   overrideAccess: boolean
@@ -20,7 +21,7 @@ type Args = {
   policies: EntityPolicies
   req: PayloadRequest
   val: unknown
-  versionFields?: Field[]
+  versionFields?: FlattenedField[]
 }
 
 /**
@@ -50,20 +51,16 @@ export async function validateSearchParam({
   const { slug } = collectionConfig || globalConfig
 
   if (globalConfig && !policies.globals[slug]) {
-    // eslint-disable-next-line no-param-reassign
-    globalConfig.fields = fields
-
-    // eslint-disable-next-line no-param-reassign
     policies.globals[slug] = await getEntityPolicies({
+      type: 'global',
       entity: globalConfig,
       operations: ['read'],
       req,
-      type: 'global',
     })
   }
 
   if (sanitizedPath !== 'id') {
-    paths = await getLocalizedPaths({
+    paths = getLocalizedPaths({
       collectionSlug: collectionConfig?.slug,
       fields,
       globalSlug: globalConfig?.slug,
@@ -74,6 +71,19 @@ export async function validateSearchParam({
     })
   }
   const promises = []
+
+  // Sanitize relation.otherRelation.id to relation.otherRelation
+  if (paths.at(-1)?.path === 'id') {
+    const previousField = paths.at(-2)?.field
+    if (
+      previousField &&
+      (previousField.type === 'relationship' || previousField.type === 'upload') &&
+      typeof previousField.relationTo === 'string'
+    ) {
+      paths.pop()
+    }
+  }
+
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
@@ -81,15 +91,18 @@ export async function validateSearchParam({
         return
       }
 
+      if (fieldIsVirtual(field)) {
+        errors.push({ path })
+      }
+
       if (!overrideAccess && fieldAffectsData(field)) {
         if (collectionSlug) {
           if (!policies.collections[collectionSlug]) {
-            // eslint-disable-next-line no-param-reassign
             policies.collections[collectionSlug] = await getEntityPolicies({
+              type: 'collection',
               entity: req.payload.collections[collectionSlug].config,
               operations: ['read'],
-              req,
-              type: 'collection',
+              req: isolateObjectProperty(req, 'transactionID'),
             })
           }
 
@@ -101,65 +114,46 @@ export async function validateSearchParam({
             errors.push({ path: incomingPath })
           }
         }
-        let fieldAccess
         let fieldPath = path
         // remove locale from end of path
         if (path.endsWith(`.${req.locale}`)) {
           fieldPath = path.slice(0, -(req.locale.length + 1))
         }
         // remove ".value" from ends of polymorphic relationship paths
-        if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+        if (
+          (field.type === 'relationship' || field.type === 'upload') &&
+          Array.isArray(field.relationTo)
+        ) {
           fieldPath = fieldPath.replace('.value', '')
         }
+
         const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections'
         const entitySlug = collectionSlug || globalConfig.slug
         const segments = fieldPath.split('.')
 
+        let fieldAccess
         if (versionFields) {
           fieldAccess = policies[entityType][entitySlug]
           if (segments[0] === 'parent' || segments[0] === 'version') {
             segments.shift()
-          } else {
-            if (['json', 'relationship', 'richText'].includes(field.type)) {
-              fieldAccess = fieldAccess[field.name]
-            } else {
-              segments.forEach((segment, pathIndex) => {
-                if (fieldAccess[segment]) {
-                  if (pathIndex === segments.length - 1) {
-                    fieldAccess = fieldAccess[segment]
-                  } else if ('fields' in fieldAccess[segment]) {
-                    fieldAccess = fieldAccess[segment].fields
-                  } else if ('blocks' in fieldAccess[segment]) {
-                    fieldAccess = fieldAccess[segment]
-                  }
-                }
-              })
-            }
           }
-
-          fieldAccess = fieldAccess.read.permission
         } else {
           fieldAccess = policies[entityType][entitySlug].fields
-
-          if (['json', 'relationship', 'richText'].includes(field.type)) {
-            fieldAccess = fieldAccess[field.name]
-          } else {
-            segments.forEach((segment, pathIndex) => {
-              if (fieldAccess[segment]) {
-                if (pathIndex === segments.length - 1) {
-                  fieldAccess = fieldAccess[segment]
-                } else if ('fields' in fieldAccess[segment]) {
-                  fieldAccess = fieldAccess[segment].fields
-                } else if ('blocks' in fieldAccess[segment]) {
-                  fieldAccess = fieldAccess[segment]
-                }
-              }
-            })
-          }
-
-          fieldAccess = fieldAccess.read.permission
         }
-        if (!fieldAccess) {
+
+        segments.forEach((segment) => {
+          if (fieldAccess[segment]) {
+            if ('fields' in fieldAccess[segment]) {
+              fieldAccess = fieldAccess[segment].fields
+            } else if ('blocks' in fieldAccess[segment]) {
+              fieldAccess = fieldAccess[segment]
+            } else {
+              fieldAccess = fieldAccess[segment]
+            }
+          }
+        })
+
+        if (!fieldAccess?.read?.permission) {
           errors.push({ path: fieldPath })
         }
       }

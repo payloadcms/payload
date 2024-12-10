@@ -1,22 +1,18 @@
-import type { Payload } from 'payload'
-import type { PathToQuery } from 'payload/database'
-import type { Field } from 'payload/types'
-import type { Operator } from 'payload/types'
+import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
-import objectID from 'bson-objectid'
-import mongoose from 'mongoose'
-import { getLocalizedPaths } from 'payload/database'
-import { fieldAffectsData } from 'payload/types'
-import { validOperators } from 'payload/types'
+import { Types } from 'mongoose'
+import { getLocalizedPaths } from 'payload'
+import { validOperators } from 'payload/shared'
 
-import type { MongooseAdapter } from '..'
+import type { MongooseAdapter } from '../index.js'
 
-import { operatorMap } from './operatorMap'
-import { sanitizeQueryValue } from './sanitizeQueryValue'
+import { operatorMap } from './operatorMap.js'
+import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type SearchParam = {
   path?: string
-  value: unknown
+  rawQuery?: unknown
+  value?: unknown
 }
 
 const subQueryOptions = {
@@ -38,7 +34,7 @@ export async function buildSearchParam({
   val,
 }: {
   collectionSlug?: string
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   incomingPath: string
   locale?: string
@@ -48,24 +44,21 @@ export async function buildSearchParam({
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
   let sanitizedPath = incomingPath.replace(/__/g, '.')
-  if (sanitizedPath === 'id') sanitizedPath = '_id'
+  if (sanitizedPath === 'id') {
+    sanitizedPath = '_id'
+  }
 
   let paths: PathToQuery[] = []
 
   let hasCustomID = false
 
   if (sanitizedPath === '_id') {
-    const customIDfield = payload.collections[collectionSlug]?.config.fields.find(
-      (field) => fieldAffectsData(field) && field.name === 'id',
-    )
+    const customIDFieldType = payload.collections[collectionSlug]?.customIDType
 
     let idFieldType: 'number' | 'text' = 'text'
 
-    if (customIDfield) {
-      if (customIDfield?.type === 'text' || customIDfield?.type === 'number') {
-        idFieldType = customIDfield.type
-      }
-
+    if (customIDFieldType) {
+      idFieldType = customIDFieldType
       hasCustomID = true
     }
 
@@ -75,11 +68,11 @@ export async function buildSearchParam({
       field: {
         name: 'id',
         type: idFieldType,
-      } as Field,
+      } as FlattenedField,
       path: '_id',
     })
   } else {
-    paths = await getLocalizedPaths({
+    paths = getLocalizedPaths({
       collectionSlug,
       fields,
       globalSlug,
@@ -90,15 +83,25 @@ export async function buildSearchParam({
   }
 
   const [{ field, path }] = paths
-
   if (path) {
-    const formattedValue = sanitizeQueryValue({
+    const sanitizedQueryValue = sanitizeQueryValue({
       field,
       hasCustomID,
       operator,
       path,
+      payload,
       val,
     })
+
+    if (!sanitizedQueryValue) {
+      return undefined
+    }
+
+    const { operator: formattedOperator, rawQuery, val: formattedValue } = sanitizedQueryValue
+
+    if (rawQuery) {
+      return { value: rawQuery }
+    }
 
     // If there are multiple collections to search through,
     // Recursively build up a list of query constraints
@@ -125,7 +128,7 @@ export async function buildSearchParam({
               payload,
               where: {
                 [subPath]: {
-                  [operator]: val,
+                  [formattedOperator]: val,
                 },
               },
             })
@@ -138,7 +141,7 @@ export async function buildSearchParam({
               const stringID = doc._id.toString()
               $in.push(stringID)
 
-              if (mongoose.Types.ObjectId.isValid(stringID)) {
+              if (Types.ObjectId.isValid(stringID)) {
                 $in.push(doc._id)
               }
             })
@@ -160,7 +163,7 @@ export async function buildSearchParam({
           const subQuery = priorQueryResult.value
           const result = await SubModel.find(subQuery, subQueryOptions)
 
-          const $in = result.map((doc) => doc._id.toString())
+          const $in = result.map((doc) => doc._id)
 
           // If it is the last recursion
           // then pass through the search param
@@ -183,51 +186,53 @@ export async function buildSearchParam({
       return relationshipQuery
     }
 
-    if (operator && validOperators.includes(operator as Operator)) {
-      const operatorKey = operatorMap[operator]
+    if (formattedOperator && validOperators.includes(formattedOperator as Operator)) {
+      const operatorKey = operatorMap[formattedOperator]
 
       if (field.type === 'relationship' || field.type === 'upload') {
         let hasNumberIDRelation
+        let multiIDCondition = '$or'
+        if (operatorKey === '$ne') {
+          multiIDCondition = '$and'
+        }
 
         const result = {
           value: {
-            $or: [{ [path]: { [operatorKey]: formattedValue } }],
+            [multiIDCondition]: [{ [path]: { [operatorKey]: formattedValue } }],
           },
         }
 
         if (typeof formattedValue === 'string') {
-          if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } })
+          if (Types.ObjectId.isValid(formattedValue)) {
+            result.value[multiIDCondition].push({
+              [path]: { [operatorKey]: new Types.ObjectId(formattedValue) },
+            })
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
               (relationTo) => {
-                const isRelatedToCustomNumberID = payload.collections[
-                  relationTo
-                ]?.config?.fields.find((relatedField) => {
-                  return (
-                    fieldAffectsData(relatedField) &&
-                    relatedField.name === 'id' &&
-                    relatedField.type === 'number'
-                  )
-                })
+                const isRelatedToCustomNumberID =
+                  payload.collections[relationTo]?.customIDType === 'number'
 
                 if (isRelatedToCustomNumberID) {
-                  if (isRelatedToCustomNumberID.type === 'number') hasNumberIDRelation = true
+                  hasNumberIDRelation = true
                 }
               },
             )
 
-            if (hasNumberIDRelation)
-              result.value.$or.push({ [path]: { [operatorKey]: parseFloat(formattedValue) } })
+            if (hasNumberIDRelation) {
+              result.value[multiIDCondition].push({
+                [path]: { [operatorKey]: parseFloat(formattedValue) },
+              })
+            }
           }
         }
 
-        if (result.value.$or.length > 1) {
+        if (result.value[multiIDCondition].length > 1) {
           return result
         }
       }
 
-      if (operator === 'like' && typeof formattedValue === 'string') {
+      if (formattedOperator === 'like' && typeof formattedValue === 'string') {
         const words = formattedValue.split(' ')
 
         const result = {

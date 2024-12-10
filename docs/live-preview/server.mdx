@@ -1,0 +1,192 @@
+---
+title: Server-side Live Preview
+label: Server-side
+order: 30
+desc: Learn how to implement Live Preview in your server-side front-end application.
+keywords: live preview, frontend, react, next.js, vue, nuxt.js, svelte, hook, useLivePreview
+---
+
+<Banner type="info">
+  Server-side Live Preview is only for front-end frameworks that support the concept of Server Components, i.e. [React Server Components](https://react.dev/reference/rsc/server-components). If your front-end application is built with a client-side framework like the [Next.js Pages Router](https://nextjs.org/docs/pages), [React Router](https://reactrouter.com), [Vue 3](https://vuejs.org), etc., see [client-side Live Preview](./client).
+</Banner>
+
+Server-side Live Preview works by making a roundtrip to the server every time your document is saved, i.e. draft save, autosave, or publish. While using Live Preview, the Admin Panel emits a new `window.postMessage` event which your front-end application can use to invoke this process. In Next.js, this means simply calling `router.refresh()` which will hydrate the HTML using new data straight from the [Local API](../local-api/overview).
+
+<Banner type="warning">
+  It is recommended that you enable [Autosave](../versions/autosave) alongside Live Preview to make the experience feel more responsive.
+</Banner>
+
+If your front-end application is built with [React](#react), you can use the `RefreshRouteOnChange` function that Payload provides. In the future, all other major frameworks like Vue and Svelte will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own router refresh component](#building-your-own-router-refresh-component) for more information.
+
+## React
+
+If your front-end application is built with server-side [React](https://react.dev) like [Next.js App Router](https://nextjs.org/docs/app), you can use the `RefreshRouteOnSave` component that Payload provides.
+
+First, install the `@payloadcms/live-preview-react` package:
+
+```bash
+npm install @payloadcms/live-preview-react
+```
+
+Then, render the `RefreshRouteOnSave` component anywhere in your `page.tsx`. Here's an example:
+
+`page.tsx`:
+
+```tsx
+import { RefreshRouteOnSave } from './RefreshRouteOnSave.tsx'
+import { getPayload } from 'payload'
+import config from '../payload.config'
+
+export default async function Page() {
+  const payload = await getPayload({ config })
+
+  const page = await payload.findByID({
+    collection: 'pages',
+    id: '123',
+    draft: true
+  })
+
+  return (
+    <Fragment>
+      <RefreshRouteOnSave />
+      <h1>{page.title}</h1>
+    </Fragment>
+  )
+}
+```
+
+`RefreshRouteOnSave.tsx`:
+
+```tsx
+'use client'
+import { RefreshRouteOnSave as PayloadLivePreview } from '@payloadcms/live-preview-react'
+import { useRouter } from 'next/navigation.js'
+import React from 'react'
+
+export const RefreshRouteOnSave: React.FC = () => {
+  const router = useRouter()
+
+  return (
+    <PayloadLivePreview
+      refresh={() => router.refresh()}
+      serverURL={process.env.NEXT_PUBLIC_PAYLOAD_URL}
+    />
+  )
+}
+```
+
+## Building your own router refresh component
+
+No matter what front-end framework you are using, you can build your own component using the same underlying tooling that Payload provides.
+
+First, install the base `@payloadcms/live-preview` package:
+
+```bash
+npm install @payloadcms/live-preview
+```
+
+This package provides the following functions:
+
+| Path                  | Description                                                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`ready`**           | Sends a `window.postMessage` event to the Admin Panel to indicate that the front-end is ready to receive messages.                         |
+| **`isDocumentEvent`** | Checks if a `MessageEvent` originates from the Admin Panel and is a document-level event, i.e. draft save, autosave, publish, etc.         |
+
+With these functions, you can build your own hook using your front-end framework of choice:
+
+```tsx
+import { ready, isDocumentEvent } from '@payloadcms/live-preview'
+
+// To build your own component:
+// 1. Listen for document-level `window.postMessage` events sent from the Admin Panel
+// 2. Tell the Admin Panel when it is ready to receive messages
+// 3. Refresh the route every time a new document-level event is received
+// 4. Unsubscribe from the `window.postMessage` events when it unmounts
+```
+
+Here is an example of what the same `RefreshRouteOnSave` React component from above looks like under the hood:
+
+```tsx
+'use client'
+
+import type React from 'react'
+
+import { isDocumentEvent, ready } from '@payloadcms/live-preview'
+import { useCallback, useEffect, useRef } from 'react'
+
+export const RefreshRouteOnSave: React.FC<{
+  apiRoute?: string
+  depth?: number
+  refresh: () => void
+  serverURL: string
+}> = (props) => {
+  const { apiRoute, depth, refresh, serverURL } = props
+  const hasSentReadyMessage = useRef<boolean>(false)
+
+  const onMessage = useCallback(
+    (event: MessageEvent) => {
+      if (isDocumentEvent(event, serverURL)) {
+        if (typeof refresh === 'function') {
+          refresh()
+        }
+      }
+    },
+    [refresh, serverURL],
+  )
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('message', onMessage)
+    }
+
+    if (!hasSentReadyMessage.current) {
+      hasSentReadyMessage.current = true
+
+      ready({
+        serverURL,
+      })
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('message', onMessage)
+      }
+    }
+  }, [serverURL, onMessage, depth, apiRoute])
+
+  return null
+}
+```
+
+## Example
+
+For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview/payload). There you will find a fully working example of how to implement Live Preview in your Next.js App Router application.
+
+## Troubleshooting
+
+#### Updates do not appear as fast as client-side Live Preview
+
+If you are noticing that updates feel less snappy than client-side Live Preview (i.e. the `useLivePreview` hook), this is because of how the two differ in how they work—instead of emitting events against _form state_, server-side Live Preview refreshes the route after a new document is _saved_.
+
+Use [Autosave](../versions/autosave) to mimic this effect server-side. Try decreasing the value of `versions.autoSave.interval` to make the experience feel more responsive:
+
+```ts
+// collection.ts
+{
+   versions: {
+    drafts: {
+      autosave: {
+        interval: 375,
+      },
+    },
+  },
+}
+```
+
+#### Iframe refuses to connect
+
+If your front-end application has set a [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) (CSP) that blocks the Admin Panel from loading your front-end application, the iframe will not be able to load your site. To resolve this, you can whitelist the Admin Panel's domain in your CSP by setting the `frame-ancestors` directive:
+
+```plaintext
+frame-ancestors: "self" localhost:* https://your-site.com;
+```

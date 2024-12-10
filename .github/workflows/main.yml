@@ -2,109 +2,427 @@ name: build
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types:
+      - opened
+      - reopened
+      - synchronize
   push:
-    branches: ['main']
+    branches:
+      - main
+
+concurrency:
+  # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref_protected && github.sha || ''}}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 22.6.0
+  PNPM_VERSION: 9.7.1
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pull-requests: read
     outputs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
+      needs_tests: ${{ steps.filter.outputs.needs_tests }}
       templates: ${{ steps.filter.outputs.templates }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 25
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          needs_build:
-            - '.github/workflows/**'
-            - 'packages/**'
-            - 'test/**'
-            - 'pnpm-lock.yaml'
-            - 'package.json'
-          templates:
-            - 'templates/**'
-    - name: Log all filter results
-      run: |
-        echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
-        echo "templates: ${{ steps.filter.outputs.templates }}"
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
 
-  core-build:
-    needs: changes
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
-    runs-on: ubuntu-latest
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            needs_build:
+              - '.github/workflows/**'
+              - 'packages/**'
+              - 'test/**'
+              - 'pnpm-lock.yaml'
+              - 'package.json'
+              - 'templates/**'
+            needs_tests:
+              - '.github/workflows/**'
+              - 'packages/**'
+              - 'test/**'
+              - 'pnpm-lock.yaml'
+              - 'package.json'
+            templates:
+              - 'templates/**'
+      - name: Log all filter results
+        run: |
+          echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
+          echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
+          echo "templates: ${{ steps.filter.outputs.templates }}"
 
+  lint:
+    if: >
+      github.event_name == 'pull_request' && !contains(github.event.pull_request.title, 'no-lint') && !contains(github.event.pull_request.title, 'skip-lint')
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 25
+          fetch-depth: 0
 
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
-          node-version: 18
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
+      - name: Lint staged
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...${GITHUB_SHA}
+          npx lint-staged --diff="origin/${GITHUB_BASE_REF}...${GITHUB_SHA}"
 
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
+  build:
+    needs: changes
+    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - run: pnpm install
-      - run: pnpm run build
+      - run: pnpm run build:all
+        env:
+          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 
       - name: Cache build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
-  tests:
-    runs-on: ubuntu-latest
-    needs: core-build
+  tests-unit:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Unit Tests
+        run: pnpm test:unit
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+
+  tests-types:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Types Tests
+        run: pnpm test:types --target '>=5.7'
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+
+  tests-int:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    name: int-${{ matrix.database }}
     strategy:
       fail-fast: false
       matrix:
-        database: [mongoose, postgres]
+        database:
+          - mongodb
+          - postgres
+          - postgres-custom-schema
+          - postgres-uuid
+          - supabase
+          - sqlite
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payloadtests
+      AWS_ENDPOINT_URL: http://127.0.0.1:4566
+      AWS_ACCESS_KEY_ID: localstack
+      AWS_SECRET_ACCESS_KEY: localstack
+      AWS_REGION: us-east-1
+
+    services:
+      postgres:
+        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'postgis/postgis:16-3.4' || '' }}
+        env:
+          # must specify password for PG Docker container image, see: https://registry.hub.docker.com/_/postgres?tab=description&page=1&name=10
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Start LocalStack
+        run: pnpm docker:start
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+        if: matrix.database == 'supabase'
+
+      - name: Initialize Supabase
+        run: |
+          supabase init
+          supabase start
+        if: matrix.database == 'supabase'
+
+      - name: Configure PostgreSQL
+        run: |
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
+          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
+        if: startsWith(matrix.database, 'postgres')
+
+      - name: Configure PostgreSQL with custom schema
+        run: |
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE SCHEMA custom;"
+        if: matrix.database == 'postgres-custom-schema'
+
+      - name: Configure Supabase
+        run: |
+          echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
+        if: matrix.database == 'supabase'
+
+      - name: Integration Tests
+        uses: nick-fields/retry@v3
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+        with:
+          retry_on: any
+          max_attempts: 5
+          timeout_minutes: 15
+          command: pnpm test:int
+          on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile
+
+  tests-e2e:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    name: e2e-${{ matrix.suite }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
+        suite:
+          - _community
+          - access-control
+          - admin__e2e__1
+          - admin__e2e__2
+          - admin__e2e__3
+          - admin-root
+          - auth
+          - auth-basic
+          - field-error-states
+          - fields-relationship
+          - fields
+          - fields__collections__Blocks
+          - fields__collections__Array
+          - fields__collections__Relationship
+          - fields__collections__RichText
+          - fields__collections__Lexical__e2e__main
+          - fields__collections__Lexical__e2e__blocks
+          - fields__collections__Date
+          - fields__collections__Number
+          - fields__collections__Point
+          - fields__collections__Tabs
+          - fields__collections__Text
+          - fields__collections__Upload
+          - live-preview
+          - localization
+          - locked-documents
+          - i18n
+          - plugin-cloud-storage
+          - plugin-form-builder
+          - plugin-nested-docs
+          - plugin-seo
+          - versions
+          - uploads
+    env:
+      SUITE_NAME: ${{ matrix.suite }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Start LocalStack
+        run: pnpm docker:start
+        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+
+      - name: Store Playwright's Version
+        run: |
+          # Extract the version number using a more targeted regex pattern with awk
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+
+      - name: Cache Playwright Browsers for Playwright's Version
+        id: cache-playwright-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Setup Playwright - Browsers and Dependencies
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Setup Playwright - Dependencies-only
+        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: E2E Tests
+        uses: nick-fields/retry@v3
+        with:
+          retry_on: any
+          max_attempts: 5
+          timeout_minutes: 20
+          command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
+          on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile && pnpm build:all
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.suite }}
+          path: test/test-results/
+          if-no-files-found: ignore
+          retention-days: 1
+
+      # Disabled until this is fixed: https://github.com/daun/playwright-report-summary/issues/156
+      # - uses: daun/playwright-report-summary@v3
+      #   with:
+      #     report-file: results_${{ matrix.suite }}.json
+      #     report-tag: ${{ matrix.suite }}
+      #     job-summary: true
+
+  # Build listed templates with packed local packages
+  build-templates:
+    runs-on: ubuntu-24.04
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - template: blank
+            database: mongodb
+          - template: website
+            database: mongodb
+          - template: with-payload-cloud
+            database: mongodb
+          - template: with-vercel-mongodb
+            database: mongodb
+          # Postgres
+          - template: with-postgres
+            database: postgres
+          - template: with-vercel-postgres
+            database: postgres
+
+          # Re-enable once PG conncection is figured out
+          # - template: with-vercel-website
+          #   database: postgres
+
+    name: ${{ matrix.template }}-${{ matrix.database }}
+
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: payloadtests
 
     steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
-          version: 8
-          run_install: false
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -112,13 +430,16 @@ jobs:
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: '14'  # See https://hub.docker.com/_/postgres for available versions
+          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
         if: matrix.database == 'postgres'
 
-      - run: sleep 30
+      - name: Wait for PostgreSQL
+        run: sleep 30
+        if: matrix.database == 'postgres'
+
       - name: Configure PostgreSQL
         run: |
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
@@ -126,75 +447,34 @@ jobs:
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
         if: matrix.database == 'postgres'
 
-      - name: Component Tests
-        run: pnpm test:components
-
-      - name: Integration Tests
-        run: pnpm test:int
-        env:
-          NODE_OPTIONS: --max-old-space-size=8096
-          PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
-
-  tests-e2e:
-    runs-on: ubuntu-latest
-    needs: core-build
-    strategy:
-      fail-fast: false
-      matrix:
-        part: [1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.11.0
         with:
-          node-version: 18
+          mongodb-version: 6.0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: E2E Tests
-        uses: nick-fields/retry@v2
-        with:
-          retry_on: error
-          max_attempts: 2
-          timeout_minutes: 15
-          command: pnpm test:e2e --part ${{ matrix.part }} --bail
-
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: test-results
-          path: test-results/
-          retention-days: 1
+      - name: Build Template
+        run: |
+          pnpm run script:pack --dest templates/${{ matrix.template }}
+          pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }} $POSTGRES_URL
 
   tests-type-generation:
-    runs-on: ubuntu-latest
-    needs: core-build
-
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
-          version: 8
-          run_install: false
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -205,110 +485,33 @@ jobs:
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
-  build-packages:
-    runs-on: ubuntu-latest
-    needs: core-build
-    strategy:
-      fail-fast: false
-      matrix:
-        pkg:
-          - db-mongodb
-          - db-postgres
-          - bundler-webpack
-          - bundler-vite
-          - richtext-slate
-          - richtext-lexical
-          - live-preview
-          - live-preview-react
+  all-green:
+    name: All Green
+    if: always()
+    runs-on: ubuntu-24.04
+    needs:
+      - lint
+      - build
+      - build-templates
+      - tests-unit
+      - tests-int
+      - tests-e2e
+      - tests-types
+      - tests-type-generation
 
     steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+        run: exit 1
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Build ${{ matrix.pkg }}
-        run: pnpm turbo run build --filter=${{ matrix.pkg }}
-
-  plugins:
-    runs-on: ubuntu-latest
-    needs: core-build
-    strategy:
-      fail-fast: false
-      matrix:
-        pkg:
-          - create-payload-app
-          - plugin-cloud
-          - plugin-cloud-storage
-          - plugin-form-builder
-          - plugin-nested-docs
-          - plugin-search
-          - plugin-sentry
+  publish-canary:
+    name: Publish Canary
+    runs-on: ubuntu-24.04
+    if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
+    needs:
+      - all-green
 
     steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Build ${{ matrix.pkg }}
-        run: pnpm turbo run build --filter=${{ matrix.pkg }}
-
-      - name: Test ${{ matrix.pkg }}
-        run: pnpm --filter ${{ matrix.pkg }} run test
-        if: matrix.pkg != 'create-payload-app' # degit doesn't work within GitHub Actions
-
-  templates:
-    needs: changes
-    if: ${{ needs.changes.outputs.templates == 'true' }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        template: [blank, website, ecommerce]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.10.0
-        with:
-          mongodb-version: 6.0
-
-      - name: Build Website
-        run: |
-          cd templates/${{ matrix.template }}
-          cp .env.example .env
-          yarn install
-          yarn build
+      # debug github.ref output
+      - run: |
+          echo github.ref: ${{ github.ref }}
+          echo isV3: ${{ github.ref == 'refs/heads/main' }}

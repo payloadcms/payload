@@ -13,12 +13,12 @@
     "tests",
     "test",
     "node_modules",
-    ".eslintrc.js",
+    "eslint.config.js",
     "src/**/*.spec.js",
     "src/**/*.spec.jsx",
     "src/**/*.spec.ts",
     "src/**/*.spec.tsx"
   ],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
-  "references": [{ "path": "../payload" }]
+  "references": [{ "path": "../payload" }, { "path": "../ui" }, { "path": "../next" }]
 }

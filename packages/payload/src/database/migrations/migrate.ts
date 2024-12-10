@@ -1,13 +1,18 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequest } from '../../express/types'
-import type { BaseDatabaseAdapter } from '../types'
+import type { PayloadRequest } from '../../types/index.js'
+import type { BaseDatabaseAdapter } from '../types.js'
 
-import { getMigrations } from './getMigrations'
-import { readMigrationFiles } from './readMigrationFiles'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { getMigrations } from './getMigrations.js'
+import { readMigrationFiles } from './readMigrationFiles.js'
 
-export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
+export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
+  this: BaseDatabaseAdapter,
+  args,
+): Promise<void> {
   const { payload } = this
-  const migrationFiles = await readMigrationFiles({ payload })
+  const migrationFiles = args?.migrations || (await readMigrationFiles({ payload }))
   const { existingMigrations, latestBatch } = await getMigrations({ payload })
 
   const newBatch = latestBatch + 1
@@ -20,17 +25,17 @@ export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
 
     // Run migration if not found in database
     if (existingMigration) {
-      continue // eslint-disable-line no-continue
+      continue
     }
 
     const start = Date.now()
-    let transactionID: number | string | undefined
+    const req = { payload } as PayloadRequest
 
     payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
     try {
-      transactionID = await this.beginTransaction()
-      await migration.up({ payload })
+      await initTransaction(req)
+      await migration.up({ payload, req })
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
       await payload.create({
         collection: 'payload-migrations',
@@ -38,11 +43,11 @@ export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
           name: migration.name,
           batch: newBatch,
         },
-        ...(transactionID && { req: { transactionID } as PayloadRequest }),
+        req,
       })
-      await this.commitTransaction(transactionID)
+      await commitTransaction(req)
     } catch (err: unknown) {
-      await this.rollbackTransaction(transactionID)
+      await killTransaction(req)
       payload.logger.error({ err, msg: `Error running migration ${migration.name}` })
       throw err
     }

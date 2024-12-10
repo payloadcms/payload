@@ -1,9 +1,24 @@
+import type { AdminViewProps } from 'payload'
+
+import { Button } from '@payloadcms/ui'
+import LinkImport from 'next/link.js'
 import React from 'react'
 
-import { type AdminViewComponent } from '../../../../../packages/payload/src/config/types'
-import { customNestedViewTitle } from '../../../shared'
+import { customNestedViewTitle, customViewPath } from '../../../shared.js'
 
-const CustomNestedView: AdminViewComponent = () => {
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+
+export const CustomNestedView: React.FC<AdminViewProps> = ({ initPageResult }) => {
+  const {
+    req: {
+      payload: {
+        config: {
+          routes: { admin: adminRoute },
+        },
+      },
+    },
+  } = initPageResult
+
   return (
     <div
       style={{
@@ -19,8 +34,20 @@ const CustomNestedView: AdminViewComponent = () => {
           <code>components.views[key].Component</code>
         </li>
       </ul>
+      <div className="custom-view__controls">
+        <Button buttonStyle="secondary" el="link" Link={Link} to={`${adminRoute}`}>
+          Go to Dashboard
+        </Button>
+        &nbsp; &nbsp; &nbsp;
+        <Button
+          buttonStyle="secondary"
+          el="link"
+          Link={Link}
+          to={`${adminRoute}/${customViewPath}`}
+        >
+          Go to Custom View
+        </Button>
+      </div>
     </div>
   )
 }
-
-export default CustomNestedView

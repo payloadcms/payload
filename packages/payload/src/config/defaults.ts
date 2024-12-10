@@ -1,22 +1,36 @@
-import path from 'path'
+import type { JobsConfig } from '../queues/config/types/index.js'
+import type { Config } from './types.js'
 
-import type { Config } from './types'
+import defaultAccess from '../auth/defaultAccess.js'
 
-export const defaults: Omit<Config, 'db' | 'editor'> = {
+export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
-    avatar: 'default',
-    buildPath: path.resolve(process.cwd(), './build'),
+    avatar: 'gravatar',
     components: {},
-    css: path.resolve(__dirname, '../admin/scss/custom.css'),
+    custom: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
+    dependencies: {},
     disable: false,
-    inactivityRoute: '/logout-inactivity',
-    indexHTML: path.resolve(__dirname, '../admin/index.html'),
-    logoutRoute: '/logout',
+    importMap: {
+      baseDir: `${typeof process?.cwd === 'function' ? process.cwd() : ''}`,
+    },
     meta: {
+      defaultOGImageType: 'dynamic',
       titleSuffix: '- Payload',
     },
+    routes: {
+      account: '/account',
+      createFirstUser: '/create-first-user',
+      forgot: '/forgot',
+      inactivity: '/logout-inactivity',
+      login: '/login',
+      logout: '/logout',
+      reset: '/reset',
+      unauthorized: '/unauthorized',
+    },
+    theme: 'all',
   },
+  bin: [],
   collections: [],
   cookiePrefix: 'payload',
   cors: [],
@@ -25,13 +39,6 @@ export const defaults: Omit<Config, 'db' | 'editor'> = {
   defaultDepth: 2,
   defaultMaxTextLength: 40000,
   endpoints: [],
-  express: {
-    compression: {},
-    json: {},
-    middleware: [],
-    postMiddleware: [],
-    preMiddleware: [],
-  },
   globals: [],
   graphQL: {
     disablePlaygroundInProduction: true,
@@ -39,12 +46,16 @@ export const defaults: Omit<Config, 'db' | 'editor'> = {
     schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
   },
   hooks: {},
+  i18n: {},
+  jobs: {
+    access: {
+      run: defaultAccess,
+    },
+    deleteJobOnComplete: true,
+    depth: 0,
+  } as JobsConfig,
   localization: false,
   maxDepth: 10,
-  rateLimit: {
-    max: 500,
-    window: 15 * 60 * 1000, // 15min default,
-  },
   routes: {
     admin: '/admin',
     api: '/api',
@@ -54,6 +65,7 @@ export const defaults: Omit<Config, 'db' | 'editor'> = {
   serverURL: '',
   telemetry: true,
   typescript: {
+    autoGenerate: true,
     outputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
   },
   upload: {},

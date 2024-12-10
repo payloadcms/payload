@@ -1,7 +1,6 @@
-import type { FileData, TypeWithID } from 'payload/types'
-import type { CollectionAfterDeleteHook, CollectionConfig } from 'payload/types'
+import type { CollectionAfterDeleteHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
-import type { GeneratedAdapter, TypeWithPrefix } from '../types'
+import type { GeneratedAdapter, TypeWithPrefix } from '../types.js'
 
 interface Args {
   adapter: GeneratedAdapter
@@ -20,15 +19,17 @@ export const getAfterDeleteHook = ({
       ]
 
       const promises = filesToDelete.map(async (filename) => {
-        if (filename) await adapter.handleDelete({ collection, doc, filename, req })
+        if (filename) {
+          await adapter.handleDelete({ collection, doc, filename, req })
+        }
       })
 
       await Promise.all(promises)
     } catch (err: unknown) {
-      req.payload.logger.error(
-        `There was an error while deleting files corresponding to the ${collection.labels?.singular} with ID ${doc.id}:`,
-      )
-      req.payload.logger.error(err)
+      req.payload.logger.error({
+        err,
+        msg: `There was an error while deleting files corresponding to the ${collection.labels?.singular} with ID ${doc.id}.`,
+      })
     }
     return doc
   }

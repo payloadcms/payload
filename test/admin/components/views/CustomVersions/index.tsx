@@ -1,42 +1,43 @@
-import React, { Fragment, useEffect } from 'react'
-import { Redirect } from 'react-router-dom'
+import type { EditViewComponent, PayloadServerReactComponent } from 'payload'
 
-import type { AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+import { SetStepNav } from '@payloadcms/ui'
+import { notFound, redirect } from 'next/navigation.js'
+import React, { Fragment } from 'react'
 
-import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
-import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
-
-const CustomVersionsView: AdminViewComponent = ({
-  canAccessAdmin,
-  // collection,
-  // global,
-  user,
+export const CustomVersionsView: PayloadServerReactComponent<EditViewComponent> = ({
+  initPageResult,
 }) => {
+  if (!initPageResult) {
+    notFound()
+  }
+
   const {
-    routes: { admin: adminRoute },
-  } = useConfig()
-
-  const { setStepNav } = useStepNav()
-
-  // This effect will only run one time and will allow us
-  // to set the step nav to display our custom route name
-
-  useEffect(() => {
-    setStepNav([
-      {
-        label: 'Custom Versions View',
+    permissions: { canAccessAdmin },
+    req: {
+      payload: {
+        config: {
+          routes: { admin: adminRoute },
+        },
       },
-    ])
-  }, [setStepNav])
+      user,
+    },
+  } = initPageResult
 
   // If an unauthorized user tries to navigate straight to this page,
   // Boot 'em out
   if (!user || (user && !canAccessAdmin)) {
-    return <Redirect to={`${adminRoute}/unauthorized`} />
+    return redirect(`${adminRoute}/unauthorized`)
   }
 
   return (
     <Fragment>
+      <SetStepNav
+        nav={[
+          {
+            label: 'Custom Versions View',
+          },
+        ]}
+      />
       <div
         style={{
           marginTop: 'calc(var(--base) * 2)',
@@ -48,7 +49,7 @@ const CustomVersionsView: AdminViewComponent = ({
         <p>This custom Versions view was added through one of the following Payload configs:</p>
         <ul>
           <li>
-            <code>components.views.Edit.Versions</code>
+            <code>components.views.edit.Versions</code>
             <p>
               {'This allows you to override only the Versions edit view specifically, but '}
               <b>
@@ -58,7 +59,7 @@ const CustomVersionsView: AdminViewComponent = ({
             </p>
           </li>
           <li>
-            <code>components.views.Edit.Versions.Component</code>
+            <code>components.views.edit.versions.Component</code>
           </li>
           <p>
             This is the most granular override, allowing you to override only the Versions
@@ -69,5 +70,3 @@ const CustomVersionsView: AdminViewComponent = ({
     </Fragment>
   )
 }
-
-export default CustomVersionsView

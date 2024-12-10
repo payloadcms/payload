@@ -1,18 +1,25 @@
-import auth from '../../../auth/operations/local'
-import create from './create'
-import deleteLocal from './delete'
-import find from './find'
-import findByID from './findByID'
-import findVersionByID from './findVersionByID'
-import findVersions from './findVersions'
-import restoreVersion from './restoreVersion'
-import update from './update'
+/* eslint-disable no-restricted-exports */
+import * as auth from '../../../auth/operations/local/index.js'
+import count from './count.js'
+import countVersions from './countVersions.js'
+import create from './create.js'
+import deleteLocal from './delete.js'
+import { duplicate } from './duplicate.js'
+import { findLocal } from './find.js'
+import findByID from './findByID.js'
+import findVersionByID from './findVersionByID.js'
+import findVersions from './findVersions.js'
+import restoreVersion from './restoreVersion.js'
+import update from './update.js'
 
 export default {
   auth,
+  count,
+  countVersions,
   create,
   deleteLocal,
-  find,
+  duplicate,
+  find: findLocal,
   findByID,
   findVersionByID,
   findVersions,

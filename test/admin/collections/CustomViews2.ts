@@ -1,48 +1,79 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import CustomTabComponent from '../components/CustomTabComponent'
-import CustomTabView from '../components/views/CustomTab'
-import CustomTabView2 from '../components/views/CustomTab2'
-import CustomNestedTabView from '../components/views/CustomTabNested'
-import CustomVersionsView from '../components/views/CustomVersions'
 import {
+  customCollectionMetaTitle,
+  customCollectionParamViewPath,
+  customCollectionParamViewPathBase,
+  customDefaultTabMetaTitle,
   customEditLabel,
   customNestedTabViewPath,
   customTabLabel,
   customTabViewPath,
-} from '../shared'
-import { customViews2CollectionSlug } from '../slugs'
+  customVersionsTabMetaTitle,
+  customViewMetaTitle,
+} from '../shared.js'
+import { customViews2CollectionSlug } from '../slugs.js'
 
 export const CustomViews2: CollectionConfig = {
   slug: customViews2CollectionSlug,
-  versions: true,
   admin: {
+    meta: {
+      title: customCollectionMetaTitle,
+    },
     components: {
       views: {
-        Edit: {
+        edit: {
           // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
-          Default: {
-            Tab: {
+          customViewWithParam: {
+            Component: '/components/views/CustomTabWithParam/index.js#CustomTabWithParamView',
+            tab: {
+              href: `${customCollectionParamViewPathBase}/123`,
+              label: 'Custom Param View',
+            },
+            path: customCollectionParamViewPath,
+          },
+          default: {
+            tab: {
               label: customEditLabel,
             },
-          },
-          Versions: CustomVersionsView,
-          MyCustomView: {
-            path: '/custom-tab-view',
-            Component: CustomTabView,
-            Tab: {
-              label: customTabLabel,
-              href: '/custom-tab-view',
+            meta: {
+              title: customDefaultTabMetaTitle,
             },
           },
-          MyCustomViewWithCustomTab: {
-            path: customTabViewPath,
-            Component: CustomTabView2,
-            Tab: CustomTabComponent,
+          myCustomView: {
+            Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
+            tab: {
+              href: '/custom-tab-view',
+              label: customTabLabel,
+            },
+            path: '/custom-tab-view',
+            meta: {
+              title: customViewMetaTitle,
+            },
           },
-          MyCustomViewWithNestedPath: {
+          myCustomViewWithCustomTab: {
+            Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
+            tab: {
+              Component: '/components/CustomTabComponent/index.js#CustomTabComponent',
+            },
+            path: customTabViewPath,
+          },
+          myCustomViewWithNestedPath: {
+            Component: '/components/views/CustomTabNested/index.js#CustomNestedTabView',
+            tab: {
+              href: customNestedTabViewPath,
+              label: 'Custom Nested Tab View',
+            },
             path: customNestedTabViewPath,
-            Component: CustomNestedTabView,
+            meta: {
+              title: 'Custom Nested Meta Title',
+            },
+          },
+          versions: {
+            Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
+            meta: {
+              title: customVersionsTabMetaTitle,
+            },
           },
         },
       },
@@ -54,4 +85,5 @@ export const CustomViews2: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: true,
 }

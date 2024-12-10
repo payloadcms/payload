@@ -1,42 +1,67 @@
-import { GraphQLClient } from 'graphql-request'
+import type { Payload } from 'payload'
 
-import { initPayloadTest } from '../helpers/configHelpers'
-import configPromise from './config'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-let client: GraphQLClient
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+
+let restClient: NextRESTClient
+let payload: Payload
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 describe('Custom GraphQL', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    const config = await configPromise
-    const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`
-    client = new GraphQLClient(url)
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
-  describe('Isolated Transaction ID', () => {
-    it('should isolate transaction IDs between queries in the same request', async () => {
-      const query = `query {
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
+  if (!['sqlite'].includes(process.env.PAYLOAD_DATABASE || '')) {
+    describe('Isolated Transaction ID', () => {
+      it('should isolate transaction IDs between queries in the same request', async () => {
+        const query = `query {
           TransactionID1
           TransactionID2
       }`
-      const response = await client.request(query)
-      // either no transactions at all or they are different
-      expect(
-        (response.TransactionID2 === null && response.TransactionID1 === null) ||
-          response.TransactionID2 !== response.TransactionID1,
-      ).toBe(true)
-    })
-    it('should isolate transaction IDs between mutations in the same request', async () => {
-      const query = `mutation {
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+          })
+          .then((res) => res.json())
+        // either no transactions at all or they are different
+        expect(
+          (data.TransactionID2 === null && data.TransactionID1 === null) ||
+            data.TransactionID2 !== data.TransactionID1,
+        ).toBe(true)
+      })
+      it('should isolate transaction IDs between mutations in the same request', async () => {
+        const query = `mutation {
           MutateTransactionID1
           MutateTransactionID2
       }`
-      const response = await client.request(query)
-      // either no transactions at all or they are different
-      expect(
-        (response.MutateTransactionID2 === null && response.MutateTransactionID1 === null) ||
-          response.MutateTransactionID2 !== response.MutateTransactionID1,
-      ).toBe(true)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+          })
+          .then((res) => res.json())
+        // either no transactions at all or they are different
+        expect(
+          (data.MutateTransactionID2 === null && data.MutateTransactionID1 === null) ||
+            data.MutateTransactionID2 !== data.MutateTransactionID1,
+        ).toBe(true)
+      })
     })
-  })
+  } else {
+    it('should not run isolated transaction ID tests for sqlite', () => {
+      expect(true).toBe(true)
+    })
+  }
 })

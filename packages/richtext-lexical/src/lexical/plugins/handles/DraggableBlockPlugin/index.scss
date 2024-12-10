@@ -1,0 +1,78 @@
+@import '../../../../scss/styles.scss';
+
+@layer payload-default {
+  .draggable-block-menu {
+    border-radius: $style-radius-m;
+    padding: 0;
+    cursor: grab;
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    will-change: transform;
+    background-color: var(--theme-bg);
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &:hover {
+      background-color: var(--theme-elevation-100);
+      .icon {
+        opacity: 1;
+      }
+    }
+
+    .icon {
+      width: 18px;
+      height: 24px;
+      opacity: 0.3;
+      background-image: url(../../../ui/icons/DraggableBlock/index.svg);
+    }
+
+    html[data-theme='dark'] & {
+      .icon {
+        background-image: url(../../../ui/icons/DraggableBlock/light.svg);
+      }
+    }
+  }
+
+  .rich-text-lexical--show-gutter
+    > .rich-text-lexical__wrap
+    > .editor-container
+    > .editor-scroller
+    > .editor {
+    > .draggable-block-target-line {
+      left: 3rem;
+    }
+  }
+
+  .draggable-block-target-line {
+    pointer-events: none;
+    background: var(--theme-success-400);
+    border-radius: 1px;
+    height: base(0.2);
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    will-change: transform;
+    transition: transform 0.1s;
+  }
+
+  /* This targets Firefox 57+. The transition looks ugly on firefox, thus we disable it here */
+  @-moz-document url-prefix() {
+    .draggable-block-target-line {
+      transition: none;
+    }
+  }
+
+  .rich-text-lexical {
+    .ContentEditable__root > * {
+      will-change: margin-top, margin-bottom;
+      transition:
+        margin-top 0.08s,
+        margin-bottom 0.08s;
+    }
+  }
+}

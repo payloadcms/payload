@@ -1,32 +1,33 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from 'payload'
 
-import CustomTabComponent from '../components/CustomTabComponent'
-import CustomDefaultEditView from '../components/views/CustomEditDefault'
-import CustomView from '../components/views/CustomTab'
-import CustomVersionsView from '../components/views/CustomVersions'
-import { customGlobalViews2GlobalSlug } from '../slugs'
+import { customGlobalViews2GlobalSlug } from '../slugs.js'
 
 export const CustomGlobalViews2: GlobalConfig = {
   slug: customGlobalViews2GlobalSlug,
-  versions: true,
   admin: {
     components: {
       views: {
-        Edit: {
-          Default: CustomDefaultEditView,
-          Versions: CustomVersionsView,
-          MyCustomView: {
-            path: '/custom-tab-view',
-            Component: CustomView,
-            Tab: {
-              label: 'Custom',
-              href: '/custom-tab-view',
-            },
+        edit: {
+          default: {
+            Component: '/components/views/CustomEditDefault/index.js#CustomDefaultEditView',
           },
-          MyCustomViewWithCustomTab: {
+          myCustomView: {
+            Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
+            tab: {
+              href: '/custom-tab-view',
+              label: 'Custom',
+            },
+            path: '/custom-tab-view',
+          },
+          myCustomViewWithCustomTab: {
+            Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
+            tab: {
+              Component: '/components/CustomTabComponent/index.js#CustomTabComponent',
+            },
             path: '/custom-tab-component',
-            Component: CustomView,
-            Tab: CustomTabComponent,
+          },
+          versions: {
+            Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
           },
         },
       },
@@ -38,4 +39,5 @@ export const CustomGlobalViews2: GlobalConfig = {
       type: 'text',
     },
   ],
+  versions: true,
 }

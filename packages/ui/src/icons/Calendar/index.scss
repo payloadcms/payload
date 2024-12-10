@@ -1,0 +1,13 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .icon--calendar {
+    height: $baseline;
+    width: $baseline;
+
+    .stroke {
+      stroke: currentColor;
+      stroke-width: $style-stroke-width-s;
+    }
+  }
+}

@@ -1,0 +1,107 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .array-field {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 2);
+
+    &__header {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) / 2);
+
+      &__header-content {
+        display: flex;
+        flex-direction: column;
+        gap: calc(var(--base) / 4);
+      }
+    }
+
+    &--has-no-error {
+      > .array-field__header .array-field__header-content {
+        color: var(--theme-text);
+      }
+    }
+
+    &__header-content {
+      display: flex;
+      align-items: center;
+      gap: base(0.5);
+    }
+
+    &__header-wrap {
+      display: flex;
+      align-items: flex-end;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    &__header-actions {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      color: var(--theme-elevation-800);
+    }
+
+    &__header-action {
+      @extend %btn-reset;
+      cursor: pointer;
+      margin-left: base(0.5);
+
+      &:hover,
+      &:focus-visible {
+        text-decoration: underline;
+        color: var(--theme-elevation-600);
+      }
+    }
+
+    &__row-header {
+      display: flex;
+      align-items: center;
+      gap: base(0.5);
+      pointer-events: none;
+    }
+
+    &__draggable-rows {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) / 2);
+    }
+
+    &__title {
+      margin-bottom: 0;
+    }
+
+    &__add-row {
+      align-self: flex-start;
+      color: var(--theme-elevation-400);
+      margin: 2px 0;
+
+      &:hover {
+        color: var(--theme-elevation-800);
+      }
+    }
+  }
+
+  html[data-theme='light'] {
+    .array-field {
+      &--has-error {
+        > .array-field__header .array-field__header-content {
+          color: var(--theme-error-750);
+        }
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .array-field {
+      &--has-error {
+        > .array-field__header .array-field__header-content {
+          color: var(--theme-error-500);
+        }
+      }
+    }
+  }
+}

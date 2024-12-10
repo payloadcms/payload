@@ -3,8 +3,8 @@ import { jsx } from 'slate-hyperscript'
 
 const ELEMENT_TAGS = {
   A: (el) => ({
-    newTab: el.getAttribute('target') === '_blank',
     type: 'link',
+    newTab: el.getAttribute('target') === '_blank',
     url: el.getAttribute('href'),
   }),
   BLOCKQUOTE: () => ({ type: 'blockquote' }),
@@ -72,7 +72,7 @@ const deserialize = (el) => {
   return children
 }
 
-const withHTML = (incomingEditor) => {
+export const withHTML = (incomingEditor) => {
   const { insertData } = incomingEditor
 
   const editor = incomingEditor
@@ -94,5 +94,3 @@ const withHTML = (incomingEditor) => {
 
   return editor
 }
-
-export default withHTML

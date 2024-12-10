@@ -1,17 +1,19 @@
-import type { Field, PayloadRequest } from 'payload/types'
+import type { Field, PayloadRequest, PopulateType } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/types'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
-import { populate } from './populate'
-import { recurseRichText } from './richTextRelationshipPromise'
+import { populate } from './populate.js'
+import { recurseRichText } from './richTextRelationshipPromise.js'
 
 type NestedRichTextFieldsArgs = {
   currentDepth?: number
   data: unknown
   depth: number
+  draft: boolean
   fields: Field[]
   overrideAccess: boolean
-  promises: Promise<void>[]
+  populateArg?: PopulateType
+  populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
 }
@@ -20,9 +22,11 @@ export const recurseNestedFields = ({
   currentDepth = 0,
   data,
   depth,
+  draft,
   fields,
   overrideAccess = false,
-  promises,
+  populateArg,
+  populationPromises,
   req,
   showHiddenFields,
 }: NestedRichTextFieldsArgs): void => {
@@ -34,17 +38,20 @@ export const recurseNestedFields = ({
             data[field.name].forEach(({ relationTo, value }, i) => {
               const collection = req.payload.collections[relationTo]
               if (collection) {
-                promises.push(
+                populationPromises.push(
                   populate({
                     id: value,
                     collection,
                     currentDepth,
                     data: data[field.name],
                     depth,
+                    draft,
                     field,
                     key: i,
                     overrideAccess,
                     req,
+                    select:
+                      populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate,
                     showHiddenFields,
                   }),
                 )
@@ -54,17 +61,20 @@ export const recurseNestedFields = ({
             data[field.name].forEach((id, i) => {
               const collection = req.payload.collections[field.relationTo as string]
               if (collection) {
-                promises.push(
+                populationPromises.push(
                   populate({
                     id,
                     collection,
                     currentDepth,
                     data: data[field.name],
                     depth,
+                    draft,
                     field,
                     key: i,
                     overrideAccess,
                     req,
+                    select:
+                      populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate,
                     showHiddenFields,
                   }),
                 )
@@ -78,17 +88,19 @@ export const recurseNestedFields = ({
         ) {
           if (!('hasMany' in field) || !field.hasMany) {
             const collection = req.payload.collections[data[field.name].relationTo]
-            promises.push(
+            populationPromises.push(
               populate({
                 id: data[field.name].value,
                 collection,
                 currentDepth,
                 data: data[field.name],
                 depth,
+                draft,
                 field,
                 key: 'value',
                 overrideAccess,
                 req,
+                select: populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate,
                 showHiddenFields,
               }),
             )
@@ -97,17 +109,19 @@ export const recurseNestedFields = ({
       }
       if (typeof data[field.name] !== 'undefined' && typeof field.relationTo === 'string') {
         const collection = req.payload.collections[field.relationTo]
-        promises.push(
+        populationPromises.push(
           populate({
             id: data[field.name],
             collection,
             currentDepth,
             data,
             depth,
+            draft,
             field,
             key: field.name,
             overrideAccess,
             req,
+            select: populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate,
             showHiddenFields,
           }),
         )
@@ -118,9 +132,11 @@ export const recurseNestedFields = ({
           currentDepth,
           data: data[field.name],
           depth,
+          draft,
           fields: field.fields,
           overrideAccess,
-          promises,
+          populateArg,
+          populationPromises,
           req,
           showHiddenFields,
         })
@@ -129,9 +145,11 @@ export const recurseNestedFields = ({
           currentDepth,
           data,
           depth,
+          draft,
           fields: field.fields,
           overrideAccess,
-          promises,
+          populateArg,
+          populationPromises,
           req,
           showHiddenFields,
         })
@@ -140,11 +158,13 @@ export const recurseNestedFields = ({
       field.tabs.forEach((tab) => {
         recurseNestedFields({
           currentDepth,
-          data,
+          data: tabHasName(tab) ? data[tab.name] : data,
           depth,
+          draft,
           fields: tab.fields,
           overrideAccess,
-          promises,
+          populateArg,
+          populationPromises,
           req,
           showHiddenFields,
         })
@@ -158,9 +178,11 @@ export const recurseNestedFields = ({
               currentDepth,
               data: data[field.name][i],
               depth,
+              draft,
               fields: block.fields,
               overrideAccess,
-              promises,
+              populateArg,
+              populationPromises,
               req,
               showHiddenFields,
             })
@@ -174,9 +196,11 @@ export const recurseNestedFields = ({
             currentDepth,
             data: data[field.name][i],
             depth,
+            draft,
             fields: field.fields,
             overrideAccess,
-            promises,
+            populateArg,
+            populationPromises,
             req,
             showHiddenFields,
           })
@@ -191,9 +215,10 @@ export const recurseNestedFields = ({
             children: node.children,
             currentDepth,
             depth,
+            draft,
             field,
             overrideAccess,
-            promises,
+            populationPromises,
             req,
             showHiddenFields,
           })

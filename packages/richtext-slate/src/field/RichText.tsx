@@ -1,108 +1,132 @@
 'use client'
 
+import type { PayloadRequest } from 'payload'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
-import isHotkey from 'is-hotkey'
-import { Error, FieldDescription, Label, useField, withCondition } from 'payload/components/forms'
-import { useEditDepth } from 'payload/components/utilities'
-import { getTranslation } from 'payload/utilities'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'
+import { getTranslation } from '@payloadcms/translations'
+import {
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  RenderCustomComponent,
+  useEditDepth,
+  useField,
+  useTranslation,
+  withCondition,
+} from '@payloadcms/ui'
+import { mergeFieldStyles } from '@payloadcms/ui/shared'
+import { isHotkey } from 'is-hotkey'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import { createEditor, Node, Element as SlateElement, Text, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
-import type { ElementNode, FieldProps, RichTextElement, RichTextLeaf, TextNode } from '../types'
+import type { ElementNode, TextNode } from '../types.js'
+import type { LoadedSlateFieldProps } from './types.js'
 
-import { defaultRichTextValue } from '../data/defaultValue'
-import { richTextValidate } from '../data/validation'
-import elementTypes from './elements'
-import listTypes from './elements/listTypes'
-import enablePlugins from './enablePlugins'
-import hotkeys from './hotkeys'
+import { defaultRichTextValue } from '../data/defaultValue.js'
+import { richTextValidate } from '../data/validation.js'
+import { listTypes } from './elements/listTypes.js'
 import './index.scss'
-import leafTypes from './leaves'
-import toggleLeaf from './leaves/toggle'
-import mergeCustomFunctions from './mergeCustomFunctions'
-import withEnterBreakOut from './plugins/withEnterBreakOut'
-import withHTML from './plugins/withHTML'
-
-const defaultElements: RichTextElement[] = [
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
-  'ul',
-  'ol',
-  'indent',
-  'link',
-  'relationship',
-  'upload',
-]
-const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code']
+import { hotkeys } from './hotkeys.js'
+import { toggleLeaf } from './leaves/toggle.js'
+import { withEnterBreakOut } from './plugins/withEnterBreakOut.js'
+import { withHTML } from './plugins/withHTML.js'
+import { ElementButtonProvider } from './providers/ElementButtonProvider.js'
+import { ElementProvider } from './providers/ElementProvider.js'
+import { LeafButtonProvider } from './providers/LeafButtonProvider.js'
+import { LeafProvider } from './providers/LeafProvider.js'
 
 const baseClass = 'rich-text'
 
 declare module 'slate' {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor & HistoryEditor
+    Editor: BaseEditor & HistoryEditor & ReactEditor
     Element: ElementNode
     Text: TextNode
   }
 }
 
-const RichText: React.FC<FieldProps> = (props) => {
+const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      condition,
-      description,
-      hideGutter,
-      placeholder,
-      readOnly,
-      style,
-      width,
-    } = {
-      className: undefined,
-      condition: undefined,
-      description: undefined,
-      hideGutter: undefined,
-      placeholder: undefined,
-      readOnly: undefined,
-      style: undefined,
-      width: undefined,
+    elements,
+    field,
+    field: {
+      name,
+      admin: { className, description, placeholder, readOnly: readOnlyFromAdmin } = {},
+      label,
+      required,
     },
-    admin,
-    defaultValue: defaultValueFromProps,
-    label,
+    leaves,
     path: pathFromProps,
-    required,
+    plugins,
+    readOnly: readOnlyFromTopLevelProps,
+    schemaPath: schemaPathFromProps,
     validate = richTextValidate,
   } = props
 
-  const elements: RichTextElement[] = admin?.elements || defaultElements
-  const leaves: RichTextLeaf[] = admin?.leaves || defaultLeaves
+  const path = pathFromProps ?? name
+  const schemaPath = schemaPathFromProps ?? name
 
-  const path = pathFromProps || name
+  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n } = useTranslation()
-  const [loaded, setLoaded] = useState(false)
-  const [enabledElements, setEnabledElements] = useState({})
-  const [enabledLeaves, setEnabledLeaves] = useState({})
   const editorRef = useRef(null)
   const toolbarRef = useRef(null)
 
   const drawerDepth = useEditDepth()
   const drawerIsOpen = drawerDepth > 1
 
+  const memoizedValidate = useCallback(
+    (value, validationOptions) => {
+      if (typeof validate === 'function') {
+        return validate(value, {
+          ...validationOptions,
+          req: {
+            t: i18n.t,
+          } as PayloadRequest,
+          required,
+        })
+      }
+    },
+    [validate, required, i18n],
+  )
+
+  const {
+    customComponents: { Description, Error, Label } = {},
+    formInitializing,
+    initialValue,
+    setValue,
+    showError,
+    value,
+  } = useField({
+    path,
+    validate: memoizedValidate,
+  })
+
+  const disabled = readOnlyFromProps || formInitializing
+
+  const editor = useMemo(() => {
+    let CreatedEditor = withEnterBreakOut(withHistory(withReact(createEditor())))
+
+    CreatedEditor = withHTML(CreatedEditor)
+
+    if (plugins.length) {
+      CreatedEditor = plugins.reduce((editorWithPlugins, plugin) => {
+        return plugin(editorWithPlugins)
+      }, CreatedEditor)
+    }
+
+    return CreatedEditor
+  }, [plugins])
+
   const renderElement = useCallback(
     ({ attributes, children, element }) => {
-      const matchedElement = enabledElements[element.type]
+      // return <div {...attributes}>{children}</div>
+
+      const matchedElement = elements[element.type]
       const Element = matchedElement?.Element
 
       let attr = { ...attributes }
@@ -111,14 +135,14 @@ const RichText: React.FC<FieldProps> = (props) => {
       if (element.textAlign) {
         if (element.type === 'relationship' || element.type === 'upload') {
           switch (element.textAlign) {
+            case 'center':
+              attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } }
+              break
             case 'left':
               attr = { ...attr, style: { marginRight: 'auto' } }
               break
             case 'right':
               attr = { ...attr, style: { marginLeft: 'auto' } }
-              break
-            case 'center':
-              attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } }
               break
             default:
               attr = { ...attr, style: { textAlign: element.textAlign } }
@@ -126,11 +150,11 @@ const RichText: React.FC<FieldProps> = (props) => {
           }
         } else if (element.type === 'li') {
           switch (element.textAlign) {
-            case 'right':
-              attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } }
-              break
             case 'center':
               attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'center' } }
+              break
+            case 'right':
+              attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } }
               break
             case 'left':
             default:
@@ -144,15 +168,17 @@ const RichText: React.FC<FieldProps> = (props) => {
 
       if (Element) {
         const el = (
-          <Element
+          <ElementProvider
             attributes={attr}
+            childNodes={children}
             editorRef={editorRef}
             element={element}
             fieldProps={props}
             path={path}
+            schemaPath={schemaPath}
           >
-            {children}
-          </Element>
+            {Element}
+          </ElementProvider>
         )
 
         return el
@@ -160,22 +186,32 @@ const RichText: React.FC<FieldProps> = (props) => {
 
       return <div {...attr}>{children}</div>
     },
-    [enabledElements, path, props],
+    [elements, path, props, schemaPath],
   )
 
   const renderLeaf = useCallback(
     ({ attributes, children, leaf }) => {
-      const matchedLeaves = Object.entries(enabledLeaves).filter(([leafName]) => leaf[leafName])
+      const matchedLeaves = Object.entries(leaves).filter(([leafName]) => leaf[leafName])
 
       if (matchedLeaves.length > 0) {
         return matchedLeaves.reduce(
-          (result, [leafName], i) => {
-            if (enabledLeaves[leafName]?.Leaf) {
-              const Leaf = enabledLeaves[leafName]?.Leaf
+          (result, [, leafConfig], i) => {
+            if (leafConfig?.Leaf) {
+              const Leaf = leafConfig.Leaf
+
               return (
-                <Leaf editorRef={editorRef} fieldProps={props} key={i} leaf={leaf} path={path}>
-                  {result}
-                </Leaf>
+                <LeafProvider
+                  attributes={attributes}
+                  editorRef={editorRef}
+                  fieldProps={props}
+                  key={i}
+                  leaf={leaf}
+                  path={path}
+                  result={result}
+                  schemaPath={schemaPath}
+                >
+                  {Leaf}
+                </LeafProvider>
               )
             }
 
@@ -187,45 +223,8 @@ const RichText: React.FC<FieldProps> = (props) => {
 
       return <span {...attributes}>{children}</span>
     },
-    [enabledLeaves, path, props],
+    [path, props, schemaPath, leaves],
   )
-
-  const memoizedValidate = useCallback(
-    (value, validationOptions) => {
-      return validate(value, { ...validationOptions, required })
-    },
-    [validate, required],
-  )
-
-  const fieldType = useField({
-    condition,
-    path,
-    validate: memoizedValidate,
-  })
-
-  const { errorMessage, initialValue, setValue, showError, value } = fieldType
-
-  const classes = [
-    baseClass,
-    'field-type',
-    className,
-    showError && 'error',
-    readOnly && `${baseClass}--read-only`,
-    !hideGutter && `${baseClass}--gutter`,
-  ]
-    .filter(Boolean)
-    .join(' ')
-
-  const editor = useMemo(() => {
-    let CreatedEditor = withEnterBreakOut(withHistory(withReact(createEditor())))
-
-    CreatedEditor = withHTML(CreatedEditor)
-    CreatedEditor = enablePlugins(CreatedEditor, elements)
-    CreatedEditor = enablePlugins(CreatedEditor, leaves)
-
-    return CreatedEditor
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elements, leaves, path])
 
   // All slate changes fire the onChange event
   // including selection changes
@@ -233,7 +232,7 @@ const RichText: React.FC<FieldProps> = (props) => {
   // and only fire setValue when onChange is because of value
   const handleChange = useCallback(
     (val: unknown) => {
-      const ops = editor.operations.filter((o: BaseOperation) => {
+      const ops = editor?.operations.filter((o: BaseOperation) => {
         if (o) {
           return o.type !== 'set_selection'
         }
@@ -241,25 +240,13 @@ const RichText: React.FC<FieldProps> = (props) => {
       })
 
       if (ops && Array.isArray(ops) && ops.length > 0) {
-        if (!readOnly && val !== defaultRichTextValue && val !== value) {
+        if (!disabled && val !== defaultRichTextValue && val !== value) {
           setValue(val)
         }
       }
     },
-    [editor.operations, readOnly, setValue, value],
+    [editor?.operations, disabled, setValue, value],
   )
-
-  useEffect(() => {
-    if (!loaded) {
-      const mergedElements = mergeCustomFunctions(elements, elementTypes)
-      const mergedLeaves = mergeCustomFunctions(leaves, leafTypes)
-
-      setEnabledElements(mergedElements)
-      setEnabledLeaves(mergedLeaves)
-
-      setLoaded(true)
-    }
-  }, [loaded, elements, leaves])
 
   useEffect(() => {
     function setClickableState(clickState: 'disabled' | 'enabled') {
@@ -271,20 +258,22 @@ const RichText: React.FC<FieldProps> = (props) => {
         const isButton = child.tagName === 'BUTTON'
         const isDisabling = clickState === 'disabled'
         child.setAttribute('tabIndex', isDisabling ? '-1' : '0')
-        if (isButton) child.setAttribute('disabled', isDisabling ? 'disabled' : null)
+        if (isButton) {
+          child.setAttribute('disabled', isDisabling ? 'disabled' : null)
+        }
       })
     }
 
-    if (loaded && readOnly) {
+    if (disabled) {
       setClickableState('disabled')
     }
 
     return () => {
-      if (loaded && readOnly) {
+      if (disabled) {
         setClickableState('enabled')
       }
     }
-  }, [loaded, readOnly])
+  }, [disabled])
 
   // useEffect(() => {
   //   // If there is a change to the initial value, we need to reset Slate history
@@ -296,9 +285,17 @@ const RichText: React.FC<FieldProps> = (props) => {
   //   }
   // }, [path, editor]);
 
-  if (!loaded) {
-    return null
-  }
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
+  const classes = [
+    baseClass,
+    'field-type',
+    className,
+    showError && 'error',
+    disabled && `${baseClass}--read-only`,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   let valueToRender = value
 
@@ -311,27 +308,26 @@ const RichText: React.FC<FieldProps> = (props) => {
     }
   }
 
-  if (!valueToRender) valueToRender = defaultValueFromProps || defaultRichTextValue
+  if (!valueToRender) {
+    valueToRender = defaultRichTextValue
+  }
 
   return (
-    <div
-      className={classes}
-      style={{
-        ...style,
-        width,
-      }}
-    >
+    <div className={classes} style={styles}>
+      {Label || <FieldLabel label={label} required={required} />}
       <div className={`${baseClass}__wrap`}>
-        <Error message={errorMessage} showError={showError} />
-        <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         <Slate
           editor={editor}
-          key={JSON.stringify({ initialValue, path })}
+          key={JSON.stringify({ initialValue, path })} // makes sure slate is completely re-rendered when initialValue changes, bypassing the slate-internal value memoization. That way, external changes to the form will update the editor
           onChange={handleChange}
           value={valueToRender as any[]}
         >
           <div className={`${baseClass}__wrapper`}>
-            {elements?.length + leaves?.length > 0 && (
+            {Object.keys(elements)?.length + Object.keys(leaves)?.length > 0 && (
               <div
                 className={[`${baseClass}__toolbar`, drawerIsOpen && `${baseClass}__drawerIsOpen`]
                   .filter(Boolean)
@@ -339,30 +335,39 @@ const RichText: React.FC<FieldProps> = (props) => {
                 ref={toolbarRef}
               >
                 <div className={`${baseClass}__toolbar-wrap`}>
-                  {elements.map((element, i) => {
-                    let elementName: string
-                    if (typeof element === 'object' && element?.name) elementName = element.name
-                    if (typeof element === 'string') elementName = element
-
-                    const elementType = enabledElements[elementName]
-                    const Button = elementType?.Button
+                  {Object.values(elements).map((element) => {
+                    const Button = element?.Button
 
                     if (Button) {
-                      return <Button fieldProps={props} key={i} path={path} />
+                      return (
+                        <ElementButtonProvider
+                          disabled={disabled}
+                          fieldProps={props}
+                          key={element.name}
+                          path={path}
+                          schemaPath={schemaPath}
+                        >
+                          {Button}
+                        </ElementButtonProvider>
+                      )
                     }
 
                     return null
                   })}
-                  {leaves.map((leaf, i) => {
-                    let leafName: string
-                    if (typeof leaf === 'object' && leaf?.name) leafName = leaf.name
-                    if (typeof leaf === 'string') leafName = leaf
-
-                    const leafType = enabledLeaves[leafName]
-                    const Button = leafType?.Button
+                  {Object.values(leaves).map((leaf) => {
+                    const Button = leaf?.Button
 
                     if (Button) {
-                      return <Button fieldProps={props} key={i} path={path} />
+                      return (
+                        <LeafButtonProvider
+                          fieldProps={props}
+                          key={leaf.name}
+                          path={path}
+                          schemaPath={schemaPath}
+                        >
+                          {Button}
+                        </LeafButtonProvider>
+                      )
                     }
 
                     return null
@@ -437,7 +442,7 @@ const RichText: React.FC<FieldProps> = (props) => {
                   })
                 }}
                 placeholder={getTranslation(placeholder, i18n)}
-                readOnly={readOnly}
+                readOnly={disabled}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
                 spellCheck
@@ -445,9 +450,13 @@ const RichText: React.FC<FieldProps> = (props) => {
             </div>
           </div>
         </Slate>
-        <FieldDescription description={description} value={value} />
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )
 }
-export default withCondition(RichText)
+
+export const RichText = withCondition(RichTextField)

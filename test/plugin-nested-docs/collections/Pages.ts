@@ -1,7 +1,6 @@
-// const payload = require('payload');
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import populateFullTitle from './populateFullTitle'
+import { populateFullTitle } from './populateFullTitle.js'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -11,6 +10,9 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'fullTitle',
+  },
+  versions: {
+    drafts: true,
   },
   access: {
     read: () => true,
@@ -37,7 +39,7 @@ export const Pages: CollectionConfig = {
       },
       admin: {
         components: {
-          Field: () => null,
+          Field: null,
         },
       },
     },

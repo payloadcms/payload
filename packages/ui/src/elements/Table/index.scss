@@ -1,0 +1,106 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .table {
+    margin-bottom: $baseline;
+    overflow: auto;
+    max-width: 100%;
+
+    table {
+      min-width: 100%;
+    }
+
+    thead {
+      color: var(--theme-elevation-400);
+
+      th {
+        font-weight: normal;
+        text-align: left;
+        [dir='rtl'] & {
+          text-align: right;
+        }
+      }
+    }
+
+    th,
+    td {
+      vertical-align: top;
+      padding: base(0.8) base(0.6);
+      min-width: 150px;
+
+      &:first-child {
+        padding-inline-start: base(0.8);
+      }
+
+      &:last-child {
+        padding-inline-end: base(0.8);
+      }
+    }
+
+    tbody {
+      tr {
+        &:nth-child(odd) {
+          background: var(--theme-elevation-50);
+          border-radius: $style-radius-s;
+        }
+      }
+    }
+
+    a:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
+
+    &--appearance-condensed {
+      thead {
+        th:first-child {
+          border-top-left-radius: $style-radius-s;
+        }
+
+        th:last-child {
+          border-top-right-radius: $style-radius-s;
+        }
+
+        background: var(--theme-elevation-50);
+      }
+
+      tbody {
+        tr {
+          &:nth-child(odd) {
+            background: transparent;
+            border-radius: 0;
+          }
+        }
+      }
+
+      th,
+      td {
+        padding: base(0.3) base(0.3);
+
+        &:first-child {
+          padding-inline-start: base(0.6);
+        }
+
+        &:last-child {
+          padding-inline-end: base(0.6);
+        }
+      }
+
+      th {
+        padding: base(0.3);
+      }
+
+      tr td,
+      th {
+        border: 0.5px solid var(--theme-elevation-100);
+      }
+    }
+
+    @include mid-break {
+      th,
+      td {
+        max-width: 70vw;
+      }
+    }
+  }
+}

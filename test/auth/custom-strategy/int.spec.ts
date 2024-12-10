@@ -1,10 +1,15 @@
-import payload from '../../../packages/payload/src'
-import { initPayloadTest } from '../../helpers/configHelpers'
-import { slug } from './config'
+import type { Payload } from 'payload'
 
-require('isomorphic-fetch')
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-let apiUrl
+import type { NextRESTClient } from '../../helpers/NextRESTClient.js'
+
+import { initPayloadInt } from '../../helpers/initPayloadInt.js'
+import { usersSlug } from './shared.js'
+
+let payload: Payload
+let restClient: NextRESTClient
 
 const [code, secret, name] = ['test', 'strategy', 'Tester']
 
@@ -12,35 +17,35 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('AuthStrategies', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    apiUrl = `${serverURL}/api`
+    ;({ payload, restClient } = await initPayloadInt(dirname, 'auth/custom-strategy'))
   })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 
   describe('create user', () => {
     beforeAll(async () => {
-      await fetch(`${apiUrl}/${slug}`, {
+      await restClient.POST(`/${usersSlug}`, {
         body: JSON.stringify({
+          name,
           code,
           secret,
-          name,
         }),
         headers,
-        method: 'post',
       })
     })
 
     it('should return a logged in user from /me', async () => {
-      const response = await fetch(`${apiUrl}/${slug}/me`, {
+      const response = await restClient.GET(`/${usersSlug}/me`, {
         headers: {
-          ...headers,
           code,
           secret,
         },
@@ -48,6 +53,8 @@ describe('AuthStrategies', () => {
 
       const data = await response.json()
 
+      // Expect that the auth strategy should be able to return headers
+      expect(response.headers.has('Smile-For-Me')).toBeTruthy()
       expect(response.status).toBe(200)
       expect(data.user.name).toBe(name)
     })

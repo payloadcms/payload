@@ -1,24 +1,22 @@
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import verifyEmail from '../verifyEmail'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { verifyEmailOperation } from '../verifyEmail.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
+export type Options<T extends CollectionSlug> = {
   collection: T
+  context?: RequestContext
   req?: PayloadRequest
   token: string
 }
 
-async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
+async function localVerifyEmail<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<boolean> {
-  const { collection: collectionSlug, req = {} as PayloadRequest, token } = options
-  setRequestContext(req)
+  const { collection: collectionSlug, token } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -28,15 +26,11 @@ async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
     )
   }
 
-  req.payload = payload
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.i18n = i18nInit(payload.config.i18n)
-
-  return verifyEmail({
+  return verifyEmailOperation({
     collection,
-    req,
+    req: await createLocalReq(options, payload),
     token,
   })
 }
 
-export default localVerifyEmail
+export const verifyEmail = localVerifyEmail

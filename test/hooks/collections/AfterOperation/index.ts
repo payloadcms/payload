@@ -1,18 +1,13 @@
-import type {
-  AfterOperationHook,
-  CollectionConfig,
-} from '../../../../packages/payload/src/collections/config/types'
-
-import { AfterOperation } from '../../payload-types'
+import type { CollectionConfig } from 'payload'
 
 export const afterOperationSlug = 'afterOperation'
 
-const AfterOperation: CollectionConfig = {
+export const AfterOperationCollection: CollectionConfig = {
   slug: afterOperationSlug,
   hooks: {
     // beforeRead: [(operation) => operation.doc],
     afterOperation: [
-      async ({ result, operation }) => {
+      ({ result, operation }) => {
         if (operation === 'create') {
           if ('docs' in result) {
             return {
@@ -28,8 +23,8 @@ const AfterOperation: CollectionConfig = {
         }
 
         if (operation === 'find') {
-          // only modify the first doc for `find` operations
-          // this is so we can test against the other operations
+          // Only modify the first doc for `find` operations.
+          // This is so that we can test against the other operations
           return {
             ...result,
             docs: result.docs?.map((doc, index) =>
@@ -65,7 +60,7 @@ const AfterOperation: CollectionConfig = {
 
         return result
       },
-    ] as AfterOperationHook<AfterOperation>[],
+    ],
   },
   fields: [
     {
@@ -75,5 +70,3 @@ const AfterOperation: CollectionConfig = {
     },
   ],
 }
-
-export default AfterOperation

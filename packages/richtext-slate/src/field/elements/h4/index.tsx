@@ -1,17 +1,14 @@
-import React from 'react'
+import type { RichTextCustomElement } from '../../../types.js'
 
-import H4Icon from '../../icons/headings/H4'
-import ElementButton from '../Button'
+const name = 'h4'
 
-const H4 = ({ attributes, children }) => <h4 {...attributes}>{children}</h4>
-
-const h4 = {
-  Button: () => (
-    <ElementButton format="h4">
-      <H4Icon />
-    </ElementButton>
-  ),
-  Element: H4,
+export const h4: RichTextCustomElement = {
+  name,
+  Button: {
+    clientProps: {
+      format: name,
+    },
+    path: '@payloadcms/richtext-slate/client#H4ElementButton',
+  },
+  Element: '@payloadcms/richtext-slate/client#Heading4Element',
 }
-
-export default h4

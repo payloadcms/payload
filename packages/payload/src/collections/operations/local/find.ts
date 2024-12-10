@@ -1,17 +1,28 @@
-import type { GeneratedTypes } from '../../../'
-import type { PaginatedDocs } from '../../../database/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Document, Where } from '../../../types'
+import type { PaginatedDocs } from '../../../database/types.js'
+import type {
+  CollectionSlug,
+  JoinQuery,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  Sort,
+  TransformCollectionWithSelect,
+  Where,
+} from '../../../types/index.js'
+import type { SelectFromCollectionSlug } from '../../config/types.js'
 
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import { getDataLoader } from '../../dataloader'
-import find from '../find'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { findOperation } from '../find.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
@@ -20,48 +31,50 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   depth?: number
   disableErrors?: boolean
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: false | TypedLocale
+  includeLockStatus?: boolean
+  joins?: JoinQuery<TSlug>
   limit?: number
-  locale?: string
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
-  sort?: string
+  sort?: Sort
   user?: Document
   where?: Where
 }
 
-export default async function findLocal<T extends keyof GeneratedTypes['collections']>(
+export async function findLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<T>,
-): Promise<PaginatedDocs<GeneratedTypes['collections'][T]>> {
+  options: Options<TSlug, TSelect>,
+): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> {
   const {
     collection: collectionSlug,
-    context,
     currentDepth,
     depth,
     disableErrors,
     draft = false,
-    fallbackLocale,
+    includeLockStatus,
+    joins,
     limit,
-    locale = null,
     overrideAccess = true,
     page,
     pagination = true,
-    req = {} as PayloadRequest,
+    populate,
+    select,
     showHiddenFields,
     sort,
-    user,
     where,
   } = options
-  setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -69,38 +82,21 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     )
   }
 
-  let fallbackLocaleToUse = defaultLocale
-
-  if (typeof req.fallbackLocale !== 'undefined') {
-    fallbackLocaleToUse = req.fallbackLocale
-  }
-
-  if (typeof fallbackLocale !== 'undefined') {
-    fallbackLocaleToUse = fallbackLocale
-  }
-
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.locale = locale ?? req?.locale ?? defaultLocale
-  req.fallbackLocale = fallbackLocaleToUse
-  req.i18n = i18nInit(payload.config.i18n)
-  req.payload = payload
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
-  if (typeof user !== 'undefined') req.user = user
-
-  return find<GeneratedTypes['collections'][T]>({
+  return findOperation<TSlug, TSelect>({
     collection,
     currentDepth,
     depth,
     disableErrors,
     draft,
+    includeLockStatus,
+    joins,
     limit,
     overrideAccess,
     page,
     pagination,
-    req,
+    populate,
+    req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
     sort,
     where,

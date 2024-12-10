@@ -1,16 +1,14 @@
-import type { GeneratedTypes } from '../../..'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Result } from '../forgotPassword'
+import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
+import type { Result } from '../forgotPassword.js'
 
-import { getDataLoader } from '../../../collections/dataloader'
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import forgotPassword from '../forgotPassword'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { forgotPasswordOperation } from '../forgotPassword.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
+export type Options<T extends CollectionSlug> = {
   collection: T
+  context?: RequestContext
   data: {
     email: string
   }
@@ -19,18 +17,11 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequest
 }
 
-async function localForgotPassword<T extends keyof GeneratedTypes['collections']>(
+async function localForgotPassword<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {
-  const {
-    collection: collectionSlug,
-    data,
-    disableEmail,
-    expiration,
-    req = {} as PayloadRequest,
-  } = options
-  setRequestContext(req)
+  const { collection: collectionSlug, data, disableEmail, expiration } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -42,20 +33,13 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
     )
   }
 
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.payload = payload
-  req.i18n = i18nInit(payload.config.i18n)
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
-  return forgotPassword({
+  return forgotPasswordOperation({
     collection,
     data,
     disableEmail,
     expiration,
-    req,
+    req: await createLocalReq(options, payload),
   })
 }
 
-export default localForgotPassword
+export const forgotPassword = localForgotPassword

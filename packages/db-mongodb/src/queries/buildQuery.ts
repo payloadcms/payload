@@ -1,13 +1,12 @@
-import type { Payload } from 'payload'
-import type { Field, Where } from 'payload/types'
+import type { FlattenedField, Payload, Where } from 'payload'
 
-import { QueryError } from 'payload/errors'
+import { QueryError } from 'payload'
 
-import { parseParams } from './parseParams'
+import { parseParams } from './parseParams.js'
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string
-  versionsFields?: Field[]
+  versionsFields?: FlattenedField[]
 }
 
 export type BuildQueryArgs = {
@@ -19,7 +18,10 @@ export type BuildQueryArgs = {
 
 // This plugin asynchronously builds a list of Mongoose query constraints
 // which can then be used in subsequent Mongoose queries.
-const getBuildQueryPlugin = ({ collectionSlug, versionsFields }: GetBuildQueryPluginArgs = {}) => {
+export const getBuildQueryPlugin = ({
+  collectionSlug,
+  versionsFields,
+}: GetBuildQueryPluginArgs = {}) => {
   return function buildQueryPlugin(schema) {
     const modifiedSchema = schema
     async function buildQuery({
@@ -32,11 +34,11 @@ const getBuildQueryPlugin = ({ collectionSlug, versionsFields }: GetBuildQueryPl
       if (!fields) {
         if (globalSlug) {
           const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug)
-          fields = globalConfig.fields
+          fields = globalConfig.flattenedFields
         }
         if (collectionSlug) {
           const collectionConfig = payload.collections[collectionSlug].config
-          fields = collectionConfig.fields
+          fields = collectionConfig.flattenedFields
         }
       }
       const errors = []
@@ -58,5 +60,3 @@ const getBuildQueryPlugin = ({ collectionSlug, versionsFields }: GetBuildQueryPl
     modifiedSchema.statics.buildQuery = buildQuery
   }
 }
-
-export default getBuildQueryPlugin

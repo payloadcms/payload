@@ -1,23 +1,27 @@
 type Query {
   Collection1(id: String!, draft: Boolean): Collection1
   Collection1s(draft: Boolean, where: Collection1_where, limit: Int, page: Int, sort: String): Collection1s
+  countCollection1s(draft: Boolean, where: Collection1_where): countCollection1s
   docAccessCollection1(id: String!): collection1DocAccess
   Collection2(id: String!, draft: Boolean): Collection2
   Collection2s(draft: Boolean, where: Collection2_where, limit: Int, page: Int, sort: String): Collection2s
+  countCollection2s(draft: Boolean, where: Collection2_where): countCollection2s
   docAccessCollection2(id: String!): collection2DocAccess
   User(id: String!, draft: Boolean): User
   Users(draft: Boolean, where: User_where, limit: Int, page: Int, sort: String): Users
+  countUsers(draft: Boolean, where: User_where): countUsers
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
   PayloadPreference(id: String!, draft: Boolean): PayloadPreference
   PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, sort: String): PayloadPreferences
+  countPayloadPreferences(draft: Boolean, where: PayloadPreference_where): countPayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
 }
 
 type Collection1 {
-  id: String
+  id: String!
   testing: String!
   title: String!
   meta: [SharedMetaArray!]
@@ -192,6 +196,10 @@ input Collection1_where_or {
   id: Collection1_id_operator
   AND: [Collection1_where_and]
   OR: [Collection1_where_or]
+}
+
+type countCollection1s {
+  totalDocs: Int
 }
 
 type collection1DocAccess {
@@ -433,7 +441,7 @@ type Collection1CreateDocAccess {
 """
 The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSONObject
+scalar JSONObject @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type Collection1ReadDocAccess {
   permission: Boolean!
@@ -451,8 +459,9 @@ type Collection1DeleteDocAccess {
 }
 
 type Collection2 {
-  id: String
-  meta: SharedMeta
+  id: String!
+  metaArray: [SharedMetaArray!]
+  metaGroup: SharedMeta
   nestedGroup: Collection2_NestedGroup
   updatedAt: DateTime
   createdAt: DateTime
@@ -482,9 +491,11 @@ type Collection2s {
 }
 
 input Collection2_where {
-  meta__title: Collection2_meta__title_operator
-  meta__description: Collection2_meta__description_operator
-  meta__id: Collection2_meta__id_operator
+  metaArray__title: Collection2_metaArray__title_operator
+  metaArray__description: Collection2_metaArray__description_operator
+  metaArray__id: Collection2_metaArray__id_operator
+  metaGroup__title: Collection2_metaGroup__title_operator
+  metaGroup__description: Collection2_metaGroup__description_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
   updatedAt: Collection2_updatedAt_operator
@@ -494,7 +505,7 @@ input Collection2_where {
   OR: [Collection2_where_or]
 }
 
-input Collection2_meta__title_operator {
+input Collection2_metaArray__title_operator {
   equals: String
   not_equals: String
   like: String
@@ -505,7 +516,7 @@ input Collection2_meta__title_operator {
   exists: Boolean
 }
 
-input Collection2_meta__description_operator {
+input Collection2_metaArray__description_operator {
   equals: String
   not_equals: String
   like: String
@@ -516,7 +527,29 @@ input Collection2_meta__description_operator {
   exists: Boolean
 }
 
-input Collection2_meta__id_operator {
+input Collection2_metaArray__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Collection2_metaGroup__title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Collection2_metaGroup__description_operator {
   equals: String
   not_equals: String
   like: String
@@ -583,9 +616,11 @@ input Collection2_id_operator {
 }
 
 input Collection2_where_and {
-  meta__title: Collection2_meta__title_operator
-  meta__description: Collection2_meta__description_operator
-  meta__id: Collection2_meta__id_operator
+  metaArray__title: Collection2_metaArray__title_operator
+  metaArray__description: Collection2_metaArray__description_operator
+  metaArray__id: Collection2_metaArray__id_operator
+  metaGroup__title: Collection2_metaGroup__title_operator
+  metaGroup__description: Collection2_metaGroup__description_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
   updatedAt: Collection2_updatedAt_operator
@@ -596,9 +631,11 @@ input Collection2_where_and {
 }
 
 input Collection2_where_or {
-  meta__title: Collection2_meta__title_operator
-  meta__description: Collection2_meta__description_operator
-  meta__id: Collection2_meta__id_operator
+  metaArray__title: Collection2_metaArray__title_operator
+  metaArray__description: Collection2_metaArray__description_operator
+  metaArray__id: Collection2_metaArray__id_operator
+  metaGroup__title: Collection2_metaGroup__title_operator
+  metaGroup__description: Collection2_metaGroup__description_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
   updatedAt: Collection2_updatedAt_operator
@@ -606,6 +643,10 @@ input Collection2_where_or {
   id: Collection2_id_operator
   AND: [Collection2_where_and]
   OR: [Collection2_where_or]
+}
+
+type countCollection2s {
+  totalDocs: Int
 }
 
 type collection2DocAccess {
@@ -617,84 +658,184 @@ type collection2DocAccess {
 }
 
 type Collection2DocAccessFields {
-  meta: Collection2DocAccessFields_meta
+  metaArray: Collection2DocAccessFields_metaArray
+  metaGroup: Collection2DocAccessFields_metaGroup
   nestedGroup: Collection2DocAccessFields_nestedGroup
   updatedAt: Collection2DocAccessFields_updatedAt
   createdAt: Collection2DocAccessFields_createdAt
 }
 
-type Collection2DocAccessFields_meta {
-  create: Collection2DocAccessFields_meta_Create
-  read: Collection2DocAccessFields_meta_Read
-  update: Collection2DocAccessFields_meta_Update
-  delete: Collection2DocAccessFields_meta_Delete
-  fields: Collection2DocAccessFields_meta_Fields
+type Collection2DocAccessFields_metaArray {
+  create: Collection2DocAccessFields_metaArray_Create
+  read: Collection2DocAccessFields_metaArray_Read
+  update: Collection2DocAccessFields_metaArray_Update
+  delete: Collection2DocAccessFields_metaArray_Delete
+  fields: Collection2DocAccessFields_metaArray_Fields
 }
 
-type Collection2DocAccessFields_meta_Create {
+type Collection2DocAccessFields_metaArray_Create {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_Read {
+type Collection2DocAccessFields_metaArray_Read {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_Update {
+type Collection2DocAccessFields_metaArray_Update {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_Delete {
+type Collection2DocAccessFields_metaArray_Delete {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_Fields {
-  title: Collection2DocAccessFields_meta_title
-  description: Collection2DocAccessFields_meta_description
+type Collection2DocAccessFields_metaArray_Fields {
+  title: Collection2DocAccessFields_metaArray_title
+  description: Collection2DocAccessFields_metaArray_description
+  id: Collection2DocAccessFields_metaArray_id
 }
 
-type Collection2DocAccessFields_meta_title {
-  create: Collection2DocAccessFields_meta_title_Create
-  read: Collection2DocAccessFields_meta_title_Read
-  update: Collection2DocAccessFields_meta_title_Update
-  delete: Collection2DocAccessFields_meta_title_Delete
+type Collection2DocAccessFields_metaArray_title {
+  create: Collection2DocAccessFields_metaArray_title_Create
+  read: Collection2DocAccessFields_metaArray_title_Read
+  update: Collection2DocAccessFields_metaArray_title_Update
+  delete: Collection2DocAccessFields_metaArray_title_Delete
 }
 
-type Collection2DocAccessFields_meta_title_Create {
+type Collection2DocAccessFields_metaArray_title_Create {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_title_Read {
+type Collection2DocAccessFields_metaArray_title_Read {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_title_Update {
+type Collection2DocAccessFields_metaArray_title_Update {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_title_Delete {
+type Collection2DocAccessFields_metaArray_title_Delete {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_description {
-  create: Collection2DocAccessFields_meta_description_Create
-  read: Collection2DocAccessFields_meta_description_Read
-  update: Collection2DocAccessFields_meta_description_Update
-  delete: Collection2DocAccessFields_meta_description_Delete
+type Collection2DocAccessFields_metaArray_description {
+  create: Collection2DocAccessFields_metaArray_description_Create
+  read: Collection2DocAccessFields_metaArray_description_Read
+  update: Collection2DocAccessFields_metaArray_description_Update
+  delete: Collection2DocAccessFields_metaArray_description_Delete
 }
 
-type Collection2DocAccessFields_meta_description_Create {
+type Collection2DocAccessFields_metaArray_description_Create {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_description_Read {
+type Collection2DocAccessFields_metaArray_description_Read {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_description_Update {
+type Collection2DocAccessFields_metaArray_description_Update {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_description_Delete {
+type Collection2DocAccessFields_metaArray_description_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaArray_id {
+  create: Collection2DocAccessFields_metaArray_id_Create
+  read: Collection2DocAccessFields_metaArray_id_Read
+  update: Collection2DocAccessFields_metaArray_id_Update
+  delete: Collection2DocAccessFields_metaArray_id_Delete
+}
+
+type Collection2DocAccessFields_metaArray_id_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaArray_id_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaArray_id_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaArray_id_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup {
+  create: Collection2DocAccessFields_metaGroup_Create
+  read: Collection2DocAccessFields_metaGroup_Read
+  update: Collection2DocAccessFields_metaGroup_Update
+  delete: Collection2DocAccessFields_metaGroup_Delete
+  fields: Collection2DocAccessFields_metaGroup_Fields
+}
+
+type Collection2DocAccessFields_metaGroup_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_Fields {
+  title: Collection2DocAccessFields_metaGroup_title
+  description: Collection2DocAccessFields_metaGroup_description
+}
+
+type Collection2DocAccessFields_metaGroup_title {
+  create: Collection2DocAccessFields_metaGroup_title_Create
+  read: Collection2DocAccessFields_metaGroup_title_Read
+  update: Collection2DocAccessFields_metaGroup_title_Update
+  delete: Collection2DocAccessFields_metaGroup_title_Delete
+}
+
+type Collection2DocAccessFields_metaGroup_title_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_title_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_title_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_title_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_description {
+  create: Collection2DocAccessFields_metaGroup_description_Create
+  read: Collection2DocAccessFields_metaGroup_description_Read
+  update: Collection2DocAccessFields_metaGroup_description_Update
+  delete: Collection2DocAccessFields_metaGroup_description_Delete
+}
+
+type Collection2DocAccessFields_metaGroup_description_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_description_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_description_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_description_Delete {
   permission: Boolean!
 }
 
@@ -868,7 +1009,7 @@ type Collection2DeleteDocAccess {
 }
 
 type User {
-  id: String
+  id: String!
   updatedAt: DateTime
   createdAt: DateTime
   email: EmailAddress!
@@ -968,6 +1109,10 @@ input User_where_or {
   id: User_id_operator
   AND: [User_where_and]
   OR: [User_where_or]
+}
+
+type countUsers {
+  totalDocs: Int
 }
 
 type usersDocAccess {
@@ -1106,12 +1251,13 @@ type UsersUnlockDocAccess {
 type usersMe {
   collection: String
   exp: Int
+  strategy: String
   token: String
   user: User
 }
 
 type PayloadPreference {
-  id: String
+  id: String!
   user: PayloadPreference_User_Relationship!
   key: String
   value: JSON
@@ -1133,7 +1279,7 @@ union PayloadPreference_User = User
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSON
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type PayloadPreferences {
   docs: [PayloadPreference]
@@ -1243,6 +1389,10 @@ input PayloadPreference_where_or {
   id: PayloadPreference_id_operator
   AND: [PayloadPreference_where_and]
   OR: [PayloadPreference_where_or]
+}
+
+type countPayloadPreferences {
+  totalDocs: Int
 }
 
 type payload_preferencesDocAccess {
@@ -1664,84 +1814,184 @@ type collection2Access {
 }
 
 type Collection2Fields {
-  meta: Collection2Fields_meta
+  metaArray: Collection2Fields_metaArray
+  metaGroup: Collection2Fields_metaGroup
   nestedGroup: Collection2Fields_nestedGroup
   updatedAt: Collection2Fields_updatedAt
   createdAt: Collection2Fields_createdAt
 }
 
-type Collection2Fields_meta {
-  create: Collection2Fields_meta_Create
-  read: Collection2Fields_meta_Read
-  update: Collection2Fields_meta_Update
-  delete: Collection2Fields_meta_Delete
-  fields: Collection2Fields_meta_Fields
+type Collection2Fields_metaArray {
+  create: Collection2Fields_metaArray_Create
+  read: Collection2Fields_metaArray_Read
+  update: Collection2Fields_metaArray_Update
+  delete: Collection2Fields_metaArray_Delete
+  fields: Collection2Fields_metaArray_Fields
 }
 
-type Collection2Fields_meta_Create {
+type Collection2Fields_metaArray_Create {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_Read {
+type Collection2Fields_metaArray_Read {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_Update {
+type Collection2Fields_metaArray_Update {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_Delete {
+type Collection2Fields_metaArray_Delete {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_Fields {
-  title: Collection2Fields_meta_title
-  description: Collection2Fields_meta_description
+type Collection2Fields_metaArray_Fields {
+  title: Collection2Fields_metaArray_title
+  description: Collection2Fields_metaArray_description
+  id: Collection2Fields_metaArray_id
 }
 
-type Collection2Fields_meta_title {
-  create: Collection2Fields_meta_title_Create
-  read: Collection2Fields_meta_title_Read
-  update: Collection2Fields_meta_title_Update
-  delete: Collection2Fields_meta_title_Delete
+type Collection2Fields_metaArray_title {
+  create: Collection2Fields_metaArray_title_Create
+  read: Collection2Fields_metaArray_title_Read
+  update: Collection2Fields_metaArray_title_Update
+  delete: Collection2Fields_metaArray_title_Delete
 }
 
-type Collection2Fields_meta_title_Create {
+type Collection2Fields_metaArray_title_Create {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_title_Read {
+type Collection2Fields_metaArray_title_Read {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_title_Update {
+type Collection2Fields_metaArray_title_Update {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_title_Delete {
+type Collection2Fields_metaArray_title_Delete {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_description {
-  create: Collection2Fields_meta_description_Create
-  read: Collection2Fields_meta_description_Read
-  update: Collection2Fields_meta_description_Update
-  delete: Collection2Fields_meta_description_Delete
+type Collection2Fields_metaArray_description {
+  create: Collection2Fields_metaArray_description_Create
+  read: Collection2Fields_metaArray_description_Read
+  update: Collection2Fields_metaArray_description_Update
+  delete: Collection2Fields_metaArray_description_Delete
 }
 
-type Collection2Fields_meta_description_Create {
+type Collection2Fields_metaArray_description_Create {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_description_Read {
+type Collection2Fields_metaArray_description_Read {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_description_Update {
+type Collection2Fields_metaArray_description_Update {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_description_Delete {
+type Collection2Fields_metaArray_description_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaArray_id {
+  create: Collection2Fields_metaArray_id_Create
+  read: Collection2Fields_metaArray_id_Read
+  update: Collection2Fields_metaArray_id_Update
+  delete: Collection2Fields_metaArray_id_Delete
+}
+
+type Collection2Fields_metaArray_id_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaArray_id_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaArray_id_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaArray_id_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup {
+  create: Collection2Fields_metaGroup_Create
+  read: Collection2Fields_metaGroup_Read
+  update: Collection2Fields_metaGroup_Update
+  delete: Collection2Fields_metaGroup_Delete
+  fields: Collection2Fields_metaGroup_Fields
+}
+
+type Collection2Fields_metaGroup_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_Fields {
+  title: Collection2Fields_metaGroup_title
+  description: Collection2Fields_metaGroup_description
+}
+
+type Collection2Fields_metaGroup_title {
+  create: Collection2Fields_metaGroup_title_Create
+  read: Collection2Fields_metaGroup_title_Read
+  update: Collection2Fields_metaGroup_title_Update
+  delete: Collection2Fields_metaGroup_title_Delete
+}
+
+type Collection2Fields_metaGroup_title_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_title_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_title_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_title_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_description {
+  create: Collection2Fields_metaGroup_description_Create
+  read: Collection2Fields_metaGroup_description_Read
+  update: Collection2Fields_metaGroup_description_Update
+  delete: Collection2Fields_metaGroup_description_Delete
+}
+
+type Collection2Fields_metaGroup_description_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_description_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_description_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_description_Delete {
   permission: Boolean!
 }
 
@@ -2202,22 +2452,25 @@ type Mutation {
   createCollection1(data: mutationCollection1Input!, draft: Boolean): Collection1
   updateCollection1(id: String!, autosave: Boolean, data: mutationCollection1UpdateInput!, draft: Boolean): Collection1
   deleteCollection1(id: String!): Collection1
+  duplicateCollection1(id: String!): Collection1
   createCollection2(data: mutationCollection2Input!, draft: Boolean): Collection2
   updateCollection2(id: String!, autosave: Boolean, data: mutationCollection2UpdateInput!, draft: Boolean): Collection2
   deleteCollection2(id: String!): Collection2
+  duplicateCollection2(id: String!): Collection2
   createUser(data: mutationUserInput!, draft: Boolean): User
   updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean): User
   deleteUser(id: String!): User
-  refreshTokenUser(token: String): usersRefreshedUser
+  refreshTokenUser: usersRefreshedUser
   logoutUser: String
   unlockUser(email: String!): Boolean!
-  loginUser(email: String, password: String): usersLoginResult
-  forgotPasswordUser(disableEmail: Boolean, email: String!, expiration: Int): Boolean!
+  loginUser(email: String!, password: String): usersLoginResult
+  forgotPasswordUser(disableEmail: Boolean, expiration: Int, email: String!): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
   updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean): PayloadPreference
   deletePayloadPreference(id: String!): PayloadPreference
+  duplicatePayloadPreference(id: String!): PayloadPreference
 }
 
 input mutationCollection1Input {
@@ -2251,13 +2504,20 @@ input mutationCollection1Update_MetaInput {
 }
 
 input mutationCollection2Input {
-  meta: mutationCollection2_MetaInput
+  metaArray: [mutationCollection2_MetaArrayInput]
+  metaGroup: mutationCollection2_MetaGroupInput
   nestedGroup: mutationCollection2_NestedGroupInput
   updatedAt: String
   createdAt: String
 }
 
-input mutationCollection2_MetaInput {
+input mutationCollection2_MetaArrayInput {
+  title: String
+  description: String
+  id: String
+}
+
+input mutationCollection2_MetaGroupInput {
   title: String
   description: String
 }
@@ -2272,13 +2532,20 @@ input mutationCollection2_NestedGroup_MetaInput {
 }
 
 input mutationCollection2UpdateInput {
-  meta: mutationCollection2Update_MetaInput
+  metaArray: [mutationCollection2Update_MetaArrayInput]
+  metaGroup: mutationCollection2Update_MetaGroupInput
   nestedGroup: mutationCollection2Update_NestedGroupInput
   updatedAt: String
   createdAt: String
 }
 
-input mutationCollection2Update_MetaInput {
+input mutationCollection2Update_MetaArrayInput {
+  title: String
+  description: String
+  id: String
+}
+
+input mutationCollection2Update_MetaGroupInput {
   title: String
   description: String
 }
@@ -2321,6 +2588,7 @@ input mutationUserUpdateInput {
 type usersRefreshedUser {
   exp: Int
   refreshedToken: String
+  strategy: String
   user: usersJWT
 }
 

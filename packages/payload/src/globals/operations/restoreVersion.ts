@@ -1,31 +1,37 @@
-import type { PayloadRequest } from '../../express/types'
-import type { TypeWithVersion } from '../../versions/types'
-import type { SanitizedGlobalConfig } from '../config/types'
+import type { PayloadRequest, PopulateType } from '../../types/index.js'
+import type { TypeWithVersion } from '../../versions/types.js'
+import type { SanitizedGlobalConfig } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess'
-import { NotFound } from '../../errors'
-import { afterChange } from '../../fields/hooks/afterChange'
-import { afterRead } from '../../fields/hooks/afterRead'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
+import executeAccess from '../../auth/executeAccess.js'
+import { NotFound } from '../../errors/index.js'
+import { afterChange } from '../../fields/hooks/afterChange/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
   depth?: number
+  draft?: boolean
   globalConfig: SanitizedGlobalConfig
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
   showHiddenFields?: boolean
 }
 
-async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
+export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any>(
+  args: Arguments,
+): Promise<T> => {
   const {
     id,
     depth,
+    draft,
     globalConfig,
     overrideAccess,
-    req: { payload, t },
+    populate,
+    req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
   } = args
@@ -53,7 +59,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     })
 
     if (!versionDocs || versionDocs.length === 0) {
-      throw new NotFound(t)
+      throw new NotFound(req.t)
     }
 
     const rawVersion = versionDocs[0]
@@ -61,14 +67,19 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // Patch globalType onto version doc
     rawVersion.version.globalType = globalConfig.slug
 
+    // Overwrite draft status if draft is true
+
+    if (draft) {
+      rawVersion.version._status = 'draft'
+    }
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
 
     const previousDoc = await payload.findGlobal({
+      slug: globalConfig.slug,
       depth,
       req,
-      slug: globalConfig.slug,
     })
 
     // /////////////////////////////////////
@@ -76,23 +87,35 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // /////////////////////////////////////
 
     const global = await payload.db.findGlobal({
-      req,
       slug: globalConfig.slug,
+      req,
     })
 
     let result = rawVersion.version
 
     if (global) {
       result = await payload.db.updateGlobal({
+        slug: globalConfig.slug,
         data: result,
         req,
-        slug: globalConfig.slug,
+      })
+
+      const now = new Date().toISOString()
+
+      result = await payload.db.createGlobalVersion({
+        autosave: false,
+        createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
+        globalSlug: globalConfig.slug,
+        parent: id,
+        req,
+        updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
+        versionData: result,
       })
     } else {
       result = await payload.db.createGlobal({
+        slug: globalConfig.slug,
         data: result,
         req,
-        slug: globalConfig.slug,
       })
     }
 
@@ -105,8 +128,12 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
       context: req.context,
       depth,
       doc: result,
+      draft: undefined,
+      fallbackLocale,
       global: globalConfig,
+      locale,
       overrideAccess,
+      populate,
       req,
       showHiddenFields,
     })
@@ -159,7 +186,9 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
         })) || result
     }, Promise.resolve())
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {
@@ -167,5 +196,3 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     throw error
   }
 }
-
-export default restoreVersion

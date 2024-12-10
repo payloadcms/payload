@@ -1,5 +1,5 @@
-import type { FieldTypes } from '../exports/config'
-import type { Field } from '../fields/config/types'
+import type { ClientField } from '../fields/config/client.js'
+import type { FieldTypes } from '../fields/config/types.js'
 
 export type FieldSchemaJSON = {
   blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`
@@ -8,26 +8,18 @@ export type FieldSchemaJSON = {
   name: string
   relationTo?: string // TODO: conditionally add based on `type`
   slug?: string // TODO: conditionally add based on `type`
-  type: keyof FieldTypes
+  type: FieldTypes
 }[]
 
-export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
+export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
   return fields.reduce((acc, field) => {
     let result = acc
 
     switch (field.type) {
-      case 'group':
-        acc.push({
-          name: field.name,
-          fields: fieldSchemaToJSON(field.fields),
-          type: field.type,
-        })
-
-        break
-
       case 'array':
         acc.push({
           name: field.name,
+          type: field.type,
           fields: fieldSchemaToJSON([
             ...field.fields,
             {
@@ -35,7 +27,6 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
               type: 'text',
             },
           ]),
-          type: field.type,
         })
 
         break
@@ -43,6 +34,7 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
       case 'blocks':
         acc.push({
           name: field.name,
+          type: field.type,
           blocks: field.blocks.reduce((acc, block) => {
             acc[block.slug] = {
               fields: fieldSchemaToJSON([
@@ -56,14 +48,33 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
 
             return acc
           }, {}),
-          type: field.type,
         })
 
         break
 
+      case 'collapsible': // eslint-disable no-fallthrough
       case 'row':
-      case 'collapsible':
         result = result.concat(fieldSchemaToJSON(field.fields))
+        break
+
+      case 'group':
+        acc.push({
+          name: field.name,
+          type: field.type,
+          fields: fieldSchemaToJSON(field.fields),
+        })
+
+        break
+
+      case 'relationship': // eslint-disable no-fallthrough
+      case 'upload':
+        acc.push({
+          name: field.name,
+          type: field.type,
+          hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
+          relationTo: field.relationTo,
+        })
+
         break
 
       case 'tabs': {
@@ -73,8 +84,8 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
           if ('name' in tab) {
             tabFields.push({
               name: tab.name,
-              fields: fieldSchemaToJSON(tab.fields),
               type: field.type,
+              fields: fieldSchemaToJSON(tab.fields),
             })
             return
           }
@@ -86,17 +97,6 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
 
         break
       }
-
-      case 'relationship':
-      case 'upload':
-        acc.push({
-          name: field.name,
-          hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
-          relationTo: field.relationTo,
-          type: field.type,
-        })
-
-        break
 
       default:
         if ('name' in field) {

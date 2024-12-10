@@ -1,0 +1,25 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .icon--chevron {
+    height: calc(var(--base) / 2);
+    width: calc(var(--base) / 2);
+
+    .stroke {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: $style-stroke-width-s;
+      vector-effect: non-scaling-stroke;
+    }
+
+    &.icon--size-large {
+      height: var(--base);
+      width: var(--base);
+    }
+
+    &.icon--size-small {
+      height: 8px;
+      width: 8px;
+    }
+  }
+}

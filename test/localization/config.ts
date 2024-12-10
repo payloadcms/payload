@@ -1,70 +1,75 @@
-import type { LocalizedPost } from './payload-types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { LocalizedPost } from './payload-types.js'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { ArrayCollection } from './collections/Array'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { ArrayCollection } from './collections/Array/index.js'
+import { BlocksCollection } from './collections/Blocks/index.js'
+import { Group } from './collections/Group/index.js'
+import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
+import { NestedArray } from './collections/NestedArray/index.js'
+import { NestedFields } from './collections/NestedFields/index.js'
+import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
+import { NoLocalizedFieldsCollection } from './collections/NoLocalizedFields/index.js'
+import { RichTextCollection } from './collections/RichText/index.js'
+import { Tab } from './collections/Tab/index.js'
 import {
+  blocksWithLocalizedSameName,
   defaultLocale,
   englishTitle,
+  hungarianLocale,
   localizedPostsSlug,
+  localizedSortSlug,
+  portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
+  relationshipLocalizedSlug,
   relationSpanishTitle,
   relationSpanishTitle2,
-  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
   withLocalizedRelSlug,
   withRequiredLocalizedFields,
-} from './shared'
+} from './shared.js'
 
-export type LocalizedPostAllLocale = LocalizedPost & {
+export type LocalizedPostAllLocale = {
   title: {
     en?: string
     es?: string
   }
-}
+} & LocalizedPost
 
 const openAccess = {
-  read: () => true,
   create: () => true,
   delete: () => true,
+  read: () => true,
   update: () => true,
 }
 
 export default buildConfigWithDefaults({
-  localization: {
-    locales: [
-      {
-        label: 'English',
-        code: defaultLocale,
-        rtl: false,
-      },
-      {
-        label: 'Spanish',
-        code: spanishLocale,
-        rtl: false,
-      },
-      {
-        label: 'Arabic',
-        code: 'ar',
-        rtl: true,
-      },
-    ],
-    defaultLocale,
-    fallback: true,
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   collections: [
+    RichTextCollection,
+    BlocksCollection,
+    NestedArray,
+    NestedFields,
     {
-      slug: 'users',
       auth: true,
       fields: [
         {
           name: 'relation',
-          type: 'relationship',
           relationTo: localizedPostsSlug,
+          type: 'relationship',
         },
       ],
+      slug: 'users',
     },
     {
       slug: localizedPostsSlug,
@@ -75,27 +80,31 @@ export default buildConfigWithDefaults({
       fields: [
         {
           name: 'title',
-          type: 'text',
-          localized: true,
           index: true,
+          localized: true,
+          type: 'text',
         },
         {
           name: 'description',
           type: 'text',
         },
         {
-          name: 'localizedCheckbox',
-          type: 'checkbox',
+          name: 'localizedDescription',
           localized: true,
+          type: 'text',
+        },
+        {
+          name: 'localizedCheckbox',
+          localized: true,
+          type: 'checkbox',
         },
         {
           name: 'children',
-          type: 'relationship',
-          relationTo: localizedPostsSlug,
           hasMany: true,
+          relationTo: localizedPostsSlug,
+          type: 'relationship',
         },
         {
-          type: 'group',
           name: 'group',
           fields: [
             {
@@ -103,126 +112,211 @@ export default buildConfigWithDefaults({
               type: 'text',
             },
           ],
+          type: 'group',
+        },
+        {
+          name: 'unique',
+          type: 'text',
+          localized: true,
+          unique: true,
         },
       ],
     },
+    NoLocalizedFieldsCollection,
     ArrayCollection,
     {
-      slug: withRequiredLocalizedFields,
       fields: [
         {
           name: 'title',
-          type: 'text',
-          required: true,
           localized: true,
+          required: true,
+          type: 'text',
         },
         {
-          name: 'layout',
-          type: 'blocks',
-          required: true,
-          localized: true,
-          blocks: [
+          type: 'tabs',
+          tabs: [
             {
-              slug: 'text',
+              label: 'Main Nav',
+              fields: [
+                {
+                  name: 'nav',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'layout',
+                      blocks: [
+                        {
+                          fields: [
+                            {
+                              name: 'text',
+                              type: 'text',
+                            },
+                            {
+                              name: 'nestedArray',
+                              type: 'array',
+                              fields: [
+                                {
+                                  name: 'text',
+                                  type: 'text',
+                                },
+                                {
+                                  name: 'l2',
+                                  type: 'array',
+                                  fields: [
+                                    {
+                                      name: 'l3',
+                                      type: 'array',
+                                      fields: [
+                                        {
+                                          name: 'l4',
+                                          type: 'array',
+                                          fields: [
+                                            {
+                                              name: 'superNestedText',
+                                              type: 'text',
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                          slug: 'text',
+                        },
+                        {
+                          fields: [
+                            {
+                              name: 'number',
+                              type: 'number',
+                            },
+                          ],
+                          slug: 'number',
+                        },
+                      ],
+                      localized: true,
+                      required: true,
+                      type: 'blocks',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'myTab',
               fields: [
                 {
                   name: 'text',
                   type: 'text',
                 },
-              ],
-            },
-            {
-              slug: 'number',
-              fields: [
                 {
-                  name: 'number',
-                  type: 'number',
+                  name: 'group',
+                  type: 'group',
+                  localized: true,
+                  fields: [
+                    {
+                      name: 'nestedArray2',
+                      type: 'array',
+                      fields: [
+                        {
+                          name: 'nestedText',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                    {
+                      name: 'nestedText',
+                      type: 'text',
+                    },
+                  ],
                 },
               ],
             },
           ],
         },
       ],
+      slug: withRequiredLocalizedFields,
     },
     {
-      slug: withLocalizedRelSlug,
       access: openAccess,
       fields: [
         // Relationship
         {
           name: 'localizedRelationship',
-          type: 'relationship',
           relationTo: localizedPostsSlug,
+          type: 'relationship',
         },
         // Relation hasMany
         {
           name: 'localizedRelationHasManyField',
-          type: 'relationship',
-          relationTo: localizedPostsSlug,
           hasMany: true,
+          relationTo: localizedPostsSlug,
+          type: 'relationship',
         },
         // Relation multiple relationTo
         {
           name: 'localizedRelationMultiRelationTo',
-          type: 'relationship',
           relationTo: [localizedPostsSlug, 'dummy'],
+          type: 'relationship',
         },
         // Relation multiple relationTo hasMany
         {
           name: 'localizedRelationMultiRelationToHasMany',
-          type: 'relationship',
-          relationTo: [localizedPostsSlug, 'dummy'],
           hasMany: true,
+          relationTo: [localizedPostsSlug, 'dummy'],
+          type: 'relationship',
         },
       ],
+      slug: withLocalizedRelSlug,
     },
     {
-      slug: relationshipLocalizedSlug,
       fields: [
         {
           name: 'relationship',
-          type: 'relationship',
-          relationTo: localizedPostsSlug,
           localized: true,
+          relationTo: localizedPostsSlug,
+          type: 'relationship',
         },
         {
           name: 'relationshipHasMany',
-          type: 'relationship',
-          relationTo: localizedPostsSlug,
           hasMany: true,
           localized: true,
+          relationTo: localizedPostsSlug,
+          type: 'relationship',
         },
         {
           name: 'relationMultiRelationTo',
-          type: 'relationship',
-          relationTo: [localizedPostsSlug, 'dummy'],
           localized: true,
+          relationTo: [localizedPostsSlug, 'dummy'],
+          type: 'relationship',
         },
         {
           name: 'relationMultiRelationToHasMany',
-          type: 'relationship',
-          relationTo: [localizedPostsSlug, 'dummy'],
           hasMany: true,
           localized: true,
+          relationTo: [localizedPostsSlug, 'dummy'],
+          type: 'relationship',
         },
         {
           name: 'arrayField',
-          label: 'Array Field',
-          type: 'array',
-          localized: true,
           fields: [
             {
-              type: 'relationship',
               name: 'nestedRelation',
               label: 'Nested Relation',
               relationTo: localizedPostsSlug,
+              type: 'relationship',
             },
           ],
+          label: 'Array Field',
+          localized: true,
+          type: 'array',
         },
       ],
+      slug: relationshipLocalizedSlug,
     },
     {
-      slug: 'dummy',
       access: openAccess,
       fields: [
         {
@@ -230,26 +324,120 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      slug: 'dummy',
     },
-  ],
-  globals: [
+    NestedToArrayAndBlock,
+    Group,
+    Tab,
     {
-      slug: 'global-array',
+      slug: localizedSortSlug,
+      access: openAccess,
       fields: [
         {
-          name: 'array',
-          type: 'array',
-          fields: [
+          name: 'title',
+          index: true,
+          localized: true,
+          type: 'text',
+        },
+        {
+          name: 'date',
+          type: 'date',
+          localized: true,
+        },
+      ],
+    },
+    {
+      slug: blocksWithLocalizedSameName,
+      fields: [
+        {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
             {
-              name: 'text',
-              type: 'text',
-              localized: true,
+              slug: 'block_first',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
+            {
+              slug: 'block_second',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
             },
           ],
         },
       ],
     },
+    LocalizedWithinLocalized,
   ],
+  globals: [
+    {
+      fields: [
+        {
+          name: 'array',
+          fields: [
+            {
+              name: 'text',
+              localized: true,
+              type: 'text',
+            },
+          ],
+          type: 'array',
+        },
+      ],
+      slug: 'global-array',
+    },
+    {
+      fields: [
+        {
+          name: 'text',
+          localized: true,
+          type: 'text',
+        },
+      ],
+      slug: 'global-text',
+    },
+  ],
+  localization: {
+    defaultLocale,
+    fallback: true,
+    locales: [
+      {
+        code: defaultLocale,
+        label: 'English',
+        rtl: false,
+      },
+      {
+        code: spanishLocale,
+        label: 'Spanish',
+        rtl: false,
+      },
+      {
+        code: portugueseLocale,
+        fallbackLocale: spanishLocale,
+        label: 'Portuguese',
+      },
+      {
+        code: 'ar',
+        label: 'Arabic',
+        rtl: true,
+      },
+      {
+        code: hungarianLocale,
+        label: 'Hungarian',
+        rtl: false,
+      },
+    ],
+  },
   onInit: async (payload) => {
     const collection = localizedPostsSlug
 
@@ -267,6 +455,8 @@ export default buildConfigWithDefaults({
       },
     })
 
+    console.log('SEED 1')
+
     await payload.create({
       collection: 'users',
       data: {
@@ -277,13 +467,15 @@ export default buildConfigWithDefaults({
     })
 
     await payload.update({
-      collection,
       id: localizedPost.id,
-      locale: spanishLocale,
+      collection,
       data: {
         title: spanishTitle,
       },
+      locale: spanishLocale,
     })
+
+    console.log('SEED 2')
 
     const localizedRelation = await payload.create({
       collection,
@@ -293,13 +485,15 @@ export default buildConfigWithDefaults({
     })
 
     await payload.update({
-      collection,
       id: localizedPost.id,
-      locale: spanishLocale,
+      collection,
       data: {
         title: relationSpanishTitle,
       },
+      locale: spanishLocale,
     })
+
+    console.log('SEED 3')
 
     const localizedRelation2 = await payload.create({
       collection,
@@ -308,47 +502,50 @@ export default buildConfigWithDefaults({
       },
     })
     await payload.update({
-      collection,
       id: localizedPost.id,
-      locale: spanishLocale,
+      collection,
       data: {
         title: relationSpanishTitle2,
       },
+      locale: spanishLocale,
     })
+
+    console.log('SEED 4')
 
     await payload.create({
       collection: withLocalizedRelSlug,
       data: {
-        relationship: localizedRelation.id,
         localizedRelationHasManyField: [localizedRelation.id, localizedRelation2.id],
         localizedRelationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
         localizedRelationMultiRelationToHasMany: [
           { relationTo: localizedPostsSlug, value: localizedRelation.id },
           { relationTo: localizedPostsSlug, value: localizedRelation2.id },
         ],
+        relationship: localizedRelation.id,
       },
     })
     await payload.create({
       collection: relationshipLocalizedSlug,
-      locale: 'en',
       data: {
-        relationship: localizedRelation.id,
-        relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
-        relationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
-        relationMultiRelationToHasMany: [
-          { relationTo: localizedPostsSlug, value: localizedRelation.id },
-          { relationTo: localizedPostsSlug, value: localizedRelation2.id },
-        ],
         arrayField: [
           {
             nestedRelation: localizedRelation.id,
           },
         ],
+        relationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
+        relationMultiRelationToHasMany: [
+          { relationTo: localizedPostsSlug, value: localizedRelation.id },
+          { relationTo: localizedPostsSlug, value: localizedRelation2.id },
+        ],
+        relationship: localizedRelation.id,
+        relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
       },
+      locale: 'en',
     })
 
+    console.log('SEED 5')
+
     const globalArray = await payload.updateGlobal({
-      slug: 'global-array',
       data: {
         array: [
           {
@@ -359,17 +556,23 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      slug: 'global-array',
     })
 
     await payload.updateGlobal({
-      slug: 'global-array',
-      locale: 'es',
       data: {
         array: globalArray.array.map((row, i) => ({
           ...row,
           text: `test es ${i + 1}`,
         })),
       },
+      locale: 'es',
+      slug: 'global-array',
     })
+
+    console.log('SEED COMPLETE')
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

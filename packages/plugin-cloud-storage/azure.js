@@ -1,1 +1,3 @@
-exports.azureBlobStorageAdapter = require('./dist/adapters/azure').azureBlobStorageAdapter
+export { azureBlobStorageAdapter } from './dist/adapters/azure/index.js'
+
+//# sourceMappingURL=azure.js.map

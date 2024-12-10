@@ -1,29 +1,32 @@
-import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
-
-import { GraphQLClient } from 'graphql-request'
-
-import type { SanitizedConfig } from '../../packages/payload/src/config/types'
-import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type {
   SerializedBlockNode,
   SerializedLinkNode,
   SerializedRelationshipNode,
   SerializedUploadNode,
-} from '../../packages/richtext-lexical/src'
-import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types'
+} from '@payloadcms/richtext-lexical'
+import type {
+  SerializedEditorState,
+  SerializedParagraphNode,
+} from '@payloadcms/richtext-lexical/lexical'
+import type { PaginatedDocs, Payload } from 'payload'
 
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
-import configPromise from '../uploads/config'
-import { arrayDoc } from './collections/Array/shared'
-import { lexicalDocData } from './collections/Lexical/data'
-import { lexicalMigrateDocData } from './collections/LexicalMigrate/data'
-import { richTextDocData } from './collections/RichText/data'
-import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText'
-import { textDoc } from './collections/Text/shared'
-import { uploadsDoc } from './collections/Upload/shared'
-import { clearAndSeedEverything } from './seed'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
+
+import { devUser } from '../credentials.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { lexicalDocData } from './collections/Lexical/data.js'
+import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
+import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
+import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
+import { richTextDocData } from './collections/RichText/data.js'
+import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
+import { textDoc } from './collections/Text/shared.js'
+import { uploadsDoc } from './collections/Upload/shared.js'
+import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
@@ -31,38 +34,37 @@ import {
   richTextFieldsSlug,
   textFieldsSlug,
   uploadsSlug,
-} from './slugs'
+} from './slugs.js'
 
-let client: RESTClient
-let graphQLClient: GraphQLClient
-let serverURL: string
-let config: SanitizedConfig
-let token: string
+let payload: Payload
+let restClient: NextRESTClient
 
 let createdArrayDocID: number | string = null
 let createdJPGDocID: number | string = null
 let createdTextDocID: number | string = null
 let createdRichTextDocID: number | string = null
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('Lexical', () => {
   beforeAll(async () => {
-    ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
-    config = await configPromise
-
-    client = new RESTClient(config, { defaultSlug: richTextFieldsSlug, serverURL })
-    const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`
-    graphQLClient = new GraphQLClient(graphQLURL)
-    token = await client.login()
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
-    client = new RESTClient(config, { defaultSlug: richTextFieldsSlug, serverURL })
-    await client.login()
+    restClient = new NextRESTClient(payload.config)
+    await restClient.login({
+      slug: 'users',
+      credentials: devUser,
+    })
 
     createdArrayDocID = (
       await payload.find({
         collection: arrayFieldsSlug,
+        depth: 0,
         where: {
           title: {
             equals: 'array doc 1',
@@ -74,6 +76,7 @@ describe('Lexical', () => {
     createdJPGDocID = (
       await payload.find({
         collection: uploadsSlug,
+        depth: 0,
         where: {
           filename: {
             equals: 'payload.jpg',
@@ -85,6 +88,7 @@ describe('Lexical', () => {
     createdTextDocID = (
       await payload.find({
         collection: textFieldsSlug,
+        depth: 0,
         where: {
           text: {
             equals: 'Seeded text document',
@@ -96,6 +100,7 @@ describe('Lexical', () => {
     createdRichTextDocID = (
       await payload.find({
         collection: richTextFieldsSlug,
+        depth: 0,
         where: {
           title: {
             equals: 'Rich Text',
@@ -110,12 +115,12 @@ describe('Lexical', () => {
       const richTextDoc: RichTextField = (
         await payload.find({
           collection: richTextFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: richTextDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -146,12 +151,12 @@ describe('Lexical', () => {
       const richTextDoc: RichTextField = (
         await payload.find({
           collection: richTextFieldsSlug,
+          depth: 1,
           where: {
             title: {
               equals: richTextDocData.title,
             },
           },
-          depth: 1,
         })
       ).docs[0] as never
 
@@ -174,25 +179,24 @@ describe('Lexical', () => {
       )
 
       expect(richTextDoc?.lexicalCustomFields).not.toStrictEqual(seededDocument) // The whole seededDocument should not match, as richTextDoc should now contain populated documents not present in the seeded document
-      expect(richTextDoc?.lexicalCustomFields).toMatchObject(seededDocument) // subset of seededDocument should match
 
       const lexical: SerializedEditorState = richTextDoc?.lexicalCustomFields
 
       const linkNode: SerializedLinkNode = (lexical.root.children[1] as SerializedParagraphNode)
         .children[3] as SerializedLinkNode
-      expect(linkNode.fields.doc.value.items[1].text).toStrictEqual(arrayDoc.items[1].text)
+      expect(linkNode.fields.doc.value.text).toStrictEqual(textDoc.text)
     })
 
     it('should populate relationship node', async () => {
       const richTextDoc: RichTextField = (
         await payload.find({
           collection: richTextFieldsSlug,
+          depth: 1,
           where: {
             title: {
               equals: richTextDocData.title,
             },
           },
-          depth: 1,
         })
       ).docs[0] as never
 
@@ -212,17 +216,16 @@ describe('Lexical', () => {
           }
         }
       }`
-      const response: {
-        RichTextFields: PaginatedDocs<RichTextField>
-      } = await graphQLClient.request(
-        query,
-        {},
-        {
-          Authorization: `JWT ${token}`,
-        },
-      )
 
-      const { docs } = response.RichTextFields
+      const response: {
+        data: { RichTextFields: PaginatedDocs<RichTextField> }
+      } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+
+      const { docs } = response.data.RichTextFields
 
       const uploadNode: SerializedUploadNode = docs[0].lexicalCustomFields.root.children.find(
         (node) => node.type === 'upload',
@@ -230,49 +233,106 @@ describe('Lexical', () => {
       expect((uploadNode.value.media as any).filename).toStrictEqual('payload.png')
     })
   })
+
+  it('ensure link nodes convert to markdown', async () => {
+    const newLexicalDoc = await payload.create({
+      collection: lexicalFieldsSlug,
+      depth: 0,
+      data: {
+        title: 'Lexical Markdown Test',
+        lexicalWithBlocks: {
+          root: {
+            type: 'root',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [
+              {
+                children: [
+                  {
+                    children: [
+                      {
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'link to payload',
+                        type: 'text',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    type: 'autolink',
+                    version: 2,
+                    fields: {
+                      linkType: 'custom',
+                      url: 'https://payloadcms.com',
+                    },
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+          },
+        },
+      },
+    })
+
+    expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(
+      '[link to payload](https://payloadcms.com)',
+    )
+  })
+
   describe('converters and migrations', () => {
-    it('hTMLConverter: should output correct HTML for top-level lexical field', async () => {
+    it('htmlConverter: should output correct HTML for top-level lexical field', async () => {
       const lexicalDoc: LexicalMigrateField = (
         await payload.find({
           collection: lexicalMigrateFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalMigrateDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
       const htmlField: string = lexicalDoc?.lexicalSimple_html
       expect(htmlField).toStrictEqual('<p>simple</p>')
     })
-    it('hTMLConverter: should output correct HTML for lexical field nested in group', async () => {
+    it('htmlConverter: should output correct HTML for lexical field nested in group', async () => {
       const lexicalDoc: LexicalMigrateField = (
         await payload.find({
           collection: lexicalMigrateFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalMigrateDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
       const htmlField: string = lexicalDoc?.groupWithLexicalField?.lexicalInGroupField_html
       expect(htmlField).toStrictEqual('<p>group</p>')
     })
-    it('hTMLConverter: should output correct HTML for lexical field nested in array', async () => {
+    it('htmlConverter: should output correct HTML for lexical field nested in array', async () => {
       const lexicalDoc: LexicalMigrateField = (
         await payload.find({
           collection: lexicalMigrateFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalMigrateDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -288,12 +348,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -312,12 +372,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 1,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 1,
         })
       ).docs[0] as never
 
@@ -336,12 +396,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -367,12 +427,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 1,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 1,
         })
       ).docs[0] as never
 
@@ -403,12 +463,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -417,7 +477,7 @@ describe('Lexical', () => {
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
         .children[4] as SerializedBlockNode
 
-      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richTextField
 
       const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
         .children[0] as SerializedRelationshipNode
@@ -425,21 +485,22 @@ describe('Lexical', () => {
       /**
        * Depth 1 population:
        */
-      expect(subEditorRelationshipNode.value.id).toStrictEqual(createdRichTextDocID)
+      expect(subEditorRelationshipNode.value).toStrictEqual(createdRichTextDocID)
       // But the value should not be populated and only have the id field:
-      expect(Object.keys(subEditorRelationshipNode.value)).toHaveLength(1)
+
+      expect(typeof subEditorRelationshipNode.value).not.toStrictEqual('object')
     })
 
     it('should populate relationship nodes inside of a sub-editor from a blocks node with 1 depth', async () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 1,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 1,
         })
       ).docs[0] as never
 
@@ -448,7 +509,7 @@ describe('Lexical', () => {
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
         .children[4] as SerializedBlockNode
 
-      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richTextField
 
       const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
         .children[0] as SerializedRelationshipNode
@@ -472,21 +533,21 @@ describe('Lexical', () => {
       /**
        * Depth 2 population:
        */
-      expect(populatedDocEditorRelationshipNode.value.id).toStrictEqual(createdTextDocID)
+      expect(populatedDocEditorRelationshipNode.value).toStrictEqual(createdTextDocID)
       // But the value should not be populated and only have the id field - that's because it would require a depth of 2
-      expect(Object.keys(populatedDocEditorRelationshipNode.value)).toHaveLength(1)
+      expect(populatedDocEditorRelationshipNode.value).not.toStrictEqual('object')
     })
 
     it('should populate relationship nodes inside of a sub-editor from a blocks node with depth 2', async () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 2,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 2,
         })
       ).docs[0] as never
 
@@ -495,7 +556,7 @@ describe('Lexical', () => {
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
         .children[4] as SerializedBlockNode
 
-      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richTextField
 
       const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
         .children[0] as SerializedRelationshipNode
@@ -520,6 +581,102 @@ describe('Lexical', () => {
       expect(populatedDocEditorRelationshipNode.value.id).toStrictEqual(createdTextDocID)
       // Should now be populated (length 12)
       expect(populatedDocEditorRelationshipNode.value.text).toStrictEqual(textDoc.text)
+    })
+  })
+
+  describe('Localization', () => {
+    it('ensure localized lexical field is different across locales', async () => {
+      const lexicalDocEN = await payload.find({
+        collection: 'lexical-localized-fields',
+        locale: 'en',
+        where: {
+          title: {
+            equals: 'Localized Lexical en',
+          },
+        },
+      })
+
+      expect(lexicalDocEN.docs[0].lexicalBlocksLocalized.root.children[0].children[0].text).toEqual(
+        'English text',
+      )
+
+      const lexicalDocES = await payload.findByID({
+        collection: 'lexical-localized-fields',
+        locale: 'es',
+        id: lexicalDocEN.docs[0].id,
+      })
+
+      expect(lexicalDocES.lexicalBlocksLocalized.root.children[0].children[0].text).toEqual(
+        'Spanish text',
+      )
+    })
+
+    it('ensure localized text field within blocks field within unlocalized lexical field is different across locales', async () => {
+      const lexicalDocEN = await payload.find({
+        collection: 'lexical-localized-fields',
+        locale: 'en',
+        where: {
+          title: {
+            equals: 'Localized Lexical en',
+          },
+        },
+      })
+
+      expect(
+        lexicalDocEN.docs[0].lexicalBlocksSubLocalized.root.children[0].children[0].text,
+      ).toEqual('Shared text')
+
+      expect(
+        (lexicalDocEN.docs[0].lexicalBlocksSubLocalized.root.children[1].fields as any)
+          .textLocalized,
+      ).toEqual('English text in block')
+
+      const lexicalDocES = await payload.findByID({
+        collection: 'lexical-localized-fields',
+        locale: 'es',
+        id: lexicalDocEN.docs[0].id,
+      })
+
+      expect(lexicalDocES.lexicalBlocksSubLocalized.root.children[0].children[0].text).toEqual(
+        'Shared text',
+      )
+
+      expect(
+        (lexicalDocES.lexicalBlocksSubLocalized.root.children[1].fields as any).textLocalized,
+      ).toEqual('Spanish text in block')
+    })
+  })
+
+  describe('Hooks', () => {
+    it('ensure hook within number field within lexical block runs', async () => {
+      const lexicalDocEN = await payload.create({
+        collection: 'lexical-localized-fields',
+        locale: 'en',
+        data: {
+          title: 'Localized Lexical hooks',
+          lexicalBlocksLocalized: textToLexicalJSON({ text: 'some text' }) as any,
+          lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
+            'Shared text',
+            'English text in block',
+          ) as any,
+        },
+      })
+
+      expect(
+        (lexicalDocEN.lexicalBlocksSubLocalized.root.children[1].fields as any).counter,
+      ).toEqual(20) // Initial: 1. BeforeChange: +1 (2). AfterRead: *10 (20)
+
+      // update document with same data
+      const lexicalDocENUpdated = await payload.update({
+        collection: 'lexical-localized-fields',
+        locale: 'en',
+        id: lexicalDocEN.id,
+        data: lexicalDocEN,
+      })
+
+      expect(
+        (lexicalDocENUpdated.lexicalBlocksSubLocalized.root.children[1].fields as any).counter,
+      ).toEqual(210) // Initial: 20. BeforeChange: +1 (21). AfterRead: *10 (210)
     })
   })
 })

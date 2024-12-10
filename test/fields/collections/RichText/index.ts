@@ -1,17 +1,18 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
   HTMLConverterFeature,
-  LinkFeature,
-  TreeviewFeature,
-  UploadFeature,
   lexicalEditor,
-} from '../../../../packages/richtext-lexical/src'
-import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/features/converters/html/field'
-import { slateEditor } from '../../../../packages/richtext-slate/src'
-import { richTextFieldsSlug } from '../../slugs'
-import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks'
+  lexicalHTML,
+  LinkFeature,
+  TreeViewFeature,
+  UploadFeature,
+} from '@payloadcms/richtext-lexical'
+import { slateEditor } from '@payloadcms/richtext-slate'
+
+import { richTextFieldsSlug } from '../../slugs.js'
+import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks.js'
 
 const RichTextFields: CollectionConfig = {
   slug: richTextFieldsSlug,
@@ -34,10 +35,11 @@ const RichTextFields: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
-          TreeviewFeature(),
+          TreeViewFeature(),
           HTMLConverterFeature({}),
           LinkFeature({
-            fields: [
+            fields: ({ defaultFields }) => [
+              ...defaultFields,
               {
                 name: 'rel',
                 label: 'Rel Attribute',
@@ -102,7 +104,7 @@ const RichTextFields: CollectionConfig = {
         },
       },
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures, TreeviewFeature()],
+        features: ({ defaultFeatures }) => [...defaultFeatures, TreeViewFeature()],
       }),
     },
     {
@@ -182,6 +184,7 @@ const RichTextFields: CollectionConfig = {
                   {
                     name: 'caption',
                     type: 'richText',
+                    editor: slateEditor({}),
                   },
                 ],
               },
@@ -229,6 +232,7 @@ const RichTextFields: CollectionConfig = {
                   {
                     name: 'caption',
                     type: 'richText',
+                    editor: slateEditor({}),
                   },
                 ],
               },
@@ -306,6 +310,7 @@ const RichTextFields: CollectionConfig = {
           slug: 'richTextBlock',
           fields: [
             {
+              editor: slateEditor({}),
               name: 'text',
               type: 'richText',
             },

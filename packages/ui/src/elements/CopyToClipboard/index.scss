@@ -1,0 +1,28 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .copy-to-clipboard {
+    @extend %btn-reset;
+    position: relative;
+    cursor: pointer;
+    vertical-align: middle;
+    border-radius: 100%;
+
+    textarea {
+      position: absolute;
+      opacity: 0;
+      z-index: -1;
+      height: 0px;
+      width: 0px;
+    }
+
+    &:focus,
+    &:active {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+    }
+  }
+}

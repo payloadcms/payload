@@ -1,6 +1,12 @@
 type Query {
   ErrorField(id: String!, draft: Boolean): ErrorField
-  ErrorFields(draft: Boolean, where: ErrorField_where, limit: Int, page: Int, sort: String): ErrorFields
+  ErrorFields(
+    draft: Boolean
+    where: ErrorField_where
+    limit: Int
+    page: Int
+    sort: String
+  ): ErrorFields
   docAccessErrorField(id: String!): error_fieldsDocAccess
   Upload(id: String!, draft: Boolean): Upload
   Uploads(draft: Boolean, where: Upload_where, limit: Int, page: Int, sort: String): Uploads
@@ -11,7 +17,13 @@ type Query {
   meUser: usersMe
   initializedUser: Boolean
   PayloadPreference(id: String!, draft: Boolean): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, sort: String): PayloadPreferences
+  PayloadPreferences(
+    draft: Boolean
+    where: PayloadPreference_where
+    limit: Int
+    page: Int
+    sort: String
+  ): PayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
 }
@@ -83,7 +95,8 @@ scalar JSON
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress
+  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 enum ErrorField_Home_Array_radio {
   mint
@@ -4737,10 +4750,20 @@ type PayloadPreferencesDeleteAccess {
 
 type Mutation {
   createErrorField(data: mutationErrorFieldInput!, draft: Boolean): ErrorField
-  updateErrorField(id: String!, autosave: Boolean, data: mutationErrorFieldUpdateInput!, draft: Boolean): ErrorField
+  updateErrorField(
+    id: String!
+    autosave: Boolean
+    data: mutationErrorFieldUpdateInput!
+    draft: Boolean
+  ): ErrorField
   deleteErrorField(id: String!): ErrorField
   createUpload(data: mutationUploadInput!, draft: Boolean): Upload
-  updateUpload(id: String!, autosave: Boolean, data: mutationUploadUpdateInput!, draft: Boolean): Upload
+  updateUpload(
+    id: String!
+    autosave: Boolean
+    data: mutationUploadUpdateInput!
+    draft: Boolean
+  ): Upload
   deleteUpload(id: String!): Upload
   createUser(data: mutationUserInput!, draft: Boolean): User
   updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean): User
@@ -4753,7 +4776,12 @@ type Mutation {
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean): PayloadPreference
+  updatePayloadPreference(
+    id: String!
+    autosave: Boolean
+    data: mutationPayloadPreferenceUpdateInput!
+    draft: Boolean
+  ): PayloadPreference
   deletePayloadPreference(id: String!): PayloadPreference
 }
 

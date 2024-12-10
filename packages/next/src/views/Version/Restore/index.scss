@@ -1,0 +1,79 @@
+@import '../../.././scss/styles.scss';
+
+@layer payload-default {
+  .restore-version {
+    cursor: pointer;
+    display: flex;
+
+    .popup-button {
+      display: flex;
+    }
+
+    &__chevron {
+      background-color: var(--theme-elevation-150);
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      cursor: pointer;
+
+      .stroke {
+        stroke-width: 1px;
+      }
+
+      &:hover {
+        background: var(--theme-elevation-100);
+      }
+    }
+
+    &__button {
+      border-top-right-radius: 0px;
+      border-bottom-right-radius: 0px;
+      margin-right: 2px;
+
+      &:focus {
+        border-radius: 0;
+        outline-offset: 0;
+      }
+    }
+
+    &__modal {
+      @include blur-bg;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+
+      &__toggle {
+        @extend %btn-reset;
+      }
+    }
+
+    &__wrapper {
+      z-index: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: base(0.8);
+      padding: base(2);
+      max-width: base(36);
+    }
+
+    &__content {
+      display: flex;
+      flex-direction: column;
+      gap: base(0.4);
+
+      > * {
+        margin: 0;
+      }
+    }
+
+    &__controls {
+      display: flex;
+      gap: base(0.4);
+
+      .btn {
+        margin: 0;
+      }
+    }
+  }
+}

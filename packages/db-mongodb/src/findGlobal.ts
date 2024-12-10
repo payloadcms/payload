@@ -1,21 +1,26 @@
-import type { FindGlobal } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { FindGlobal, PayloadRequest } from 'payload'
 
-import { combineQueries } from 'payload/database'
+import { combineQueries } from 'payload'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.js'
 
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { withSession } from './withSession.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
-  { locale, req = {} as PayloadRequest, slug, where },
+  { slug, locale, req = {} as PayloadRequest, select, where },
 ) {
   const Model = this.globals
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
+    select: buildProjectionFromSelect({
+      adapter: this,
+      fields: this.payload.globals.config.find((each) => each.slug === slug).flattenedFields,
+      select,
+    }),
   }
 
   const query = await Model.buildQuery({

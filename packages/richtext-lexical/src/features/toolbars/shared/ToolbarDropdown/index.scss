@@ -1,0 +1,129 @@
+@import '../../../../scss/styles';
+
+@layer payload-default {
+  .toolbar-popup__dropdown {
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    justify-content: center;
+    gap: base(0.2);
+    height: base(1.5);
+    border: 0;
+    background: none;
+    border-radius: $style-radius-m;
+    cursor: pointer;
+    position: relative;
+    padding: 0 base(0.4) 0 base(0.3);
+    transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
+
+    &-label {
+      color: var(--theme-elevation-600);
+      padding-block: 0;
+      padding-inline: base(0.2) base(0.4);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.2;
+    }
+
+    &:hover:not([disabled]) {
+      background-color: var(--theme-elevation-100);
+    }
+
+    .active {
+      background-color: var(--theme-elevation-100);
+
+      .toolbar-popup__dropdown-caret {
+        &:after {
+          transform: rotate(0deg);
+        }
+      }
+    }
+
+    &-caret {
+      width: base(0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(45deg);
+      &:after {
+        display: block;
+        content: ' ';
+        position: absolute;
+
+        /* Vector 3 */
+
+        width: 4px;
+        height: 4px;
+        transform: translateY(-2px);
+        border: solid 1px var(--theme-elevation-600);
+        border-width: 0 1px 1px 0;
+      }
+    }
+
+    &-items {
+      position: absolute;
+      background: var(--theme-elevation-0);
+      border-radius: $style-radius-m;
+      min-width: 132.5px;
+      max-width: 200px;
+      z-index: 100;
+
+      .toolbar-popup__dropdown-item {
+        all: unset; // reset all default button styles
+        cursor: pointer;
+        color: var(--theme-elevation-900);
+        transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
+        position: relative;
+
+        .text {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+
+        &:hover:not([disabled]),
+        &.active {
+          background-color: var(--theme-elevation-100);
+        }
+        &.disabled {
+          cursor: not-allowed;
+          opacity: 0.2;
+        }
+
+        .btn__icon {
+          // Override default button icon styles that
+          // set a background color when focused
+          background: none !important;
+          background-color: none !important;
+        }
+
+        padding-left: 6.25px;
+        padding-right: 6.25px;
+        width: 100%;
+        height: 30px;
+        border-radius: $style-radius-m;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        gap: 6.25px;
+
+        .icon {
+          min-width: 20px;
+          height: 20px;
+          color: var(--theme-elevation-600);
+        }
+      }
+    }
+  }
+
+  html[data-theme='light'] {
+    .toolbar-popup__dropdown {
+      &-items {
+        position: absolute;
+        @include shadow-m;
+      }
+    }
+  }
+}

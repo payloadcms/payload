@@ -1,9 +1,11 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequest } from '../../express/types'
-import type { BaseDatabaseAdapter } from '../types'
+import type { PayloadRequest } from '../../types/index.js'
+import type { BaseDatabaseAdapter } from '../types.js'
 
-import { getMigrations } from './getMigrations'
-import { readMigrationFiles } from './readMigrationFiles'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { getMigrations } from './getMigrations.js'
+import { readMigrationFiles } from './readMigrationFiles.js'
 
 export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
   const { payload } = this
@@ -16,7 +18,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
     return
   }
 
-  let transactionID
+  const req = { payload } as PayloadRequest
 
   // Rollback all migrations in order
   for (const migration of migrationFiles) {
@@ -28,21 +30,21 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
       payload.logger.info({ msg: `Migrating down: ${migration.name}` })
       try {
         const start = Date.now()
-        transactionID = await this.beginTransaction()
-        await migration.down({ payload })
+        await initTransaction(req)
+        await migration.down({ payload, req })
         await payload.delete({
           collection: 'payload-migrations',
-          req: { transactionID } as PayloadRequest,
+          req,
           where: {
             id: {
               equals: existingMigration.id,
             },
           },
         })
-        await this.commitTransaction(transactionID)
+        await commitTransaction(req)
         payload.logger.info({ msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)` })
       } catch (err: unknown) {
-        await this.rollbackTransaction(transactionID)
+        await killTransaction(req)
         payload.logger.error({ err, msg: `Error running migration ${migration.name}` })
         throw err
       }
@@ -60,6 +62,6 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
       },
     })
   } catch (err: unknown) {
-    payload.logger.error({ error: err, msg: 'Error deleting dev migration' })
+    payload.logger.error({ err, msg: 'Error deleting dev migration' })
   }
 }

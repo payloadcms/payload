@@ -1,11 +1,9 @@
 import httpStatus from 'http-status'
 
-import APIError from './APIError'
+import { APIError } from './APIError.js'
 
-class InvalidSchema extends APIError {
+export class InvalidSchema extends APIError {
   constructor(message: string, results: any) {
     super(message, httpStatus.INTERNAL_SERVER_ERROR, results)
   }
 }
-
-export default InvalidSchema

@@ -1,81 +1,174 @@
+import { fileURLToPath } from 'node:url'
 import path from 'path'
-
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { CustomViews1 } from './collections/CustomViews1'
-import { CustomViews2 } from './collections/CustomViews2'
-import { Geo } from './collections/Geo'
-import { CollectionGroup1A } from './collections/Group1A'
-import { CollectionGroup1B } from './collections/Group1B'
-import { CollectionGroup2A } from './collections/Group2A'
-import { CollectionGroup2B } from './collections/Group2B'
-import { CollectionHidden } from './collections/Hidden'
-import { CollectionNoApiView } from './collections/NoApiView'
-import { Posts } from './collections/Posts'
-import { Users } from './collections/Users'
-import AfterDashboard from './components/AfterDashboard'
-import AfterNavLinks from './components/AfterNavLinks'
-import BeforeLogin from './components/BeforeLogin'
-import Logout from './components/Logout'
-import CustomDefaultView from './components/views/CustomDefault'
-import CustomMinimalRoute from './components/views/CustomMinimal'
-import CustomView from './components/views/CustomView'
-import CustomNestedView from './components/views/CustomViewNested'
-import { CustomGlobalViews1 } from './globals/CustomViews1'
-import { CustomGlobalViews2 } from './globals/CustomViews2'
-import { Global } from './globals/Global'
-import { GlobalGroup1A } from './globals/Group1A'
-import { GlobalGroup1B } from './globals/Group1B'
-import { GlobalHidden } from './globals/Hidden'
-import { GlobalNoApiView } from './globals/NoApiView'
-import { clearAndSeedEverything } from './seed'
-import { customNestedViewPath, customViewPath } from './shared'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { BaseListFilter } from './collections/BaseListFilter.js'
+import { CustomFields } from './collections/CustomFields/index.js'
+import { CustomIdRow } from './collections/CustomIdRow.js'
+import { CustomIdTab } from './collections/CustomIdTab.js'
+import { CustomViews1 } from './collections/CustomViews1.js'
+import { CustomViews2 } from './collections/CustomViews2.js'
+import { DisableDuplicate } from './collections/DisableDuplicate.js'
+import { Geo } from './collections/Geo.js'
+import { CollectionGroup1A } from './collections/Group1A.js'
+import { CollectionGroup1B } from './collections/Group1B.js'
+import { CollectionGroup2A } from './collections/Group2A.js'
+import { CollectionGroup2B } from './collections/Group2B.js'
+import { CollectionHidden } from './collections/Hidden.js'
+import { CollectionNoApiView } from './collections/NoApiView.js'
+import { Posts } from './collections/Posts.js'
+import { UploadCollection } from './collections/Upload.js'
+import { Users } from './collections/Users.js'
+import { CustomGlobalViews1 } from './globals/CustomViews1.js'
+import { CustomGlobalViews2 } from './globals/CustomViews2.js'
+import { Global } from './globals/Global.js'
+import { GlobalGroup1A } from './globals/Group1A.js'
+import { GlobalGroup1B } from './globals/Group1B.js'
+import { GlobalHidden } from './globals/Hidden.js'
+import { GlobalNoApiView } from './globals/NoApiView.js'
+import { Settings } from './globals/Settings.js'
+import { seed } from './seed.js'
+import {
+  customAdminRoutes,
+  customNestedViewPath,
+  customParamViewPath,
+  customRootViewMetaTitle,
+  customViewPath,
+  protectedCustomNestedViewPath,
+  publicCustomViewPath,
+} from './shared.js'
 
 export default buildConfigWithDefaults({
   admin: {
-    css: path.resolve(__dirname, 'styles.scss'),
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
     components: {
-      // providers: [CustomProvider, CustomProvider],
-      afterDashboard: [AfterDashboard],
-      beforeLogin: [BeforeLogin],
-      logout: {
-        Button: Logout,
+      actions: ['/components/AdminButton/index.js#AdminButton'],
+      afterDashboard: [
+        '/components/AfterDashboard/index.js#AfterDashboard',
+        '/components/AfterDashboardClient/index.js#AfterDashboardClient',
+      ],
+      afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
+      beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
+      graphics: {
+        Logo: '/components/graphics/Logo.js#Logo',
+        Icon: '/components/graphics/Icon.js#Icon',
       },
-      afterNavLinks: [AfterNavLinks],
+      header: ['/components/CustomHeader/index.js#CustomHeader'],
+      logout: {
+        Button: '/components/Logout/index.js#Logout',
+      },
+      providers: [
+        '/components/CustomProviderServer/index.js#CustomProviderServer',
+        '/components/CustomProvider/index.js#CustomProvider',
+      ],
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
-        CustomMinimalView: {
-          path: '/custom-minimal-view',
-          Component: CustomMinimalRoute,
-        },
         CustomDefaultView: {
+          Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
           path: '/custom-default-view',
-          Component: CustomDefaultView,
         },
-        CustomView: {
-          path: customViewPath,
-          exact: true,
-          Component: CustomView,
+        CustomMinimalView: {
+          Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
+          path: '/custom-minimal-view',
+          meta: {
+            title: customRootViewMetaTitle,
+          },
         },
         CustomNestedView: {
+          Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
+          exact: true,
           path: customNestedViewPath,
-          Component: CustomNestedView,
+        },
+        CustomView: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          exact: true,
+          path: customViewPath,
+          strict: true,
+        },
+        ProtectedCustomNestedView: {
+          Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
+          exact: true,
+          path: protectedCustomNestedViewPath,
+        },
+        PublicCustomView: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          exact: true,
+          path: publicCustomViewPath,
+          strict: true,
+        },
+        CustomViewWithParam: {
+          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
+          path: customParamViewPath,
         },
       },
     },
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
+    meta: {
+      description: 'This is a custom meta description',
+      icons: [
+        {
+          type: 'image/png',
+          rel: 'icon',
+          url: '/custom-favicon-dark.png',
+        },
+        {
+          type: 'image/png',
+          media: '(prefers-color-scheme: dark)',
+          rel: 'icon',
+          url: '/custom-favicon-light.png',
+        },
+      ],
+      openGraph: {
+        description: 'This is a custom OG description',
+        title: 'This is a custom OG title',
+      },
+      titleSuffix: '- Custom Title Suffix',
+    },
+    routes: customAdminRoutes,
+    dependencies: {
+      myTestComponent: {
+        path: '/components/TestComponent.js#TestComponent',
+        type: 'component',
+        clientProps: {
+          test: 'hello',
         },
       },
-    }),
+    },
   },
+  collections: [
+    UploadCollection,
+    Posts,
+    Users,
+    CollectionHidden,
+    CollectionNoApiView,
+    CustomViews1,
+    CustomViews2,
+    CustomFields,
+    CollectionGroup1A,
+    CollectionGroup1B,
+    CollectionGroup2A,
+    CollectionGroup2B,
+    Geo,
+    CustomIdTab,
+    CustomIdRow,
+    DisableDuplicate,
+    BaseListFilter,
+  ],
+  globals: [
+    GlobalHidden,
+    GlobalNoApiView,
+    Global,
+    CustomGlobalViews1,
+    CustomGlobalViews2,
+    GlobalGroup1A,
+    GlobalGroup1B,
+    Settings,
+  ],
   i18n: {
-    resources: {
+    translations: {
       en: {
         general: {
           dashboard: 'Home',
@@ -87,44 +180,27 @@ export default buildConfigWithDefaults({
     defaultLocale: 'en',
     locales: [
       {
-        label: {
-          es: 'Español',
-          en: 'Spanish',
-        },
         code: 'es',
+        label: {
+          en: 'Spanish',
+          es: 'Español',
+        },
       },
       {
-        label: {
-          es: 'Inglés',
-          en: 'English',
-        },
         code: 'en',
+        label: {
+          en: 'English',
+          es: 'Inglés',
+        },
       },
     ],
   },
-  collections: [
-    Posts,
-    Users,
-    CollectionHidden,
-    CollectionNoApiView,
-    CustomViews1,
-    CustomViews2,
-    CollectionGroup1A,
-    CollectionGroup1B,
-    CollectionGroup2A,
-    CollectionGroup2B,
-    Geo,
-  ],
-  globals: [
-    GlobalHidden,
-    GlobalNoApiView,
-    Global,
-    CustomGlobalViews1,
-    CustomGlobalViews2,
-    GlobalGroup1A,
-    GlobalGroup1B,
-  ],
   onInit: async (payload) => {
-    await clearAndSeedEverything(payload)
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

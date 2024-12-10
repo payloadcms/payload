@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "sourceMaps": true,
+  "jsc": {
+    "target": "esnext",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "dts": true
+    },
+    "transform": {
+      "react": {
+        "runtime": "automatic",
+        "pragmaFrag": "React.Fragment",
+        "throwIfNamespace": true,
+        "development": false,
+        "useBuiltins": true
+      }
+    }
+  },
+  "module": {
+    "type": "commonjs"
+  }
+}

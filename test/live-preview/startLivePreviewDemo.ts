@@ -1,7 +1,11 @@
+import type { ChildProcessWithoutNullStreams } from 'child_process'
+import type { Payload } from 'payload'
+
 import { spawn } from 'child_process'
 import path from 'path'
-
-import type { Payload } from '../../packages/payload/src'
+import { fileURLToPath } from 'url'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const installNodeModules = async (args: { payload: Payload }): Promise<void> => {
   const { payload } = args
@@ -10,8 +14,8 @@ const installNodeModules = async (args: { payload: Payload }): Promise<void> => 
 
   return new Promise(function (resolve) {
     // Install the node modules for the Next.js app
-    const installation = spawn('yarn', ['install'], {
-      cwd: path.resolve(__dirname, './next-app'),
+    const installation = spawn('pnpm', ['install', '--ignore-workspace'], {
+      cwd: path.resolve(dirname, './next-app'),
     })
 
     installation.stdout.on('data', (data) => {
@@ -34,15 +38,15 @@ const installNodeModules = async (args: { payload: Payload }): Promise<void> => 
   })
 }
 
-const bootNextApp = async (args: { payload: Payload }): Promise<void> => {
+const bootNextApp = async (args: { payload: Payload }): Promise<ChildProcessWithoutNullStreams> => {
   const { payload } = args
 
   let started = false
 
   return new Promise(function (resolve, reject) {
     // Boot up the Next.js app
-    const app = spawn('yarn', ['dev'], {
-      cwd: path.resolve(__dirname, './next-app'),
+    const app = spawn('pnpm', ['dev'], {
+      cwd: path.resolve(dirname, './next-app'),
     })
 
     app.stdout.on('data', (data) => {
@@ -54,7 +58,7 @@ const bootNextApp = async (args: { payload: Payload }): Promise<void> => {
       payload.logger.info(data.toString())
 
       if (data.toString().includes('Ready in')) {
-        resolve()
+        resolve(app)
       }
     })
 
@@ -69,7 +73,11 @@ const bootNextApp = async (args: { payload: Payload }): Promise<void> => {
   })
 }
 
-export const startLivePreviewDemo = async (args: { payload: Payload }): Promise<void> => {
+export const startLivePreviewDemo = async (args: {
+  payload: Payload
+}): Promise<ChildProcessWithoutNullStreams> => {
   await installNodeModules(args)
-  await bootNextApp(args)
+  const process = await bootNextApp(args)
+
+  return process
 }

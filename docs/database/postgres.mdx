@@ -2,48 +2,72 @@
 title: Postgres
 label: Postgres
 order: 50
-desc: Payload supports Postgres through an officially supported Drizzle database adapter. 
-keywords: Postgres, documentation, typescript, Content Management System, cms, headless, javascript, node, react, express
+desc: Payload supports Postgres through an officially supported Drizzle Database Adapter.
+keywords: Postgres, documentation, typescript, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 To use Payload with Postgres, install the package `@payloadcms/db-postgres`. It leverages Drizzle ORM and `node-postgres` to interact with a Postgres database that you provide.
 
-<Banner>
-  The Postgres database adapter is currently in beta. If you would like to help us test this package, we'd love to hear if you find any bugs or issues!
-</Banner>
+Alternatively, the `@payloadcms/db-vercel-postgres` package is also available and is optimized for use with Vercel.
 
 It automatically manages changes to your database for you in development mode, and exposes a full suite of migration controls for you to leverage in order to keep other database environments in sync with your schema. DDL transformations are automatically generated.
 
-To configure Payload to use Postgres, pass the `postgresAdapter` to your Payload config as follows:
+To configure Payload to use Postgres, pass the `postgresAdapter` to your Payload Config as follows:
+
+### Usage
+
+`@payloadcms/db-postgres`:
 
 ```ts
 import { postgresAdapter } from '@payloadcms/db-postgres'
 
 export default buildConfig({
-  // Your config goes here
-  collections: [
-    // Collections go here
-  ],
   // Configure the Postgres adapter here
   db: postgresAdapter({
     // Postgres-specific arguments go here.
     // `pool` is required.
     pool: {
       connectionString: process.env.DATABASE_URI,
-    }
+    },
   }),
 })
 ```
 
-### Options
+`@payloadcms/db-vercel-postgres`:
 
-| Option            | Description                                                                                                                                                                      |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pool`            | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres`.                                      |
-| `push`            | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
-| `migrationDir`    | Customize the directory that migrations are stored. |
+```ts
+import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 
-### Access to Drizzle
+export default buildConfig({
+  // Automatically uses proces.env.POSTGRES_URL if no options are provided.
+  db: vercelPostgresAdapter(),
+  // Optionally, can accept the same options as the @vercel/postgres package.
+  db: vercelPostgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URL
+    },
+  }),
+})
+```
+
+## Options
+
+| Option                      | Description                                                                                                                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pool` \*                   | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres` or to `@vercel/postgres`              |
+| `push`                      | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
+| `migrationDir`              | Customize the directory that migrations are stored.                                                                                                                              |
+| `schemaName` (experimental) | A string for the postgres schema to use, defaults to 'public'.                                                                                                                   |
+| `idType`                    | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                              |
+| `transactionOptions`        | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                       |
+| `disableCreateDatabase`     | Pass `true` to disable auto database creation if it doesn't exist. Defaults to `false`.                                                                                           |
+| `localesSuffix`             | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                 |
+| `relationshipsSuffix`       | A string appended to the end of table names for storing relationships. Default is '_rels'.                                                                                       |
+| `versionsSuffix`            | A string appended to the end of table names for storing versions. Defaults to '_v'.                                                                                              |
+| `beforeSchemaInit`          | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                          |
+| `afterSchemaInit`           | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
+
+## Access to Drizzle
 
 After Payload is initialized, this adapter will expose the full power of Drizzle to you for use if you need it.
 
@@ -53,7 +77,7 @@ You can access Drizzle as follows:
 payload.db.drizzle
 ```
 
-### Tables, relations, and enums
+## Tables, relations, and enums
 
 In addition to exposing Drizzle directly, all of the tables, Drizzle relations, and enum configs are exposed for you via the `payload.db` property as well.
 
@@ -61,27 +85,149 @@ In addition to exposing Drizzle directly, all of the tables, Drizzle relations, 
 - Enums - `payload.db.enums`
 - Relations - `payload.db.relations`
 
-### Prototyping in development mode
+## Prototyping in development mode
 
 Drizzle exposes two ways to work locally in development mode.
 
-The first is [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push), which automatically pushes changes you make to your Payload config (and therefore, Drizzle schema) to your database so you don't have to manually migrate every time you change your Payload config. This only works in development mode, and should not be mixed with manually running [`migrate`](/docs/database/migrations) commands. 
+The first is [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push), which automatically pushes changes you make to your Payload Config (and therefore, Drizzle schema) to your database so you don't have to manually migrate every time you change your Payload Config. This only works in development mode, and should not be mixed with manually running [`migrate`](/docs/database/migrations) commands.
 
 You will be warned if any changes that you make will entail data loss while in development mode. Push is enabled by default, but you can opt out if you'd like.
 
-Alternatively, you can disable `push` and rely solely on migrations to keep your local database in sync with your Payload config.
+Alternatively, you can disable `push` and rely solely on migrations to keep your local database in sync with your Payload Config.
 
-### Migration workflows
+## Migration workflows
 
-Migrations are extremely powerful thanks to the seamless way that Payload and Drizzle work together. Let's take the following scenario:
+In Postgres, migrations are a fundamental aspect of working with Payload and you should become familiar with how they work.
 
-1. You are building your Payload config locally, with a local database used for testing.
-1. You have left the default setting of `push` enabled, so every time you change your Payload config (add or remove fields, collections, etc.), Drizzle will automatically push changes to your local DB.
-1. Once you're done with your changes, or have completed a feature, you can run `npm run payload migrate:create`. 
-1. Payload and Drizzle will look for any existing migrations, and automatically generate all SQL changes necessary to convert your schema from its prior state into the state of your current Payload config, and store the resulting DDL in a newly created migration.
-1. Once you're ready to go to production, you will be able to run `npm run payload migrate` against your production database, which will apply any new migrations that have not yet run.
-1. Now your production database is in sync with your Payload config!
+For more information about migrations, [click here](./migrations#when-to-run-migrations).
 
-<Banner type="warning">
-  Warning: do not mix "push" and migrations with your local development database. If you use "push" locally, and then try to migrate, Payload will throw a warning, telling you that these two methods are not meant to be used interchangeably.
-</Banner>
+## Drizzle schema hooks
+
+### beforeSchemaInit
+
+Runs before the schema is built. You can use this hook to extend your database structure with tables that won't be managed by Payload.
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import { integer, pgTable, serial } from 'drizzle-orm/pg-core'
+
+postgresAdapter({
+  beforeSchemaInit: [
+    ({ schema, adapter }) => {
+      return {
+        ...schema,
+        tables: {
+          ...schema.tables,
+          addedTable: pgTable('added_table', {
+            id: serial('id').notNull(),
+          }),
+        },
+      }
+    },
+  ],
+})
+```
+
+One use case is preserving your existing database structure when migrating to Payload. By default, Payload drops the current database schema, which may not be desirable in this scenario.
+To quickly generate the Drizzle schema from your database you can use [Drizzle Introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
+You should get the `schema.ts` file which may look like this:
+
+```ts
+import { pgTable, uniqueIndex, serial, varchar, text } from 'drizzle-orm/pg-core'
+
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  fullName: text('full_name'),
+  phone: varchar('phone', { length: 256 }),
+})
+
+export const countries = pgTable(
+  'countries',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 256 }),
+  },
+  (countries) => {
+    return {
+      nameIndex: uniqueIndex('name_idx').on(countries.name),
+    }
+  },
+)
+
+```
+
+You can import them into your config and append to the schema with the `beforeSchemaInit` hook like this:
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import { users, countries } from '../drizzle/schema'
+
+postgresAdapter({
+  beforeSchemaInit: [
+    ({ schema, adapter }) => {
+      return {
+        ...schema,
+        tables: {
+          ...schema.tables,
+          users,
+          countries
+        },
+      }
+    },
+  ],
+})
+```
+
+Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection. 
+
+
+### afterSchemaInit
+
+Runs after the Drizzle schema is built. You can use this hook to modify the schema with features that aren't supported by Payload, or if you want to add a column that you don't want to be in the Payload config.
+To extend a table, Payload exposes `extendTable` utillity to the args. You can refer to the [Drizzle documentation](https://orm.drizzle.team/docs/sql-schema-declaration).
+The following example adds the `extra_integer_column` column and a composite index on `country` and `city` columns.
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import { index, integer } from 'drizzle-orm/pg-core'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [
+    {
+      slug: 'places',
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  db: postgresAdapter({
+    afterSchemaInit: [
+      ({ schema, extendTable, adapter }) => {
+        extendTable({
+          table: schema.tables.places,
+          columns: {
+            extraIntegerColumn: integer('extra_integer_column'),
+          },
+          extraConfig: (table) => ({
+            country_city_composite_index: index('country_city_composite_index').on(
+              table.country,
+              table.city,
+            ),
+          }),
+        })
+
+        return schema
+      },
+    ],
+  }),
+})
+
+```

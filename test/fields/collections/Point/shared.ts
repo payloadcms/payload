@@ -1,4 +1,4 @@
-import type { PointField } from '../../payload-types'
+import type { PointField } from '../../payload-types.js'
 
 export const pointDoc: Partial<PointField> = {
   point: [7, -7],

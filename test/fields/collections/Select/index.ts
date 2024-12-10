@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { selectFieldsSlug } from '../../slugs'
+import { selectFieldsSlug } from '../../slugs.js'
 
 const SelectFields: CollectionConfig = {
   slug: selectFieldsSlug,
@@ -79,6 +79,88 @@ const SelectFields: CollectionConfig = {
         {
           label: 'Value Six',
           value: 'six',
+        },
+      ],
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'selectHasMany',
+          hasMany: true,
+          type: 'select',
+          admin: {
+            isClearable: true,
+            isSortable: true,
+          },
+          options: [
+            {
+              label: 'Value One',
+              value: 'one',
+            },
+            {
+              label: 'Value Two',
+              value: 'two',
+            },
+            {
+              label: 'Value Three',
+              value: 'three',
+            },
+            {
+              label: 'Value Four',
+              value: 'four',
+            },
+            {
+              label: 'Value Five',
+              value: 'five',
+            },
+            {
+              label: 'Value Six',
+              value: 'six',
+            },
+          ],
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'selectHasMany',
+              hasMany: true,
+              type: 'select',
+              admin: {
+                isClearable: true,
+                isSortable: true,
+              },
+              options: [
+                {
+                  label: 'Value One',
+                  value: 'one',
+                },
+                {
+                  label: 'Value Two',
+                  value: 'two',
+                },
+                {
+                  label: 'Value Three',
+                  value: 'three',
+                },
+                {
+                  label: 'Value Four',
+                  value: 'four',
+                },
+                {
+                  label: 'Value Five',
+                  value: 'five',
+                },
+                {
+                  label: 'Value Six',
+                  value: 'six',
+                },
+              ],
+            },
+          ],
         },
       ],
     },

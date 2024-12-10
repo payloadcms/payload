@@ -1,43 +1,84 @@
 {
   "name": "create-payload-app",
-  "version": "1.0.0",
+  "version": "3.5.0",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/create-payload-app"
+  },
   "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "type": "module",
+  "exports": {
+    "./types": {
+      "import": "./src/types.ts",
+      "require": "./src/types.ts"
+    },
+    "./commands": {
+      "import": "./src/lib/init-next.ts",
+      "require": "./src/lib/init-next.ts",
+      "types": "./src/lib/init-next.ts"
+    },
+    "./lib/*": {
+      "import": "./src/lib/*",
+      "require": "./src/lib/*",
+      "types": "./src/lib/*"
+    },
+    "./utils/*": {
+      "import": "./src/utils/*",
+      "require": "./src/utils/*",
+      "types": "./src/utils/*"
+    }
+  },
   "bin": {
     "create-payload-app": "bin/cli.js"
-  },
-  "scripts": {
-    "build": "pnpm build:swc",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "test": "jest",
-    "prepublishOnly": "pnpm test && pnpm clean && pnpm build"
   },
   "files": [
     "package.json",
     "dist",
     "bin"
   ],
+  "scripts": {
+    "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
+    "prepublishOnly": "pnpm clean && pnpm build",
+    "test": "jest",
+    "typecheck": "tsc"
+  },
   "dependencies": {
+    "@clack/prompts": "^0.7.0",
     "@sindresorhus/slugify": "^1.1.0",
+    "@swc/core": "1.7.10",
     "arg": "^5.0.0",
     "chalk": "^4.1.0",
-    "command-exists": "^1.2.9",
-    "degit": "^2.8.4",
+    "comment-json": "^4.2.3",
+    "esprima-next": "^6.0.3",
     "execa": "^5.0.0",
-    "figures": "^3.2.0",
+    "figures": "^6.1.0",
     "fs-extra": "^9.0.1",
-    "handlebars": "^4.7.7",
-    "ora": "^5.1.0",
-    "prompts": "^2.4.2",
+    "globby": "11.1.0",
+    "tar": "^7.4.3",
     "terminal-link": "^2.1.1"
   },
   "devDependencies": {
-    "@types/command-exists": "^1.2.0",
-    "@types/degit": "^2.8.3",
+    "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
-    "@types/jest": "^27.0.3",
-    "@types/node": "^16.6.2",
-    "@types/prompts": "^2.4.1",
-    "ts-jest": "^29.1.0"
+    "@types/jest": "29.5.12",
+    "@types/node": "22.5.4"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
   }
 }

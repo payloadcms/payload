@@ -1,0 +1,51 @@
+---
+title: JWT Strategy
+label: JWT Strategy
+order: 40
+desc: Enable JSON Web Token based authentication to interface with Payload.
+keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Payload offers the ability to [Authenticate](./overview) via JSON Web Tokens (JWT). These can be read from the responses of `login`, `logout`, `refresh`, and `me` auth operations.
+
+<Banner type="success">
+  <strong>Tip:</strong>
+  You can access the logged-in user from within [Access Control](../access-control/overview) and [Hooks](../hooks/overview) through the `req.user` argument. [More details](./token-data).
+</Banner>
+
+### Identifying Users Via The Authorization Header
+
+In addition to authenticating via an HTTP-only cookie, you can also identify users via the `Authorization` header on an HTTP request.
+
+Example:
+
+```ts
+const user = await fetch('http://localhost:3000/api/users/login', {
+  method: 'POST',
+  body: JSON.stringify({
+    email: 'dev@payloadcms.com',
+    password: 'password',
+  })
+}).then(req => await req.json())
+
+const request = await fetch('http://localhost:3000', {
+  headers: {
+    Authorization: `JWT ${user.token}`,
+  },
+})
+```
+
+### Omitting The Token
+
+In some cases you may want to prevent the token from being returned from the auth operations. You can do that by setting `removeTokenFromResponse` to `true` like so:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const UsersWithoutJWTs: CollectionConfig = {
+  slug: 'users-without-jwts',
+  auth: {
+    removeTokenFromRepsonse: true, // highlight-line
+  },
+}
+```

@@ -1,0 +1,79 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .template-default {
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+
+    [dir='rtl'] &__nav-toggler-wrapper {
+      left: unset;
+      right: 0;
+    }
+
+    &__nav-toggler-wrapper {
+      position: sticky;
+      z-index: var(--z-modal);
+      top: 0;
+      left: 0;
+      height: 0;
+      width: var(--gutter-h);
+      display: flex;
+      justify-content: center;
+    }
+
+    &__nav-toggler-container {
+      height: var(--app-header-height);
+      display: flex;
+      align-items: center;
+    }
+
+    &__nav-toggler {
+      display: flex;
+      align-items: center;
+    }
+
+    &__wrap {
+      min-width: 0;
+      width: 100%;
+      flex-grow: 1;
+      position: relative;
+      background-color: var(--theme-bg);
+      &:before {
+        content: '';
+        display: block;
+        position: absolute;
+        inset: 0;
+        background-color: inherit;
+        opacity: 0;
+        z-index: var(--z-status);
+        visibility: hidden;
+        transition: all var(--nav-trans-time) linear;
+      }
+    }
+
+    @include mid-break {
+      &__nav-toggler-wrapper {
+        .hamburger {
+          left: unset;
+        }
+      }
+    }
+
+    @include small-break {
+      &__nav-toggler-wrapper {
+        width: unset;
+        justify-content: unset;
+
+        .hamburger {
+          display: none;
+        }
+      }
+
+      .template-default {
+        &__wrap {
+          min-width: 100%;
+        }
+      }
+    }
+  }
+}

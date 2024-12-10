@@ -1,14 +1,13 @@
-import type { User } from '../auth'
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types/index.js'
 
 export type PreferenceRequest = {
   key: string
   overrideAccess?: boolean
   req: PayloadRequest
-  user: User
+  user: PayloadRequest['user']
 }
 
-export type PreferenceUpdateRequest = PreferenceRequest & { value: undefined }
+export type PreferenceUpdateRequest = { value: unknown } & PreferenceRequest
 
 export type CollapsedPreferences = string[]
 
@@ -16,11 +15,12 @@ export type TabsPreferences = Array<{
   [path: string]: number
 }>
 
+export type InsideFieldsPreferences = {
+  collapsed: CollapsedPreferences
+  tabIndex: number
+}
 export type FieldsPreferences = {
-  [key: string]: {
-    collapsed: CollapsedPreferences
-    tabIndex: number
-  }
+  [key: string]: InsideFieldsPreferences
 }
 
 export type DocumentPreferences = {

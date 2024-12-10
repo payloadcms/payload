@@ -1,15 +1,16 @@
-import type { Block, CollectionConfig, Field } from 'payload/types'
+import type { Block, CollectionConfig, Field } from 'payload'
 
-import merge from 'deepmerge'
+import { deepMergeWithSourceArrays } from 'payload'
 
-import type { FieldConfig, PluginConfig } from '../../types'
+import type { FormBuilderPluginConfig } from '../../types.js'
 
-import { fields } from './fields'
+import { fields } from './fields.js'
 
 // all settings can be overridden by the config
-export const generateFormCollection = (formConfig: PluginConfig): CollectionConfig => {
+export const generateFormCollection = (formConfig: FormBuilderPluginConfig): CollectionConfig => {
   const redirect: Field = {
     name: 'redirect',
+    type: 'group',
     admin: {
       condition: (_, siblingData) => siblingData?.confirmationType === 'redirect',
       hideGutter: true,
@@ -17,17 +18,17 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
     fields: [
       {
         name: 'url',
+        type: 'text',
         label: 'URL to redirect to',
         required: true,
-        type: 'text',
       },
     ],
-    type: 'group',
   }
 
   if (formConfig.redirectRelationships) {
     redirect.fields.unshift({
       name: 'reference',
+      type: 'relationship',
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'reference',
       },
@@ -35,11 +36,11 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
       maxDepth: 2,
       relationTo: formConfig.redirectRelationships,
       required: true,
-      type: 'relationship',
     })
 
     redirect.fields.unshift({
       name: 'type',
+      type: 'radio',
       admin: {
         layout: 'horizontal',
       },
@@ -54,18 +55,178 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
           value: 'custom',
         },
       ],
-      type: 'radio',
     })
 
-    if (redirect.fields[2].type !== 'row') redirect.fields[2].label = 'Custom URL'
+    if (redirect.fields[2].type !== 'row') {
+      redirect.fields[2].label = 'Custom URL'
+    }
 
     redirect.fields[2].admin = {
       condition: (_, siblingData) => siblingData?.type === 'custom',
     }
   }
 
+  const defaultFields: Field[] = [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'fields',
+      type: 'blocks',
+      blocks: Object.entries(formConfig?.fields || {})
+        .map(([fieldKey, fieldConfig]) => {
+          // let the config enable/disable fields with either boolean values or objects
+          if (fieldConfig !== false) {
+            const block = fields[fieldKey]
+
+            if (block === undefined && typeof fieldConfig === 'object') {
+              return fieldConfig
+            }
+
+            if (typeof block === 'object' && typeof fieldConfig === 'object') {
+              return deepMergeWithSourceArrays(block, fieldConfig)
+            }
+
+            if (typeof block === 'function') {
+              return block(fieldConfig)
+            }
+
+            return block
+          }
+
+          return null
+        })
+        .filter(Boolean) as Block[],
+    },
+    {
+      name: 'submitButtonLabel',
+      type: 'text',
+      localized: true,
+    },
+    {
+      name: 'confirmationType',
+      type: 'radio',
+      admin: {
+        description:
+          'Choose whether to display an on-page message or redirect to a different page after they submit the form.',
+        layout: 'horizontal',
+      },
+      defaultValue: 'message',
+      options: [
+        {
+          label: 'Message',
+          value: 'message',
+        },
+        {
+          label: 'Redirect',
+          value: 'redirect',
+        },
+      ],
+    },
+    {
+      name: 'confirmationMessage',
+      type: 'richText',
+      admin: {
+        condition: (_, siblingData) => siblingData?.confirmationType === 'message',
+      },
+      localized: true,
+      required: true,
+    },
+    redirect,
+    {
+      name: 'emails',
+      type: 'array',
+      access: {
+        read: ({ req: { user } }) => !!user,
+      },
+      admin: {
+        description:
+          "Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.",
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'emailTo',
+              type: 'text',
+              admin: {
+                placeholder: '"Email Sender" <sender@email.com>',
+                width: '100%',
+              },
+              label: 'Email To',
+            },
+            {
+              name: 'cc',
+              type: 'text',
+              admin: {
+                style: {
+                  maxWidth: '50%',
+                },
+              },
+              label: 'CC',
+            },
+            {
+              name: 'bcc',
+              type: 'text',
+              admin: {
+                style: {
+                  maxWidth: '50%',
+                },
+              },
+              label: 'BCC',
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'replyTo',
+              type: 'text',
+              admin: {
+                placeholder: '"Reply To" <reply-to@email.com>',
+                width: '50%',
+              },
+              label: 'Reply To',
+            },
+            {
+              name: 'emailFrom',
+              type: 'text',
+              admin: {
+                placeholder: '"Email From" <email-from@email.com>',
+                width: '50%',
+              },
+              label: 'Email From',
+            },
+          ],
+        },
+        {
+          name: 'subject',
+          type: 'text',
+          defaultValue: "You've received a new message.",
+          label: 'Subject',
+          localized: true,
+          required: true,
+        },
+        {
+          name: 'message',
+          type: 'richText',
+          admin: {
+            description: 'Enter the message that should be sent in this email.',
+          },
+          label: 'Message',
+          localized: true,
+        },
+      ],
+    },
+  ]
+
   const config: CollectionConfig = {
     ...(formConfig?.formOverrides || {}),
+    slug: formConfig?.formOverrides?.slug || 'forms',
     access: {
       read: () => true,
       ...(formConfig?.formOverrides?.access || {}),
@@ -75,160 +236,10 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
       useAsTitle: 'title',
       ...(formConfig?.formOverrides?.admin || {}),
     },
-    fields: [
-      {
-        name: 'title',
-        required: true,
-        type: 'text',
-      },
-      {
-        name: 'fields',
-        blocks: Object.entries(formConfig?.fields || {})
-          .map(([fieldKey, fieldConfig]) => {
-            // let the config enable/disable fields with either boolean values or objects
-            if (fieldConfig !== false) {
-              const block = fields[fieldKey]
-
-              if (block === undefined && typeof fieldConfig === 'object') {
-                return fieldConfig
-              }
-
-              if (typeof block === 'object' && typeof fieldConfig === 'object') {
-                return merge<FieldConfig>(block, fieldConfig, {
-                  arrayMerge: (_, sourceArray) => sourceArray,
-                })
-              }
-
-              if (typeof block === 'function') {
-                return block(fieldConfig)
-              }
-
-              return block
-            }
-
-            return null
-          })
-          .filter(Boolean) as Block[],
-        type: 'blocks',
-      },
-      {
-        name: 'submitButtonLabel',
-        localized: true,
-        type: 'text',
-      },
-      {
-        name: 'confirmationType',
-        admin: {
-          description:
-            'Choose whether to display an on-page message or redirect to a different page after they submit the form.',
-          layout: 'horizontal',
-        },
-        defaultValue: 'message',
-        options: [
-          {
-            label: 'Message',
-            value: 'message',
-          },
-          {
-            label: 'Redirect',
-            value: 'redirect',
-          },
-        ],
-        type: 'radio',
-      },
-      {
-        name: 'confirmationMessage',
-        admin: {
-          condition: (_, siblingData) => siblingData?.confirmationType === 'message',
-        },
-        localized: true,
-        required: true,
-        type: 'richText',
-      },
-      redirect,
-      {
-        name: 'emails',
-        admin: {
-          description:
-            "Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}.",
-        },
-        fields: [
-          {
-            fields: [
-              {
-                name: 'emailTo',
-                admin: {
-                  placeholder: '"Email Sender" <sender@email.com>',
-                  width: '100%',
-                },
-                label: 'Email To',
-                type: 'text',
-              },
-              {
-                name: 'cc',
-                admin: {
-                  width: '50%',
-                },
-                label: 'CC',
-                type: 'text',
-              },
-              {
-                name: 'bcc',
-                admin: {
-                  width: '50%',
-                },
-                label: 'BCC',
-                type: 'text',
-              },
-            ],
-            type: 'row',
-          },
-          {
-            fields: [
-              {
-                name: 'replyTo',
-                admin: {
-                  placeholder: '"Reply To" <reply-to@email.com>',
-                  width: '50%',
-                },
-                label: 'Reply To',
-                type: 'text',
-              },
-              {
-                name: 'emailFrom',
-                admin: {
-                  placeholder: '"Email From" <email-from@email.com>',
-                  width: '50%',
-                },
-                label: 'Email From',
-                type: 'text',
-              },
-            ],
-            type: 'row',
-          },
-          {
-            name: 'subject',
-            defaultValue: "You've received a new message.",
-            label: 'Subject',
-            localized: true,
-            required: true,
-            type: 'text',
-          },
-          {
-            name: 'message',
-            admin: {
-              description: 'Enter the message that should be sent in this email.',
-            },
-            label: 'Message',
-            localized: true,
-            type: 'richText',
-          },
-        ],
-        type: 'array',
-      },
-      ...(formConfig?.formOverrides?.fields || []),
-    ],
-    slug: formConfig?.formOverrides?.slug || 'forms',
+    fields:
+      formConfig?.formOverrides?.fields && typeof formConfig?.formOverrides?.fields === 'function'
+        ? formConfig.formOverrides.fields({ defaultFields })
+        : defaultFields,
   }
 
   return config

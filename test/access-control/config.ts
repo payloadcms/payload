@@ -1,73 +1,117 @@
-import type { FieldAccess } from '../../packages/payload/src/fields/config/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { FieldAccess } from 'payload'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { firstArrayText, secondArrayText } from './shared'
+import type { Config, User } from './payload-types.js'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { textToLexicalJSON } from '../fields/collections/LexicalLocalized/textToLexicalJSON.js'
+import { Disabled } from './collections/Disabled/index.js'
+import { Regression1 } from './collections/Regression-1/index.js'
+import { Regression2 } from './collections/Regression-2/index.js'
+import { RichText } from './collections/RichText/index.js'
 import {
+  createNotUpdateCollectionSlug,
   docLevelAccessSlug,
+  firstArrayText,
+  fullyRestrictedSlug,
+  hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  noAdminAccessEmail,
+  nonAdminUserEmail,
+  nonAdminUserSlug,
+  readNotUpdateGlobalSlug,
+  readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
-  restrictedSlug,
   restrictedVersionsSlug,
+  secondArrayText,
   siblingDataSlug,
   slug,
   unrestrictedSlug,
-  userRestrictedSlug,
-} from './shared'
+  userRestrictedCollectionSlug,
+  userRestrictedGlobalSlug,
+} from './shared.js'
 
 const openAccess = {
   create: () => true,
+  delete: () => true,
   read: () => true,
   update: () => true,
-  delete: () => true,
 }
 
 const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) => {
-  if (user) return true
-  if (siblingData?.allowPublicReadability) return true
+  if (user) {
+    return true
+  }
+  if (siblingData?.allowPublicReadability) {
+    return true
+  }
 
   return false
 }
 
-export const requestHeaders = { authorization: 'Bearer testBearerToken' }
+export const requestHeaders = new Headers({ authorization: 'Bearer testBearerToken' })
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
-  return !!headers && headers.authorization === requestHeaders.authorization
+  return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
+}
+
+function isUser(user: Config['user']): user is {
+  collection: 'users'
+} & User {
+  return user?.collection === 'users'
 }
 
 export default buildConfigWithDefaults({
   admin: {
+    autoLogin: false,
     user: 'users',
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   collections: [
     {
       slug: 'users',
-      auth: true,
       access: {
-        // admin: () => true,
-        admin: async () =>
-          new Promise((resolve) => {
+        // admin:  () => true,
+        admin: async ({ req }) => {
+          if (req.user?.email === noAdminAccessEmail) {
+            return false
+          }
+
+          return new Promise((resolve) => {
             // Simulate a request to an external service to determine access, i.e. another instance of Payload
             setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
-          }),
+          })
+        },
       },
+      auth: true,
       fields: [
         {
           name: 'roles',
           type: 'select',
-          hasMany: true,
-          options: ['admin', 'user'],
-          defaultValue: ['user'],
           access: {
-            create: ({ req }) => req.user?.roles?.includes('admin'),
+            create: ({ req }) => isUser(req.user) && req.user?.roles?.includes('admin'),
             read: () => false,
             update: ({ req }) => {
-              return req.user?.roles?.includes('admin')
+              return isUser(req.user) && req.user?.roles?.includes('admin')
             },
           },
+          defaultValue: ['user'],
+          hasMany: true,
+          options: ['admin', 'user'],
         },
       ],
+    },
+    {
+      slug: nonAdminUserSlug,
+      auth: true,
+      fields: [],
     },
     {
       slug,
@@ -85,16 +129,16 @@ export default buildConfigWithDefaults({
           },
         },
         {
-          type: 'group',
           name: 'group',
+          type: 'group',
           fields: [
             {
               name: 'restrictedGroupText',
               type: 'text',
               access: {
+                create: () => false,
                 read: () => false,
                 update: () => false,
-                create: () => false,
               },
             },
           ],
@@ -106,27 +150,27 @@ export default buildConfigWithDefaults({
               name: 'restrictedRowText',
               type: 'text',
               access: {
+                create: () => false,
                 read: () => false,
                 update: () => false,
-                create: () => false,
               },
             },
           ],
         },
         {
           type: 'collapsible',
-          label: 'Access',
           fields: [
             {
               name: 'restrictedCollapsibleText',
               type: 'text',
               access: {
+                create: () => false,
                 read: () => false,
                 update: () => false,
-                create: () => false,
               },
             },
           ],
+          label: 'Access',
         },
       ],
     },
@@ -140,43 +184,76 @@ export default buildConfigWithDefaults({
         {
           name: 'userRestrictedDocs',
           type: 'relationship',
-          relationTo: userRestrictedSlug,
           hasMany: true,
+          relationTo: userRestrictedCollectionSlug,
+        },
+        {
+          name: 'createNotUpdateDocs',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: createNotUpdateCollectionSlug,
         },
       ],
     },
     {
-      slug: restrictedSlug,
+      slug: 'relation-restricted',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'post',
+          type: 'relationship',
+          relationTo: slug,
+        },
+      ],
+    },
+    {
+      slug: fullyRestrictedSlug,
+      access: {
+        create: () => false,
+        delete: () => false,
+        read: () => false,
+        update: () => false,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
       ],
-      access: {
-        create: () => false,
-        read: () => false,
-        update: () => false,
-        delete: () => false,
-      },
     },
     {
       slug: readOnlySlug,
+      access: {
+        create: () => false,
+        delete: () => false,
+        read: () => true,
+        update: () => false,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
       ],
-      access: {
-        create: () => false,
-        read: () => true,
-        update: () => false,
-        delete: () => false,
-      },
     },
     {
-      slug: userRestrictedSlug,
+      slug: userRestrictedCollectionSlug,
+      access: {
+        create: () => true,
+        delete: () => false,
+        read: () => true,
+        update: ({ req }) => ({
+          name: {
+            equals: req.user?.email,
+          },
+        }),
+      },
       admin: {
         useAsTitle: 'name',
       },
@@ -186,20 +263,51 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+    },
+    {
+      slug: createNotUpdateCollectionSlug,
       access: {
         create: () => true,
-        read: () => true,
-        update: ({ req }) => ({
-          name: {
-            equals: req.user?.email,
-          },
-        }),
         delete: () => false,
+        read: () => true,
+        update: () => false,
       },
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
     },
     {
       slug: restrictedVersionsSlug,
-      versions: true,
+      access: {
+        read: ({ req: { user } }) => {
+          if (user) {
+            return true
+          }
+
+          return {
+            hidden: {
+              not_equals: true,
+            },
+          }
+        },
+        readVersions: ({ req: { user } }) => {
+          if (user) {
+            return true
+          }
+
+          return {
+            'version.hidden': {
+              not_equals: true,
+            },
+          }
+        },
+      },
       fields: [
         {
           name: 'name',
@@ -211,26 +319,7 @@ export default buildConfigWithDefaults({
           hidden: true,
         },
       ],
-      access: {
-        read: ({ req: { user } }) => {
-          if (user) return true
-
-          return {
-            hidden: {
-              not_equals: true,
-            },
-          }
-        },
-        readVersions: ({ req: { user } }) => {
-          if (user) return true
-
-          return {
-            'version.hidden': {
-              not_equals: true,
-            },
-          }
-        },
-      },
+      versions: true,
     },
     {
       slug: siblingDataSlug,
@@ -245,8 +334,8 @@ export default buildConfigWithDefaults({
               fields: [
                 {
                   name: 'allowPublicReadability',
-                  label: 'Allow Public Readability',
                   type: 'checkbox',
+                  label: 'Allow Public Readability',
                 },
                 {
                   name: 'text',
@@ -265,9 +354,9 @@ export default buildConfigWithDefaults({
       slug: relyOnRequestHeadersSlug,
       access: {
         create: UseRequestHeadersAccess,
+        delete: UseRequestHeadersAccess,
         read: UseRequestHeadersAccess,
         update: UseRequestHeadersAccess,
-        delete: UseRequestHeadersAccess,
       },
       fields: [
         {
@@ -278,10 +367,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: docLevelAccessSlug,
-      labels: {
-        singular: 'Doc Level Access',
-        plural: 'Doc Level Access',
-      },
       access: {
         delete: () => ({
           and: [
@@ -302,7 +387,6 @@ export default buildConfigWithDefaults({
         {
           name: 'approvedTitle',
           type: 'text',
-          localized: true,
           access: {
             update: (args) => {
               if (args?.doc?.lockTitle) {
@@ -311,6 +395,7 @@ export default buildConfigWithDefaults({
               return true
             },
           },
+          localized: true,
         },
         {
           name: 'lockTitle',
@@ -318,6 +403,10 @@ export default buildConfigWithDefaults({
           defaultValue: false,
         },
       ],
+      labels: {
+        plural: 'Doc Level Access',
+        singular: 'Doc Level Access',
+      },
     },
     {
       slug: hiddenFieldsSlug,
@@ -368,7 +457,9 @@ export default buildConfigWithDefaults({
       slug: hiddenAccessSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true
+          if (user) {
+            return true
+          }
 
           return {
             hidden: {
@@ -390,6 +481,129 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: hiddenAccessCountSlug,
+      access: {
+        read: ({ req: { user } }) => {
+          if (user) {
+            return true
+          }
+
+          return {
+            hidden: {
+              not_equals: true,
+            },
+          }
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
+      ],
+    },
+    {
+      slug: 'fields-and-top-access',
+      access: {
+        readVersions: () => ({
+          'version.secret': {
+            equals: 'will-success-access-read',
+          },
+        }),
+        read: () => ({
+          secret: {
+            equals: 'will-success-access-read',
+          },
+        }),
+      },
+      versions: { drafts: true },
+      fields: [
+        {
+          type: 'text',
+          name: 'secret',
+          access: { read: () => false },
+        },
+      ],
+    },
+    Disabled,
+    RichText,
+    Regression1,
+    Regression2,
+  ],
+  globals: [
+    {
+      slug: 'settings',
+      admin: {
+        components: {
+          elements: {
+            SaveButton: '/TestButton.js#TestButton',
+          },
+        },
+      },
+      fields: [
+        {
+          name: 'test',
+          type: 'checkbox',
+          label: 'Allow access to test global',
+        },
+      ],
+    },
+    {
+      slug: 'test',
+      access: {
+        read: async ({ req: { payload } }) => {
+          const access = await payload.findGlobal({ slug: 'settings' })
+          return Boolean(access.test)
+        },
+      },
+      fields: [],
+    },
+    {
+      slug: readOnlyGlobalSlug,
+      access: {
+        read: () => true,
+        update: () => false,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: userRestrictedGlobalSlug,
+      access: {
+        read: () => true,
+        update: ({ data, req }) => data?.name === req.user?.email,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: readNotUpdateGlobalSlug,
+      access: {
+        read: () => true,
+        update: () => false,
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -397,6 +611,22 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+      },
+    })
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: noAdminAccessEmail,
+        password: 'test',
+      },
+    })
+
+    await payload.create({
+      collection: nonAdminUserSlug,
+      data: {
+        email: nonAdminUserEmail,
+        password: 'test',
       },
     })
 
@@ -426,15 +656,77 @@ export default buildConfigWithDefaults({
       data: {
         array: [
           {
-            text: firstArrayText,
             allowPublicReadability: true,
+            text: firstArrayText,
           },
           {
-            text: secondArrayText,
             allowPublicReadability: false,
+            text: secondArrayText,
           },
         ],
       },
     })
+
+    await payload.updateGlobal({
+      slug: userRestrictedGlobalSlug,
+      data: {
+        name: 'dev@payloadcms.com',
+      },
+    })
+
+    await payload.create({
+      collection: 'regression1',
+      data: {
+        richText4: textToLexicalJSON({ text: 'Text1' }),
+        array: [{ art: textToLexicalJSON({ text: 'Text2' }) }],
+        arrayWithAccessFalse: [{ richText6: textToLexicalJSON({ text: 'Text3' }) }],
+        group1: {
+          text: 'Text4',
+          richText1: textToLexicalJSON({ text: 'Text5' }),
+        },
+        blocks: [
+          {
+            blockType: 'myBlock3',
+            richText7: textToLexicalJSON({ text: 'Text6' }),
+            blockName: 'My Block 1',
+          },
+        ],
+        blocks3: [
+          {
+            blockType: 'myBlock2',
+            richText5: textToLexicalJSON({ text: 'Text7' }),
+            blockName: 'My Block 2',
+          },
+        ],
+        tab1: {
+          richText2: textToLexicalJSON({ text: 'Text8' }),
+          blocks2: [
+            {
+              blockType: 'myBlock',
+              richText3: textToLexicalJSON({ text: 'Text9' }),
+              blockName: 'My Block 3',
+            },
+          ],
+        },
+      },
+    })
+
+    await payload.create({
+      collection: 'regression2',
+      data: {
+        array: [
+          {
+            richText2: textToLexicalJSON({ text: 'Text1' }),
+          },
+        ],
+        group: {
+          text: 'Text2',
+          richText1: textToLexicalJSON({ text: 'Text3' }),
+        },
+      },
+    })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

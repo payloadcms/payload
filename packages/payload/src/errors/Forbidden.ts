@@ -1,16 +1,15 @@
-import type { TFunction } from 'i18next'
+import type { TFunction } from '@payloadcms/translations'
 
+import { en } from '@payloadcms/translations/languages/en'
 import httpStatus from 'http-status'
 
-import APIError from './APIError'
+import { APIError } from './APIError.js'
 
-class Forbidden extends APIError {
+export class Forbidden extends APIError {
   constructor(t?: TFunction) {
     super(
-      t ? t('error:notAllowedToPerformAction') : 'You are not allowed to perform this action.',
+      t ? t('error:notAllowedToPerformAction') : en.translations.error.notAllowedToPerformAction,
       httpStatus.FORBIDDEN,
     )
   }
 }
-
-export default Forbidden

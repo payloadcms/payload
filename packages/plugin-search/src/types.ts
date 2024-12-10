@@ -1,7 +1,16 @@
-import type { Payload } from 'payload'
-import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  CollectionConfig,
+  Field,
+  LabelFunction,
+  Locale,
+  Payload,
+  PayloadRequest,
+  StaticLabel,
+} from 'payload'
 
-export interface DocToSync {
+export type DocToSync = {
   [key: string]: any
   doc: {
     relationTo: string
@@ -15,21 +24,53 @@ export type BeforeSync = (args: {
     [key: string]: any
   }
   payload: Payload
+  req: PayloadRequest
   searchDoc: DocToSync
 }) => DocToSync | Promise<DocToSync>
 
-export interface SearchConfig {
+export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
+
+export type SearchPluginConfig = {
   beforeSync?: BeforeSync
   collections?: string[]
   defaultPriorities?: {
-    [collection: string]: ((doc: any) => Promise<number> | number) | number
+    [collection: string]: ((doc: any) => number | Promise<number>) | number
   }
   deleteDrafts?: boolean
-  searchOverrides?: Partial<CollectionConfig>
+  localize?: boolean
+  reindexBatchSize?: number
+  searchOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   syncDrafts?: boolean
 }
 
-// TODO: extend this hook with additional args
-// searchConfig: SearchConfig
-// collection: string
-export type SyncWithSearch = CollectionAfterChangeHook
+export type CollectionLabels = {
+  [collection: string]: {
+    plural?: LabelFunction | StaticLabel
+    singular?: LabelFunction | StaticLabel
+  }
+}
+
+export type SearchPluginConfigWithLocales = {
+  labels?: CollectionLabels
+  locales?: string[]
+} & SearchPluginConfig
+
+export type SyncWithSearchArgs = {
+  collection: string
+  pluginConfig: SearchPluginConfig
+} & Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'>
+
+export type SyncDocArgs = {
+  locale?: string
+  onSyncError?: () => void
+} & Omit<SyncWithSearchArgs, 'context' | 'previousDoc'>
+
+// Extend the `CollectionAfterChangeHook` with more function args
+// Convert the `collection` arg from `SanitizedCollectionConfig` to a string
+export type SyncWithSearch = (Args: SyncWithSearchArgs) => ReturnType<CollectionAfterChangeHook>
+
+export type DeleteFromSearch = (
+  Args: {
+    pluginConfig: SearchPluginConfig
+  } & Parameters<CollectionAfterDeleteHook>[0],
+) => ReturnType<CollectionAfterDeleteHook>

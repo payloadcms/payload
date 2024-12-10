@@ -1,14 +1,13 @@
 'use client'
 
-import { useListDrawer } from 'payload/components/elements'
+import { useListDrawer, useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import RelationshipIcon from '../../../icons/Relationship'
-import ElementButton from '../../Button'
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
-import { injectVoidElement } from '../../injectVoid'
+import { RelationshipIcon } from '../../../icons/Relationship/index.js'
+import { ElementButton } from '../../Button.js'
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
+import { injectVoidElement } from '../../injectVoid.js'
 import './index.scss'
 
 const baseClass = 'relationship-rich-text-button'
@@ -17,9 +16,9 @@ const insertRelationship = (editor, { relationTo, value }) => {
   const text = { text: ' ' }
 
   const relationship = {
+    type: 'relationship',
     children: [text],
     relationTo,
-    type: 'relationship',
     value,
   }
 
@@ -32,8 +31,8 @@ type Props = {
   enabledCollectionSlugs: string[]
   path: string
 }
-const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
-  const { t } = useTranslation('fields')
+const RelationshipButtonComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
+  const { t } = useTranslation()
   const editor = useSlate()
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState(
     () => enabledCollectionSlugs[0],
@@ -44,9 +43,9 @@ const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   })
 
   const onSelect = useCallback(
-    ({ collectionConfig, docID }) => {
+    ({ collectionSlug, docID }) => {
       insertRelationship(editor, {
-        relationTo: collectionConfig.slug,
+        relationTo: collectionSlug,
         value: {
           id: docID,
         },
@@ -72,7 +71,7 @@ const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
           onClick={() => {
             // do nothing
           }}
-          tooltip={t('addRelationship')}
+          tooltip={t('fields:addRelationship')}
         >
           <RelationshipIcon />
         </ElementButton>
@@ -82,10 +81,10 @@ const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   )
 }
 
-export default (props: Props): React.ReactNode => {
+export const RelationshipButton = (props: Props): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props}>
-      <RelationshipButton {...props} />
+      <RelationshipButtonComponent {...props} />
     </EnabledRelationshipsCondition>
   )
 }

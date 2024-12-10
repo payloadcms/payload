@@ -1,96 +1,126 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Document, Where } from '../../../types'
-import type { File } from '../../../uploads/types'
-import type { BulkOperationResult } from '../../config/types'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+  Where,
+} from '../../../types/index.js'
+import type { File } from '../../../uploads/types.js'
+import type {
+  BulkOperationResult,
+  RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../../config/types.js'
 
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import getFileByPath from '../../../uploads/getFileByPath'
-import { getDataLoader } from '../../dataloader'
-import update from '../update'
-import updateByID from '../updateByID'
+import { APIError } from '../../../errors/index.js'
+import { getFileByPath } from '../../../uploads/getFileByPath.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { updateOperation } from '../update.js'
+import { updateByIDOperation } from '../updateByID.js'
 
-export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
+export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   autosave?: boolean
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
-  data: DeepPartial<GeneratedTypes['collections'][TSlug]>
+  data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
+  disableTransaction?: boolean
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: false | TypedLocale
   file?: File
   filePath?: string
-  locale?: string
+  locale?: TypedLocale
   overrideAccess?: boolean
+  overrideLock?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
+  publishSpecificLocale?: string
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
   user?: Document
 }
 
-export type ByIDOptions<TSlug extends keyof GeneratedTypes['collections']> = BaseOptions<TSlug> & {
+export type ByIDOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+> = {
   id: number | string
+  limit?: never
   where?: never
-}
+} & BaseOptions<TSlug, TSelect>
 
-export type ManyOptions<TSlug extends keyof GeneratedTypes['collections']> = BaseOptions<TSlug> & {
+export type ManyOptions<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+> = {
   id?: never
+  limit?: number
   where: Where
-}
+} & BaseOptions<TSlug, TSelect>
 
-export type Options<TSlug extends keyof GeneratedTypes['collections']> =
-  | ByIDOptions<TSlug>
-  | ManyOptions<TSlug>
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+> = ByIDOptions<TSlug, TSelect> | ManyOptions<TSlug, TSelect>
 
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function updateLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: ByIDOptions<TSlug>,
-): Promise<GeneratedTypes['collections'][TSlug]>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  options: ByIDOptions<TSlug, TSelect>,
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+async function updateLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: ManyOptions<TSlug>,
-): Promise<BulkOperationResult<TSlug>>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  options: ManyOptions<TSlug, TSelect>,
+): Promise<BulkOperationResult<TSlug, TSelect>>
+async function updateLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  options: Options<TSlug, TSelect>,
+): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>>
+async function updateLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
+  options: Options<TSlug, TSelect>,
+): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
   const {
     id,
     autosave,
     collection: collectionSlug,
-    context,
     data,
     depth,
+    disableTransaction,
     draft,
-    fallbackLocale,
     file,
     filePath,
-    locale = null,
+    limit,
     overrideAccess = true,
+    overrideLock,
     overwriteExistingFiles = false,
-    req: incomingReq,
+    populate,
+    publishSpecificLocale,
+    select,
     showHiddenFields,
-    user,
     where,
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const i18n = i18nInit(payload.config.i18n)
-  const defaultLocale = payload.config.localization
-    ? payload.config.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -98,22 +128,8 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
-  const req = {
-    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
-    files: {
-      file: file ?? (await getFileByPath(filePath)),
-    },
-    i18n,
-    locale: locale ?? defaultLocale,
-    payload,
-    payloadAPI: 'local',
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req, context)
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
+  const req = await createLocalReq(options, payload)
+  req.file = file ?? (await getFileByPath(filePath))
 
   const args = {
     id,
@@ -121,19 +137,25 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     collection,
     data,
     depth,
+    disableTransaction,
     draft,
+    limit,
     overrideAccess,
+    overrideLock,
     overwriteExistingFiles,
     payload,
+    populate,
+    publishSpecificLocale,
     req,
+    select,
     showHiddenFields,
     where,
   }
 
   if (options.id) {
-    return updateByID<TSlug>(args)
+    return updateByIDOperation<TSlug, TSelect>(args)
   }
-  return update<TSlug>(args)
+  return updateOperation<TSlug, TSelect>(args)
 }
 
 export default updateLocal

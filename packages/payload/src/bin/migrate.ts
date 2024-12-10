@@ -1,9 +1,9 @@
 import type { ParsedArgs } from 'minimist'
 
-import minimist from 'minimist'
+import type { SanitizedConfig } from '../config/types.js'
 
-import payload from '..'
-import { prettySyncLoggerDestination } from '../utilities/logger'
+import payload from '../index.js'
+import { prettySyncLoggerDestination } from '../utilities/logger.js'
 
 /**
  * The default logger's options did not allow for forcing sync logging
@@ -26,8 +26,33 @@ const availableCommands = [
 
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
 
-export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
-  const { _: args, file, help } = parsedArgs
+type Args = {
+  config: SanitizedConfig
+  parsedArgs: ParsedArgs
+}
+
+export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
+  const { _: args, file, forceAcceptWarning: forceAcceptFromProps, help } = parsedArgs
+
+  const formattedArgs = Object.keys(parsedArgs)
+    .map((key) => {
+      const formattedKey = key.replace(/^[-_]+/, '')
+      if (!formattedKey) {
+        return null
+      }
+
+      return formattedKey
+        .split('-')
+        .map((word, index) =>
+          index === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1),
+        )
+        .join('')
+    })
+    .filter(Boolean)
+
+  const forceAcceptWarning = forceAcceptFromProps || formattedArgs.includes('forceAcceptWarning')
+  const skipEmpty = formattedArgs.includes('skipEmpty')
+
   if (help) {
     // eslint-disable-next-line no-console
     console.log(`\n\n${availableCommandsMsg}\n`) // Avoid having to init payload to get the logger
@@ -38,9 +63,8 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
 
   // Barebones instance to access database adapter
   await payload.init({
+    config,
     disableOnInit: true,
-    local: true,
-    secret: process.env.PAYLOAD_SECRET || '--unused--',
     ...prettySyncLogger,
   })
 
@@ -61,11 +85,24 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
     case 'migrate':
       await adapter.migrate()
       break
-    case 'migrate:status':
-      await adapter.migrateStatus()
+    case 'migrate:create':
+      try {
+        await adapter.createMigration({
+          file,
+          forceAcceptWarning,
+          migrationName: args[1],
+          payload,
+          skipEmpty,
+        })
+      } catch (err) {
+        throw new Error(`Error creating migration: ${err.message}`)
+      }
       break
     case 'migrate:down':
       await adapter.migrateDown()
+      break
+    case 'migrate:fresh':
+      await adapter.migrateFresh({ forceAcceptWarning })
       break
     case 'migrate:refresh':
       await adapter.migrateRefresh()
@@ -73,15 +110,8 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
     case 'migrate:reset':
       await adapter.migrateReset()
       break
-    case 'migrate:fresh':
-      await adapter.migrateFresh()
-      break
-    case 'migrate:create':
-      try {
-        await adapter.createMigration({ file, migrationName: args[1], payload })
-      } catch (err) {
-        throw new Error(`Error creating migration: ${err.message}`)
-      }
+    case 'migrate:status':
+      await adapter.migrateStatus()
       break
 
     default:
@@ -92,13 +122,4 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
   }
 
   payload.logger.info('Done.')
-}
-
-// When launched directly call migrate
-if (module.id === require.main.id) {
-  const args = minimist(process.argv.slice(2))
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  migrate(args).then(() => {
-    process.exit(0)
-  })
 }

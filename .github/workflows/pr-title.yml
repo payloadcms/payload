@@ -1,0 +1,117 @@
+name: pr-title
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+
+permissions:
+  pull-requests: write
+
+jobs:
+  main:
+    name: lint-pr-title
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        id: lint_pr_title
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            build
+            chore
+            ci
+            docs
+            examples
+            feat
+            fix
+            perf
+            refactor
+            revert
+            style
+            templates
+            test
+          scopes: |
+            cpa
+            db-\*
+            db-mongodb
+            db-postgres
+            db-vercel-postgres
+            db-sqlite
+            drizzle
+            email-nodemailer
+            eslint
+            graphql
+            live-preview
+            live-preview-react
+            next
+            payload-cloud
+            plugin-cloud
+            plugin-cloud-storage
+            plugin-form-builder
+            plugin-nested-docs
+            plugin-redirects
+            plugin-search
+            plugin-sentry
+            plugin-seo
+            plugin-stripe
+            richtext-\*
+            richtext-lexical
+            richtext-slate
+            storage-\*
+            storage-azure
+            storage-gcs
+            storage-uploadthing
+            storage-vercel-blob
+            storage-s3
+            translations
+            ui
+            templates
+            examples(\/(\w|-)+)?
+            deps
+
+          # Disallow uppercase letters at the beginning of the subject
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" found in the pull request title "{title}"
+            didn't match the configured pattern. Please ensure that the subject
+            doesn't start with an uppercase character.
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        # When the previous steps fails, the workflow would stop. By adding this
+        # condition you can continue the execution with the populated error message.
+        if: always() && (steps.lint_pr_title.outputs.error_message != null)
+        with:
+          header: pr-title-lint-error
+          message: |
+            Pull Request titles must follow the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/) and have valid scopes.
+
+            ${{ steps.lint_pr_title.outputs.error_message }}
+
+            ```
+            feat(ui): add Button component
+            ^    ^    ^
+            |    |    |__ Subject
+            |    |_______ Scope
+            |____________ Type
+            ```
+
+      # Delete a previous comment when the issue has been resolved
+      - if: ${{ steps.lint_pr_title.outputs.error_message == null }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: pr-title-lint-error
+          delete: true
+
+  label-pr-on-open:
+    name: label-pr-on-open
+    runs-on: ubuntu-24.04
+    if: github.event.action == 'opened'
+    steps:
+      - name: Tag with 2.x branch with v2
+        if: github.event.pull_request.base.ref == '2.x'
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: v2

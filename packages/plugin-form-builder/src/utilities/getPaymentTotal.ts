@@ -1,9 +1,9 @@
-import type { FieldValues, PaymentField, PriceCondition } from '../types'
+import type { FieldValues, PaymentField, PriceCondition } from '../types.js'
 
 export const getPaymentTotal = (
-  args: Partial<PaymentField> & {
+  args: {
     fieldValues: FieldValues
-  },
+  } & Partial<PaymentField>,
 ): number => {
   const { basePrice = 0, fieldValues, priceConditions } = args
 
@@ -28,16 +28,16 @@ export const getPaymentTotal = (
               total += valueToUse
               break
             }
-            case 'subtract': {
-              total -= valueToUse
+            case 'divide': {
+              total /= valueToUse
               break
             }
             case 'multiply': {
               total *= valueToUse
               break
             }
-            case 'divide': {
-              total /= valueToUse
+            case 'subtract': {
+              total -= valueToUse
               break
             }
             default: {

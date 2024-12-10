@@ -6,7 +6,7 @@
     "emitDeclarationOnly": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "jsx": "react"
+    "jsx": "react-jsx"
   },
   "exclude": [
     "dist",
@@ -14,12 +14,18 @@
     "tests",
     "test",
     "node_modules",
-    ".eslintrc.js",
+    "eslint.config.js",
     "src/**/*.spec.js",
     "src/**/*.spec.jsx",
     "src/**/*.spec.ts",
     "src/**/*.spec.tsx"
   ],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
-  "references": [{ "path": "../payload" }] // db-mongodb depends on payload
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "src/**/*.json",
+    "src/field/leaves/italic/Italic"
+  ],
+  "references": [{ "path": "../payload" }, { "path": "../translations" }, { "path": "../ui" }]
 }

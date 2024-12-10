@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { relationsSlug } from '../Relations'
+import { relationsSlug } from '../Relations/index.js'
 
 export const nestedAfterReadHooksSlug = 'nested-after-read-hooks'
 

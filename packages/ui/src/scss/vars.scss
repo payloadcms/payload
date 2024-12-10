@@ -1,0 +1,192 @@
+@use 'sass:math';
+
+/////////////////////////////
+// BREAKPOINTS
+/////////////////////////////
+
+$breakpoint-xs-width: 400px !default;
+$breakpoint-s-width: 768px !default;
+$breakpoint-m-width: 1024px !default;
+$breakpoint-l-width: 1440px !default;
+
+//////////////////////////////
+// BASELINE GRID
+//////////////////////////////
+
+$baseline-px: 20px !default;
+$baseline-body-size: 13px !default;
+$baseline: math.div($baseline-px, $baseline-body-size) + rem;
+
+@function base($multiplier) {
+  @return ($baseline-px * $multiplier);
+}
+
+//////////////////////////////
+// COLORS (DEPRECATED. DO NOT USE. PREFER CSS VARIABLES)
+//////////////////////////////
+
+$color-dark-gray: #333333 !default;
+$color-gray: #9a9a9a !default;
+$color-light-gray: #dadada !default;
+$color-background-gray: #f3f3f3 !default;
+$color-red: #ff6f76 !default;
+$color-yellow: #fdffa4 !default;
+$color-green: #b2ffd6 !default;
+$color-purple: #f3ddf3 !default;
+
+//////////////////////////////
+// STYLES
+//////////////////////////////
+
+$style-radius-s: 3px !default;
+$style-radius-m: 4px !default;
+$style-radius-l: 8px !default;
+$style-stroke-width: 1px !default;
+
+$style-stroke-width-s: 1px !default;
+$style-stroke-width-m: 2px !default;
+
+//////////////////////////////
+// MISC
+//////////////////////////////
+
+$top-header-offset: calc(base(1) - 1px);
+$top-header-offset-m: base(3);
+$focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
+
+//////////////////////////////
+// SHADOWS
+//////////////////////////////
+
+@mixin shadow-sm {
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+@mixin shadow-m {
+  box-shadow: 0 4px 8px -3px rgba(0, 0, 0, 0.1);
+}
+
+@mixin shadow-lg {
+  box-shadow: 0 -2px 16px -2px rgba(0, 0, 0, 0.2);
+}
+
+@mixin shadow-lg-top {
+  box-shadow: 0 2px 16px -2px rgba(0, 0, 0, 0.2);
+}
+
+@mixin inputShadow {
+  @include shadow-sm;
+
+  &:not(:disabled) {
+    &:hover {
+      box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+@mixin soft-shadow-bottom {
+  box-shadow: 0 7px 14px 0px rgb(0 0 0 / 5%);
+}
+
+//////////////////////////////
+// STYLE MIXINS
+//////////////////////////////
+
+@mixin blur-bg($color: var(--theme-bg), $opacity: 0.75) {
+  &:before,
+  &:after {
+    content: ' ';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  &:before {
+    background: $color;
+    opacity: $opacity;
+  }
+
+  &:after {
+    backdrop-filter: blur(8px);
+  }
+}
+
+@mixin blur-bg-light {
+  @include blur-bg(var(--theme-bg), 0.3);
+}
+
+@mixin readOnly {
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-400);
+  box-shadow: none;
+
+  &:hover {
+    border-color: var(--theme-elevation-150);
+    box-shadow: none;
+  }
+}
+
+@mixin formInput() {
+  @include inputShadow;
+  font-family: var(--font-body);
+  width: 100%;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-input-bg);
+  color: var(--theme-elevation-800);
+  font-size: 1rem;
+  height: base(2);
+  line-height: base(1);
+  padding: base(0.4) base(0.75);
+  -webkit-appearance: none;
+  transition-property: border, box-shadow, background-color;
+  transition-duration: 100ms, 100ms, 500ms;
+  transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+
+  &[data-rtl='true'] {
+    direction: rtl;
+  }
+
+  &::-webkit-input-placeholder {
+    color: var(--theme-elevation-400);
+    font-weight: normal;
+    font-size: 1rem;
+  }
+
+  &::-moz-placeholder {
+    color: var(--theme-elevation-400);
+    font-weight: normal;
+    font-size: 1rem;
+  }
+
+  &:hover {
+    border-color: var(--theme-elevation-250);
+  }
+
+  &:focus,
+  &:focus-within,
+  &:active {
+    border-color: var(--theme-elevation-400);
+    outline: 0;
+  }
+
+  &:disabled {
+    @include readOnly;
+  }
+}
+
+@mixin lightInputError {
+  background-color: var(--theme-error-50);
+  border: 1px solid var(--theme-error-500);
+}
+
+@mixin darkInputError {
+  background-color: var(--theme-error-100);
+  border: 1px solid var(--theme-error-400);
+
+  &:hover {
+    border-color: var(--theme-error-500);
+  }
+}

@@ -3,128 +3,163 @@ title: Relationship Field
 label: Relationship
 order: 130
 desc: The Relationship field provides the ability to relate documents together. Learn how to use Relationship fields, see examples and options.
-keywords: relationship, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: relationship, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The Relationship field is one of the most powerful fields Payload features. It provides for the
-  ability to easily relate documents together.
-</Banner>
+The Relationship Field is one of the most powerful fields Payload features. It provides for the ability to easily relate documents together.
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/relationship.png"
   srcDark="https://payloadcms.com/images/docs/fields/relationship-dark.png"
-  alt="Shows a relationship field in the Payload admin panel"
-  caption="Admin panel screenshot of a Relationship field"
+  alt="Shows a relationship field in the Payload Admin Panel"
+  caption="Admin Panel screenshot of a Relationship field"
 />
 
-**Example uses:**
+The Relationship field is used in a variety of ways, including:
 
 - To add `Product` documents to an `Order` document
 - To allow for an `Order` to feature a `placedBy` relationship to either an `Organization` or `User` collection
 - To assign `Category` documents to `Post` documents
 
-### Config
+To add a Relationship Field, set the `type` to `relationship` in your [Field Config](./overview):
 
-| Option              | Description                                                                                                                                                                                         |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** \*       | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
-| **`relationTo`** \* | Provide one or many collection `slug`s to be able to assign relationships to.                                                                                                                       |
-| **`filterOptions`** | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options).                                                                                     |
-| **`hasMany`**       | Boolean when, if set to `true`, allows this field to have many relations instead of only one.                                                                                                       |
-| **`minRows`**       | A number for the fewest allowed items during validation when a value is present. Used with `hasMany`.                                                                                               |
-| **`maxRows`**       | A number for the most allowed items during validation when a value is present. Used with `hasMany`.                                                                                                 |
-| **`maxDepth`**      | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth)                                                                      |
-| **`label`**         | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
-| **`unique`**        | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
-| **`validate`**      | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
-| **`index`**         | Build a an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`saveToJWT`**     | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
-| **`hooks`**         | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
-| **`access`**        | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
-| **`hidden`**        | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                    |
-| **`defaultValue`**  | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                |
-| **`localized`**     | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
-| **`required`**      | Require this field to have a value.                                                                                                                                                                 |
-| **`admin`**         | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                                            |
-| **`custom`**        | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
+```ts
+import type { Field } from 'payload'
+
+export const MyRelationshipField: Field = {
+  // ...
+  // highlight-start
+  type: 'relationship',
+  relationTo: 'products',
+  // highlight-end
+}
+```
+
+## Config Options
+
+| Option                 | Description                                                                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                          |
+| **`relationTo`** \*    | Provide one or many collection `slug`s to be able to assign relationships to.                                                                                                   |
+| **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options).                                                                 |
+| **`hasMany`**          | Boolean when, if set to `true`, allows this field to have many relations instead of only one.                                                                                   |
+| **`minRows`**          | A number for the fewest allowed items during validation when a value is present. Used with `hasMany`.                                                                           |
+| **`maxRows`**          | A number for the most allowed items during validation when a value is present. Used with `hasMany`.                                                                             |
+| **`maxDepth`**         | Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](/docs/getting-started/concepts#field-level-max-depth) |
+| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                         |
+| **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                    |
+| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                    |
+| **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often.     |
+| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                 |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                           |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                              |
+| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                |
+| **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                            |
+| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                 |
+| **`required`**         | Require this field to have a value.                                                                                                                                             |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                   |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                       |
+| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                     |
+| **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)                |
 
 _\* An asterisk denotes that a property is required._
 
 <Banner type="success">
   <strong>Tip:</strong>
-  <br />
-  The [Depth](/docs/getting-started/concepts#depth) parameter can be used to automatically populate
-  related documents that are returned by the API.
+  The [Depth](../queries/depth) parameter can be used to automatically populate related documents that are returned by the API.
 </Banner>
 
-### Admin config
+## Admin Options
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), the Relationship field type also allows for the following admin-specific properties:
+The customize the appearance and behavior of the Relationship Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
-**`isSortable`**
+```ts
+import type { Field } from 'payload'
 
-Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop (only works when `hasMany` is set to `true`).
+export const MyRelationshipField: Field = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
 
-**`allowCreate`**
+The Relationship Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
-Set to `false` if you'd like to disable the ability to create new documents from within the relationship field (hides the "Add new" button in the admin UI).
+| Property                       | Description                                                                                                                              |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **`isSortable`**               | Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop (only works when `hasMany` is set to `true`). |
+| **`allowCreate`**              | Set to `false` if you'd like to disable the ability to create new documents from within the relationship field.                             |
+| **`allowEdit`**              | Set to `false` if you'd like to disable the ability to edit documents from within the relationship field.                             |
+| **`sortOptions`**              | Define a default sorting order for the options within a Relationship field's dropdown. [More](#sortOptions)                                |
 
-**`sortOptions`**
-
-The `sortOptions` property allows you to define a default sorting order for the options within a Relationship field's dropdown. This can be particularly useful for ensuring that the most relevant options are presented first to the user.
+### Sort Options
 
 You can specify `sortOptions` in two ways:
 
 **As a string:**
 
-Provide a string to define a global default sort field for all relationship field dropdowns across different collections. You can prefix the field name with a minus symbol ("-") to sort in descending order.
+Provide a string to define a global default sort field for all relationship field dropdowns across different
+collections. You can prefix the field name with a minus symbol ("-") to sort in descending order.
 
 Example:
 
 ```ts
 sortOptions: 'fieldName',
 ```
+
 This configuration will sort all relationship field dropdowns by `"fieldName"` in ascending order.
 
 **As an object :**
 
-Specify an object where keys are collection slugs and values are strings representing the field names to sort by. This allows for different sorting fields for each collection's relationship dropdown.
+Specify an object where keys are collection slugs and values are strings representing the field names to sort by. This
+allows for different sorting fields for each collection's relationship dropdown.
 
 Example:
 
 ```ts
 sortOptions: {
-  "pages": "fieldName1",
-  "posts": "-fieldName2",
-  "categories": "fieldName3"
+  "pages"
+:
+  "fieldName1",
+    "posts"
+:
+  "-fieldName2",
+    "categories"
+:
+  "fieldName3"
 }
 ```
+
 In this configuration:
+
 - Dropdowns related to `pages` will be sorted by `"fieldName1"` in ascending order.
 - Dropdowns for `posts` will use `"fieldName2"` for sorting in descending order (noted by the "-" prefix).
 - Dropdowns associated with `categories` will sort based on `"fieldName3"` in ascending order.
 
 Note: If `sortOptions` is not defined, the default sorting behavior of the Relationship field dropdown will be used.
 
-### Filtering relationship options
+## Filtering relationship options
 
-Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.
+Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both
+for validating input and filtering available relationships in the UI.
 
-The `filterOptions` property can either be a `Where` query directly, or a function (synchronous or asynchronous) that returns one. When using a function, it will be called with an argument object containing the following properties:
+The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to
+prevent all, or a `Where` query. When using a function, it will be
+called with an argument object with the following properties:
 
-| Property      | Description                                                                          |
-| ------------- | ------------------------------------------------------------------------------------ |
-| `relationTo`  | The `relationTo` to filter against (as defined on the field)                         |
-| `data`        | An object of the full collection or global document currently being edited           |
-| `siblingData` | An object of the document data limited to fields within the same parent to the field |
-| `id`          | The value of the collection `id`, will be `undefined` on create request              |
-| `user`        | The currently authenticated user object                                              |
+| Property      | Description                                                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property                |
+| `data`        | An object containing the full collection or global document currently being edited                    |
+| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field |
+| `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation      |
+| `user`        | An object containing the currently authenticated user                                                 |
 
-### Example
+## Example
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -160,21 +195,32 @@ You can learn more about writing queries [here](/docs/queries/overview).
   When a relationship field has both <strong>filterOptions</strong> and a custom{' '}
   <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong>{' '}
   unless you call the default relationship field validation function imported from{' '}
-  <strong>payload/fields/validations</strong> in your validate function.
+  <strong>payload/shared</strong> in your validate function.
 </Banner>
 
-### How the data is saved
+## Bi-directional relationships
 
-Given the variety of options possible within the `relationship` field type, the shape of the data needed for creating and updating these fields can vary. The following sections will describe the variety of data shapes that can arise from this field.
+The `relationship` field on its own is used to define relationships for the document that contains the relationship field, and this can be considered as a "one-way" relationship. For example, if you have a Post that has a `category` relationship field on it, the related `category` itself will not surface any information about the posts that have the category set.
 
-#### Has One
+However, the `relationship` field can be used in conjunction with the `Join` field to produce powerful bi-directional relationship authoring capabilities. If you're interested in bi-directional relationships, check out the [documentation for the Join field](./join).
 
-The most simple pattern of a relationship is to use `hasMany: false` with a `relationTo` that allows for only one type of collection.
+## How the data is saved
+
+Given the variety of options possible within the `relationship` field type, the shape of the data needed for creating
+and updating these fields can vary. The following sections will describe the variety of data shapes that can arise from
+this field.
+
+### Has One
+
+The most simple pattern of a relationship is to use `hasMany: false` with a `relationTo` that allows for only one type
+of collection.
 
 ```ts
 {
   slug: 'example-collection',
-  fields: [
+    fields
+:
+  [
     {
       name: 'owner', // required
       type: 'relationship', // required
@@ -198,14 +244,17 @@ When querying documents in this collection via REST API, you could query as foll
 
 `?where[owner][equals]=6031ac9e1289176380734024`.
 
-#### Has One - Polymorphic
+### Has One - Polymorphic
 
-Also known as **dynamic references**, in this configuration, the `relationTo` field is an array of Collection slugs that tells Payload which Collections are valid to reference.
+Also known as **dynamic references**, in this configuration, the `relationTo` field is an array of Collection slugs that
+tells Payload which Collections are valid to reference.
 
 ```ts
 {
   slug: 'example-collection',
-  fields: [
+    fields
+:
+  [
     {
       name: 'owner', // required
       type: 'relationship', // required
@@ -237,14 +286,16 @@ You can also query for documents where a field has a relationship to a specific 
 
 This query would return only documents that have an owner relationship to organizations.
 
-#### Has Many
+### Has Many
 
 The `hasMany` tells Payload that there may be more than one collection saved to the field.
 
 ```ts
 {
   slug: 'example-collection',
-  fields: [
+    fields
+:
+  [
     {
       name: 'owners', // required
       type: 'relationship', // required
@@ -267,12 +318,14 @@ When querying documents, the format does not change for arrays:
 
 `?where[owners][equals]=6031ac9e1289176380734024`.
 
-#### Has Many - Polymorphic
+### Has Many - Polymorphic
 
 ```ts
 {
   slug: 'example-collection',
-  fields: [
+    fields
+:
+  [
     {
       name: 'owners', // required
       type: 'relationship', // required
@@ -284,7 +337,8 @@ When querying documents, the format does not change for arrays:
 }
 ```
 
-Relationship fields with `hasMany` set to more than one kind of collections save their data as an array of objects—each containing the Collection `slug` as the `relationTo` value, and the related document `id` for the `value`:
+Relationship fields with `hasMany` set to more than one kind of collections save their data as an array of objects—each
+containing the Collection `slug` as the `relationTo` value, and the related document `id` for the `value`:
 
 ```json
 {
@@ -305,12 +359,14 @@ Querying is done in the same way as the earlier Polymorphic example:
 
 `?where[owners.value][equals]=6031ac9e1289176380734024`.
 
+### Querying and Filtering Polymorphic Relationships
 
-#### Querying and Filtering Polymorphic Relationships
+Polymorphic and non-polymorphic relationships must be queried differently because of how the related data is stored and
+may be inconsistent across different collections. Because of this, filtering polymorphic relationship fields from the
+Collection List admin UI is limited to the `id` value.
 
-Polymorphic and non-polymorphic relationships must be queried differently because of how the related data is stored and may be inconsistent across different collections. Because of this, filtering polymorphic relationship fields from the Collection List admin UI is limited to the `id` value.
-
-For a polymorphic relationship, the response will always be an array of objects. Each object will contain the `relationTo` and `value` properties.
+For a polymorphic relationship, the response will always be an array of objects. Each object will contain
+the `relationTo` and `value` properties.
 
 The data can be queried by the related document ID:
 
@@ -326,5 +382,6 @@ Since we are referencing multiple collections, the field you are querying on may
 <Banner type="warning">
   <strong>Note:</strong>
   <br />
-  You <strong>cannot</strong> query on a field within a polymorphic relationship as you would with a non-polymorphic relationship.
+  You <strong>cannot</strong> query on a field within a polymorphic relationship as you would with a
+  non-polymorphic relationship.
 </Banner>

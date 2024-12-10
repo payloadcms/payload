@@ -1,7 +1,22 @@
-import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { CollectionConfig } from 'payload'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import {
+  chainedRelSlug,
+  customIdNumberSlug,
+  customIdSlug,
+  defaultAccessRelSlug,
+  polymorphicRelationshipsSlug,
+  relationSlug,
+  slug,
+  slugWithLocalizedRel,
+  treeSlug,
+} from './shared.js'
 
 const openAccess = {
   create: () => true,
@@ -36,15 +51,16 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
   }
 }
 
-export const slug = 'posts'
-export const relationSlug = 'relation'
-export const defaultAccessRelSlug = 'strict-access'
-export const chainedRelSlug = 'chained'
-export const customIdSlug = 'custom-id'
-export const customIdNumberSlug = 'custom-id-number'
-export const polymorphicRelationshipsSlug = 'polymorphic-relationships'
-
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
+  localization: {
+    locales: ['en', 'de'],
+    defaultLocale: 'en',
+  },
   collections: [
     {
       slug,
@@ -67,6 +83,22 @@ export default buildConfigWithDefaults({
           name: 'relationField',
           type: 'relationship',
           relationTo: relationSlug,
+        },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  name: 'relationField',
+                  type: 'relationship',
+                  relationTo: relationSlug,
+                },
+              ],
+            },
+          ],
         },
         // Relationship w/ default access
         {
@@ -104,6 +136,23 @@ export default buildConfigWithDefaults({
               not_equals: true,
             },
           },
+        },
+      ],
+    },
+    {
+      slug: slugWithLocalizedRel,
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        // Relationship
+        {
+          name: 'relationField',
+          type: 'relationship',
+          relationTo: relationSlug,
+          localized: true,
         },
       ],
     },
@@ -202,6 +251,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'movieReviews',
       fields: [
         {
           name: 'movieReviewer',
@@ -231,8 +281,6 @@ export default buildConfigWithDefaults({
           type: 'radio',
         },
       ],
-
-      slug: 'movieReviews',
     },
     {
       slug: polymorphicRelationshipsSlug,
@@ -241,6 +289,82 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           name: 'polymorphic',
           relationTo: ['movies'],
+        },
+      ],
+    },
+    {
+      slug: treeSlug,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'parent',
+          type: 'relationship',
+          relationTo: 'tree',
+        },
+      ],
+    },
+    {
+      slug: 'pages',
+      fields: [
+        {
+          type: 'array',
+          name: 'menu',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'rels-to-pages',
+      fields: [
+        {
+          name: 'page',
+          type: 'relationship',
+          relationTo: 'pages',
+        },
+      ],
+    },
+    {
+      slug: 'rels-to-pages-and-custom-text-ids',
+      fields: [
+        {
+          name: 'rel',
+          type: 'relationship',
+          relationTo: ['pages', 'custom-id', 'custom-id-number'],
+        },
+      ],
+    },
+    {
+      slug: 'object-writes',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'movies',
+          name: 'one',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'movies',
+          name: 'many',
+          hasMany: true,
+        },
+        {
+          type: 'relationship',
+          relationTo: ['movies'],
+          name: 'onePoly',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['movies'],
+          name: 'manyPoly',
+          hasMany: true,
         },
       ],
     },
@@ -337,5 +461,23 @@ export default buildConfigWithDefaults({
         filteredRelation: filteredRelation.id,
       },
     })
+
+    const root = await payload.create({
+      collection: 'tree',
+      data: {
+        text: 'root',
+      },
+    })
+
+    await payload.create({
+      collection: 'tree',
+      data: {
+        text: 'sub',
+        parent: root.id,
+      },
+    })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

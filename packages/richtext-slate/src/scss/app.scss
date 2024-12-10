@@ -1,0 +1,204 @@
+@import 'styles';
+@import './toasts.scss';
+@import './colors.scss';
+@layer payload-default {
+  :root {
+    --base-px: 20;
+    --base-body-size: 13;
+    --base: calc((var(--base-px) / var(--base-body-size)) * 1rem);
+
+    --breakpoint-xs-width: #{$breakpoint-xs-width};
+    --breakpoint-s-width: #{$breakpoint-s-width};
+    --breakpoint-m-width: #{$breakpoint-m-width};
+    --breakpoint-l-width: #{$breakpoint-l-width};
+    --scrollbar-width: 17px;
+
+    --theme-bg: var(--theme-elevation-0);
+    --theme-input-bg: var(--theme-elevation-0);
+    --theme-text: var(--theme-elevation-800);
+    --theme-overlay: rgba(5, 5, 5, 0.5);
+    --theme-baseline: #{$baseline-px};
+    --theme-baseline-body-size: #{$baseline-body-size};
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+      sans-serif;
+    --font-serif: 'Georgia', 'Bitstream Charter', 'Charis SIL', Utopia, 'URW Bookman L', serif;
+    --font-mono: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+
+    --style-radius-s: #{$style-radius-s};
+    --style-radius-m: #{$style-radius-m};
+    --style-radius-l: #{$style-radius-l};
+
+    --z-popup: 10;
+    --z-nav: 20;
+    --z-modal: 30;
+    --z-status: 40;
+
+    --accessibility-outline: 2px solid var(--theme-text);
+    --accessibility-outline-offset: 2px;
+
+    --gutter-h: #{base(3)};
+    --spacing-view-bottom: var(--gutter-h);
+    --doc-controls-height: calc(var(--base) * 2.8);
+    --app-header-height: calc(var(--base) * 2.8);
+    --nav-width: 275px;
+    --nav-trans-time: 150ms;
+
+    @include mid-break {
+      --gutter-h: #{base(2)};
+      --app-header-height: calc(var(--base) * 2.4);
+      --doc-controls-height: calc(var(--base) * 2.4);
+    }
+
+    @include small-break {
+      --gutter-h: #{base(0.8)};
+      --spacing-view-bottom: calc(var(--base) * 2);
+      --nav-width: 100vw;
+    }
+  }
+
+  /////////////////////////////
+  // GLOBAL STYLES
+  /////////////////////////////
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    @extend %body;
+    background: var(--theme-bg);
+    -webkit-font-smoothing: antialiased;
+
+    &[data-theme='dark'] {
+      --theme-bg: var(--theme-elevation-0);
+      --theme-text: var(--theme-elevation-1000);
+      --theme-input-bg: var(--theme-elevation-50);
+      --theme-overlay: rgba(5, 5, 5, 0.75);
+      color-scheme: dark;
+
+      ::selection {
+        color: var(--color-base-1000);
+      }
+
+      ::-moz-selection {
+        color: var(--color-base-1000);
+      }
+    }
+
+    @include mid-break {
+      font-size: 12px;
+    }
+  }
+
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-weight: 400;
+    color: var(--theme-text);
+    margin: 0;
+    // this is for the nav to be able to push the document over
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-success-250);
+    color: var(--theme-base-800);
+  }
+
+  ::-moz-selection {
+    background: var(--color-success-250);
+    color: var(--theme-base-800);
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  h1 {
+    @extend %h1;
+  }
+
+  h2 {
+    @extend %h2;
+  }
+
+  h3 {
+    @extend %h3;
+  }
+
+  h4 {
+    @extend %h4;
+  }
+
+  h5 {
+    @extend %h5;
+  }
+
+  h6 {
+    @extend %h6;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  ul,
+  ol {
+    padding-left: $baseline;
+    margin: 0;
+  }
+
+  :focus-visible {
+    outline: var(--accessibility-outline);
+  }
+
+  a {
+    color: currentColor;
+
+    &:focus {
+      &:not(:focus-visible) {
+        opacity: 0.8;
+      }
+      outline: none;
+    }
+
+    &:active {
+      opacity: 0.7;
+      outline: none;
+    }
+  }
+
+  svg {
+    vertical-align: middle;
+  }
+
+  dialog {
+    width: 100%;
+    border: 0;
+    padding: 0;
+    color: currentColor;
+  }
+
+  .payload__modal-item {
+    min-height: 100%;
+    background: transparent;
+  }
+
+  .payload__modal-container--enterDone {
+    overflow: auto;
+  }
+
+  .payload__modal-item--enter,
+  .payload__modal-item--enterDone {
+    z-index: var(--z-modal);
+  }
+
+  // @import '~payload-user-css'; TODO: re-enable this
+}

@@ -1,4 +1,4 @@
-import type { DateField } from '../../payload-types'
+import type { DateField } from '../../payload-types.js'
 
 export const dateDoc: Partial<DateField> = {
   default: '2022-08-12T10:00:00.000+00:00',

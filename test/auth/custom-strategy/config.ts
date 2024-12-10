@@ -1,99 +1,98 @@
-import type { Request } from 'express'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
 
-import { Strategy } from 'passport-strategy'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
-import type { Payload } from '../../../packages/payload/src/payload'
+import type { AuthStrategyFunction } from 'payload'
 
-import { buildConfigWithDefaults } from '../../buildConfigWithDefaults'
+import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
+import { usersSlug } from './shared.js'
 
-export const slug = 'users'
 export const strategyName = 'test-local'
 
-export class CustomStrategy extends Strategy {
-  ctx: Payload
+const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, payload }) => {
+  const usersQuery = await payload.find({
+    collection: usersSlug,
+    where: {
+      code: {
+        equals: headers.get('code'),
+      },
+      secret: {
+        equals: headers.get('secret'),
+      },
+    },
+  })
 
-  constructor(ctx: Payload) {
-    super()
-    this.ctx = ctx
-  }
+  const user = usersQuery.docs[0] || null
+  if (!user) return { user: null }
 
-  authenticate(req: Request, options?: any): void {
-    if (!req.headers.code && !req.headers.secret) {
-      return this.success(null)
-    }
-    this.ctx
-      .find({
-        collection: slug,
-        where: {
-          code: {
-            equals: req.headers.code,
-          },
-          secret: {
-            equals: req.headers.secret,
-          },
-        },
-      })
-      .then((users) => {
-        if (users.docs && users.docs.length) {
-          const user = users.docs[0]
-          user.collection = slug
-          user._strategy = `${slug}-${strategyName}`
-          this.success(user)
-        } else {
-          this.error(null)
-        }
-      })
+  return {
+    responseHeaders: new Headers({
+      'Smile-For-Me': 'please',
+    }),
+    user: {
+      ...user,
+      _strategy: `${usersSlug}-${strategyName}`,
+      collection: usersSlug,
+    },
   }
 }
 
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   collections: [
     {
-      slug,
+      slug: usersSlug,
+      access: {
+        create: () => true,
+      },
       auth: {
         disableLocalStrategy: true,
         strategies: [
           {
             name: strategyName,
-            strategy: (ctx) => new CustomStrategy(ctx),
+            authenticate: customAuthenticationStrategy,
           },
         ],
-      },
-      access: {
-        create: () => true,
       },
       fields: [
         {
           name: 'code',
-          label: 'Code',
           type: 'text',
-          unique: true,
           index: true,
+          label: 'Code',
+          unique: true,
         },
         {
           name: 'secret',
-          label: 'Secret',
           type: 'text',
+          label: 'Secret',
         },
         {
           name: 'name',
-          label: 'Name',
           type: 'text',
+          label: 'Name',
         },
         {
           name: 'roles',
-          label: 'Role',
           type: 'select',
+          defaultValue: ['user'],
+          hasMany: true,
+          label: 'Role',
           options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
-          defaultValue: 'user',
           required: true,
           saveToJWT: true,
-          hasMany: true,
         },
       ],
     },
   ],
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
 })

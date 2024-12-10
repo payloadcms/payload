@@ -1,14 +1,16 @@
-import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
-import type { AccessResult } from '../../config/types'
-import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types'
-import type { SanitizedGlobalConfig } from '../../globals/config/types'
-import type { PayloadRequest, Where } from '../../types'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
+import type { AccessResult } from '../../config/types.js'
+import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
+import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 
-import { hasWhereAccessResult } from '../../auth'
-import { combineQueries } from '../../database/combineQueries'
-import { docHasTimestamps } from '../../types'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
-import { appendVersionToQueryKey } from './appendVersionToQueryKey'
+import { hasWhereAccessResult } from '../../auth/index.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { docHasTimestamps } from '../../types/index.js'
+import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
+import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
 
 type Arguments<T> = {
   accessResult: AccessResult
@@ -17,6 +19,7 @@ type Arguments<T> = {
   entityType: 'collection' | 'global'
   overrideAccess: boolean
   req: PayloadRequest
+  select?: SelectType
 }
 
 const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
@@ -25,6 +28,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   entity,
   entityType,
   req,
+  select,
 }: Arguments<T>): Promise<T> => {
   const { locale } = req
 
@@ -48,9 +52,18 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
   if (docHasTimestamps(doc)) {
     queryToBuild.and.push({
-      updatedAt: {
-        greater_than: doc.updatedAt,
-      },
+      or: [
+        {
+          updatedAt: {
+            greater_than: doc.updatedAt,
+          },
+        },
+        {
+          latest: {
+            equals: true,
+          },
+        },
+      ],
     })
   }
 
@@ -60,12 +73,14 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     versionAccessResult = appendVersionToQueryKey(accessResult)
   }
 
-  const findVersionsArgs: FindVersionsArgs & FindGlobalVersionsArgs = {
+  const findVersionsArgs: FindGlobalVersionsArgs & FindVersionsArgs = {
     collection: entity.slug,
     global: entity.slug,
     limit: 1,
     locale,
+    pagination: false,
     req,
+    select: getQueryDraftsSelect({ select }),
     sort: '-updatedAt',
     where: combineQueries(queryToBuild, versionAccessResult),
   }
@@ -83,7 +98,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     return doc
   }
 
-  draft = JSON.parse(JSON.stringify(draft))
+  draft = deepCopyObjectSimple(draft)
   draft = sanitizeInternalFields(draft)
 
   // Patch globalType onto version doc
@@ -91,15 +106,18 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     draft.version.globalType = doc.globalType
   }
 
+  // handle when .version wasn't selected due to projection
+  if (!draft.version) {
+    draft.version = {}
+  }
+
   // Disregard all other draft content at this point,
   // Only interested in the version itself.
   // Operations will handle firing hooks, etc.
-  return {
-    id: doc.id,
-    ...draft.version,
-    createdAt: draft.createdAt,
-    updatedAt: draft.updatedAt,
-  }
+
+  draft.version.id = doc.id
+
+  return draft.version
 }
 
 export default replaceWithDraftIfAvailable

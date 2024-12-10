@@ -1,0 +1,24 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .code-editor {
+    direction: ltr;
+    @include formInput;
+    height: auto;
+    padding: 0;
+
+    .monaco-editor {
+      .view-overlays .current-line {
+        max-width: calc(100% - 14px);
+        border-width: 0px;
+      }
+
+      &:focus-within {
+        .view-overlays .current-line {
+          border-right: 0;
+          border-width: 1px;
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { autosaveCollectionSlug } from '../slugs'
+import { autosaveCollectionSlug } from '../slugs.js'
 
 const AutosavePosts: CollectionConfig = {
   slug: autosaveCollectionSlug,
@@ -10,8 +10,7 @@ const AutosavePosts: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'description', 'createdAt'],
-    preview: () => 'https://payloadcms.com',
+    defaultColumns: ['title', 'description', 'createdAt', '_status'],
   },
   versions: {
     maxPerDoc: 35,

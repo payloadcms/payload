@@ -1,19 +1,21 @@
+'use client'
+
+import { LogOutIcon, useConfig } from '@payloadcms/ui'
 import React from 'react'
 
-import LogOut from '../../../../packages/payload/src/admin/components/icons/LogOut'
-import { useConfig } from '../../../../packages/payload/src/admin/components/utilities/Config'
-
-const Logout: React.FC = () => {
-  const config = useConfig()
+export const Logout: React.FC = () => {
   const {
-    admin: { logoutRoute },
-    routes: { admin },
-  } = config
+    config: {
+      admin: {
+        routes: { logout: logoutRoute },
+      },
+      routes: { admin },
+    },
+  } = useConfig()
+
   return (
     <a href={`${admin}${logoutRoute}#custom`}>
-      <LogOut />
+      <LogOutIcon />
     </a>
   )
 }
-
-export default Logout

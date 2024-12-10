@@ -1,28 +1,40 @@
-/* eslint-disable no-param-reassign */
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types'
-import type { Field, TabAsField } from '../../config/types'
+import type { RichTextAdapter } from '../../../admin/RichText.js'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
-import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types'
-import getValueWithDefault from '../../getDefaultValue'
-import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc'
-import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc'
-import { traverseFields } from './traverseFields'
+import { MissingEditorProp } from '../../../errors/index.js'
+import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
+import { getDefaultValue } from '../../getDefaultValue.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
+import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js'
+import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
+import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
+  /**
+   * The original data (not modified by any hooks)
+   */
   doc: T
   field: Field | TabAsField
-  global: SanitizedGlobalConfig | null
+  fieldIndex: number
+  global: null | SanitizedGlobalConfig
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
+  parentPath: (number | string)[]
+  parentSchemaPath: string[]
   req: PayloadRequest
-  siblingData: Record<string, unknown>
-  siblingDoc: Record<string, unknown>
+  siblingData: JsonObject
+  /**
+   * The original siblingData (not modified by any hooks)
+   */
+  siblingDoc: JsonObject
 }
 
 // This function is responsible for the following actions, in order:
@@ -39,13 +51,26 @@ export const promise = async <T>({
   data,
   doc,
   field,
+  fieldIndex,
   global,
   operation,
   overrideAccess,
+  parentPath,
+  parentSchemaPath,
   req,
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
+  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
+    field,
+    index: fieldIndex,
+    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
+    parentPath: parentPath.join('.'),
+    parentSchemaPath: parentSchemaPath.join('.'),
+  })
+  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
+  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
+
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
       if (field.type === 'number' && typeof siblingData[field.name] === 'string') {
@@ -65,6 +90,30 @@ export const promise = async <T>({
 
     // Sanitize incoming data
     switch (field.type) {
+      case 'array':
+      case 'blocks': {
+        // Handle cases of arrays being intentionally set to 0
+        if (siblingData[field.name] === '0' || siblingData[field.name] === 0) {
+          siblingData[field.name] = []
+        }
+
+        break
+      }
+
+      case 'checkbox': {
+        if (siblingData[field.name] === 'true') {
+          siblingData[field.name] = true
+        }
+        if (siblingData[field.name] === 'false') {
+          siblingData[field.name] = false
+        }
+        if (siblingData[field.name] === '') {
+          siblingData[field.name] = false
+        }
+
+        break
+      }
+
       case 'number': {
         if (typeof siblingData[field.name] === 'string') {
           const value = siblingData[field.name] as string
@@ -89,29 +138,6 @@ export const promise = async <T>({
 
         break
       }
-
-      case 'checkbox': {
-        if (siblingData[field.name] === 'true') siblingData[field.name] = true
-        if (siblingData[field.name] === 'false') siblingData[field.name] = false
-        if (siblingData[field.name] === '') siblingData[field.name] = false
-
-        break
-      }
-
-      case 'richText': {
-        if (typeof siblingData[field.name] === 'string') {
-          try {
-            const richTextJSON = JSON.parse(siblingData[field.name] as string)
-            siblingData[field.name] = richTextJSON
-          } catch {
-            // Disregard this data as it is not valid.
-            // Will be reported to user by field validation
-          }
-        }
-
-        break
-      }
-
       case 'relationship':
       case 'upload': {
         if (
@@ -120,7 +146,7 @@ export const promise = async <T>({
           siblingData[field.name] === 'null' ||
           siblingData[field.name] === null
         ) {
-          if (field.type === 'relationship' && field.hasMany === true) {
+          if (field.hasMany === true) {
             siblingData[field.name] = []
           } else {
             siblingData[field.name] = null
@@ -131,36 +157,50 @@ export const promise = async <T>({
 
         if (Array.isArray(field.relationTo)) {
           if (Array.isArray(value)) {
-            value.forEach((relatedDoc: { relationTo: string; value: unknown }, i) => {
+            value.forEach((relatedDoc: { relationTo: string; value: JsonValue }, i) => {
               const relatedCollection = req.payload.config.collections.find(
                 (collection) => collection.slug === relatedDoc.relationTo,
               )
+
+              if (
+                typeof relatedDoc.value === 'object' &&
+                relatedDoc.value &&
+                'id' in relatedDoc.value
+              ) {
+                relatedDoc.value = relatedDoc.value.id
+              }
+
+              if (relatedCollection?.fields) {
+                const relationshipIDField = relatedCollection.fields.find(
+                  (collectionField) =>
+                    fieldAffectsData(collectionField) && collectionField.name === 'id',
+                )
+                if (relationshipIDField?.type === 'number') {
+                  siblingData[field.name][i] = {
+                    ...relatedDoc,
+                    value: parseFloat(relatedDoc.value as string),
+                  }
+                }
+              }
+            })
+          }
+          if (field.hasMany !== true && valueIsValueWithRelation(value)) {
+            const relatedCollection = req.payload.config.collections.find(
+              (collection) => collection.slug === value.relationTo,
+            )
+
+            if (typeof value.value === 'object' && value.value && 'id' in value.value) {
+              value.value = (value.value as TypeWithID).id
+            }
+
+            if (relatedCollection?.fields) {
               const relationshipIDField = relatedCollection.fields.find(
                 (collectionField) =>
                   fieldAffectsData(collectionField) && collectionField.name === 'id',
               )
               if (relationshipIDField?.type === 'number') {
-                siblingData[field.name][i] = {
-                  ...relatedDoc,
-                  value: parseFloat(relatedDoc.value as string),
-                }
+                siblingData[field.name] = { ...value, value: parseFloat(value.value as string) }
               }
-            })
-          }
-          if (
-            field.type === 'relationship' &&
-            field.hasMany !== true &&
-            valueIsValueWithRelation(value)
-          ) {
-            const relatedCollection = req.payload.config.collections.find(
-              (collection) => collection.slug === value.relationTo,
-            )
-            const relationshipIDField = relatedCollection.fields.find(
-              (collectionField) =>
-                fieldAffectsData(collectionField) && collectionField.name === 'id',
-            )
-            if (relationshipIDField?.type === 'number') {
-              siblingData[field.name] = { ...value, value: parseFloat(value.value as string) }
             }
           }
         } else {
@@ -169,36 +209,53 @@ export const promise = async <T>({
               const relatedCollection = req.payload.config.collections.find(
                 (collection) => collection.slug === field.relationTo,
               )
+
+              if (typeof relatedDoc === 'object' && relatedDoc && 'id' in relatedDoc) {
+                value[i] = relatedDoc.id
+              }
+
+              if (relatedCollection?.fields) {
+                const relationshipIDField = relatedCollection.fields.find(
+                  (collectionField) =>
+                    fieldAffectsData(collectionField) && collectionField.name === 'id',
+                )
+                if (relationshipIDField?.type === 'number') {
+                  siblingData[field.name][i] = parseFloat(relatedDoc as string)
+                }
+              }
+            })
+          }
+          if (field.hasMany !== true && value) {
+            const relatedCollection = req.payload.config.collections.find(
+              (collection) => collection.slug === field.relationTo,
+            )
+
+            if (typeof value === 'object' && value && 'id' in value) {
+              siblingData[field.name] = value.id
+            }
+
+            if (relatedCollection?.fields) {
               const relationshipIDField = relatedCollection.fields.find(
                 (collectionField) =>
                   fieldAffectsData(collectionField) && collectionField.name === 'id',
               )
               if (relationshipIDField?.type === 'number') {
-                siblingData[field.name][i] = parseFloat(relatedDoc as string)
+                siblingData[field.name] = parseFloat(value as string)
               }
-            })
-          }
-          if (field.type === 'relationship' && field.hasMany !== true && value) {
-            const relatedCollection = req.payload.config.collections.find(
-              (collection) => collection.slug === field.relationTo,
-            )
-            const relationshipIDField = relatedCollection.fields.find(
-              (collectionField) =>
-                fieldAffectsData(collectionField) && collectionField.name === 'id',
-            )
-            if (relationshipIDField?.type === 'number') {
-              siblingData[field.name] = parseFloat(value as string)
             }
           }
         }
         break
       }
-
-      case 'array':
-      case 'blocks': {
-        // Handle cases of arrays being intentionally set to 0
-        if (siblingData[field.name] === '0' || siblingData[field.name] === 0) {
-          siblingData[field.name] = []
+      case 'richText': {
+        if (typeof siblingData[field.name] === 'string') {
+          try {
+            const richTextJSON = JSON.parse(siblingData[field.name] as string)
+            siblingData[field.name] = richTextJSON
+          } catch {
+            // Disregard this data as it is not valid.
+            // Will be reported to user by field validation
+          }
         }
 
         break
@@ -222,7 +279,12 @@ export const promise = async <T>({
           global,
           operation,
           originalDoc: doc,
+          overrideAccess,
+          path: fieldPath,
+          previousSiblingDoc: siblingDoc,
+          previousValue: siblingData[field.name],
           req,
+          schemaPath: fieldSchemaPath,
           siblingData,
           value: siblingData[field.name],
         })
@@ -251,7 +313,7 @@ export const promise = async <T>({
 
         // Otherwise compute default value
       } else if (typeof field.defaultValue !== 'undefined') {
-        siblingData[field.name] = await getValueWithDefault({
+        siblingData[field.name] = await getDefaultValue({
           defaultValue: field.defaultValue,
           locale: req.locale,
           user: req.user,
@@ -263,9 +325,103 @@ export const promise = async <T>({
 
   // Traverse subfields
   switch (field.type) {
+    case 'array': {
+      const rows = siblingData[field.name]
+
+      if (Array.isArray(rows)) {
+        const promises = []
+        rows.forEach((row, i) => {
+          promises.push(
+            traverseFields({
+              id,
+              collection,
+              context,
+              data,
+              doc,
+              fields: field.fields,
+              global,
+              operation,
+              overrideAccess,
+              path: [...fieldPath, i],
+              req,
+              schemaPath: fieldSchemaPath,
+              siblingData: row as JsonObject,
+              siblingDoc: getExistingRowDoc(row as JsonObject, siblingDoc[field.name]),
+            }),
+          )
+        })
+        await Promise.all(promises)
+      }
+      break
+    }
+
+    case 'blocks': {
+      const rows = siblingData[field.name]
+
+      if (Array.isArray(rows)) {
+        const promises = []
+        rows.forEach((row, i) => {
+          const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
+          const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
+          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+
+          if (block) {
+            ;(row as JsonObject).blockType = blockTypeToMatch
+
+            promises.push(
+              traverseFields({
+                id,
+                collection,
+                context,
+                data,
+                doc,
+                fields: block.fields,
+                global,
+                operation,
+                overrideAccess,
+                path: [...fieldPath, i],
+                req,
+                schemaPath: fieldSchemaPath,
+                siblingData: row as JsonObject,
+                siblingDoc: rowSiblingDoc,
+              }),
+            )
+          }
+        })
+        await Promise.all(promises)
+      }
+
+      break
+    }
+
+    case 'collapsible':
+    case 'row': {
+      await traverseFields({
+        id,
+        collection,
+        context,
+        data,
+        doc,
+        fields: field.fields,
+        global,
+        operation,
+        overrideAccess,
+        path: fieldPath,
+        req,
+        schemaPath: fieldSchemaPath,
+        siblingData,
+        siblingDoc,
+      })
+
+      break
+    }
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
-      if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
+      if (typeof siblingData[field.name] !== 'object') {
+        siblingData[field.name] = {}
+      }
+      if (typeof siblingDoc[field.name] !== 'object') {
+        siblingDoc[field.name] = {}
+      }
 
       const groupData = siblingData[field.name] as Record<string, unknown>
       const groupDoc = siblingDoc[field.name] as Record<string, unknown>
@@ -280,96 +436,53 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: fieldPath,
         req,
-        siblingData: groupData,
-        siblingDoc: groupDoc,
+        schemaPath: fieldSchemaPath,
+        siblingData: groupData as JsonObject,
+        siblingDoc: groupDoc as JsonObject,
       })
 
       break
     }
 
-    case 'array': {
-      const rows = siblingData[field.name]
-
-      if (Array.isArray(rows)) {
-        const promises = []
-        rows.forEach((row) => {
-          promises.push(
-            traverseFields({
-              id,
-              collection,
-              context,
-              data,
-              doc,
-              fields: field.fields,
-              global,
-              operation,
-              overrideAccess,
-              req,
-              siblingData: row,
-              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
-            }),
-          )
-        })
-        await Promise.all(promises)
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
-      break
-    }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
 
-    case 'blocks': {
-      const rows = siblingData[field.name]
+      const editor: RichTextAdapter = field?.editor
 
-      if (Array.isArray(rows)) {
-        const promises = []
-        rows.forEach((row) => {
-          const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
-          const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
-          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+      if (editor?.hooks?.beforeValidate?.length) {
+        await editor.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
+          await priorHook
 
-          if (block) {
-            row.blockType = blockTypeToMatch
+          const hookedValue = await currentHook({
+            collection,
+            context,
+            data,
+            field,
+            global,
+            operation,
+            originalDoc: doc,
+            overrideAccess,
+            path: fieldPath,
+            previousSiblingDoc: siblingDoc,
+            previousValue: siblingData[field.name],
+            req,
+            schemaPath: fieldSchemaPath,
+            siblingData,
+            value: siblingData[field.name],
+          })
 
-            promises.push(
-              traverseFields({
-                id,
-                collection,
-                context,
-                data,
-                doc,
-                fields: block.fields,
-                global,
-                operation,
-                overrideAccess,
-                req,
-                siblingData: row,
-                siblingDoc: rowSiblingDoc,
-              }),
-            )
+          if (hookedValue !== undefined) {
+            siblingData[field.name] = hookedValue
           }
-        })
-        await Promise.all(promises)
+        }, Promise.resolve())
       }
-
-      break
-    }
-
-    case 'row':
-    case 'collapsible': {
-      await traverseFields({
-        id,
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        overrideAccess,
-        req,
-        siblingData,
-        siblingDoc,
-      })
-
       break
     }
 
@@ -377,8 +490,12 @@ export const promise = async <T>({
       let tabSiblingData
       let tabSiblingDoc
       if (tabHasName(field)) {
-        if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
-        if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
 
         tabSiblingData = siblingData[field.name] as Record<string, unknown>
         tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>
@@ -397,7 +514,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
       })
@@ -416,7 +535,9 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
+        path: fieldPath,
         req,
+        schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
       })

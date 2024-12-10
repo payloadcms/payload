@@ -1,9 +1,11 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequest } from '../../express/types'
-import type { BaseDatabaseAdapter } from '../types'
+import type { PayloadRequest } from '../../types/index.js'
+import type { BaseDatabaseAdapter } from '../types.js'
 
-import { getMigrations } from './getMigrations'
-import { readMigrationFiles } from './readMigrationFiles'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { getMigrations } from './getMigrations.js'
+import { readMigrationFiles } from './readMigrationFiles.js'
 
 /**
  * Run all migration down functions before running up
@@ -12,61 +14,57 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
-  const { existingMigrations, latestBatch } = await getMigrations({
+  const { existingMigrations } = await getMigrations({
     payload,
   })
 
-  if (!existingMigrations?.length) {
-    payload.logger.info({ msg: 'No migrations to rollback.' })
-    return
-  }
+  const req = { payload } as PayloadRequest
 
-  payload.logger.info({
-    msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
-  })
+  if (existingMigrations?.length) {
+    payload.logger.info({
+      msg: `Rolling back all ${existingMigrations.length} migration(s).`,
+    })
+    // Reverse order of migrations to rollback
+    existingMigrations.reverse()
 
-  let transactionID
+    for (const migration of existingMigrations) {
+      try {
+        const migrationFile = migrationFiles.find((m) => m.name === migration.name)
+        if (!migrationFile) {
+          throw new Error(`Migration ${migration.name} not found locally.`)
+        }
 
-  // Reverse order of migrations to rollback
-  existingMigrations.reverse()
-
-  for (const migration of existingMigrations) {
-    try {
-      const migrationFile = migrationFiles.find((m) => m.name === migration.name)
-      if (!migrationFile) {
-        throw new Error(`Migration ${migration.name} not found locally.`)
-      }
-
-      payload.logger.info({ msg: `Migrating down: ${migration.name}` })
-      const start = Date.now()
-      transactionID = await this.beginTransaction()
-      await migrationFile.down({ payload })
-      payload.logger.info({
-        msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)`,
-      })
-      await payload.delete({
-        collection: 'payload-migrations',
-        req: {
-          transactionID,
-        } as PayloadRequest,
-        where: {
-          name: {
-            equals: migration.name,
+        payload.logger.info({ msg: `Migrating down: ${migration.name}` })
+        const start = Date.now()
+        await initTransaction(req)
+        await migrationFile.down({ payload, req })
+        payload.logger.info({
+          msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)`,
+        })
+        await payload.delete({
+          collection: 'payload-migrations',
+          req,
+          where: {
+            name: {
+              equals: migration.name,
+            },
           },
-        },
-      })
-    } catch (err: unknown) {
-      await this.rollbackTransaction(transactionID)
-      let msg = `Error running migration ${migration.name}. Rolling back.`
-      if (err instanceof Error) {
-        msg += ` ${err.message}`
+        })
+      } catch (err: unknown) {
+        await killTransaction(req)
+        let msg = `Error running migration ${migration.name}. Rolling back.`
+        if (err instanceof Error) {
+          msg += ` ${err.message}`
+        }
+        payload.logger.error({
+          err,
+          msg,
+        })
+        process.exit(1)
       }
-      payload.logger.error({
-        err,
-        msg,
-      })
-      process.exit(1)
     }
+  } else {
+    payload.logger.info({ msg: 'No migrations to rollback.' })
   }
 
   // Run all migrate up
@@ -74,23 +72,21 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
     payload.logger.info({ msg: `Migrating: ${migration.name}` })
     try {
       const start = Date.now()
-      transactionID = await this.beginTransaction()
-      await migration.up({ payload })
+      await initTransaction(req)
+      await migration.up({ payload, req })
       await payload.create({
         collection: 'payload-migrations',
         data: {
           name: migration.name,
           executed: true,
         },
-        req: {
-          transactionID,
-        } as PayloadRequest,
+        req,
       })
-      await this.commitTransaction(transactionID)
+      await commitTransaction(req)
 
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
-      await this.rollbackTransaction(transactionID)
+      await killTransaction(req)
       let msg = `Error running migration ${migration.name}. Rolling back.`
       if (err instanceof Error) {
         msg += ` ${err.message}`

@@ -1,0 +1,228 @@
+@import '../../scss/styles.scss';
+
+$header-height: base(5);
+
+@layer payload-default {
+  .edit-upload {
+    --edit-upload-cell-spacing: calc(var(--base) * 1.5);
+    --edit-upload-sidebar-width: calc(350px + var(--gutter-h));
+    height: 100%;
+    margin-right: calc(var(--gutter-h) * -1);
+    margin-left: calc(var(--gutter-h) * -1);
+
+    &__header {
+      height: $header-height;
+      border-bottom: 1px solid var(--theme-elevation-150);
+      padding: 0 var(--gutter-h);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      & h2 {
+        margin: 0;
+        text-wrap: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    [dir='rtl'] &__actions {
+      margin-right: auto;
+      margin-left: unset;
+    }
+
+    &__actions {
+      min-width: 350px;
+      margin-left: auto;
+      padding: base(0.5) 0 base(0.5) base(1.5);
+      justify-content: flex-end;
+      display: flex;
+      gap: base(1);
+      text-wrap: nowrap;
+    }
+
+    &__toolWrap {
+      display: flex;
+      justify-content: flex-end;
+      height: (calc(100% - #{$header-height}));
+    }
+
+    .ReactCrop__selection-addon,
+    &__crop-window {
+      height: 100%;
+      width: 100%;
+    }
+
+    &__focal-wrapper {
+      position: relative;
+      display: inline-flex;
+      max-height: 100%;
+    }
+
+    &__draggable-container {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 0;
+      pointer-events: none;
+
+      &--dragging {
+        pointer-events: all;
+
+        .edit-upload__focalPoint {
+          cursor: grabbing;
+        }
+      }
+    }
+
+    &__draggable {
+      @include btn-reset;
+      position: absolute;
+    }
+
+    &__focalPoint {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      width: 50px;
+      height: 50px;
+      transform: translate3d(-50%, -50%, 0);
+      pointer-events: all;
+
+      svg {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 100%;
+        width: base(2);
+        height: base(2);
+        color: white;
+      }
+    }
+
+    &__crop,
+    &__focalOnly {
+      padding: base(1.5) base(1.5) base(1.5) 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    &__crop {
+      padding: var(--edit-upload-cell-spacing);
+      padding-left: var(--gutter-h);
+      display: flex;
+      align-items: flex-start;
+      height: 100%;
+    }
+
+    &__imageWrap {
+      position: relative;
+    }
+
+    &__point {
+      cursor: move;
+      position: absolute;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 100%;
+
+      & svg {
+        width: base(2);
+        height: base(2);
+      }
+    }
+
+    &__sidebar {
+      border-left: 1px solid var(--theme-elevation-150);
+      padding-top: var(--edit-upload-cell-spacing);
+      min-width: var(--edit-upload-sidebar-width);
+
+      & > div:first-child {
+        margin-bottom: base(1);
+      }
+    }
+
+    &__groupWrap {
+      display: flex;
+      flex-direction: column;
+      gap: base(0.5);
+      padding-right: var(--gutter-h);
+      padding-left: var(--edit-upload-cell-spacing);
+      width: 100%;
+
+      + .edit-upload__groupWrap {
+        padding-top: var(--edit-upload-cell-spacing);
+        margin-top: var(--edit-upload-cell-spacing);
+        border-top: 1px solid var(--theme-elevation-150);
+      }
+    }
+
+    &__inputsWrap,
+    &__titleWrap {
+      display: flex;
+      gap: base(1);
+    }
+
+    &__titleWrap {
+      justify-content: space-between;
+      align-items: center;
+
+      & h3 {
+        margin: 0;
+      }
+    }
+
+    &__reset {
+      height: fit-content;
+      border-radius: var(--style-radius-s);
+      background-color: var(--theme-elevation-150);
+      padding: 0 base(0.4);
+    }
+
+    &__input {
+      flex: 1;
+      & input {
+        @include formInput;
+      }
+    }
+
+    @include mid-break {
+      --edit-upload-cell-spacing: var(--gutter-h);
+      &__sidebar {
+        padding-left: 0;
+        border-left: 0;
+        width: 100%;
+      }
+      &__toolWrap {
+        flex-direction: column-reverse;
+      }
+    }
+
+    @include small-break {
+      flex-direction: column;
+
+      &__focalPoint {
+        border-right: none;
+        padding: base(1) 0;
+      }
+
+      &__inputsWrap {
+        flex-direction: column;
+        gap: base(1);
+      }
+
+      &__sidebar {
+        min-width: 0;
+      }
+    }
+  }
+}

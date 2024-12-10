@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types/index.js'
 
 type Args = {
   collectionSlug: string
@@ -17,7 +17,9 @@ const docWithFilenameExists = async ({ collectionSlug, filename, req }: Args): P
       },
     },
   })
-  if (doc) return true
+  if (doc) {
+    return true
+  }
 
   return false
 }

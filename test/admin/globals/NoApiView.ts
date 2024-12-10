@@ -1,6 +1,6 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from 'payload'
 
-import { noApiViewGlobalSlug } from '../slugs'
+import { noApiViewGlobalSlug } from '../slugs.js'
 
 export const GlobalNoApiView: GlobalConfig = {
   slug: noApiViewGlobalSlug,

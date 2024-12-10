@@ -1,9 +1,9 @@
 import type { Storage } from '@google-cloud/storage'
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import path from 'path'
 
-import type { HandleUpload } from '../../types'
+import type { HandleUpload } from '../../types.js'
 
 interface Args {
   acl?: 'Private' | 'Public'

@@ -1,18 +1,35 @@
-import ObjectID from 'bson-objectid'
+import ObjectIdImport from 'bson-objectid'
 
-import type { Field, FieldHook } from '../config/types'
+import type { TextField } from '../config/types.js'
 
-const generateID: FieldHook = ({ operation, value }) =>
-  (operation !== 'create' ? value : false) || new ObjectID().toHexString()
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
-export const baseIDField: Field = {
+export const baseIDField: TextField = {
   name: 'id',
+  type: 'text',
   admin: {
-    disabled: true,
+    hidden: true,
   },
+  defaultValue: () => new ObjectId().toHexString(),
   hooks: {
-    beforeChange: [generateID],
+    beforeChange: [
+      ({ operation, value }) => {
+        // If creating new doc, need to disregard any
+        // ids that have been passed in because they will cause
+        // primary key unique conflicts in relational DBs
+        if (!value || (operation === 'create' && value)) {
+          return new ObjectId().toHexString()
+        }
+
+        return value
+      },
+    ],
+    beforeDuplicate: [
+      () => {
+        return new ObjectId().toHexString()
+      },
+    ],
   },
   label: 'ID',
-  type: 'text',
 }

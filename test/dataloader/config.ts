@@ -1,7 +1,20 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { slateEditor } from '@payloadcms/richtext-slate'
+
+import type { Post } from './payload-types.js'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'posts',
@@ -14,19 +27,15 @@ export default buildConfigWithDefaults({
         {
           name: 'owner',
           type: 'relationship',
-          relationTo: 'users',
           hooks: {
             beforeChange: [({ req: { user } }) => user?.id],
           },
+          relationTo: 'users',
         },
       ],
     },
     {
       slug: 'relation-a',
-      labels: {
-        singular: 'Relation A',
-        plural: 'Relation As',
-      },
       fields: [
         {
           name: 'relationship',
@@ -36,15 +45,16 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
+          editor: slateEditor({}),
         },
       ],
+      labels: {
+        plural: 'Relation As',
+        singular: 'Relation A',
+      },
     },
     {
       slug: 'relation-b',
-      labels: {
-        singular: 'Relation B',
-        plural: 'Relation Bs',
-      },
       fields: [
         {
           name: 'relationship',
@@ -54,6 +64,53 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
+          editor: slateEditor({}),
+        },
+      ],
+      labels: {
+        plural: 'Relation Bs',
+        singular: 'Relation B',
+      },
+    },
+    {
+      slug: 'shops',
+      access: { read: () => true },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'items',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: 'items',
+        },
+      ],
+    },
+    {
+      slug: 'items',
+      access: { read: () => true },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'itemTags',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: 'itemTags',
+        },
+      ],
+    },
+    {
+      slug: 'itemTags',
+      access: { read: () => true },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
         },
       ],
     },
@@ -68,13 +125,29 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
-      user,
       collection: 'posts',
       data: postDoc,
+      user,
     })
+
+    const tag = await payload.create({
+      collection: 'itemTags',
+      data: { name: 'tag1' },
+    })
+    const item = await payload.create({
+      collection: 'items',
+      data: { name: 'item1', itemTags: [tag.id] },
+    })
+    const shop = await payload.create({
+      collection: 'shops',
+      data: { name: 'shop1', items: [item.id] },
+    })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 
-export const postDoc = {
+export const postDoc: Pick<Post, 'title'> = {
   title: 'test post',
 }

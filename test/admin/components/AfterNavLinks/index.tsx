@@ -1,17 +1,22 @@
+'use client'
+
+import type { PayloadClientReactComponent, SanitizedConfig } from 'payload'
+
+import LinkImport from 'next/link.js'
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+
+import { useConfig } from '@payloadcms/ui'
 import React from 'react'
-import { NavLink } from 'react-router-dom'
-
-// As this is the demo project, we import our dependencies from the `src` directory.
-import { useConfig } from '../../../../packages/payload/src/admin/components/utilities/Config'
-
-// In your projects, you can import as follows:
-// import { useConfig } from 'payload/components/utilities';
 
 const baseClass = 'after-nav-links'
 
-const AfterNavLinks: React.FC = () => {
+export const AfterNavLinks: PayloadClientReactComponent<
+  SanitizedConfig['admin']['components']['afterNavLinks'][0]
+> = () => {
   const {
-    routes: { admin: adminRoute },
+    config: {
+      routes: { admin: adminRoute },
+    },
   } = useConfig()
 
   return (
@@ -27,26 +32,16 @@ const AfterNavLinks: React.FC = () => {
         Custom Routes
       </h4>
       <h4 className="nav__link" style={{ margin: 0 }}>
-        <NavLink
-          activeClassName="active"
-          style={{ textDecoration: 'none' }}
-          to={`${adminRoute}/custom-default-view`}
-        >
+        <Link href={`${adminRoute}/custom-default-view`} style={{ textDecoration: 'none' }}>
           Default Template
-        </NavLink>
+        </Link>
       </h4>
       <h4 className="nav__link" style={{ margin: 0 }}>
-        <NavLink
-          activeClassName="active"
-          style={{ textDecoration: 'none' }}
-          to={`${adminRoute}/custom-minimal-view`}
-        >
+        <Link href={`${adminRoute}/custom-minimal-view`} style={{ textDecoration: 'none' }}>
           Minimal Template
-        </NavLink>
+        </Link>
       </h4>
       <div id="custom-css" />
     </div>
   )
 }
-
-export default AfterNavLinks

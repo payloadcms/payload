@@ -1,57 +1,45 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { CreateMigration } from 'payload/database'
+import type { CreateMigration, MigrationTemplateArgs } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
+import { getPredefinedMigration, writeMigrationIndex } from 'payload'
+import { fileURLToPath } from 'url'
 
-const migrationTemplate = (upSQL?: string, downSQL?: string) => `import {
-  MigrateUpArgs,
+const migrationTemplate = ({ downSQL, imports, upSQL }: MigrationTemplateArgs): string => `import {
   MigrateDownArgs,
-} from "@payloadcms/db-mongodb";
-
-export async function up({ payload }: MigrateUpArgs): Promise<void> {
+  MigrateUpArgs,
+} from '@payloadcms/db-mongodb'
+${imports ?? ''}
+export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
 ${upSQL ?? `  // Migration code`}
-};
+}
 
-export async function down({ payload }: MigrateDownArgs): Promise<void> {
+export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
 ${downSQL ?? `  // Migration code`}
-};
+}
 `
 
 export const createMigration: CreateMigration = async function createMigration({
   file,
   migrationName,
   payload,
+  skipEmpty,
 }) {
+  const filename = fileURLToPath(import.meta.url)
+  const dirname = path.dirname(filename)
+
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
+  const predefinedMigration = await getPredefinedMigration({
+    dirname,
+    file,
+    migrationName,
+    payload,
+  })
 
-  let migrationFileContent: string | undefined
-
-  // Check for predefined migration.
-  // Either passed in via --file or prefixed with @payloadcms/db-mongodb/
-  if (file || migrationName.startsWith('@payloadcms/db-mongodb/')) {
-    if (!file) file = migrationName
-
-    const predefinedMigrationName = file.replace('@payloadcms/db-mongodb/', '')
-    migrationName = predefinedMigrationName
-    const cleanPath = path.join(__dirname, `../predefinedMigrations/${predefinedMigrationName}.js`)
-
-    // Check if predefined migration exists
-    if (fs.existsSync(cleanPath)) {
-      const { down, up } = require(cleanPath)
-      migrationFileContent = migrationTemplate(up, down)
-    } else {
-      payload.logger.error({
-        msg: `Canned migration ${predefinedMigrationName} not found.`,
-      })
-      process.exit(1)
-    }
-  } else {
-    migrationFileContent = migrationTemplate()
-  }
+  const migrationFileContent = migrationTemplate(predefinedMigration)
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
@@ -59,9 +47,15 @@ export const createMigration: CreateMigration = async function createMigration({
 
   const timestamp = `${formattedDate}_${formattedTime}`
 
-  const formattedName = migrationName.replace(/\W/g, '_')
-  const fileName = `${timestamp}_${formattedName}.ts`
+  const formattedName = migrationName?.replace(/\W/g, '_')
+  const fileName = migrationName ? `${timestamp}_${formattedName}.ts` : `${timestamp}_migration.ts`
   const filePath = `${dir}/${fileName}`
-  fs.writeFileSync(filePath, migrationFileContent)
+
+  if (!skipEmpty) {
+    fs.writeFileSync(filePath, migrationFileContent)
+  }
+
+  writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
+
   payload.logger.info({ msg: `Migration created at ${filePath}` })
 }

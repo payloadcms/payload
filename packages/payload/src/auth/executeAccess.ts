@@ -1,23 +1,43 @@
-import type { Access, AccessResult } from '../config/types'
+import type { Access, AccessResult } from '../config/types.js'
+import type { PayloadRequest } from '../types/index.js'
 
-import { Forbidden } from '../errors'
+import { Forbidden } from '../errors/index.js'
 
-const executeAccess = async (operation, access: Access): Promise<AccessResult> => {
+type OperationArgs = {
+  data?: any
+  disableErrors?: boolean
+  id?: number | string
+  isReadingStaticFile?: boolean
+  req: PayloadRequest
+}
+const executeAccess = async (
+  { id, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,
+  access: Access,
+): Promise<AccessResult> => {
   if (access) {
-    const result = await access(operation)
+    const result = await access({
+      id,
+      data,
+      isReadingStaticFile,
+      req,
+    })
 
     if (!result) {
-      if (!operation.disableErrors) throw new Forbidden(operation.req.t)
+      if (!disableErrors) {
+        throw new Forbidden(req.t)
+      }
     }
 
     return result
   }
 
-  if (operation.req.user) {
+  if (req.user) {
     return true
   }
 
-  if (!operation.disableErrors) throw new Forbidden(operation.req.t)
+  if (!disableErrors) {
+    throw new Forbidden(req.t)
+  }
   return false
 }
 

@@ -1,0 +1,54 @@
+@import '../../../../scss/styles.scss';
+
+@layer payload-default {
+  .relationship--single-value {
+    &.rs__single-value {
+      overflow: visible;
+      min-width: 0;
+    }
+
+    &__label-text {
+      max-width: unset;
+      display: flex;
+      align-items: center;
+      overflow: visible;
+      width: 100%;
+      flex-shrink: 1;
+    }
+
+    &__text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &__drawer-toggler {
+      border: none;
+      background-color: transparent;
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: base(0.25);
+      pointer-events: all;
+
+      .icon {
+        width: base(0.75);
+        height: base(0.75);
+      }
+
+      &:focus-visible {
+        outline: var(--accessibility-outline);
+      }
+
+      &:hover {
+        background-color: var(--theme-elevation-100);
+      }
+    }
+
+    &__label {
+      flex-grow: 1;
+    }
+  }
+}

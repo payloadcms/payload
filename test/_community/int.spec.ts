@@ -1,41 +1,45 @@
-import payload from '../../packages/payload/src'
-import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { postsSlug } from './collections/Posts'
+import type { Payload } from 'payload'
 
-require('isomorphic-fetch')
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-let apiUrl
-let jwt
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
-const headers = {
-  'Content-Type': 'application/json',
-}
+import { devUser } from '../credentials.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { postsSlug } from './collections/Posts/index.js'
+
+let payload: Payload
+let token: string
+let restClient: NextRESTClient
+
 const { email, password } = devUser
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('_Community Tests', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    apiUrl = `${serverURL}/api`
+    const initialized = await initPayloadInt(dirname)
+    ;({ payload, restClient } = initialized)
 
-    const response = await fetch(`${apiUrl}/users/login`, {
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-      headers,
-      method: 'post',
-    })
+    const data = await restClient
+      .POST('/users/login', {
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
+      .then((res) => res.json())
 
-    const data = await response.json()
-    jwt = data.token
+    token = data.token
   })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 
@@ -48,25 +52,26 @@ describe('_Community Tests', () => {
     const newPost = await payload.create({
       collection: postsSlug,
       data: {
-        text: 'LOCAL API EXAMPLE',
+        title: 'LOCAL API EXAMPLE',
       },
+      context: {},
     })
 
-    expect(newPost.text).toEqual('LOCAL API EXAMPLE')
+    expect(newPost.title).toEqual('LOCAL API EXAMPLE')
   })
 
   it('rest API example', async () => {
-    const newPost = await fetch(`${apiUrl}/${postsSlug}`, {
-      method: 'POST',
-      headers: {
-        ...headers,
-        Authorization: `JWT ${jwt}`,
-      },
-      body: JSON.stringify({
-        text: 'REST API EXAMPLE',
-      }),
-    }).then((res) => res.json())
+    const data = await restClient
+      .POST(`/${postsSlug}`, {
+        body: JSON.stringify({
+          title: 'REST API EXAMPLE',
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+      })
+      .then((res) => res.json())
 
-    expect(newPost.doc.text).toEqual('REST API EXAMPLE')
+    expect(data.doc.title).toEqual('REST API EXAMPLE')
   })
 })

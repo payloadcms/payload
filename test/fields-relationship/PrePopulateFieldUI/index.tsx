@@ -1,14 +1,16 @@
+'use client'
+import { useField } from '@payloadcms/ui'
 import * as React from 'react'
 
-import useField from '../../../packages/payload/src/admin/components/forms/useField'
-import { collection1Slug } from '../collectionSlugs'
+import { collection1Slug } from '../collectionSlugs.js'
 
 export const PrePopulateFieldUI: React.FC<{
   hasMany?: boolean
   hasMultipleRelations?: boolean
-  path: string
-}> = ({ hasMany = true, hasMultipleRelations = false, path }) => {
-  const { setValue } = useField({ path })
+  path?: string
+  targetFieldPath: string
+}> = ({ hasMany = true, hasMultipleRelations = false, path, targetFieldPath }) => {
+  const { setValue } = useField({ path: targetFieldPath })
 
   const addDefaults = React.useCallback(() => {
     const fetchRelationDocs = async () => {
@@ -34,6 +36,7 @@ export const PrePopulateFieldUI: React.FC<{
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     fetchRelationDocs()
   }, [setValue, hasMultipleRelations, hasMany])
 

@@ -1,8 +1,6 @@
-import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { SanitizedGlobalConfig } from '../globals/config/types'
-import type { Payload } from '../payload'
-import type { PayloadRequest } from '../types'
-import type { Where } from '../types'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
 type Args = {
   collection?: SanitizedCollectionConfig
@@ -35,6 +33,7 @@ export const enforceMaxVersions = async ({
 
       const query = await payload.db.findVersions({
         collection: collection.slug,
+        limit: 1,
         pagination: false,
         req,
         skip: max,
@@ -46,6 +45,8 @@ export const enforceMaxVersions = async ({
     } else if (global) {
       const query = await payload.db.findGlobalVersions({
         global: global.slug,
+        limit: 1,
+        pagination: false,
         req,
         skip: max,
         sort: '-updatedAt',
@@ -69,7 +70,7 @@ export const enforceMaxVersions = async ({
       }
 
       await payload.db.deleteVersions({
-        collection: collection?.slug,
+        collection: slug,
         req,
         where: deleteQuery,
       })

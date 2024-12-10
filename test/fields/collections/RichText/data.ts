@@ -1,6 +1,5 @@
-import { defaultRichTextValue } from '../../../../packages/richtext-lexical/src'
-import { generateLexicalRichText } from './generateLexicalRichText'
-import { generateSlateRichText } from './generateSlateRichText'
+import { generateLexicalRichText } from './generateLexicalRichText.js'
+import { generateSlateRichText } from './generateSlateRichText.js'
 
 export const richTextBlocks = [
   {

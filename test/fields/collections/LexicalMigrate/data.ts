@@ -1,8 +1,20 @@
-import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData'
+import { generateSlateRichText } from '../RichText/generateSlateRichText.js'
+import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData.js'
 
 export const lexicalMigrateDocData = {
   title: 'Rich Text',
   lexicalWithLexicalPluginData: payloadPluginLexicalData,
+  lexicalWithSlateData: [
+    ...generateSlateRichText(),
+    {
+      children: [
+        {
+          text: 'Some block quote',
+        },
+      ],
+      type: 'blockquote',
+    },
+  ],
   arrayWithLexicalField: [
     {
       lexicalInArrayField: getSimpleLexicalData('array 1'),

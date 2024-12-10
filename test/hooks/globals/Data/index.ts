@@ -1,6 +1,4 @@
-/* eslint-disable no-param-reassign */
-
-import type { GlobalConfig } from '../../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from 'payload'
 
 export const dataHooksGlobalSlug = 'data-hooks-global'
 
@@ -19,7 +17,7 @@ export const DataHooksGlobal: GlobalConfig = {
       },
     ],
     beforeRead: [
-      async ({ context, global }) => {
+      ({ context, global }) => {
         context['global_beforeRead_global'] = JSON.stringify(global)
       },
     ],
@@ -37,7 +35,7 @@ export const DataHooksGlobal: GlobalConfig = {
       },
     ],
     afterChange: [
-      async ({ context, global, doc }) => {
+      ({ context, global, doc }) => {
         context['global_afterChange_global'] = JSON.stringify(global)
 
         // Needs to be done for both afterRead (for findOne test) and afterChange (for update test), as afterChange is called after afterRead
@@ -67,6 +65,10 @@ export const DataHooksGlobal: GlobalConfig = {
 
         afterRead: [
           ({ global, field, context }) => {
+            if (context['field_beforeChange_GlobalAndField_override']) {
+              return context['field_beforeChange_GlobalAndField_override']
+            }
+
             return (
               (context['field_beforeChange_GlobalAndField'] as string) +
               JSON.stringify(global) +

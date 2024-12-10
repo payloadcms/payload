@@ -1,0 +1,58 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .popup-button-list {
+    --list-button-padding: calc(var(--base) * 0.5);
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    gap: 3px;
+    [dir='rtl'] &__text-align--left {
+      text-align: right;
+    }
+    &__text-align--left {
+      text-align: left;
+    }
+
+    &__text-align--center {
+      text-align: center;
+    }
+    [dir='rtl'] &__text-align--right {
+      text-align: left;
+    }
+    &__text-align--right {
+      text-align: right;
+    }
+
+    &__button {
+      @extend %btn-reset;
+      padding-left: var(--list-button-padding);
+      padding-right: var(--list-button-padding);
+      padding-top: 2px;
+      padding-bottom: 2px;
+      cursor: pointer;
+      text-align: inherit;
+      line-height: var(--base);
+      text-decoration: none;
+      border-radius: 3px;
+
+      button {
+        @extend %btn-reset;
+
+        &:focus-visible {
+          outline: none;
+        }
+      }
+
+      &:hover,
+      &:focus-visible,
+      &:focus-within {
+        background-color: var(--popup-button-highlight);
+      }
+    }
+
+    &__button--selected {
+      background-color: var(--theme-elevation-150);
+    }
+  }
+}

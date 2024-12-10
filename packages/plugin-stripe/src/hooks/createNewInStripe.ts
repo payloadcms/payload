@@ -1,33 +1,31 @@
-import type { CollectionBeforeValidateHook, CollectionConfig } from 'payload/types'
+import type { CollectionBeforeValidateHook, CollectionConfig } from 'payload'
 
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types'
+import type { StripePluginConfig } from '../types.js'
 
-import { deepen } from '../utilities/deepen'
+import { deepen } from '../utilities/deepen.js'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+// api version can only be the latest, stripe recommends ts ignoring it
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
-type HookArgsWithCustomCollection = Omit<
-  Parameters<CollectionBeforeValidateHook>[0],
-  'collection'
-> & {
+type HookArgsWithCustomCollection = {
   collection: CollectionConfig
-}
+} & Omit<Parameters<CollectionBeforeValidateHook>[0], 'collection'>
 
 export type CollectionBeforeValidateHookWithArgs = (
-  args: HookArgsWithCustomCollection & {
+  args: {
     collection?: CollectionConfig
-    stripeConfig?: StripeConfig
-  },
-) => void
+    pluginConfig?: StripePluginConfig
+  } & HookArgsWithCustomCollection,
+) => Promise<Partial<any>>
 
 export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (args) => {
-  const { collection, data, operation, req, stripeConfig } = args
+  const { collection, data, operation, pluginConfig, req } = args
 
-  const { logs, sync } = stripeConfig || {}
+  const { logs, sync } = pluginConfig || {}
 
   const payload = req?.payload
 
@@ -40,7 +38,9 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
 
   if (payload) {
     if (data?.skipSync) {
-      if (logs) payload.logger.info(`Bypassing collection-level hooks.`)
+      if (logs) {
+        payload.logger.info(`Bypassing collection-level hooks.`)
+      }
     } else {
       // initialize as 'false' so that all Payload admin events sync to Stripe
       // then conditionally set to 'true' to for events that originate from webhooks
@@ -65,23 +65,26 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
         syncedFields = deepen(syncedFields)
 
         if (operation === 'update') {
-          if (logs)
+          if (logs) {
             payload.logger.info(
               `A '${collectionSlug}' document has changed in Payload with ID: '${data?.id}', syncing with Stripe...`,
             )
+          }
 
           // NOTE: the Stripe document will be created in the "afterChange" hook, so create a new stripe document here if no stripeID exists
           if (!dataRef.stripeID) {
             try {
               // NOTE: Typed as "any" because the "create" method is not standard across all Stripe resources
               const stripeResource = await stripe?.[syncConfig.stripeResourceType]?.create(
-                syncedFields as any,
+                // @ts-expect-error
+                syncedFields,
               )
 
-              if (logs)
+              if (logs) {
                 payload.logger.info(
                   `✅ Successfully created new '${syncConfig.stripeResourceType}' resource in Stripe with ID: '${stripeResource.id}'.`,
                 )
+              }
 
               dataRef.stripeID = stripeResource.id
 
@@ -89,32 +92,38 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
               dataRef.skipSync = true
             } catch (error: unknown) {
               const msg = error instanceof Error ? error.message : error
-              if (logs) payload.logger.error(`- Error creating Stripe document: ${msg}`)
+              if (logs) {
+                payload.logger.error(`- Error creating Stripe document: ${msg}`)
+              }
             }
           }
         }
 
         if (operation === 'create') {
-          if (logs)
+          if (logs) {
             payload.logger.info(
               `A new '${collectionSlug}' document was created in Payload with ID: '${data?.id}', syncing with Stripe...`,
             )
+          }
 
           try {
-            if (logs)
+            if (logs) {
               payload.logger.info(
                 `- Creating new '${syncConfig.stripeResourceType}' resource in Stripe...`,
               )
+            }
 
             // NOTE: Typed as "any" because the "create" method is not standard across all Stripe resources
             const stripeResource = await stripe?.[syncConfig.stripeResourceType]?.create(
-              syncedFields as any,
+              // @ts-expect-error
+              syncedFields,
             )
 
-            if (logs)
+            if (logs) {
               payload.logger.info(
                 `✅ Successfully created new '${syncConfig.stripeResourceType}' resource in Stripe with ID: '${stripeResource.id}'.`,
               )
+            }
 
             dataRef.stripeID = stripeResource.id
 

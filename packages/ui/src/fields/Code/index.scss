@@ -1,0 +1,26 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .code-field {
+    position: relative;
+
+    &.error {
+      textarea {
+        border: 1px solid var(--theme-error-500) !important;
+      }
+      .code-editor {
+        border-color: var(--theme-error-500);
+      }
+      .monaco-editor-background,
+      .margin {
+        background-color: var(--theme-error-50);
+      }
+    }
+
+    .read-only {
+      .code-editor {
+        @include readOnly;
+      }
+    }
+  }
+}

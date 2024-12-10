@@ -1,8 +1,12 @@
-import { Main } from './main'
-import { error } from './utils/log'
+import { Main } from './main.js'
+import { error } from './utils/log.js'
 
-async function main(): Promise<void> {
-  await new Main().init()
+export async function main(): Promise<void> {
+  try {
+    await new Main().init()
+  } catch (e) {
+    if (e instanceof Error) {
+      error(e.message)
+    }
+  }
 }
-
-main().catch((e) => error(`An error has occurred: ${e instanceof Error ? e.message : e}`))

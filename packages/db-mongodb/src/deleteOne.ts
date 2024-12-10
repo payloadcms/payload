@@ -1,25 +1,31 @@
-import type { DeleteOne } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
-import type { Document } from 'payload/types'
+import type { DeleteOne, Document, PayloadRequest } from 'payload'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.js'
 
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { withSession } from './withSession.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,
-  { collection, req = {} as PayloadRequest, where },
+  { collection, req = {} as PayloadRequest, select, where },
 ) {
   const Model = this.collections[collection]
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   const query = await Model.buildQuery({
     payload: this.payload,
     where,
   })
 
-  const doc = await Model.findOneAndDelete(query, options).lean()
+  const doc = await Model.findOneAndDelete(query, {
+    ...options,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: this.payload.collections[collection].config.flattenedFields,
+      select,
+    }),
+  }).lean()
 
   let result: Document = JSON.parse(JSON.stringify(doc))
 

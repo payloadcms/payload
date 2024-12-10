@@ -1,7 +1,8 @@
-import type { PayloadRequest } from '../../../express/types'
+import type { Payload } from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 
-import { sendEvent } from '..'
-import { oneWayHash } from '../oneWayHash'
+import { sendEvent } from '../index.js'
+import { oneWayHash } from '../oneWayHash.js'
 
 export type AdminInitEvent = {
   domainID?: string
@@ -9,9 +10,13 @@ export type AdminInitEvent = {
   userID?: string
 }
 
-export const adminInit = (req: PayloadRequest): void => {
-  const { payload, user } = req
-  const { host } = req.headers
+type Args = {
+  headers: Request['headers']
+  payload: Payload
+  user: PayloadRequest['user']
+}
+export const adminInit = ({ headers, payload, user }: Args): void => {
+  const host = headers.get('host')
 
   let domainID: string
   let userID: string
@@ -27,8 +32,8 @@ export const adminInit = (req: PayloadRequest): void => {
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   sendEvent({
     event: {
-      domainID,
       type: 'admin-init',
+      domainID,
       userID,
     },
     payload,

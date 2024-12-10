@@ -1,16 +1,20 @@
 import { Editor, Element, Node, Text, Transforms } from 'slate'
 import { ReactEditor } from 'slate-react'
 
-import { getCommonBlock } from './getCommonBlock'
-import isListActive from './isListActive'
-import listTypes from './listTypes'
-import { unwrapList } from './unwrapList'
+import { getCommonBlock } from './getCommonBlock.js'
+import { isListActive } from './isListActive.js'
+import { listTypes } from './listTypes.js'
+import { unwrapList } from './unwrapList.js'
 
-const toggleList = (editor: Editor, format: string): void => {
+export const toggleList = (editor: Editor, format: string): void => {
   let currentListFormat: string
 
-  if (isListActive(editor, 'ol')) currentListFormat = 'ol'
-  if (isListActive(editor, 'ul')) currentListFormat = 'ul'
+  if (isListActive(editor, 'ol')) {
+    currentListFormat = 'ol'
+  }
+  if (isListActive(editor, 'ul')) {
+    currentListFormat = 'ul'
+  }
 
   // If the format is currently active,
   // remove the list
@@ -49,7 +53,7 @@ const toggleList = (editor: Editor, format: string): void => {
     )
     // Otherwise we can assume that we should just activate the list
   } else {
-    Transforms.wrapNodes(editor, { children: [], type: format })
+    Transforms.wrapNodes(editor, { type: format, children: [] })
 
     const [, parentNodePath] = getCommonBlock(
       editor,
@@ -90,11 +94,9 @@ const toggleList = (editor: Editor, format: string): void => {
     )
 
     nodesToWrap.forEach(([, path]) => {
-      Transforms.wrapNodes(editor, { children: [], type: 'li' }, { at: path })
+      Transforms.wrapNodes(editor, { type: 'li', children: [] }, { at: path })
     })
   }
 
   ReactEditor.focus(editor)
 }
-
-export default toggleList

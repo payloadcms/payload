@@ -16,11 +16,10 @@ To use the Slate editor, first you need to install it:
 npm install --save @payloadcms/richtext-slate
 ```
 
-
-After installation, you can pass it to your top-level Payload config:
+After installation, you can pass it to your top-level Payload Config:
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 export default buildConfig({
@@ -28,14 +27,14 @@ export default buildConfig({
     // your collections here
   ],
   // Pass the Slate editor to the root config
-  editor: slateEditor({})
+  editor: slateEditor({}),
 })
 ```
 
 And here's an example for how to install the Slate editor on a field-by-field basis, while customizing its options:
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 export const Pages: CollectionConfig = {
@@ -52,11 +51,11 @@ export const Pages: CollectionConfig = {
           ],
           leaves: [
             // customize leaves allowed in Slate editor here
-          ]
-        }
-      })
-    }
-  ]
+          ],
+        },
+      }),
+    },
+  ],
 }
 ```
 
@@ -64,7 +63,7 @@ export const Pages: CollectionConfig = {
 
 **`elements`**
 
-The `elements` property is used to specify which built-in or custom [SlateJS elements](https://docs.slatejs.org/concepts/02-nodes#element) should be made available to the field within the admin panel.
+The `elements` property is used to specify which built-in or custom [SlateJS elements](https://docs.slatejs.org/concepts/02-nodes#element) should be made available to the field within the Admin Panel.
 
 The default `elements` available in Payload are:
 
@@ -86,7 +85,7 @@ The default `elements` available in Payload are:
 
 **`leaves`**
 
-The `leaves` property specifies built-in or custom [SlateJS leaves](https://docs.slatejs.org/concepts/08-rendering#leaves) to be enabled within the Admin panel.
+The `leaves` property specifies built-in or custom [SlateJS leaves](https://docs.slatejs.org/concepts/08-rendering#leaves) to be enabled within the Admin Panel.
 
 The default `leaves` available in Payload are:
 
@@ -168,7 +167,9 @@ Specifying custom `Type`s let you extend your custom elements by adding addition
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
+
+import { slateEditor } from '@payloadcms/richtext-slate'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -182,57 +183,59 @@ export const ExampleCollection: CollectionConfig = {
         },
       ],
       required: true,
-      admin: {
-        elements: [
-          'h2',
-          'h3',
-          'h4',
-          'link',
-          'blockquote',
-          {
-            name: 'cta',
-            Button: CustomCallToActionButton,
-            Element: CustomCallToActionElement,
-            plugins: [
-              // any plugins that are required by this element go here
-            ],
-          },
-        ],
-        leaves: [
-          'bold',
-          'italic',
-          {
-            name: 'highlight',
-            Button: CustomHighlightButton,
-            Leaf: CustomHighlightLeaf,
-            plugins: [
-              // any plugins that are required by this leaf go here
-            ],
-          },
-        ],
-        link: {
-          // Inject your own fields into the Link element
-          fields: [
+      editor: slateEditor({
+        admin: {
+          elements: [
+            'h2',
+            'h3',
+            'h4',
+            'link',
+            'blockquote',
             {
-              name: 'rel',
-              label: 'Rel Attribute',
-              type: 'select',
-              hasMany: true,
-              options: ['noopener', 'noreferrer', 'nofollow'],
-            },
-          ],
-        },
-        upload: {
-          collections: {
-            media: {
-              fields: [
-                // any fields that you would like to save
-                // on an upload element in the `media` collection
+              name: 'cta',
+              Button: CustomCallToActionButton,
+              Element: CustomCallToActionElement,
+              plugins: [
+                // any plugins that are required by this element go here
               ],
             },
+          ],
+          leaves: [
+            'bold',
+            'italic',
+            {
+              name: 'highlight',
+              Button: CustomHighlightButton,
+              Leaf: CustomHighlightLeaf,
+              plugins: [
+                // any plugins that are required by this leaf go here
+              ],
+            },
+          ],
+          link: {
+            // Inject your own fields into the Link element
+            fields: [
+              {
+                name: 'rel',
+                label: 'Rel Attribute',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+              },
+            ],
+          },
+          upload: {
+            collections: {
+              media: {
+                fields: [
+                  // any fields that you would like to save
+                  // on an upload element in the `media` collection
+                ],
+              },
+            },
           },
         },
-      },
+      }),
     },
   ],
 }

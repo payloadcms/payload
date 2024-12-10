@@ -1,4 +1,4 @@
-import type { FieldHook } from '../../../packages/payload/src/fields/config/types'
+import type { FieldHook } from 'payload'
 
 export const generateFullTitle = (breadcrumbs: Array<{ label: string }>): string | undefined => {
   if (Array.isArray(breadcrumbs)) {
@@ -11,7 +11,5 @@ export const generateFullTitle = (breadcrumbs: Array<{ label: string }>): string
   return undefined
 }
 
-const populateFullTitle: FieldHook = async ({ data, originalDoc }) =>
+export const populateFullTitle: FieldHook = ({ data, originalDoc }) =>
   generateFullTitle(data?.breadcrumbs || originalDoc?.breadcrumbs)
-
-export default populateFullTitle

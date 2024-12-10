@@ -1,17 +1,7 @@
-import React from 'react'
+import type { RichTextCustomLeaf } from '../../../types.js'
 
-import UnderlineIcon from '../../icons/Underline'
-import LeafButton from '../Button'
-
-const Underline = ({ attributes, children }) => <u {...attributes}>{children}</u>
-
-const underline = {
-  Button: () => (
-    <LeafButton format="underline">
-      <UnderlineIcon />
-    </LeafButton>
-  ),
-  Leaf: Underline,
+export const underline: RichTextCustomLeaf = {
+  name: 'underline',
+  Button: '@payloadcms/richtext-slate/client#UnderlineLeafButton',
+  Leaf: '@payloadcms/richtext-slate/client#UnderlineLeaf',
 }
-
-export default underline

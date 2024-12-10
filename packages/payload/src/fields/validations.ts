@@ -1,7 +1,15 @@
-import type { RichTextAdapter } from '../exports/types'
+import Ajv from 'ajv'
+import ObjectIdImport from 'bson-objectid'
+
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+
+import type { RichTextAdapter } from '../admin/types.js'
+import type { CollectionSlug } from '../index.js'
+import type { Where } from '../types/index.js'
 import type {
   ArrayField,
-  BlockField,
+  BlocksField,
   CheckboxField,
   CodeField,
   DateField,
@@ -12,38 +20,78 @@ import type {
   RadioField,
   RelationshipField,
   RelationshipValue,
+  RelationshipValueMany,
+  RelationshipValueSingle,
   RichTextField,
   SelectField,
-  TextField,
   TextareaField,
+  TextField,
   UploadField,
   Validate,
-} from './config/types'
+} from './config/types.js'
 
-import canUseDOM from '../utilities/canUseDOM'
-import { getIDType } from '../utilities/getIDType'
-import { isNumber } from '../utilities/isNumber'
-import { isValidID } from '../utilities/isValidID'
-import { fieldAffectsData } from './config/types'
+import { isNumber } from '../utilities/isNumber.js'
+import { isValidID } from '../utilities/isValidID.js'
 
-export const text: Validate<unknown, unknown, TextField> = (
-  value: string,
-  { config, maxLength: fieldMaxLength, minLength, required, t },
+export type TextFieldValidation = Validate<string, unknown, unknown, TextField>
+
+export type TextFieldManyValidation = Validate<string[], unknown, unknown, TextField>
+
+export type TextFieldSingleValidation = Validate<string, unknown, unknown, TextField>
+
+export const text: TextFieldValidation = (
+  value,
+  {
+    hasMany,
+    maxLength: fieldMaxLength,
+    maxRows,
+    minLength,
+    minRows,
+    req: {
+      payload: { config },
+      t,
+    },
+    required,
+  },
 ) => {
   let maxLength: number
 
-  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
-  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
-  if (value && maxLength && value.length > maxLength) {
-    return t('validation:shorterThanMax', { maxLength })
+  if (!required) {
+    if (!value) {
+      return true
+    }
   }
 
-  if (value && minLength && value?.length < minLength) {
-    return t('validation:longerThanMin', { minLength })
+  if (hasMany === true) {
+    const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
+    if (typeof lengthValidationResult === 'string') {
+      return lengthValidationResult
+    }
+  }
+
+  if (typeof config?.defaultMaxTextLength === 'number') {
+    maxLength = config.defaultMaxTextLength
+  }
+  if (typeof fieldMaxLength === 'number') {
+    maxLength = fieldMaxLength
+  }
+
+  const stringsToValidate: string[] = Array.isArray(value) ? value : [value]
+
+  for (const stringValue of stringsToValidate) {
+    const length = stringValue?.length || 0
+
+    if (typeof maxLength === 'number' && length > maxLength) {
+      return t('validation:shorterThanMax', { label: t('general:value'), maxLength, stringValue })
+    }
+
+    if (typeof minLength === 'number' && length < minLength) {
+      return t('validation:longerThanMin', { label: t('general:value'), minLength, stringValue })
+    }
   }
 
   if (required) {
-    if (typeof value !== 'string' || value?.length === 0) {
+    if (!(typeof value === 'string' || Array.isArray(value)) || value?.length === 0) {
       return t('validation:required')
     }
   }
@@ -51,14 +99,28 @@ export const text: Validate<unknown, unknown, TextField> = (
   return true
 }
 
-export const password: Validate<unknown, unknown, TextField> = (
-  value: string,
-  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
+export type PasswordFieldValidation = Validate<string, unknown, unknown, TextField>
+
+export const password: PasswordFieldValidation = (
+  value,
+  {
+    maxLength: fieldMaxLength,
+    minLength = 3,
+    req: {
+      payload: { config },
+      t,
+    },
+    required,
+  },
 ) => {
   let maxLength: number
 
-  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
-  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
+  if (typeof config?.defaultMaxTextLength === 'number') {
+    maxLength = config.defaultMaxTextLength
+  }
+  if (typeof fieldMaxLength === 'number') {
+    maxLength = fieldMaxLength
+  }
 
   if (value && maxLength && value.length > maxLength) {
     return t('validation:shorterThanMax', { maxLength })
@@ -75,7 +137,56 @@ export const password: Validate<unknown, unknown, TextField> = (
   return true
 }
 
-export const email: Validate<unknown, unknown, EmailField> = (value: string, { required, t }) => {
+export type ConfirmPasswordFieldValidation = Validate<
+  string,
+  unknown,
+  { password: string },
+  TextField
+>
+
+export const confirmPassword: ConfirmPasswordFieldValidation = (
+  value,
+  { req: { t }, required, siblingData },
+) => {
+  if (required && !value) {
+    return t('validation:required')
+  }
+
+  if (value && value !== siblingData.password) {
+    return t('fields:passwordsDoNotMatch')
+  }
+
+  return true
+}
+
+export type EmailFieldValidation = Validate<string, unknown, { username?: string }, EmailField>
+
+export const email: EmailFieldValidation = (
+  value,
+  {
+    collectionSlug,
+    req: {
+      payload: { config },
+      t,
+    },
+    required,
+    siblingData,
+  },
+) => {
+  if (collectionSlug) {
+    const collection = config.collections.find(({ slug }) => slug === collectionSlug)
+
+    if (
+      collection.auth.loginWithUsername &&
+      !collection.auth.loginWithUsername?.requireUsername &&
+      !collection.auth.loginWithUsername?.requireEmail
+    ) {
+      if (!value && !siblingData?.username) {
+        return t('validation:required')
+      }
+    }
+  }
+
   if ((value && !/\S[^\s@]*@\S+\.\S+/.test(value)) || (!value && required)) {
     return t('validation:emailAddress')
   }
@@ -83,14 +194,73 @@ export const email: Validate<unknown, unknown, EmailField> = (value: string, { r
   return true
 }
 
-export const textarea: Validate<unknown, unknown, TextareaField> = (
-  value: string,
-  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
+export type UsernameFieldValidation = Validate<string, unknown, { email?: string }, TextField>
+
+export const username: UsernameFieldValidation = (
+  value,
+  {
+    collectionSlug,
+    req: {
+      payload: { config },
+      t,
+    },
+    required,
+    siblingData,
+  },
 ) => {
   let maxLength: number
 
-  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
-  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
+  if (collectionSlug) {
+    const collection = config.collections.find(({ slug }) => slug === collectionSlug)
+
+    if (
+      collection.auth.loginWithUsername &&
+      !collection.auth.loginWithUsername?.requireUsername &&
+      !collection.auth.loginWithUsername?.requireEmail
+    ) {
+      if (!value && !siblingData?.email) {
+        return t('validation:required')
+      }
+    }
+  }
+
+  if (typeof config?.defaultMaxTextLength === 'number') {
+    maxLength = config.defaultMaxTextLength
+  }
+
+  if (value && maxLength && value.length > maxLength) {
+    return t('validation:shorterThanMax', { maxLength })
+  }
+
+  if ((value && !/^[\w.-]+$/.test(value)) || (!value && required)) {
+    return t('validation:username')
+  }
+
+  return true
+}
+
+export type TextareaFieldValidation = Validate<string, unknown, unknown, TextareaField>
+
+export const textarea: TextareaFieldValidation = (
+  value,
+  {
+    maxLength: fieldMaxLength,
+    minLength,
+    req: {
+      payload: { config },
+      t,
+    },
+    required,
+  },
+) => {
+  let maxLength: number
+
+  if (typeof config?.defaultMaxTextLength === 'number') {
+    maxLength = config.defaultMaxTextLength
+  }
+  if (typeof fieldMaxLength === 'number') {
+    maxLength = fieldMaxLength
+  }
   if (value && maxLength && value.length > maxLength) {
     return t('validation:shorterThanMax', { maxLength })
   }
@@ -106,7 +276,9 @@ export const textarea: Validate<unknown, unknown, TextareaField> = (
   return true
 }
 
-export const code: Validate<unknown, unknown, CodeField> = (value: string, { required, t }) => {
+export type CodeFieldValidation = Validate<string, unknown, unknown, CodeField>
+
+export const code: CodeFieldValidation = (value, { req: { t }, required }) => {
   if (required && value === undefined) {
     return t('validation:required')
   }
@@ -114,10 +286,56 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { req
   return true
 }
 
-export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = (
-  value: string,
-  { jsonError, required, t },
+export type JSONFieldValidation = Validate<
+  string,
+  unknown,
+  unknown,
+  { jsonError?: string } & JSONField
+>
+
+export const json: JSONFieldValidation = async (
+  value,
+  { jsonError, jsonSchema, req: { t }, required },
 ) => {
+  const isNotEmpty = (value) => {
+    if (value === undefined || value === null) {
+      return false
+    }
+
+    if (Array.isArray(value) && value.length === 0) {
+      return false
+    }
+
+    if (typeof value === 'object' && Object.keys(value).length === 0) {
+      return false
+    }
+
+    return true
+  }
+
+  const fetchSchema = ({ schema, uri }: Record<string, unknown>) => {
+    if (uri && schema) {
+      return schema
+    }
+    // @ts-expect-error
+    return fetch(uri)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        return response.json()
+      })
+      .then((json) => {
+        const jsonSchemaSanitizations = {
+          id: undefined,
+          $id: json.id,
+          $schema: 'http://json-schema.org/draft-07/schema#',
+        }
+
+        return Object.assign(json, jsonSchemaSanitizations)
+      })
+  }
+
   if (required && !value) {
     return t('validation:required')
   }
@@ -126,13 +344,26 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
     return t('validation:invalidInput')
   }
 
+  if (jsonSchema && isNotEmpty(value)) {
+    try {
+      jsonSchema.schema = await fetchSchema(jsonSchema)
+      const { schema } = jsonSchema
+      // @ts-expect-error
+      const ajv = new Ajv()
+
+      if (!ajv.validate(schema, value)) {
+        return t(ajv.errorsText())
+      }
+    } catch (error) {
+      return t(error.message)
+    }
+  }
   return true
 }
 
-export const checkbox: Validate<unknown, unknown, CheckboxField> = (
-  value: boolean,
-  { required, t },
-) => {
+export type CheckboxFieldValidation = Validate<boolean, unknown, unknown, CheckboxField>
+
+export const checkbox: CheckboxFieldValidation = (value, { req: { t }, required }) => {
   if ((value && typeof value !== 'boolean') || (required && typeof value !== 'boolean')) {
     return t('validation:trueOrFalse')
   }
@@ -140,9 +371,10 @@ export const checkbox: Validate<unknown, unknown, CheckboxField> = (
   return true
 }
 
-export const date: Validate<unknown, unknown, DateField> = (value, { required, t }) => {
+export type DateFieldValidation = Validate<Date, unknown, unknown, DateField>
+
+export const date: DateFieldValidation = (value, { req: { t }, required }) => {
   if (value && !isNaN(Date.parse(value.toString()))) {
-    /* eslint-disable-line */
     return true
   }
 
@@ -157,16 +389,22 @@ export const date: Validate<unknown, unknown, DateField> = (value, { required, t
   return true
 }
 
-export const richText: Validate<object, unknown, RichTextField, RichTextField> = async (
-  value,
-  options,
-) => {
+export type RichTextFieldValidation = Validate<object, unknown, unknown, RichTextField>
+
+export const richText: RichTextFieldValidation = async (value, options) => {
+  if (!options?.editor) {
+    throw new Error('richText field has no editor property.')
+  }
+  if (typeof options?.editor === 'function') {
+    throw new Error('Attempted to access unsanitized rich text editor.')
+  }
+
   const editor: RichTextAdapter = options?.editor
 
-  return await editor.validate(value, options)
+  return editor.validate(value, options)
 }
 
-const validateArrayLength: any = (
+const validateArrayLength = (
   value,
   options: {
     maxRows?: number
@@ -177,88 +415,111 @@ const validateArrayLength: any = (
 ) => {
   const { maxRows, minRows, required, t } = options
 
-  const arrayLength = Array.isArray(value) ? value.length : 0
+  const arrayLength = Array.isArray(value) ? value.length : value || 0
 
-  if (!required && arrayLength === 0) return true
+  if (!required && arrayLength === 0) {
+    return true
+  }
 
   if (minRows && arrayLength < minRows) {
-    return t('validation:requiresAtLeast', { count: minRows, label: t('rows') })
+    return t('validation:requiresAtLeast', { count: minRows, label: t('general:rows') })
   }
 
   if (maxRows && arrayLength > maxRows) {
-    return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') })
+    return t('validation:requiresNoMoreThan', { count: maxRows, label: t('general:rows') })
   }
 
   if (required && !arrayLength) {
-    return t('validation:requiresAtLeast', { count: 1, label: t('row') })
+    return t('validation:requiresAtLeast', { count: 1, label: t('general:row') })
   }
 
   return true
 }
 
-export const number: Validate<unknown, unknown, NumberField> = (
-  value: number | number[],
-  { hasMany, max, maxRows, min, minRows, required, t },
+export type NumberFieldValidation = Validate<number | number[], unknown, unknown, NumberField>
+
+export type NumberFieldManyValidation = Validate<number[], unknown, unknown, NumberField>
+
+export type NumberFieldSingleValidation = Validate<number, unknown, unknown, NumberField>
+
+export const number: NumberFieldValidation = (
+  value,
+  { hasMany, max, maxRows, min, minRows, req: { t }, required },
 ) => {
   if (hasMany === true) {
     const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
-    if (typeof lengthValidationResult === 'string') return lengthValidationResult
+    if (typeof lengthValidationResult === 'string') {
+      return lengthValidationResult
+    }
   }
 
   if (!value && !isNumber(value)) {
     // if no value is present, validate based on required
-    if (required) return t('validation:required')
-    if (!required) return true
+    if (required) {
+      return t('validation:required')
+    }
+    if (!required) {
+      return true
+    }
   }
 
   const numbersToValidate: number[] = Array.isArray(value) ? value : [value]
 
   for (const number of numbersToValidate) {
-    if (!isNumber(number)) return t('validation:enterNumber')
+    if (!isNumber(number)) {
+      return t('validation:enterNumber')
+    }
 
     const numberValue = parseFloat(number as unknown as string)
 
     if (typeof max === 'number' && numberValue > max) {
-      return t('validation:greaterThanMax', { label: t('value'), max, value })
+      return t('validation:greaterThanMax', { label: t('general:value'), max, value })
     }
 
     if (typeof min === 'number' && numberValue < min) {
-      return t('validation:lessThanMin', { label: t('value'), min, value })
+      return t('validation:lessThanMin', { label: t('general:value'), min, value })
     }
   }
 
   return true
 }
 
-export const array: Validate<unknown, unknown, ArrayField> = (
+export type ArrayFieldValidation = Validate<unknown[], unknown, unknown, ArrayField>
+
+export const array: ArrayFieldValidation = (value, { maxRows, minRows, req: { t }, required }) => {
+  return validateArrayLength(value, { maxRows, minRows, required, t })
+}
+
+export type BlocksFieldValidation = Validate<unknown, unknown, unknown, BlocksField>
+
+export const blocks: BlocksFieldValidation = (
   value,
-  { maxRows, minRows, required, t },
+  { maxRows, minRows, req: { t }, required },
 ) => {
   return validateArrayLength(value, { maxRows, minRows, required, t })
 }
 
-export const blocks: Validate<unknown, unknown, BlockField> = (
+const validateFilterOptions: Validate<
+  unknown,
+  unknown,
+  unknown,
+  RelationshipField | UploadField
+> = async (
   value,
-  { maxRows, minRows, required, t },
+  { id, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
 ) => {
-  return validateArrayLength(value, { maxRows, minRows, required, t })
-}
-
-const validateFilterOptions: Validate = async (
-  value,
-  { id, data, filterOptions, payload, relationTo, req, siblingData, t, user },
-) => {
-  if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
+  if (typeof filterOptions !== 'undefined' && value) {
     const options: {
       [collection: string]: (number | string)[]
     } = {}
 
-    const collections = typeof relationTo === 'string' ? [relationTo] : relationTo
+    const falseCollections: CollectionSlug[] = []
+    const collections = !Array.isArray(relationTo) ? [relationTo] : relationTo
     const values = Array.isArray(value) ? value : [value]
 
-    await Promise.all(
-      collections.map(async (collection) => {
-        const optionFilter =
+    for (const collection of collections) {
+      try {
+        let optionFilter =
           typeof filterOptions === 'function'
             ? await filterOptions({
                 id,
@@ -269,11 +530,19 @@ const validateFilterOptions: Validate = async (
               })
             : filterOptions
 
+        if (optionFilter === true) {
+          optionFilter = null
+        }
+
         const valueIDs: (number | string)[] = []
 
         values.forEach((val) => {
-          if (typeof val === 'object' && val?.value) {
-            valueIDs.push(val.value)
+          if (typeof val === 'object') {
+            if (val?.value) {
+              valueIDs.push(val.value)
+            } else if (ObjectId.isValid(val)) {
+              valueIDs.push(new ObjectId(val).toHexString())
+            }
           }
 
           if (typeof val === 'string' || typeof val === 'number') {
@@ -282,11 +551,17 @@ const validateFilterOptions: Validate = async (
         })
 
         if (valueIDs.length > 0) {
-          const findWhere = {
+          const findWhere: Where = {
             and: [{ id: { in: valueIDs } }],
           }
 
-          if (optionFilter) findWhere.and.push(optionFilter)
+          if (optionFilter && optionFilter !== true) {
+            findWhere.and.push(optionFilter)
+          }
+
+          if (optionFilter === false) {
+            falseCollections.push(collection)
+          }
 
           const result = await payload.find({
             collection,
@@ -301,8 +576,14 @@ const validateFilterOptions: Validate = async (
         } else {
           options[collection] = []
         }
-      }),
-    )
+      } catch (err) {
+        req.payload.logger.error({
+          err,
+          msg: `Error validating filter options for collection ${collection}`,
+        })
+        options[collection] = []
+      }
+    }
 
     const invalidRelationships = values.filter((val) => {
       let collection: string
@@ -314,11 +595,23 @@ const validateFilterOptions: Validate = async (
         if (typeof val === 'string' || typeof val === 'number') {
           requestedID = val
         }
+
+        if (typeof val === 'object' && ObjectId.isValid(val)) {
+          requestedID = new ObjectId(val).toHexString()
+        }
       }
 
       if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
         collection = val.relationTo
         requestedID = val.value
+      }
+
+      if (falseCollections.find((slug) => relationTo === slug)) {
+        return true
+      }
+
+      if (!options[collection]) {
+        return true
       }
 
       return options[collection].indexOf(requestedID) === -1
@@ -338,47 +631,47 @@ const validateFilterOptions: Validate = async (
   return true
 }
 
-export const upload: Validate<unknown, unknown, UploadField> = (value: string, options) => {
-  if (!value && options.required) {
-    return options.t('validation:required')
-  }
+export type UploadFieldValidation = Validate<unknown, unknown, unknown, UploadField>
 
-  if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
-    const idField = options?.config?.collections
-      ?.find((collection) => collection.slug === options.relationTo)
-      ?.fields?.find((field) => fieldAffectsData(field) && field.name === 'id')
+export type UploadFieldManyValidation = Validate<unknown[], unknown, unknown, UploadField>
 
-    const type = getIDType(idField, options?.payload?.db?.defaultIDType)
+export type UploadFieldSingleValidation = Validate<unknown, unknown, unknown, UploadField>
 
-    if (!isValidID(value, type)) {
-      return options.t('validation:validUploadID')
-    }
-  }
+export const upload: UploadFieldValidation = async (value, options) => {
+  const {
+    maxRows,
+    minRows,
+    relationTo,
+    req: { payload, t },
+    required,
+  } = options
 
-  return validateFilterOptions(value, options)
-}
-
-export const relationship: Validate<unknown, unknown, RelationshipField> = async (
-  value: RelationshipValue,
-  options,
-) => {
-  const { config, maxRows, minRows, payload, relationTo, required, t } = options
-
-  if ((!value || (Array.isArray(value) && value.length === 0)) && required) {
+  if (
+    ((!value && typeof value !== 'number') || (Array.isArray(value) && value.length === 0)) &&
+    required
+  ) {
     return t('validation:required')
   }
 
   if (Array.isArray(value) && value.length > 0) {
     if (minRows && value.length < minRows) {
-      return t('validation:lessThanMin', { label: t('rows'), min: minRows, value: value.length })
+      return t('validation:lessThanMin', {
+        label: t('general:rows'),
+        min: minRows,
+        value: value.length,
+      })
     }
 
     if (maxRows && value.length > maxRows) {
-      return t('validation:greaterThanMax', { label: t('rows'), max: maxRows, value: value.length })
+      return t('validation:greaterThanMax', {
+        label: t('general:rows'),
+        max: maxRows,
+        value: value.length,
+      })
     }
   }
 
-  if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
+  if (typeof value !== 'undefined' && value !== null) {
     const values = Array.isArray(value) ? value : [value]
 
     const invalidRelationships = values.filter((val) => {
@@ -389,7 +682,7 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         collectionSlug = relationTo
 
         // custom id
-        if (val) {
+        if (val || typeof val === 'number') {
           requestedID = val
         }
       }
@@ -399,15 +692,14 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         requestedID = val.value
       }
 
-      if (requestedID === null) return false
+      if (requestedID === null) {
+        return false
+      }
 
-      const idField = config?.collections
-        ?.find((collection) => collection.slug === collectionSlug)
-        ?.fields?.find((field) => fieldAffectsData(field) && field.name === 'id')
+      const idType =
+        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
 
-      const type = getIDType(idField, payload?.db?.defaultIDType)
-
-      return !isValidID(requestedID, type)
+      return !isValidID(requestedID, idType)
     })
 
     if (invalidRelationships.length > 0) {
@@ -422,9 +714,113 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
   return validateFilterOptions(value, options)
 }
 
-export const select: Validate<unknown, unknown, SelectField> = (
+export type RelationshipFieldValidation = Validate<
+  RelationshipValue,
+  unknown,
+  unknown,
+  RelationshipField
+>
+
+export type RelationshipFieldManyValidation = Validate<
+  RelationshipValueMany,
+  unknown,
+  unknown,
+  RelationshipField
+>
+
+export type RelationshipFieldSingleValidation = Validate<
+  RelationshipValueSingle,
+  unknown,
+  unknown,
+  RelationshipField
+>
+
+export const relationship: RelationshipFieldValidation = async (value, options) => {
+  const {
+    maxRows,
+    minRows,
+    relationTo,
+    req: { payload, t },
+    required,
+  } = options
+
+  if (
+    ((!value && typeof value !== 'number') || (Array.isArray(value) && value.length === 0)) &&
+    required
+  ) {
+    return t('validation:required')
+  }
+
+  if (Array.isArray(value) && value.length > 0) {
+    if (minRows && value.length < minRows) {
+      return t('validation:lessThanMin', {
+        label: t('general:rows'),
+        min: minRows,
+        value: value.length,
+      })
+    }
+
+    if (maxRows && value.length > maxRows) {
+      return t('validation:greaterThanMax', {
+        label: t('general:rows'),
+        max: maxRows,
+        value: value.length,
+      })
+    }
+  }
+
+  if (typeof value !== 'undefined' && value !== null) {
+    const values = Array.isArray(value) ? value : [value]
+
+    const invalidRelationships = values.filter((val) => {
+      let collectionSlug: string
+      let requestedID
+
+      if (typeof relationTo === 'string') {
+        collectionSlug = relationTo
+
+        // custom id
+        if (val || typeof val === 'number') {
+          requestedID = val
+        }
+      }
+
+      if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
+        collectionSlug = val.relationTo
+        requestedID = val.value
+      }
+
+      if (requestedID === null) {
+        return false
+      }
+
+      const idType =
+        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
+
+      return !isValidID(requestedID, idType)
+    })
+
+    if (invalidRelationships.length > 0) {
+      return `This relationship field has the following invalid relationships: ${invalidRelationships
+        .map((err, invalid) => {
+          return `${err} ${JSON.stringify(invalid)}`
+        })
+        .join(', ')}`
+    }
+  }
+
+  return validateFilterOptions(value, options)
+}
+
+export type SelectFieldValidation = Validate<string | string[], unknown, unknown, SelectField>
+
+export type SelectFieldManyValidation = Validate<string[], unknown, unknown, SelectField>
+
+export type SelectFieldSingleValidation = Validate<string, unknown, unknown, SelectField>
+
+export const select: SelectFieldValidation = (
   value,
-  { hasMany, options, required, t },
+  { hasMany, options, req: { t }, required },
 ) => {
   if (
     Array.isArray(value) &&
@@ -459,7 +855,9 @@ export const select: Validate<unknown, unknown, SelectField> = (
   return true
 }
 
-export const radio: Validate<unknown, unknown, RadioField> = (value, { options, required, t }) => {
+export type RadioFieldValidation = Validate<unknown, unknown, unknown, RadioField>
+
+export const radio: RadioFieldValidation = (value, { options, req: { t }, required }) => {
   if (value) {
     const valueMatchesOption = options.some(
       (option) => option === value || (typeof option !== 'string' && option.value === value),
@@ -470,10 +868,14 @@ export const radio: Validate<unknown, unknown, RadioField> = (value, { options, 
   return required ? t('validation:required') : true
 }
 
-export const point: Validate<unknown, unknown, PointField> = (
-  value: [number | string, number | string] = ['', ''],
-  { required, t },
-) => {
+export type PointFieldValidation = Validate<
+  [number | string, number | string],
+  unknown,
+  unknown,
+  PointField
+>
+
+export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
   const lng = parseFloat(String(value[0]))
   const lat = parseFloat(String(value[1]))
   if (
@@ -493,11 +895,17 @@ export const point: Validate<unknown, unknown, PointField> = (
   return true
 }
 
-export default {
+/**
+ * Built-in field validations used by Payload
+ *
+ * These can be re-used in custom validations
+ */
+export const validations = {
   array,
   blocks,
   checkbox,
   code,
+  confirmPassword,
   date,
   email,
   json,

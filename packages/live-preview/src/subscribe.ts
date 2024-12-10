@@ -1,4 +1,4 @@
-import { handleMessage } from '.'
+import { handleMessage } from './handleMessage.js'
 
 export const subscribe = <T>(args: {
   apiRoute?: string
@@ -6,11 +6,18 @@ export const subscribe = <T>(args: {
   depth?: number
   initialData: T
   serverURL: string
-}): ((event: MessageEvent) => void) => {
+}): ((event: MessageEvent) => Promise<void> | void) => {
   const { apiRoute, callback, depth, initialData, serverURL } = args
 
   const onMessage = async (event: MessageEvent) => {
-    const mergedData = await handleMessage<T>({ apiRoute, depth, event, initialData, serverURL })
+    const mergedData = await handleMessage<T>({
+      apiRoute,
+      depth,
+      event,
+      initialData,
+      serverURL,
+    })
+
     callback(mergedData)
   }
 

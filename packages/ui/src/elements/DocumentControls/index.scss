@@ -1,0 +1,239 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .doc-controls {
+    @include blur-bg-light;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+
+    &__divider {
+      content: '';
+      display: block;
+      position: absolute;
+      height: 1px;
+      background: var(--theme-elevation-100);
+      width: 100%;
+      left: 0;
+      top: 100%;
+    }
+
+    &__wrapper {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: space-between;
+      gap: var(--base);
+      padding-bottom: 1px;
+      z-index: 4;
+      height: var(--doc-controls-height);
+    }
+
+    &__content {
+      display: flex;
+      align-items: center;
+      flex-grow: 1;
+      overflow: hidden;
+      padding: base(0.8) 0;
+    }
+
+    &__meta {
+      flex-grow: 1;
+      display: flex;
+      list-style: none;
+      padding: 0;
+      gap: var(--base);
+      margin: 0;
+      width: 100%;
+
+      & button {
+        margin: 0;
+      }
+    }
+
+    &__locked-controls.locked {
+      position: unset;
+
+      .tooltip {
+        top: calc(var(--base) * -0.5);
+      }
+    }
+
+    &__list-item {
+      display: flex;
+      align-items: center;
+      margin: 0;
+    }
+
+    &__value-wrap {
+      overflow: hidden;
+    }
+
+    &__value {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin: 0;
+      font-weight: 600;
+      line-height: base(1.2);
+    }
+
+    &__label {
+      color: var(--theme-elevation-500);
+      white-space: nowrap;
+      margin: 0;
+    }
+
+    &__controls-wrapper {
+      --controls-gap: calc(var(--base) / 2);
+      --dot-button-width: calc(var(--base) * 2);
+      display: flex;
+      align-items: center;
+      margin: 0;
+      gap: var(--controls-gap);
+      position: relative;
+    }
+
+    &__controls {
+      display: flex;
+      align-items: center;
+      margin: 0;
+      gap: calc(var(--base) / 2);
+
+      button {
+        margin: 0;
+        white-space: nowrap;
+      }
+    }
+
+    &__dots {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 2px;
+      border: 1px solid var(--theme-elevation-100);
+      border-radius: $style-radius-m;
+      height: calc(var(--base) * 1.6);
+      width: calc(var(--base) * 1.6);
+
+      &:hover {
+        border: 1px solid var(--theme-elevation-500);
+        background-color: var(--theme-elevation-100);
+      }
+
+      > div {
+        width: 3px;
+        height: 3px;
+        border-radius: 100%;
+        background-color: currentColor;
+      }
+    }
+
+    &__popup {
+      position: relative;
+    }
+
+    .popup--active {
+      .doc-controls {
+        &__dots {
+          border: 1px solid var(--theme-elevation-500);
+          background-color: var(--theme-elevation-100);
+        }
+      }
+    }
+
+    .popup__trigger-wrap {
+      display: flex;
+    }
+
+    @include mid-break {
+      // On mobile, only stick the controls to the top
+      // The timestamps and meta can scroll past
+      // The same container needs to the sticky, though
+      // So we use a static height with a negative top equal to the meta height plus top padding
+      top: base(-2.8);
+      padding-right: 0;
+      padding-left: 0;
+
+      &__wrapper {
+        flex-direction: column;
+        gap: 0;
+        height: unset;
+      }
+
+      &__content {
+        width: 100%;
+        overflow: auto;
+        padding-inline: base(2);
+        // this container has a fixed height
+        // this means the scrollbar (when present) overlaps the content
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+
+      &__meta {
+        width: auto;
+        gap: calc(var(--base) / 2);
+
+        &::after {
+          content: '';
+          display: block;
+          position: absolute;
+          right: 0;
+          width: base(0.8);
+          height: var(--base);
+          background: linear-gradient(to right, transparent, var(--theme-bg));
+          flex-shrink: 0;
+          z-index: 1111;
+          pointer-events: none;
+        }
+      }
+
+      &__controls-wrapper {
+        background-color: var(--theme-bg);
+        width: 100%;
+        transform: translate3d(0, 0, 0);
+        padding-right: var(--gutter-h);
+        justify-content: space-between;
+        height: var(--doc-controls-height);
+        border-top: 1px solid var(--theme-elevation-100);
+      }
+
+      &__controls {
+        padding-left: var(--gutter-h);
+        overflow: auto;
+
+        // do not show scrollbar because the parent container has a static height
+        // this container has a gradient overlay as visual indication of `overflow: scroll`
+        &::-webkit-scrollbar {
+          display: none;
+        }
+
+        &::after {
+          content: '';
+          display: block;
+          position: sticky;
+          right: 0;
+          width: calc(var(--base) * 2);
+          height: calc(var(--base) * 1.5);
+          background: linear-gradient(to right, transparent, var(--theme-bg));
+          flex-shrink: 0;
+          z-index: 1111;
+          pointer-events: none;
+        }
+      }
+    }
+
+    @include small-break {
+      &__content {
+        padding-inline: base(0.8);
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .bulk-upload--actions-bar {
+    display: flex;
+    padding-inline: var(--gutter-h);
+    align-items: center;
+    border-bottom: 1px solid var(--theme-border-color);
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    background-color: var(--theme-bg);
+    height: var(--doc-controls-height);
+
+    &__navigation {
+      display: flex;
+      gap: var(--base);
+      align-items: center;
+      width: 100%;
+    }
+
+    &__locationText {
+      font-variant-numeric: tabular-nums;
+      margin: 0;
+    }
+
+    &__controls {
+      display: flex;
+      gap: calc(var(--base) / 2);
+
+      .btn {
+        background-color: var(--theme-elevation-100);
+        width: calc(var(--base) * 1.2);
+        height: calc(var(--base) * 1.2);
+
+        svg {
+          max-width: 1rem;
+        }
+
+        &:hover {
+          background-color: var(--theme-elevation-200);
+        }
+
+        &__label {
+          display: flex;
+        }
+      }
+    }
+
+    &__buttons {
+      display: flex;
+      gap: var(--base);
+      margin-left: auto;
+    }
+
+    @include mid-break {
+      &__navigation {
+        justify-content: space-between;
+      }
+      &__saveButtons {
+        display: none;
+      }
+    }
+  }
+}

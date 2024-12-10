@@ -1,33 +1,31 @@
-import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
-import { APIError } from 'payload/errors'
+import { APIError } from 'payload'
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types'
+import type { StripePluginConfig } from '../types.js'
 
-import { deepen } from '../utilities/deepen'
+import { deepen } from '../utilities/deepen.js'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+// api version can only be the latest, stripe recommends ts ignoring it
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
-type HookArgsWithCustomCollection = Omit<
-  Parameters<CollectionBeforeChangeHook>[0],
-  'collection'
-> & {
+type HookArgsWithCustomCollection = {
   collection: CollectionConfig
-}
+} & Omit<Parameters<CollectionBeforeChangeHook>[0], 'collection'>
 
 export type CollectionBeforeChangeHookWithArgs = (
-  args: HookArgsWithCustomCollection & {
+  args: {
     collection?: CollectionConfig
-    stripeConfig?: StripeConfig
-  },
-) => void
+    pluginConfig?: StripePluginConfig
+  } & HookArgsWithCustomCollection,
+) => Promise<Partial<any>>
 
 export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async (args) => {
-  const { collection, data, operation, originalDoc, req, stripeConfig } = args
+  const { collection, data, operation, originalDoc, pluginConfig, req } = args
 
-  const { logs, sync } = stripeConfig || {}
+  const { logs, sync } = pluginConfig || {}
 
   const { payload } = req
 
@@ -51,17 +49,21 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
 
         syncedFields = deepen(syncedFields)
 
-        if (logs)
+        if (logs) {
           payload.logger.info(
             `A '${collectionSlug}' document has changed in Payload with ID: '${originalDoc?._id}', syncing with Stripe...`,
           )
+        }
 
         if (!data.stripeID) {
           // NOTE: the "beforeValidate" hook populates this
-          if (logs) payload.logger.error(`- There is no Stripe ID for this document, skipping.`)
+          if (logs) {
+            payload.logger.error(`- There is no Stripe ID for this document, skipping.`)
+          }
         } else {
-          if (logs)
+          if (logs) {
             payload.logger.info(`- Syncing to Stripe resource with ID: '${data.stripeID}'...`)
+          }
 
           try {
             const stripeResource = await stripe?.[syncConfig?.stripeResourceType]?.update(
@@ -69,10 +71,11 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
               syncedFields,
             )
 
-            if (logs)
+            if (logs) {
               payload.logger.info(
                 `✅ Successfully synced Stripe resource with ID: '${stripeResource.id}'.`,
               )
+            }
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : error
             throw new APIError(`Failed to sync document with ID: '${data.id}' to Stripe: ${msg}`)

@@ -1,9 +1,9 @@
-import type { Field } from '../fields/config/types'
+import type { Field } from '../fields/config/types.js'
 
-import { fieldAffectsData } from '../fields/config/types'
-import APIError from './APIError'
+import { fieldAffectsData } from '../fields/config/types.js'
+import { APIError } from './APIError.js'
 
-class MissingFieldType extends APIError {
+export class MissingFieldType extends APIError {
   constructor(field: Field) {
     super(
       `Field${
@@ -12,5 +12,3 @@ class MissingFieldType extends APIError {
     )
   }
 }
-
-export default MissingFieldType

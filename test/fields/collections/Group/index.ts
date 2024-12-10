@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { groupFieldsSlug } from '../../slugs'
+import { groupFieldsSlug } from '../../slugs.js'
 
 export const groupDefaultValue = 'set from parent'
 export const groupDefaultChild = 'child takes priority'
@@ -59,6 +59,35 @@ const GroupFields: CollectionConfig = {
       ],
     },
     {
+      name: 'arrayOfGroups',
+      type: 'array',
+      defaultValue: [
+        {
+          groupItem: {
+            text: 'Hello world',
+          },
+        },
+      ],
+      fields: [
+        {
+          name: 'groupItem',
+          type: 'group',
+          fields: [{ name: 'text', type: 'text' }],
+        },
+      ],
+    },
+    {
+      name: 'localizedGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+      localized: true,
+    },
+    {
       name: 'potentiallyEmptyGroup',
       type: 'group',
       fields: [
@@ -111,7 +140,6 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
-
     {
       type: 'tabs',
       tabs: [
@@ -163,6 +191,113 @@ const GroupFields: CollectionConfig = {
               ],
             },
           ],
+        },
+      ],
+    },
+    {
+      name: 'camelCaseGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              type: 'text',
+              name: 'text',
+              localized: true,
+            },
+            {
+              type: 'array',
+              name: 'array',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupArr',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              type: 'text',
+              name: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupSelect',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'select',
+          hasMany: true,
+          options: ['one', 'two'],
+          name: 'select',
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'email-fields',
+          name: 'email',
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupManyRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'email-fields',
+          name: 'email',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupPolyRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: ['email-fields'],
+          name: 'email',
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupPolyHasManyRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: ['email-fields'],
+          name: 'email',
+          hasMany: true,
         },
       ],
     },

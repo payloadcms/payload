@@ -1,0 +1,16 @@
+@use '../shared.scss';
+
+.wrap {
+  position: relative;
+  margin-bottom: var(--base);
+}
+
+.textarea {
+  @include shared.formInput;
+  height: unset;
+}
+
+.label {
+  margin-bottom: 10px;
+  display: block;
+}

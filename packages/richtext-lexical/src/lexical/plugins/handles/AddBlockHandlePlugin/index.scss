@@ -1,0 +1,35 @@
+@import '../../../../scss/styles.scss';
+
+@layer payload-default {
+  .add-block-menu {
+    all: unset; // reset all default button styles
+    border-radius: $style-radius-m;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    will-change: transform;
+
+    &:hover {
+      background-color: var(--theme-elevation-100);
+      .icon {
+        opacity: 1;
+      }
+    }
+
+    .icon {
+      width: 18px;
+      height: 24px;
+      opacity: 0.3;
+      background-image: url(../../../ui/icons/Add/index.svg);
+    }
+
+    html[data-theme='dark'] & {
+      .icon {
+        background-image: url(../../../ui/icons/Add/light.svg);
+      }
+    }
+  }
+}

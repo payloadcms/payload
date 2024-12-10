@@ -1,0 +1,169 @@
+{
+  "name": "@payloadcms/next",
+  "version": "3.5.0",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/next"
+  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./withPayload": {
+      "import": "./src/withPayload.js",
+      "default": "./src/withPayload.js"
+    },
+    "./layouts": {
+      "import": "./src/exports/layouts.ts",
+      "types": "./src/exports/layouts.ts",
+      "default": "./src/exports/layouts.ts"
+    },
+    "./routes": {
+      "import": "./src/exports/routes.ts",
+      "types": "./src/exports/routes.ts",
+      "default": "./src/exports/routes.ts"
+    },
+    "./templates": {
+      "import": "./src/exports/templates.ts",
+      "types": "./src/exports/templates.ts",
+      "default": "./src/exports/templates.ts"
+    },
+    "./utilities": {
+      "import": "./src/exports/utilities.ts",
+      "types": "./src/exports/utilities.ts",
+      "default": "./src/exports/utilities.ts"
+    },
+    "./views": {
+      "import": "./src/exports/views.ts",
+      "types": "./src/exports/views.ts",
+      "default": "./src/exports/views.ts"
+    }
+  },
+  "main": "./src/index.js",
+  "types": "./src/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm build:reactcompiler",
+    "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
+    "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs --strip-leading-paths",
+    "build:esbuild": "node bundleScss.js",
+    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild  && pnpm build:cjs",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:esbuild",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
+  },
+  "lint-staged": {
+    "**/package.json": "sort-package-json",
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ]
+  },
+  "dependencies": {
+    "@dnd-kit/core": "6.0.8",
+    "@payloadcms/graphql": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "busboy": "^1.6.0",
+    "file-type": "19.3.0",
+    "graphql-http": "^1.22.0",
+    "graphql-playground-html": "1.6.30",
+    "http-status": "1.6.2",
+    "path-to-regexp": "^6.2.1",
+    "qs-esm": "7.0.2",
+    "react-diff-viewer-continued": "3.2.6",
+    "sass": "1.77.4",
+    "sonner": "^1.7.0",
+    "uuid": "10.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.25.9",
+    "@babel/core": "7.26.0",
+    "@babel/preset-env": "7.26.0",
+    "@babel/preset-react": "7.25.9",
+    "@babel/preset-typescript": "7.26.0",
+    "@next/eslint-plugin-next": "15.0.4",
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/busboy": "1.5.4",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
+    "@types/uuid": "10.0.0",
+    "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
+    "esbuild": "0.24.0",
+    "esbuild-sass-plugin": "3.3.1",
+    "eslint-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
+    "payload": "workspace:*",
+    "swc-plugin-transform-remove-imports": "2.0.0"
+  },
+  "peerDependencies": {
+    "graphql": "^16.8.1",
+    "next": "^15.0.0",
+    "payload": "workspace:*"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
+  },
+  "publishConfig": {
+    "exports": {
+      "./css": {
+        "import": "./dist/prod/styles.css",
+        "default": "./dist/prod/styles.css"
+      },
+      "./withPayload": {
+        "import": "./dist/withPayload.js",
+        "require": "./dist/cjs/withPayload.cjs",
+        "default": "./dist/withPayload.js"
+      },
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts",
+        "default": "./dist/exports/layouts.js"
+      },
+      "./routes": {
+        "import": "./dist/exports/routes.js",
+        "types": "./dist/exports/routes.d.ts",
+        "default": "./dist/exports/routes.js"
+      },
+      "./templates": {
+        "import": "./dist/exports/templates.js",
+        "types": "./dist/exports/templates.d.ts",
+        "default": "./dist/exports/templates.js"
+      },
+      "./utilities": {
+        "import": "./dist/exports/utilities.js",
+        "types": "./dist/exports/utilities.d.ts",
+        "default": "./dist/exports/utilities.js"
+      },
+      "./views": {
+        "import": "./dist/exports/views.js",
+        "types": "./dist/exports/views.d.ts",
+        "default": "./dist/exports/views.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/index.js"
+  }
+}

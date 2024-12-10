@@ -1,16 +1,11 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-await-in-loop */
 import type { FilterQuery } from 'mongoose'
-import type { Payload } from 'payload'
-import type { Operator, Where } from 'payload/types'
-import type { Field } from 'payload/types'
+import type { FlattenedField, Operator, Payload, Where } from 'payload'
 
-import deepmerge from 'deepmerge'
-import { validOperators } from 'payload/types'
-import { combineMerge } from 'payload/utilities'
+import { deepMergeWithCombinedArrays } from 'payload'
+import { validOperators } from 'payload/shared'
 
-import { buildAndOrConditions } from './buildAndOrConditions'
-import { buildSearchParam } from './buildSearchParams'
+import { buildAndOrConditions } from './buildAndOrConditions.js'
+import { buildSearchParam } from './buildSearchParams.js'
 
 export async function parseParams({
   collectionSlug,
@@ -21,7 +16,7 @@ export async function parseParams({
   where,
 }: {
   collectionSlug?: string
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   locale: string
   payload: Payload
@@ -48,7 +43,9 @@ export async function parseParams({
           payload,
           where: condition,
         })
-        if (builtConditions.length > 0) result[conditionOperator] = builtConditions
+        if (builtConditions.length > 0) {
+          result[conditionOperator] = builtConditions
+        }
       } else {
         // It's a path - and there can be multiple comparisons on a single path.
         // For example - title like 'test' and title not equal to 'tester'
@@ -74,7 +71,10 @@ export async function parseParams({
                   [searchParam.path]: searchParam.value,
                 }
               } else if (typeof searchParam?.value === 'object') {
-                result = deepmerge(result, searchParam.value, { arrayMerge: combineMerge })
+                result = deepMergeWithCombinedArrays(result, searchParam.value, {
+                  // dont clone Types.ObjectIDs
+                  clone: false,
+                })
               }
             }
           }

@@ -1,14 +1,27 @@
-import type { ValidateOptions } from './config/types'
+import { jest } from '@jest/globals'
 
-import { number, password, point, relationship, select, text, textarea } from './validations'
+import type { ValidateOptions } from './config/types.js'
+
+import { number, password, point, relationship, select, text, textarea } from './validations.js'
 
 const t = jest.fn((string) => string)
 
 let options: ValidateOptions<any, any, any> = {
   data: undefined,
   operation: 'create',
+  req: {
+    context: {},
+    payload: {
+      config: {
+        db: {
+          defaultIDType: 'text',
+          init: () => null,
+        },
+      },
+    },
+    t,
+  },
   siblingData: undefined,
-  t,
 }
 
 describe('Field Validations', () => {
@@ -46,6 +59,16 @@ describe('Field Validations', () => {
     it('should validate minLength with no value', () => {
       const val = undefined
       const result = text(val, { ...options, minLength: 10 })
+      expect(result).toBe(true)
+    })
+    it('should validate an array of texts', async () => {
+      const val = ['test']
+      const result = text(val, { ...options, hasMany: true })
+      expect(result).toBe(true)
+    })
+    it('should handle required array of texts', async () => {
+      const val = ['test']
+      const result = text(val, { ...options, hasMany: true, required: true })
       expect(result).toBe(true)
     })
   })
@@ -194,28 +217,32 @@ describe('Field Validations', () => {
 
   describe('relationship', () => {
     const relationCollection = {
+      slug: 'relation',
       fields: [
         {
           name: 'id',
           type: 'text',
         },
       ],
-      slug: 'relation',
     }
 
     const relationshipOptions = {
       ...options,
-      config: {
-        collections: [relationCollection],
-      },
-      payload: {
-        collections: {
-          relation: {
-            config: relationCollection,
+      relationTo: 'relation',
+      req: {
+        ...options.req,
+        payload: {
+          ...options.req.payload,
+          collections: {
+            relation: {
+              config: relationCollection,
+            },
+          },
+          config: {
+            collections: [relationCollection],
           },
         },
       },
-      relationTo: 'relation',
     }
     it('should handle required', async () => {
       const val = undefined
@@ -266,8 +293,8 @@ describe('Field Validations', () => {
   describe('select', () => {
     const selectOptions = {
       ...options,
-      options: ['one', 'two', 'three'],
       type: 'select',
+      options: ['one', 'two', 'three'],
     }
     const optionsRequired = {
       ...selectOptions,

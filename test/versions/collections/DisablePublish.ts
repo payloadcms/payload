@@ -1,14 +1,15 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { disablePublishSlug } from '../slugs'
+import { disablePublishSlug } from '../slugs.js'
 
 const DisablePublish: CollectionConfig = {
+  slug: disablePublishSlug,
   access: {
     create: ({ data }) => {
-      return data._status !== 'published'
+      return data?._status !== 'published'
     },
     update: ({ data }) => {
-      return data._status !== 'published'
+      return data?._status !== 'published'
     },
   },
   admin: {
@@ -17,11 +18,10 @@ const DisablePublish: CollectionConfig = {
   fields: [
     {
       name: 'title',
-      required: true,
       type: 'text',
+      required: true,
     },
   ],
-  slug: disablePublishSlug,
   versions: {
     drafts: true,
   },

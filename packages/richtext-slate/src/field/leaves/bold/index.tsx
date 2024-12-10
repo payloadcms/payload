@@ -1,17 +1,7 @@
-import React from 'react'
+import type { RichTextCustomLeaf } from '../../../types.js'
 
-import BoldIcon from '../../icons/Bold'
-import LeafButton from '../Button'
-
-const Bold = ({ attributes, children }) => <strong {...attributes}>{children}</strong>
-
-const bold = {
-  Button: () => (
-    <LeafButton format="bold">
-      <BoldIcon />
-    </LeafButton>
-  ),
-  Leaf: Bold,
+export const bold: RichTextCustomLeaf = {
+  name: 'bold',
+  Button: '@payloadcms/richtext-slate/client#BoldLeafButton',
+  Leaf: '@payloadcms/richtext-slate/client#BoldLeaf',
 }
-
-export default bold

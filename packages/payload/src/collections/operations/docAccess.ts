@@ -1,26 +1,24 @@
-import type { CollectionPermission } from '../../auth'
-import type { PayloadRequest } from '../../express/types'
-import type { AllOperations } from '../../types'
+import type { SanitizedCollectionPermission } from '../../auth/index.js'
+import type { AllOperations, PayloadRequest } from '../../types/index.js'
+import type { Collection } from '../config/types.js'
 
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { getEntityPolicies } from '../../utilities/getEntityPolicies'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
+import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizePermissions } from '../../utilities/sanitizePermissions.js'
 
 const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
 
 type Arguments = {
+  collection: Collection
   id: string
   req: PayloadRequest
 }
 
-export async function docAccess(args: Arguments): Promise<CollectionPermission> {
+export async function docAccessOperation(args: Arguments): Promise<SanitizedCollectionPermission> {
   const {
     id,
+    collection: { config },
     req,
-    req: {
-      collection: { config },
-    },
   } = args
 
   const collectionOperations = [...allOperations]
@@ -38,19 +36,21 @@ export async function docAccess(args: Arguments): Promise<CollectionPermission> 
   }
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     const result = await getEntityPolicies({
       id,
+      type: 'collection',
       entity: config,
       operations: collectionOperations,
       req,
-      type: 'collection',
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    const sanitizedPermissions = sanitizePermissions({
+      collections: {
+        [config.slug]: result,
+      },
+    })
 
-    return result
+    return sanitizedPermissions?.collections?.[config.slug]
   } catch (e: unknown) {
     await killTransaction(req)
     throw e

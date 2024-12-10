@@ -1,22 +1,14 @@
-import React from 'react'
+import type { RichTextCustomElement } from '../../../types.js'
 
-import OLIcon from '../../icons/OrderedList'
-import ListButton from '../ListButton'
-import './index.scss'
+const name = 'ol'
 
-const OL = ({ attributes, children }) => (
-  <ol className="rich-text-ol" {...attributes}>
-    {children}
-  </ol>
-)
-
-const ol = {
-  Button: () => (
-    <ListButton format="ol">
-      <OLIcon />
-    </ListButton>
-  ),
-  Element: OL,
+export const ol: RichTextCustomElement = {
+  name,
+  Button: {
+    clientProps: {
+      format: name,
+    },
+    path: '@payloadcms/richtext-slate/client#OLElementButton',
+  },
+  Element: '@payloadcms/richtext-slate/client#OrderedListElement',
 }
-
-export default ol

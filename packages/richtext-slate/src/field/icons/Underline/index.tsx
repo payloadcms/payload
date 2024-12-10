@@ -1,6 +1,6 @@
 import React from 'react'
 
-const UnderlineIcon: React.FC = () => (
+export const UnderlineIcon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="graphic underline-icon"
@@ -16,5 +16,3 @@ const UnderlineIcon: React.FC = () => (
     />
   </svg>
 )
-
-export default UnderlineIcon

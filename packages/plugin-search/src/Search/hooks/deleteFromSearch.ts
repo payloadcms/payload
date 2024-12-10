@@ -1,34 +1,41 @@
-import type { CollectionAfterDeleteHook } from 'payload/types'
+import type { DeleteFromSearch } from '../../types.js'
 
-const deleteFromSearch: CollectionAfterDeleteHook = ({ doc, req: { payload } }) => {
+export const deleteFromSearch: DeleteFromSearch = async ({
+  collection,
+  doc,
+  pluginConfig,
+  req: { payload },
+  req,
+}) => {
+  const searchSlug = pluginConfig?.searchOverrides?.slug || 'search'
   try {
-    const deleteSearchDoc = async (): Promise<any> => {
-      const searchDocQuery = await payload.find({
-        collection: 'search',
-        depth: 0,
-        where: {
-          'doc.value': {
-            equals: doc.id,
+    const searchDocQuery = await payload.find({
+      collection: searchSlug,
+      depth: 0,
+      req,
+      where: {
+        doc: {
+          equals: {
+            relationTo: collection.slug,
+            value: doc.id,
           },
         },
+      },
+    })
+
+    if (searchDocQuery?.docs?.[0]) {
+      await payload.delete({
+        id: searchDocQuery?.docs?.[0]?.id,
+        collection: searchSlug,
+        req,
       })
-
-      if (searchDocQuery?.docs?.[0]) {
-        payload.delete({
-          id: searchDocQuery?.docs?.[0]?.id,
-          collection: 'search',
-        })
-      }
     }
-
-    deleteSearchDoc()
   } catch (err: unknown) {
     payload.logger.error({
-      err: `Error deleting search doc: ${err}`,
+      err,
+      msg: `Error deleting ${searchSlug} doc.`,
     })
   }
 
   return doc
 }
-
-export default deleteFromSearch

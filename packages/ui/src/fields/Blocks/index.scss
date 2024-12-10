@@ -1,0 +1,121 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .blocks-field {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 2);
+
+    &__header {
+      h3 {
+        margin: 0;
+      }
+    }
+
+    &__header-wrap {
+      display: flex;
+      align-items: flex-end;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    &__heading-with-error {
+      display: flex;
+      align-items: center;
+      gap: base(0.5);
+    }
+
+    &--has-no-error {
+      > .array-field__header .array-field__heading-with-error {
+        color: var(--theme-text);
+      }
+    }
+
+    &--has-error {
+      > .array-field__header {
+        color: var(--theme-error-500);
+      }
+    }
+
+    &__error-pill {
+      align-self: center;
+    }
+
+    &__header-actions {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+
+    &__header-action {
+      @extend %btn-reset;
+      cursor: pointer;
+      margin-left: base(0.5);
+
+      &:hover,
+      &:focus-visible {
+        text-decoration: underline;
+      }
+    }
+
+    &__block-header {
+      display: inline-flex;
+      max-width: 100%;
+      width: 100%;
+      overflow: hidden;
+      gap: base(0.375);
+    }
+
+    &__block-number {
+      flex-shrink: 0;
+    }
+
+    &__block-pill {
+      flex-shrink: 0;
+      display: block;
+      line-height: unset;
+    }
+
+    &__rows {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) / 2);
+    }
+
+    &__drawer-toggler {
+      background-color: transparent;
+      margin: 0;
+      padding: 0;
+      border: none;
+      align-self: flex-start;
+
+      .btn {
+        color: var(--theme-elevation-400);
+        margin: 0;
+
+        &:hover {
+          color: var(--theme-elevation-800);
+        }
+      }
+    }
+  }
+
+  html[data-theme='light'] {
+    .blocks-field--has-error {
+      .section-title__input,
+      .blocks-field__heading-with-error {
+        color: var(--theme-error-750);
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .blocks-field--has-error {
+      .section-title__input,
+      .blocks-field__heading-with-error {
+        color: var(--theme-error-500);
+      }
+    }
+  }
+}

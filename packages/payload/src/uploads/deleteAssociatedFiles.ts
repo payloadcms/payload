@@ -1,14 +1,12 @@
-import type { TFunction } from 'i18next'
-
 import fs from 'fs'
-import path from 'path'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { SanitizedConfig } from '../config/types'
-import type { FileData, FileToSave } from './types'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { PayloadRequest } from '../types/index.js'
+import type { FileData, FileToSave } from './types.js'
 
-import { ErrorDeletingFile } from '../errors'
-import fileExists from './fileExists'
+import { ErrorDeletingFile } from '../errors/index.js'
+import fileExists from './fileExists.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -16,30 +14,30 @@ type Args = {
   doc: Record<string, unknown>
   files?: FileToSave[]
   overrideDelete: boolean
-  t: TFunction
+  req: PayloadRequest
 }
 
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   collectionConfig,
-  config,
   doc,
   files = [],
   overrideDelete,
-  t,
+  req,
 }) => {
-  if (!collectionConfig.upload) return
+  if (!collectionConfig.upload) {
+    return
+  }
   if (overrideDelete || files.length > 0) {
-    const { staticDir } = collectionConfig.upload
-    const staticPath = path.resolve(config.paths.configDir, staticDir)
+    const { staticDir: staticPath } = collectionConfig.upload
 
-    const fileToDelete = `${staticPath}/${doc.filename}`
+    const fileToDelete = `${staticPath}/${doc.filename as string}`
 
     try {
       if (await fileExists(fileToDelete)) {
         fs.unlinkSync(fileToDelete)
       }
     } catch (err) {
-      throw new ErrorDeletingFile(t)
+      throw new ErrorDeletingFile(req.t)
     }
 
     if (doc.sizes) {
@@ -47,16 +45,15 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
       // Since forEach will not wait until unlink is finished it could
       // happen that two operations will try to delete the same file.
       // To avoid this it is recommended to use "sync" instead
-      // eslint-disable-next-line no-restricted-syntax
+
       for (const size of sizes) {
         const sizeToDelete = `${staticPath}/${size.filename}`
         try {
-          // eslint-disable-next-line no-await-in-loop
           if (await fileExists(sizeToDelete)) {
             fs.unlinkSync(sizeToDelete)
           }
         } catch (err) {
-          throw new ErrorDeletingFile(t)
+          throw new ErrorDeletingFile(req.t)
         }
       }
     }

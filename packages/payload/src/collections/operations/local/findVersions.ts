@@ -1,60 +1,60 @@
-import type { GeneratedTypes } from '../../../'
-import type { PaginatedDocs } from '../../../database/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Document, Where } from '../../../types'
-import type { TypeWithVersion } from '../../../versions/types'
+import type { PaginatedDocs } from '../../../database/types.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  Sort,
+  Where,
+} from '../../../types/index.js'
+import type { TypeWithVersion } from '../../../versions/types.js'
+import type { DataFromCollectionSlug } from '../../config/types.js'
 
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import { getDataLoader } from '../../dataloader'
-import findVersions from '../findVersions'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { findVersionsOperation } from '../findVersions.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type Options<TSlug extends CollectionSlug> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: false | TypedLocale
   limit?: number
-  locale?: string
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   page?: number
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
-  sort?: string
+  sort?: Sort
   user?: Document
   where?: Where
 }
 
-export default async function findVersionsLocal<T extends keyof GeneratedTypes['collections']>(
+export default async function findVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['collections'][T]>>> {
+  options: Options<TSlug>,
+): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<TSlug>>>> {
   const {
     collection: collectionSlug,
-    context,
     depth,
-    fallbackLocale,
     limit,
-    locale = null,
     overrideAccess = true,
     page,
-    req: incomingReq,
+    populate,
+    select,
     showHiddenFields,
     sort,
-    user,
     where,
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -62,28 +62,15 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     )
   }
 
-  const i18n = i18nInit(payload.config.i18n)
-  const req = {
-    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
-    i18n,
-    locale: locale ?? defaultLocale,
-    payload,
-    payloadAPI: 'local',
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req, context)
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
-  return findVersions({
+  return findVersionsOperation({
     collection,
     depth,
     limit,
     overrideAccess,
     page,
-    req,
+    populate,
+    req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
     sort,
     where,

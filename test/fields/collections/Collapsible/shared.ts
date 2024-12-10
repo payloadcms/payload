@@ -1,6 +1,8 @@
-import type { CollapsibleField } from '../../payload-types'
+import type { RequiredDataFromCollection } from 'payload/types'
 
-export const collapsibleDoc: Partial<CollapsibleField> = {
+import type { CollapsibleField } from '../../payload-types.js'
+
+export const collapsibleDoc: RequiredDataFromCollection<CollapsibleField> = {
   text: 'Seeded collapsible doc',
   group: {
     textWithinGroup: 'some text within a group',

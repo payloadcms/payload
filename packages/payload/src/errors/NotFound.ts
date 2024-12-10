@@ -1,13 +1,12 @@
-import type { TFunction } from 'i18next'
+import type { TFunction } from '@payloadcms/translations'
 
+import { en } from '@payloadcms/translations/languages/en'
 import httpStatus from 'http-status'
 
-import APIError from './APIError'
+import { APIError } from './APIError.js'
 
-class NotFound extends APIError {
+export class NotFound extends APIError {
   constructor(t?: TFunction) {
-    super(t ? t('error:notFound') : 'The requested resource was not found.', httpStatus.NOT_FOUND)
+    super(t ? t('general:notFound') : en.translations.general.notFound, httpStatus.NOT_FOUND)
   }
 }
-
-export default NotFound

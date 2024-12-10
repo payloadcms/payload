@@ -2,169 +2,165 @@
 title: Email Functionality
 label: Overview
 order: 10
-desc: Payload uses NodeMailer to allow you to send emails smoothly from your app. Set up email functions such as password resets, order confirmations and more.
-keywords: email, overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+desc: Payload uses an adapter pattern to enable email functionality. Set up email functions such as password resets, order confirmations and more.
+keywords: email, overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-### Introduction
+## Introduction
 
-Payload comes ready to send your application's email. Whether you simply need built-in password reset
-email to work or you want customers to get an order confirmation email, you're almost there. Payload makes use of
-[NodeMailer](https://nodemailer.com) for email and won't get in your way for those already familiar.
+Payload has a few email adapters that can be imported to enable email functionality. The [@payloadcms/email-nodemailer](https://www.npmjs.com/package/@payloadcms/email-nodemailer) package will be the package most will want to install. This package provides an easy way to use [Nodemailer](https://nodemailer.com) for email and won't get in your way for those already familiar.
 
-For email to send from your Payload server, some configuration is required. The settings you provide will be set
-in the `email` property object of your payload init call. Payload will make use of the transport that you have configured for it for things like reset password or verifying new user accounts and email send methods are available to you as well on your payload instance.
+The email adapter should be passed into the `email` property of the Payload Config. This will allow Payload to send [auth-related emails](../authentication/email) for things like password resets, new user verification, and any other email sending needs you may have.
 
-### Configuration
+## Configuration
 
-**Three ways to set it up**
+### Default Configuration
 
-1. **Default**: When email is not needed, a mock email handler will be created and used when nothing is provided. This is ideal for development environments and can be changed later when ready to [go to production](/docs/production/deployment).
-1. **Recommended**: Set the `transportOptions` and Payload will do the set up for you.
-1. **Advanced**: The `transport` object can be assigned a nodemailer transport object set up in your server scripts and given for Payload to use.
+When email is not needed or desired, Payload will log a warning on startup notifying that email is not configured. A  warning message will also be logged on any attempt to send an email.
 
-The following options are configurable in the `email` property object as part of the options object when calling payload.init().
+### Email Adapter
 
-| Option                   | Description                                                                                                                                                                                  |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`fromName`** \*        | The name part of the From field that will be seen on the delivered email                                                                                                                     |
-| **`fromAddress`** \*     | The email address part of the From field that will be used when delivering email                                                                                                             |
-| **`transport`**          | The NodeMailer transport object for when you want to do it yourself, not needed when transportOptions is set                                                                                 |
-| **`transportOptions`**   | An object that configures the transporter that Payload will create. For all the available options see the [NodeMailer documentation](https://nodemailer.com/smtp/) or see the examples below |
-| **`logMockCredentials`** | If set to true and no transport/transportOptions, ethereal credentials will be logged to console on startup                                                                                  |
+An email adapter will require at least the following fields:
 
-_\* An asterisk denotes that a property is required._
+| Option                      | Description                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| **`defaultFromName`** \*    | The name part of the From field that will be seen on the delivered email         |
+| **`defaultFromAddress`** \* | The email address part of the From field that will be used when delivering email |
 
-### Use SMTP
 
-Simple Mail Transfer Protocol, also known as SMTP can be passed in using the `transportOptions` object on the `email` options.
+### Official Email Adapters
 
-**Example email part using SMTP:**
+| Name       | Package                                                                                    | Description                                                                                                                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nodemailer | [@payloadcms/email-nodemailer](https://www.npmjs.com/package/@payloadcms/email-nodemailer) | Use any [Nodemailer transport](https://nodemailer.com/transports), including SMTP, Resend, SendGrid, and more. This was provided by default in Payload 2.x. This is the easiest migration path. |
+| Resend     | [@payloadcms/email-resend](https://www.npmjs.com/package/@payloadcms/email-resend)         | Resend email via their REST API. This is preferred for serverless platforms such as Vercel because it is much more lightweight than the nodemailer adapter.                                     |
+
+## Nodemailer Configuration
+
+| Option                 | Description                                                                                                                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`transport`**        | The Nodemailer transport object for when you want to do it yourself, not needed when transportOptions is set                                                                           |
+| **`transportOptions`** | An object that configures the transporter that Payload will create. For all the available options see the [Nodemailer documentation](https://nodemailer.com) or see the examples below |
+
+## Use SMTP
+
+Simple Mail Transfer Protocol (SMTP) options can be passed in using the `transportOptions` object on the `email` options. See the [Nodemailer SMTP documentation](https://nodemailer.com/smtp/) for more information, including details on when `secure` should and should not be set to `true`.
+
+**Example email options using SMTP:**
 
 ```ts
-payload.init({
-  email: {
+import { buildConfig } from 'payload'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+
+export default buildConfig({
+  email: nodemailerAdapter({
+    defaultFromAddress: 'info@payloadcms.com',
+    defaultFromName: 'Payload',
+    // Nodemailer transportOptions
     transportOptions: {
       host: process.env.SMTP_HOST,
+      port: 587,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
-      port: 587,
-      secure: true, // use TLS
-      tls: {
-        // do not fail on invalid certs
-        rejectUnauthorized: false,
-      },
     },
-    fromName: 'hello',
-    fromAddress: 'hello@example.com',
-  },
-  // ...
+  }),
 })
 ```
 
-<Banner type="warning">
-  It is best practice to avoid saving credentials or API keys directly in your code, use
-  [environment variables](/docs/configuration/overview#using-environment-variables-in-your-config).
-</Banner>
-
-### Use an email service
-
-Many third party mail providers are available and offer benefits beyond basic SMTP. As an example your payload init could look this if you wanted to use SendGrid.com though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
+**Example email options using nodemailer.createTransport:**
 
 ```ts
-import payload from 'payload'
-import nodemailerSendgrid from 'nodemailer-sendgrid'
-
-const sendGridAPIKey = process.env.SENDGRID_API_KEY
-
-payload.init({
-  ...(sendGridAPIKey
-    ? {
-        email: {
-          transportOptions: nodemailerSendgrid({
-            apiKey: sendGridAPIKey,
-          }),
-          fromName: 'Admin',
-          fromAddress: 'admin@example.com',
-        },
-      }
-    : {}),
-})
-```
-
-### Use a custom NodeMailer transport
-
-To take full control of the mail transport you may wish to use `nodemailer.createTransport()` on your server and provide it to Payload init.
-
-```ts
-import payload from 'payload'
+import { buildConfig } from 'payload'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
 
-const payload = require('payload')
-const nodemailer = require('nodemailer')
-
-const transport = await nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: 587,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-})
-
-payload.init({
-  email: {
-    fromName: 'Admin',
-    fromAddress: 'admin@example.com',
-    transport,
-  },
-  // ...
+export default buildConfig({
+  email: nodemailerAdapter({
+    defaultFromAddress: 'info@payloadcms.com',
+    defaultFromName: 'Payload',
+    // Any Nodemailer transport can be used
+    transport: nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: 587,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    }),
+  }),
 })
 ```
 
-### Sending Mail
+**Custom Transport:**
 
-With a working transport you can call it anywhere you have access to payload by calling `payload.sendEmail(message)`. The `message` will contain the `to`, `subject` and `email` or `text` for the email being sent. To see all available message configuration options see [NodeMailer](https://nodemailer.com/message).
+You also have the ability to bring your own nodemailer transport. This is an example of using the SendGrid nodemailer transport.
 
-### Mock transport
-
-By default, Payload uses a mock implementation that only sends mail to the [ethereal](https://ethereal.email) capture service that will never reach a user's inbox. While in development you may wish to make use of the captured messages which is why the payload output during server output helpfully logs this out on the server console.
-
-To see ethereal credentials, add `logMockCredentials: true` to the email options. This will cause them to be logged to console on startup.
 
 ```ts
-payload.init({
-  email: {
-    fromName: 'Admin',
-    fromAddress: 'admin@example.com',
-    logMockCredentials: true, // Optional
-  },
-  // ...
+import { buildConfig } from 'payload'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+import nodemailerSendgrid from 'nodemailer-sendgrid'
+
+
+export default buildConfig({
+  email: nodemailerAdapter({
+    defaultFromAddress: 'info@payloadcms.com',
+    defaultFromName: 'Payload',
+    transportOptions: nodemailerSendgrid({
+      apiKey: process.env.SENDGRID_API_KEY,
+    }),
+  }),
 })
 ```
 
-**Console output when starting payload with a mock email instance and logMockCredentials: true**
+During development, if you pass nothing to `nodemailerAdapter`, it will use the [ethereal.email](https://ethereal.email) service.
 
+This will log the ethereal.email details to console on startup.
+
+```ts
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+
+export default buildConfig({
+  email: nodemailerAdapter(),
+})
 ```
-[06:37:21] INFO  (payload): Starting Payload...
-[06:37:22] INFO  (payload): Payload Demo Initialized
-[06:37:22] INFO  (payload): listening on 3000...
-[06:37:22] INFO  (payload): Connected to MongoDB server successfully!
-[06:37:23] INFO  (payload): E-mail configured with mock configuration
-[06:37:23] INFO  (payload): Log into mock email provider at https://ethereal.email
-[06:37:23] INFO  (payload): Mock email account username: hhav5jw7doo4euev@ethereal.email
-[06:37:23] INFO  (payload): Mock email account password: VNdGcvDZeyEhtuPBqf
+
+## Resend Configuration
+
+The Resend adapter requires an API key to be passed in the options. This can be found in the Resend dashboard. This is the preferred package if you are deploying on Vercel because this is much more lightweight than the Nodemailer adapter.
+
+| Option | Description                         |
+| ------ | ----------------------------------- |
+| apiKey | The API key for the Resend service. |
+
+```ts
+import { buildConfig } from 'payload'
+import { resendAdapter } from '@payloadcms/email-resend'
+
+export default buildConfig({
+  email: resendAdapter({
+    defaultFromAddress: 'dev@payloadcms.com',
+    defaultFromName: 'Payload CMS',
+    apiKey: process.env.RESEND_API_KEY || '',
+  }),
+})
 ```
 
-The mock email handler is used when payload is started with neither `transport` or `transportOptions` to know how to deliver email.
+## Sending Mail
 
-<Banner type="warning">
-  The randomly generated email account username and password will be different each time the Payload
-  server starts.
-</Banner>
+With a working transport you can call it anywhere you have access to Payload by calling `payload.sendEmail(message)`. The `message` will contain the `to`, `subject` and `html` or `text` for the email being sent. Other options are also available and can be seen in the sendEmail args. Support for these will depend on the adapter being used.
 
-### Using multiple mail providers
+```ts
+// Example of sending an email
+const email = await payload.sendEmail({
+  to: 'test@example.com',
+  subject: 'This is a test email',
+  text: 'This is my message body',
+})
+```
+
+## Using multiple mail providers
 
 Payload supports the use of a single transporter of email, but there is nothing stopping you from having more. Consider a use case where sending bulk email is handled differently than transactional email and could be done using a [hook](/docs/hooks/overview).

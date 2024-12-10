@@ -1,4 +1,14 @@
-export function generateLexicalRichText() {
+import type {
+  SerializedBlockNode,
+  SerializedParagraphNode,
+  SerializedTextNode,
+  SerializedUploadNode,
+  TypedEditorState,
+} from '@payloadcms/richtext-lexical'
+
+export function generateLexicalRichText(): TypedEditorState<
+  SerializedBlockNode | SerializedParagraphNode | SerializedTextNode | SerializedUploadNode
+> {
   return {
     root: {
       type: 'root',
@@ -22,12 +32,14 @@ export function generateLexicalRichText() {
           format: '',
           indent: 0,
           type: 'paragraph',
+          textFormat: 0,
           version: 1,
         },
         {
           format: '',
           type: 'upload',
-          version: 1,
+          version: 2,
+          id: '665d105a91e1c337ba8308dd',
           fields: {
             caption: {
               root: {
@@ -57,11 +69,9 @@ export function generateLexicalRichText() {
                   {
                     format: '',
                     type: 'relationship',
-                    version: 1,
+                    version: 2,
                     relationTo: 'text-fields',
-                    value: {
-                      id: '{{TEXT_DOC_ID}}',
-                    },
+                    value: '{{TEXT_DOC_ID}}',
                   },
                 ],
                 direction: 'ltr',
@@ -69,9 +79,7 @@ export function generateLexicalRichText() {
             },
           },
           relationTo: 'uploads',
-          value: {
-            id: '{{UPLOAD_DOC_ID}}',
-          },
+          value: '{{UPLOAD_DOC_ID}}',
         },
         {
           format: '',
@@ -110,7 +118,7 @@ export function generateLexicalRichText() {
           version: 2,
           fields: {
             id: '65298b1ddb4ef8c744a7faab',
-            richText: {
+            richTextField: {
               root: {
                 type: 'root',
                 format: '',
@@ -120,11 +128,9 @@ export function generateLexicalRichText() {
                   {
                     format: '',
                     type: 'relationship',
-                    version: 1,
+                    version: 2,
                     relationTo: 'rich-text-fields',
-                    value: {
-                      id: '{{RICH_TEXT_DOC_ID}}',
-                    },
+                    value: '{{RICH_TEXT_DOC_ID}}',
                   },
                   {
                     children: [
@@ -149,7 +155,7 @@ export function generateLexicalRichText() {
               },
             },
             blockName: 'Block Node, with RichText Field, with Relationship Node',
-            blockType: 'richText',
+            blockType: 'richTextBlock',
           },
         },
         {
@@ -173,11 +179,9 @@ export function generateLexicalRichText() {
                       {
                         format: '',
                         type: 'relationship',
-                        version: 1,
+                        version: 2,
                         relationTo: 'text-fields',
-                        value: {
-                          id: '{{TEXT_DOC_ID}}',
-                        },
+                        value: '{{TEXT_DOC_ID}}',
                       },
                       {
                         children: [
@@ -224,6 +228,7 @@ export function generateLexicalRichText() {
           indent: 0,
           type: 'paragraph',
           version: 1,
+          textFormat: 0,
         },
         {
           format: '',
@@ -254,6 +259,7 @@ export function generateLexicalRichText() {
           indent: 0,
           type: 'paragraph',
           version: 1,
+          textFormat: 0,
         },
         {
           format: '',
@@ -279,6 +285,34 @@ export function generateLexicalRichText() {
           indent: 0,
           type: 'paragraph',
           version: 1,
+          textFormat: 0,
+        },
+        {
+          format: '',
+          type: 'block',
+          version: 2,
+          fields: {
+            id: '666c9dfd189d72626ea301f9',
+            blockName: '',
+            tab1: {
+              text1: 'Some text1',
+            },
+            tab2: {
+              text2: 'Some text2',
+            },
+            blockType: 'tabBlock',
+          },
+        },
+        {
+          format: '',
+          type: 'block',
+          version: 2,
+          fields: {
+            id: '666c9e0b189d72626ea301fa',
+            blockName: '',
+            blockType: 'code',
+            code: 'Some code\nhello\nworld',
+          },
         },
       ],
       direction: 'ltr',

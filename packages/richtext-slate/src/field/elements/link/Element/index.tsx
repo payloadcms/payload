@@ -1,30 +1,30 @@
 'use client'
+import type { FormState } from 'payload'
 
-import type { Fields } from 'payload/types'
-import type { HTMLAttributes } from 'react'
-
-import { useModal } from '@faceless-ui/modal'
-import { Button, Popup } from 'payload/components'
-import { useDrawerSlug } from 'payload/components/elements'
-import { reduceFieldsToValues } from 'payload/components/forms'
+import { getTranslation } from '@payloadcms/translations'
 import {
-  buildStateFromSchema,
-  useAuth,
+  Button,
+  Popup,
+  Translation,
   useConfig,
   useDocumentInfo,
+  useDrawerSlug,
   useLocale,
-} from 'payload/components/utilities'
-import { sanitizeFields } from 'payload/config'
-import { deepCopyObject, getTranslation } from 'payload/utilities'
-import React, { useCallback, useEffect, useState } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
+  useModal,
+  useServerFunctions,
+  useTranslation,
+} from '@payloadcms/ui'
+import { deepCopyObject, reduceFieldsToValues } from 'payload/shared'
+import { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import type { FieldProps } from '../../../../types'
+import type { LinkElementType } from '../types.js'
 
-import { LinkDrawer } from '../LinkDrawer'
-import { transformExtraFields, unwrapLink } from '../utilities'
+import { useElement } from '../../../providers/ElementProvider.js'
+import { LinkDrawer } from '../LinkDrawer/index.js'
+import { linkFieldsSchemaPath } from '../shared.js'
+import { unwrapLink } from '../utilities.js'
 import './index.scss'
 
 const baseClass = 'rich-text-link'
@@ -33,7 +33,7 @@ const baseClass = 'rich-text-link'
  * This function is called when an existing link is edited.
  * When a link is first created, another function is called: {@link ../Button/index.tsx#insertLink}
  */
-const insertChange = (editor, fields, customFieldSchema) => {
+const insertChange = (editor, fields) => {
   const data = reduceFieldsToValues(fields, true)
 
   const [, parentPath] = Editor.above(editor)
@@ -45,7 +45,7 @@ const insertChange = (editor, fields, customFieldSchema) => {
     url: data.url,
   }
 
-  if (customFieldSchema) {
+  if (data.fields) {
     newNode.fields = data.fields
   }
 
@@ -58,39 +58,26 @@ const insertChange = (editor, fields, customFieldSchema) => {
   ReactEditor.focus(editor)
 }
 
-export const LinkElement: React.FC<{
-  attributes: HTMLAttributes<HTMLDivElement>
-  children: React.ReactNode
-  editorRef: React.RefObject<HTMLDivElement>
-  element: any
-  fieldProps: FieldProps
-}> = (props) => {
-  const { attributes, children, editorRef, element, fieldProps } = props
+export const LinkElement = () => {
+  const { attributes, children, editorRef, element, fieldProps, schemaPath } =
+    useElement<LinkElementType>()
 
-  const customFieldSchema = fieldProps?.admin?.link?.fields
+  const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
+
+  const { componentMap } = fieldProps
+  const fields = componentMap[linkFieldsSchemaPath]
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const editor = useSlate()
-  const config = useConfig()
-  const { user } = useAuth()
+  const { config } = useConfig()
   const { code: locale } = useLocale()
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
   const { closeModal, openModal, toggleModal } = useModal()
   const [renderModal, setRenderModal] = useState(false)
   const [renderPopup, setRenderPopup] = useState(false)
-  const [initialState, setInitialState] = useState<Fields>({})
-  const { getDocPreferences } = useDocumentInfo()
-  const [fieldSchema] = useState(() => {
-    const fieldsUnsanitized = transformExtraFields(customFieldSchema, config, i18n)
-    // Sanitize custom fields here
-    const validRelationships = config.collections.map((c) => c.slug) || []
-    const fields = sanitizeFields({
-      config: config,
-      fields: fieldsUnsanitized,
-      validRelationships,
-    })
+  const [initialState, setInitialState] = useState<FormState>({})
 
-    return fields
-  })
+  const { getFormState } = useServerFunctions()
 
   const drawerSlug = useDrawerSlug('rich-text-link')
 
@@ -111,22 +98,37 @@ export const LinkElement: React.FC<{
         url: element.url,
       }
 
-      const preferences = await getDocPreferences()
-      const state = await buildStateFromSchema({
-        config,
+      const { state } = await getFormState({
+        collectionSlug,
         data,
-        fieldSchema,
-        locale,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        globalSlug,
         operation: 'update',
-        preferences,
-        t,
-        user,
+        renderAllFields: true,
+        schemaPath: fieldMapPath ?? '',
       })
+
       setInitialState(state)
     }
 
-    awaitInitialState()
-  }, [renderModal, element, fieldSchema, user, locale, t, getDocPreferences, config])
+    if (renderModal) {
+      void awaitInitialState()
+    }
+  }, [
+    renderModal,
+    element,
+    locale,
+    t,
+    collectionSlug,
+    config,
+    id,
+    fieldMapPath,
+    getFormState,
+    globalSlug,
+    getDocPreferences,
+    docPermissions,
+  ])
 
   return (
     <span className={baseClass} {...attributes}>
@@ -134,16 +136,18 @@ export const LinkElement: React.FC<{
         {renderModal && (
           <LinkDrawer
             drawerSlug={drawerSlug}
-            fieldSchema={fieldSchema}
+            fields={Array.isArray(fields) ? fields : []}
             handleClose={() => {
               toggleModal(drawerSlug)
               setRenderModal(false)
             }}
             handleModalSubmit={(fields) => {
-              insertChange(editor, fields, customFieldSchema)
+              insertChange(editor, fields)
               closeModal(drawerSlug)
+              setRenderModal(false)
             }}
             initialState={initialState}
+            schemaPath={schemaPath}
           />
         )}
         <Popup
@@ -155,26 +159,30 @@ export const LinkElement: React.FC<{
           render={() => (
             <div className={`${baseClass}__popup`}>
               {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (
-                <Trans
+                <Translation
+                  elements={{
+                    '0': ({ children }) => (
+                      <a
+                        className={`${baseClass}__link-label`}
+                        href={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
+                        rel="noreferrer"
+                        target="_blank"
+                        title={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
+                      >
+                        {children}
+                      </a>
+                    ),
+                  }}
                   i18nKey="fields:linkedTo"
-                  values={{
+                  t={t}
+                  variables={{
                     label: getTranslation(
                       config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels
                         ?.singular,
                       i18n,
                     ),
                   }}
-                >
-                  <a
-                    className={`${baseClass}__link-label`}
-                    href={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
-                    rel="noreferrer"
-                    target="_blank"
-                    title={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
-                  >
-                    label
-                  </a>
-                </Trans>
+                />
               )}
               {(element.linkType === 'custom' || !element.linkType) && (
                 <a
@@ -221,7 +229,9 @@ export const LinkElement: React.FC<{
         className={[`${baseClass}__popup-toggler`].filter(Boolean).join(' ')}
         onClick={() => setRenderPopup(true)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') setRenderPopup(true)
+          if (e.key === 'Enter') {
+            setRenderPopup(true)
+          }
         }}
         role="button"
         tabIndex={0}

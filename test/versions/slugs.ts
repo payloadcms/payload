@@ -1,14 +1,17 @@
-export const autosaveCollectionSlug = 'autosave-posts' as const
+export const autosaveCollectionSlug = 'autosave-posts'
 
-export const draftCollectionSlug = 'draft-posts' as const
+export const customIDSlug = 'custom-ids'
 
-export const postCollectionSlug = 'posts' as const
+export const draftCollectionSlug = 'draft-posts'
+export const draftWithMaxCollectionSlug = 'draft-with-max-posts'
 
-export const versionCollectionSlug = 'version-posts' as const
+export const postCollectionSlug = 'posts'
 
-export const disablePublishSlug = 'disable-publish' as const
+export const versionCollectionSlug = 'version-posts'
 
-export const disablePublishGlobalSlug = 'disable-publish-global' as const
+export const disablePublishSlug = 'disable-publish'
+
+export const disablePublishGlobalSlug = 'disable-publish-global'
 
 export const collectionSlugs = [
   autosaveCollectionSlug,
@@ -17,7 +20,12 @@ export const collectionSlugs = [
   versionCollectionSlug,
 ]
 
-export const autoSaveGlobalSlug = 'autosave-global' as const
-export const draftGlobalSlug = 'draft-global' as const
+export const autoSaveGlobalSlug = 'autosave-global'
+export const draftGlobalSlug = 'draft-global'
+export const draftWithMaxGlobalSlug = 'draft-with-max-global'
 
 export const globalSlugs = [autoSaveGlobalSlug, draftGlobalSlug]
+
+export const localizedCollectionSlug = 'localized-posts'
+
+export const localizedGlobalSlug = 'localized-global'

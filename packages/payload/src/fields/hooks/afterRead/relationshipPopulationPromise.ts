@@ -1,17 +1,22 @@
-import type { PayloadRequest } from '../../../express/types'
-import type { RelationshipField, UploadField } from '../../config/types'
+import type { PayloadRequest, PopulateType } from '../../../types/index.js'
+import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
 
-import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types'
+import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
+import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types.js'
 
 type PopulateArgs = {
   currentDepth: number
   data: Record<string, unknown>
   dataReference: Record<string, any>
   depth: number
-  field: RelationshipField | UploadField
+  draft: boolean
+  fallbackLocale: null | string
+  field: JoinField | RelationshipField | UploadField
   index?: number
   key?: string
+  locale: null | string
   overrideAccess: boolean
+  populateArg?: PopulateType
   req: PayloadRequest
   showHiddenFields: boolean
 }
@@ -21,19 +26,28 @@ const populate = async ({
   data,
   dataReference,
   depth,
+  draft,
+  fallbackLocale,
   field,
   index,
   key,
+  locale,
   overrideAccess,
+  populateArg,
   req,
   showHiddenFields,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference
-  const relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo
+  let relation
+  if (field.type === 'join') {
+    relation = field.collection
+  } else {
+    relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo
+  }
   const relatedCollection = req.payload.collections[relation]
 
   if (relatedCollection) {
-    let id = Array.isArray(field.relationTo) ? data.value : data
+    let id = field.type !== 'join' && Array.isArray(field.relationTo) ? data.value : data
     let relationshipValue
     const shouldPopulate = depth && currentDepth <= depth
 
@@ -48,17 +62,21 @@ const populate = async ({
 
     if (shouldPopulate) {
       relationshipValue = await req.payloadDataLoader.load(
-        JSON.stringify([
-          req.transactionID,
-          relatedCollection.config.slug,
-          id,
+        createDataloaderCacheKey({
+          collectionSlug: relatedCollection.config.slug,
+          currentDepth: currentDepth + 1,
           depth,
-          currentDepth + 1,
-          req.locale,
-          req.fallbackLocale,
+          docID: id as string,
+          draft,
+          fallbackLocale,
+          locale,
           overrideAccess,
+          select:
+            populateArg?.[relatedCollection.config.slug] ??
+            relatedCollection.config.defaultPopulate,
           showHiddenFields,
-        ]),
+          transactionID: req.transactionID,
+        }),
       )
     }
 
@@ -66,20 +84,21 @@ const populate = async ({
       // ids are visible regardless of access controls
       relationshipValue = id
     }
-
     if (typeof index === 'number' && typeof key === 'string') {
-      if (Array.isArray(field.relationTo)) {
+      if (field.type !== 'join' && Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][key][index].value = relationshipValue
       } else {
         dataToUpdate[field.name][key][index] = relationshipValue
       }
     } else if (typeof index === 'number' || typeof key === 'string') {
-      if (Array.isArray(field.relationTo)) {
+      if (field.type === 'join') {
+        dataToUpdate[field.name].docs[index ?? key] = relationshipValue
+      } else if (Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][index ?? key].value = relationshipValue
       } else {
         dataToUpdate[field.name][index ?? key] = relationshipValue
       }
-    } else if (Array.isArray(field.relationTo)) {
+    } else if (field.type !== 'join' && Array.isArray(field.relationTo)) {
       dataToUpdate[field.name].value = relationshipValue
     } else {
       dataToUpdate[field.name] = relationshipValue
@@ -90,18 +109,26 @@ const populate = async ({
 type PromiseArgs = {
   currentDepth: number
   depth: number
-  field: RelationshipField | UploadField
+  draft: boolean
+  fallbackLocale: null | string
+  field: JoinField | RelationshipField | UploadField
+  locale: null | string
   overrideAccess: boolean
+  populate?: PopulateType
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, any>
 }
 
-const relationshipPopulationPromise = async ({
+export const relationshipPopulationPromise = async ({
   currentDepth,
   depth,
+  draft,
+  fallbackLocale,
   field,
+  locale,
   overrideAccess,
+  populate: populateArg,
   req,
   showHiddenFields,
   siblingDoc,
@@ -110,25 +137,30 @@ const relationshipPopulationPromise = async ({
   const populateDepth = fieldHasMaxDepth(field) && field.maxDepth < depth ? field.maxDepth : depth
   const rowPromises = []
 
-  if (fieldSupportsMany(field) && field.hasMany) {
+  if (field.type === 'join' || (fieldSupportsMany(field) && field.hasMany)) {
     if (
-      req.locale === 'all' &&
+      field.localized &&
+      locale === 'all' &&
       typeof siblingDoc[field.name] === 'object' &&
       siblingDoc[field.name] !== null
     ) {
-      Object.keys(siblingDoc[field.name]).forEach((key) => {
-        if (Array.isArray(siblingDoc[field.name][key])) {
-          siblingDoc[field.name][key].forEach((relatedDoc, index) => {
+      Object.keys(siblingDoc[field.name]).forEach((localeKey) => {
+        if (Array.isArray(siblingDoc[field.name][localeKey])) {
+          siblingDoc[field.name][localeKey].forEach((relatedDoc, index) => {
             const rowPromise = async () => {
               await populate({
                 currentDepth,
-                data: siblingDoc[field.name][key][index],
+                data: siblingDoc[field.name][localeKey][index],
                 dataReference: resultingDoc,
                 depth: populateDepth,
+                draft,
+                fallbackLocale,
                 field,
                 index,
-                key,
+                key: localeKey,
+                locale,
                 overrideAccess,
+                populateArg,
                 req,
                 showHiddenFields,
               })
@@ -137,18 +169,28 @@ const relationshipPopulationPromise = async ({
           })
         }
       })
-    } else if (Array.isArray(siblingDoc[field.name])) {
-      siblingDoc[field.name].forEach((relatedDoc, index) => {
+    } else if (
+      Array.isArray(siblingDoc[field.name]) ||
+      Array.isArray(siblingDoc[field.name]?.docs)
+    ) {
+      ;(Array.isArray(siblingDoc[field.name])
+        ? siblingDoc[field.name]
+        : siblingDoc[field.name].docs
+      ).forEach((relatedDoc, index) => {
         const rowPromise = async () => {
           if (relatedDoc) {
             await populate({
               currentDepth,
-              data: relatedDoc,
+              data: relatedDoc?.id ? relatedDoc.id : relatedDoc,
               dataReference: resultingDoc,
               depth: populateDepth,
+              draft,
+              fallbackLocale,
               field,
               index,
+              locale,
               overrideAccess,
+              populateArg,
               req,
               showHiddenFields,
             })
@@ -159,20 +201,25 @@ const relationshipPopulationPromise = async ({
       })
     }
   } else if (
+    field.localized &&
+    locale === 'all' &&
     typeof siblingDoc[field.name] === 'object' &&
-    siblingDoc[field.name] !== null &&
-    req.locale === 'all'
+    siblingDoc[field.name] !== null
   ) {
-    Object.keys(siblingDoc[field.name]).forEach((key) => {
+    Object.keys(siblingDoc[field.name]).forEach((localeKey) => {
       const rowPromise = async () => {
         await populate({
           currentDepth,
-          data: siblingDoc[field.name][key],
+          data: siblingDoc[field.name][localeKey],
           dataReference: resultingDoc,
           depth: populateDepth,
+          draft,
+          fallbackLocale,
           field,
-          key,
+          key: localeKey,
+          locale,
           overrideAccess,
+          populateArg,
           req,
           showHiddenFields,
         })
@@ -187,13 +234,15 @@ const relationshipPopulationPromise = async ({
       data: siblingDoc[field.name],
       dataReference: resultingDoc,
       depth: populateDepth,
+      draft,
+      fallbackLocale,
       field,
+      locale,
       overrideAccess,
+      populateArg,
       req,
       showHiddenFields,
     })
   }
   await Promise.all(rowPromises)
 }
-
-export default relationshipPopulationPromise

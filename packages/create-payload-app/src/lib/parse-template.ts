@@ -1,41 +1,34 @@
-import prompts from 'prompts'
+import * as p from '@clack/prompts'
 
-import type { CliArgs, ProjectTemplate } from '../types'
+import type { CliArgs, ProjectTemplate } from '../types.js'
 
 export async function parseTemplate(
   args: CliArgs,
   validTemplates: ProjectTemplate[],
-): Promise<ProjectTemplate> {
+): Promise<ProjectTemplate | undefined> {
   if (args['--template']) {
     const templateName = args['--template']
     const template = validTemplates.find((t) => t.name === templateName)
-    if (!template) throw new Error('Invalid template given')
+    if (!template) {
+      throw new Error('Invalid template given')
+    }
     return template
   }
 
-  const response = await prompts(
-    {
-      name: 'value',
-      choices: validTemplates.map((p) => {
-        return {
-          description: p.description,
-          title: p.name,
-          value: p.name,
-        }
-      }),
-      message: 'Choose project template',
-      type: 'select',
-      validate: (value: string) => !!value.length,
-    },
-    {
-      onCancel: () => {
-        process.exit(0)
-      },
-    },
-  )
+  const response = await p.select<{ label: string; value: string }[], string>({
+    message: 'Choose project template',
+    options: validTemplates.map((p) => {
+      return {
+        label: p.name,
+        value: p.name,
+      }
+    }),
+  })
+  if (p.isCancel(response)) {
+    process.exit(0)
+  }
 
-  const template = validTemplates.find((t) => t.name === response.value)
-  if (!template) throw new Error('Template is undefined')
+  const template = validTemplates.find((t) => t.name === response)
 
   return template
 }

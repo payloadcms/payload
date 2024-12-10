@@ -1,17 +1,7 @@
-import React from 'react'
+import type { RichTextCustomLeaf } from '../../../types.js'
 
-import CodeIcon from '../../icons/Code'
-import LeafButton from '../Button'
-
-const Code = ({ attributes, children }) => <code {...attributes}>{children}</code>
-
-const code = {
-  Button: () => (
-    <LeafButton format="code">
-      <CodeIcon />
-    </LeafButton>
-  ),
-  Leaf: Code,
+export const code: RichTextCustomLeaf = {
+  name: 'code',
+  Button: '@payloadcms/richtext-slate/client#CodeLeafButton',
+  Leaf: '@payloadcms/richtext-slate/client#CodeLeaf',
 }
-
-export default code

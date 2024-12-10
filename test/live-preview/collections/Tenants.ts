@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { tenantsSlug } from '../shared'
+import { tenantsSlug } from '../shared.js'
 
 export const Tenants: CollectionConfig = {
   slug: tenantsSlug,

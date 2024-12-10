@@ -1,63 +1,61 @@
 import crypto from 'crypto'
-import PassportAPIKey from 'passport-headerapikey'
 
-import type { SanitizedCollectionConfig } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
-import type { Payload } from '../../payload'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { Where } from '../../types/index.js'
+import type { AuthStrategyFunction, User } from '../index.js'
 
-import find from '../../collections/operations/find'
+export const APIKeyAuthentication =
+  (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
+  async ({ headers, payload }) => {
+    const authHeader = headers.get('Authorization')
 
-export default (payload: Payload, config: SanitizedCollectionConfig): PassportAPIKey => {
-  const { secret } = payload
-  const opts = {
-    header: 'Authorization',
-    prefix: `${config.slug} API-Key `,
-  }
+    if (authHeader?.startsWith(`${collectionConfig.slug} API-Key `)) {
+      const apiKey = authHeader.replace(`${collectionConfig.slug} API-Key `, '')
+      const apiKeyIndex = crypto.createHmac('sha1', payload.secret).update(apiKey).digest('hex')
 
-  return new PassportAPIKey(opts, true, async (apiKey, done, req) => {
-    const apiKeyIndex = crypto.createHmac('sha1', secret).update(apiKey).digest('hex')
-
-    try {
-      const where: { [key: string]: any } = {}
-      if (config.auth.verify) {
-        where.and = [
-          {
-            // TODO: Search for index
-            apiKeyIndex: {
-              equals: apiKeyIndex,
+      try {
+        const where: Where = {}
+        if (collectionConfig.auth?.verify) {
+          where.and = [
+            {
+              apiKeyIndex: {
+                equals: apiKeyIndex,
+              },
             },
-          },
-          {
-            _verified: {
-              not_equals: false,
+            {
+              _verified: {
+                not_equals: false,
+              },
             },
-          },
-        ]
-      } else {
-        where.apiKeyIndex = {
-          equals: apiKeyIndex,
+          ]
+        } else {
+          where.apiKeyIndex = {
+            equals: apiKeyIndex,
+          }
         }
-      }
-      const userQuery = await find({
-        collection: {
-          config,
-        },
-        depth: config.auth.depth,
-        overrideAccess: true,
-        req: req as PayloadRequest,
-        where,
-      })
 
-      if (userQuery.docs && userQuery.docs.length > 0) {
-        const user = userQuery.docs[0]
-        user.collection = config.slug
-        user._strategy = 'api-key'
-        done(null, user)
-      } else {
-        done(null, false)
+        const userQuery = await payload.find({
+          collection: collectionConfig.slug,
+          depth: collectionConfig.auth.depth,
+          limit: 1,
+          overrideAccess: true,
+          pagination: false,
+          where,
+        })
+
+        if (userQuery.docs && userQuery.docs.length > 0) {
+          const user = userQuery.docs[0]
+          user.collection = collectionConfig.slug
+          user._strategy = 'api-key'
+
+          return {
+            user: user as User,
+          }
+        }
+      } catch (err) {
+        return { user: null }
       }
-    } catch (err) {
-      done(null, false)
     }
-  })
-}
+
+    return { user: null }
+  }

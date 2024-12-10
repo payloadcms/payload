@@ -1,12 +1,12 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 import type stream from 'stream'
 
 import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs'
 import path from 'path'
 
-import type { HandleUpload } from '../../types'
+import type { HandleUpload } from '../../types.js'
 
 interface Args {
   acl?: 'private' | 'public-read'

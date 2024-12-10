@@ -1,29 +1,43 @@
 {
-  "name": "payload-example-whitelabel-cms",
+  "name": "payload-example-whitelabel",
   "version": "1.0.0",
-  "main": "dist/server.js",
   "license": "MIT",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
-    "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
-    "build:server": "tsc",
-    "build": "yarn copyfiles && yarn build:payload && yarn build:server",
-    "serve": "cross-env PAYLOAD_CONFIG_PATH=dist/payload.config.js NODE_ENV=production node dist/server.js",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
-    "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types",
-    "generate:graphQLSchema": "PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema"
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:schema": "payload-graphql generate:schema",
+    "generate:types": "payload generate:types",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "payload": "latest"
+    "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/next": "latest",
+    "@payloadcms/richtext-lexical": "latest",
+    "cross-env": "^7.0.3",
+    "graphql": "^16.9.0",
+    "next": "^15.0.0",
+    "payload": "latest",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "sharp": "0.32.6"
   },
   "devDependencies": {
-    "@types/express": "^4.17.9",
-    "copyfiles": "^2.4.1",
-    "cross-env": "^7.0.3",
-    "nodemon": "^2.0.6",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.8.4"
+    "@payloadcms/graphql": "latest",
+    "@types/node": "^20.11.25",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^15.0.0",
+    "tsx": "^4.16.2",
+    "typescript": "5.5.2"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
   }
 }

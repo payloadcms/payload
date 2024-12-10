@@ -1,0 +1,11 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .clear-indicator {
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+    }
+  }
+}

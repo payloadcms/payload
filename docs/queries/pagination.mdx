@@ -1,9 +1,9 @@
 ---
 title: Pagination
 label: Pagination
-order: 20
+order: 40
 desc: Payload queries are equipped with automatic pagination so you create paginated lists of documents within your app.
-keywords: query, documents, pagination, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: query, documents, pagination, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 All collection `find` queries are paginated automatically. Responses are returned with top-level meta data related to pagination, and returned documents are nested within a `docs` array.
@@ -62,4 +62,4 @@ All Payload APIs support the pagination controls below. With them, you can creat
 
 ### Disabling pagination within Local API
 
-For `find` operations within the Local API, you can disable pagination to retrieve all documents from a collection by passing `pagination: false` to the `find` local operation. This is not supported in REST or GraphQL, however, because it could potentially lead to malicious activity.
+For `find` operations within the Local API, you can disable pagination to retrieve all documents from a collection by passing `pagination: false` to the `find` local operation.

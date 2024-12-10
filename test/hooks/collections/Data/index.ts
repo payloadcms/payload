@@ -1,6 +1,4 @@
-/* eslint-disable no-param-reassign */
-
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
 export const dataHooksSlug = 'data-hooks'
 
@@ -14,7 +12,7 @@ export const DataHooks: CollectionConfig = {
   },
   hooks: {
     beforeOperation: [
-      async ({ context, collection, args }) => {
+      ({ context, collection, args }) => {
         context['collection_beforeOperation_collection'] = JSON.stringify(collection)
 
         return args
@@ -29,12 +27,12 @@ export const DataHooks: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ context, collection }) => {
+      ({ context, collection }) => {
         context['collection_afterChange_collection'] = JSON.stringify(collection)
       },
     ],
     beforeRead: [
-      async ({ context, collection }) => {
+      ({ context, collection }) => {
         context['collection_beforeRead_collection'] = JSON.stringify(collection)
       },
     ],

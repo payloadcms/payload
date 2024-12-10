@@ -1,12 +1,12 @@
 import type { ContainerClient } from '@azure/storage-blob'
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 import { AbortController } from '@azure/abort-controller'
 import fs from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
 
-import type { HandleUpload } from '../../types'
+import type { HandleUpload } from '../../types.js'
 
 interface Args {
   collection: CollectionConfig

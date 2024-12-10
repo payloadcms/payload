@@ -5,19 +5,9 @@
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-    "rootDir": "./src" /* Specify the root folder within your source files. */
+    "rootDir": "./src" /* Specify the root folder within your source files. */,
+    "strict": true
   },
-  "exclude": [
-    "dist",
-    "build",
-    "tests",
-    "test",
-    "node_modules",
-    ".eslintrc.js",
-    "src/**/*.spec.js",
-    "src/**/*.spec.jsx",
-    "src/**/*.spec.ts",
-    "src/**/*.spec.tsx"
-  ],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"]
+  "exclude": ["dist", "build", "tests", "test", "node_modules", "eslint.config.js"],
+  "include": ["src/**/*.ts", "src/**/*.spec.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"]
 }

@@ -1,18 +1,12 @@
-import type { TFunction } from 'i18next'
+import type { TFunction } from '@payloadcms/translations'
 
+import { en } from '@payloadcms/translations/languages/en'
 import httpStatus from 'http-status'
 
-import APIError from './APIError'
+import { APIError } from './APIError.js'
 
-class LockedAuth extends APIError {
+export class LockedAuth extends APIError {
   constructor(t?: TFunction) {
-    super(
-      t
-        ? t('error:userLocked')
-        : 'This user is locked due to having too many failed login attempts.',
-      httpStatus.UNAUTHORIZED,
-    )
+    super(t ? t('error:userLocked') : en.translations.error.userLocked, httpStatus.UNAUTHORIZED)
   }
 }
-
-export default LockedAuth

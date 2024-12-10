@@ -2,10 +2,10 @@
 import { Editor, Transforms } from 'slate'
 import { ReactEditor } from 'slate-react'
 
-import isElementActive from './isActive'
-import { isWithinListItem } from './isWithinListItem'
+import { isElementActive } from './isActive.js'
+import { isWithinListItem } from './isWithinListItem.js'
 
-const toggleElement = (editor: Editor, format: string, blockType = 'type'): void => {
+export const toggleElement = (editor: Editor, format: string, blockType = 'type'): void => {
   const isActive = isElementActive(editor, format, blockType)
 
   const formatByBlockType = {
@@ -19,7 +19,7 @@ const toggleElement = (editor: Editor, format: string, blockType = 'type'): void
   }
 
   if (!isActive && isWithinLI && blockType !== 'textAlign') {
-    const block = { children: [], type: 'li' }
+    const block = { type: 'li', children: [] }
     Transforms.wrapNodes(editor, block, {
       at: Editor.unhangRange(editor, editor.selection),
     })
@@ -35,5 +35,3 @@ const toggleElement = (editor: Editor, format: string, blockType = 'type'): void
 
   ReactEditor.focus(editor)
 }
-
-export default toggleElement

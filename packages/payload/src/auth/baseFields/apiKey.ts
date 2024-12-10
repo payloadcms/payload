@@ -1,64 +1,62 @@
 import crypto from 'crypto'
 
-import type { Field, FieldHook } from '../../fields/config/types'
-
-import { extractTranslations } from '../../translations/extractTranslations'
-
-const labels = extractTranslations(['authentication:enableAPIKey', 'authentication:apiKey'])
+import type { Field, FieldHook } from '../../fields/config/types.js'
 
 const encryptKey: FieldHook = ({ req, value }) =>
-  value ? req.payload.encrypt(value as string) : undefined
+  value ? req.payload.encrypt(value as string) : null
 const decryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.decrypt(value as string) : undefined
 
-export default [
+export const apiKeyFields = [
   {
     name: 'enableAPIKey',
+    type: 'checkbox',
     admin: {
       components: {
-        Field: () => null,
+        Field: false,
       },
     },
-    defaultValue: false,
-    label: labels['authentication:enableAPIKey'],
-    type: 'checkbox',
+    label: ({ t }) => t('authentication:enableAPIKey'),
   },
   {
     name: 'apiKey',
+    type: 'text',
     admin: {
       components: {
-        Field: () => null,
+        Field: false,
       },
     },
     hooks: {
       afterRead: [decryptKey],
       beforeChange: [encryptKey],
     },
-    label: labels['authentication:apiKey'],
-    type: 'text',
+    label: ({ t }) => t('authentication:apiKey'),
   },
   {
     name: 'apiKeyIndex',
+    type: 'text',
     admin: {
       disabled: true,
     },
     hidden: true,
     hooks: {
       beforeValidate: [
-        async ({ data, req, value }) => {
-          if (data.apiKey) {
+        ({ data, req, value }) => {
+          if (data?.apiKey === false || data?.apiKey === null) {
+            return null
+          }
+          if (data?.enableAPIKey === false || data?.enableAPIKey === null) {
+            return null
+          }
+          if (data?.apiKey) {
             return crypto
               .createHmac('sha1', req.payload.secret)
               .update(data.apiKey as string)
               .digest('hex')
           }
-          if (data.enableAPIKey === false) {
-            return null
-          }
           return value
         },
       ],
     },
-    type: 'text',
   },
 ] as Field[]

@@ -1,20 +1,22 @@
 'use client'
 
-import type { HTMLAttributes } from 'react'
-
-import { Button } from 'payload/components'
-import { useDocumentDrawer, useListDrawer } from 'payload/components/elements'
-import { usePayloadAPI } from 'payload/components/hooks'
-import { useConfig } from 'payload/components/utilities'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
+import {
+  Button,
+  useConfig,
+  useDocumentDrawer,
+  useListDrawer,
+  usePayloadAPI,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useCallback, useReducer, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
-import type { FieldProps } from '../../../../types'
+import type { RelationshipElementType } from '../types.js'
 
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
+import { useElement } from '../../../providers/ElementProvider.js'
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
 import './index.scss'
 
 const baseClass = 'rich-text-relationship'
@@ -23,25 +25,21 @@ const initialParams = {
   depth: 0,
 }
 
-type Props = {
-  attributes: HTMLAttributes<HTMLDivElement>
-  children: React.ReactNode
-  element: any
-  fieldProps: FieldProps
-}
-const Element: React.FC<Props> = (props) => {
+const RelationshipElementComponent: React.FC = () => {
   const {
     attributes,
     children,
     element,
     element: { relationTo, value },
     fieldProps,
-  } = props
+  } = useElement<RelationshipElementType>()
 
   const {
-    collections,
-    routes: { api },
-    serverURL,
+    config: {
+      collections,
+      routes: { api },
+      serverURL,
+    },
   } = useConfig()
   const [enabledCollectionSlugs] = useState(() =>
     collections
@@ -51,9 +49,10 @@ const Element: React.FC<Props> = (props) => {
   const [relatedCollection, setRelatedCollection] = useState(() =>
     collections.find((coll) => coll.slug === relationTo),
   )
+
   const selected = useSelected()
   const focused = useFocused()
-  const { i18n, t } = useTranslation(['fields', 'general'])
+  const { i18n, t } = useTranslation()
   const editor = useSlateStatic()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
@@ -84,9 +83,9 @@ const Element: React.FC<Props> = (props) => {
       Transforms.setNodes(
         editor,
         {
+          type: 'relationship',
           children: [{ text: ' ' }],
           relationTo: relatedCollection.slug,
-          type: 'relationship',
           value: { id: doc.id },
         },
         { at: elementPath },
@@ -104,21 +103,21 @@ const Element: React.FC<Props> = (props) => {
   )
 
   const swapRelationship = React.useCallback(
-    ({ collectionConfig, docID }) => {
+    ({ collectionSlug, docID }) => {
       const elementPath = ReactEditor.findPath(editor, element)
 
       Transforms.setNodes(
         editor,
         {
-          children: [{ text: ' ' }],
-          relationTo: collectionConfig.slug,
           type: 'relationship',
+          children: [{ text: ' ' }],
+          relationTo: collectionSlug,
           value: { id: docID },
         },
         { at: elementPath },
       )
 
-      setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug))
+      setRelatedCollection(collections.find((coll) => coll.slug === collectionSlug))
 
       setParams({
         ...initialParams,
@@ -141,7 +140,7 @@ const Element: React.FC<Props> = (props) => {
     >
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
-          {t('labelRelationship', {
+          {t('fields:labelRelationship', {
             label: getTranslation(relatedCollection.labels.singular, i18n),
           })}
         </p>
@@ -154,24 +153,24 @@ const Element: React.FC<Props> = (props) => {
       <div className={`${baseClass}__actions`}>
         <ListDrawerToggler
           className={`${baseClass}__list-drawer-toggler`}
-          disabled={fieldProps?.admin?.readOnly}
+          disabled={fieldProps?.field?.admin?.readOnly}
         >
           <Button
             buttonStyle="icon-label"
-            disabled={fieldProps?.admin?.readOnly}
+            disabled={fieldProps?.field?.admin?.readOnly}
             el="div"
             icon="swap"
             onClick={() => {
               // do nothing
             }}
             round
-            tooltip={t('swapRelationship')}
+            tooltip={t('fields:swapRelationship')}
           />
         </ListDrawerToggler>
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__removeButton`}
-          disabled={fieldProps?.admin?.readOnly}
+          disabled={fieldProps?.field?.admin?.readOnly}
           icon="x"
           onClick={(e) => {
             e.preventDefault()
@@ -188,10 +187,10 @@ const Element: React.FC<Props> = (props) => {
   )
 }
 
-export default (props: Props): React.ReactNode => {
+export const RelationshipElement = (props: any): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props}>
-      <Element {...props} />
+      <RelationshipElementComponent {...props} />
     </EnabledRelationshipsCondition>
   )
 }

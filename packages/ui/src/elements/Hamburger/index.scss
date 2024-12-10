@@ -1,0 +1,46 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .hamburger {
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background-color: var(--theme-bg);
+    outline: none;
+    position: relative;
+    color: var(--theme-text);
+    box-shadow: 0px 0px 0px 1px var(--theme-elevation-150);
+    padding: base(0.1);
+    border-radius: 3px;
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    width: 100%;
+    transition-property: box-shadow, background-color;
+    transition-duration: 100ms;
+    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+    --hamburger-size: var(--base);
+
+    &:hover {
+      background-color: var(--theme-elevation-100);
+      box-shadow: 0px 0px 0px 1px var(--theme-elevation-500);
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &::after {
+      z-index: -1;
+    }
+
+    &__open-icon,
+    &__close-icon {
+      width: var(--hamburger-size);
+      height: var(--hamburger-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}

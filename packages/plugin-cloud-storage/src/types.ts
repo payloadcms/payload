@@ -1,8 +1,12 @@
-import type { NextFunction, Response } from 'express'
-import type { FileData, ImageSize } from 'payload/types'
-import type { TypeWithID } from 'payload/types'
-import type { CollectionConfig, PayloadRequest } from 'payload/types'
-import type { Configuration as WebpackConfig } from 'webpack'
+import type {
+  CollectionConfig,
+  Field,
+  FileData,
+  ImageSize,
+  PayloadRequest,
+  TypeWithID,
+  UploadCollectionSlug,
+} from 'payload'
 
 export interface File {
   buffer: Buffer
@@ -25,30 +29,37 @@ export interface TypeWithPrefix {
 
 export type HandleDelete = (args: {
   collection: CollectionConfig
-  doc: TypeWithID & FileData & TypeWithPrefix
+  doc: FileData & TypeWithID & TypeWithPrefix
   filename: string
   req: PayloadRequest
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {
   collection: CollectionConfig
+  data: any
   filename: string
   prefix?: string
 }) => Promise<string> | string
 
 export type StaticHandler = (
   req: PayloadRequest,
-  res: Response,
-  next: NextFunction,
-) => Promise<unknown> | unknown
+  args: { doc?: TypeWithID; params: { collection: string; filename: string } },
+) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
-  generateURL: GenerateURL
+  /**
+   * Additional fields to be injected into the base collection and image sizes
+   */
+  fields?: Field[]
+  /**
+   * Generates the public URL for a file
+   */
+  generateURL?: GenerateURL
   handleDelete: HandleDelete
   handleUpload: HandleUpload
+  name: string
   onInit?: () => void
   staticHandler: StaticHandler
-  webpack?: (config: WebpackConfig) => WebpackConfig
 }
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter
@@ -69,7 +80,7 @@ export interface CollectionOptions {
 }
 
 export interface PluginOptions {
-  collections: Record<string, CollectionOptions>
+  collections: Partial<Record<UploadCollectionSlug, CollectionOptions>>
   /**
    * Whether or not to enable the plugin
    *

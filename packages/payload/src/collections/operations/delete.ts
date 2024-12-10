@@ -1,80 +1,90 @@
 import httpStatus from 'http-status'
 
-import type { GeneratedTypes } from '../../'
-import type { AccessResult } from '../../config/types'
-import type { PayloadRequest } from '../../express/types'
-import type { Where } from '../../types'
-import type { BeforeOperationHook, Collection } from '../config/types'
+import type { AccessResult } from '../../config/types.js'
+import type { CollectionSlug } from '../../index.js'
+import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
+import type {
+  BeforeOperationHook,
+  BulkOperationResult,
+  Collection,
+  DataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess'
-import { combineQueries } from '../../database/combineQueries'
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths'
-import { APIError } from '../../errors'
-import { afterRead } from '../../fields/hooks/afterRead'
-import { deleteUserPreferences } from '../../preferences/deleteUserPreferences'
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
-import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions'
-import { buildAfterOperation } from './utils'
+import executeAccess from '../../auth/executeAccess.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { APIError } from '../../errors/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
+import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
   collection: Collection
   depth?: number
+  disableTransaction?: boolean
   overrideAccess?: boolean
+  overrideLock?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
   where: Where
 }
 
-async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
+export const deleteOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   incomingArgs: Arguments,
-): Promise<{
-  docs: GeneratedTypes['collections'][TSlug][]
-  errors: {
-    id: GeneratedTypes['collections'][TSlug]['id']
-    message: string
-  }[]
-}> {
+): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'delete',
-        })) || args
-    },
-    Promise.resolve(),
-  )
-
-  const {
-    collection: { config: collectionConfig },
-    depth,
-    overrideAccess,
-    req: {
-      locale,
-      payload: { config },
-      payload,
-      t,
-    },
-    req,
-    showHiddenFields,
-    where,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
+
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'delete',
+            req: args.req,
+          })) || args
+      },
+      Promise.resolve(),
+    )
+
+    const {
+      collection: { config: collectionConfig },
+      depth,
+      overrideAccess,
+      overrideLock,
+      populate,
+      req: {
+        fallbackLocale,
+        locale,
+        payload: { config },
+        payload,
+      },
+      req,
+      select,
+      showHiddenFields,
+      where,
+    } = args
 
     if (!where) {
       throw new APIError("Missing 'where' query of documents to delete.", httpStatus.BAD_REQUEST)
@@ -103,22 +113,34 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     // Retrieve documents
     // /////////////////////////////////////
 
-    const { docs } = await payload.db.find<GeneratedTypes['collections'][TSlug]>({
+    const { docs } = await payload.db.find<DataFromCollectionSlug<TSlug>>({
       collection: collectionConfig.slug,
       locale,
       req,
+      select,
       where: fullWhere,
     })
 
     const errors = []
 
-    /* eslint-disable no-param-reassign */
     const promises = docs.map(async (doc) => {
       let result
 
       const { id } = doc
 
       try {
+        // /////////////////////////////////////
+        // Handle potentially locked documents
+        // /////////////////////////////////////
+
+        await checkDocumentLockStatus({
+          id,
+          collectionSlug: collectionConfig.slug,
+          lockErrorMessage: `Document with ID ${id} is currently locked and cannot be deleted.`,
+          overrideLock,
+          req,
+        })
+
         // /////////////////////////////////////
         // beforeDelete - Collection
         // /////////////////////////////////////
@@ -139,7 +161,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           config,
           doc,
           overrideDelete: true,
-          t,
+          req,
         })
 
         // /////////////////////////////////////
@@ -149,9 +171,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         if (collectionConfig.versions) {
           await deleteCollectionVersions({
             id,
+            slug: collectionConfig.slug,
             payload,
             req,
-            slug: collectionConfig.slug,
           })
         }
 
@@ -178,9 +200,14 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           context: req.context,
           depth,
           doc: result || doc,
+          draft: undefined,
+          fallbackLocale,
           global: null,
+          locale,
           overrideAccess,
+          populate,
           req,
+          select,
           showHiddenFields,
         })
 
@@ -253,20 +280,20 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation: 'delete',
       result,
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }
-
-export default deleteOperation

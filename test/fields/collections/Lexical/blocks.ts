@@ -1,11 +1,12 @@
-import type { Block } from '../../../../packages/payload/src/fields/config/types'
+import type { ArrayField, Block } from 'payload'
 
-import { lexicalEditor } from '../../../../packages/richtext-lexical/src'
-import { textFieldsSlug } from '../Text/shared'
+import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
-export const BlockColumns: any = {
+import { textFieldsSlug } from '../Text/shared.js'
+
+export const BlockColumns = ({ name }: { name: string }): ArrayField => ({
   type: 'array',
-  name: 'columns',
+  name,
   interfaceName: 'BlockColumns',
   admin: {
     initCollapsed: true,
@@ -15,8 +16,19 @@ export const BlockColumns: any = {
       name: 'text',
       type: 'text',
     },
+    {
+      name: 'subArray',
+      type: 'array',
+      fields: [
+        {
+          name: 'requiredText',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
   ],
-}
+})
 export const ConditionalLayoutBlock: Block = {
   fields: [
     {
@@ -28,7 +40,7 @@ export const ConditionalLayoutBlock: Block = {
       required: true,
     },
     {
-      ...BlockColumns,
+      ...BlockColumns({ name: 'columns' }),
       admin: {
         condition: (data, siblingData) => {
           return ['1'].includes(siblingData.layout)
@@ -38,7 +50,7 @@ export const ConditionalLayoutBlock: Block = {
       maxRows: 1,
     },
     {
-      ...BlockColumns,
+      ...BlockColumns({ name: 'columns2' }),
       admin: {
         condition: (data, siblingData) => {
           return ['2'].includes(siblingData.layout)
@@ -48,7 +60,7 @@ export const ConditionalLayoutBlock: Block = {
       maxRows: 2,
     },
     {
-      ...BlockColumns,
+      ...BlockColumns({ name: 'columns3' }),
       admin: {
         condition: (data, siblingData) => {
           return ['3'].includes(siblingData.layout)
@@ -73,6 +85,7 @@ export const TextBlock: Block = {
 }
 
 export const RadioButtonsBlock: Block = {
+  interfaceName: 'LexicalBlocksRadioButtonsBlock',
   fields: [
     {
       name: 'radioButtons',
@@ -99,12 +112,36 @@ export const RadioButtonsBlock: Block = {
 export const RichTextBlock: Block = {
   fields: [
     {
-      name: 'richText',
+      name: 'richTextField',
       type: 'richText',
-      editor: lexicalEditor(),
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          FixedToolbarFeature(),
+          BlocksFeature({
+            blocks: [
+              {
+                fields: [
+                  {
+                    name: 'subRichTextField',
+                    type: 'richText',
+                    editor: lexicalEditor({}),
+                  },
+                  {
+                    name: 'subUploadField',
+                    type: 'upload',
+                    relationTo: 'uploads',
+                  },
+                ],
+                slug: 'lexicalAndUploadBlock',
+              },
+            ],
+          }),
+        ],
+      }),
     },
   ],
-  slug: 'richText',
+  slug: 'richTextBlock',
 }
 
 export const UploadAndRichTextBlock: Block = {
@@ -212,4 +249,45 @@ export const SubBlockBlock: Block = {
       ],
     },
   ],
+}
+
+export const TabBlock: Block = {
+  slug: 'tabBlock',
+  fields: [
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Tab1',
+          name: 'tab1',
+          fields: [
+            {
+              name: 'text1',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          label: 'Tab2',
+          name: 'tab2',
+          fields: [
+            {
+              name: 'text2',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+}
+
+export const CodeBlock: Block = {
+  fields: [
+    {
+      name: 'code',
+      type: 'code',
+    },
+  ],
+  slug: 'code',
 }

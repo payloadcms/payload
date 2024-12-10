@@ -1,31 +1,53 @@
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types'
-import type { Operation } from '../../../types'
-import type { Field, TabAsField } from '../../config/types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { ValidationFieldError } from '../../../errors/index.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
-import { promise } from './promise'
+import { promise } from './promise.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
-  data: Record<string, unknown>
-  doc: Record<string, unknown>
-  docWithLocales: Record<string, unknown>
-  errors: { field: string; message: string }[]
+  data: JsonObject
+  /**
+   * The original data (not modified by any hooks)
+   */
+  doc: JsonObject
+  /**
+   * The original data with locales (not modified by any hooks)
+   */
+  docWithLocales: JsonObject
+  errors: ValidationFieldError[]
   fields: (Field | TabAsField)[]
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   id?: number | string
-  mergeLocaleActions: (() => void)[]
+  mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
-  path: string
+  path: (number | string)[]
   req: PayloadRequest
-  siblingData: Record<string, unknown>
-  siblingDoc: Record<string, unknown>
-  siblingDocWithLocales: Record<string, unknown>
+  schemaPath: string[]
+  siblingData: JsonObject
+  /**
+   * The original siblingData (not modified by any hooks)
+   */
+  siblingDoc: JsonObject
+  /**
+   * The original siblingData with locales (not modified by any hooks)
+   */
+  siblingDocWithLocales: JsonObject
   skipValidation?: boolean
 }
 
+/**
+ * This function is responsible for the following actions, in order:
+ * - Run condition
+ * - Execute field hooks
+ * - Validate data
+ * - Transform data for storage
+ * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
+ */
 export const traverseFields = async ({
   id,
   collection,
@@ -40,6 +62,7 @@ export const traverseFields = async ({
   operation,
   path,
   req,
+  schemaPath,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
@@ -47,7 +70,7 @@ export const traverseFields = async ({
 }: Args): Promise<void> => {
   const promises = []
 
-  fields.forEach((field) => {
+  fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
         id,
@@ -58,10 +81,12 @@ export const traverseFields = async ({
         docWithLocales,
         errors,
         field,
+        fieldIndex,
         global,
         mergeLocaleActions,
         operation,
-        path,
+        parentPath: path,
+        parentSchemaPath: schemaPath,
         req,
         siblingData,
         siblingDoc,

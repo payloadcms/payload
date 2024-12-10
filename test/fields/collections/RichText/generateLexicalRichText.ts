@@ -1,4 +1,5 @@
-import { loremIpsum } from './loremIpsum'
+import { textFieldsSlug } from '../../slugs.js'
+import { loremIpsum } from './loremIpsum.js'
 
 export function generateLexicalRichText() {
   return {
@@ -53,8 +54,9 @@ export function generateLexicalRichText() {
               direction: 'ltr',
               format: '',
               indent: 0,
+              id: '665d10938106ab380c7f3730',
               type: 'link',
-              version: 1,
+              version: 2,
               fields: {
                 url: 'https://payloadcms.com',
                 newTab: true,
@@ -85,15 +87,14 @@ export function generateLexicalRichText() {
               direction: 'ltr',
               format: '',
               indent: 0,
+              id: '665d10938106ab380c7f3730',
               type: 'link',
-              version: 1,
+              version: 2,
               fields: {
                 url: 'https://',
                 doc: {
-                  value: {
-                    id: '{{ARRAY_DOC_ID}}',
-                  },
-                  relationTo: 'array-fields',
+                  value: '{{TEXT_DOC_ID}}',
+                  relationTo: textFieldsSlug,
                 },
                 newTab: false,
                 linkType: 'internal',
@@ -118,10 +119,8 @@ export function generateLexicalRichText() {
         {
           format: '',
           type: 'relationship',
-          version: 1,
-          value: {
-            id: '{{TEXT_DOC_ID}}',
-          },
+          version: 2,
+          value: '{{TEXT_DOC_ID}}',
           relationTo: 'text-fields',
         },
         {
@@ -232,11 +231,10 @@ export function generateLexicalRichText() {
         {
           format: '',
           type: 'upload',
-          version: 1,
+          version: 2,
+          id: '665d10938106ab380c7f372f',
           relationTo: 'uploads',
-          value: {
-            id: '{{UPLOAD_DOC_ID}}',
-          },
+          value: '{{UPLOAD_DOC_ID}}',
           fields: {
             caption: {
               root: {

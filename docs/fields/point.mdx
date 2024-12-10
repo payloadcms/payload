@@ -3,59 +3,63 @@ title: Point Field
 label: Point
 order: 110
 desc: The Point field type stores coordinates in the database. Learn how to use Point field for geolocation and geometry.
-
-keywords: point, geolocation, geospatial, geojson, 2dsphere, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: point, geolocation, geospatial, geojson, 2dsphere, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-<Banner>
-  The Point field type saves a pair of coordinates in the database and assigns an index for location
-  related queries.
-</Banner>
-
-<Banner type="warning">
-  <strong>Note:</strong> The Point field type is currently only supported in MongoDB.
-</Banner>
+The Point Field saves a pair of coordinates in the database and assigns an index for location related queries. The data structure in the database matches the GeoJSON structure to represent point. The Payload APIs simplifies the object data to only the [longitude, latitude] location.
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/point.png"
   srcDark="https://payloadcms.com/images/docs/fields/point-dark.png"
-  alt="Shows a Point field in the Payload admin panel"
-  caption="Admin panel screenshot of a Point field"
+  alt="Shows a Point field in the Payload Admin Panel"
+  caption="Admin Panel screenshot of a Point field"
 />
 
-The data structure in the database matches the GeoJSON structure to represent point. The Payload APIs simplifies the object data to only the [longitude, latitude] location.
+To add a Point Field, set the `type` to `point` in your [Field Config](./overview):
 
-### Config
+```ts
+import type { Field } from 'payload'
 
-| Option             | Description                                                                                                                                                                                                       |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                            |
-| **`label`**        | Used as a field label in the Admin panel and to name the generated GraphQL type.                                                                                                                                  |
-| **`unique`**       | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                                      |
-| **`index`**        | Build an [index](/docs/database/overview) for this field to produce faster queries. To support location queries, point index defaults to `2dsphere`, to disable the index set to `false`. |
-| **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                                      |
-| **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                                     |
-| **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                                        |
-| **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                                           |
-| **`hidden`**       | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                                  |
-| **`defaultValue`** | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                              |
-| **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                                   |
-| **`required`**     | Require this field to have a value.                                                                                                                                                                               |
-| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                                         |
-| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                         |
+export const MyPointField: Field = {
+  // ...
+  type: 'point', // highlight-line
+}
+```
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  The Point Field currently is not supported in SQLite.
+</Banner>
+
+## Config
+
+| Option                 | Description                                                                                                                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                    |
+| **`label`**            | Used as a field label in the Admin Panel and to name the generated GraphQL type.                                                                                                          |
+| **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                              |
+| **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. To support location queries, point index defaults to `2dsphere`, to disable the index set to `false`. |
+| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                              |
+| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                           |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                     |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                        |
+| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                          |
+| **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                      |
+| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                           |
+| **`required`**         | Require this field to have a value.                                                                                                                                                       |
+| **`admin`**            | Admin-specific configuration. [More details](../admin/fields#admin-options).                                                                                                              |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                 |
+| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                               |
+| **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)                          |
 
 _\* An asterisk denotes that a property is required._
 
-<Banner type="warning">
-  <strong>Note:</strong> The Point field type is currently only supported in MongoDB.
-</Banner>
-
-### Example
+## Example
 
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -69,6 +73,59 @@ export const ExampleCollection: CollectionConfig = {
 }
 ```
 
-### Querying
+## Querying - near
 
 In order to do query based on the distance to another point, you can use the `near` operator. When querying using the near operator, the returned documents will be sorted by nearest first.
+
+## Querying - within
+
+In order to do query based on whether points are within a specific area defined in GeoJSON, you can use the `within` operator.
+Example:
+```ts
+const polygon: Point[] = [
+  [9.0, 19.0], // bottom-left
+  [9.0, 21.0], // top-left
+  [11.0, 21.0], // top-right
+  [11.0, 19.0], // bottom-right
+  [9.0, 19.0], // back to starting point to close the polygon
+]
+
+payload.find({
+  collection: "points",
+  where: {
+    point: {
+      within: {
+        type: 'Polygon',
+        coordinates: [polygon],
+      },
+    },
+  },
+})
+```
+
+
+## Querying - intersects
+
+In order to do query based on whether points intersect a specific area defined in GeoJSON, you can use the `intersects` operator.
+Example:
+```ts
+const polygon: Point[] = [
+  [9.0, 19.0], // bottom-left
+  [9.0, 21.0], // top-left
+  [11.0, 21.0], // top-right
+  [11.0, 19.0], // bottom-right
+  [9.0, 19.0], // back to starting point to close the polygon
+]
+
+payload.find({
+  collection: "points",
+  where: {
+    point: {
+      intersects: {
+        type: 'Polygon',
+        coordinates: [polygon],
+      },
+    },
+  },
+})
+```

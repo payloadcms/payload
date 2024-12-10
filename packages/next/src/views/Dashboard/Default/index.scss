@@ -1,0 +1,69 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .dashboard {
+    width: 100%;
+    --gap: var(--base);
+    --cols: 5;
+
+    &__wrap {
+      padding-bottom: var(--spacing-view-bottom);
+      display: flex;
+      flex-direction: column;
+      gap: var(--base);
+    }
+
+    &__group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+    }
+
+    &__label {
+      margin: 0;
+    }
+
+    &__card-list {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      gap: var(--gap);
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+
+      .card {
+        height: 100%;
+      }
+    }
+
+    &__locked.locked {
+      align-items: unset;
+      justify-content: unset;
+    }
+
+    @include large-break {
+      --cols: 4;
+    }
+
+    @include mid-break {
+      --gap: var(--base);
+      --cols: 2;
+    }
+
+    @include small-break {
+      --cols: 2;
+
+      &__wrap {
+        gap: var(--base);
+      }
+
+      &__card-list {
+        gap: base(0.4);
+      }
+    }
+
+    @include extra-small-break {
+      --cols: 1;
+    }
+  }
+}

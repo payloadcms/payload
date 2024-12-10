@@ -1,0 +1,65 @@
+@import '../scss/styles';
+
+@layer payload-default {
+  .rich-text-lexical {
+    .editor {
+      position: relative;
+    }
+
+    .editor-container {
+      position: relative;
+
+      font-family: var(--font-serif);
+      font-size: base(0.8);
+      letter-spacing: 0.02em;
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: var(--font-body);
+        line-height: 1.125;
+        letter-spacing: 0;
+      }
+    }
+
+    &--show-gutter {
+      > .rich-text-lexical__wrap
+        > .editor-container
+        > .editor-scroller
+        > .editor
+        > div
+        > .editor-placeholder {
+        left: 3rem;
+      }
+    }
+
+    &:not(&--show-gutter)
+      > .rich-text-lexical__wrap
+      > .editor-container
+      > .editor-scroller
+      > .editor
+      > div
+      > .editor-placeholder {
+      left: 0;
+    }
+
+    .editor-placeholder {
+      position: absolute;
+      top: 8px;
+      font-size: base(0.8);
+      line-height: 1.5;
+      color: var(--theme-elevation-500);
+      /* Prevent text selection */
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+
+      /* Make it behave more like a background element (no interaction) */
+      pointer-events: none;
+    }
+  }
+}

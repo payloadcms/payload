@@ -4,9 +4,12 @@
     "composite": true, // Make sure typescript knows that this module depends on their references
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "jsx": "react"
+    "strict": true
   },
   "exclude": [
     "dist",
@@ -14,12 +17,13 @@
     "tests",
     "test",
     "node_modules",
-    ".eslintrc.js",
-    "src/**/*.spec.js",
-    "src/**/*.spec.jsx",
-    "src/**/*.spec.ts",
-    "src/**/*.spec.tsx"
+    "eslint.config.js",
   ],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
-  "references": [{ "path": "../payload" }] // richtext-lexical depends on payload
+  "references": [
+    { "path": "../payload" },
+    { "path": "../translations" },
+    { "path": "../ui" },
+    { "path": "../next" }
+  ]
 }

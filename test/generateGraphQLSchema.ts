@@ -1,34 +1,41 @@
+import type { SanitizedConfig } from 'payload'
+
+import { generateSchema } from '@payloadcms/graphql/utilities'
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
-import { generateGraphQLSchema } from '../packages/payload/src/bin/generateGraphQLSchema'
+import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
 
-let testDir
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+const loadConfig = async (configPath: string): Promise<SanitizedConfig> => {
+  return await (
+    await import(configPath)
+  ).default
+}
+
+let testDir: string
 if (testConfigDir) {
-  testDir = path.resolve(__dirname, testConfigDir)
-  setPaths(testDir)
-  generateGraphQLSchema()
+  testDir = path.resolve(dirname, testConfigDir)
+  const config = await loadConfig(path.resolve(testDir, 'config.ts'))
+
+  setTestEnvPaths(testDir)
+  generateSchema(config)
 } else {
   // Generate graphql schema for entire directory
-  testDir = __dirname
+  testDir = dirname
 
-  fs.readdirSync(__dirname, { withFileTypes: true })
+  const config = await loadConfig(path.resolve(testDir, 'config.ts'))
+
+  fs.readdirSync(dirname, { withFileTypes: true })
     .filter((f) => f.isDirectory())
     .forEach((dir) => {
       const suiteDir = path.resolve(testDir, dir.name)
-      const configFound = setPaths(suiteDir)
-      if (configFound) generateGraphQLSchema()
+      const configFound = setTestEnvPaths(suiteDir)
+      if (configFound) generateSchema(config)
     })
-}
-
-// Set config path and TS output path using test dir
-function setPaths(dir) {
-  const configPath = path.resolve(dir, 'config.ts')
-  if (fs.existsSync(configPath)) {
-    process.env.PAYLOAD_CONFIG_PATH = configPath
-    return true
-  }
-  return false
 }

@@ -1,0 +1,101 @@
+---
+title: Environment Variables
+label: Environment Variables
+order: 100
+desc: Learn how to use Environment Variables in your Payload project
+---
+
+Environment Variables are a way to store sensitive information that your application needs to function. This could be anything from API keys to [Database](../database/overview) credentials. Payload allows you to easily use Environment Variables within your config and throughout your application.
+
+## Next.js Applications
+
+If you are using Next.js, no additional setup is required other than creating your `.env` file.
+
+To use Environment Variables, add a `.env` file to the root of your project:
+
+```plaintext
+project-name/
+├─ .env
+├─ package.json
+├─ payload.config.ts
+```
+
+Here is an example of what an `.env` file might look like:
+
+```plaintext
+SERVER_URL=localhost:3000
+DATABASE_URI=mongodb://localhost:27017/my-database
+```
+
+To use Environment Variables in your Payload Config, you can access them directly from `process.env`:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  serverURL: process.env.SERVER_URL, // highlight-line
+  // ...
+})
+```
+
+## Client-side Environments
+
+For security and safety reasons, the [Admin Panel](../admin/overview) does **not** include Environment Variables in its _client-side_ bundle by default. But, Next.js provides a mechanism to expose Environment Variables to the client-side bundle when needed.
+
+If you are building a [Custom Component](../admin/components) and need to access Environment Variables from the client-side, you can do so by prefixing them with `NEXT_PUBLIC_`.
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  Be careful about what variables you provide to your client-side code. Analyze every single one to make sure that you're not accidentally leaking sensitive information. Only ever include keys that are safe for the public to read in plain text.
+</Banner>
+
+For example, if you've got the following Environment Variable:
+
+```bash
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_XXXXXXXXXXXXXXXXXX
+```
+
+This key will automatically be made available to the client-side Payload bundle and can be referenced in your Custom Component as follows:
+
+```tsx
+'use client'
+import React from 'react'
+
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY // highlight-line
+
+const MyClientComponent = () => {
+  // do something with the key
+
+  return (
+    <div>
+      My Client Component
+    </div>
+  )
+}
+```
+
+For more information, check out the [Next.js Documentation](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables).
+
+## Outside of Next.js
+
+If you are using Payload outside of Next.js, we suggest using the [`dotenv`](https://www.npmjs.com/package/dotenv) package to handle Environment Variables from `.env` files. This will automatically load your Environment Variables into `process.env`.
+
+To do this, import the package as high up in your application as possible:
+
+```ts
+import dotenv from 'dotenv'
+dotenv.config() // highlight-line
+
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  serverURL: process.env.SERVER_URL,
+  // ...
+})
+```
+
+<Banner type="warning">
+  <strong>Tip:</strong>
+  Be sure that `dotenv` can find your `.env` file. By default, it will look for a file named `.env` in the root of your project. If you need to specify a different file, pass the path into the config options.
+</Banner>
+

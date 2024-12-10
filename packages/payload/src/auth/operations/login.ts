@@ -1,25 +1,25 @@
-import type { CookieOptions, Response } from 'express'
+import type {
+  AuthOperationsFromCollectionSlug,
+  Collection,
+  DataFromCollectionSlug,
+} from '../../collections/config/types.js'
+import type { CollectionSlug } from '../../index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
+import type { User } from '../types.js'
 
-import jwt from 'jsonwebtoken'
-
-import type { GeneratedTypes } from '../../'
-import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
-import type { User } from '../types'
-
-import { buildAfterOperation } from '../../collections/operations/utils'
-import { AuthenticationError, LockedAuth } from '../../errors'
-import { afterRead } from '../../fields/hooks/afterRead'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import getCookieExpiration from '../../utilities/getCookieExpiration'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
-import isLocked from '../isLocked'
-import { authenticateLocalStrategy } from '../strategies/local/authenticate'
-import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts'
-import { getFieldsToSign } from './getFieldsToSign'
-import unlock from './unlock'
+import { buildAfterOperation } from '../../collections/operations/utils.js'
+import { AuthenticationError, LockedAuth, ValidationError } from '../../errors/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { Forbidden } from '../../index.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { getFieldsToSign } from '../getFieldsToSign.js'
+import { getLoginOptions } from '../getLoginOptions.js'
+import isLocked from '../isLocked.js'
+import { jwtSign } from '../jwt.js'
+import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
+import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
+import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
 export type Result = {
   exp?: number
@@ -27,75 +27,164 @@ export type Result = {
   user?: User
 }
 
-export type Arguments = {
+export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
-  data: {
-    email: string
-    password: string
-  }
+  data: AuthOperationsFromCollectionSlug<TSlug>['login']
   depth?: number
   overrideAccess?: boolean
   req: PayloadRequest
-  res?: Response
   showHiddenFields?: boolean
 }
 
-async function login<TSlug extends keyof GeneratedTypes['collections']>(
-  incomingArgs: Arguments,
-): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
+export const loginOperation = async <TSlug extends CollectionSlug>(
+  incomingArgs: Arguments<TSlug>,
+): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> => {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection?.config,
-        context: args.req.context,
-        operation: 'login',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    collection: { config: collectionConfig },
-    data,
-    depth,
-    overrideAccess,
-    req,
-    req: {
-      payload,
-      payload: { config, secret },
-    },
-    showHiddenFields,
-  } = args
+  if (args.collection.config.auth.disableLocalStrategy) {
+    throw new Forbidden(args.req.t)
+  }
 
   try {
-    const shouldCommit = await initTransaction(req)
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection?.config,
+          context: args.req.context,
+          operation: 'login',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      collection: { config: collectionConfig },
+      data,
+      depth,
+      overrideAccess,
+      req,
+      req: {
+        fallbackLocale,
+        locale,
+        payload,
+        payload: { secret },
+      },
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Login
     // /////////////////////////////////////
 
+    let user
     const { email: unsanitizedEmail, password } = data
+    const loginWithUsername = collectionConfig.auth.loginWithUsername
 
-    const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase().trim() : null
+    const sanitizedEmail =
+      typeof unsanitizedEmail === 'string' ? unsanitizedEmail.toLowerCase().trim() : null
+    const sanitizedUsername =
+      'username' in data && typeof data?.username === 'string'
+        ? data.username.toLowerCase().trim()
+        : null
 
-    let user = await payload.db.findOne<any>({
+    const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
+
+    // cannot login with email, did not provide username
+    if (!canLoginWithEmail && !sanitizedUsername) {
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [{ message: req.i18n.t('validation:required'), path: 'username' }],
+      })
+    }
+
+    // cannot login with username, did not provide email
+    if (!canLoginWithUsername && !sanitizedEmail) {
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [{ message: req.i18n.t('validation:required'), path: 'email' }],
+      })
+    }
+
+    // can login with either email or username, did not provide either
+    if (!sanitizedUsername && !sanitizedEmail) {
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [
+          { message: req.i18n.t('validation:required'), path: 'email' },
+          { message: req.i18n.t('validation:required'), path: 'username' },
+        ],
+      })
+    }
+
+    // did not provide password for login
+    if (typeof password !== 'string' || password.trim() === '') {
+      throw new ValidationError({
+        collection: collectionConfig.slug,
+        errors: [{ message: req.i18n.t('validation:required'), path: 'password' }],
+      })
+    }
+
+    let whereConstraint: Where = {}
+    const emailConstraint: Where = {
+      email: {
+        equals: sanitizedEmail,
+      },
+    }
+    const usernameConstraint: Where = {
+      username: {
+        equals: sanitizedUsername,
+      },
+    }
+
+    if (canLoginWithEmail && canLoginWithUsername && (sanitizedUsername || sanitizedEmail)) {
+      if (sanitizedUsername) {
+        whereConstraint = {
+          or: [
+            usernameConstraint,
+            {
+              email: {
+                equals: sanitizedUsername,
+              },
+            },
+          ],
+        }
+      } else {
+        whereConstraint = {
+          or: [
+            emailConstraint,
+            {
+              username: {
+                equals: sanitizedEmail,
+              },
+            },
+          ],
+        }
+      }
+    } else if (canLoginWithEmail && sanitizedEmail) {
+      whereConstraint = emailConstraint
+    } else if (canLoginWithUsername && sanitizedUsername) {
+      whereConstraint = usernameConstraint
+    }
+
+    user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,
       req,
-      where: { email: { equals: email.toLowerCase() } },
+      where: whereConstraint,
     })
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {
-      throw new AuthenticationError(req.t)
+      throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && sanitizedUsername))
     }
 
-    if (user && isLocked(user.lockUntil)) {
+    user.collection = collectionConfig.slug
+
+    if (isLocked(new Date(user.lockUntil).getTime())) {
       throw new LockedAuth(req.t)
     }
 
@@ -119,21 +208,23 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     }
 
     if (maxLoginAttemptsEnabled) {
-      await unlock({
-        collection: {
-          config: collectionConfig,
-        },
-        data,
-        overrideAccess: true,
+      await resetLoginAttempts({
+        collection: collectionConfig,
+        doc: user,
+        payload: req.payload,
         req,
       })
     }
 
     const fieldsToSign = getFieldsToSign({
       collectionConfig,
-      email,
+      email: sanitizedEmail,
       user,
     })
+
+    // /////////////////////////////////////
+    // beforeLogin - Collection
+    // /////////////////////////////////////
 
     await collectionConfig.hooks.beforeLogin.reduce(async (priorHook, hook) => {
       await priorHook
@@ -147,25 +238,11 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
         })) || user
     }, Promise.resolve())
 
-    const token = jwt.sign(fieldsToSign, secret, {
-      expiresIn: collectionConfig.auth.tokenExpiration,
+    const { exp, token } = await jwtSign({
+      fieldsToSign,
+      secret,
+      tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
-
-    if (args.res) {
-      const cookieOptions: CookieOptions = {
-        domain: undefined,
-        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-        httpOnly: true,
-        path: '/',
-        sameSite: collectionConfig.auth.cookies.sameSite,
-        secure: collectionConfig.auth.cookies.secure,
-      }
-
-      if (collectionConfig.auth.cookies.domain)
-        cookieOptions.domain = collectionConfig.auth.cookies.domain
-
-      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions)
-    }
 
     req.user = user
 
@@ -195,7 +272,10 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: user,
+      draft: undefined,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -217,24 +297,8 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
         })) || user
     }, Promise.resolve())
 
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      user =
-        (await hook({
-          collection: args.collection?.config,
-          context: req.context,
-          doc: user,
-          req,
-        })) || user
-    }, Promise.resolve())
-
-    let result: Result & { user: GeneratedTypes['collections'][TSlug] } = {
-      exp: (jwt.decode(token) as jwt.JwtPayload).exp,
+    let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
+      exp,
       token,
       user,
     }
@@ -243,28 +307,20 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: args.collection?.config,
       operation: 'login',
       result,
     })
 
-    if (collectionConfig.auth.removeTokenFromResponses) {
-      delete result.token
-    }
-
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
-
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }
-
-export default login

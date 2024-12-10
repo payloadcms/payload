@@ -1,39 +1,40 @@
-import type { Response } from 'express'
-import type { MarkOptional } from 'ts-essentials'
+import type {
+  AuthOperationsFromCollectionSlug,
+  Collection,
+  DataFromCollectionSlug,
+  RequiredDataFromCollectionSlug,
+} from '../../collections/config/types.js'
+import type { CollectionSlug } from '../../index.js'
+import type { PayloadRequest, SelectType } from '../../types/index.js'
 
-import type { GeneratedTypes } from '../../'
-import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
+import { Forbidden } from '../../errors/index.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { ensureUsernameOrEmail } from '../ensureUsernameOrEmail.js'
 
-import { Forbidden } from '../../errors'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
-
-export type Arguments<T extends { [field: number | string | symbol]: unknown }> = {
+export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
-  data: MarkOptional<T, 'createdAt' | 'id' | 'sizes' | 'updatedAt'> & {
-    email: string
-    password: string
-  }
+  data: AuthOperationsFromCollectionSlug<TSlug>['registerFirstUser'] &
+    RequiredDataFromCollectionSlug<TSlug>
   req: PayloadRequest
-  res: Response
 }
 
-export type Result<T> = {
-  message: string
-  user: T
+export type Result<TData> = {
+  exp?: number
+  token?: string
+  user?: TData
 }
 
-async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections']>(
-  args: Arguments<GeneratedTypes['collections'][TSlug]>,
-): Promise<Result<GeneratedTypes['collections'][TSlug]>> {
+export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
+  args: Arguments<TSlug>,
+): Promise<Result<DataFromCollectionSlug<TSlug>>> => {
   const {
     collection: {
       config,
       config: {
-        auth: { verify },
         slug,
+        auth: { verify },
       },
     },
     data,
@@ -41,21 +42,35 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     req: { payload },
   } = args
 
+  if (config.auth.disableLocalStrategy) {
+    throw new Forbidden(req.t)
+  }
+
   try {
     const shouldCommit = await initTransaction(req)
+
+    ensureUsernameOrEmail<TSlug>({
+      authOptions: config.auth,
+      collectionSlug: slug,
+      data,
+      operation: 'create',
+      req,
+    })
 
     const doc = await payload.db.findOne({
       collection: config.slug,
       req,
     })
 
-    if (doc) throw new Forbidden(req.t)
+    if (doc) {
+      throw new Forbidden(req.t)
+    }
 
     // /////////////////////////////////////
     // Register first user
     // /////////////////////////////////////
 
-    const result = await payload.create<TSlug>({
+    const result = await payload.create<TSlug, SelectType>({
       collection: slug as TSlug,
       data,
       overrideAccess: true,
@@ -78,27 +93,23 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     // Log in new user
     // /////////////////////////////////////
 
-    const { token } = await payload.login({
+    const { exp, token } = await payload.login({
       ...args,
       collection: slug,
       req,
     })
 
-    const resultToReturn = {
-      ...result,
-      token,
+    if (shouldCommit) {
+      await commitTransaction(req)
     }
 
-    if (shouldCommit) await commitTransaction(req)
-
     return {
-      message: 'Registered and logged in successfully. Welcome!',
-      user: resultToReturn,
+      exp,
+      token,
+      user: result,
     }
   } catch (error: unknown) {
     await killTransaction(req)
     throw error
   }
 }
-
-export default registerFirstUser

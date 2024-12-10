@@ -1,11 +1,12 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from 'payload'
 
-import { disablePublishGlobalSlug } from '../slugs'
+import { disablePublishGlobalSlug } from '../slugs.js'
 
 const DisablePublishGlobal: GlobalConfig = {
+  slug: disablePublishGlobalSlug,
   access: {
     update: ({ data }) => {
-      return data._status !== 'published'
+      return data?._status !== 'published'
     },
   },
   fields: [
@@ -14,7 +15,6 @@ const DisablePublishGlobal: GlobalConfig = {
       type: 'text',
     },
   ],
-  slug: disablePublishGlobalSlug,
   versions: {
     drafts: true,
   },

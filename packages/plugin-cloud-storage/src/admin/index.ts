@@ -1,8 +1,8 @@
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
-import type { PluginOptions } from '../types'
+import type { PluginOptions } from '../types.js'
 
-import { getFields } from './fields/getFields'
+import { getFields } from './fields/getFields.js'
 
 // This is the admin plugin cloud-storage stubfile.
 // It only extends the config that are required by the admin UI.

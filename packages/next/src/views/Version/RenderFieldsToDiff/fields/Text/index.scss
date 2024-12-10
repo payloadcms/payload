@@ -1,0 +1,15 @@
+@layer payload-default {
+  .text-diff {
+    &__locale-label {
+      [dir='ltr'] & {
+        margin-right: calc(var(--base) * 0.25);
+      }
+      [dir='rtl'] & {
+        margin-left: calc(var(--base) * 0.25);
+      }
+      background: var(--theme-elevation-100);
+      padding: calc(var(--base) * 0.25);
+      // border-radius: $style-radius-m;
+    }
+  }
+}

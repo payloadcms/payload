@@ -1,14 +1,26 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { ServerEditorConfig } from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
-  LinkFeature,
-  TreeviewFeature,
-  UploadFeature,
+  defaultEditorFeatures,
+  EXPERIMENTAL_TableFeature,
+  FixedToolbarFeature,
+  getEnabledNodes,
+  HeadingFeature,
   lexicalEditor,
-} from '../../../../packages/richtext-lexical/src'
-import { lexicalFieldsSlug } from '../../slugs'
+  LinkFeature,
+  sanitizeServerEditorConfig,
+  TreeViewFeature,
+  UploadFeature,
+} from '@payloadcms/richtext-lexical'
+import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
+import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
+
+import { lexicalFieldsSlug } from '../../slugs.js'
 import {
+  CodeBlock,
   ConditionalLayoutBlock,
   RadioButtonsBlock,
   RelationshipBlock,
@@ -16,18 +28,237 @@ import {
   RichTextBlock,
   SelectFieldBlock,
   SubBlockBlock,
+  TabBlock,
   TextBlock,
   UploadAndRichTextBlock,
-} from './blocks'
+} from './blocks.js'
+
+const editorConfig: ServerEditorConfig = {
+  features: [
+    ...defaultEditorFeatures,
+    //TestRecorderFeature(),
+    TreeViewFeature(),
+    //HTMLConverterFeature(),
+    FixedToolbarFeature(),
+    LinkFeature({
+      fields: ({ defaultFields }) => [
+        ...defaultFields,
+        {
+          name: 'rel',
+          type: 'select',
+          admin: {
+            description:
+              'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+          },
+          hasMany: true,
+          label: 'Rel Attribute',
+          options: ['noopener', 'noreferrer', 'nofollow'],
+        },
+      ],
+    }),
+    UploadFeature({
+      collections: {
+        uploads: {
+          fields: [
+            {
+              name: 'caption',
+              type: 'richText',
+              editor: lexicalEditor(),
+            },
+          ],
+        },
+      },
+    }),
+    BlocksFeature({
+      blocks: [
+        RichTextBlock,
+        TextBlock,
+        UploadAndRichTextBlock,
+        SelectFieldBlock,
+        RelationshipBlock,
+        RelationshipHasManyBlock,
+        SubBlockBlock,
+        RadioButtonsBlock,
+        ConditionalLayoutBlock,
+        TabBlock,
+        CodeBlock,
+        {
+          slug: 'myBlock',
+          admin: {
+            components: {},
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myBlockWithLabel',
+          admin: {
+            components: {
+              Label: '/collections/Lexical/blockComponents/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myBlockWithBlock',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponent.js#BlockComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'BlockRSC',
+
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myBlockWithBlockAndLabel',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponent.js#BlockComponent',
+              Label: '/collections/Lexical/blockComponents/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+      ],
+      inlineBlocks: [
+        {
+          slug: 'myInlineBlock',
+          admin: {
+            components: {},
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myInlineBlockWithLabel',
+          admin: {
+            components: {
+              Label: '/collections/Lexical/inlineBlockComponents/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myInlineBlockWithBlock',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/inlineBlockComponents/BlockComponent.js#BlockComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
+          slug: 'myInlineBlockWithBlockAndLabel',
+          admin: {
+            components: {
+              Block: '/collections/Lexical/inlineBlockComponents/BlockComponent.js#BlockComponent',
+              Label: '/collections/Lexical/inlineBlockComponents/LabelComponent.js#LabelComponent',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+      ],
+    }),
+    EXPERIMENTAL_TableFeature(),
+  ],
+}
 
 export const LexicalFields: CollectionConfig = {
   slug: lexicalFieldsSlug,
-  admin: {
-    useAsTitle: 'title',
-    listSearchableFields: ['title', 'richTextLexicalCustomFields'],
-  },
   access: {
     read: () => true,
+  },
+  admin: {
+    listSearchableFields: ['title', 'richTextLexicalCustomFields'],
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -36,13 +267,16 @@ export const LexicalFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'lexicalRootEditor',
+      type: 'richText',
+    },
+    {
       name: 'lexicalSimple',
       type: 'richText',
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
           //TestRecorderFeature(),
-          TreeviewFeature(),
+          TreeViewFeature(),
           BlocksFeature({
             blocks: [
               RichTextBlock,
@@ -56,62 +290,70 @@ export const LexicalFields: CollectionConfig = {
               ConditionalLayoutBlock,
             ],
           }),
+          HeadingFeature({ enabledHeadingSizes: ['h2', 'h4'] }),
         ],
       }),
     },
     {
       name: 'lexicalWithBlocks',
       type: 'richText',
-      required: true,
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          //TestRecorderFeature(),
-          TreeviewFeature(),
-          //HTMLConverterFeature(),
-          LinkFeature({
-            fields: [
-              {
-                name: 'rel',
-                label: 'Rel Attribute',
-                type: 'select',
-                hasMany: true,
-                options: ['noopener', 'noreferrer', 'nofollow'],
-                admin: {
-                  description:
-                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-                },
-              },
-            ],
-          }),
-          UploadFeature({
-            collections: {
-              uploads: {
-                fields: [
-                  {
-                    name: 'caption',
-                    type: 'richText',
-                    editor: lexicalEditor(),
-                  },
-                ],
-              },
-            },
-          }),
-          BlocksFeature({
-            blocks: [
-              RichTextBlock,
-              TextBlock,
-              UploadAndRichTextBlock,
-              SelectFieldBlock,
-              RelationshipBlock,
-              RelationshipHasManyBlock,
-              SubBlockBlock,
-              RadioButtonsBlock,
-              ConditionalLayoutBlock,
-            ],
-          }),
-        ],
+        admin: {
+          hideGutter: false,
+        },
+        features: editorConfig.features,
       }),
+      required: true,
+    },
+    //{
+    //  name: 'rendered',
+    //  type: 'ui',
+    //  admin: {
+    //    components: {
+    //      Field: './collections/Lexical/LexicalRendered.js#LexicalRendered',
+    //    },
+    //  },
+    //},
+    {
+      name: 'lexicalWithBlocks_markdown',
+      type: 'textarea',
+      hooks: {
+        afterRead: [
+          async ({ data, req, siblingData }) => {
+            const yourSanitizedEditorConfig = await sanitizeServerEditorConfig(
+              editorConfig,
+              req.payload.config,
+            )
+
+            const headlessEditor = createHeadlessEditor({
+              nodes: getEnabledNodes({
+                editorConfig: yourSanitizedEditorConfig,
+              }),
+            })
+
+            const yourEditorState: SerializedEditorState = siblingData.lexicalWithBlocks
+            try {
+              headlessEditor.update(
+                () => {
+                  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+                },
+                { discrete: true },
+              )
+            } catch (e) {
+              /* empty */
+            }
+
+            // Export to markdown
+            let markdown: string
+            headlessEditor.getEditorState().read(() => {
+              markdown = $convertToMarkdownString(
+                yourSanitizedEditorConfig?.features?.markdownTransformers,
+              )
+            })
+            return markdown
+          },
+        ],
+      },
     },
   ],
 }

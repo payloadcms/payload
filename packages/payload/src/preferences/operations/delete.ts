@@ -1,15 +1,12 @@
-import type { Document, Where } from '../../types'
-import type { PreferenceRequest } from '../types'
+import type { Document, Where } from '../../types/index.js'
+import type { PreferenceRequest } from '../types.js'
 
-import defaultAccess from '../../auth/defaultAccess'
-import executeAccess from '../../auth/executeAccess'
-import NotFound from '../../errors/NotFound'
-import UnauthorizedError from '../../errors/UnathorizedError'
+import { NotFound } from '../../errors/NotFound.js'
+import { UnauthorizedError } from '../../errors/UnathorizedError.js'
 
-async function deleteOperation(args: PreferenceRequest): Promise<Document> {
+export async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const {
     key,
-    overrideAccess,
     req: { payload },
     req,
     user,
@@ -17,10 +14,6 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
 
   if (!user) {
     throw new UnauthorizedError(req.t)
-  }
-
-  if (!overrideAccess) {
-    await executeAccess({ req }, defaultAccess)
   }
 
   const where: Where = {
@@ -31,18 +24,14 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
     ],
   }
 
-  const result = await payload.delete({
+  const result = await payload.db.deleteOne({
     collection: 'payload-preferences',
-    depth: 0,
-    user,
+    req,
     where,
   })
 
-  // @ts-expect-error // TODO: fix later
-  if (result.docs.length === 1) {
-    return result.docs[0]
+  if (result) {
+    return result
   }
-  throw new NotFound()
+  throw new NotFound(req.t)
 }
-
-export default deleteOperation

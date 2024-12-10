@@ -1,7 +1,7 @@
 import lodashGet from 'lodash.get'
 import Stripe from 'stripe'
 
-import type { StripeProxy } from '../types'
+import type { StripeProxy } from '../types.js'
 
 export const stripeProxy: StripeProxy = async ({ stripeArgs, stripeMethod, stripeSecretKey }) => {
   const stripe = new Stripe(stripeSecretKey, {

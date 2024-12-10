@@ -1,16 +1,26 @@
-/* eslint-disable no-param-reassign */
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
 export const hooksSlug = 'hooks'
 const Hooks: CollectionConfig = {
   slug: hooksSlug,
   access: {
-    read: () => true,
     create: () => true,
     delete: () => true,
+    read: () => true,
     update: () => true,
   },
   hooks: {
+    beforeOperation: [
+      ({ operation, req }) => {
+        if (
+          typeof req.payload.db.beginTransaction === 'function' &&
+          !req.transactionID &&
+          ['create', 'delete', 'update'].includes(operation)
+        ) {
+          throw new Error('transactionID is missing in beforeOperation hook')
+        }
+      },
+    ],
     beforeValidate: [({ data }) => validateHookOrder('collectionBeforeValidate', data)],
     beforeChange: [({ data }) => validateHookOrder('collectionBeforeChange', data)],
     afterChange: [
@@ -43,7 +53,15 @@ const Hooks: CollectionConfig = {
       type: 'checkbox',
       hooks: {
         beforeChange: [
-          ({ data }) => {
+          ({ data, operation, previousSiblingDoc, previousValue }) => {
+            if (operation === 'update') {
+              if (typeof previousValue === 'undefined') {
+                throw new Error('previousValue is missing in beforeChange hook')
+              }
+              if (!previousSiblingDoc) {
+                throw new Error('previousSiblingDoc is missing in beforeChange hook')
+              }
+            }
             data.fieldBeforeChange = true
             validateHookOrder('fieldBeforeChange', data)
             return true
@@ -106,7 +124,7 @@ const Hooks: CollectionConfig = {
   ],
 }
 
-const createHookOrder = [
+const writeHooksOrder = [
   'fieldBeforeValidate',
   'collectionBeforeValidate',
   'collectionBeforeChange',
@@ -119,10 +137,11 @@ const createHookOrder = [
 
 const validateHookOrder = (check: string, data) => {
   let hasMatched
-  createHookOrder.forEach((hook) => {
-    if (check === 'collectionBeforeRead' && !data.id) {
-      data[check] = true
-    } else if (hook === check) {
+  if (check === 'collectionBeforeRead') {
+    data.collectionBeforeRead = true
+  }
+  writeHooksOrder.forEach((hook) => {
+    if (hook === check) {
       data[check] = true
       hasMatched = true
     } else if ((!hasMatched && !data[hook]) || (hasMatched && data[hook])) {

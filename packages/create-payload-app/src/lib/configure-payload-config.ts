@@ -1,117 +1,173 @@
 import fse from 'fs-extra'
+import globby from 'globby'
 import path from 'path'
 
-import type { DbDetails } from '../types'
+import type { DbType, StorageAdapterType } from '../types.js'
 
-import { warning } from '../utils/log'
-import { bundlerPackages, dbPackages, editorPackages } from './packages'
+import { warning } from '../utils/log.js'
+import { dbReplacements, storageReplacements } from './replacements.js'
 
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
-  dbDetails: DbDetails | undefined
-  projectDir: string
+  dbType?: DbType
+  envNames?: {
+    dbUri: string
+  }
+  packageJsonName?: string
+  projectDirOrConfigPath: { payloadConfigPath: string } | { projectDir: string }
+  sharp?: boolean
+  storageAdapter?: StorageAdapterType
 }): Promise<void> {
-  if (!args.dbDetails) {
+  if (!args.dbType) {
     return
   }
 
   // Update package.json
-  const packageJsonPath = path.resolve(args.projectDir, 'package.json')
-  try {
-    const packageObj = await fse.readJson(packageJsonPath)
+  const packageJsonPath =
+    'projectDir' in args.projectDirOrConfigPath &&
+    path.resolve(args.projectDirOrConfigPath.projectDir, 'package.json')
 
-    packageObj.dependencies['payload'] = '^2.0.0'
+  if (packageJsonPath && fse.existsSync(packageJsonPath)) {
+    try {
+      const packageObj = await fse.readJson(packageJsonPath)
 
-    const dbPackage = dbPackages[args.dbDetails.type]
-    const bundlerPackage = bundlerPackages['webpack']
-    const editorPackage = editorPackages['slate']
+      const dbPackage = dbReplacements[args.dbType]
 
-    // Delete all other db adapters
-    Object.values(dbPackages).forEach((p) => {
-      if (p.packageName !== dbPackage.packageName) {
-        delete packageObj.dependencies[p.packageName]
+      // Delete all other db adapters
+      Object.values(dbReplacements).forEach((p) => {
+        if (p.packageName !== dbPackage.packageName) {
+          delete packageObj.dependencies[p.packageName]
+        }
+      })
+
+      // Set version of db adapter to match payload version
+      packageObj.dependencies[dbPackage.packageName] = packageObj.dependencies['payload']
+
+      if (args.storageAdapter) {
+        const storagePackage = storageReplacements[args.storageAdapter]
+
+        if (storagePackage?.packageName) {
+          // Set version of storage adapter to match payload version
+          packageObj.dependencies[storagePackage.packageName] = packageObj.dependencies['payload']
+        }
       }
-    })
 
-    packageObj.dependencies[dbPackage.packageName] = dbPackage.version
-    packageObj.dependencies[bundlerPackage.packageName] = bundlerPackage.version
-    packageObj.dependencies[editorPackage.packageName] = editorPackage.version
+      // Sharp provided by default, only remove if explicitly set to false
+      if (args.sharp === false) {
+        delete packageObj.dependencies['sharp']
+      }
 
-    await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
-  } catch (err: unknown) {
-    warning('Unable to update name in package.json')
+      if (args.packageJsonName) {
+        packageObj.name = args.packageJsonName
+      }
+
+      await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
+    } catch (err: unknown) {
+      warning(`Unable to configure Payload in package.json`)
+      warning(err instanceof Error ? err.message : '')
+    }
   }
 
   try {
-    const possiblePaths = [
-      path.resolve(args.projectDir, 'src/payload.config.ts'),
-      path.resolve(args.projectDir, 'src/payload/payload.config.ts'),
-    ]
-
     let payloadConfigPath: string | undefined
-
-    possiblePaths.forEach((p) => {
-      if (fse.pathExistsSync(p) && !payloadConfigPath) {
-        payloadConfigPath = p
-      }
-    })
+    if (!('payloadConfigPath' in args.projectDirOrConfigPath)) {
+      payloadConfigPath = (
+        await globby('**/payload.config.ts', {
+          absolute: true,
+          cwd: args.projectDirOrConfigPath.projectDir,
+        })
+      )?.[0]
+    } else {
+      payloadConfigPath = args.projectDirOrConfigPath.payloadConfigPath
+    }
 
     if (!payloadConfigPath) {
-      warning('Unable to update payload.config.ts with plugins')
+      warning('Unable to update payload.config.ts with plugins. Could not find payload.config.ts.')
       return
     }
 
     const configContent = fse.readFileSync(payloadConfigPath, 'utf-8')
-    const configLines = configContent.split('\n')
+    let configLines = configContent.split('\n')
 
-    const dbReplacement = dbPackages[args.dbDetails.type]
-    const bundlerReplacement = bundlerPackages['webpack']
-    const editorReplacement = editorPackages['slate']
+    // DB Replacement
+    const dbReplacement = dbReplacements[args.dbType]
 
-    let dbConfigStartLineIndex: number | undefined
-    let dbConfigEndLineIndex: number | undefined
-
-    configLines.forEach((l, i) => {
-      if (l.includes('// database-adapter-import')) {
-        configLines[i] = dbReplacement.importReplacement
-      }
-      if (l.includes('// bundler-import')) {
-        configLines[i] = bundlerReplacement.importReplacement
-      }
-
-      if (l.includes('// bundler-config')) {
-        configLines[i] = bundlerReplacement.configReplacement
-      }
-
-      if (l.includes('// editor-import')) {
-        configLines[i] = editorReplacement.importReplacement
-      }
-
-      if (l.includes('// editor-config')) {
-        configLines[i] = editorReplacement.configReplacement
-      }
-
-      if (l.includes('// database-adapter-config-start')) {
-        dbConfigStartLineIndex = i
-      }
-      if (l.includes('// database-adapter-config-end')) {
-        dbConfigEndLineIndex = i
-      }
+    configLines = replaceInConfigLines({
+      endMatch: `// database-adapter-config-end`,
+      lines: configLines,
+      replacement: dbReplacement.configReplacement(args.envNames?.dbUri),
+      startMatch: `// database-adapter-config-start`,
     })
 
-    if (!dbConfigStartLineIndex || !dbConfigEndLineIndex) {
-      warning('Unable to update payload.config.ts with database adapter import')
-    } else {
-      // Replaces lines between `// database-adapter-config-start` and `// database-adapter-config-end`
-      configLines.splice(
-        dbConfigStartLineIndex,
-        dbConfigEndLineIndex - dbConfigStartLineIndex + 1,
-        ...dbReplacement.configReplacement,
-      )
+    configLines = replaceInConfigLines({
+      lines: configLines,
+      replacement: [dbReplacement.importReplacement],
+      startMatch: '// database-adapter-import',
+    })
+
+    // Storage Adapter Replacement
+    if (args.storageAdapter) {
+      const replacement = storageReplacements[args.storageAdapter]
+      configLines = replaceInConfigLines({
+        lines: configLines,
+        replacement: replacement.configReplacement,
+        startMatch: '// storage-adapter-placeholder',
+      })
+
+      if (replacement?.importReplacement !== undefined) {
+        configLines = replaceInConfigLines({
+          lines: configLines,
+          replacement: [replacement.importReplacement],
+          startMatch: '// storage-adapter-import-placeholder',
+        })
+      }
+    }
+
+    // Sharp Replacement (provided by default, only remove if explicitly set to false)
+    if (args.sharp === false) {
+      configLines = replaceInConfigLines({
+        lines: configLines,
+        replacement: [],
+        startMatch: 'sharp,',
+      })
+      configLines = replaceInConfigLines({
+        lines: configLines,
+        replacement: [],
+        startMatch: "import sharp from 'sharp'",
+      })
     }
 
     fse.writeFileSync(payloadConfigPath, configLines.join('\n'))
   } catch (err: unknown) {
-    warning('Unable to update payload.config.ts with plugins')
+    warning(
+      `Unable to update payload.config.ts with plugins: ${err instanceof Error ? err.message : ''}`,
+    )
   }
+}
+
+function replaceInConfigLines({
+  endMatch,
+  lines,
+  replacement,
+  startMatch,
+}: {
+  /** Optional endMatch to replace multiple lines */
+  endMatch?: string
+  lines: string[]
+  replacement: string[]
+  startMatch: string
+}) {
+  if (!replacement) {
+    return lines
+  }
+
+  const startIndex = lines.findIndex((l) => l.includes(startMatch))
+  const endIndex = endMatch ? lines.findIndex((l) => l.includes(endMatch)) : startIndex
+
+  if (startIndex === -1 || endIndex === -1) {
+    return lines
+  }
+
+  lines.splice(startIndex, endIndex - startIndex + 1, ...replacement)
+  return lines
 }

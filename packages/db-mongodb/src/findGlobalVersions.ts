@@ -1,15 +1,14 @@
 import type { PaginateOptions } from 'mongoose'
-import type { FindGlobalVersions } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { FindGlobalVersions, PayloadRequest } from 'payload'
 
-import { flattenWhereToOperators } from 'payload/database'
-import { buildVersionGlobalFields } from 'payload/versions'
+import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.js'
 
-import { buildSortParam } from './queries/buildSortParam'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
+import { buildSortParam } from './queries/buildSortParam.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { withSession } from './withSession.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,
@@ -20,6 +19,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     page,
     pagination,
     req = {} as PayloadRequest,
+    select,
     skip,
     sort: sortArg,
     where,
@@ -27,10 +27,12 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 ) {
   const Model = this.versions[global]
   const versionFields = buildVersionGlobalFields(
+    this.payload.config,
     this.payload.globals.config.find(({ slug }) => slug === global),
+    true,
   )
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     limit,
     skip,
   }
@@ -63,32 +65,49 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    offset: skip,
+    limit,
     options,
     page,
     pagination,
+    projection: buildProjectionFromSelect({ adapter: this, fields: versionFields, select }),
     sort,
     useEstimatedCount,
   }
 
-  if (!useEstimatedCount && this.disableIndexHints !== true) {
-    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding a hint.
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
+  }
+
+  if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
+    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
+    // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
+    // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
+    // the correct indexed field
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
+          ...options,
           hint: { _id: 1 },
         }),
       )
     }
   }
 
-  if (limit > 0) {
+  if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
     paginationOptions.options.limit = limit
+
+    // Disable pagination if limit is 0
+    if (limit === 0) {
+      paginationOptions.pagination = false
+    }
   }
 
   const result = await Model.paginate(query, paginationOptions)
@@ -97,7 +116,6 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc.id = doc._id
       return sanitizeInternalFields(doc)
     }),

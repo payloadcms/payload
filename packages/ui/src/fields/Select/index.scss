@@ -1,0 +1,27 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .field-type.select {
+    position: relative;
+  }
+
+  html[data-theme='light'] {
+    .field-type.select {
+      &.error {
+        .rs__control {
+          @include lightInputError;
+        }
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .field-type.select {
+      &.error {
+        .rs__control {
+          @include darkInputError;
+        }
+      }
+    }
+  }
+}

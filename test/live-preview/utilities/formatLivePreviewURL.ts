@@ -1,17 +1,33 @@
-export const formatLivePreviewURL = async ({ data, documentInfo }) => {
-  let baseURL = 'http://localhost:3001'
+import type { LivePreviewConfig } from 'payload'
+
+export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
+  data,
+  collectionConfig,
+  req,
+}) => {
+  let baseURL = `${req.protocol}//${req.host}/live-preview`
 
   // You can run async requests here, if needed
   // For example, multi-tenant apps may need to lookup additional data
   if (data.tenant) {
     try {
-      const fullTenant = await fetch(
-        `http://localhost:3000/api/tenants?where[id][equals]=${data.tenant}&limit=1&depth=0`,
-      )
-        .then((res) => res.json())
+      const fullTenant = await req.payload
+        .find({
+          collection: 'tenants',
+          where: {
+            id: {
+              equals: data.tenant,
+            },
+          },
+          limit: 1,
+          depth: 0,
+        })
         .then((res) => res?.docs?.[0])
 
-      baseURL = fullTenant?.clientURL
+      if (fullTenant?.clientURL) {
+        // Note: appending a fully-qualified URL here won't work for preview deployments on Vercel
+        baseURL = `${fullTenant.clientURL}/live-preview`
+      }
     } catch (e) {
       console.error(e)
     }
@@ -20,7 +36,10 @@ export const formatLivePreviewURL = async ({ data, documentInfo }) => {
   // Format the URL as needed, based on the document and data
   // I.e. append '/posts' to the URL if the document is a post
   // You can also do this on individual collection or global config, if preferred
+  const isPage = collectionConfig && collectionConfig.slug === 'pages'
+  const isHomePage = isPage && data?.slug === 'home'
+
   return `${baseURL}${
-    documentInfo?.slug && documentInfo.slug !== 'pages' ? `/${documentInfo.slug}` : ''
-  }${data?.slug && data.slug !== 'home' ? `/${data.slug}` : ''}`
+    !isPage && collectionConfig ? `/${collectionConfig.slug}` : ''
+  }${!isHomePage && data.slug ? `/${data.slug}` : ''}`
 }

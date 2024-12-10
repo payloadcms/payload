@@ -1,33 +1,33 @@
-import jwt from 'jsonwebtoken'
-import url from 'url'
+import { decodeJwt } from 'jose'
 
-import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
-import type { User } from '../types'
+import type { Collection } from '../../collections/config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { ClientUser, User } from '../types.js'
 
-import getExtractJWT from '../getExtractJWT'
-
-export type Result = {
+export type MeOperationResult = {
   collection?: string
   exp?: number
+  strategy?: string
   token?: string
-  user?: User
+  user?: ClientUser
 }
 
 export type Arguments = {
   collection: Collection
+  currentToken?: string
   req: PayloadRequest
 }
 
-async function me({ collection, req }: Arguments): Promise<Result> {
-  const extractJWT = getExtractJWT(req.payload.config)
-  let response: Result = {
+export const meOperation = async (args: Arguments): Promise<MeOperationResult> => {
+  const { collection, currentToken, req } = args
+
+  let result: MeOperationResult = {
     user: null,
   }
 
   if (req.user) {
-    const parsedURL = url.parse(req.originalUrl)
-    const isGraphQL = parsedURL.pathname === `/api${req.payload.config.routes.graphQL}`
+    const { pathname } = req
+    const isGraphQL = pathname === `/api${req.payload.config.routes.graphQL}`
 
     const user = (await req.payload.findByID({
       id: req.user.id,
@@ -38,25 +38,46 @@ async function me({ collection, req }: Arguments): Promise<Result> {
       showHiddenFields: false,
     })) as User
 
+    if (user) {
+      user.collection = collection.config.slug
+    }
+
     if (req.user.collection !== collection.config.slug) {
       return {
         user: null,
       }
     }
 
-    delete user.collection
+    // /////////////////////////////////////
+    // me hook - Collection
+    // /////////////////////////////////////
 
-    response = {
-      collection: req.user.collection,
-      user,
+    for (const meHook of collection.config.hooks.me) {
+      const hookResult = await meHook({ args, user })
+
+      if (hookResult) {
+        result.user = hookResult.user
+        result.exp = hookResult.exp
+
+        break
+      }
     }
 
-    const token = extractJWT(req)
+    result.collection = req.user.collection
+    result.strategy = req.user._strategy
 
-    if (token) {
-      const decoded = jwt.decode(token) as jwt.JwtPayload
-      if (decoded) response.exp = decoded.exp
-      if (!collection.config.auth.removeTokenFromResponses) response.token = token
+    if (!result.user) {
+      result.user = user
+
+      if (currentToken) {
+        const decoded = decodeJwt(currentToken)
+        if (decoded) {
+          result.exp = decoded.exp
+        }
+        if (!collection.config.auth.removeTokenFromResponses) {
+          result.token = currentToken
+        }
+      }
     }
   }
 
@@ -67,16 +88,14 @@ async function me({ collection, req }: Arguments): Promise<Result> {
   await collection.config.hooks.afterMe.reduce(async (priorHook, hook) => {
     await priorHook
 
-    response =
+    result =
       (await hook({
         collection: collection?.config,
         context: req.context,
         req,
-        response,
-      })) || response
+        response: result,
+      })) || result
   }, Promise.resolve())
 
-  return response
+  return result
 }
-
-export default me

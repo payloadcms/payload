@@ -1,58 +1,76 @@
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Document } from '../../../types'
+/* eslint-disable no-restricted-exports */
+import type {
+  CollectionSlug,
+  JoinQuery,
+  Payload,
+  RequestContext,
+  SelectType,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDisableErrors,
+  Document,
+  PayloadRequest,
+  PopulateType,
+  TransformCollectionWithSelect,
+} from '../../../types/index.js'
+import type { SelectFromCollectionSlug } from '../../config/types.js'
 
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import { getDataLoader } from '../../dataloader'
-import findByID from '../findByID'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { findByIDOperation } from '../findByID.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
-  collection: T
+export type Options<
+  TSlug extends CollectionSlug,
+  TDisableErrors extends boolean,
+  TSelect extends SelectType,
+> = {
+  collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
   currentDepth?: number
   depth?: number
-  disableErrors?: boolean
+  disableErrors?: TDisableErrors
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: false | TypedLocale
   id: number | string
-  locale?: string
+  includeLockStatus?: boolean
+  joins?: JoinQuery<TSlug>
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
   user?: Document
 }
 
-export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(
+export default async function findByIDLocal<
+  TSlug extends CollectionSlug,
+  TDisableErrors extends boolean,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<T>,
-): Promise<GeneratedTypes['collections'][T]> {
+  options: Options<TSlug, TDisableErrors, TSelect>,
+): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> {
   const {
     id,
     collection: collectionSlug,
-    context,
     currentDepth,
     depth,
     disableErrors = false,
     draft = false,
-    fallbackLocale,
-    locale = null,
+    includeLockStatus,
+    joins,
     overrideAccess = true,
-    req = {} as PayloadRequest,
+    populate,
+    select,
     showHiddenFields,
-    user,
   } = options
-  setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -60,36 +78,19 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     )
   }
 
-  let fallbackLocaleToUse = defaultLocale
-
-  if (typeof req.fallbackLocale !== 'undefined') {
-    fallbackLocaleToUse = req.fallbackLocale
-  }
-
-  if (typeof fallbackLocale !== 'undefined') {
-    fallbackLocaleToUse = fallbackLocale
-  }
-
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.locale = locale ?? req?.locale ?? defaultLocale
-  req.fallbackLocale = fallbackLocaleToUse
-  req.i18n = i18nInit(payload.config.i18n)
-  req.payload = payload
-
-  if (typeof user !== 'undefined') req.user = user
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
-  return findByID<GeneratedTypes['collections'][T]>({
+  return findByIDOperation<TSlug, TDisableErrors, TSelect>({
     id,
     collection,
     currentDepth,
     depth,
     disableErrors,
     draft,
+    includeLockStatus,
+    joins,
     overrideAccess,
-    req,
+    populate,
+    req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
   })
 }

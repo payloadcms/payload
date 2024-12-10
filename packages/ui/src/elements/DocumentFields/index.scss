@@ -1,0 +1,194 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .document-fields {
+    width: 100%;
+    display: flex;
+    --doc-sidebar-width: 325px;
+
+    &--has-sidebar {
+      .document-fields {
+        &__main {
+          width: 66.66%;
+        }
+
+        &__edit {
+          [dir='ltr'] & {
+            top: 0;
+            right: 0;
+            border-right: 1px solid var(--theme-elevation-100);
+            padding-right: calc(var(--base) * 2);
+          }
+
+          [dir='rtl'] & {
+            top: 0;
+            left: 0;
+            border-left: 1px solid var(--theme-elevation-100);
+            padding-left: calc(var(--base) * 2);
+          }
+        }
+
+        &__fields {
+          & > .tabs-field,
+          & > .group-field {
+            margin-right: calc(var(--base) * -2);
+          }
+        }
+      }
+    }
+
+    &__main {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      flex-grow: 1;
+    }
+
+    &__edit {
+      padding-top: calc(var(--base) * 1.5);
+      padding-bottom: var(--spacing-view-bottom);
+      flex-grow: 1;
+    }
+
+    &__sidebar-wrap {
+      position: sticky;
+      top: var(--doc-controls-height);
+      width: 33.33%;
+      height: calc(100vh - var(--doc-controls-height));
+      min-width: var(--doc-sidebar-width);
+      flex-shrink: 0;
+    }
+
+    &__sidebar {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    &__sidebar-fields {
+      display: flex;
+      flex-direction: column;
+      gap: var(--base);
+      padding-top: calc(var(--base) * 1.5);
+      padding-left: calc(var(--base) * 2);
+      padding-right: var(--gutter-h);
+      padding-bottom: var(--spacing-view-bottom);
+    }
+
+    &__label {
+      color: var(--theme-elevation-400);
+    }
+
+    &--force-sidebar-wrap {
+      display: block;
+
+      .document-fields {
+        &__main {
+          width: 100%;
+          min-height: initial;
+        }
+
+        &__sidebar-wrap {
+          position: static;
+          width: 100%;
+          height: initial;
+          border-left: 0;
+        }
+
+        &__sidebar {
+          padding-bottom: base(3.5);
+          overflow: visible;
+        }
+
+        &__sidebar-fields {
+          padding-top: 0;
+          padding-left: var(--gutter-h);
+          padding-bottom: 0;
+        }
+      }
+    }
+
+    @include mid-break {
+      display: block;
+
+      &--has-sidebar {
+        .document-fields {
+          &__main {
+            width: 100%;
+          }
+
+          &__edit {
+            [dir='ltr'] & {
+              border-right: 0;
+              padding-right: var(--gutter-h);
+            }
+
+            [dir='rtl'] & {
+              border-left: 0;
+              padding-left: var(--gutter-h);
+            }
+          }
+
+          &__fields {
+            & > .tabs-field,
+            & > .group-field {
+              margin-right: calc(var(--gutter-h) * -1);
+            }
+          }
+        }
+      }
+
+      &__main {
+        width: 100%;
+        min-height: initial;
+      }
+
+      &__sidebar-wrap {
+        position: static;
+        width: 100%;
+        height: initial;
+        border-left: 0;
+      }
+
+      &__form {
+        display: block;
+      }
+
+      &__sidebar-fields {
+        padding-top: 0;
+        padding-left: var(--gutter-h);
+        padding-right: var(--gutter-h);
+        padding-bottom: 0;
+        gap: base(0.5);
+
+        [dir='ltr'] & {
+          padding-right: var(--gutter-h);
+        }
+
+        [dir='rtl'] & {
+          padding-left: var(--gutter-h);
+        }
+      }
+
+      &__sidebar {
+        padding-bottom: base(3.5);
+        overflow: visible;
+      }
+    }
+
+    @include small-break {
+      &__sidebar-wrap {
+        min-width: initial;
+        width: 100%;
+      }
+
+      &__edit {
+        padding-top: calc(var(--base) / 2);
+      }
+    }
+  }
+}

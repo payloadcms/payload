@@ -1,37 +1,72 @@
+import { fileURLToPath } from 'node:url'
 import path from 'path'
-
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import AutosavePosts from './collections/Autosave'
-import DisablePublish from './collections/DisablePublish'
-import DraftPosts from './collections/Drafts'
-import Posts from './collections/Posts'
-import VersionPosts from './collections/Versions'
-import AutosaveGlobal from './globals/Autosave'
-import DisablePublishGlobal from './globals/DisablePublish'
-import DraftGlobal from './globals/Draft'
-import { clearAndSeedEverything } from './seed'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import AutosavePosts from './collections/Autosave.js'
+import CustomIDs from './collections/CustomIDs.js'
+import DisablePublish from './collections/DisablePublish.js'
+import DraftPosts from './collections/Drafts.js'
+import DraftWithMax from './collections/DraftsWithMax.js'
+import LocalizedPosts from './collections/Localized.js'
+import Posts from './collections/Posts.js'
+import VersionPosts from './collections/Versions.js'
+import AutosaveGlobal from './globals/Autosave.js'
+import DisablePublishGlobal from './globals/DisablePublish.js'
+import DraftGlobal from './globals/Draft.js'
+import DraftWithMaxGlobal from './globals/DraftWithMax.js'
+import LocalizedGlobal from './globals/LocalizedGlobal.js'
+import { seed } from './seed.js'
 
 export default buildConfigWithDefaults({
   admin: {
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
-        },
-      },
-    }),
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
-  collections: [DisablePublish, Posts, AutosavePosts, DraftPosts, VersionPosts],
-  globals: [AutosaveGlobal, DraftGlobal, DisablePublishGlobal],
+  collections: [
+    DisablePublish,
+    Posts,
+    AutosavePosts,
+    DraftPosts,
+    DraftWithMax,
+    LocalizedPosts,
+    VersionPosts,
+    CustomIDs,
+  ],
+  globals: [AutosaveGlobal, DraftGlobal, DraftWithMaxGlobal, DisablePublishGlobal, LocalizedGlobal],
   indexSortableFields: true,
   localization: {
     defaultLocale: 'en',
-    locales: ['en', 'es'],
+    locales: [
+      {
+        code: 'en',
+        label: 'English',
+      },
+      {
+        code: 'es',
+        label: {
+          en: 'Spanish',
+          es: 'Español',
+          de: 'Spanisch',
+        },
+      },
+      {
+        code: 'de',
+        label: {
+          en: 'German',
+          es: 'Alemán',
+          de: 'Deutsch',
+        },
+      },
+    ],
   },
   onInit: async (payload) => {
-    await clearAndSeedEverything(payload)
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

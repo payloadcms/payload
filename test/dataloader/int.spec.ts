@@ -1,34 +1,80 @@
-import { GraphQLClient } from 'graphql-request'
+import type { Payload } from 'payload'
 
-import payload from '../../packages/payload/src'
-import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { postDoc } from './config'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+
+import { devUser } from '../credentials.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { postDoc } from './config.js'
+
+let restClient: NextRESTClient
+let payload: Payload
+let token: string
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 describe('dataloader', () => {
-  let serverURL
   beforeAll(async () => {
-    const init = await initPayloadTest({ __dirname, init: { local: false } })
-    serverURL = init.serverURL
+    ;({ payload, restClient } = await initPayloadInt(dirname))
+
+    const loginResult = await payload.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+
+    if (loginResult.token) token = loginResult.token
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   describe('graphql', () => {
-    let client: GraphQLClient
-    let token: string
+    it('should allow multiple parallel queries', async () => {
+      for (let i = 0; i < 100; i++) {
+        const query = `
+          query {
+            Shops {
+              docs {
+                name
+                items {
+                  name
+                }
+              }
+            }
+            Items {
+              docs {
+                name
+                itemTags {
+                  name
+                }
+              }
+            }
+          }`
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-    beforeAll(async () => {
-      const url = `${serverURL}/api/graphql`
-      client = new GraphQLClient(url)
+        const normalizedResponse = JSON.parse(JSON.stringify(data))
 
-      const loginResult = await payload.login({
-        collection: 'users',
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-      })
-
-      if (loginResult.token) token = loginResult.token
+        expect(normalizedResponse).toStrictEqual({
+          Items: { docs: [{ name: 'item1', itemTags: [{ name: 'tag1' }] }] },
+          Shops: { docs: [{ name: 'shop1', items: [{ name: 'item1' }] }] },
+        })
+      }
     })
 
     it('should allow querying via graphql', async () => {
@@ -43,11 +89,16 @@ describe('dataloader', () => {
         }
       }`
 
-      const response = await client.request(query, null, {
-        Authorization: `JWT ${token}`,
-      })
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
 
-      const { docs } = response.Posts
+      const { docs } = data.Posts
       expect(docs[0].title).toStrictEqual(postDoc.title)
     })
 
@@ -87,8 +138,8 @@ describe('dataloader', () => {
       expect(relationB.id).toBeDefined()
 
       await payload.update({
-        collection: 'relation-a',
         id: relationA.id,
+        collection: 'relation-a',
         data: {
           relationship: relationB.id,
           richText: [
@@ -100,36 +151,37 @@ describe('dataloader', () => {
               ],
             },
             {
+              type: 'relationship',
               children: [
                 {
                   text: '',
                 },
               ],
-              type: 'relationship',
+              relationTo: 'relation-b',
               value: {
                 id: relationB.id,
               },
-              relationTo: 'relation-b',
             },
           ],
         },
       })
 
       const relationANoDepth = await payload.findByID({
-        collection: 'relation-a',
         id: relationA.id,
+        collection: 'relation-a',
         depth: 0,
       })
 
       expect(relationANoDepth.relationship).toStrictEqual(relationB.id)
 
       const relationAWithDepth = await payload.findByID({
-        collection: 'relation-a',
         id: relationA.id,
+        collection: 'relation-a',
         depth: 4,
       })
 
       const innerMostRelationship =
+        // @ts-expect-error Deep typing not worth doing
         relationAWithDepth.relationship.relationship.richText[1].value.relationship.relationship
 
       expect(innerMostRelationship).toStrictEqual(relationB.id)

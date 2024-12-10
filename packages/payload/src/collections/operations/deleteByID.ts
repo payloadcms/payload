@@ -1,70 +1,84 @@
-import type { GeneratedTypes } from '../../'
-import type { PayloadRequest } from '../../express/types'
-import type { Document } from '../../types'
-import type { BeforeOperationHook, Collection } from '../config/types'
+import type { CollectionSlug } from '../../index.js'
+import type {
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
+import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess'
-import { hasWhereAccessResult } from '../../auth/types'
-import { combineQueries } from '../../database/combineQueries'
-import { Forbidden, NotFound } from '../../errors'
-import { afterRead } from '../../fields/hooks/afterRead'
-import { deleteUserPreferences } from '../../preferences/deleteUserPreferences'
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
-import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions'
-import { buildAfterOperation } from './utils'
+import executeAccess from '../../auth/executeAccess.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { Forbidden, NotFound } from '../../errors/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
+import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
   collection: Collection
   depth?: number
+  disableTransaction?: boolean
   id: number | string
   overrideAccess?: boolean
+  overrideLock?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
+export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
   incomingArgs: Arguments,
-): Promise<Document> {
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'delete',
-        })) || args
-    },
-    Promise.resolve(),
-  )
-
-  const {
-    id,
-    collection: { config: collectionConfig },
-    depth,
-    overrideAccess,
-    req: {
-      payload: { config },
-      payload,
-      t,
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
+
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'delete',
+            req: args.req,
+          })) || args
+      },
+      Promise.resolve(),
+    )
+
+    const {
+      id,
+      collection: { config: collectionConfig },
+      depth,
+      overrideAccess,
+      overrideLock,
+      populate,
+      req: {
+        fallbackLocale,
+        locale,
+        payload: { config },
+        payload,
+      },
+      req,
+      select,
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Access
@@ -101,15 +115,31 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
       where: combineQueries({ id: { equals: id } }, accessResults),
     })
 
-    if (!docToDelete && !hasWhereAccess) throw new NotFound(t)
-    if (!docToDelete && hasWhereAccess) throw new Forbidden(t)
+    if (!docToDelete && !hasWhereAccess) {
+      throw new NotFound(req.t)
+    }
+    if (!docToDelete && hasWhereAccess) {
+      throw new Forbidden(req.t)
+    }
+
+    // /////////////////////////////////////
+    // Handle potentially locked documents
+    // /////////////////////////////////////
+
+    await checkDocumentLockStatus({
+      id,
+      collectionSlug: collectionConfig.slug,
+      lockErrorMessage: `Document with ID ${id} is currently locked and cannot be deleted.`,
+      overrideLock,
+      req,
+    })
 
     await deleteAssociatedFiles({
       collectionConfig,
       config,
       doc: docToDelete,
       overrideDelete: true,
-      t,
+      req,
     })
 
     // /////////////////////////////////////
@@ -119,9 +149,9 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     if (collectionConfig.versions) {
       await deleteCollectionVersions({
         id,
+        slug: collectionConfig.slug,
         payload,
         req,
-        slug: collectionConfig.slug,
       })
     }
 
@@ -129,9 +159,10 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Delete document
     // /////////////////////////////////////
 
-    let result = await req.payload.db.deleteOne({
+    let result: DataFromCollectionSlug<TSlug> = await req.payload.db.deleteOne({
       collection: collectionConfig.slug,
       req,
+      select,
       where: { id: { equals: id } },
     })
 
@@ -155,9 +186,14 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: result,
+      draft: undefined,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
+      populate,
       req,
+      select,
       showHiddenFields,
     })
 
@@ -198,7 +234,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation: 'deleteByID',
@@ -209,13 +245,13 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // 8. Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
-    return result
+    return result as TransformCollectionWithSelect<TSlug, TSelect>
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }
-
-export default deleteByID

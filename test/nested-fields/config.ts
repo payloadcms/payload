@@ -1,6 +1,10 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 
 // fields with fields
 // - array -> fields
@@ -12,6 +16,11 @@ import { devUser } from '../credentials'
 // - tabs -> named-tab -> fields
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'nested-fields',
@@ -185,5 +194,8 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

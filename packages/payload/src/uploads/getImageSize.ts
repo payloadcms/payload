@@ -1,15 +1,32 @@
-import type { UploadedFile } from 'express-fileupload'
-
 import fs from 'fs'
-import probeImageSize from 'probe-image-size'
+import sizeOfImport from 'image-size'
+import { promisify } from 'util'
 
-import type { ProbedImageSize } from './types'
+import type { PayloadRequest } from '../types/index.js'
+import type { ProbedImageSize } from './types.js'
 
-export default async function (file: UploadedFile): Promise<ProbedImageSize> {
+import { temporaryFileTask } from './tempFile.js'
+
+const { imageSize } = sizeOfImport
+const imageSizePromise = promisify(imageSize)
+
+export async function getImageSize(file: PayloadRequest['file']): Promise<ProbedImageSize> {
   if (file.tempFilePath) {
-    const data = fs.readFileSync(file.tempFilePath)
-    return probeImageSize.sync(data)
+    return imageSizePromise(file.tempFilePath)
   }
 
-  return probeImageSize.sync(file.data)
+  // Tiff file do not support buffers or streams, so we must write to file first
+  // then retrieve dimensions. https://github.com/image-size/image-size/issues/103
+  if (file.mimetype === 'image/tiff') {
+    const dimensions = await temporaryFileTask(
+      async (filepath: string) => {
+        fs.writeFileSync(filepath, file.data)
+        return imageSizePromise(filepath)
+      },
+      { extension: 'tiff' },
+    )
+    return dimensions
+  }
+
+  return imageSize(file.data)
 }

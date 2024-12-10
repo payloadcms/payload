@@ -1,8 +1,15 @@
-import type { TypeWithID } from '../collections/config/types'
-import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types'
-import type { Payload } from '../payload'
-import type { Document, PayloadRequest, Where } from '../types'
-import type { TypeWithVersion } from '../versions/types'
+import type { TypeWithID } from '../collections/config/types.js'
+import type { CollectionSlug, GlobalSlug } from '../index.js'
+import type {
+  Document,
+  JoinQuery,
+  Payload,
+  PayloadRequest,
+  SelectType,
+  Sort,
+  Where,
+} from '../types/index.js'
+import type { TypeWithVersion } from '../versions/types.js'
 
 export type { TypeWithVersion }
 
@@ -11,16 +18,20 @@ export interface BaseDatabaseAdapter {
    * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
    * @returns an identifier for the transaction or null if one cannot be established
    */
-  beginTransaction?: BeginTransaction
+  beginTransaction: BeginTransaction
   /**
    * Persist the changes made since the start of the transaction.
    */
-  commitTransaction?: CommitTransaction
+  commitTransaction: CommitTransaction
 
   /**
    * Open the connection to the database
    */
   connect?: Connect
+
+  count: Count
+  countGlobalVersions: CountGlobalVersions
+  countVersions: CountVersions
 
   create: Create
 
@@ -44,13 +55,12 @@ export interface BaseDatabaseAdapter {
   deleteOne: DeleteOne
 
   deleteVersions: DeleteVersions
-
   /**
    * Terminate the connection with the database
    */
   destroy?: Destroy
 
-  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
+  find: Find
 
   findGlobal: FindGlobal
 
@@ -68,7 +78,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: () => Promise<void>
+  migrate: (args?: { migrations?: Migration[] }) => Promise<void>
 
   /**
    * Run any migration down functions that have been performed
@@ -78,16 +88,17 @@ export interface BaseDatabaseAdapter {
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: () => Promise<void>
+  migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
+
   /**
    * Run all migration down functions before running up
    */
   migrateRefresh: () => Promise<void>
-
   /**
    * Run all migrate down functions
    */
   migrateReset: () => Promise<void>
+
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
@@ -101,6 +112,13 @@ export interface BaseDatabaseAdapter {
    */
   name: string
   /**
+   * Full package name of the database adapter
+   *
+   * @example @payloadcms/db-postgres
+   */
+  packageName: string
+
+  /**
    * reference to the instance of payload
    */
   payload: Payload
@@ -109,15 +127,15 @@ export interface BaseDatabaseAdapter {
   /**
    * Abort any changes since the start of the transaction.
    */
-  rollbackTransaction?: RollbackTransaction
+  rollbackTransaction: RollbackTransaction
   /**
    * A key-value store of all sessions open (used for transactions)
    */
   sessions?: {
     [id: string]: {
       db: unknown
-      reject: () => void
-      resolve: () => void
+      reject: () => Promise<void>
+      resolve: () => Promise<void>
     }
   }
 
@@ -128,19 +146,32 @@ export interface BaseDatabaseAdapter {
   updateOne: UpdateOne
 
   updateVersion: UpdateVersion
+
+  upsert: Upsert
 }
 
-export type Init = (payload: Payload) => Promise<void>
+export type Init = () => Promise<void> | void
 
-export type Connect = (payload: Payload) => Promise<void>
+type ConnectArgs = {
+  hotReload: boolean
+}
 
-export type Destroy = (payload: Payload) => Promise<void>
+export type Connect = (args?: ConnectArgs) => Promise<void>
+
+export type Destroy = () => Promise<void>
 
 export type CreateMigration = (args: {
+  /** dirname of the package, required in drizzle */
+  dirname?: string
   file?: string
+  forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
-}) => Promise<void>
+  /**
+   * Skips the prompt asking to create empty migrations
+   */
+  skipEmpty?: boolean
+}) => Promise<void> | void
 
 export type Transaction = (
   callback: () => Promise<void>,
@@ -151,47 +182,74 @@ export type BeginTransaction = (
   options?: Record<string, unknown>,
 ) => Promise<null | number | string>
 
-export type RollbackTransaction = (id: number | string) => Promise<void>
+export type RollbackTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
-export type CommitTransaction = (id: number | string) => Promise<void>
+export type CommitTransaction = (id: number | Promise<number | string> | string) => Promise<void>
 
 export type QueryDraftsArgs = {
-  collection: string
+  collection: CollectionSlug
+  joins?: JoinQuery
   limit?: number
   locale?: string
   page?: number
   pagination?: boolean
   req: PayloadRequest
-  sort?: string
+  select?: SelectType
+  sort?: Sort
   where?: Where
 }
 
 export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
 
 export type FindOneArgs = {
-  collection: string
+  collection: CollectionSlug
+  joins?: JoinQuery
   locale?: string
   req: PayloadRequest
+  select?: SelectType
   where?: Where
 }
 
-export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<T | null>
+export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null | T>
 
 export type FindArgs = {
-  collection: string
+  collection: CollectionSlug
+  joins?: JoinQuery
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
   locale?: string
   page?: number
   pagination?: boolean
+  projection?: Record<string, unknown>
   req: PayloadRequest
+  select?: SelectType
   skip?: number
-  sort?: string
+  sort?: Sort
   versions?: boolean
   where?: Where
 }
 
 export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
+
+export type CountArgs = {
+  collection: CollectionSlug
+  locale?: string
+  req: PayloadRequest
+  where?: Where
+}
+
+export type Count = (args: CountArgs) => Promise<{ totalDocs: number }>
+
+export type CountVersions = (args: CountArgs) => Promise<{ totalDocs: number }>
+
+export type CountGlobalVersionArgs = {
+  global: string
+  locale?: string
+  req: PayloadRequest
+  where?: Where
+}
+
+export type CountGlobalVersions = (args: CountGlobalVersionArgs) => Promise<{ totalDocs: number }>
 
 type BaseVersionArgs = {
   limit?: number
@@ -199,35 +257,42 @@ type BaseVersionArgs = {
   page?: number
   pagination?: boolean
   req: PayloadRequest
+  select?: SelectType
   skip?: number
-  sort?: string
+  sort?: Sort
   versions?: boolean
   where?: Where
 }
 
-export type FindVersionsArgs = BaseVersionArgs & {
-  collection: string
-}
+export type FindVersionsArgs = {
+  collection: CollectionSlug
+} & BaseVersionArgs
 
 export type FindVersions = <T = TypeWithID>(
   args: FindVersionsArgs,
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
-export type FindGlobalVersionsArgs = BaseVersionArgs & {
-  global: string
-}
+export type FindGlobalVersionsArgs = {
+  global: GlobalSlug
+} & BaseVersionArgs
 
 export type FindGlobalArgs = {
   locale?: string
   req: PayloadRequest
+  select?: SelectType
   slug: string
   where?: Where
 }
 
 export type UpdateGlobalVersionArgs<T = TypeWithID> = {
-  global: string
+  global: GlobalSlug
   locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
+  select?: SelectType
   versionData: T
 } & (
   | {
@@ -244,23 +309,30 @@ export type UpdateGlobalVersion = <T extends TypeWithID = TypeWithID>(
   args: UpdateGlobalVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
-export type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
+export type FindGlobal = <T extends Record<string, unknown> = any>(
+  args: FindGlobalArgs,
+) => Promise<T>
 
-export type CreateGlobalArgs<T extends GlobalsTypeWithID = any> = {
+export type CreateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
   req: PayloadRequest
   slug: string
 }
-export type CreateGlobal = <T extends GlobalsTypeWithID = any>(
+export type CreateGlobal = <T extends Record<string, unknown> = any>(
   args: CreateGlobalArgs<T>,
 ) => Promise<T>
 
-export type UpdateGlobalArgs<T extends GlobalsTypeWithID = any> = {
+export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
+  select?: SelectType
   slug: string
 }
-export type UpdateGlobal = <T extends GlobalsTypeWithID = any>(
+export type UpdateGlobal = <T extends Record<string, unknown> = any>(
   args: UpdateGlobalArgs<T>,
 ) => Promise<T>
 // export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
@@ -270,7 +342,7 @@ export type FindGlobalVersions = <T = TypeWithID>(
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
 export type DeleteVersionsArgs = {
-  collection: string
+  collection: CollectionSlug
   locale?: string
   req: PayloadRequest
   sort?: {
@@ -281,11 +353,14 @@ export type DeleteVersionsArgs = {
 
 export type CreateVersionArgs<T = TypeWithID> = {
   autosave: boolean
-  collectionSlug: string
+  collectionSlug: CollectionSlug
   createdAt: string
   /** ID of the parent document for which the version should be created for */
   parent: number | string
+  publishedLocale?: string
   req: PayloadRequest
+  select?: SelectType
+  snapshot?: true
   updatedAt: string
   versionData: T
 }
@@ -297,10 +372,13 @@ export type CreateVersion = <T extends TypeWithID = TypeWithID>(
 export type CreateGlobalVersionArgs<T = TypeWithID> = {
   autosave: boolean
   createdAt: string
-  globalSlug: string
+  globalSlug: GlobalSlug
   /** ID of the parent document for which the version should be created for */
   parent: number | string
+  publishedLocale?: string
   req: PayloadRequest
+  select?: SelectType
+  snapshot?: true
   updatedAt: string
   versionData: T
 }
@@ -312,9 +390,14 @@ export type CreateGlobalVersion = <T extends TypeWithID = TypeWithID>(
 export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 
 export type UpdateVersionArgs<T = TypeWithID> = {
-  collection: string
+  collection: CollectionSlug
   locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
+  select?: SelectType
   versionData: T
 } & (
   | {
@@ -332,25 +415,28 @@ export type UpdateVersion = <T extends TypeWithID = TypeWithID>(
 ) => Promise<TypeWithVersion<T>>
 
 export type CreateArgs = {
-  collection: string
+  collection: CollectionSlug
   data: Record<string, unknown>
   draft?: boolean
   locale?: string
   req: PayloadRequest
+  select?: SelectType
 }
 
 export type Create = (args: CreateArgs) => Promise<Document>
 
 export type UpdateOneArgs = {
-  collection: string
+  collection: CollectionSlug
   data: Record<string, unknown>
   draft?: boolean
+  joins?: JoinQuery
   locale?: string
-  options?: {
-    new?: boolean
-    upsert?: boolean
-  }
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
   req: PayloadRequest
+  select?: SelectType
 } & (
   | {
       id: number | string
@@ -364,30 +450,45 @@ export type UpdateOneArgs = {
 
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
-export type DeleteOneArgs = {
-  collection: string
+export type UpsertArgs = {
+  collection: CollectionSlug
+  data: Record<string, unknown>
+  joins?: JoinQuery
+  locale?: string
   req: PayloadRequest
+  select?: SelectType
+  where: Where
+}
+
+export type Upsert = (args: UpsertArgs) => Promise<Document>
+
+export type DeleteOneArgs = {
+  collection: CollectionSlug
+  joins?: JoinQuery
+  req: PayloadRequest
+  select?: SelectType
   where: Where
 }
 
 export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
 export type DeleteManyArgs = {
-  collection: string
+  collection: CollectionSlug
+  joins?: JoinQuery
   req: PayloadRequest
   where: Where
 }
 
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
-export type Migration = MigrationData & {
-  down: ({ payload }: { payload }) => Promise<boolean>
-  up: ({ payload }: { payload }) => Promise<boolean>
-}
+export type Migration = {
+  down: (args: unknown) => Promise<void>
+  up: (args: unknown) => Promise<void>
+} & MigrationData
 
 export type MigrationData = {
-  batch: number
-  id: string
+  batch?: number
+  id?: string
   name: string
 }
 
@@ -402,4 +503,23 @@ export type PaginatedDocs<T = any> = {
   prevPage?: null | number | undefined
   totalDocs: number
   totalPages: number
+}
+
+export type DatabaseAdapterResult<T = BaseDatabaseAdapter> = {
+  defaultIDType: 'number' | 'text'
+  init: (args: { payload: Payload }) => T
+}
+
+export type DBIdentifierName =
+  | ((Args: {
+      /** The name of the parent table when using relational DBs */
+      tableName?: string
+    }) => string)
+  | string
+
+export type MigrationTemplateArgs = {
+  downSQL?: string
+  imports?: string
+  packageName?: string
+  upSQL?: string
 }

@@ -1,25 +1,32 @@
+import { fileURLToPath } from 'node:url'
 import path from 'path'
-
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { collectionEndpoints } from './endpoints/collections'
-import { globalEndpoints } from './endpoints/globals'
-import { endpoints } from './endpoints/root'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { collectionEndpoints } from './endpoints/collections.js'
+import { globalEndpoints } from './endpoints/globals.js'
+import { endpoints } from './endpoints/root.js'
 import {
   collectionSlug,
   globalSlug,
   noEndpointsCollectionSlug,
   noEndpointsGlobalSlug,
-} from './shared'
+} from './shared.js'
 
 export default buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: collectionSlug,
       access: {
-        read: () => true,
         create: () => true,
         delete: () => true,
+        read: () => true,
         update: () => true,
       },
       endpoints: collectionEndpoints,
@@ -32,7 +39,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: noEndpointsCollectionSlug,
-      graphQL: false,
       endpoints: false,
       fields: [
         {
@@ -40,8 +46,10 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      graphQL: false,
     },
   ],
+  endpoints,
   globals: [
     {
       slug: globalSlug,
@@ -50,7 +58,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: noEndpointsGlobalSlug,
-      graphQL: false,
       endpoints: false,
       fields: [
         {
@@ -58,23 +65,9 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      graphQL: false,
     },
   ],
-  endpoints,
-  admin: {
-    webpack: (config) => {
-      return {
-        ...config,
-        resolve: {
-          ...config.resolve,
-          alias: {
-            ...config.resolve.alias,
-            express: path.resolve(__dirname, './mocks/emptyModule.js'),
-          },
-        },
-      }
-    },
-  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -83,5 +76,8 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

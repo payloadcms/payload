@@ -1,20 +1,22 @@
-import blockquote from './blockquote'
-import h1 from './h1'
-import h2 from './h2'
-import h3 from './h3'
-import h4 from './h4'
-import h5 from './h5'
-import h6 from './h6'
-import indent from './indent'
-import li from './li'
-import link from './link'
-import ol from './ol'
-import relationship from './relationship'
-import textAlign from './textAlign'
-import ul from './ul'
-import upload from './upload'
+import type { RichTextCustomElement } from '../../types.js'
 
-const elements = {
+import { blockquote } from './blockquote/index.js'
+import { h1 } from './h1/index.js'
+import { h2 } from './h2/index.js'
+import { h3 } from './h3/index.js'
+import { h4 } from './h4/index.js'
+import { h5 } from './h5/index.js'
+import { h6 } from './h6/index.js'
+import { indent } from './indent/index.js'
+import { li } from './li/index.js'
+import { link } from './link/index.js'
+import { ol } from './ol/index.js'
+import { relationship } from './relationship/index.js'
+import { textAlign } from './textAlign/index.js'
+import { ul } from './ul/index.js'
+import { upload } from './upload/index.js'
+
+export const elements: Record<string, RichTextCustomElement> = {
   blockquote,
   h1,
   h2,
@@ -31,5 +33,3 @@ const elements = {
   ul,
   upload,
 }
-
-export default elements

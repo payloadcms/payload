@@ -1,5 +1,5 @@
-import type { PayloadRequest } from '../express/types'
-import type { Payload } from '../payload'
+import type { Payload } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 type Args = {
   id?: number | string
@@ -8,7 +8,7 @@ type Args = {
   slug: string
 }
 
-export const deleteCollectionVersions = async ({ id, payload, req, slug }: Args): Promise<void> => {
+export const deleteCollectionVersions = async ({ id, slug, payload, req }: Args): Promise<void> => {
   try {
     await payload.db.deleteVersions({
       collection: slug,

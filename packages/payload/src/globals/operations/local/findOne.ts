@@ -1,72 +1,67 @@
-import type { GeneratedTypes } from '../../..'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Document } from '../../../types'
+import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformGlobalWithSelect,
+} from '../../../types/index.js'
+import type { SelectFromGlobalSlug } from '../../config/types.js'
 
-import { getDataLoader } from '../../../collections/dataloader'
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import findOne from '../findOne'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { findOneOperation } from '../findOne.js'
 
-export type Options<T extends keyof GeneratedTypes['globals']> = {
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+  context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: string
-  locale?: string
+  fallbackLocale?: false | TypedLocale
+  includeLockStatus?: boolean
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
-  slug: T
+  slug: TSlug
   user?: Document
 }
 
-export default async function findOneLocal<T extends keyof GeneratedTypes['globals']>(
+export default async function findOneLocal<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectFromGlobalSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<T>,
-): Promise<GeneratedTypes['globals'][T]> {
+  options: Options<TSlug, TSelect>,
+): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
   const {
+    slug: globalSlug,
     depth,
     draft = false,
-    fallbackLocale = null,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
+    includeLockStatus,
     overrideAccess = true,
+    populate,
+    select,
     showHiddenFields,
-    slug: globalSlug,
-    user,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
 
   if (!globalConfig) {
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
-  const i18n = i18nInit(payload.config.i18n)
-
-  const req = {
-    fallbackLocale: fallbackLocale ?? options.req?.fallbackLocale ?? defaultLocale,
-    i18n,
-    locale: locale ?? options.req?.locale ?? defaultLocale,
-    payload,
-    payloadAPI: 'local',
-    t: i18n.t,
-    user,
-  } as PayloadRequest
-  setRequestContext(req)
-
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
-  return findOne({
+  return findOneOperation({
+    slug: globalSlug as string,
     depth,
     draft,
     globalConfig,
+    includeLockStatus,
     overrideAccess,
-    req,
+    populate,
+    req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
-    slug: globalSlug as string,
   })
 }

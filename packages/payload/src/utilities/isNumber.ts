@@ -1,5 +1,5 @@
 export function isNumber(value: unknown): value is number {
-  if (typeof value === 'string' && value.trim() === '') {
+  if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) {
     return false
   }
 

@@ -1,28 +1,45 @@
-import type { NextFunction, Response } from 'express'
-
 import httpStatus from 'http-status'
 
-import type { GeneratedTypes } from '../../'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadHandler } from '../../config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
 
-import findOne from '../operations/findOne'
+import { findOne } from '../operations/findOne.js'
 
-export default async function findOneHandler(
-  req: PayloadRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<Response<GeneratedTypes['collections']['_preference']> | void> {
+export const findByIDHandler: PayloadHandler = async (incomingReq): Promise<Response> => {
+  // We cannot import the addDataAndFileToRequest utility here from the 'next' package because of dependency issues
+  // However that utility should be used where possible instead of manually appending the data
+  let data
+
   try {
-    const result = await findOne({
-      key: req.params.key,
-      req,
-      user: req.user,
-    })
-
-    return res
-      .status(httpStatus.OK)
-      .json(result || { message: req.t('general:notFound'), value: null })
+    data = await incomingReq.json()
   } catch (error) {
-    return next(error)
+    data = {}
   }
+
+  const reqWithData: PayloadRequest = incomingReq
+
+  if (data) {
+    reqWithData.data = data
+    reqWithData.json = () => Promise.resolve(data)
+  }
+
+  const result = await findOne({
+    key: reqWithData.routeParams?.key as string,
+    req: reqWithData,
+    user: reqWithData.user,
+  })
+
+  return Response.json(
+    {
+      ...(result
+        ? result
+        : {
+            message: reqWithData.t('general:notFound'),
+            value: null,
+          }),
+    },
+    {
+      status: httpStatus.OK,
+    },
+  )
 }

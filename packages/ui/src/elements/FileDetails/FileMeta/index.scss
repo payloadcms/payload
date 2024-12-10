@@ -1,0 +1,31 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .file-meta {
+    &__url {
+      display: flex;
+      gap: base(0.4);
+
+      a {
+        font-weight: 600;
+        text-decoration: none;
+
+        &:hover,
+        &:focus-visible {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    &__size-type,
+    &__url a {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__edit {
+      position: relative;
+    }
+  }
+}

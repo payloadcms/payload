@@ -1,51 +1,62 @@
-import type { Response } from 'express'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequest } from 'payload'
 
-import { Forbidden } from 'payload/errors'
+import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+import { Forbidden } from 'payload'
 
-import type { StripeConfig } from '../types'
+import type { StripePluginConfig } from '../types.js'
 
-import { stripeProxy } from '../utilities/stripeProxy'
+import { stripeProxy } from '../utilities/stripeProxy.js'
 
 export const stripeREST = async (args: {
-  next: any
+  pluginConfig: StripePluginConfig
   req: PayloadRequest
-  res: Response
-  stripeConfig: StripeConfig
 }): Promise<any> => {
-  const { req, res, stripeConfig } = args
+  let responseStatus = 200
+  let responseJSON
+
+  const { pluginConfig, req } = args
+
+  await addDataAndFileToRequest(req)
+
+  const requestWithData = req
 
   const {
-    body: {
+    data: {
       stripeArgs, // example: ['cus_MGgt3Tuj3D66f2'] or [{ limit: 100 }, { stripeAccount: 'acct_1J9Z4pKZ4Z4Z4Z4Z' }]
       stripeMethod, // example: 'subscriptions.list',
     },
     payload,
     user,
-  } = req
+  } = requestWithData
 
-  const { stripeSecretKey } = stripeConfig
+  const { stripeSecretKey } = pluginConfig
 
   try {
     if (!user) {
       // TODO: make this customizable from the config
-      throw new Forbidden()
+      throw new Forbidden(req.t)
     }
 
-    const pluginRes = await stripeProxy({
+    responseJSON = await stripeProxy({
       stripeArgs,
       stripeMethod,
       stripeSecretKey,
     })
 
-    const { status } = pluginRes
-
-    res.status(status).json(pluginRes)
+    const { status } = responseJSON
+    responseStatus = status
   } catch (error: unknown) {
-    const message = `An error has occurred in the Stripe plugin REST handler: '${error}'`
+    const message = `An error has occurred in the Stripe plugin REST handler: '${JSON.stringify(
+      error,
+    )}'`
     payload.logger.error(message)
-    return res.status(500).json({
+    responseStatus = 500
+    responseJSON = {
       message,
-    })
+    }
   }
+
+  return Response.json(responseJSON, {
+    status: responseStatus,
+  })
 }

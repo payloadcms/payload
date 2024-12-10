@@ -2,30 +2,32 @@ import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired } from 'ts-essentials'
 
 import type {
-  CustomPreviewButtonProps,
-  CustomPublishButtonProps,
-  CustomSaveButtonProps,
-  CustomSaveDraftButtonProps,
-} from '../../admin/components/elements/types'
-import type { User } from '../../auth/types'
+  CustomPreviewButton,
+  CustomPublishButton,
+  CustomSaveButton,
+  CustomSaveDraftButton,
+} from '../../admin/types.js'
 import type {
   Access,
-  AdminViewComponent,
-  EditViewConfig,
+  EditConfig,
   Endpoint,
   EntityDescription,
+  EntityDescriptionComponent,
   GeneratePreviewURL,
+  LabelFunction,
   LivePreviewConfig,
-} from '../../config/types'
-import type { PayloadRequest } from '../../express/types'
-import type { RequestContext } from '../../express/types'
-import type { Field } from '../../fields/config/types'
-import type { Where } from '../../types'
-import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types'
+  MetaConfig,
+  StaticLabel,
+} from '../../config/types.js'
+import type { DBIdentifierName } from '../../database/types.js'
+import type { Field, FlattenedField } from '../../fields/config/types.js'
+import type { GlobalSlug, RequestContext, TypedGlobal, TypedGlobalSelect } from '../../index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
+import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
-export type TypeWithID = {
-  id: number | string
-}
+export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
+
+export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
 export type BeforeValidateHook = (args: {
   context: RequestContext
@@ -33,7 +35,7 @@ export type BeforeValidateHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
-  req?: PayloadRequest
+  req: PayloadRequest
 }) => any
 
 export type BeforeChangeHook = (args: {
@@ -78,62 +80,38 @@ export type GlobalAdminOptions = {
    */
   components?: {
     elements?: {
+      Description?: EntityDescriptionComponent
       /**
        * Replaces the "Preview" button
        */
-      PreviewButton?: CustomPreviewButtonProps
+      PreviewButton?: CustomPreviewButton
       /**
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButtonProps
+      PublishButton?: CustomPublishButton
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
        */
-      SaveButton?: CustomSaveButtonProps
+      SaveButton?: CustomSaveButton
       /**
        * Replaces the "Save Draft" button
        * + drafts must be enabled
        * + autosave must be disabled
        */
-      SaveDraftButton?: CustomSaveDraftButtonProps
+      SaveDraftButton?: CustomSaveDraftButton
     }
     views?: {
       /**
-       * Set to a React component to replace the entire "Edit" view, including all nested routes.
+       * Set to a React component to replace the entire Edit View, including all nested routes.
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
-      Edit?:
-        | (
-            | {
-                /**
-                 * Replace or modify individual nested routes, or add new ones:
-                 * + `Default` - `/admin/globals/:slug`
-                 * + `API` - `/admin/globals/:id/api`
-                 * + `LivePreview` - `/admin/globals/:id/preview`
-                 * + `References` - `/admin/globals/:id/references`
-                 * + `Relationships` - `/admin/globals/:id/relationships`
-                 * + `Versions` - `/admin/globals/:id/versions`
-                 * + `Version` - `/admin/globals/:id/versions/:version`
-                 * + `CustomView` - `/admin/globals/:id/:path`
-                 */
-                API?: AdminViewComponent | Partial<EditViewConfig>
-                Default?: AdminViewComponent | Partial<EditViewConfig>
-                LivePreview?: AdminViewComponent | Partial<EditViewConfig>
-                Version?: AdminViewComponent | Partial<EditViewConfig>
-                Versions?: AdminViewComponent | Partial<EditViewConfig>
-                // TODO: uncomment these as they are built
-                // References?: EditView
-                // Relationships?: EditView
-              }
-            | {
-                [name: string]: EditViewConfig
-              }
-          )
-        | AdminViewComponent
+      edit?: EditConfig
     }
   }
+  /** Extension point to add your custom data. Available in server and client. */
+  custom?: Record<string, any>
   /**
    * Custom description for collection
    */
@@ -145,15 +123,16 @@ export type GlobalAdminOptions = {
   /**
    * Exclude the global from the admin nav and routes
    */
-  hidden?: ((args: { user: User }) => boolean) | boolean
+  hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
   /**
-   * Hide the API URL within the Edit view
+   * Hide the API URL within the Edit View
    */
   hideAPIURL?: boolean
   /**
    * Live preview options
    */
   livePreview?: LivePreviewConfig
+  meta?: MetaConfig
   /**
    * Function to generate custom preview URL
    */
@@ -168,9 +147,13 @@ export type GlobalConfig = {
     update?: Access
   }
   admin?: GlobalAdminOptions
-  /** Extension point to add your custom data. */
+  /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-  endpoints?: Omit<Endpoint, 'root'>[] | false
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
+  endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   graphQL?:
     | {
@@ -184,7 +167,16 @@ export type GlobalConfig = {
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
   }
-  label?: Record<string, string> | string
+  label?: LabelFunction | StaticLabel
+  /**
+   * Enables / Disables the ability to lock documents while editing
+   * @default true
+   */
+  lockDocuments?:
+    | {
+        duration: number
+      }
+    | false
   slug: string
   /**
    * Options used in typescript generation
@@ -195,13 +187,21 @@ export type GlobalConfig = {
      */
     interface?: string
   }
-  versions?: IncomingGlobalVersions | boolean
+  versions?: boolean | IncomingGlobalVersions
 }
 
 export interface SanitizedGlobalConfig
-  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'versions'> {
-  endpoints: Omit<Endpoint, 'root'>[] | false
+  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
+  endpoints: Endpoint[] | false
+
   fields: Field[]
+
+  /**
+   * Fields in the database schema structure
+   * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
+   */
+  flattenedFields: FlattenedField[]
+  slug: GlobalSlug
   versions: SanitizedGlobalVersions
 }
 

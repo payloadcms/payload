@@ -1,14 +1,13 @@
 'use client'
 
-import { useListDrawer } from 'payload/components/elements'
+import { useListDrawer, useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import UploadIcon from '../../../icons/Upload'
-import ElementButton from '../../Button'
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
-import { injectVoidElement } from '../../injectVoid'
+import { UploadIcon } from '../../../icons/Upload/index.js'
+import { ElementButton } from '../../Button.js'
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
+import { injectVoidElement } from '../../injectVoid.js'
 import './index.scss'
 
 const baseClass = 'upload-rich-text-button'
@@ -17,9 +16,9 @@ const insertUpload = (editor, { relationTo, value }) => {
   const text = { text: ' ' }
 
   const upload = {
+    type: 'upload',
     children: [text],
     relationTo,
-    type: 'upload',
     value,
   }
 
@@ -34,7 +33,7 @@ type ButtonProps = {
 }
 
 const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
-  const { t } = useTranslation(['upload', 'general'])
+  const { t } = useTranslation()
   const editor = useSlate()
 
   const [ListDrawer, ListDrawerToggler, { closeDrawer }] = useListDrawer({
@@ -43,9 +42,9 @@ const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
   })
 
   const onSelect = useCallback(
-    ({ collectionConfig, docID }) => {
+    ({ collectionSlug, docID }) => {
       insertUpload(editor, {
-        relationTo: collectionConfig.slug,
+        relationTo: collectionSlug,
         value: {
           id: docID,
         },
@@ -75,7 +74,7 @@ const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
   )
 }
 
-export default (props: ButtonProps): React.ReactNode => {
+export const UploadElementButton = (props: ButtonProps): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props} uploads>
       <UploadButton {...props} />

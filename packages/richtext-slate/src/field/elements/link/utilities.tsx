@@ -1,11 +1,9 @@
-import type { i18n } from 'i18next'
-import type { SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { Field, SanitizedConfig } from 'payload'
 import type { Editor } from 'slate'
 
 import { Element, Range, Transforms } from 'slate'
 
-import { getBaseFields } from './LinkDrawer/baseFields'
+import { getBaseFields } from './LinkDrawer/baseFields.js'
 
 export const unwrapLink = (editor: Editor): void => {
   Transforms.unwrapNodes(editor, { match: (n) => Element.isElement(n) && n.type === 'link' })
@@ -16,9 +14,9 @@ export const wrapLink = (editor: Editor): void => {
   const isCollapsed = selection && Range.isCollapsed(selection)
 
   const link = {
+    type: 'link',
     children: isCollapsed ? [{ text: '' }] : [],
     newTab: false,
-    type: 'link',
     url: undefined,
   }
 
@@ -30,36 +28,20 @@ export const wrapLink = (editor: Editor): void => {
   }
 }
 
-export const withLinks = (incomingEditor: Editor): Editor => {
-  const editor = incomingEditor
-  const { isInline } = editor
-
-  editor.isInline = (element) => {
-    if (element.type === 'link') {
-      return true
-    }
-
-    return isInline(element)
-  }
-
-  return editor
-}
-
 /**
  * This function is run to enrich the basefields which every link has with potential, custom user-added fields.
  */
 export function transformExtraFields(
   customFieldSchema:
-    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
+    | ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[])
     | Field[],
   config: SanitizedConfig,
-  i18n: i18n,
 ): Field[] {
   const baseFields: Field[] = getBaseFields(config)
 
   const fields =
     typeof customFieldSchema === 'function'
-      ? customFieldSchema({ config, defaultFields: baseFields, i18n })
+      ? customFieldSchema({ config, defaultFields: baseFields })
       : baseFields
 
   // Wrap fields which are not part of the base schema in a group named 'fields' - otherwise they will be rendered but not saved
@@ -80,9 +62,10 @@ export function transformExtraFields(
     }
   }
 
-  if (Array.isArray(customFieldSchema) || fields.length > 0) {
+  if ((Array.isArray(customFieldSchema) && customFieldSchema?.length) || extraFields?.length) {
     fields.push({
       name: 'fields',
+      type: 'group',
       admin: {
         style: {
           borderBottom: 0,
@@ -94,7 +77,6 @@ export function transformExtraFields(
       fields: Array.isArray(customFieldSchema)
         ? customFieldSchema.concat(extraFields)
         : extraFields,
-      type: 'group',
     })
   }
   return fields

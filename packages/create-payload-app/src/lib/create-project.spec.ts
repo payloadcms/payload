@@ -1,22 +1,28 @@
+import { jest } from '@jest/globals'
+import fs from 'fs'
 import fse from 'fs-extra'
+import globby from 'globby'
+import * as os from 'node:os'
 import path from 'path'
-import type { BundlerType, CliArgs, DbType, ProjectTemplate } from '../types'
-import { createProject } from './create-project'
-import { bundlerPackages, dbPackages, editorPackages } from './packages'
-import exp from 'constants'
-import { getValidTemplates } from './templates'
 
-const projectDir = path.resolve(__dirname, './tmp')
+import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
+
+import { createProject } from './create-project.js'
+import { dbReplacements } from './replacements.js'
+import { getValidTemplates } from './templates.js'
+
 describe('createProject', () => {
+  let projectDir: string
   beforeAll(() => {
+    // eslint-disable-next-line no-console
     console.log = jest.fn()
   })
 
   beforeEach(() => {
-    if (fse.existsSync(projectDir)) {
-      fse.rmdirSync(projectDir, { recursive: true })
-    }
+    const tempDirectory = fs.realpathSync(os.tmpdir())
+    projectDir = `${tempDirectory}/${Math.random().toString(36).substring(7)}`
   })
+
   afterEach(() => {
     if (fse.existsSync(projectDir)) {
       fse.rmSync(projectDir, { recursive: true })
@@ -24,116 +30,92 @@ describe('createProject', () => {
   })
 
   describe('#createProject', () => {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const args = {
       _: ['project-name'],
       '--db': 'mongodb',
+      '--local-template': 'blank',
       '--no-deps': true,
     } as CliArgs
     const packageManager = 'yarn'
-
-    it('creates starter project', async () => {
-      const projectName = 'starter-project'
-      const template: ProjectTemplate = {
-        name: 'blank',
-        type: 'starter',
-        url: 'https://github.com/payloadcms/payload/templates/blank',
-        description: 'Blank Template',
-      }
-      await createProject({
-        cliArgs: args,
-        projectName,
-        projectDir,
-        template,
-        packageManager,
-      })
-
-      const packageJsonPath = path.resolve(projectDir, 'package.json')
-      const packageJson = fse.readJsonSync(packageJsonPath)
-
-      // Check package name and description
-      expect(packageJson.name).toEqual(projectName)
-    })
 
     it('creates plugin template', async () => {
       const projectName = 'plugin'
       const template: ProjectTemplate = {
         name: 'plugin',
         type: 'plugin',
-        url: 'https://github.com/payloadcms/payload-plugin-template',
         description: 'Template for creating a Payload plugin',
+        url: 'https://github.com/payloadcms/payload-plugin-template',
       }
       await createProject({
         cliArgs: args,
-        projectName,
-        projectDir,
-        template,
         packageManager,
+        projectDir,
+        projectName,
+        template,
       })
 
       const packageJsonPath = path.resolve(projectDir, 'package.json')
       const packageJson = fse.readJsonSync(packageJsonPath)
 
       // Check package name and description
-      expect(packageJson.name).toEqual(projectName)
+      expect(packageJson.name).toStrictEqual(projectName)
     })
 
-    describe('db adapters and bundlers', () => {
+    describe('creates project from template', () => {
       const templates = getValidTemplates()
 
       it.each([
-        ['blank', 'mongodb', 'webpack'],
-        ['blank', 'postgres', 'webpack'],
-        ['website', 'mongodb', 'webpack'],
-        ['website', 'postgres', 'webpack'],
-        ['ecommerce', 'mongodb', 'webpack'],
-        ['ecommerce', 'postgres', 'webpack'],
-      ])('update config and deps: %s, %s, %s', async (templateName, db, bundler) => {
+        ['blank', 'mongodb'],
+        ['blank', 'postgres'],
+
+        // TODO: Re-enable these once 3.0 is stable and templates updated
+        // ['website', 'mongodb'],
+        // ['website', 'postgres'],
+        // ['ecommerce', 'mongodb'],
+        // ['ecommerce', 'postgres'],
+      ])('update config and deps: %s, %s', async (templateName, db) => {
         const projectName = 'starter-project'
 
         const template = templates.find((t) => t.name === templateName)
 
+        const cliArgs = {
+          ...args,
+          '--db': db,
+          '--local-template': templateName,
+        } as CliArgs
+
         await createProject({
-          cliArgs: args,
-          projectName,
-          projectDir,
-          template,
-          packageManager,
+          cliArgs,
           dbDetails: {
-            dbUri: `${db}://localhost:27017/create-project-test`,
             type: db as DbType,
+            dbUri: `${db}://localhost:27017/create-project-test`,
           },
+          packageManager,
+          projectDir,
+          projectName,
+          template: template as ProjectTemplate,
         })
 
-        const dbReplacement = dbPackages[db as DbType]
-        const bundlerReplacement = bundlerPackages[bundler as BundlerType]
-        const editorReplacement = editorPackages['slate']
+        const dbReplacement = dbReplacements[db as DbType]
 
         const packageJsonPath = path.resolve(projectDir, 'package.json')
         const packageJson = fse.readJsonSync(packageJsonPath)
 
-        // Check deps
-        expect(packageJson.dependencies['payload']).toEqual('^2.0.0')
-        expect(packageJson.dependencies[dbReplacement.packageName]).toEqual(dbReplacement.version)
+        // Verify git was initialized
+        expect(fse.existsSync(path.resolve(projectDir, '.git'))).toBe(true)
 
         // Should only have one db adapter
         expect(
           Object.keys(packageJson.dependencies).filter((n) => n.startsWith('@payloadcms/db-')),
         ).toHaveLength(1)
 
-        expect(packageJson.dependencies[bundlerReplacement.packageName]).toEqual(
-          bundlerReplacement.version,
-        )
-        expect(packageJson.dependencies[editorReplacement.packageName]).toEqual(
-          editorReplacement.version,
-        )
+        const payloadConfigPath = (
+          await globby('**/payload.config.ts', {
+            absolute: true,
+            cwd: projectDir,
+          })
+        )?.[0]
 
-        let payloadConfigPath = path.resolve(projectDir, 'src/payload.config.ts')
-
-        // Website and ecommerce templates have payload.config.ts in src/payload
-        if (!fse.existsSync(payloadConfigPath)) {
-          payloadConfigPath = path.resolve(projectDir, 'src/payload/payload.config.ts')
-        }
         const content = fse.readFileSync(payloadConfigPath, 'utf-8')
 
         // Check payload.config.ts
@@ -142,19 +124,8 @@ describe('createProject', () => {
 
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
-        expect(content).toContain(dbReplacement.configReplacement.join('\n'))
-
-        expect(content).not.toContain('// bundler-config-import')
-        expect(content).toContain(bundlerReplacement.importReplacement)
-
-        expect(content).not.toContain('// bundler-config')
-        expect(content).toContain(bundlerReplacement.configReplacement)
+        expect(content).toContain(dbReplacement.configReplacement().join('\n'))
       })
     })
-  })
-
-  describe('Templates', () => {
-    it.todo('Verify that all templates are valid')
-    // Loop through all templates.ts that should have replacement comments, and verify that they are present
   })
 })

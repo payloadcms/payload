@@ -1,19 +1,43 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "noEmit": false /* Do not emit outputs. */,
-    "emitDeclarationOnly": true,
-    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-    "rootDir": "../" /* Specify the root folder within your source files. */
+    "noEmit": true,
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": false,
+    "types": ["jest", "node", "@types/jest"],
+    "incremental": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@payload-config": ["./fields/config.ts"]
+    }
   },
-  "exclude": ["dist", "build", "node_modules", ".eslintrc.js"],
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.d.ts",
-    "src/**/*.json",
-    "**/*.ts",
-    "test/**/*.tsx",
-    "../packages/**/src/**/*.ts"
-  ]
+  "exclude": [
+    "dist",
+    "build",
+    "node_modules",
+    "eslint.config.js",
+    "dist/**/*.js",
+    "**/dist/**/*.js"
+  ],
+  "include": ["./**/*.ts", "./**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts", "setup.js"],
+  "references": []
 }

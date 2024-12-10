@@ -1,5 +1,5 @@
-import type { Payload } from '../..'
-import type { MigrationData } from '../types'
+import type { Payload } from '../../index.js'
+import type { MigrationData } from '../types.js'
 
 /**
  * Gets all existing migrations from the database, excluding the dev migration
@@ -12,7 +12,7 @@ export async function getMigrations({
   const migrationQuery = await payload.find({
     collection: 'payload-migrations',
     limit: 0,
-    sort: '-name',
+    sort: ['-batch', '-name'],
     where: {
       batch: {
         not_equals: -1,

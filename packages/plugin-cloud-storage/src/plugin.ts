@@ -1,11 +1,10 @@
-import type { Config } from 'payload/config'
+import type { Config } from 'payload'
 
-import type { PluginOptions } from './types'
+import type { PluginOptions } from './types.js'
 
-import { getFields } from './fields/getFields'
-import { getAfterDeleteHook } from './hooks/afterDelete'
-import { getBeforeChangeHook } from './hooks/beforeChange'
-import { extendWebpackConfig } from './webpack'
+import { getFields } from './fields/getFields.js'
+import { getAfterDeleteHook } from './hooks/afterDelete.js'
+import { getBeforeChangeHook } from './hooks/beforeChange.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -16,18 +15,11 @@ import { extendWebpackConfig } from './webpack'
 
 // Optionally, the adapter can specify any Webpack config overrides if they are necessary.
 
-export const cloudStorage =
+export const cloudStoragePlugin =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
     const { collections: allCollectionOptions, enabled } = pluginOptions
     const config = { ...incomingConfig }
-
-    const webpack = extendWebpackConfig({ config: incomingConfig, options: pluginOptions })
-
-    config.admin = {
-      ...(config.admin || {}),
-      webpack,
-    }
 
     // Return early if disabled. Only webpack config mods are applied.
     if (enabled === false) {
@@ -47,7 +39,9 @@ export const cloudStorage =
             prefix: options.prefix,
           })
 
-          if (adapter.onInit) initFunctions.push(adapter.onInit)
+          if (adapter.onInit) {
+            initFunctions.push(adapter.onInit)
+          }
 
           const fields = getFields({
             adapter,
@@ -84,6 +78,7 @@ export const cloudStorage =
             },
             upload: {
               ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
+              adapter: adapter.name,
               disableLocalStorage:
                 typeof options.disableLocalStorage === 'boolean'
                   ? options.disableLocalStorage
@@ -97,7 +92,9 @@ export const cloudStorage =
       }),
       onInit: async (payload) => {
         initFunctions.forEach((fn) => fn())
-        if (config.onInit) await config.onInit(payload)
+        if (config.onInit) {
+          await config.onInit(payload)
+        }
       },
     }
   }

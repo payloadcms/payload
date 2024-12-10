@@ -1,23 +1,26 @@
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types'
-import type { Field, TabAsField } from '../../config/types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
-import { promise } from './promise'
+import { promise } from './promise.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
-  data: Record<string, unknown>
-  doc: Record<string, unknown>
+  data: JsonObject
+  doc: JsonObject
   fields: (Field | TabAsField)[]
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
-  previousDoc: Record<string, unknown>
-  previousSiblingDoc: Record<string, unknown>
+  path: (number | string)[]
+  previousDoc: JsonObject
+  previousSiblingDoc: JsonObject
   req: PayloadRequest
-  siblingData: Record<string, unknown>
-  siblingDoc: Record<string, unknown>
+  schemaPath: string[]
+  siblingData: JsonObject
+  siblingDoc: JsonObject
 }
 
 export const traverseFields = async ({
@@ -28,15 +31,17 @@ export const traverseFields = async ({
   fields,
   global,
   operation,
+  path,
   previousDoc,
   previousSiblingDoc,
   req,
+  schemaPath,
   siblingData,
   siblingDoc,
 }: Args): Promise<void> => {
   const promises = []
 
-  fields.forEach((field) => {
+  fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
         collection,
@@ -44,8 +49,11 @@ export const traverseFields = async ({
         data,
         doc,
         field,
+        fieldIndex,
         global,
         operation,
+        parentPath: path,
+        parentSchemaPath: schemaPath,
         previousDoc,
         previousSiblingDoc,
         req,

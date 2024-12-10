@@ -1,46 +1,46 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { codeFieldsSlug } from '../../slugs'
+import { codeFieldsSlug } from '../../slugs.js'
 
 const Code: CollectionConfig = {
+  slug: codeFieldsSlug,
   fields: [
     {
       name: 'javascript',
+      type: 'code',
       admin: {
         language: 'javascript',
       },
-      type: 'code',
     },
     {
       name: 'typescript',
+      type: 'code',
       admin: {
         language: 'typescript',
       },
-      type: 'code',
     },
     {
       name: 'json',
+      type: 'code',
       admin: {
         language: 'json',
       },
-      type: 'code',
     },
     {
       name: 'html',
+      type: 'code',
       admin: {
         language: 'html',
       },
-      type: 'code',
     },
     {
       name: 'css',
+      type: 'code',
       admin: {
         language: 'css',
       },
-      type: 'code',
     },
   ],
-  slug: codeFieldsSlug,
 }
 
 export default Code

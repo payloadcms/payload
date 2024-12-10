@@ -1,0 +1,53 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .paginator {
+    display: flex;
+    margin-bottom: $baseline;
+
+    &__page {
+      cursor: pointer;
+
+      &--is-current {
+        background: var(--theme-elevation-100);
+        color: var(--theme-elevation-400);
+        cursor: default;
+      }
+
+      &--is-last-page {
+        margin-right: 0;
+      }
+    }
+
+    .clickable-arrow--right {
+      margin-right: base(0.25);
+    }
+
+    &__page {
+      @extend %btn-reset;
+      width: base(2);
+      height: base(2);
+      display: flex;
+      justify-content: center;
+      align-content: center;
+      outline: 0;
+      padding: base(0.5);
+      color: var(--theme-elevation-800);
+      line-height: base(1);
+
+      &:focus-visible {
+        outline: var(--accessibility-outline);
+      }
+    }
+
+    &__page,
+    &__separator {
+      margin-right: base(0.25);
+    }
+
+    &__separator {
+      align-self: center;
+      color: var(--theme-elevation-400);
+    }
+  }
+}

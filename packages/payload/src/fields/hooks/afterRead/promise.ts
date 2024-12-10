@@ -1,30 +1,57 @@
-/* eslint-disable no-param-reassign */
-import type { RichTextAdapter } from '../../../admin/components/forms/field-types/RichText/types'
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types'
-import type { Field, TabAsField } from '../../config/types'
+import type { RichTextAdapter } from '../../../admin/RichText.js'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { RequestContext } from '../../../index.js'
+import type {
+  JsonObject,
+  PayloadRequest,
+  PopulateType,
+  SelectMode,
+  SelectType,
+} from '../../../types/index.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
-import { fieldAffectsData, tabHasName } from '../../config/types'
-import relationshipPopulationPromise from './relationshipPopulationPromise'
-import { traverseFields } from './traverseFields'
+import { MissingEditorProp } from '../../../errors/index.js'
+import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { getDefaultValue } from '../../getDefaultValue.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
+import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
+import { traverseFields } from './traverseFields.js'
 
 type Args = {
-  collection: SanitizedCollectionConfig | null
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth: number
   depth: number
-  doc: Record<string, unknown>
+  doc: JsonObject
+  draft: boolean
+  fallbackLocale: null | string
   field: Field | TabAsField
+  fieldIndex: number
+  /**
+   * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
+   */
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
-  global: SanitizedGlobalConfig | null
+  global: null | SanitizedGlobalConfig
+  locale: null | string
   overrideAccess: boolean
+  /**
+   * The parent's path.
+   */
+  parentPath: (number | string)[]
+  /**
+   * The parent's schemaPath (path without indexes).
+   */
+  parentSchemaPath: string[]
+  populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
+  select?: SelectType
+  selectMode?: SelectMode
   showHiddenFields: boolean
-  siblingDoc: Record<string, unknown>
+  siblingDoc: JsonObject
   triggerAccessControl?: boolean
   triggerHooks?: boolean
 }
@@ -43,19 +70,38 @@ export const promise = async ({
   currentDepth,
   depth,
   doc,
+  draft,
+  fallbackLocale,
   field,
+  fieldIndex,
   fieldPromises,
   findMany,
   flattenLocales,
   global,
+  locale,
   overrideAccess,
+  parentPath,
+  parentSchemaPath,
+  populate,
   populationPromises,
   req,
+  select,
+  selectMode,
   showHiddenFields,
   siblingDoc,
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): Promise<void> => {
+  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
+    field,
+    index: fieldIndex,
+    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
+    parentPath: parentPath.join('.'),
+    parentSchemaPath: parentSchemaPath.join('.'),
+  })
+  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
+  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
+
   if (
     fieldAffectsData(field) &&
     field.hidden &&
@@ -65,24 +111,35 @@ export const promise = async ({
     delete siblingDoc[field.name]
   }
 
+  if (fieldAffectsData(field) && select && selectMode) {
+    if (selectMode === 'include') {
+      if (!select[field.name]) {
+        delete siblingDoc[field.name]
+        return
+      }
+    }
+
+    if (selectMode === 'exclude') {
+      if (select[field.name] === false) {
+        delete siblingDoc[field.name]
+        return
+      }
+    }
+  }
+
   const shouldHoistLocalizedValue =
     flattenLocales &&
     fieldAffectsData(field) &&
     typeof siblingDoc[field.name] === 'object' &&
     siblingDoc[field.name] !== null &&
     field.localized &&
-    req.locale !== 'all' &&
+    locale !== 'all' &&
     req.payload.config.localization
 
   if (shouldHoistLocalizedValue) {
     // replace actual value with localized value before sanitizing
     // { [locale]: fields } -> fields
-    const { locale } = req
     const value = siblingDoc[field.name][locale]
-    const fallbackLocale =
-      req.payload.config.localization &&
-      req.payload.config.localization?.fallback &&
-      req.fallbackLocale
 
     let hoistedValue = value
 
@@ -124,6 +181,29 @@ export const promise = async ({
 
       break
     }
+    case 'point': {
+      const pointDoc = siblingDoc[field.name] as Record<string, unknown>
+      if (Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2) {
+        siblingDoc[field.name] = pointDoc.coordinates
+      } else {
+        siblingDoc[field.name] = undefined
+      }
+
+      break
+    }
+
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      // Rich Text fields should use afterRead hooks to do population. The previous editor.populationPromises have been renamed to editor.graphQLPopulationPromises
+      break
+    }
+
     case 'tabs': {
       field.tabs.forEach((tab) => {
         if (
@@ -133,56 +213,6 @@ export const promise = async ({
           siblingDoc[tab.name] = {}
         }
       })
-
-      break
-    }
-
-    case 'richText': {
-      const editor: RichTextAdapter = field?.editor
-      // This is run here AND in the GraphQL Resolver
-      if (editor?.populationPromise) {
-        const populationPromise = editor.populationPromise({
-          context,
-          currentDepth,
-          depth,
-          field,
-          findMany,
-          flattenLocales,
-          overrideAccess,
-          populationPromises,
-          req,
-          showHiddenFields,
-          siblingDoc,
-        })
-
-        if (populationPromise) {
-          populationPromises.push(populationPromise)
-        }
-      }
-
-      // This is only run here, independent of depth
-      if (editor?.afterReadPromise) {
-        const afterReadPromise = editor?.afterReadPromise({
-          field,
-          incomingEditorState: siblingDoc[field.name] as object,
-          siblingDoc,
-        })
-
-        if (afterReadPromise) {
-          populationPromises.push(afterReadPromise)
-        }
-      }
-
-      break
-    }
-
-    case 'point': {
-      const pointDoc = siblingDoc[field.name] as Record<string, unknown>
-      if (Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2) {
-        siblingDoc[field.name] = pointDoc.coordinates
-      } else {
-        siblingDoc[field.name] = undefined
-      }
 
       break
     }
@@ -200,7 +230,7 @@ export const promise = async ({
 
         const shouldRunHookOnAllLocales =
           field.localized &&
-          (req.locale === 'all' || !flattenLocales) &&
+          (locale === 'all' || !flattenLocales) &&
           typeof siblingDoc[field.name] === 'object'
 
         if (shouldRunHookOnAllLocales) {
@@ -209,12 +239,20 @@ export const promise = async ({
               const hookedValue = await currentHook({
                 collection,
                 context,
+                currentDepth,
                 data: doc,
+                depth,
+                draft,
                 field,
+                findMany,
                 global,
                 operation: 'read',
                 originalDoc: doc,
+                overrideAccess,
+                path: fieldPath,
                 req,
+                schemaPath: fieldSchemaPath,
+                showHiddenFields,
                 siblingData: siblingDoc,
                 value,
               })
@@ -230,13 +268,20 @@ export const promise = async ({
           const hookedValue = await currentHook({
             collection,
             context,
+            currentDepth,
             data: doc,
+            depth,
+            draft,
             field,
             findMany,
             global,
             operation: 'read',
             originalDoc: doc,
+            overrideAccess,
+            path: fieldPath,
             req,
+            schemaPath: fieldSchemaPath,
+            showHiddenFields,
             siblingData: siblingDoc,
             value: siblingDoc[field.name],
           })
@@ -249,6 +294,7 @@ export const promise = async ({
     }
 
     // Execute access control
+    let allowDefaultValue = true
     if (triggerAccessControl && field.access && field.access.read) {
       const result = overrideAccess
         ? true
@@ -261,17 +307,37 @@ export const promise = async ({
           })
 
       if (!result) {
+        allowDefaultValue = false
         delete siblingDoc[field.name]
       }
     }
 
-    if (field.type === 'relationship' || field.type === 'upload') {
+    // Set defaultValue on the field for globals being returned without being first created
+    // or collection documents created prior to having a default
+    if (
+      allowDefaultValue &&
+      typeof siblingDoc[field.name] === 'undefined' &&
+      typeof field.defaultValue !== 'undefined'
+    ) {
+      siblingDoc[field.name] = await getDefaultValue({
+        defaultValue: field.defaultValue,
+        locale,
+        user: req.user,
+        value: siblingDoc[field.name],
+      })
+    }
+
+    if (field.type === 'relationship' || field.type === 'upload' || field.type === 'join') {
       populationPromises.push(
         relationshipPopulationPromise({
           currentDepth,
           depth,
+          draft,
+          fallbackLocale,
           field,
+          locale,
           overrideAccess,
+          populate,
           req,
           showHiddenFields,
           siblingDoc,
@@ -281,52 +347,42 @@ export const promise = async ({
   }
 
   switch (field.type) {
-    case 'group': {
-      let groupDoc = siblingDoc[field.name] as Record<string, unknown>
-      if (typeof siblingDoc[field.name] !== 'object') groupDoc = {}
-
-      traverseFields({
-        collection,
-        context,
-        currentDepth,
-        depth,
-        doc,
-        fieldPromises,
-        fields: field.fields,
-        findMany,
-        flattenLocales,
-        global,
-        overrideAccess,
-        populationPromises,
-        req,
-        showHiddenFields,
-        siblingDoc: groupDoc,
-        triggerAccessControl,
-        triggerHooks,
-      })
-
-      break
-    }
-
     case 'array': {
-      const rows = siblingDoc[field.name]
+      const rows = siblingDoc[field.name] as JsonObject
+
+      let arraySelect = select?.[field.name]
+
+      if (selectMode === 'include' && typeof arraySelect === 'object') {
+        arraySelect = {
+          ...arraySelect,
+          id: true,
+        }
+      }
 
       if (Array.isArray(rows)) {
-        rows.forEach((row) => {
+        rows.forEach((row, i) => {
           traverseFields({
             collection,
             context,
             currentDepth,
             depth,
             doc,
+            draft,
+            fallbackLocale,
             fieldPromises,
             fields: field.fields,
             findMany,
             flattenLocales,
             global,
+            locale,
             overrideAccess,
+            path: [...fieldPath, i],
+            populate,
             populationPromises,
             req,
+            schemaPath: fieldSchemaPath,
+            select: typeof arraySelect === 'object' ? arraySelect : undefined,
+            selectMode,
             showHiddenFields,
             siblingDoc: row || {},
             triggerAccessControl,
@@ -336,23 +392,29 @@ export const promise = async ({
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
-            localeRows.forEach((row) => {
+            localeRows.forEach((row, i) => {
               traverseFields({
                 collection,
                 context,
                 currentDepth,
                 depth,
                 doc,
+                draft,
+                fallbackLocale,
                 fieldPromises,
                 fields: field.fields,
                 findMany,
                 flattenLocales,
                 global,
+                locale,
                 overrideAccess,
+                path: [...fieldPath, i],
+                populate,
                 populationPromises,
                 req,
+                schemaPath: fieldSchemaPath,
                 showHiddenFields,
-                siblingDoc: row || {},
+                siblingDoc: (row as JsonObject) || {},
                 triggerAccessControl,
                 triggerHooks,
               })
@@ -368,9 +430,45 @@ export const promise = async ({
     case 'blocks': {
       const rows = siblingDoc[field.name]
 
+      let blocksSelect = select?.[field.name]
+
       if (Array.isArray(rows)) {
-        rows.forEach((row) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+        rows.forEach((row, i) => {
+          const block = field.blocks.find(
+            (blockType) => blockType.slug === (row as JsonObject).blockType,
+          )
+
+          let blockSelectMode = selectMode
+
+          if (typeof blocksSelect === 'object') {
+            blocksSelect = {
+              ...blocksSelect,
+            }
+
+            // sanitize blocks: {cta: false} to blocks: {cta: {id: true, blockType: true}}
+            if (selectMode === 'exclude' && blocksSelect[block.slug] === false) {
+              blockSelectMode = 'include'
+              blocksSelect[block.slug] = {
+                id: true,
+                blockType: true,
+              }
+            } else if (selectMode === 'include') {
+              if (!blocksSelect[block.slug]) {
+                blocksSelect[block.slug] = {}
+              }
+
+              if (typeof blocksSelect[block.slug] === 'object') {
+                blocksSelect[block.slug] = {
+                  ...(blocksSelect[block.slug] as object),
+                }
+
+                blocksSelect[block.slug]['id'] = true
+                blocksSelect[block.slug]['blockType'] = true
+              }
+            }
+          }
+
+          const blockSelect = blocksSelect?.[block.slug]
 
           if (block) {
             traverseFields({
@@ -379,16 +477,24 @@ export const promise = async ({
               currentDepth,
               depth,
               doc,
+              draft,
+              fallbackLocale,
               fieldPromises,
               fields: block.fields,
               findMany,
               flattenLocales,
               global,
+              locale,
               overrideAccess,
+              path: [...fieldPath, i],
+              populate,
               populationPromises,
               req,
+              schemaPath: fieldSchemaPath,
+              select: typeof blockSelect === 'object' ? blockSelect : undefined,
+              selectMode: blockSelectMode,
               showHiddenFields,
-              siblingDoc: row || {},
+              siblingDoc: (row as JsonObject) || {},
               triggerAccessControl,
               triggerHooks,
             })
@@ -397,8 +503,10 @@ export const promise = async ({
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
-            localeRows.forEach((row) => {
-              const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+            localeRows.forEach((row, i) => {
+              const block = field.blocks.find(
+                (blockType) => blockType.slug === (row as JsonObject).blockType,
+              )
 
               if (block) {
                 traverseFields({
@@ -407,16 +515,22 @@ export const promise = async ({
                   currentDepth,
                   depth,
                   doc,
+                  draft,
+                  fallbackLocale,
                   fieldPromises,
                   fields: block.fields,
                   findMany,
                   flattenLocales,
                   global,
+                  locale,
                   overrideAccess,
+                  path: [...fieldPath, i],
+                  populate,
                   populationPromises,
                   req,
+                  schemaPath: fieldSchemaPath,
                   showHiddenFields,
-                  siblingDoc: row || {},
+                  siblingDoc: (row as JsonObject) || {},
                   triggerAccessControl,
                   triggerHooks,
                 })
@@ -431,22 +545,30 @@ export const promise = async ({
       break
     }
 
-    case 'row':
-    case 'collapsible': {
+    case 'collapsible':
+    case 'row': {
       traverseFields({
         collection,
         context,
         currentDepth,
         depth,
         doc,
+        draft,
+        fallbackLocale,
         fieldPromises,
         fields: field.fields,
         findMany,
         flattenLocales,
         global,
+        locale,
         overrideAccess,
+        path: fieldPath,
+        populate,
         populationPromises,
         req,
+        schemaPath: fieldSchemaPath,
+        select,
+        selectMode,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,
@@ -455,12 +577,156 @@ export const promise = async ({
 
       break
     }
+    case 'group': {
+      let groupDoc = siblingDoc[field.name] as JsonObject
+      if (typeof siblingDoc[field.name] !== 'object') {
+        groupDoc = {}
+      }
+
+      const groupSelect = select?.[field.name]
+
+      traverseFields({
+        collection,
+        context,
+        currentDepth,
+        depth,
+        doc,
+        draft,
+        fallbackLocale,
+        fieldPromises,
+        fields: field.fields,
+        findMany,
+        flattenLocales,
+        global,
+        locale,
+        overrideAccess,
+        path: fieldPath,
+        populate,
+        populationPromises,
+        req,
+        schemaPath: fieldSchemaPath,
+        select: typeof groupSelect === 'object' ? groupSelect : undefined,
+        selectMode,
+        showHiddenFields,
+        siblingDoc: groupDoc,
+        triggerAccessControl,
+        triggerHooks,
+      })
+
+      break
+    }
+
+    case 'richText': {
+      if (!field?.editor) {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+      }
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.hooks?.afterRead?.length) {
+        await editor.hooks.afterRead.reduce(async (priorHook, currentHook) => {
+          await priorHook
+
+          const shouldRunHookOnAllLocales =
+            field.localized &&
+            (locale === 'all' || !flattenLocales) &&
+            typeof siblingDoc[field.name] === 'object'
+
+          if (shouldRunHookOnAllLocales) {
+            const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
+              (async () => {
+                const hookedValue = await currentHook({
+                  collection,
+                  context,
+                  currentDepth,
+                  data: doc,
+                  depth,
+                  draft,
+                  fallbackLocale,
+                  field,
+                  fieldPromises,
+                  findMany,
+                  flattenLocales,
+                  global,
+                  locale,
+                  operation: 'read',
+                  originalDoc: doc,
+                  overrideAccess,
+                  path: fieldPath,
+                  populate,
+                  populationPromises,
+                  req,
+                  schemaPath: fieldSchemaPath,
+                  showHiddenFields,
+                  siblingData: siblingDoc,
+                  triggerAccessControl,
+                  triggerHooks,
+                  value,
+                })
+
+                if (hookedValue !== undefined) {
+                  siblingDoc[field.name][locale] = hookedValue
+                }
+              })(),
+            )
+
+            await Promise.all(hookPromises)
+          } else {
+            const hookedValue = await currentHook({
+              collection,
+              context,
+              currentDepth,
+              data: doc,
+              depth,
+              draft,
+              fallbackLocale,
+              field,
+              fieldPromises,
+              findMany,
+              flattenLocales,
+              global,
+              locale,
+              operation: 'read',
+              originalDoc: doc,
+              overrideAccess,
+              path: fieldPath,
+              populate,
+              populationPromises,
+              req,
+              schemaPath: fieldSchemaPath,
+              showHiddenFields,
+              siblingData: siblingDoc,
+              triggerAccessControl,
+              triggerHooks,
+              value: siblingDoc[field.name],
+            })
+
+            if (hookedValue !== undefined) {
+              siblingDoc[field.name] = hookedValue
+            }
+          }
+        }, Promise.resolve())
+      }
+      break
+    }
 
     case 'tab': {
       let tabDoc = siblingDoc
+      let tabSelect: SelectType | undefined
       if (tabHasName(field)) {
-        tabDoc = siblingDoc[field.name] as Record<string, unknown>
-        if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
+        tabDoc = siblingDoc[field.name] as JsonObject
+        if (typeof siblingDoc[field.name] !== 'object') {
+          tabDoc = {}
+        }
+
+        if (typeof select?.[field.name] === 'object') {
+          tabSelect = select?.[field.name] as SelectType
+        }
+      } else {
+        tabSelect = select
       }
 
       traverseFields({
@@ -469,14 +735,22 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
+        fallbackLocale,
         fieldPromises,
         fields: field.fields,
         findMany,
         flattenLocales,
         global,
+        locale,
         overrideAccess,
+        path: fieldPath,
+        populate,
         populationPromises,
         req,
+        schemaPath: fieldSchemaPath,
+        select: tabSelect,
+        selectMode,
         showHiddenFields,
         siblingDoc: tabDoc,
         triggerAccessControl,
@@ -493,14 +767,22 @@ export const promise = async ({
         currentDepth,
         depth,
         doc,
+        draft,
+        fallbackLocale,
         fieldPromises,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         findMany,
         flattenLocales,
         global,
+        locale,
         overrideAccess,
+        path: fieldPath,
+        populate,
         populationPromises,
         req,
+        schemaPath: fieldSchemaPath,
+        select,
+        selectMode,
         showHiddenFields,
         siblingDoc,
         triggerAccessControl,

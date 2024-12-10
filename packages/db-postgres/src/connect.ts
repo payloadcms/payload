@@ -1,108 +1,121 @@
-import type { Connect } from 'payload/database'
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { Connect, Payload } from 'payload'
 
-import { eq, sql } from 'drizzle-orm'
+import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { numeric, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core'
-import { Pool } from 'pg'
-import prompts from 'prompts'
+import pg from 'pg'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.js'
 
-export const connect: Connect = async function connect(this: PostgresAdapter, payload) {
+const connectWithReconnect = async function ({
+  adapter,
+  payload,
+  reconnect = false,
+}: {
+  adapter: PostgresAdapter
+  payload: Payload
+  reconnect?: boolean
+}) {
+  let result
+
+  if (!reconnect) {
+    result = await adapter.pool.connect()
+  } else {
+    try {
+      result = await adapter.pool.connect()
+    } catch (ignore) {
+      setTimeout(() => {
+        payload.logger.info('Reconnecting to postgres')
+        void connectWithReconnect({ adapter, payload, reconnect: true })
+      }, 1000)
+    }
+  }
+  if (!result) {
+    return
+  }
+  result.prependListener('error', (err) => {
+    try {
+      if (err.code === 'ECONNRESET') {
+        void connectWithReconnect({ adapter, payload, reconnect: true })
+      }
+    } catch (ignore) {
+      // swallow error
+    }
+  })
+}
+
+export const connect: Connect = async function connect(
+  this: PostgresAdapter,
+  options = {
+    hotReload: false,
+  },
+) {
+  const { hotReload } = options
+
   this.schema = {
+    pgSchema: this.pgSchema,
     ...this.tables,
     ...this.relations,
     ...this.enums,
   }
 
   try {
-    this.pool = new Pool(this.poolOptions)
-    await this.pool.connect()
+    if (!this.pool) {
+      this.pool = new pg.Pool(this.poolOptions)
+      await connectWithReconnect({ adapter: this, payload: this.payload })
+    }
 
-    this.drizzle = drizzle(this.pool, { schema: this.schema })
-    if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      this.payload.logger.info('---- DROPPING TABLES ----')
-      await this.drizzle.execute(sql`drop schema public cascade;
-      create schema public;`)
-      this.payload.logger.info('---- DROPPED TABLES ----')
+    const logger = this.logger || false
+    this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
+
+    if (!hotReload) {
+      if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
+        this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
+        await this.dropDatabase({ adapter: this })
+        this.payload.logger.info('---- DROPPED TABLES ----')
+      }
     }
   } catch (err) {
-    payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
+    if (err.message?.match(/database .* does not exist/i) && !this.disableCreateDatabase) {
+      // capitalize first char of the err msg
+      this.payload.logger.info(
+        `${err.message.charAt(0).toUpperCase() + err.message.slice(1)}, creating...`,
+      )
+      const isCreated = await this.createDatabase()
+
+      if (isCreated) {
+        await this.connect(options)
+        return
+      }
+    } else {
+      this.payload.logger.error({
+        err,
+        msg: `Error: cannot connect to Postgres. Details: ${err.message}`,
+      })
+    }
+
+    if (typeof this.rejectInitializing === 'function') {
+      this.rejectInitializing()
+    }
     process.exit(1)
   }
 
+  await this.createExtensions()
+
   // Only push schema if not in production
   if (
-    process.env.NODE_ENV === 'production' ||
-    process.env.PAYLOAD_MIGRATING === 'true' ||
-    this.push === false
-  )
-    return
-
-  const { pushSchema } = require('drizzle-kit/utils')
-
-  // This will prompt if clarifications are needed for Drizzle to push new schema
-  const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(
-    this.schema,
-    this.drizzle,
-  )
-
-  if (warnings.length) {
-    let message = `Warnings detected during schema push: \n\n${warnings.join('\n')}\n\n`
-
-    if (hasDataLoss) {
-      message += `DATA LOSS WARNING: Possible data loss detected if schema is pushed.\n\n`
-    }
-
-    message += `Accept warnings and push schema to database?`
-
-    const { confirm: acceptWarnings } = await prompts(
-      {
-        name: 'confirm',
-        initial: false,
-        message,
-        type: 'confirm',
-      },
-      {
-        onCancel: () => {
-          process.exit(0)
-        },
-      },
-    )
-
-    // Exit if user does not accept warnings.
-    // Q: Is this the right type of exit for this interaction?
-    if (!acceptWarnings) {
-      process.exit(0)
-    }
+    process.env.NODE_ENV !== 'production' &&
+    process.env.PAYLOAD_MIGRATING !== 'true' &&
+    this.push !== false
+  ) {
+    await pushDevSchema(this as unknown as DrizzleAdapter)
   }
 
-  await apply()
+  if (typeof this.resolveInitializing === 'function') {
+    this.resolveInitializing()
+  }
 
-  // Migration table def in order to use query using drizzle
-  const migrationsSchema = pgTable('payload_migrations', {
-    name: varchar('name'),
-    batch: numeric('batch'),
-    created_at: timestamp('created_at'),
-    updated_at: timestamp('updated_at'),
-  })
-
-  const devPush = await this.drizzle
-    .select()
-    .from(migrationsSchema)
-    .where(eq(migrationsSchema.batch, '-1'))
-
-  if (!devPush.length) {
-    await this.drizzle.insert(migrationsSchema).values({
-      name: 'dev',
-      batch: '-1',
-    })
-  } else {
-    await this.drizzle
-      .update(migrationsSchema)
-      .set({
-        updated_at: new Date(),
-      })
-      .where(eq(migrationsSchema.batch, '-1'))
+  if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
+    await this.migrate({ migrations: this.prodMigrations })
   }
 }

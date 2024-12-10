@@ -1,4 +1,5 @@
-import { mergeData } from '.'
+import { isLivePreviewEvent } from './isLivePreviewEvent.js'
+import { mergeData } from './mergeData.js'
 
 // For performance reasons, `fieldSchemaJSON` will only be sent once on the initial message
 // We need to cache this value so that it can be used across subsequent messages
@@ -19,12 +20,7 @@ export const handleMessage = async <T>(args: {
 }): Promise<T> => {
   const { apiRoute, depth, event, initialData, serverURL } = args
 
-  if (
-    event.origin === serverURL &&
-    event.data &&
-    typeof event.data === 'object' &&
-    event.data.type === 'payload-live-preview'
-  ) {
+  if (isLivePreviewEvent(event, serverURL)) {
     const { data, externallyUpdatedRelationship, fieldSchemaJSON } = event.data
 
     if (!payloadLivePreviewFieldSchema && fieldSchemaJSON) {
@@ -47,6 +43,7 @@ export const handleMessage = async <T>(args: {
       fieldSchema: payloadLivePreviewFieldSchema,
       incomingData: data,
       initialData: payloadLivePreviewPreviousData || initialData,
+      locale: event.data.locale,
       serverURL,
     })
 

@@ -1,16 +1,16 @@
-import type { CollectionPermission, GlobalPermission } from '../auth/types'
-import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
-import type { Access } from '../config/types'
-import type { PayloadRequest } from '../express/types'
-import type { FieldAccess } from '../fields/config/types'
-import type { SanitizedGlobalConfig } from '../globals/config/types'
-import type { AllOperations, Document, Where } from '../types'
+import type { CollectionPermission, GlobalPermission } from '../auth/types.js'
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
+import type { Access } from '../config/types.js'
+import type { Field, FieldAccess } from '../fields/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { AllOperations, Document, PayloadRequest, Where } from '../types/index.js'
 
-import { tabHasName } from '../fields/config/types'
+import { combineQueries } from '../database/combineQueries.js'
+import { tabHasName } from '../fields/config/types.js'
 
 type Args = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
-  id?: string
+  id?: number | string
   operations: AllOperations[]
   req: PayloadRequest
   type: 'collection' | 'global'
@@ -31,54 +31,51 @@ type CreateAccessPromise = (args: {
 }) => Promise<void>
 
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
-  const { id, entity, operations, req, type } = args
-  const isLoggedIn = !!req.user
-  // ---- ---- ---- ---- ---- ---- ---- ---- ----
-  // `policies` and `promises` get mutated in
-  // the functions below, and return in the end
-  // ---- ---- ---- ---- ---- ---- ---- ---- ----
+  const { id, type, entity, operations, req } = args
+  const { data, locale, payload, user } = req
+  const isLoggedIn = !!user
+
   const policies = {
     fields: {},
   } as ReturnType<T>
 
   let docBeingAccessed
 
-  async function getEntityDoc({ where }: { where?: Where } = {}): Promise<TypeWithID & Document> {
+  async function getEntityDoc({ where }: { where?: Where } = {}): Promise<Document & TypeWithID> {
     if (entity.slug) {
       if (type === 'global') {
-        return req.payload.findGlobal({
+        return payload.findGlobal({
+          slug: entity.slug,
+          fallbackLocale: null,
+          locale,
           overrideAccess: true,
           req,
-          slug: entity.slug,
         })
       }
 
       if (type === 'collection' && id) {
         if (typeof where === 'object') {
-          const paginatedRes = await req.payload.find({
+          const paginatedRes = await payload.find({
             collection: entity.slug,
+            depth: 0,
+            fallbackLocale: null,
             limit: 1,
+            locale,
             overrideAccess: true,
+            pagination: false,
             req,
-            where: {
-              ...where,
-              and: [
-                ...(where.and || []),
-                {
-                  id: {
-                    equals: id,
-                  },
-                },
-              ],
-            },
+            where: combineQueries(where, { id: { equals: id } }),
           })
 
           return paginatedRes?.docs?.[0] || undefined
         }
 
-        return req.payload.findByID({
+        return payload.findByID({
           id,
           collection: entity.slug,
+          depth: 0,
+          fallbackLocale: null,
+          locale,
           overrideAccess: true,
           req,
         })
@@ -98,11 +95,15 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     const mutablePolicies = policiesObj
 
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
-      docBeingAccessed = await getEntityDoc()
+      // assign docBeingAccessed first as the promise to avoid multiple calls to getEntityDoc
+      docBeingAccessed = getEntityDoc().then((doc) => {
+        docBeingAccessed = doc
+      })
     }
+    // awaiting the promise to ensure docBeingAccessed is assigned before it is used
+    await docBeingAccessed
 
-    const data = req?.body
-
+    // https://payloadcms.slack.com/archives/C048Z9C2BEX/p1702054928343769
     const accessResult = await access({ id, data, doc: docBeingAccessed, req })
 
     if (typeof accessResult === 'object' && !disableWhere) {
@@ -118,15 +119,32 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     }
   }
 
-  const executeFieldPolicies = async ({ entityPermission, fields, operation, policiesObj }) => {
+  const executeFieldPolicies = async ({
+    entityPermission,
+    fields,
+    operation,
+    policiesObj,
+  }: {
+    entityPermission
+    fields: Field[]
+    operation: AllOperations
+    policiesObj
+  }) => {
     const mutablePolicies = policiesObj.fields
+
+    // Fields don't have all operations of a collection
+    if (operation === 'delete' || operation === 'readVersions' || operation === 'unlock') {
+      return
+    }
 
     await Promise.all(
       fields.map(async (field) => {
-        if (field.name) {
-          if (!mutablePolicies[field.name]) mutablePolicies[field.name] = {}
+        if ('name' in field && field.name) {
+          if (!mutablePolicies[field.name]) {
+            mutablePolicies[field.name] = {}
+          }
 
-          if (field.access && typeof field.access[operation] === 'function') {
+          if ('access' in field && field.access && typeof field.access[operation] === 'function') {
             await createAccessPromise({
               access: field.access[operation],
               accessLevel: 'field',
@@ -140,8 +158,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             }
           }
 
-          if (field.fields) {
-            if (!mutablePolicies[field.name].fields) mutablePolicies[field.name].fields = {}
+          if ('fields' in field && field.fields) {
+            if (!mutablePolicies[field.name].fields) {
+              mutablePolicies[field.name].fields = {}
+            }
 
             await executeFieldPolicies({
               entityPermission,
@@ -151,8 +171,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             })
           }
 
-          if (field?.blocks) {
-            if (!mutablePolicies[field.name]?.blocks) mutablePolicies[field.name].blocks = {}
+          if ('blocks' in field && field.blocks) {
+            if (!mutablePolicies[field.name]?.blocks) {
+              mutablePolicies[field.name].blocks = {}
+            }
 
             await Promise.all(
               field.blocks.map(async (block) => {
@@ -176,7 +198,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
               }),
             )
           }
-        } else if (field.fields) {
+        } else if ('fields' in field && field.fields) {
           await executeFieldPolicies({
             entityPermission,
             fields: field.fields,

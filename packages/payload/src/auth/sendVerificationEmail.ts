@@ -1,43 +1,43 @@
-import type { Collection } from '../collections/config/types'
-import type { EmailOptions, SanitizedConfig } from '../config/types'
-import type { PayloadRequest } from '../express/types'
-import type { Payload } from '../payload'
-import type { User, VerifyConfig } from './types'
+import { URL } from 'url'
+
+import type { Collection } from '../collections/config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { InitializedEmailAdapter } from '../email/types.js'
+import type { PayloadRequest } from '../types/index.js'
+import type { User, VerifyConfig } from './types.js'
 
 type Args = {
   collection: Collection
   config: SanitizedConfig
   disableEmail: boolean
-  emailOptions: EmailOptions
+  email: InitializedEmailAdapter
   req: PayloadRequest
-  sendEmail: Payload['sendEmail']
   token: string
   user: User
 }
 
-async function sendVerificationEmail(args: Args): Promise<void> {
+export async function sendVerificationEmail(args: Args): Promise<void> {
   // Verify token from e-mail
   const {
     collection: { config: collectionConfig },
     config,
     disableEmail,
-    emailOptions,
+    email,
     req,
-    sendEmail,
     token,
     user,
   } = args
 
   if (!disableEmail) {
+    const protocol = new URL(req.url).protocol // includes the final :
     const serverURL =
       config.serverURL !== null && config.serverURL !== ''
         ? config.serverURL
-        : `${req.protocol}://${req.get('host')}`
+        : `${protocol}//${req.headers.get('host')}`
 
     const verificationURL = `${serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`
 
     let html = `${req.t('authentication:newAccountCreated', {
-      interpolation: { escapeValue: false },
       serverURL: config.serverURL,
       verificationURL,
     })}`
@@ -64,14 +64,11 @@ async function sendVerificationEmail(args: Args): Promise<void> {
       })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    sendEmail({
-      from: `"${emailOptions.fromName}" <${emailOptions.fromAddress}>`,
+    await email.sendEmail({
+      from: `"${email.defaultFromName}" <${email.defaultFromAddress}>`,
       html,
       subject,
       to: user.email,
     })
   }
 }
-
-export default sendVerificationEmail

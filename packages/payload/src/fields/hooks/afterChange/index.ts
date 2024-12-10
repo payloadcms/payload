@@ -1,33 +1,43 @@
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 
-import { deepCopyObject } from '../../../utilities/deepCopyObject'
-import { traverseFields } from './traverseFields'
+import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
+import { traverseFields } from './traverseFields.js'
 
-type Args<T> = {
-  collection: SanitizedCollectionConfig | null
+type Args<T extends JsonObject> = {
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
-  data: Record<string, unknown> | T
-  doc: Record<string, unknown> | T
-  global: SanitizedGlobalConfig | null
+  /**
+   * The data before hooks
+   */
+  data: T
+  /**
+   * The data after hooks
+   */
+  doc: T
+  global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
-  previousDoc: Record<string, unknown> | T
+  previousDoc: T
   req: PayloadRequest
 }
 
-export const afterChange = async <T extends Record<string, unknown>>({
+/**
+ * This function is responsible for the following actions, in order:
+ * - Execute field hooks
+ */
+export const afterChange = async <T extends JsonObject>({
   collection,
   context,
   data,
-
   doc: incomingDoc,
   global,
   operation,
   previousDoc,
   req,
 }: Args<T>): Promise<T> => {
-  const doc = deepCopyObject(incomingDoc)
+  const doc = deepCopyObjectSimple(incomingDoc)
 
   await traverseFields({
     collection,
@@ -37,9 +47,11 @@ export const afterChange = async <T extends Record<string, unknown>>({
     fields: collection?.fields || global?.fields,
     global,
     operation,
+    path: [],
     previousDoc,
     previousSiblingDoc: previousDoc,
     req,
+    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
   })

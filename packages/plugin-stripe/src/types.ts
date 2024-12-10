@@ -1,35 +1,35 @@
-import type { Payload } from 'payload'
-import type { Config as PayloadConfig } from 'payload/config'
+import type { CollectionSlug, Payload, Config as PayloadConfig, PayloadRequest } from 'payload'
 import type Stripe from 'stripe'
 
 export type StripeWebhookHandler<T = any> = (args: {
   config: PayloadConfig
   event: T
   payload: Payload
+  pluginConfig?: StripePluginConfig
+  req: PayloadRequest
   stripe: Stripe
-  stripeConfig?: StripeConfig
-}) => void
+}) => Promise<void> | void
 
-export interface StripeWebhookHandlers {
+export type StripeWebhookHandlers = {
   [webhookName: string]: StripeWebhookHandler
 }
 
-export interface FieldSyncConfig {
+export type FieldSyncConfig = {
   fieldPath: string
   stripeProperty: string
 }
 
-export interface SyncConfig {
-  collection: string
+export type SyncConfig = {
+  collection: CollectionSlug
   fields: FieldSyncConfig[]
   stripeResourceType: 'customers' | 'products' // TODO: get this from Stripe types
   stripeResourceTypeSingular: 'customer' | 'product' // TODO: there must be a better way to do this
 }
 
-export interface StripeConfig {
+export type StripePluginConfig = {
   isTestKey?: boolean
   logs?: boolean
-  // @deprecated this will default as `false` in the next major version release
+  /** @default false */
   rest?: boolean
   stripeSecretKey: string
   stripeWebhooksEndpointSecret?: string
@@ -37,9 +37,9 @@ export interface StripeConfig {
   webhooks?: StripeWebhookHandler | StripeWebhookHandlers
 }
 
-export type SanitizedStripeConfig = StripeConfig & {
+export type SanitizedStripePluginConfig = {
   sync: SyncConfig[] // convert to required
-}
+} & StripePluginConfig
 
 export type StripeProxy = (args: {
   stripeArgs: any[]

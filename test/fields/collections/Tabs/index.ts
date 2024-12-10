@@ -1,10 +1,8 @@
-/* eslint-disable no-param-reassign */
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { tabsFieldsSlug } from '../../slugs'
-import { getBlocksField } from '../Blocks'
-import { UIField } from './UIField'
-import { namedTabDefaultValue } from './constants'
+import { tabsFieldsSlug } from '../../slugs.js'
+import { getBlocksField } from '../Blocks/index.js'
+import { namedTabDefaultValue } from './constants.js'
 
 const TabsFields: CollectionConfig = {
   slug: tabsFieldsSlug,
@@ -36,7 +34,7 @@ const TabsFields: CollectionConfig = {
               label: 'Demo UI Field',
               admin: {
                 components: {
-                  Field: UIField,
+                  Field: '/collections/Tabs/UIField.js#UIField',
                 },
               },
             },
@@ -115,6 +113,7 @@ const TabsFields: CollectionConfig = {
         {
           name: 'tab',
           label: 'Tab with Name',
+          interfaceName: 'TabWithName',
           description: 'This tab has a name, which should namespace the contained fields.',
           fields: [
             {
@@ -141,6 +140,21 @@ const TabsFields: CollectionConfig = {
               name: 'defaultValue',
               type: 'text',
               defaultValue: namedTabDefaultValue,
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'arrayInRow',
+                  type: 'array',
+                  fields: [
+                    {
+                      name: 'textInArrayInRow',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
@@ -186,14 +200,18 @@ const TabsFields: CollectionConfig = {
           hooks: {
             beforeValidate: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {}
+                if (!data.hooksTab) {
+                  data.hooksTab = {}
+                }
                 data.hooksTab.beforeValidate = true
                 return data.hooksTab
               },
             ],
             beforeChange: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {}
+                if (!data.hooksTab) {
+                  data.hooksTab = {}
+                }
                 data.hooksTab.beforeChange = true
                 return data.hooksTab
               },
@@ -206,7 +224,9 @@ const TabsFields: CollectionConfig = {
             ],
             afterRead: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {}
+                if (!data.hooksTab) {
+                  data.hooksTab = {}
+                }
                 data.hooksTab.afterRead = true
                 return data.hooksTab
               },
@@ -229,6 +249,32 @@ const TabsFields: CollectionConfig = {
             {
               name: 'afterRead',
               type: 'checkbox',
+            },
+          ],
+        },
+        {
+          name: 'camelCaseTab',
+          fields: [
+            {
+              name: 'array',
+              type: 'array',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                  localized: true,
+                },
+                {
+                  type: 'array',
+                  name: 'array',
+                  fields: [
+                    {
+                      type: 'text',
+                      name: 'text',
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },

@@ -1,0 +1,28 @@
+@layer payload-default {
+  .upload-field-card {
+    background: var(--theme-elevation-50);
+    border: 1px solid var(--theme-border-color);
+    border-radius: var(--style-radius-s);
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: calc(var(--base) / 2);
+
+    &--size-medium {
+      padding: calc(var(--base) * 0.5);
+
+      .thumbnail {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    &--size-small {
+      padding: calc(var(--base) / 3) calc(var(--base) / 2);
+      .thumbnail {
+        width: 25px;
+        height: 25px;
+      }
+    }
+  }
+}

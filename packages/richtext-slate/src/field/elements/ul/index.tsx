@@ -1,22 +1,14 @@
-import React from 'react'
+import type { RichTextCustomElement } from '../../../types.js'
 
-import ULIcon from '../../icons/UnorderedList'
-import ListButton from '../ListButton'
-import './index.scss'
+const name = 'ul'
 
-const UL = ({ attributes, children }) => (
-  <ul className="rich-text-ul" {...attributes}>
-    {children}
-  </ul>
-)
-
-const ul = {
-  Button: () => (
-    <ListButton format="ul">
-      <ULIcon />
-    </ListButton>
-  ),
-  Element: UL,
+export const ul: RichTextCustomElement = {
+  name,
+  Button: {
+    clientProps: {
+      format: name,
+    },
+    path: '@payloadcms/richtext-slate/client#ULElementButton',
+  },
+  Element: '@payloadcms/richtext-slate/client#UnorderedListElement',
 }
-
-export default ul

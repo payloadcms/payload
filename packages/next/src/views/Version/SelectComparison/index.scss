@@ -1,0 +1,15 @@
+@layer payload-default {
+  .compare-version {
+    &__error-loading {
+      border: 1px solid var(--theme-error-500);
+      min-height: calc(var(--base) * 2);
+      padding: calc(var(--base) * 0.5) calc(var(--base) * 0.75);
+      background-color: var(--theme-error-100);
+      color: var(--theme-elevation-0);
+    }
+
+    &__label {
+      margin-bottom: calc(var(--base) * 0.25);
+    }
+  }
+}

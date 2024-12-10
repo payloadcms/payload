@@ -1,16 +1,19 @@
-import type { PayloadRequest } from 'payload/types'
-import type { Collection, Field, RichTextField } from 'payload/types'
+import type { Collection, Field, PayloadRequest, RichTextField, SelectType } from 'payload'
 
-import type { AdapterArguments } from '../types'
+import { createDataloaderCacheKey } from 'payload'
+
+import type { AdapterArguments } from '../types.js'
 
 type Arguments = {
   currentDepth?: number
   data: unknown
   depth: number
+  draft: boolean
   field: RichTextField<any[], AdapterArguments, AdapterArguments>
   key: number | string
   overrideAccess?: boolean
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields: boolean
 }
 
@@ -20,29 +23,33 @@ export const populate = async ({
   currentDepth,
   data,
   depth,
+  draft,
   key,
   overrideAccess,
   req,
+  select,
   showHiddenFields,
-}: Omit<Arguments, 'field'> & {
+}: {
   collection: Collection
   field: Field
   id: string
-}): Promise<void> => {
+} & Omit<Arguments, 'field'>): Promise<void> => {
   const dataRef = data as Record<string, unknown>
 
   const doc = await req.payloadDataLoader.load(
-    JSON.stringify([
-      req.transactionID,
-      collection.config.slug,
-      id,
+    createDataloaderCacheKey({
+      collectionSlug: collection.config.slug,
+      currentDepth: currentDepth + 1,
       depth,
-      currentDepth + 1,
-      req.locale,
-      req.fallbackLocale,
-      typeof overrideAccess === 'undefined' ? false : overrideAccess,
+      docID: id,
+      draft,
+      fallbackLocale: req.locale,
+      locale: req.fallbackLocale,
+      overrideAccess: typeof overrideAccess === 'undefined' ? false : overrideAccess,
+      select,
       showHiddenFields,
-    ]),
+      transactionID: req.transactionID,
+    }),
   )
 
   if (doc) {

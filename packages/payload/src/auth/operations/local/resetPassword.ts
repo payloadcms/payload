@@ -1,16 +1,14 @@
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Result } from '../resetPassword'
+import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
+import type { Result } from '../resetPassword.js'
 
-import { getDataLoader } from '../../../collections/dataloader'
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import resetPassword from '../resetPassword'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { resetPasswordOperation } from '../resetPassword.js'
 
-export type Options<T extends keyof GeneratedTypes['collections']> = {
+export type Options<T extends CollectionSlug> = {
   collection: T
+  context?: RequestContext
   data: {
     password: string
     token: string
@@ -19,13 +17,11 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequest
 }
 
-async function localResetPassword<T extends keyof GeneratedTypes['collections']>(
+async function localResetPassword<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {
-  const { collection: collectionSlug, data, overrideAccess, req = {} as PayloadRequest } = options
-
-  setRequestContext(req)
+  const { collection: collectionSlug, data, overrideAccess } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -37,19 +33,18 @@ async function localResetPassword<T extends keyof GeneratedTypes['collections']>
     )
   }
 
-  req.payload = payload
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.i18n = i18nInit(payload.config.i18n)
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
-  return resetPassword({
+  const result = await resetPasswordOperation({
     collection,
     data,
     overrideAccess,
-    req,
+    req: await createLocalReq(options, payload),
   })
+
+  if (collection.config.auth.removeTokenFromResponses) {
+    delete result.token
+  }
+
+  return result
 }
 
-export default localResetPassword
+export const resetPassword = localResetPassword

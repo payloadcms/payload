@@ -1,35 +1,50 @@
-import findUp from 'find-up'
-import fs from 'fs'
+import { getTsconfig } from 'get-tsconfig'
 import path from 'path'
+
+import { findUpSync } from '../utilities/findUp.js'
+
+/**
+ * List of all filenames to detect as a Payload configuration file.
+ */
+export const payloadConfigFileNames = ['payload.config.js', 'payload.config.ts']
 
 /**
  * Returns the source and output paths from the nearest tsconfig.json file.
  * If no tsconfig.json file is found, returns the current working directory.
  * @returns An object containing the source and output paths.
  */
-const getTSConfigPaths = (): { outPath: string; srcPath: string } => {
-  const tsConfigPath = findUp.sync('tsconfig.json')
-
-  if (!tsConfigPath) {
-    return { outPath: process.cwd(), srcPath: process.cwd() }
-  }
+const getTSConfigPaths = (): {
+  configPath?: string
+  outPath?: string
+  rootPath?: string
+  srcPath?: string
+  tsConfigPath?: string
+} => {
+  const tsConfigResult = getTsconfig()
+  const tsConfig = tsConfigResult.config
+  const tsConfigDir = path.dirname(tsConfigResult.path)
 
   try {
-    // Read the file as a string and remove trailing commas
-    const rawTsConfig = fs
-      .readFileSync(tsConfigPath, 'utf-8')
-      .replace(/,\s*\]/g, ']')
-      .replace(/,\s*\}/g, '}')
+    const rootConfigDir = path.resolve(tsConfigDir, tsConfig.compilerOptions.baseUrl || '')
+    const srcPath = tsConfig.compilerOptions?.rootDir || path.resolve(process.cwd(), 'src')
+    const outPath = tsConfig.compilerOptions?.outDir || path.resolve(process.cwd(), 'dist')
+    let configPath = tsConfig.compilerOptions?.paths?.['@payload-config']?.[0]
 
-    const tsConfig = JSON.parse(rawTsConfig)
-
-    const srcPath = tsConfig.compilerOptions?.rootDir || process.cwd()
-    const outPath = tsConfig.compilerOptions?.outDir || process.cwd()
-
-    return { outPath, srcPath }
+    if (configPath) {
+      configPath = path.resolve(rootConfigDir, configPath)
+    }
+    return {
+      configPath,
+      outPath,
+      rootPath: rootConfigDir,
+      srcPath,
+      tsConfigPath: tsConfigResult.path,
+    }
   } catch (error) {
     console.error(`Error parsing tsconfig.json: ${error}`) // Do not throw the error, as we can still continue with the other config path finding methods
-    return { outPath: process.cwd(), srcPath: process.cwd() }
+    return {
+      rootPath: process.cwd(),
+    }
   }
 }
 
@@ -38,7 +53,7 @@ const getTSConfigPaths = (): { outPath: string; srcPath: string } => {
  * @returns The absolute path to the Payload configuration file.
  * @throws An error if no configuration file is found.
  */
-const findConfig = (): string => {
+export const findConfig = (): string => {
   // If the developer has specified a config path,
   // format it if relative and use it directly if absolute
   if (process.env.PAYLOAD_CONFIG_PATH) {
@@ -49,32 +64,27 @@ const findConfig = (): string => {
     return path.resolve(process.cwd(), process.env.PAYLOAD_CONFIG_PATH)
   }
 
-  const { outPath, srcPath } = getTSConfigPaths()
+  const { configPath, outPath, rootPath, srcPath } = getTSConfigPaths()
 
-  const searchPaths = process.env.NODE_ENV === 'production' ? [outPath, srcPath] : [srcPath]
+  // if configPath is absolute file, not folder, return it
+  if (path.extname(configPath) === '.js' || path.extname(configPath) === '.ts') {
+    return configPath
+  }
 
-  // eslint-disable-next-line no-restricted-syntax
+  const searchPaths =
+    process.env.NODE_ENV === 'production'
+      ? [configPath, outPath, srcPath, rootPath]
+      : [configPath, srcPath, rootPath]
+
   for (const searchPath of searchPaths) {
-    const configPath = findUp.sync(
-      (dir) => {
-        const tsPath = path.join(dir, 'payload.config.ts')
-        const hasTS = findUp.sync.exists(tsPath)
+    if (!searchPath) {
+      continue
+    }
 
-        if (hasTS) {
-          return tsPath
-        }
-
-        const jsPath = path.join(dir, 'payload.config.js')
-        const hasJS = findUp.sync.exists(jsPath)
-
-        if (hasJS) {
-          return jsPath
-        }
-
-        return undefined
-      },
-      { cwd: searchPath },
-    )
+    const configPath = findUpSync({
+      dir: searchPath,
+      fileNames: payloadConfigFileNames,
+    })
 
     if (configPath) {
       return configPath
@@ -84,22 +94,26 @@ const findConfig = (): string => {
   // If no config file is found in the directories defined by tsconfig.json,
   // try searching in the 'src' and 'dist' directory as a last resort, as they are most commonly used
   if (process.env.NODE_ENV === 'production') {
-    const distConfigPath = findUp.sync(['payload.config.js', 'payload.config.ts'], {
-      cwd: path.resolve(process.cwd(), 'dist'),
+    const distConfigPath = findUpSync({
+      dir: path.resolve(process.cwd(), 'dist'),
+      fileNames: ['payload.config.js'],
     })
 
-    if (distConfigPath) return distConfigPath
+    if (distConfigPath) {
+      return distConfigPath
+    }
   } else {
-    const srcConfigPath = findUp.sync(['payload.config.js', 'payload.config.ts'], {
-      cwd: path.resolve(process.cwd(), 'src'),
+    const srcConfigPath = findUpSync({
+      dir: path.resolve(process.cwd(), 'src'),
+      fileNames: payloadConfigFileNames,
     })
 
-    if (srcConfigPath) return srcConfigPath
+    if (srcConfigPath) {
+      return srcConfigPath
+    }
   }
 
   throw new Error(
     'Error: cannot find Payload config. Please create a configuration file located at the root of your current working directory called "payload.config.js" or "payload.config.ts".',
   )
 }
-
-export default findConfig

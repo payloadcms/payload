@@ -2,7 +2,7 @@ import type * as AWS from '@aws-sdk/client-s3'
 
 import path from 'path'
 
-import type { GenerateURL } from '../../types'
+import type { GenerateURL } from '../../types.js'
 
 interface Args {
   bucket: string

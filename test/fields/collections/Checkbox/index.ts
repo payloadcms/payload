@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { checkboxFieldsSlug } from '../../slugs'
+import { checkboxFieldsSlug } from '../../slugs.js'
 
 const CheckboxFields: CollectionConfig = {
   slug: checkboxFieldsSlug,

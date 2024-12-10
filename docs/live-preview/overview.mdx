@@ -2,87 +2,90 @@
 title: Live Preview
 label: Overview
 order: 10
-desc: With Live Preview you can render your front-end application directly within the Admin panel. Your changes take effect as you type. No save needed.
+desc: With Live Preview you can render your front-end application directly within the Admin Panel. Your changes take effect as you type. No save needed.
 keywords: live preview, preview, live, iframe, iframe preview, visual editing, design
 ---
 
-**With Live Preview you can render your front-end application directly within the Admin panel. As you type, your changes take effect in real-time. No need to save a draft or publish your changes.**
+With Live Preview you can render your front-end application directly within the [Admin Panel](../admin/overview). As you type, your changes take effect in real-time. No need to save a draft or publish your changes. This works in both [Server-side](./server) as well as [Client-side](./client) environments.
 
-Live Preview works by rendering an iframe on the page that loads your front-end application. The Admin panel communicates with your app through [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) events. These events are emitted every time a change is made to the document. Your app then listens for these events and re-renders itself with the data it receives.
+Live Preview works by rendering an iframe on the page that loads your front-end application. The Admin Panel communicates with your app through [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) events. These events are emitted every time a change is made to the Document. Your app then listens for these events and re-renders itself with the data it receives.
+
+To add Live Preview, use the `admin.livePreview` property in your [Payload Config](../configuration/overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    // ...
+    // highlight-start
+    livePreview: {
+      url: 'http://localhost:3000',
+      collections: ['pages']
+    },
+    // highlight-end
+  }
+})
+```
+<Banner type="warning">
+  <strong>Reminder:</strong>
+  Alternatively, you can define the <code>admin.livePreview</code> property on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Settings defined here will be merged into the top-level as overrides.
+</Banner>
 
 {/* IMAGE OF LIVE PREVIEW HERE */}
 
-<Banner type="warning">
-  Live Preview is currently in beta. You may use this feature in production, but please be aware that it is subject to change and may not be fully stable for all use cases. If you encounter any issues, please [report them](https://github.com/payloadcms/payload/issues/new?assignees=jacobsfletch&labels=possible-bug&projects=&title=Live%20Preview&template=1.bug_report.yml) with as much detail as possible.
-</Banner>
+## Options
 
-## Setup
+Setting up Live Preview is easy. This can be done either globally through the [Root Admin Config](../admin/overview), or on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Once configured, a new "Live Preview" tab will appear at the top of enabled Documents. Navigating to this tab opens the preview window and loads your front-end application.
 
-Setting up Live Preview is easy. You first need to enable it through the `admin.livePreview` property of your Payload config. It takes the following options:
+The following options are available:
 
-| Path                  | Description                                                                                                                                                                                   |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`url`** \*          | String, or function that returns a string, pointing to your front-end application. This value is used as the iframe `src`. [More details](#url).                                              |
-| **`breakpoints`**     | Array of breakpoints to be used as “device sizes” in the preview window. Each item appears as an option in the toolbar. [More details](#breakpoints).                                         |
-| **`collections`**     | Array of collection slugs to enable Live Preview on.                                                                                                                                          |
-| **`globals`**         | Array of global slugs to enable Live Preview on.                                                                                                                                              |
+| Path              | Description                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`url`** \*      | String, or function that returns a string, pointing to your front-end application. This value is used as the iframe `src`. [More details](#url).      |
+| **`breakpoints`** | Array of breakpoints to be used as “device sizes” in the preview window. Each item appears as an option in the toolbar. [More details](#breakpoints). |
+| **`collections`** | Array of collection slugs to enable Live Preview on.                                                                                                  |
+| **`globals`**     | Array of global slugs to enable Live Preview on.                                                                                                      |
 
 _\* An asterisk denotes that a property is required._
 
-Here is a basic example of enabling Live Preview on a `pages` collection:
-
-```ts
-// payload.config.ts
-{
-  // ...
-  admin: {
-    // ...
-    livePreview: {
-      url: 'http://localhost:3000', // The URL to your front-end, this can also be a function (see below)
-      collections: ['pages'], // The collections to enable Live Preview on (globals are also possible)
-    },
-  }
-}
-```
-
-Alternatively, you can define the <code>admin.livePreview</code> property on individual collection and global configs. Settings defined here will be merged into the top-level as overrides (if applicable).
-
-```ts
-// Collection.ts
-{
-  // ...
-  admin: {
-    // ...
-    livePreview: {
-      url: 'http://localhost:3000',
-    },
-  }
-}
-```
-
-Once configured, a new "Live Preview" tab will appear at the top of enabled documents. Navigating to this tab opens the preview window and loads your front-end application.
-
 ### URL
 
-The `url` property is a string that points to your front-end application. This value is used as the `src` attribute of the iframe rendering your front-end.
+The `url` property resolves to a string that points to your front-end application. This value is used as the `src` attribute of the iframe rendering your front-end. Once loaded, the Admin Panel will communicate directly with your app through `window.postMessage` events.
 
-You can also pass a function in order to dynamically format URLs. This function is called with the following arguments:
-
-| Path                  | Description                                                                                                                                                                                 |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`data`**            | The data of the document being edited. This includes changes that have not yet been saved.                                                                                                  |
-| **`documentInfo`**    | Information about the document being edited like collection slug. [More details](../admin/hooks#usedocumentinfo).                                                                           |
-| **`locale`**          | The locale currently being edited (if applicable). [More details](../configuration/localization).                                                                         |
-
-Here is an example of using a function that returns a dynamic URL:
+To set the URL, use the `admin.livePreview.url` property in your [Payload Config](../configuration/overview):
 
 ```ts
-// payload.config.ts
-{
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
   // ...
   admin: {
     // ...
     livePreview: {
+      url: 'http://localhost:3000', // highlight-line
+      collections: ['pages'],
+    },
+  }
+})
+```
+
+#### Dynamic URLs
+
+You can also pass a function in order to dynamically format URLs. This is useful for multi-tenant applications, localization, or any other scenario where the URL needs to be generated based on the Document being edited.
+
+To set dynamic URLs, set the `admin.livePreview.url` property in your [Payload Config](../configuration/overview) to a function:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    // ...
+    livePreview: {
+      // highlight-start
       url: ({
         data,
         documentInfo,
@@ -92,33 +95,43 @@ Here is an example of using a function that returns a dynamic URL:
       }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
       collections: ['pages'],
     },
+    // highlight-end
   }
-}
+})
+```
+
+The following arguments are provided to the `url` function:
+
+| Path               | Description                                                                                                       |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| **`data`**         | The data of the Document being edited. This includes changes that have not yet been saved.                        |
+| **`locale`**       | The locale currently being edited (if applicable). [More details](../configuration/localization).                 |
+| **`collectionConfig`** | The Collection Admin Config of the Document being edited. [More details](../admin/collections).                 |
+| **`globalConfig`** | The Global Admin Config of the Document being edited. [More details](../admin/globals).                          |
+| **`req`**          | The Payload Request object.  |
+
+If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
+
+```ts
+url: (doc, { req }) => `${req.protocol}//${req.host}/${doc.slug}` // highlight-line
 ```
 
 ### Breakpoints
 
-The breakpoints property is an array of objects which are used as “device sizes” in the preview window. Each item will render as an option in the toolbar. When selected, the preview window will resize to the exact dimensions specified in that breakpoint. Each breakpoint takes the following properties:
+The breakpoints property is an array of objects which are used as “device sizes” in the preview window. Each item will render as an option in the toolbar. When selected, the preview window will resize to the exact dimensions specified in that breakpoint.
 
-| Path                  | Description                                                                                                                                                                                 |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`label`** \*        | The label to display in the drop-down. This is what the user will see.                                                                                                                      |
-| **`name`** \*         | The name of the breakpoint.                                                                                                                                                                 |
-| **`width`** \*        | The width of the breakpoint. This is used to set the width of the iframe.                                                                                                                   |
-| **`height`** \*       | The height of the breakpoint. This is used to set the height of the iframe.                                                                                                                 |
-
-_\* An asterisk denotes that a property is required._
-
-Here is an example of defining breakpoints:
+To set breakpoints, use the `admin.livePreview.breakpoints` property in your [Payload Config](../configuration/overview):
 
 ```ts
-// payload.config.ts
-{
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
   // ...
   admin: {
     // ...
     livePreview: {
       url: 'http://localhost:3000',
+      // highlight-start
       breakpoints: [
         {
           label: 'Mobile',
@@ -126,23 +139,23 @@ Here is an example of defining breakpoints:
           width: 375,
           height: 667,
         },
-        {
-          label: 'Tablet',
-          name: 'tablet',
-          width: 768,
-          height: 1024,
-        },
-        {
-          label: 'Desktop',
-          name: 'desktop',
-          width: 1440,
-          height: 900,
-        },
       ],
+      // highlight-end
     },
   }
-}
+})
 ```
+
+The following options are available for each breakpoint:
+
+| Path            | Description                                                                 |
+| --------------- | --------------------------------------------------------------------------- |
+| **`label`** \*  | The label to display in the drop-down. This is what the user will see.      |
+| **`name`** \*   | The name of the breakpoint.                                                 |
+| **`width`** \*  | The width of the breakpoint. This is used to set the width of the iframe.   |
+| **`height`** \* | The height of the breakpoint. This is used to set the height of the iframe. |
+
+_\* An asterisk denotes that a property is required._
 
 {/* IMAGE OF TOOLBAR HERE */}
 

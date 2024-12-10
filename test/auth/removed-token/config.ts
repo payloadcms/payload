@@ -1,11 +1,19 @@
-import { buildConfigWithDefaults } from '../../buildConfigWithDefaults'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+
+import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
 
 export const collectionSlug = 'users'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 export default buildConfigWithDefaults({
-  debug: true,
   admin: {
     user: 'users',
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   collections: [
     {
@@ -16,15 +24,16 @@ export default buildConfigWithDefaults({
       fields: [
         {
           name: 'roles',
-          label: 'Role',
           type: 'select',
+          defaultValue: ['user'],
+          hasMany: true,
+          label: 'Role',
           options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
-          defaultValue: 'user',
           required: true,
           saveToJWT: true,
-          hasMany: true,
         },
       ],
     },
   ],
+  debug: true,
 })

@@ -1,34 +1,33 @@
-import type { Create } from 'payload/database'
-import type { Document, PayloadRequest } from 'payload/types'
+import type { Create, Document, PayloadRequest } from 'payload'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession'
-import { ValidationError } from 'payload/errors'
-import { i18nInit } from 'payload/utilities'
+import { handleError } from './utilities/handleError.js'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { withSession } from './withSession.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
   { collection, data, req = {} as PayloadRequest },
 ) {
   const Model = this.collections[collection]
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
   let doc
+
+  const sanitizedData = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data,
+    fields: this.payload.collections[collection].config.fields,
+  })
+
+  if (this.payload.collections[collection].customIDType) {
+    sanitizedData._id = sanitizedData.id
+  }
+
   try {
-    ;[doc] = await Model.create([data], options)
+    ;[doc] = await Model.create([sanitizedData], options)
   } catch (error) {
-    // Handle uniqueness error from MongoDB
-    throw error.code === 11000 && error.keyValue
-      ? new ValidationError(
-          [
-            {
-              field: Object.keys(error.keyValue)[0],
-              message: req.t('error:valueMustBeUnique'),
-            },
-          ],
-          req?.t ?? i18nInit(this.payload.config.i18n).t,
-        )
-      : error
+    handleError({ collection, error, req })
   }
 
   // doc.toJSON does not do stuff like converting ObjectIds to string, or date strings to date objects. That's why we use JSON.parse/stringify here

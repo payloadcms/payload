@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const Relationship: React.FC = () => (
+export const RelationshipIcon: React.FC = () => (
   <svg className="icon icon--relationship" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
     <path
       className="stroke"
@@ -13,5 +13,3 @@ const Relationship: React.FC = () => (
     <line className="stroke" strokeWidth="2" x1="18.7061" x2="13.0493" y1="6.40767" y2="12.0645" />
   </svg>
 )
-
-export default Relationship

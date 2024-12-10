@@ -1,29 +1,38 @@
 import path from 'path'
+import { getFileByPath } from 'payload'
+import { fileURLToPath } from 'url'
 
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import removeFiles from '../helpers/removeFiles'
-import { Uploads1 } from './collections/Upload1'
-import Uploads2 from './collections/Upload2'
-import AdminThumbnailCol from './collections/admin-thumbnail'
-import { audioSlug, enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './shared'
-
-const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import removeFiles from '../helpers/removeFiles.js'
+import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
+import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
+import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
+import { Uploads1 } from './collections/Upload1/index.js'
+import { Uploads2 } from './collections/Upload2/index.js'
+import {
+  animatedTypeMedia,
+  audioSlug,
+  customFileNameMediaSlug,
+  enlargeSlug,
+  focalNoSizesSlug,
+  mediaSlug,
+  mediaWithoutRelationPreviewSlug,
+  mediaWithRelationPreviewSlug,
+  reduceSlug,
+  relationPreviewSlug,
+  relationSlug,
+  unstoredMediaSlug,
+  versionSlug,
+} from './shared.js'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  serverURL: undefined,
   admin: {
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          fs: mockModulePath,
-        },
-      },
-    }),
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   collections: [
     {
@@ -34,6 +43,11 @@ export default buildConfigWithDefaults({
           type: 'upload',
           relationTo: 'media',
         },
+        {
+          name: 'versionedImage',
+          type: 'upload',
+          relationTo: versionSlug,
+        },
       ],
     },
     {
@@ -42,164 +56,245 @@ export default buildConfigWithDefaults({
         {
           name: 'audio',
           type: 'upload',
-          relationTo: 'media',
           filterOptions: {
             mimeType: {
               in: ['audio/mpeg'],
             },
           },
+          relationTo: 'media',
         },
       ],
     },
     {
       slug: 'gif-resize',
+      fields: [],
       upload: {
-        staticURL: '/media-gif',
-        staticDir: './media-gif',
-        mimeTypes: ['image/gif'],
-        resizeOptions: {
-          position: 'center',
-          width: 200,
-          height: 200,
-        },
         formatOptions: {
           format: 'gif',
         },
         imageSizes: [
           {
             name: 'small',
-            width: 100,
-            height: 100,
             formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 100,
+            width: 100,
           },
           {
             name: 'large',
-            width: 1000,
-            height: 1000,
             formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 1000,
+            width: 1000,
           },
         ],
+        mimeTypes: ['image/gif'],
+        resizeOptions: {
+          height: 200,
+          position: 'center',
+          width: 200,
+        },
+        staticDir: path.resolve(dirname, './media-gif'),
       },
-      fields: [],
+    },
+    {
+      slug: 'filename-compound-index',
+      fields: [
+        {
+          name: 'alt',
+          type: 'text',
+          admin: {
+            description: 'Alt text to be used for compound index',
+          },
+        },
+      ],
+      upload: {
+        filenameCompoundIndex: ['filename', 'alt'],
+        imageSizes: [
+          {
+            name: 'small',
+            formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 100,
+            width: 100,
+          },
+          {
+            name: 'large',
+            formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 1000,
+            width: 1000,
+          },
+        ],
+        mimeTypes: ['image/*'],
+      },
     },
     {
       slug: 'no-image-sizes',
+      fields: [],
       upload: {
-        staticURL: '/no-image-sizes',
-        staticDir: './no-image-sizes',
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         resizeOptions: {
+          height: 200,
           position: 'center',
           width: 200,
-          height: 200,
         },
+        staticDir: path.resolve(dirname, './no-image-sizes'),
       },
-      fields: [],
     },
     {
       slug: 'object-fit',
+      fields: [],
       upload: {
-        staticURL: '/object-fit',
-        staticDir: './object-fit',
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'fitContain',
-            width: 400,
-            height: 300,
             fit: 'contain',
+            height: 300,
+            width: 400,
           },
           {
             name: 'fitInside',
-            width: 300,
-            height: 400,
             fit: 'inside',
+            height: 400,
+            width: 300,
           },
           {
             name: 'fitCover',
-            width: 900,
-            height: 300,
             fit: 'cover',
+            height: 300,
+            width: 900,
           },
           {
             name: 'fitOutside',
-            width: 900,
-            height: 200,
             fit: 'outside',
+            height: 200,
+            width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './object-fit'),
       },
+    },
+    {
+      slug: 'with-meta-data',
       fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeOne',
+            height: 300,
+            width: 400,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './with-meta-data'),
+        withMetadata: true,
+      },
+    },
+    {
+      slug: 'without-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeTwo',
+            height: 400,
+            width: 300,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './without-meta-data'),
+        withMetadata: false,
+      },
+    },
+    {
+      slug: 'with-only-jpeg-meta-data',
+      fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'sizeThree',
+            height: 400,
+            width: 300,
+            withoutEnlargement: false,
+          },
+        ],
+        staticDir: path.resolve(dirname, './with-only-jpeg-meta-data'),
+        // eslint-disable-next-line @typescript-eslint/require-await
+        withMetadata: async ({ metadata }) => {
+          if (metadata.format === 'jpeg') {
+            return true
+          }
+          return false
+        },
+      },
     },
     {
       slug: 'crop-only',
+      fields: [],
       upload: {
         focalPoint: false,
-        staticURL: '/crop-only',
-        staticDir: './crop-only',
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'focalTest',
-            width: 400,
             height: 300,
+            width: 400,
           },
           {
             name: 'focalTest2',
-            width: 600,
             height: 300,
+            width: 600,
           },
           {
             name: 'focalTest3',
-            width: 900,
             height: 300,
+            width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './crop-only'),
       },
-      fields: [],
     },
     {
       slug: 'focal-only',
+      fields: [],
       upload: {
         crop: false,
-        staticURL: '/focal-only',
-        staticDir: './focal-only',
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'focalTest',
-            width: 400,
             height: 300,
+            width: 400,
           },
           {
             name: 'focalTest2',
-            width: 600,
             height: 300,
+            width: 600,
           },
           {
             name: 'focalTest3',
-            width: 900,
             height: 300,
+            width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './focal-only'),
       },
+    },
+    {
+      slug: focalNoSizesSlug,
       fields: [],
+      upload: {
+        crop: false,
+        focalPoint: true,
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './focal-no-sizes'),
+      },
     },
     {
       slug: mediaSlug,
+      fields: [],
       upload: {
-        staticURL: '/media',
-        staticDir: './media',
+        staticDir: path.resolve(dirname, './media'),
         // crop: false,
         // focalPoint: false,
-        mimeTypes: [
-          'image/png',
-          'image/jpg',
-          'image/jpeg',
-          'image/gif',
-          'image/svg+xml',
-          'audio/mpeg',
-        ],
         formatOptions: {
           format: 'png',
           options: { quality: 90 },
@@ -207,143 +302,161 @@ export default buildConfigWithDefaults({
         imageSizes: [
           {
             name: 'maintainedAspectRatio',
-            width: 1024,
-            height: undefined,
             crop: 'center',
-            position: 'center',
             formatOptions: { format: 'png', options: { quality: 90 } },
+            height: undefined,
+            position: 'center',
+            width: 1024,
           },
           {
             name: 'differentFormatFromMainImage',
-            width: 200,
-            height: undefined,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
+            height: undefined,
+            width: 200,
           },
           {
             name: 'maintainedImageSize',
-            width: undefined,
             height: undefined,
+            width: undefined,
           },
           {
             name: 'maintainedImageSizeWithNewFormat',
-            width: undefined,
-            height: undefined,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
+            height: undefined,
+            width: undefined,
           },
           {
             name: 'accidentalSameSize',
-            width: 320,
             height: 80,
             position: 'top',
+            width: 320,
           },
           {
             name: 'tablet',
-            width: 640,
             height: 480,
+            width: 640,
           },
           {
             name: 'mobile',
-            width: 320,
-            height: 240,
             crop: 'left top',
+            height: 240,
+            width: 320,
           },
           {
             name: 'icon',
-            width: 16,
             height: 16,
+            width: 16,
           },
           {
             name: 'focalTest',
-            width: 400,
             height: 300,
+            width: 400,
           },
           {
             name: 'focalTest2',
-            width: 600,
             height: 300,
+            width: 600,
           },
           {
             name: 'focalTest3',
-            width: 900,
             height: 300,
+            width: 900,
           },
           {
             name: 'focalTest4',
-            width: 300,
             height: 400,
+            width: 300,
           },
           {
             name: 'focalTest5',
-            width: 300,
             height: 600,
+            width: 300,
           },
           {
             name: 'focalTest6',
-            width: 300,
             height: 800,
+            width: 300,
           },
           {
             name: 'focalTest7',
-            width: 300,
             height: 300,
+            width: 300,
           },
         ],
       },
+    },
+    {
+      slug: animatedTypeMedia,
       fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+        resizeOptions: {
+          position: 'center',
+          width: 200,
+          height: 200,
+        },
+        imageSizes: [
+          {
+            name: 'squareSmall',
+            width: 480,
+            height: 480,
+            position: 'centre',
+            withoutEnlargement: false,
+          },
+          {
+            name: 'undefinedHeight',
+            width: 300,
+            height: undefined,
+          },
+          {
+            name: 'undefinedWidth',
+            width: undefined,
+            height: 300,
+          },
+          {
+            name: 'undefinedAll',
+            width: undefined,
+            height: undefined,
+          },
+        ],
+      },
     },
     {
       slug: enlargeSlug,
+      fields: [],
       upload: {
-        staticURL: '/enlarge',
-        staticDir: './media/enlarge',
-        mimeTypes: [
-          'image/png',
-          'image/jpg',
-          'image/jpeg',
-          'image/gif',
-          'image/svg+xml',
-          'audio/mpeg',
-        ],
         imageSizes: [
           {
             name: 'accidentalSameSize',
-            width: 320,
             height: 80,
+            width: 320,
             withoutEnlargement: false,
           },
           {
             name: 'sameSizeWithNewFormat',
-            width: 320,
-            height: 80,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
+            height: 80,
+            width: 320,
             withoutEnlargement: false,
           },
           {
             name: 'resizedLarger',
-            width: 640,
             height: 480,
+            width: 640,
             withoutEnlargement: false,
           },
           {
             name: 'resizedSmaller',
-            width: 180,
             height: 50,
+            width: 180,
           },
           {
             name: 'widthLowerHeightLarger',
-            width: 300,
-            height: 300,
             fit: 'contain',
+            height: 300,
+            width: 300,
           },
         ],
-      },
-      fields: [],
-    },
-    {
-      slug: reduceSlug,
-      upload: {
-        staticURL: '/reduce',
-        staticDir: './media/reduce',
         mimeTypes: [
           'image/png',
           'image/jpg',
@@ -352,109 +465,215 @@ export default buildConfigWithDefaults({
           'image/svg+xml',
           'audio/mpeg',
         ],
+        staticDir: path.resolve(dirname, './media/enlarge'),
+      },
+    },
+    {
+      slug: reduceSlug,
+      fields: [],
+      upload: {
         imageSizes: [
           {
             name: 'accidentalSameSize',
-            width: 320,
             height: 80,
+            width: 320,
             withoutEnlargement: false,
           },
           {
             name: 'sameSizeWithNewFormat',
-            width: 320,
-            height: 80,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
+            height: 80,
+            width: 320,
             withoutReduction: true,
           },
           {
             name: 'resizedLarger',
-            width: 640,
             height: 480,
+            width: 640,
           },
           {
             name: 'resizedSmaller',
-            width: 180,
             height: 50,
+            width: 180,
             withoutReduction: true,
           },
         ],
+        mimeTypes: [
+          'image/png',
+          'image/jpg',
+          'image/jpeg',
+          'image/gif',
+          'image/svg+xml',
+          'audio/mpeg',
+        ],
+        staticDir: path.resolve(dirname, './media/reduce'),
       },
-      fields: [],
     },
     {
       slug: 'media-trim',
+      fields: [],
       upload: {
-        staticURL: '/media-trim',
-        staticDir: './media-trim',
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        trimOptions: 0,
         imageSizes: [
           {
             name: 'trimNumber',
-            width: 1024,
             height: undefined,
             trimOptions: 0,
+            width: 1024,
           },
           {
             name: 'trimString',
-            width: 1024,
             height: undefined,
             trimOptions: 0,
+            width: 1024,
           },
           {
             name: 'trimOptions',
-            width: 1024,
             height: undefined,
             trimOptions: {
               background: '#000000',
               threshold: 50,
             },
+            width: 1024,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, './media-trim'),
+        trimOptions: 0,
       },
-      fields: [],
     },
     {
-      slug: 'unstored-media',
+      slug: customFileNameMediaSlug,
+      fields: [],
       upload: {
-        staticURL: '/media',
+        imageSizes: [
+          {
+            name: 'custom',
+            height: 500,
+            width: 500,
+            generateImageName: ({ extension, height, width, sizeName }) =>
+              `${sizeName}-${width}x${height}.${extension}`,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: path.resolve(dirname, `./${customFileNameMediaSlug}`),
+      },
+    },
+    {
+      slug: unstoredMediaSlug,
+      fields: [],
+      upload: {
         disableLocalStorage: true,
       },
-      fields: [],
     },
     {
       slug: 'externally-served-media',
+      fields: [],
       upload: {
         // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (http://localhost:3000/media)
-        staticURL: 'http://localhost:3000/media',
-        staticDir: './media',
+        staticDir: path.resolve(dirname, './media'),
       },
-      fields: [],
     },
     Uploads1,
     Uploads2,
-    AdminThumbnailCol,
+    AdminThumbnailFunction,
+    AdminThumbnailSize,
     {
       slug: 'optional-file',
-      upload: {
-        staticURL: '/optional',
-        staticDir: './optional',
-        filesRequiredOnCreate: false,
-      },
       fields: [],
+      upload: {
+        filesRequiredOnCreate: false,
+        staticDir: path.resolve(dirname, './optional'),
+      },
     },
     {
       slug: 'required-file',
-      upload: {
-        staticURL: '/required',
-        staticDir: './required',
-        filesRequiredOnCreate: true,
-      },
       fields: [],
+      upload: {
+        filesRequiredOnCreate: true,
+        staticDir: path.resolve(dirname, './required'),
+      },
+    },
+    {
+      slug: versionSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: {
+        filesRequiredOnCreate: true,
+        staticDir: path.resolve(dirname, `./${versionSlug}`),
+      },
+      versions: {
+        drafts: true,
+      },
+    },
+    CustomUploadFieldCollection,
+    {
+      slug: mediaWithRelationPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: {
+        displayPreview: true,
+      },
+    },
+    {
+      slug: mediaWithoutRelationPreviewSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: true,
+    },
+    {
+      slug: relationPreviewSlug,
+      fields: [
+        {
+          name: 'imageWithPreview1',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+        },
+        {
+          name: 'imageWithPreview2',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: true,
+        },
+        {
+          name: 'imageWithoutPreview1',
+          type: 'upload',
+          relationTo: mediaWithRelationPreviewSlug,
+          displayPreview: false,
+        },
+        {
+          name: 'imageWithoutPreview2',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+        },
+        {
+          name: 'imageWithPreview3',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+          displayPreview: true,
+        },
+        {
+          name: 'imageWithoutPreview3',
+          type: 'upload',
+          relationTo: mediaWithoutRelationPreviewSlug,
+          displayPreview: false,
+        },
+      ],
     },
   ],
   onInit: async (payload) => {
-    const uploadsDir = path.resolve(__dirname, './media')
+    const uploadsDir = path.resolve(dirname, './media')
     removeFiles(path.normalize(uploadsDir))
 
     await payload.create({
@@ -466,7 +685,7 @@ export default buildConfigWithDefaults({
     })
 
     // Create image
-    const imageFilePath = path.resolve(__dirname, './image.png')
+    const imageFilePath = path.resolve(dirname, './image.png')
     const imageFile = await getFileByPath(imageFilePath)
 
     const { id: uploadedImage } = await payload.create({
@@ -475,15 +694,62 @@ export default buildConfigWithDefaults({
       file: imageFile,
     })
 
+    const { id: versionedImage } = await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: imageFile,
+    })
+
     await payload.create({
       collection: relationSlug,
       data: {
         image: uploadedImage,
+        versionedImage,
       },
     })
 
+    // Create animated type images
+    const animatedImageFilePath = path.resolve(dirname, './animated.webp')
+    const animatedImageFile = await getFileByPath(animatedImageFilePath)
+
+    await payload.create({
+      collection: animatedTypeMedia,
+      data: {},
+      file: animatedImageFile,
+    })
+
+    await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: animatedImageFile,
+    })
+
+    const nonAnimatedImageFilePath = path.resolve(dirname, './non-animated.webp')
+    const nonAnimatedImageFile = await getFileByPath(nonAnimatedImageFilePath)
+
+    await payload.create({
+      collection: animatedTypeMedia,
+      data: {},
+      file: nonAnimatedImageFile,
+    })
+
+    await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: nonAnimatedImageFile,
+    })
+
     // Create audio
-    const audioFilePath = path.resolve(__dirname, './audio.mp3')
+    const audioFilePath = path.resolve(dirname, './audio.mp3')
     const audioFile = await getFileByPath(audioFilePath)
 
     const file = await payload.create({
@@ -501,7 +767,7 @@ export default buildConfigWithDefaults({
 
     // Create admin thumbnail media
     await payload.create({
-      collection: AdminThumbnailCol.slug,
+      collection: AdminThumbnailSize.slug,
       data: {},
       file: {
         ...audioFile,
@@ -510,12 +776,65 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
-      collection: AdminThumbnailCol.slug,
+      collection: AdminThumbnailSize.slug,
       data: {},
       file: {
         ...imageFile,
         name: `thumb-${imageFile.name}`,
       },
     })
+
+    await payload.create({
+      collection: AdminThumbnailFunction.slug,
+      data: {},
+      file: {
+        ...imageFile,
+        name: `function-image-${imageFile.name}`,
+      },
+    })
+
+    // Create media with and without relation preview
+    const { id: uploadedImageWithPreview } = await payload.create({
+      collection: mediaWithRelationPreviewSlug,
+      data: {},
+      file: imageFile,
+    })
+
+    const { id: uploadedImageWithoutPreview } = await payload.create({
+      collection: mediaWithoutRelationPreviewSlug,
+      data: {},
+      file: imageFile,
+    })
+
+    await payload.create({
+      collection: relationPreviewSlug,
+      data: {
+        imageWithPreview1: uploadedImageWithPreview,
+        imageWithPreview2: uploadedImageWithPreview,
+        imageWithoutPreview1: uploadedImageWithPreview,
+        imageWithoutPreview2: uploadedImageWithoutPreview,
+        imageWithPreview3: uploadedImageWithoutPreview,
+        imageWithoutPreview3: uploadedImageWithoutPreview,
+      },
+    })
+
+    await payload.create({
+      collection: 'filename-compound-index',
+      data: {
+        alt: 'alt-1',
+      },
+      file: imageFile,
+    })
+  },
+  serverURL: undefined,
+  upload: {
+    // debug: true,
+    abortOnLimit: true,
+    limits: {
+      fileSize: 2_000_000, // 2MB
+    },
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

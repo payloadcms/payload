@@ -1,45 +1,40 @@
-@import 'payload/scss';
+@import '../scss/styles.scss';
 
-.rich-text-lexical {
-  display: flex;
-
-  .errorBoundary {
-    pre {
-      text-wrap: unset;
+@layer payload-default {
+  .rich-text-lexical {
+    & > .field-error.tooltip {
+      right: auto;
+      position: static;
+      margin-bottom: 0.2em;
+      max-width: fit-content;
     }
-  }
 
-  &__wrap {
-    width: 100%;
-    position: relative;
-  }
-
-  &--read-only {
-    .editor-shell {
-      .editor {
-        background: var(--theme-elevation-200);
-        color: var(--theme-elevation-450);
-        padding: base(0.5);
+    .errorBoundary {
+      pre {
+        text-wrap: unset;
       }
     }
-  }
-}
 
-html[data-theme='light'] {
-  .rich-text-lexical {
-    &.error {
-      .editor-shell {
-        @include lightInputError;
-      }
+    &__wrap {
+      width: 100%;
+      position: relative;
     }
-  }
-}
 
-html[data-theme='dark'] {
-  .rich-text-lexical {
-    &.error {
-      .editor-shell {
-        @include darkInputError;
+    &--read-only {
+      .editor-container {
+        .editor {
+          @keyframes fadeInBackground {
+            from {
+              background-color: transparent;
+            }
+            to {
+              background-color: var(--theme-elevation-100);
+            }
+          }
+
+          animation: fadeInBackground 0.5s ease forwards;
+          color: var(--theme-elevation-450);
+        }
       }
     }
   }

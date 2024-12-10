@@ -1,42 +1,43 @@
-import React, { Fragment, useEffect } from 'react'
-import { Redirect } from 'react-router-dom'
+import type { EditViewComponent, PayloadServerReactComponent } from 'payload'
 
-import type { AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+import { SetStepNav } from '@payloadcms/ui'
+import { notFound, redirect } from 'next/navigation.js'
+import React, { Fragment } from 'react'
 
-import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
-import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
-
-const CustomEditView: AdminViewComponent = ({
-  canAccessAdmin,
-  //  collection,
-  //  global,
-  user,
+export const CustomEditView: PayloadServerReactComponent<EditViewComponent> = ({
+  initPageResult,
 }) => {
+  if (!initPageResult) {
+    notFound()
+  }
+
   const {
-    routes: { admin: adminRoute },
-  } = useConfig()
-
-  const { setStepNav } = useStepNav()
-
-  // This effect will only run one time and will allow us
-  // to set the step nav to display our custom route name
-
-  useEffect(() => {
-    setStepNav([
-      {
-        label: 'Custom Edit View',
+    permissions: { canAccessAdmin },
+    req: {
+      payload: {
+        config: {
+          routes: { admin: adminRoute },
+        },
       },
-    ])
-  }, [setStepNav])
+      user,
+    },
+  } = initPageResult
 
   // If an unauthorized user tries to navigate straight to this page,
   // Boot 'em out
   if (!user || (user && !canAccessAdmin)) {
-    return <Redirect to={`${adminRoute}/unauthorized`} />
+    return redirect(`${adminRoute}/unauthorized`)
   }
 
   return (
     <Fragment>
+      <SetStepNav
+        nav={[
+          {
+            label: 'Custom Edit View',
+          },
+        ]}
+      />
       <div
         style={{
           marginTop: 'calc(var(--base) * 2)',
@@ -46,7 +47,7 @@ const CustomEditView: AdminViewComponent = ({
       >
         <h1>Custom Edit View</h1>
         <p>This custom edit view was added through the following Payload config:</p>
-        <code>components.views.Edit</code>
+        <code>components.views.edit</code>
         <p>
           {'This takes precedence over the default edit view, '}
           <b>as well as all nested views like versions.</b>
@@ -56,5 +57,3 @@ const CustomEditView: AdminViewComponent = ({
     </Fragment>
   )
 }
-
-export default CustomEditView

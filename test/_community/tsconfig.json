@@ -1,9 +1,3 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "paths": {
-      "payload/generated-types": ["./payload-types.ts"]
-    }
-  }
+  "extends": "../tsconfig.json",
 }

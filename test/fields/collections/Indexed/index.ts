@@ -1,44 +1,80 @@
-import type {
-  BeforeDuplicate,
-  CollectionConfig,
-} from '../../../../packages/payload/src/collections/config/types'
-import type { IndexedField } from '../../payload-types'
+import type { CollectionConfig } from 'payload'
 
-import { indexedFieldsSlug } from '../../slugs'
-
-const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
-  return {
-    ...data,
-    collapsibleLocalizedUnique: data.collapsibleLocalizedUnique
-      ? `${data.collapsibleLocalizedUnique}-copy`
-      : '',
-    collapsibleTextUnique: data.collapsibleTextUnique ? `${data.collapsibleTextUnique}-copy` : '',
-    group: {
-      ...(data.group || {}),
-      localizedUnique: data.group?.localizedUnique ? `${data.group?.localizedUnique}-copy` : '',
-    },
-    uniqueText: data.uniqueText ? `${data.uniqueText}-copy` : '',
-  }
-}
+import { indexedFieldsSlug } from '../../slugs.js'
 
 const IndexedFields: CollectionConfig = {
   slug: indexedFieldsSlug,
-  // used to assert that versions also get indexes
-  admin: {
-    hooks: {
-      beforeDuplicate,
-    },
-  },
   fields: [
     {
       name: 'text',
+      type: 'text',
       index: true,
       required: true,
-      type: 'text',
     },
     {
       name: 'uniqueText',
       type: 'text',
+      unique: true,
+    },
+    {
+      name: 'uniqueRelationship',
+      type: 'relationship',
+      relationTo: 'text-fields',
+      unique: true,
+    },
+    {
+      name: 'uniqueHasManyRelationship',
+      type: 'relationship',
+      relationTo: 'text-fields',
+      unique: true,
+      hasMany: true,
+    },
+    {
+      name: 'uniqueHasManyRelationship_2',
+      type: 'relationship',
+      relationTo: 'text-fields',
+      hasMany: true,
+      unique: true,
+    },
+    {
+      name: 'uniquePolymorphicRelationship',
+      type: 'relationship',
+      relationTo: ['text-fields'],
+      unique: true,
+    },
+    {
+      name: 'uniquePolymorphicRelationship_2',
+      type: 'relationship',
+      relationTo: ['text-fields'],
+      unique: true,
+    },
+    {
+      name: 'uniqueHasManyPolymorphicRelationship',
+      type: 'relationship',
+      relationTo: ['text-fields'],
+      unique: true,
+      hasMany: true,
+    },
+    {
+      name: 'uniqueHasManyPolymorphicRelationship_2',
+      type: 'relationship',
+      relationTo: ['text-fields'],
+      unique: true,
+      hasMany: true,
+    },
+    {
+      name: 'uniqueRequiredText',
+      type: 'text',
+      defaultValue: 'uniqueRequired',
+      required: true,
+      unique: true,
+    },
+    {
+      name: 'localizedUniqueRequiredText',
+      type: 'text',
+      defaultValue: 'localizedUniqueRequired',
+      localized: true,
+      required: true,
       unique: true,
     },
     {
@@ -47,11 +83,12 @@ const IndexedFields: CollectionConfig = {
     },
     {
       name: 'group',
+      type: 'group',
       fields: [
         {
           name: 'localizedUnique',
-          localized: true,
           type: 'text',
+          localized: true,
           unique: true,
         },
         {
@@ -64,25 +101,41 @@ const IndexedFields: CollectionConfig = {
           type: 'point',
         },
       ],
-      type: 'group',
     },
     {
+      type: 'collapsible',
       fields: [
         {
           name: 'collapsibleLocalizedUnique',
-          localized: true,
           type: 'text',
+          localized: true,
           unique: true,
         },
         {
           name: 'collapsibleTextUnique',
-          label: 'collapsibleTextUnique',
           type: 'text',
+          label: 'collapsibleTextUnique',
           unique: true,
         },
       ],
       label: 'Collapsible',
-      type: 'collapsible',
+    },
+    {
+      type: 'text',
+      name: 'someText',
+      index: true,
+    },
+    {
+      type: 'array',
+      name: 'some',
+      index: true,
+      fields: [
+        {
+          type: 'text',
+          name: 'text',
+          index: true,
+        },
+      ],
     },
   ],
   versions: true,

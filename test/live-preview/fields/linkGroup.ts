@@ -1,8 +1,9 @@
-import type { ArrayField, Field } from '../../../packages/payload/src/fields/config/types'
-import type { LinkAppearances } from './link'
+import type { ArrayField, Field } from 'payload'
 
-import deepMerge from '../utilities/deepMerge'
-import link from './link'
+import type { LinkAppearances } from './link.js'
+
+import deepMerge from '../utilities/deepMerge.js'
+import link from './link.js'
 
 type LinkGroupType = (options?: {
   appearances?: LinkAppearances[] | false

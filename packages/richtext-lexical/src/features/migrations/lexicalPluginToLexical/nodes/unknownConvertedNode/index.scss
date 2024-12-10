@@ -1,0 +1,16 @@
+@layer payload-default {
+  span.unknownConverted {
+    text-transform: uppercase;
+    font-family: 'Roboto Mono', monospace;
+    letter-spacing: 2px;
+    font-size: calc(var(--base) * 0.5);
+    margin: 0 0 var(--base);
+    background: red;
+    color: white;
+    display: inline-block;
+
+    div {
+      background: red;
+    }
+  }
+}

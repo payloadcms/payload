@@ -1,0 +1,81 @@
+@import '../../scss/styles.scss';
+@layer payload-default {
+  .step-nav {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 2);
+
+    &::after {
+      content: ' ';
+      position: sticky;
+      top: 0;
+      right: 0;
+      width: var(--base);
+      background: linear-gradient(to right, transparent, var(--theme-bg));
+    }
+
+    // Use a pseudo element for the accessability so that it doesn't take up DOM space
+    // Also because the parent element has `overflow: hidden` which would clip an outline
+    &__home {
+      width: 18px;
+      height: 18px;
+      position: relative;
+
+      &:focus-visible {
+        outline: none;
+
+        &::after {
+          content: '';
+          border: var(--accessibility-outline);
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          pointer-events: none;
+        }
+      }
+    }
+
+    * {
+      display: block;
+    }
+
+    a {
+      border: 0;
+      display: flex;
+      align-items: center;
+      font-weight: 600;
+      text-decoration: none;
+
+      label {
+        cursor: pointer;
+      }
+
+      &:hover,
+      &:focus-visible {
+        text-decoration: underline;
+      }
+    }
+
+    span {
+      max-width: base(8);
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    @include mid-break {
+      .step-nav {
+        &__home {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+
+    @include small-break {
+      gap: base(0.4);
+    }
+  }
+}

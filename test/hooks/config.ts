@@ -1,19 +1,32 @@
-import type { SanitizedConfig } from '../../packages/payload/src/config/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+import type { SanitizedConfig } from 'payload'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import AfterOperation from './collections/AfterOperation'
-import ChainingHooks from './collections/ChainingHooks'
-import ContextHooks from './collections/ContextHooks'
-import { DataHooks } from './collections/Data'
-import Hooks, { hooksSlug } from './collections/Hook'
-import NestedAfterReadHooks from './collections/NestedAfterReadHooks'
-import Relations from './collections/Relations'
-import TransformHooks from './collections/Transform'
-import Users, { seedHooksUsers } from './collections/Users'
-import { DataHooksGlobal } from './globals/Data'
+import { APIError } from 'payload'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { AfterOperationCollection } from './collections/AfterOperation/index.js'
+import { BeforeValidateCollection } from './collections/BeforeValidate/index.js'
+import ChainingHooks from './collections/ChainingHooks/index.js'
+import ContextHooks from './collections/ContextHooks/index.js'
+import { DataHooks } from './collections/Data/index.js'
+import Hooks, { hooksSlug } from './collections/Hook/index.js'
+import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js'
+import Relations from './collections/Relations/index.js'
+import TransformHooks from './collections/Transform/index.js'
+import Users, { seedHooksUsers } from './collections/Users/index.js'
+import { DataHooksGlobal } from './globals/Data/index.js'
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
-    AfterOperation,
+    BeforeValidateCollection,
+    AfterOperationCollection,
     ContextHooks,
     TransformHooks,
     Hooks,
@@ -24,12 +37,23 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     DataHooks,
   ],
   globals: [DataHooksGlobal],
+  endpoints: [
+    {
+      path: '/throw-to-after-error',
+      method: 'get',
+      handler: () => {
+        throw new APIError("I'm a teapot", 418)
+      },
+    },
+  ],
+  hooks: {
+    afterError: [() => console.log('Running afterError hook')],
+  },
   onInit: async (payload) => {
     await seedHooksUsers(payload)
     await payload.create({
       collection: hooksSlug,
       data: {
-        check: 'update',
         fieldBeforeValidate: false,
         collectionBeforeValidate: false,
         fieldBeforeChange: false,
@@ -41,6 +65,9 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
         collectionAfterRead: false,
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 

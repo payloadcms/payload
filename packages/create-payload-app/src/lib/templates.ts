@@ -1,6 +1,6 @@
-import type { ProjectTemplate } from '../types'
+import type { ProjectTemplate } from '../types.js'
 
-import { error, info } from '../utils/log'
+import { error, info } from '../utils/log.js'
 
 export function validateTemplate(templateName: string): boolean {
   const validTemplates = getValidTemplates()
@@ -13,42 +13,26 @@ export function validateTemplate(templateName: string): boolean {
 }
 
 export function getValidTemplates(): ProjectTemplate[] {
+  // Starters _must_ be a valid template name from the templates/ directory
   return [
     {
       name: 'blank',
-      description: 'Blank Template',
       type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/blank',
+      description: 'Blank 3.0 Template',
+      url: `https://github.com/payloadcms/payload/templates/blank#main`,
     },
     {
       name: 'website',
+      type: 'starter',
       description: 'Website Template',
-      type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/website',
+      url: `https://github.com/payloadcms/payload/templates/website#main`,
     },
-    {
-      name: 'ecommerce',
-      description: 'E-commerce Template',
-      type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/ecommerce',
-    },
-    {
-      name: 'plugin',
-      description: 'Template for creating a Payload plugin',
-      type: 'plugin',
-      url: 'https://github.com/payloadcms/payload-plugin-template',
-    },
-    {
-      name: 'payload-demo',
-      description: 'Payload demo site at https://demo.payloadcms.com',
-      type: 'starter',
-      url: 'https://github.com/payloadcms/public-demo',
-    },
-    {
-      name: 'payload-website',
-      description: 'Payload website CMS at https://payloadcms.com',
-      type: 'starter',
-      url: 'https://github.com/payloadcms/website-cms',
-    },
+
+    // {
+    //   name: 'plugin',
+    //   type: 'plugin',
+    //   description: 'Template for creating a Payload plugin',
+    //   url: 'https://github.com/payloadcms/plugin-template#beta',
+    // },
   ]
 }

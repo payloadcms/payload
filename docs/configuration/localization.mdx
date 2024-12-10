@@ -2,37 +2,49 @@
 title: Localization
 label: Localization
 order: 50
-desc: Add and maintain as many locales as you need by adding Localization to your Payload config, set options for default locale, fallbacks, fields and more.
-keywords: localization, internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+desc: Add and maintain as many locales as you need by adding Localization to your Payload Config, set options for default locale, fallbacks, fields and more.
+keywords: localization, internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload features deep field-based localization support. Maintaining as many locales as you need is easy. All localization support is opt-in by default. To do so, follow the two steps below.
+Localization is one of the most important features of a modern CMS. It allows you to manage content in multiple languages, then serve it to your users based on their requested language. This is similar to [I18n](./i18n), but instead of managing translations for your application's interface, you are managing translations for the data itself.
 
-### Enabling in the Payload config
+With Localization, you can begin to serve personalized content to your users based on their specific language preferences, such as a multilingual website or multi-site application. There are no limits to the number of locales you can add to your Payload project.
 
-Add the `localization` property to your Payload config to enable localization project-wide. You'll need to provide a list of all locales that you'd like to support as well as set a few other options.
-
-**Example Payload config set up for localization:**
+To configure Localization, use the `localization` key in your [Payload Config](./overview):
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
-  collections: [
-    // collections go here
-  ],
-  localization: {
-    locales: ['en', 'es', 'de'],
-    defaultLocale: 'en',
-    fallback: true,
+  // ...
+  localization: { // highlight-line
+    // ...
   },
 })
 ```
 
-**Example Payload config set up for localization with full locales objects:**
+## Config Options
+
+Add the `localization` property to your Payload Config to enable Localization project-wide. You'll need to provide a list of all locales that you'd like to support as well as set a few other options.
+
+To configure locales, use the `localization.locales` property in your [Payload Config](./overview):
 
 ```ts
-import { buildConfig } from 'payload/config'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  localization: {
+    locales: ['en', 'es', 'de'], // required
+    defaultLocale: 'en', // required
+  },
+})
+```
+
+You can also define locales using [full configuration objects](#locale-object):
+
+```ts
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   collections: [
@@ -47,67 +59,52 @@ export default buildConfig({
       {
         label: 'Arabic',
         code: 'ar',
-        // opt-in to setting default text-alignment on Input fields to rtl (right-to-left) when current locale is rtl
+        // opt-in to setting default text-alignment on Input fields to rtl (right-to-left)
+        // when current locale is rtl
         rtl: true,
       },
     ],
-    defaultLocale: 'en',
-    fallback: true,
+    defaultLocale: 'en', // required
+    fallback: true, // defaults to true
   },
 })
 ```
 
-**Example Payload config set up for localization with full locales objects (including [internationalization](/docs/configuration/i18n) support):**
+<Banner type="success">
+  <strong>Tip:</strong>
+  Localization works very well alongside [I18n](/docs/configuration/i18n).
+</Banner>
 
-```ts
-import { buildConfig } from 'payload/config'
+The following options are available:
 
-export default buildConfig({
-  collections: [
-    // collections go here
-  ],
-  localization: {
-    locales: [
-      {
-        label: {
-          en: 'English', // English label
-          nb: 'Engelsk', // Norwegian label
-        },
-        code: 'en',
-      },
-      {
-        label: {
-          en: 'Norwegian', // English label
-          nb: 'Norsk', // Norwegian label
-        },
-        code: 'nb',
-      },
-    ],
-    defaultLocale: 'en',
-    fallback: true,
-  },
-})
-```
+| Option         | Description                                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **`locales`**  | Array of all the languages that you would like to support. [More details](#locales)                                            |
+| **`defaultLocale`** | Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale. |
+| **`fallback`** | Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated unless a fallback is explicitly provided in the request. True by default. |
 
-**Here is a brief explanation of each of the options available within the `localization` property:**
+### Locales
 
-**`locales`**
+The locales array is a list of all the languages that you would like to support. This can be strings for each language code, or [full configuration objects](#locale-object) for more advanced options.
 
-Array-based list of all locales that you would like to support. These can be strings of locale codes or objects with a `label`, a locale `code`, and the `rtl` (right-to-left) property. The locale codes do not need to be in any specific format. It's up to you to define how to represent your locales. Common patterns are to use two-letter ISO 639 language codes or four-letter language and country codes (ISO 3166‑1) such as `en-US`, `en-UK`, `es-MX`, etc.
+The locale codes do not need to be in any specific format. It's up to you to define how to represent your locales. Common patterns are to use two-letter ISO 639 language codes or four-letter language and country codes (ISO 3166‑1) such as `en-US`, `en-UK`, `es-MX`, etc.
 
-**`defaultLocale`**
+#### Locale Object
 
-Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale.
+| Option               | Description                                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **`code`** \*        | Unique code to identify the language throughout the APIs for `locale` and `fallbackLocale`                                     |
+| **`label`**          | A string to use for the selector when choosing a language, or an object keyed on the i18n keys for different languages in use. |
+| **`rtl`**            | A boolean that when true will make the admin UI display in Right-To-Left.                                                      |
+| **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present.                                       |
 
-**`fallback`**
+_\* An asterisk denotes that a property is required._
 
-Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated.
+## Field Localization
 
-### Field by field localization
+Payload Localization works on a **field** level—not a document level. In addition to configuring the base Payload Config to support Localization, you need to specify each field that you would like to localize.
 
-Payload localization works on a **field** level—not a document level. In addition to configuring the base Payload config to support localization, you need to specify each field that you would like to localize.
-
-**Here is an example of how to enable localization for a field:**
+**Here is an example of how to enable Localization for a field:**
 
 ```js
 {
@@ -123,29 +120,28 @@ With the above configuration, the `title` field will now be saved in the databas
 
 All field types with a `name` property support the `localized` property—even the more complex field types like `array`s and `block`s.
 
-<Banner>
+<Banner type="info">
   <strong>Note:</strong>
-  <br />
-  Enabling localization for field types that support nested fields will automatically create
+  Enabling Localization for field types that support nested fields will automatically create
   localized "sets" of all fields contained within the field. For example, if you have a page layout
   using a blocks field type, you have the choice of either localizing the full layout, by enabling
-  localization on the top-level blocks field, or only certain fields within the layout.
+  Localization on the top-level blocks field, or only certain fields within the layout.
 </Banner>
 
 <Banner type="warning">
   <strong>Important:</strong>
-  <br />
   When converting an existing field to or from `localized: true` the data structure in the document
   will change for this field and so existing data for this field will be lost. Before changing the
-  localization setting on fields with existing data, you may need to consider a field migration
+  Localization setting on fields with existing data, you may need to consider a field migration
   strategy.
 </Banner>
 
-### Retrieving localized docs
+## Retrieving Localized Docs
 
-When retrieving documents, you can specify which locale you'd like to receive as well as which fallback locale should be used.
+When retrieving documents, you can specify which locale you'd like to receive as well as which fallback locale should be
+used.
 
-##### REST API
+#### REST API
 
 REST API locale functionality relies on URL query parameters.
 
@@ -155,7 +151,8 @@ Specify your desired locale by providing the `locale` query parameter directly i
 
 **`?fallback-locale=`**
 
-Specify fallback locale to be used by providing the `fallback-locale` query parameter. This can be provided as either a valid locale as provided to your base Payload config, or `'null'`, `'false'`, or `'none'` to disable falling back.
+Specify fallback locale to be used by providing the `fallback-locale` query parameter. This can be provided as either a
+valid locale as provided to your base Payload Config, or `'null'`, `'false'`, or `'none'` to disable falling back.
 
 **Example:**
 
@@ -163,11 +160,13 @@ Specify fallback locale to be used by providing the `fallback-locale` query para
 fetch('https://localhost:3000/api/pages?locale=es&fallback-locale=none');
 ```
 
-##### GraphQL API
+#### GraphQL API
 
 In the GraphQL API, you can specify `locale` and `fallbackLocale` args to all relevant queries and mutations.
 
-The `locale` arg will only accept valid locales, but locales will be formatted automatically as valid GraphQL enum values (dashes or special characters will be converted to underscores, spaces will be removed, etc.). If you are curious to see how locales are auto-formatted, you can use the [GraphQL playground](/docs/graphql/overview#graphql-playground).
+The `locale` arg will only accept valid locales, but locales will be formatted automatically as valid GraphQL enum
+values (dashes or special characters will be converted to underscores, spaces will be removed, etc.). If you are curious
+to see how locales are auto-formatted, you can use the [GraphQL playground](/docs/graphql/overview#graphql-playground).
 
 The `fallbackLocale` arg will accept valid locales as well as `none` to disable falling back.
 
@@ -189,9 +188,11 @@ query {
   arguments in nested related document queries.
 </Banner>
 
-##### Local API
+#### Local API
 
-You can specify `locale` as well as `fallbackLocale` within the Local API as well as properties on the `options` argument. The `locale` property will accept any valid locale, and the `fallbackLocale` property will accept any valid locale as well as `'null'`, `'false'`, `false`, and `'none'`.
+You can specify `locale` as well as `fallbackLocale` within the Local API as well as properties on the `options`
+argument. The `locale` property will accept any valid locale, and the `fallbackLocale` property will accept any valid
+locale as well as `'null'`, `'false'`, `false`, and `'none'`.
 
 **Example:**
 
@@ -203,10 +204,9 @@ const posts = await payload.find({
 })
 ```
 
-<Banner type="alert">
+<Banner type="success">
   <strong>Tip:</strong>
-  <br />
-  The REST and Local APIs can return all localization data in one request by passing 'all' or '*' as
+  The REST and Local APIs can return all Localization data in one request by passing 'all' or '*' as
   the <strong>locale</strong> parameter. The response will be structured so that field values come
   back as the full objects keyed for each locale instead of the single, translated value.
 </Banner>

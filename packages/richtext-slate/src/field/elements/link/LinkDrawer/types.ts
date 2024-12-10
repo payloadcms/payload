@@ -1,9 +1,10 @@
-import type { Field, Fields } from 'payload/types'
+import type { ClientField, FormState } from 'payload'
 
 export type Props = {
-  drawerSlug: string
-  fieldSchema: Field[]
-  handleClose: () => void
-  handleModalSubmit: (fields: Fields, data: Record<string, unknown>) => void
-  initialState?: Fields
+  readonly drawerSlug: string
+  readonly fields: ClientField[]
+  readonly handleClose: () => void
+  readonly handleModalSubmit: (fields: FormState, data: Record<string, unknown>) => void
+  readonly initialState?: FormState
+  readonly schemaPath: string
 }

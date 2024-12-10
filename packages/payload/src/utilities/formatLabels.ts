@@ -1,4 +1,5 @@
-import pluralize, { isPlural, singular } from 'pluralize'
+import pluralize from 'pluralize'
+const { isPlural, singular } = pluralize
 
 const capitalizeFirstLetter = (string: string): string =>
   string.charAt(0).toUpperCase() + string.slice(1)

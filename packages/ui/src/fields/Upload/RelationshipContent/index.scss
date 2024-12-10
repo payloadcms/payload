@@ -1,0 +1,56 @@
+@layer payload-default {
+  .upload-relationship-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+
+    &__imageAndDetails {
+      display: flex;
+      gap: calc(var(--base) / 2);
+      align-items: center;
+      min-width: 0;
+    }
+
+    &__thumbnail {
+      align-self: center;
+      border-radius: var(--style-radius-s);
+    }
+
+    &__details {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      overflow: hidden;
+      margin-right: calc(var(--base) * 2);
+    }
+
+    &__filename {
+      margin: 0;
+      text-wrap: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      a {
+        text-decoration: none;
+      }
+    }
+
+    &__meta {
+      margin: 0;
+      color: var(--theme-elevation-500);
+      text-wrap: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    &__actions {
+      flex-shrink: 0;
+      display: flex;
+    }
+
+    .btn {
+      margin: 0;
+    }
+  }
+}

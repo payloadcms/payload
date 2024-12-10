@@ -1,53 +1,57 @@
 'use client'
 
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { FormProps } from '@payloadcms/ui'
+import type { ClientCollectionConfig } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
-import { Drawer } from 'payload/components/elements'
-import { Form, FormSubmit, RenderFields, fieldTypes } from 'payload/components/forms'
+import { getTranslation } from '@payloadcms/translations'
 import {
-  buildStateFromSchema,
-  useAuth,
+  Drawer,
+  EditDepthProvider,
+  Form,
+  FormSubmit,
+  RenderFields,
   useConfig,
   useDocumentInfo,
   useLocale,
-} from 'payload/components/utilities'
-import { sanitizeFields } from 'payload/config'
-import { deepCopyObject, getTranslation } from 'payload/utilities'
+  useModal,
+  useServerFunctions,
+  useTranslation,
+} from '@payloadcms/ui'
+import { deepCopyObject } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 
-import type { ElementProps } from '..'
+import type { LoadedSlateFieldProps } from '../../../../types.js'
+import type { UploadElementType } from '../../types.js'
 
-export const UploadDrawer: React.FC<
-  ElementProps & {
-    drawerSlug: string
-    relatedCollection: SanitizedCollectionConfig
-  }
-> = (props) => {
+import { uploadFieldsSchemaPath } from '../../shared.js'
+
+export const UploadDrawer: React.FC<{
+  readonly drawerSlug: string
+  readonly element: UploadElementType
+  readonly fieldProps: LoadedSlateFieldProps
+  readonly relatedCollection: ClientCollectionConfig
+  readonly schemaPath: string
+}> = (props) => {
   const editor = useSlateStatic()
 
-  const { drawerSlug, element, fieldProps, relatedCollection } = props
+  const { drawerSlug, element, fieldProps, relatedCollection, schemaPath } = props
 
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
-  const { user } = useAuth()
   const { closeModal } = useModal()
-  const { getDocPreferences } = useDocumentInfo()
-  const [initialState, setInitialState] = useState({})
-  const fieldSchemaUnsanitized =
-    fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields
-  const config = useConfig()
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
-  // Sanitize custom fields here
-  const validRelationships = config.collections.map((c) => c.slug) || []
-  const fieldSchema = sanitizeFields({
-    config: config,
-    fields: fieldSchemaUnsanitized,
-    validRelationships,
-  })
+  const { getFormState } = useServerFunctions()
+
+  const [initialState, setInitialState] = useState({})
+  const { componentMap } = fieldProps
+
+  const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
+  const fields = componentMap[relatedFieldSchemaPath]
+
+  const { config } = useConfig()
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
@@ -64,43 +68,94 @@ export const UploadDrawer: React.FC<
   )
 
   useEffect(() => {
-    // Sanitize custom fields here
-    const validRelationships = config.collections.map((c) => c.slug) || []
-    const fieldSchema = sanitizeFields({
-      config: config,
-      fields: fieldSchemaUnsanitized,
-      validRelationships,
-    })
+    const data = deepCopyObject(element?.fields || {})
 
     const awaitInitialState = async () => {
-      const preferences = await getDocPreferences()
-      const state = await buildStateFromSchema({
-        config,
-        data: deepCopyObject(element?.fields || {}),
-        fieldSchema,
-        locale,
+      const { state } = await getFormState({
+        id,
+        collectionSlug,
+        data,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        globalSlug,
         operation: 'update',
-        preferences,
-        t,
-        user,
+        renderAllFields: true,
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
       })
+
       setInitialState(state)
     }
 
-    awaitInitialState()
-  }, [fieldSchemaUnsanitized, config, element.fields, user, locale, t, getDocPreferences])
+    void awaitInitialState()
+  }, [
+    config,
+    element?.fields,
+    locale,
+    t,
+    collectionSlug,
+    id,
+    schemaPath,
+    relatedCollection.slug,
+    getFormState,
+    globalSlug,
+    getDocPreferences,
+    docPermissions,
+  ])
+
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) => {
+      const { state } = await getFormState({
+        id,
+        collectionSlug,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        formState: prevFormState,
+        globalSlug,
+        operation: 'update',
+        schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+      })
+
+      return state
+    },
+
+    [
+      getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
+      getDocPreferences,
+      globalSlug,
+      schemaPath,
+      relatedCollection.slug,
+    ],
+  )
 
   return (
-    <Drawer
-      slug={drawerSlug}
-      title={t('general:editLabel', {
-        label: getTranslation(relatedCollection.labels.singular, i18n),
-      })}
-    >
-      <Form initialState={initialState} onSubmit={handleUpdateEditData}>
-        <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} />
-        <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-      </Form>
-    </Drawer>
+    <EditDepthProvider>
+      <Drawer
+        slug={drawerSlug}
+        title={t('general:editLabel', {
+          label: getTranslation(relatedCollection.labels.singular, i18n),
+        })}
+      >
+        <Form
+          beforeSubmit={[onChange]}
+          disableValidationOnSubmit
+          initialState={initialState}
+          onChange={[onChange]}
+          onSubmit={handleUpdateEditData}
+        >
+          <RenderFields
+            fields={Array.isArray(fields) ? fields : []}
+            parentIndexPath=""
+            parentPath=""
+            parentSchemaPath=""
+            permissions={docPermissions.fields}
+            readOnly={false}
+          />
+          <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+        </Form>
+      </Drawer>
+    </EditDepthProvider>
   )
 }

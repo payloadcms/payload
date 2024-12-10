@@ -1,13 +1,15 @@
-import type { TFunction } from 'i18next'
+import type { TFunction } from '@payloadcms/translations'
 
+import { en } from '@payloadcms/translations/languages/en'
 import httpStatus from 'http-status'
 
-import APIError from './APIError'
+import { APIError } from './APIError.js'
 
-class MissingFile extends APIError {
+export class MissingFile extends APIError {
   constructor(t?: TFunction) {
-    super(t ? t('error:noFilesUploaded') : 'No files were uploaded.', httpStatus.BAD_REQUEST)
+    super(
+      t ? t('error:noFilesUploaded') : en.translations.error.noFilesUploaded,
+      httpStatus.BAD_REQUEST,
+    )
   }
 }
-
-export default MissingFile

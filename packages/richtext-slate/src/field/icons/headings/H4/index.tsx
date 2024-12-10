@@ -1,6 +1,6 @@
 import React from 'react'
 
-const H4Icon: React.FC = () => (
+export const H4Icon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="graphic h4-icon"
@@ -16,5 +16,3 @@ const H4Icon: React.FC = () => (
     />
   </svg>
 )
-
-export default H4Icon

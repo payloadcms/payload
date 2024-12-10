@@ -1,9 +1,7 @@
-import type { Payload } from '../../../packages/payload/src'
-import type { PayloadRequest } from '../../../packages/payload/src/express/types'
+import type { Payload } from 'payload'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
-  const req = {} as PayloadRequest
 
   try {
     await payload.create({
@@ -12,7 +10,6 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         email: 'demo@payloadcms.com',
         password: 'demo',
       },
-      req,
     })
 
     const { id: parentID } = await payload.create({
@@ -20,8 +17,8 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       data: {
         slug: 'parent-page',
         title: 'Parent page',
+        _status: 'published',
       },
-      req,
     })
 
     const { id: childID } = await payload.create({
@@ -30,8 +27,8 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         parent: parentID,
         slug: 'child-page',
         title: 'Child page',
+        _status: 'published',
       },
-      req,
     })
 
     await payload.create({
@@ -40,8 +37,8 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         parent: childID,
         slug: 'grandchild-page',
         title: 'Grandchild page',
+        _status: 'published',
       },
-      req,
     })
 
     await payload.create({
@@ -49,8 +46,8 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       data: {
         slug: 'sister-page',
         title: 'Sister page',
+        _status: 'published',
       },
-      req,
     })
     return true
   } catch (err) {

@@ -1,5 +1,4 @@
-import type { GroupField, TextField } from 'payload/types'
-import type { CollectionConfig, Field } from 'payload/types'
+import type { CollectionConfig, Field, GroupField, TextField } from 'payload'
 
 import path from 'path'
 
@@ -9,23 +8,23 @@ interface Args {
 }
 
 export const getFields = ({ collection, prefix }: Args): Field[] => {
-  const baseURLField: Field = {
+  const baseURLField: TextField = {
     name: 'url',
+    type: 'text',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: 'URL',
-    type: 'text',
   }
 
-  const basePrefixField: Field = {
+  const basePrefixField: TextField = {
     name: 'prefix',
+    type: 'text',
     admin: {
       hidden: true,
       readOnly: true,
     },
-    type: 'text',
   }
 
   const fields = [...collection.fields]
@@ -49,7 +48,7 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
   fields.push({
     ...baseURLField,
     ...(existingURLField || {}),
-  })
+  } as TextField)
 
   if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
     let existingSizesFieldIndex = -1
@@ -70,6 +69,7 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
     const sizesField: Field = {
       ...(existingSizesField || {}),
       name: 'sizes',
+      type: 'group',
       admin: {
         hidden: true,
       },
@@ -85,16 +85,15 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
         return {
           ...existingSizeField,
           name: size.name,
+          type: 'group',
           fields: [
             {
-              ...(existingSizeURLField || {}),
+              ...(existingSizeURLField || ({} as any)),
               ...baseURLField,
             },
           ],
-          type: 'group',
         }
       }),
-      type: 'group',
     }
 
     fields.push(sizesField)
@@ -120,7 +119,7 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
       ...basePrefixField,
       ...(existingPrefixField || {}),
       defaultValue: path.posix.join(prefix),
-    })
+    } as TextField)
   }
 
   return fields

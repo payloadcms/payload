@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/swcrc",
-  "sourceMaps": "inline",
+  "sourceMaps": true,
   "jsc": {
     "target": "esnext",
     "parser": {
@@ -10,6 +10,6 @@
     }
   },
   "module": {
-    "type": "commonjs"
+    "type": "es6"
   }
 }

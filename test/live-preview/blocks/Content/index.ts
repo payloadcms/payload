@@ -1,7 +1,9 @@
-import type { Block, Field } from '../../../../packages/payload/src/fields/config/types'
+import type { Block, Field } from 'payload'
 
-import { invertBackground } from '../../fields/invertBackground'
-import link from '../../fields/link'
+import { slateEditor } from '@payloadcms/richtext-slate'
+
+import { invertBackground } from '../../fields/invertBackground.js'
+import link from '../../fields/link.js'
 
 const columnFields: Field[] = [
   {
@@ -31,6 +33,7 @@ const columnFields: Field[] = [
     name: 'richText',
     label: 'Rich Text',
     type: 'richText',
+    editor: slateEditor({}),
   },
   {
     name: 'enableLink',

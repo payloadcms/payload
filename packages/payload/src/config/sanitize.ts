@@ -1,24 +1,38 @@
-import merge from 'deepmerge'
-import { isPlainObject } from 'is-plain-object'
+import type { AcceptedLanguages } from '@payloadcms/translations'
+
+import { en } from '@payloadcms/translations/languages/en'
+import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
 import type {
   Config,
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
-} from './types'
+} from './types.js'
 
-import { defaultUserCollection } from '../auth/defaultUser'
-import sanitizeCollection from '../collections/config/sanitize'
-import { migrationsCollection } from '../database/migrations/migrationsCollection'
-import { InvalidConfiguration } from '../errors'
-import sanitizeGlobals from '../globals/config/sanitize'
-import getPreferencesCollection from '../preferences/preferencesCollection'
-import checkDuplicateCollections from '../utilities/checkDuplicateCollections'
-import { defaults } from './defaults'
+import { defaultUserCollection } from '../auth/defaultUser.js'
+import { sanitizeCollection } from '../collections/config/sanitize.js'
+import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
+import { InvalidConfiguration } from '../errors/index.js'
+import { sanitizeGlobals } from '../globals/config/sanitize.js'
+import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
+import getPreferencesCollection from '../preferences/preferencesCollection.js'
+import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
+import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
+import { defaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
+
+  // default logging level will be 'error' if not provided
+  sanitizedConfig.loggingLevels = {
+    Forbidden: 'info',
+    Locked: 'info',
+    MissingFile: 'info',
+    NotFound: 'info',
+    ValidationError: 'info',
+    ...(sanitizedConfig.loggingLevels || {}),
+  }
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
@@ -31,22 +45,67 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     }
   }
 
-  if (!sanitizedConfig.collections.find(({ slug }) => slug === sanitizedConfig.admin.user)) {
+  const userCollection = sanitizedConfig.collections.find(
+    ({ slug }) => slug === sanitizedConfig.admin.user,
+  )
+  if (!userCollection || !userCollection.auth) {
     throw new InvalidConfiguration(
       `${sanitizedConfig.admin.user} is not a valid admin user collection`,
     )
   }
 
-  return sanitizedConfig as Partial<SanitizedConfig>
+  return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }
 
-export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
-  const configWithDefaults: Config = merge(defaults, incomingConfig, {
-    isMergeableObject: isPlainObject,
-  }) as Config
+export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
+  const configWithDefaults = {
+    ...defaults,
+    ...incomingConfig,
+    admin: {
+      ...defaults.admin,
+      ...incomingConfig?.admin,
+      meta: {
+        ...defaults.admin.meta,
+        ...incomingConfig?.admin?.meta,
+      },
+      routes: {
+        ...defaults.admin.routes,
+        ...incomingConfig?.admin?.routes,
+      },
+    },
+    graphQL: {
+      ...defaults.graphQL,
+      ...incomingConfig?.graphQL,
+    },
+    jobs: {
+      ...defaults.jobs,
+      ...incomingConfig?.jobs,
+      access: {
+        ...defaults.jobs.access,
+        ...incomingConfig?.jobs?.access,
+      },
+      tasks: incomingConfig?.jobs?.tasks || [],
+      workflows: incomingConfig?.jobs?.workflows || [],
+    },
+    routes: {
+      ...defaults.routes,
+      ...incomingConfig?.routes,
+    },
+    typescript: {
+      ...defaults.typescript,
+      ...incomingConfig?.typescript,
+    },
+  }
 
-  if (!configWithDefaults.serverURL) {
+  if (!configWithDefaults?.serverURL) {
     configWithDefaults.serverURL = ''
+  }
+
+  if (process.env.NEXT_BASE_PATH) {
+    if (!incomingConfig?.routes?.api) {
+      // check for incomingConfig, as configWithDefaults will always have a default value for routes.api
+      configWithDefaults.routes.api = process.env.NEXT_BASE_PATH + '/api'
+    }
   }
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
@@ -82,23 +141,107 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
         toString: () => locale.code,
       }))
     }
+
+    // Default fallback to true if not provided
+    config.localization.fallback = config.localization?.fallback ?? true
   }
 
-  configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults))
+  const i18nConfig: SanitizedConfig['i18n'] = {
+    fallbackLanguage: 'en',
+    supportedLanguages: {
+      en,
+    },
+    translations: {},
+  }
+
+  if (incomingConfig?.i18n) {
+    i18nConfig.supportedLanguages =
+      incomingConfig.i18n?.supportedLanguages || i18nConfig.supportedLanguages
+
+    const supportedLangKeys = <AcceptedLanguages[]>Object.keys(i18nConfig.supportedLanguages)
+    const fallbackLang = incomingConfig.i18n?.fallbackLanguage || i18nConfig.fallbackLanguage
+
+    i18nConfig.fallbackLanguage = supportedLangKeys.includes(fallbackLang)
+      ? fallbackLang
+      : supportedLangKeys[0]
+    i18nConfig.translations =
+      (incomingConfig.i18n?.translations as SanitizedConfig['i18n']['translations']) ||
+      i18nConfig.translations
+  }
+
+  config.i18n = i18nConfig
+
+  // Need to add default jobs collection before locked documents collections
+  if (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs.tasks.length > 0) {
+    let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
+
+    if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
+      defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
+        defaultJobsCollection,
+      })
+    }
+
+    configWithDefaults.collections.push(defaultJobsCollection)
+  }
+
+  configWithDefaults.collections.push(getLockedDocumentsCollection(config as unknown as Config))
+  configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
 
-  config.collections = config.collections.map((collection) =>
-    sanitizeCollection(configWithDefaults, collection),
-  )
+  const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
+  for (let i = 0; i < config.collections.length; i++) {
+    config.collections[i] = await sanitizeCollection(
+      config as unknown as Config,
+      config.collections[i],
+      richTextSanitizationPromises,
+    )
+  }
+
   checkDuplicateCollections(config.collections)
 
   if (config.globals.length > 0) {
-    config.globals = sanitizeGlobals(config as SanitizedConfig)
+    config.globals = await sanitizeGlobals(
+      config as unknown as Config,
+      richTextSanitizationPromises,
+    )
   }
 
   if (config.serverURL !== '') {
     config.csrf.push(config.serverURL)
   }
+
+  // Get deduped list of upload adapters
+  if (!config.upload) {
+    config.upload = { adapters: [] }
+  }
+  config.upload.adapters = Array.from(
+    new Set(config.collections.map((c) => c.upload?.adapter).filter(Boolean)),
+  )
+
+  // Pass through the email config as is so adapters don't break
+  if (incomingConfig.email) {
+    config.email = incomingConfig.email
+  }
+
+  /*
+    Execute richText sanitization
+   */
+  if (typeof incomingConfig.editor === 'function') {
+    config.editor = await incomingConfig.editor({
+      config: config as SanitizedConfig,
+      isRoot: true,
+      parentIsLocalized: false,
+    })
+    if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
+      config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)
+    }
+  }
+
+  const promises: Promise<void>[] = []
+  for (const sanitizeFunction of richTextSanitizationPromises) {
+    promises.push(sanitizeFunction(config as SanitizedConfig))
+  }
+  await Promise.all(promises)
 
   return config as SanitizedConfig
 }

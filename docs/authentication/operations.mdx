@@ -1,16 +1,16 @@
 ---
 title: Authentication Operations
 label: Operations
-order: 30
+order: 20
 desc: Enabling Authentication automatically makes key operations available such as Login, Logout, Verify, Unlock, Reset Password and more.
-keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: authentication, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Enabling Authentication on a Collection automatically exposes additional auth-based operations in the Local, REST, and GraphQL APIs.
+Enabling [Authentication](./overview) on a [Collection](../configuration/collections) automatically exposes additional auth-based operations in the [Local API](../local-api/overview), [REST API](../rest-api/overview), and [GraphQL API](../graphql/overview).
 
-### Access
+## Access
 
-The Access operation returns what a logged in user can and can't do with the collections and globals that are registered via your config. This data can be immensely helpful if your app needs to show and hide certain features based on access control, as the Payload Admin panel does.
+The Access operation returns what a logged in user can and can't do with the collections and globals that are registered via your config. This data can be immensely helpful if your app needs to show and hide certain features based on [Access Control](../access-control/overview), just as the [Admin Panel](../admin/overview) does.
 
 **REST API endpoint**:
 
@@ -69,7 +69,7 @@ query {
 
 Document access can also be queried on a collection/global basis. Access on a global can queried like `http://localhost:3000/api/global-slug/access`, Collection document access can be queried like `http://localhost:3000/api/collection-slug/access/:id`.
 
-### Me
+## Me
 
 Returns either a logged in user with token or null when there is no logged in user.
 
@@ -105,9 +105,9 @@ query {
 }
 ```
 
-### Login
+## Login
 
-Accepts an `email` and `password`. On success, it will return the logged in user as well as a token that can be used to authenticate. In the GraphQL and REST APIs, this operation also automatically sets an HTTP-only cookie including the user's token. If you pass an Express `res` to the Local API operation, Payload will set a cookie there as well.
+Accepts an `email` and `password`. On success, it will return the logged in user as well as a token that can be used to authenticate. In the GraphQL and REST APIs, this operation also automatically sets an HTTP-only cookie including the user's token. If you pass a `res` to the Local API operation, Payload will set a cookie there as well.
 
 **Example REST API login**:
 
@@ -166,7 +166,7 @@ const result = await payload.login({
 })
 ```
 
-### Logout
+## Logout
 
 As Payload sets HTTP-only cookies, logging out cannot be done by just removing a cookie in JavaScript, as HTTP-only cookies are inaccessible by JS within the browser. So, Payload exposes a `logout` operation to delete the token in a safe way.
 
@@ -189,9 +189,9 @@ mutation {
 }
 ```
 
-### Refresh
+## Refresh
 
-Allows for "refreshing" JWTs. If your user has a token that is about to expire, but the user is still active and using the app, you might want to use the `refresh` operation to receive a new token by sending the operation the token that is about to expire.
+Allows for "refreshing" JWTs. If your user has a token that is about to expire, but the user is still active and using the app, you might want to use the `refresh` operation to receive a new token by executing this operation via the authenticated user.
 
 This operation requires a non-expired token to send back a new one. If the user's token has already expired, you will need to allow them to log in again to retrieve a new token.
 
@@ -237,14 +237,7 @@ mutation {
 }
 ```
 
-<Banner type="success">
-  The Refresh operation will automatically find the user's token in either a JWT header or the
-  HTTP-only cookie. But, you can specify the token you're looking to refresh by providing the REST
-  API with a `token` within the JSON body of the request, or by providing the GraphQL resolver a
-  `token` arg.
-</Banner>
-
-### Verify by Email
+## Verify by Email
 
 If your collection supports email verification, the Verify operation will be exposed which accepts a verification token and sets the user's `_verified` property to `true`, thereby allowing the user to authenticate with the Payload API.
 
@@ -276,11 +269,11 @@ const result = await payload.verifyEmail({
 })
 ```
 
-### Unlock
+## Unlock
 
-If a user locks themselves out and you wish to deliberately unlock them, you can utilize the Unlock operation. The Admin panel features an Unlock control automatically for all collections that feature max login attempts, but you can programmatically unlock users as well by using the Unlock operation.
+If a user locks themselves out and you wish to deliberately unlock them, you can utilize the Unlock operation. The [Admin Panel](../admin/overview) features an Unlock control automatically for all collections that feature max login attempts, but you can programmatically unlock users as well by using the Unlock operation.
 
-To restrict who is allowed to unlock users, you can utilize the [`unlock`](/docs/access-control/overview#unlock) access control function.
+To restrict who is allowed to unlock users, you can utilize the [`unlock`](../access-control/collections#unlock) access control function.
 
 **Example REST API unlock**:
 
@@ -309,13 +302,13 @@ const result = await payload.unlock({
 })
 ```
 
-### Forgot Password
+## Forgot Password
 
 Payload comes with built-in forgot password functionality. Submitting an email address to the Forgot Password operation will generate an email and send it to the respective email address with a link to reset their password.
 
 The link to reset the user's password contains a token which is what allows the user to securely reset their password.
 
-By default, the Forgot Password operations send users to the Payload Admin panel to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/config#forgot-password).
+By default, the Forgot Password operations send users to the [Admin Panel](../admin/overview) to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/overview#forgot-password).
 
 **Example REST API Forgot Password**:
 
@@ -361,7 +354,7 @@ const token = await payload.forgotPassword({
   use the token to "reset" their password.
 </Banner>
 
-### Reset Password
+## Reset Password
 
 After a user has "forgotten" their password and a token is generated, that token can be used to send to the reset password operation along with a new password which will allow the user to reset their password securely.
 

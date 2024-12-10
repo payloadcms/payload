@@ -1,0 +1,113 @@
+@import '../../../../../scss/styles';
+
+@layer payload-default {
+  html[data-theme='dark'] {
+    .fixed-toolbar {
+      &__dropdown-items {
+        background: var(--theme-elevation-0);
+        transition: background 0.2s cubic-bezier(0, 0.2, 0.2, 1);
+
+        .toolbar-popup__dropdown-item {
+          color: var(--theme-elevation-900);
+
+          &:hover:not([disabled]),
+          &.active {
+            background: var(--theme-elevation-100);
+          }
+
+          .icon {
+            color: var(--theme-elevation-600);
+          }
+        }
+      }
+
+      .toolbar-popup {
+        &__dropdown {
+          transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
+
+          &:hover:not([disabled]) {
+            background: var(--theme-elevation-100);
+          }
+
+          &-caret:after {
+            filter: invert(1);
+          }
+
+          &-label {
+            color: var(--theme-elevation-750);
+          }
+        }
+      }
+    }
+  }
+
+  .fixed-toolbar.fixed-toolbar--hide {
+    visibility: hidden; // Still needs to take up space so content does not jump, thus we cannot use display: none
+    // make sure you cant interact with it
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .fixed-toolbar {
+    @include blur-bg(var(--theme-elevation-0));
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: calc(var(--base) / 4);
+    vertical-align: middle;
+    position: sticky;
+    z-index: 2;
+    top: var(--doc-controls-height);
+    border: $style-stroke-width-s solid var(--theme-elevation-150);
+    // Make it so border itself is round too and not cut off at the corners
+    border-collapse: unset;
+    transform: translateY(1px); // aligns with top bar pixel line when stuck
+    min-height: 40px; // Reduces shift when saving document if toolbar items did not load yet
+
+    &__group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2px;
+      z-index: 1;
+
+      .icon {
+        min-width: 20px;
+        height: 20px;
+        color: var(--theme-elevation-600);
+      }
+
+      .divider {
+        width: 1px;
+        height: 15px;
+        background-color: var(--theme-elevation-100);
+        margin: 0 6.25px 0 4.25px; // substract 2px from the gap
+      }
+    }
+
+    + .editor-container {
+      > .editor-scroller > .editor {
+        > .ContentEditable__root {
+          padding-top: calc(var(--base) * 1.25);
+        }
+      }
+
+      > .editor-scroller > .editor > div > .editor-placeholder {
+        top: calc(var(--base) * 1.25);
+      }
+    }
+  }
+
+  .rich-text-lexical--show-gutter {
+    .fixed-toolbar {
+      + .editor-container {
+        > .editor-scroller > .editor {
+          > .ContentEditable__root::before {
+            top: calc(var(--base) * 1.25) !important;
+            height: calc(100% - calc(var(--base) * 1.25) - 8px) !important;
+          }
+        }
+      }
+    }
+  }
+}

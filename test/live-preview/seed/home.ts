@@ -1,4 +1,6 @@
-import type { Page } from '../payload-types'
+import type { Page } from '../payload-types.js'
+
+import { postsSlug } from '../shared.js'
 
 export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
   slug: 'home',
@@ -31,15 +33,15 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
       populateBy: 'selection',
       selectedDocs: [
         {
-          relationTo: 'posts',
+          relationTo: postsSlug,
           value: '{{POST_1_ID}}',
         },
         {
-          relationTo: 'posts',
+          relationTo: postsSlug,
           value: '{{POST_2_ID}}',
         },
         {
-          relationTo: 'posts',
+          relationTo: postsSlug,
           value: '{{POST_3_ID}}',
         },
       ],
@@ -95,20 +97,78 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
     },
   ],
   relationshipAsUpload: '{{MEDIA_ID}}',
-  relationshipInRichText: [
+  richTextSlate: [
     {
       children: [
         {
           text: ' ',
         },
       ],
-      relationTo: 'posts',
+      relationTo: postsSlug,
       type: 'relationship',
       value: {
         id: '{{POST_1_ID}}',
       },
     },
+    {
+      type: 'paragraph',
+      children: [
+        {
+          text: '',
+        },
+      ],
+    },
+    {
+      children: [
+        {
+          text: '',
+        },
+      ],
+      relationTo: 'media',
+      type: 'upload',
+      value: {
+        id: '{{MEDIA_ID}}',
+      },
+    },
   ],
+  richTextLexical: {
+    root: {
+      type: 'root',
+      format: '',
+      indent: 0,
+      version: 1,
+      children: [
+        {
+          format: '',
+          type: 'relationship',
+          version: 1,
+          relationTo: postsSlug,
+          value: {
+            id: '{{POST_1_ID}}',
+          },
+        },
+        {
+          children: [],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        },
+        {
+          format: '',
+          type: 'upload',
+          version: 1,
+          fields: null,
+          relationTo: 'media',
+          value: {
+            id: '{{MEDIA_ID}}',
+          },
+        },
+      ],
+      direction: null,
+    },
+  },
   relationshipMonoHasMany: ['{{POST_1_ID}}'],
   relationshipMonoHasOne: '{{POST_1_ID}}',
   relationshipPolyHasMany: [{ relationTo: 'posts', value: '{{POST_1_ID}}' }],
@@ -123,7 +183,7 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
               text: ' ',
             },
           ],
-          relationTo: 'posts',
+          relationTo: postsSlug,
           type: 'relationship',
           value: {
             id: '{{POST_1_ID}}',

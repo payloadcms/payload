@@ -1,44 +1,89 @@
 'use client'
 
-import { Drawer } from 'payload/components/elements'
-import { Form, FormSubmit, RenderFields } from 'payload/components/forms'
-import { fieldTypes } from 'payload/components/forms'
-import { useHotkey } from 'payload/components/hooks'
-import { useEditDepth } from 'payload/components/utilities'
-import React, { useRef } from 'react'
-import { useTranslation } from 'react-i18next'
+import type { FormProps } from '@payloadcms/ui'
 
-import type { Props } from './types'
+import {
+  Drawer,
+  EditDepthProvider,
+  Form,
+  FormSubmit,
+  RenderFields,
+  useDocumentInfo,
+  useEditDepth,
+  useHotkey,
+  useServerFunctions,
+  useTranslation,
+} from '@payloadcms/ui'
+import React, { useCallback, useRef } from 'react'
 
+import type { Props } from './types.js'
+
+import { linkFieldsSchemaPath } from '../shared.js'
 import './index.scss'
 
 const baseClass = 'rich-text-link-edit-modal'
 
 export const LinkDrawer: React.FC<Props> = ({
   drawerSlug,
-  fieldSchema,
+  fields,
   handleModalSubmit,
   initialState,
+  schemaPath,
 }) => {
-  const { t } = useTranslation('fields')
+  const { t } = useTranslation()
+  const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
+
+  const { id, collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
+
+  const { getFormState } = useServerFunctions()
+
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) => {
+      const { state } = await getFormState({
+        id,
+        collectionSlug,
+        docPermissions,
+        docPreferences: await getDocPreferences(),
+        formState: prevFormState,
+        globalSlug,
+        operation: 'update',
+        schemaPath: fieldMapPath ?? '',
+      })
+
+      return state
+    },
+
+    [getFormState, id, collectionSlug, getDocPreferences, docPermissions, globalSlug, fieldMapPath],
+  )
 
   return (
-    <Drawer className={baseClass} slug={drawerSlug} title={t('editLink')}>
-      <Form fields={fieldSchema} initialState={initialState} onSubmit={handleModalSubmit}>
-        <RenderFields
-          fieldSchema={fieldSchema}
-          fieldTypes={fieldTypes}
-          forceRender
-          readOnly={false}
-        />
-        <LinkSubmit />
-      </Form>
-    </Drawer>
+    <EditDepthProvider>
+      <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
+        <Form
+          beforeSubmit={[onChange]}
+          disableValidationOnSubmit
+          initialState={initialState}
+          onChange={[onChange]}
+          onSubmit={handleModalSubmit}
+        >
+          <RenderFields
+            fields={fields}
+            forceRender
+            parentIndexPath=""
+            parentPath={''}
+            parentSchemaPath=""
+            permissions={docPermissions.fields}
+            readOnly={false}
+          />
+          <LinkSubmit />
+        </Form>
+      </Drawer>
+    </EditDepthProvider>
   )
 }
 
 const LinkSubmit: React.FC = () => {
-  const { t } = useTranslation('fields')
+  const { t } = useTranslation()
   const ref = useRef<HTMLButtonElement>(null)
   const editDepth = useEditDepth()
 

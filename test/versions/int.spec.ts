@@ -1,20 +1,31 @@
-import { GraphQLClient, request } from 'graphql-request'
+import type { Payload, PayloadRequest } from 'payload'
 
-import payload from '../../packages/payload/src'
-import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
-import AutosavePosts from './collections/Autosave'
-import configPromise from './config'
-import AutosaveGlobal from './globals/Autosave'
-import { clearAndSeedEverything } from './seed'
-import { autosaveCollectionSlug, draftCollectionSlug } from './slugs'
+import path from 'path'
+import { ValidationError } from 'payload'
+import { wait } from 'payload/shared'
+import { fileURLToPath } from 'url'
+
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+
+import { devUser } from '../credentials.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { clearAndSeedEverything } from './clearAndSeedEverything.js'
+import AutosavePosts from './collections/Autosave.js'
+import AutosaveGlobal from './globals/Autosave.js'
+import {
+  autosaveCollectionSlug,
+  autoSaveGlobalSlug,
+  draftCollectionSlug,
+  localizedCollectionSlug,
+  localizedGlobalSlug,
+} from './slugs.js'
+
+let payload: Payload
+let restClient: NextRESTClient
 
 let collectionLocalPostID: string
 let collectionLocalVersionID
 
-let graphQLURL
-
-let graphQLClient
 let token
 
 let collectionGraphQLPostID
@@ -29,15 +40,26 @@ let globalGraphQLVersionID
 const globalGraphQLOriginalTitle = 'updated global title'
 const updatedTitle = 'Here is an updated post title in EN'
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 const formatGraphQLID = (id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
 describe('Versions', () => {
   beforeAll(async () => {
-    const config = await configPromise
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
+    ;({ payload, restClient } = await initPayloadInt(dirname))
+  })
 
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
 
     const login = `
       mutation {
@@ -48,14 +70,11 @@ describe('Versions', () => {
           token
         }
       }`
+    const { data } = await restClient
+      .GRAPHQL_POST({ body: JSON.stringify({ query: login }) })
+      .then((res) => res.json())
 
-    const response = await request(graphQLURL, login)
-    token = response.loginUser.token
-    graphQLClient = new GraphQLClient(graphQLURL, { headers: { Authorization: `JWT ${token}` } })
-  })
-
-  beforeEach(async () => {
-    await clearAndSeedEverything(payload)
+    token = data.loginUser.token
 
     // now: initialize
     const autosavePost = await payload.create({
@@ -67,10 +86,7 @@ describe('Versions', () => {
     })
     collectionLocalPostID = autosavePost.id
 
-    const updatedPost: {
-      _status?: string
-      title: string
-    } = await payload.update({
+    await payload.update({
       id: collectionLocalPostID,
       collection,
       data: {
@@ -110,14 +126,23 @@ describe('Versions', () => {
         expect(collectionLocalVersionID).toBeDefined()
       })
 
-      it('should properly paginate versions', async () => {
+      it('should paginate versions', async () => {
         const versions = await payload.findVersions({
-          collection,
-          limit: 1,
+          collection: draftCollectionSlug,
+          limit: 5,
+        })
+        const versionsPage2 = await payload.findVersions({
+          collection: draftCollectionSlug,
+          limit: 5,
+          page: 2,
         })
 
-        expect(versions.docs).toHaveLength(1)
+        expect(versions.docs).toHaveLength(5)
         expect(versions.page).toBe(1)
+        expect(versionsPage2.docs).toHaveLength(5)
+        expect(versionsPage2.page).toBe(2)
+
+        expect(versions.docs[0].id).not.toBe(versionsPage2.docs[0].id)
       })
 
       it('should allow saving multiple versions of models with unique fields', async () => {
@@ -226,19 +251,53 @@ describe('Versions', () => {
         )
       })
 
+      // https://github.com/payloadcms/payload/issues/4827
+      it('should query drafts with relation', async () => {
+        const draftPost = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Description',
+            title: 'Some Title',
+          },
+        })
+
+        await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Description',
+            relation: draftPost.id,
+            title: 'With Relation',
+          },
+        })
+
+        const query = {
+          collection: draftCollectionSlug,
+          where: {
+            relation: {
+              equals: draftPost.id,
+            },
+          },
+        }
+        const all = await payload.find(query)
+        const drafts = await payload.find({ ...query, draft: true })
+
+        expect(all.docs).toHaveLength(1)
+        expect(drafts.docs).toHaveLength(1)
+      })
+
       it('should `findVersions` with sort', async () => {
         const draftsAscending = await payload.findVersions({
           collection: draftCollectionSlug,
           draft: true,
-          sort: 'createdAt',
           limit: 100,
+          sort: 'createdAt',
         })
 
         const draftsDescending = await payload.findVersions({
           collection: draftCollectionSlug,
           draft: true,
-          sort: '-createdAt',
           limit: 100,
+          sort: '-createdAt',
         })
 
         expect(draftsAscending).toBeDefined()
@@ -246,6 +305,57 @@ describe('Versions', () => {
         expect(draftsAscending.docs[0]).toMatchObject(
           draftsDescending.docs[draftsDescending.docs.length - 1],
         )
+      })
+
+      it('should have different createdAt in a new version while the same version.createdAt', async () => {
+        const doc = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { description: 'descr', title: 'title' },
+        })
+
+        await wait(10)
+
+        const upd = await payload.update({
+          collection: autosaveCollectionSlug,
+          id: doc.id,
+          data: {},
+        })
+
+        expect(upd.createdAt).toBe(doc.createdAt)
+
+        const {
+          docs: [latestVersionData],
+        } = await payload.findVersions({
+          collection: autosaveCollectionSlug,
+          where: {
+            and: [
+              {
+                parent: {
+                  equals: doc.id,
+                },
+                latest: {
+                  equals: true,
+                },
+              },
+            ],
+          },
+        })
+
+        // Version itself should have new createdAt
+        expect(new Date(latestVersionData.createdAt) > new Date(doc.createdAt)).toBe(true)
+        // But the same createdAt in version data!
+        expect(latestVersionData.version.createdAt).toBe(doc.createdAt)
+
+        const fromNonVersionsTable = await payload.findByID({
+          draft: false,
+          id: doc.id,
+          collection: autosaveCollectionSlug,
+        })
+
+        // createdAt from non-versions should be the same as version_createdAt in versions
+        expect(fromNonVersionsTable.createdAt).toBe(latestVersionData.version.createdAt)
+        // When creating new version - updatedAt should match version.updatedAt
+        expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
     })
 
@@ -289,7 +399,6 @@ describe('Versions', () => {
           draft: true,
         })
 
-        // @ts-ignore
         let updatedPost = await payload.update({
           id: versionedPost.id,
           collection: draftCollectionSlug,
@@ -305,7 +414,7 @@ describe('Versions', () => {
           },
           draft: true,
         })
-        // @ts-ignore
+
         updatedPost = await payload.update({
           id: versionedPost.id,
           collection: draftCollectionSlug,
@@ -367,10 +476,63 @@ describe('Versions', () => {
 
         expect(latestDraft).toMatchObject({
           ...versionToRestore.version,
+          // timestamps cannot be guaranteed to be the exact same to the milliseconds
+          createdAt: latestDraft.createdAt,
           updatedAt: latestDraft.updatedAt,
         })
         expect(latestDraft.blocksField).toHaveLength(0)
       })
+    })
+
+    it('should restore published version with correct data', async () => {
+      // create a post
+      const originalPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'description',
+          title: 'v1',
+          _status: 'published',
+        },
+      })
+
+      // update the post
+      await payload.update({
+        collection: draftCollectionSlug,
+        draft: true,
+        id: originalPost.id,
+        data: {
+          title: 'v2',
+          _status: 'published',
+        },
+      })
+
+      // get the version id of the original draft
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: {
+            equals: originalPost.id,
+          },
+        },
+      })
+
+      // restore the version
+      const versionToRestore = versions.docs[versions.docs.length - 1]
+      const restoredVersion = await payload.restoreVersion({
+        id: versionToRestore.id,
+        collection: draftCollectionSlug,
+      })
+
+      // get the latest draft
+      const latestDraft = await payload.findByID({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        draft: true,
+      })
+
+      // assert it has the original post content
+      expect(latestDraft.title).toStrictEqual('v1')
+      expect(restoredVersion.title).toStrictEqual('v1')
     })
 
     describe('Update', () => {
@@ -392,6 +554,7 @@ describe('Versions', () => {
           id: originalPublishedPost.id,
           collection,
           data: {
+            _status: 'draft',
             title: patchedTitle,
           },
           draft: true,
@@ -405,6 +568,7 @@ describe('Versions', () => {
           id: originalPublishedPost.id,
           collection,
           data: {
+            _status: 'draft',
             title: spanishTitle,
           },
           draft: true,
@@ -427,7 +591,98 @@ describe('Versions', () => {
         expect(draftPost.title.en).toBe(patchedTitle)
         expect(draftPost.title.es).toBe(spanishTitle)
       })
+
+      it('should validate when publishing with the draft arg', async () => {
+        // no title (not valid for publishing)
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'desc',
+          },
+          draft: true,
+        })
+
+        await expect(async () => {
+          // should not be able to publish a doc that fails validation
+          await payload.update({
+            id: doc.id,
+            collection: draftCollectionSlug,
+            data: { _status: 'published' },
+            draft: true,
+          })
+        }).rejects.toThrow(ValidationError)
+
+        // succeeds but returns zero docs updated, with an error
+        const updateManyResult = await payload.update({
+          collection: draftCollectionSlug,
+          data: { _status: 'published' },
+          draft: true,
+          where: {
+            id: { equals: doc.id },
+          },
+        })
+
+        expect(updateManyResult.docs).toHaveLength(0)
+        expect(updateManyResult.errors).toStrictEqual([
+          { id: doc.id, message: 'The following field is invalid: title' },
+        ])
+      })
     })
+
+    describe('Update Many', () => {
+      it('should update many using drafts', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'description to bulk update',
+            title: 'initial value',
+          },
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+        })
+
+        // bulk publish
+        const updated = await payload.update({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'updated description',
+          },
+          draft: true,
+          where: {
+            id: {
+              in: [doc.id],
+            },
+          },
+        })
+
+        const updatedDoc = updated.docs?.[0]
+
+        // get the published doc
+        const findResult = await payload.find({
+          collection: draftCollectionSlug,
+          where: {
+            id: { equals: doc.id },
+          },
+        })
+
+        const findDoc = findResult.docs?.[0]
+
+        expect(updatedDoc.description).toStrictEqual('updated description')
+        expect(updatedDoc.title).toStrictEqual('updated title')
+        expect(findDoc.title).toStrictEqual('updated title')
+        expect(findDoc.description).toStrictEqual('updated description')
+      })
+    })
+
     describe('Delete', () => {
       let postToDelete
       beforeEach(async () => {
@@ -460,7 +715,7 @@ describe('Versions', () => {
         const result = await payload.db.queryDrafts({
           collection,
           where: {
-            id: {
+            parent: {
               in: drafts.docs.map(({ id }) => id),
             },
             // appendVersionToQueryKey,
@@ -547,6 +802,13 @@ describe('Versions', () => {
           },
         })
 
+        const result = await payload.find({
+          collection: 'version-posts',
+          where: {
+            updatedAt: { less_than_equal: '2027-01-01T00:00:00.000Z' },
+          },
+        })
+
         await payload.update({
           id: doc1.id,
           collection: 'version-posts',
@@ -620,6 +882,62 @@ describe('Versions', () => {
         expect(docs.totalDocs).toStrictEqual(2)
       })
     })
+
+    describe('Race conditions', () => {
+      it('should keep latest true with parallel writes', async () => {
+        const doc = await payload.create({
+          collection: 'draft-posts',
+          data: {
+            description: 'A',
+            title: 'A',
+          },
+        })
+
+        for (let i = 0; i < 200; i++) {
+          payload.logger.info(`try ${i}`)
+          const writeAmount = 3
+
+          const promises = Array.from({ length: writeAmount }, async (_, i) => {
+            return new Promise((resolve) => {
+              // Add latency so updates aren't immediate after each other but still in parallel
+              setTimeout(() => {
+                payload
+                  .update({
+                    id: doc.id,
+                    collection: 'draft-posts',
+                    data: {},
+                    draft: true,
+                  })
+                  .then(resolve)
+                  .catch(resolve)
+              }, i * 5)
+            })
+          })
+
+          await Promise.all(promises)
+
+          const { docs } = await payload.findVersions({
+            collection: 'draft-posts',
+            where: {
+              and: [
+                {
+                  parent: {
+                    equals: doc.id,
+                  },
+                },
+                {
+                  latest: {
+                    equals: true,
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(docs[0]).toBeDefined()
+        }
+      })
+    })
   })
 
   describe('Querying', () => {
@@ -678,8 +996,8 @@ describe('Versions', () => {
       const { id } = await payload.create({
         collection: 'draft-posts',
         data: {
-          title: 'Title',
           description: 'Description',
+          title: 'Title',
         },
       })
 
@@ -771,6 +1089,36 @@ describe('Versions', () => {
 
       expect(byID.docs).toHaveLength(1)
     })
+
+    it('should be able to query by id AND any other field with draft=true', async () => {
+      const allDocs = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+      })
+
+      expect(allDocs.docs.length).toBeGreaterThan(1)
+
+      const results = await payload.find({
+        collection: 'draft-posts',
+        draft: true,
+        where: {
+          and: [
+            {
+              id: {
+                not_in: allDocs.docs[0].id,
+              },
+            },
+            {
+              title: {
+                like: 'Published',
+              },
+            },
+          ],
+        },
+      })
+
+      expect(results.docs).toHaveLength(1)
+    })
   })
 
   describe('Collections - GraphQL', () => {
@@ -788,10 +1136,16 @@ describe('Versions', () => {
         }
       }`
 
-      const response = await graphQLClient.request(query)
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
 
-      const data = response.createAutosavePost
-      collectionGraphQLPostID = data.id
+      collectionGraphQLPostID = data.createAutosavePost.id
     })
     describe('Create', () => {
       it('should allow a new doc to be created with draft status', async () => {
@@ -808,11 +1162,16 @@ describe('Versions', () => {
           }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        const data = response.createAutosavePost
-
-        expect(data._status).toStrictEqual('draft')
+        expect(data.createAutosavePost._status).toStrictEqual('draft')
       })
     })
 
@@ -823,30 +1182,42 @@ describe('Versions', () => {
         // modify the post to create a new version
         // language=graphQL
         const update = `mutation {
-            updateAutosavePost(id: ${formatGraphQLID(
-              collectionGraphQLPostID,
-            )}, data: {title: "${updatedTitle2}"}) {
-                title
-                updatedAt
-                createdAt
-            }
+          updateAutosavePost(id: ${formatGraphQLID(
+            collectionGraphQLPostID,
+          )}, data: {title: "${updatedTitle2}"}) {
+            title
+            updatedAt
+            createdAt
+          }
         }`
-        await graphQLClient.request(update)
+        await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: update }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
 
         // language=graphQL
         const query = `query {
-            versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
-              collectionGraphQLPostID,
-            )} } }) {
-                docs {
-                    id
-                }
+          versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
+            collectionGraphQLPostID,
+          )} } }) {
+            docs {
+              id
             }
+          }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        collectionGraphQLVersionID = response.versionsAutosavePosts.docs[0].id
+        collectionGraphQLVersionID = data.versionsAutosavePosts.docs[0].id
       })
 
       it('should allow read of versions by version id', async () => {
@@ -862,35 +1233,46 @@ describe('Versions', () => {
           }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        const data = response.versionAutosavePost
-
-        expect(data.id).toBeDefined()
-        expect(data.parent.id).toStrictEqual(collectionGraphQLPostID)
-        expect(data.version.title).toStrictEqual(updatedTitle2)
+        expect(data.versionAutosavePost.id).toBeDefined()
+        expect(data.versionAutosavePost.parent.id).toStrictEqual(collectionGraphQLPostID)
+        expect(data.versionAutosavePost.version.title).toStrictEqual(updatedTitle2)
       })
 
       it('should allow read of versions by querying version content', async () => {
         // language=graphQL
         const query = `query {
-            versionsAutosavePosts(where: { version__title: {equals: "${collectionGraphQLOriginalTitle}" } }) {
-                docs {
-                    id
-                    parent {
-                        id
-                    }
-                    version {
-                        title
-                    }
-                }
+          versionsAutosavePosts(where: { version__title: {equals: "${collectionGraphQLOriginalTitle}" } }) {
+            docs {
+              id
+              parent {
+                id
+              }
+              version {
+                title
+              }
             }
+          }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        const data = response.versionsAutosavePosts
-        const doc = data.docs[0]
+        const doc = data.versionsAutosavePosts.docs[0]
 
         expect(doc.id).toBeDefined()
         expect(doc.parent.id).toStrictEqual(collectionGraphQLPostID)
@@ -903,30 +1285,42 @@ describe('Versions', () => {
         // modify the post to create a new version
         // language=graphQL
         const update = `mutation {
-            updateAutosavePost(id: ${formatGraphQLID(
-              collectionGraphQLPostID,
-            )}, data: {title: "${collectionGraphQLOriginalTitle}"}) {
-                title
-                updatedAt
-                createdAt
-            }
+          updateAutosavePost(id: ${formatGraphQLID(
+            collectionGraphQLPostID,
+          )}, data: {title: "${collectionGraphQLOriginalTitle}"}) {
+            title
+            updatedAt
+            createdAt
+          }
         }`
-        await graphQLClient.request(update)
+        await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: update }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
 
         // language=graphQL
         const query = `query {
-            versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
-              collectionGraphQLPostID,
-            )} } }) {
-                docs {
-                    id
-                }
+          versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
+            collectionGraphQLPostID,
+          )} } }) {
+            docs {
+              id
             }
+          }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        collectionGraphQLVersionID = response.versionsAutosavePosts.docs[0].id
+        collectionGraphQLVersionID = data.versionsAutosavePosts.docs[0].id
       })
       it('should allow a version to be restored', async () => {
         // Update it
@@ -939,7 +1333,12 @@ describe('Versions', () => {
             createdAt
           }
         }`
-        await graphQLClient.request(update)
+        await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: update }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
 
         // restore a versionsPost
         const restore = `mutation {
@@ -948,7 +1347,12 @@ describe('Versions', () => {
           }
         }`
 
-        await graphQLClient.request(restore)
+        await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: restore }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
 
         const query = `query {
           AutosavePost(id: ${formatGraphQLID(collectionGraphQLPostID)}) {
@@ -956,9 +1360,16 @@ describe('Versions', () => {
           }
         }`
 
-        const response = await graphQLClient.request(query)
-        const data = response.AutosavePost
-        expect(data.title).toStrictEqual(collectionGraphQLOriginalTitle)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
+
+        expect(data.AutosavePost.title).toStrictEqual(collectionGraphQLOriginalTitle)
       })
     })
   })
@@ -967,17 +1378,17 @@ describe('Versions', () => {
     beforeEach(async () => {
       const title2 = 'Here is an updated global title in EN'
       await payload.updateGlobal({
+        slug: globalSlug,
         data: {
           title: 'Test Global',
         },
-        slug: globalSlug,
       })
 
-      const updatedGlobal = await payload.updateGlobal({
+      await payload.updateGlobal({
+        slug: globalSlug,
         data: {
           title: title2,
         },
-        slug: globalSlug,
       })
 
       const versions = await payload.findGlobalVersions({
@@ -995,6 +1406,48 @@ describe('Versions', () => {
         expect(updatedGlobal.title).toBe(title2)
         expect(updatedGlobal._status).toStrictEqual('draft')
         expect(globalLocalVersionID).toBeDefined()
+      })
+
+      it('should have different createdAt in a new version while the same version.createdAt', async () => {
+        const doc = await payload.updateGlobal({
+          slug: autoSaveGlobalSlug,
+          data: { title: 'asd' },
+        })
+
+        await wait(10)
+
+        const upd = await payload.updateGlobal({
+          slug: autoSaveGlobalSlug,
+          data: { title: 'asd2' },
+        })
+
+        expect(upd.createdAt).toBe(doc.createdAt)
+
+        const {
+          docs: [latestVersionData],
+        } = await payload.findGlobalVersions({
+          slug: autoSaveGlobalSlug,
+          where: {
+            latest: {
+              equals: true,
+            },
+          },
+        })
+
+        // Version itself should have new createdAt
+        expect(new Date(latestVersionData.createdAt) > new Date(doc.createdAt)).toBe(true)
+        // But the same version.createdAt!
+        expect(latestVersionData.version.createdAt).toBe(doc.createdAt)
+
+        const fromNonVersionsTable = await payload.findGlobal({
+          draft: false,
+          slug: autoSaveGlobalSlug,
+        })
+
+        // createdAt from non-versions should be the same as version_createdAt in versions
+        expect(fromNonVersionsTable.createdAt).toBe(latestVersionData.version.createdAt)
+        // When creating a new version - updatedAt should match
+        expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
     })
 
@@ -1015,18 +1468,18 @@ describe('Versions', () => {
         const spanishTitle = 'Title in ES'
 
         await payload.updateGlobal({
+          slug: globalSlug,
           data: {
             title: englishTitle,
           },
-          slug: globalSlug,
         })
 
         const updatedGlobalES = await payload.updateGlobal({
+          slug: globalSlug,
           data: {
             title: spanishTitle,
           },
           locale: 'es',
-          slug: globalSlug,
         })
 
         expect(updatedGlobalES.title).toBe(spanishTitle)
@@ -1034,15 +1487,15 @@ describe('Versions', () => {
         const newEnglishTitle = 'New title in EN'
 
         await payload.updateGlobal({
+          slug: globalSlug,
           data: {
             title: newEnglishTitle,
           },
-          slug: globalSlug,
         })
 
         const versions = await payload.findGlobalVersions({
-          locale: 'all',
           slug: globalSlug,
+          locale: 'all',
         })
 
         expect(versions.docs[0].version.title.en).toStrictEqual(newEnglishTitle)
@@ -1055,18 +1508,18 @@ describe('Versions', () => {
         const title2 = 'Another updated title in EN'
 
         const updatedGlobal = await payload.updateGlobal({
+          slug: globalSlug,
           data: {
             title: title2,
           },
-          slug: globalSlug,
         })
 
         expect(updatedGlobal.title).toBe(title2)
 
         // Make sure it was updated correctly
         const foundUpdatedGlobal = await payload.findGlobal({
-          draft: true,
           slug: globalSlug,
+          draft: true,
         })
         expect(foundUpdatedGlobal.title).toBe(title2)
 
@@ -1081,14 +1534,14 @@ describe('Versions', () => {
           slug: globalSlug,
         })
 
-        expect(restore.title).toBeDefined()
+        expect(restore.version.title).toBeDefined()
 
         const restoredGlobal = await payload.findGlobal({
-          draft: true,
           slug: globalSlug,
+          draft: true,
         })
 
-        expect(restoredGlobal.title).toBe(restore.title)
+        expect(restoredGlobal.title).toBe(restore.version.title.en)
       })
     })
 
@@ -1097,43 +1550,45 @@ describe('Versions', () => {
         const originalTitle = 'Here is a published global'
 
         await payload.updateGlobal({
+          slug: globalSlug,
           data: {
             _status: 'published',
             description: 'kjnjyhbbdsfseankuhsjsfghb',
             title: originalTitle,
           },
-          slug: globalSlug,
         })
 
         const publishedGlobal = await payload.findGlobal({
-          draft: true,
           slug: globalSlug,
+          draft: true,
         })
 
         const updatedTitle2 = 'Here is a draft global with a patched title'
 
         await payload.updateGlobal({
+          slug: globalSlug,
           data: {
+            _status: 'draft',
             title: updatedTitle2,
           },
           draft: true,
           locale: 'en',
-          slug: globalSlug,
         })
 
         await payload.updateGlobal({
+          slug: globalSlug,
           data: {
+            _status: 'draft',
             title: updatedTitle2,
           },
           draft: true,
           locale: 'es',
-          slug: globalSlug,
         })
 
         const updatedGlobal = await payload.findGlobal({
+          slug: globalSlug,
           draft: true,
           locale: 'all',
-          slug: globalSlug,
         })
 
         expect(publishedGlobal.title).toBe(originalTitle)
@@ -1145,22 +1600,22 @@ describe('Versions', () => {
         const originalTitle = 'Here is a draft'
 
         await payload.updateGlobal({
+          slug: globalSlug,
           data: {
             _status: 'draft',
             title: originalTitle,
           },
           draft: true,
-          slug: globalSlug,
         })
 
         const updatedTitle2 = 'Now try to publish'
 
         const result = await payload.updateGlobal({
+          slug: globalSlug,
           data: {
             _status: 'published',
             title: updatedTitle2,
           },
-          slug: globalSlug,
         })
 
         expect(result.title).toBe(updatedTitle2)
@@ -1172,68 +1627,91 @@ describe('Versions', () => {
     beforeEach(async () => {
       // language=graphql
       const update = `mutation {
-          updateAutosaveGlobal(draft: true, data: {
-              title: "${globalGraphQLOriginalTitle}"
-          }) {
-              _status
-              title
-          }
+        updateAutosaveGlobal(draft: true, data: {
+          title: "${globalGraphQLOriginalTitle}"
+        }) {
+          _status
+          title
+        }
       }`
-      await graphQLClient.request(update)
+      await restClient.GRAPHQL_POST({
+        body: JSON.stringify({ query: update }),
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+      })
 
       // language=graphQL
       const query = `query {
-          versionsAutosaveGlobal(where: { version__title: { equals: "${globalGraphQLOriginalTitle}" } }) {
-              docs {
-                  id
-                  version {
-                      title
-                  }
-              }
+        versionsAutosaveGlobal(where: { version__title: { equals: "${globalGraphQLOriginalTitle}" } }) {
+          docs {
+            id
+            version {
+              title
+            }
           }
+        }
       }`
 
-      const response = await graphQLClient.request(query)
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
 
-      globalGraphQLVersionID = response.versionsAutosaveGlobal.docs[0].id
+      globalGraphQLVersionID = data.versionsAutosaveGlobal.docs[0].id
     })
     describe('Read', () => {
       it('should allow read of versions by version id', async () => {
         // language=graphql
         const query = `query {
-            versionAutosaveGlobal(id: ${formatGraphQLID(globalGraphQLVersionID)}) {
-                id
-                version {
-                    title
-                }
+          versionAutosaveGlobal(id: ${formatGraphQLID(globalGraphQLVersionID)}) {
+            id
+            version {
+              title
             }
+          }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        const data = response.versionAutosaveGlobal
-
-        expect(data.id).toBeDefined()
-        expect(data.version.title).toStrictEqual(globalGraphQLOriginalTitle)
+        expect(data.versionAutosaveGlobal.id).toBeDefined()
+        expect(data.versionAutosaveGlobal.version.title).toStrictEqual(globalGraphQLOriginalTitle)
       })
 
       it('should allow read of versions by querying version content', async () => {
         // language=graphQL
         const query = `query {
-            versionsAutosaveGlobal(where: { version__title: {equals: "${globalGraphQLOriginalTitle}" } }) {
-                docs {
-                    id
-                    version {
-                        title
-                    }
-                }
+          versionsAutosaveGlobal(where: { version__title: {equals: "${globalGraphQLOriginalTitle}" } }) {
+            docs {
+              id
+              version {
+                title
+              }
             }
+          }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        const data = response.versionsAutosaveGlobal
-        const doc = data.docs[0]
+        const doc = data.versionsAutosaveGlobal.docs[0]
 
         expect(doc.id).toBeDefined()
         expect(doc.version.title).toStrictEqual(globalGraphQLOriginalTitle)
@@ -1244,12 +1722,17 @@ describe('Versions', () => {
       it('should allow a version to be restored', async () => {
         // language=graphql
         const restore = `mutation {
-            restoreVersionAutosaveGlobal(id: ${formatGraphQLID(globalGraphQLVersionID)}) {
-                title
-            }
+          restoreVersionAutosaveGlobal(id: ${formatGraphQLID(globalGraphQLVersionID)}) {
+            title
+          }
         }`
 
-        await graphQLClient.request(restore)
+        await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: restore }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
 
         const query = `query {
           AutosaveGlobal {
@@ -1257,9 +1740,576 @@ describe('Versions', () => {
           }
         }`
 
-        const response = await graphQLClient.request(query)
-        const data = response.AutosaveGlobal
-        expect(data.title).toStrictEqual(globalGraphQLOriginalTitle)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
+        expect(data.AutosaveGlobal).toEqual({ title: globalGraphQLOriginalTitle })
+      })
+    })
+  })
+
+  describe('Publish Individual Locale', () => {
+    const collection = localizedCollectionSlug
+    const global = localizedGlobalSlug
+
+    describe('Collections', () => {
+      let postID: string
+
+      beforeEach(async () => {
+        await payload.delete({
+          collection,
+          where: {},
+        })
+      })
+
+      it('should save correct doc data when publishing individual locale', async () => {
+        // save spanish draft
+        const draft1 = await payload.create({
+          collection,
+          data: {
+            text: 'Spanish draft',
+          },
+          draft: true,
+          locale: 'es',
+        })
+
+        postID = draft1.id as any
+
+        // save english draft
+        const draft2 = await payload.update({
+          id: postID,
+          collection,
+          data: {
+            text: 'English draft',
+            description: 'My English description',
+          },
+          draft: true,
+          locale: 'en',
+        })
+
+        // save german draft
+        const draft3 = await payload.update({
+          id: postID,
+          collection,
+          data: {
+            text: 'German draft',
+          },
+          draft: true,
+          locale: 'de',
+        })
+
+        // publish only english
+        const publishedEN1 = await payload.update({
+          id: postID,
+          collection,
+          data: {
+            text: 'English published 1',
+            _status: 'published',
+          },
+          draft: false,
+          locale: 'en',
+          publishSpecificLocale: 'en',
+        })
+
+        const docWithoutSpanishDraft = await payload.findByID({
+          collection,
+          id: postID,
+          locale: 'all',
+        })
+
+        // We're getting the published version,
+        // which should not leak any unpublished Spanish content
+        // and should retain the English fields that were not explicitly
+        // passed in from publishedEN1
+        expect(docWithoutSpanishDraft.text.es).toBeUndefined()
+        expect(docWithoutSpanishDraft.description.en).toStrictEqual('My English description')
+
+        const docWithSpanishDraft1 = await payload.findByID({
+          collection,
+          id: postID,
+          locale: 'all',
+          draft: true,
+        })
+
+        // After updating English via specific locale,
+        // We should expect to see that Spanish translations were maintained
+        expect(docWithSpanishDraft1.text.es).toStrictEqual('Spanish draft')
+        expect(docWithSpanishDraft1.text.en).toStrictEqual('English published 1')
+        expect(docWithSpanishDraft1.description.en).toStrictEqual('My English description')
+
+        const publishedEN2 = await payload.update({
+          id: postID,
+          collection,
+          data: {
+            text: 'English published 2',
+            _status: 'published',
+          },
+          draft: false,
+          locale: 'en',
+          publishSpecificLocale: 'en',
+        })
+
+        const docWithoutSpanishDraft2 = await payload.findByID({
+          collection,
+          id: postID,
+          locale: 'all',
+        })
+
+        // On the second consecutive publish of a specific locale,
+        // Make sure we maintain draft data that has never been published
+        // even after two + consecutive publish events
+        expect(docWithoutSpanishDraft2.text.es).toBeUndefined()
+        expect(docWithoutSpanishDraft2.text.en).toStrictEqual('English published 2')
+        expect(docWithoutSpanishDraft2.description.en).toStrictEqual('My English description')
+
+        await payload.update({
+          id: postID,
+          collection,
+          data: {
+            text: 'German draft 1',
+            _status: 'draft',
+          },
+          draft: true,
+          locale: 'de',
+        })
+
+        const docWithGermanDraft = await payload.findByID({
+          collection,
+          id: postID,
+          locale: 'all',
+          draft: true,
+        })
+
+        // Make sure we retain the Spanish draft,
+        // which may be lost when we create a new draft with German.
+        // Update operation should fetch both draft locales as well as published
+        // and merge them.
+        expect(docWithGermanDraft.text.de).toStrictEqual('German draft 1')
+        expect(docWithGermanDraft.text.es).toStrictEqual('Spanish draft')
+        expect(docWithGermanDraft.text.en).toStrictEqual('English published 2')
+
+        const publishedDE = await payload.update({
+          id: postID,
+          collection,
+          data: {
+            _status: 'published',
+            text: 'German published 1',
+          },
+          draft: false,
+          locale: 'de',
+          publishSpecificLocale: 'de',
+        })
+
+        const publishedENFinal = await payload.update({
+          id: postID,
+          collection,
+          data: {
+            text: 'English published 3',
+            _status: 'published',
+          },
+          draft: false,
+          locale: 'en',
+          publishSpecificLocale: 'en',
+        })
+
+        const finalPublishedNoES = await payload.findByID({
+          collection,
+          id: postID,
+          locale: 'all',
+        })
+
+        expect(finalPublishedNoES.text.de).toStrictEqual('German published 1')
+        expect(finalPublishedNoES.text.en).toStrictEqual('English published 3')
+        expect(finalPublishedNoES.text.es).toBeUndefined()
+
+        const finalDraft = await payload.findByID({
+          collection,
+          id: postID,
+          locale: 'all',
+          draft: true,
+        })
+
+        expect(finalDraft.text.de).toStrictEqual('German published 1')
+        expect(finalDraft.text.en).toStrictEqual('English published 3')
+        expect(finalDraft.text.es).toStrictEqual('Spanish draft')
+
+        const published = await payload.update({
+          collection,
+          id: postID,
+          data: {
+            _status: 'published',
+          },
+        })
+
+        const finalPublished = await payload.findByID({
+          collection,
+          id: postID,
+          locale: 'all',
+          draft: true,
+        })
+
+        expect(finalPublished.text.de).toStrictEqual('German published 1')
+        expect(finalPublished.text.en).toStrictEqual('English published 3')
+        expect(finalPublished.text.es).toStrictEqual('Spanish draft')
+      })
+
+      it('should not leak draft data', async () => {
+        const draft = await payload.create({
+          collection,
+          data: {
+            text: 'Spanish draft',
+          },
+          draft: true,
+          locale: 'es',
+        })
+
+        const published = await payload.update({
+          id: draft.id,
+          collection,
+          data: {
+            text: 'English publish',
+            _status: 'published',
+          },
+          draft: false,
+          publishSpecificLocale: 'en',
+        })
+
+        const publishedOnlyEN = await payload.findByID({
+          collection,
+          id: draft.id,
+          locale: 'all',
+        })
+
+        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
+      })
+
+      it('should merge draft data from other locales when publishing all', async () => {
+        const draft = await payload.create({
+          collection,
+          data: {
+            text: 'Spanish draft',
+          },
+          draft: true,
+          locale: 'es',
+        })
+
+        const published = await payload.update({
+          id: draft.id,
+          collection,
+          data: {
+            text: 'English publish',
+            _status: 'published',
+          },
+          draft: false,
+          publishSpecificLocale: 'en',
+        })
+
+        const publishedOnlyEN = await payload.findByID({
+          collection,
+          id: draft.id,
+          locale: 'all',
+        })
+
+        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
+
+        const published2 = await payload.update({
+          id: draft.id,
+          collection,
+          data: {
+            _status: 'published',
+          },
+          draft: false,
+        })
+
+        const publishedAll = await payload.findByID({
+          collection,
+          id: published2.id,
+          locale: 'all',
+        })
+
+        expect(publishedAll.text.es).toStrictEqual('Spanish draft')
+        expect(publishedAll.text.en).toStrictEqual('English publish')
+      })
+
+      it('should publish non-default individual locale', async () => {
+        const draft = await payload.create({
+          collection,
+          data: {
+            text: 'Spanish draft',
+          },
+          draft: true,
+          locale: 'es',
+        })
+
+        const published = await payload.update({
+          id: draft.id,
+          collection,
+          data: {
+            text: 'German publish',
+            _status: 'published',
+          },
+          draft: false,
+          publishSpecificLocale: 'de',
+        })
+
+        const publishedOnlyDE = await payload.findByID({
+          collection,
+          id: published.id,
+          locale: 'all',
+        })
+
+        expect(publishedOnlyDE.text.es).toBeUndefined()
+        expect(publishedOnlyDE.text.en).toBeUndefined()
+        expect(publishedOnlyDE.text.de).toStrictEqual('German publish')
+      })
+
+      it('should show correct data in latest version', async () => {
+        const draft = await payload.create({
+          collection,
+          data: {
+            text: 'Spanish draft',
+          },
+          draft: true,
+          locale: 'es',
+        })
+
+        const published = await payload.update({
+          id: draft.id,
+          collection,
+          data: {
+            text: 'English publish',
+            _status: 'published',
+          },
+          draft: false,
+          publishSpecificLocale: 'en',
+        })
+
+        const publishedOnlyEN = await payload.findByID({
+          collection,
+          id: published.id,
+          locale: 'all',
+        })
+
+        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
+
+        const allVersions = await payload.findVersions({
+          collection,
+          locale: 'all',
+        })
+
+        const versions = allVersions.docs.filter(
+          (version) => version.parent === published.id && version.snapshot !== true,
+        )
+        const latestVersion = versions[0].version
+
+        expect(latestVersion.text.es).toBeUndefined()
+        expect(latestVersion.text.en).toStrictEqual('English publish')
+      })
+    })
+
+    describe('Globals', () => {
+      it('should save correct global data when publishing individual locale', async () => {
+        // publish german
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'German published',
+            _status: 'published',
+          },
+          locale: 'de',
+        })
+
+        // save spanish draft
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'Spanish draft',
+            content: 'Spanish draft content',
+          },
+          draft: true,
+          locale: 'es',
+        })
+
+        // publish only english
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'Eng published',
+            _status: 'published',
+          },
+          locale: 'en',
+          publishSpecificLocale: 'en',
+        })
+
+        const globalData = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+        })
+
+        // Expect only previously published data to be present
+        expect(globalData.title.es).toBeUndefined()
+        expect(globalData.title.en).toStrictEqual('Eng published')
+        expect(globalData.title.de).toStrictEqual('German published')
+      })
+
+      it('should not leak draft data', async () => {
+        // save spanish draft
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'Another spanish draft',
+          },
+          draft: true,
+          locale: 'es',
+        })
+
+        // publish only english
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'Eng published',
+            _status: 'published',
+          },
+          draft: false,
+          locale: 'en',
+          publishSpecificLocale: 'en',
+        })
+
+        const globalData = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+        })
+
+        // Expect no draft data to be present
+        expect(globalData.title.es).toBeUndefined()
+        expect(globalData.title.en).toStrictEqual('Eng published')
+      })
+
+      it('should merge draft data from other locales when publishing all', async () => {
+        // save spanish draft
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'Spanish draft',
+            content: 'Spanish draft content',
+          },
+          draft: true,
+          locale: 'es',
+        })
+
+        // publish only english
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'Eng published',
+            _status: 'published',
+          },
+          locale: 'en',
+          publishSpecificLocale: 'en',
+        })
+
+        const publishedOnlyEN = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+        })
+
+        expect(publishedOnlyEN.title.es).toBeUndefined()
+        expect(publishedOnlyEN.title.en).toStrictEqual('Eng published')
+
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            _status: 'published',
+          },
+        })
+
+        const publishedAll = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+        })
+
+        expect(publishedAll.title.es).toStrictEqual('Spanish draft')
+        expect(publishedAll.title.en).toStrictEqual('Eng published')
+      })
+
+      it('should publish non-default individual locale', async () => {
+        // save spanish draft
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'Test span draft',
+            content: 'Test span draft content',
+          },
+          draft: true,
+          locale: 'es',
+        })
+
+        // publish only german
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'German published',
+            _status: 'published',
+          },
+          locale: 'de',
+          publishSpecificLocale: 'de',
+        })
+
+        const globalData = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+        })
+
+        // Expect only published data to be present
+        expect(globalData.title.es).toBeFalsy()
+        expect(globalData.title.de).toStrictEqual('German published')
+      })
+
+      it('should show correct data in latest version', async () => {
+        // save spanish draft
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'New spanish draft',
+            content: 'New spanish draft content',
+          },
+          draft: true,
+          locale: 'es',
+        })
+
+        // publish only english
+        await payload.updateGlobal({
+          slug: global,
+          data: {
+            title: 'New eng',
+            _status: 'published',
+          },
+          draft: false,
+          publishSpecificLocale: 'en',
+        })
+
+        const allVersions = await payload.findGlobalVersions({
+          slug: global,
+          locale: 'all',
+          where: {
+            'version._status': {
+              equals: 'published',
+            },
+          },
+        })
+
+        const versions = allVersions.docs
+        const latestVersion = versions[0].version
+        expect(latestVersion.title.es).toBeFalsy()
+        expect(latestVersion.title.en).toStrictEqual('New eng')
       })
     })
   })

@@ -1,13 +1,13 @@
-import type {
-  BeforeLoginHook,
-  CollectionConfig,
-} from '../../../../packages/payload/src/collections/config/types'
-import type { Payload } from '../../../../packages/payload/src/payload'
+import type { BeforeLoginHook, CollectionConfig, Payload } from 'payload'
 
-import { AuthenticationError } from '../../../../packages/payload/src/errors'
-import { devUser, regularUser } from '../../../credentials'
+import { AuthenticationError } from 'payload'
 
-const beforeLoginHook: BeforeLoginHook = ({ user, req }) => {
+import { devUser, regularUser } from '../../../credentials.js'
+import { afterLoginHook } from './afterLoginHook.js'
+import { meHook } from './meHook.js'
+import { refreshHook } from './refreshHook.js'
+
+const beforeLoginHook: BeforeLoginHook = ({ req, user }) => {
   const isAdmin = user.roles.includes('admin') ? user : undefined
   if (!isAdmin) {
     throw new AuthenticationError(req.t)
@@ -33,16 +33,23 @@ const Users: CollectionConfig = {
   fields: [
     {
       name: 'roles',
-      label: 'Role',
       type: 'select',
+      defaultValue: ['user'],
+      hasMany: true,
+      label: 'Role',
       options: ['admin', 'user'],
-      defaultValue: 'user',
       required: true,
       saveToJWT: true,
-      hasMany: true,
+    },
+    {
+      name: 'afterLoginHook',
+      type: 'checkbox',
     },
   ],
   hooks: {
+    me: [meHook],
+    refresh: [refreshHook],
+    afterLogin: [afterLoginHook],
     beforeLogin: [beforeLoginHook],
   },
 }

@@ -1,1 +1,2 @@
-export * from './dist/adapters/gcs'
+export { gcsAdapter } from './dist/adapters/gcs/index.js'
+//# sourceMappingURL=gcs.d.ts.map

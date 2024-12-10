@@ -1,6 +1,4 @@
-/* eslint-disable no-param-reassign */
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
-import type { PayloadRequest } from '../../../../packages/payload/src/types'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 
 export const contextHooksSlug = 'context-hooks'
 const ContextHooks: CollectionConfig = {
@@ -13,20 +11,19 @@ const ContextHooks: CollectionConfig = {
   },
   hooks: {
     beforeOperation: [
-      async ({ context, args }) => {
-        // eslint-disable-next-line prefer-destructuring
+      ({ context, args }) => {
         const req: PayloadRequest = args.req
 
-        if (!req.query || !Object.keys(req.query).length) {
+        if (req.searchParams.size === 0) {
           return args
         }
 
-        Object.keys(req.query).forEach((key) => {
+        req.searchParams.forEach((value, key) => {
           if (key.startsWith('context_')) {
             // Strip 'context_' from key, add it to context object and remove it from query params
             const newKey = key.substring('context_'.length)
-            context[newKey] = req.query[key]
-            delete req.query[key]
+            context[newKey] = value
+            req.searchParams.delete(key)
           }
         })
 

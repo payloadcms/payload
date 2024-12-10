@@ -1,34 +1,85 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Response } from 'express'
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired } from 'ts-essentials'
+import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../'
 import type {
-  CustomPreviewButtonProps,
-  CustomPublishButtonProps,
-  CustomSaveButtonProps,
-  CustomSaveDraftButtonProps,
-} from '../../admin/components/elements/types'
-import type { Props as ListProps } from '../../admin/components/views/collections/List/types'
-import type { Auth, IncomingAuthType, User } from '../../auth/types'
+  CustomPreviewButton,
+  CustomPublishButton,
+  CustomSaveButton,
+  CustomSaveDraftButton,
+  CustomUpload,
+} from '../../admin/types.js'
+import type { Arguments as MeArguments } from '../../auth/operations/me.js'
+import type {
+  Arguments as RefreshArguments,
+  Result as RefreshResult,
+} from '../../auth/operations/refresh.js'
+import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
-  AdminViewComponent,
-  EditViewConfig,
+  AfterErrorHookArgs,
+  AfterErrorResult,
+  CustomComponent,
+  EditConfig,
   Endpoint,
   EntityDescription,
+  EntityDescriptionComponent,
   GeneratePreviewURL,
+  LabelFunction,
   LivePreviewConfig,
-} from '../../config/types'
-import type { PayloadRequest, RequestContext } from '../../express/types'
-import type { Field } from '../../fields/config/types'
-import type { IncomingUploadType, Upload } from '../../uploads/types'
-import type { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types'
-import type { AfterOperationArg, AfterOperationMap } from '../operations/utils'
+  MetaConfig,
+  PayloadComponent,
+  StaticLabel,
+} from '../../config/types.js'
+import type { DBIdentifierName } from '../../database/types.js'
+import type {
+  Field,
+  FlattenedField,
+  JoinField,
+  RelationshipField,
+  UploadField,
+} from '../../fields/config/types.js'
+import type {
+  CollectionSlug,
+  JsonObject,
+  RequestContext,
+  TypedAuthOperations,
+  TypedCollection,
+  TypedCollectionSelect,
+  TypedLocale,
+} from '../../index.js'
+import type {
+  PayloadRequest,
+  SelectType,
+  Sort,
+  TransformCollectionWithSelect,
+  Where,
+} from '../../types/index.js'
+import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
+import type {
+  IncomingCollectionVersions,
+  SanitizedCollectionVersions,
+} from '../../versions/types.js'
+import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
+
+export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+
+export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
+
+export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
+  TypedAuthOperations[TSlug]
+
+export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
+  TData,
+  'createdAt' | 'id' | 'sizes' | 'updatedAt'
+>
+
+export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
+  RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
 
 export type HookOperationType =
   | 'autosave'
+  | 'count'
+  | 'countVersions'
   | 'create'
   | 'delete'
   | 'forgotPassword'
@@ -48,6 +99,7 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType
+  req: PayloadRequest
 }) => any
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
@@ -65,7 +117,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req?: PayloadRequest
+  req: PayloadRequest
 }) => any
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
@@ -135,17 +187,17 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest
 }) => any
 
-export type AfterOperationHook<T extends TypeWithID = any> = (
-  arg: AfterOperationArg<T>,
-) => Promise<ReturnType<AfterOperationMap<T>[keyof AfterOperationMap<T>]>>
-
-export type AfterErrorHook = (
-  err: Error,
-  res: unknown,
-  context: RequestContext,
-  /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
-  collection: SanitizedCollectionConfig | null,
-) => { response: any; status: number } | void
+export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string> = (
+  arg: AfterOperationArg<TOperationGeneric>,
+) =>
+  | Awaited<
+      ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
+    >
+  | Promise<
+      Awaited<
+        ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
+      >
+    >
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
@@ -169,7 +221,6 @@ export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   req: PayloadRequest
-  res: Response
 }) => any
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
@@ -180,15 +231,28 @@ export type AfterMeHook<T extends TypeWithID = any> = (args: {
   response: unknown
 }) => any
 
+export type RefreshHook<T extends TypeWithID = any> = (args: {
+  args: RefreshArguments
+  user: T
+}) => Promise<RefreshResult | void> | (RefreshResult | void)
+
+export type MeHook<T extends TypeWithID = any> = (args: {
+  args: MeArguments
+  user: T
+}) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
+
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   exp: number
   req: PayloadRequest
-  res: Response
   token: string
 }) => any
+
+export type AfterErrorHook = (
+  args: { collection: SanitizedCollectionConfig } & AfterErrorHookArgs,
+) => AfterErrorResult | Promise<AfterErrorResult>
 
 export type AfterForgotPasswordHook = (args: {
   args?: any
@@ -197,24 +261,25 @@ export type AfterForgotPasswordHook = (args: {
   context: RequestContext
 }) => any
 
-type BeforeDuplicateArgs<T> = {
-  /** The collection which this hook is being run on */
-  collection: SanitizedCollectionConfig
-  data: T
-  locale?: string
-}
-
-export type BeforeDuplicate<T = any> = (args: BeforeDuplicateArgs<T>) => Promise<T> | T
+export type BaseListFilter = (args: {
+  limit: number
+  locale?: TypedLocale
+  page: number
+  req: PayloadRequest
+  sort: string
+}) => null | Promise<null | Where> | Where
 
 export type CollectionAdminOptions = {
+  baseListFilter?: BaseListFilter
   /**
    * Custom admin components
    */
   components?: {
-    AfterList?: React.ComponentType<ListProps>[]
-    AfterListTable?: React.ComponentType<ListProps>[]
-    BeforeList?: React.ComponentType<ListProps>[]
-    BeforeListTable?: React.ComponentType<ListProps>[]
+    afterList?: CustomComponent[]
+    afterListTable?: CustomComponent[]
+    beforeList?: CustomComponent[]
+    beforeListTable?: CustomComponent[]
+    Description?: EntityDescriptionComponent
     /**
      * Components within the edit view
      */
@@ -222,60 +287,43 @@ export type CollectionAdminOptions = {
       /**
        * Replaces the "Preview" button
        */
-      PreviewButton?: CustomPreviewButtonProps
+      PreviewButton?: CustomPreviewButton
       /**
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButtonProps
+      PublishButton?: CustomPublishButton
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
        */
-      SaveButton?: CustomSaveButtonProps
+      SaveButton?: CustomSaveButton
       /**
        * Replaces the "Save Draft" button
        * + drafts must be enabled
        * + autosave must be disabled
        */
-      SaveDraftButton?: CustomSaveDraftButtonProps
+      SaveDraftButton?: CustomSaveDraftButton
+      /**
+       * Replaces the "Upload" section
+       * + upload must be enabled
+       */
+      Upload?: CustomUpload
     }
     views?: {
       /**
-       * Set to a React component to replace the entire "Edit" view, including all nested routes.
+       * Set to a React component to replace the entire Edit View, including all nested routes.
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
-      Edit?:
-        | (
-            | {
-                /**
-                 * Replace or modify individual nested routes, or add new ones:
-                 * + `Default` - `/admin/collections/:collection/:id`
-                 * + `API` - `/admin/collections/:collection/:id/api`
-                 * + `LivePreview` - `/admin/collections/:collection/:id/preview`
-                 * + `References` - `/admin/collections/:collection/:id/references`
-                 * + `Relationships` - `/admin/collections/:collection/:id/relationships`
-                 * + `Versions` - `/admin/collections/:collection/:id/versions`
-                 * + `Version` - `/admin/collections/:collection/:id/versions/:version`
-                 * + `CustomView` - `/admin/collections/:collection/:id/:path`
-                 */
-                API?: AdminViewComponent | Partial<EditViewConfig>
-                Default?: AdminViewComponent | Partial<EditViewConfig>
-                LivePreview?: AdminViewComponent | Partial<EditViewConfig>
-                Version?: AdminViewComponent | Partial<EditViewConfig>
-                Versions?: AdminViewComponent | Partial<EditViewConfig>
-                // TODO: uncomment these as they are built
-                // References?: EditView
-                // Relationships?: EditView
-              }
-            | {
-                [key: string]: EditViewConfig
-              }
-          )
-        | AdminViewComponent
-      List?: React.ComponentType<ListProps>
+      edit?: EditConfig
+      list?: {
+        actions?: CustomComponent[]
+        Component?: PayloadComponent
+      }
     }
   }
+  /** Extension point to add your custom data. Available in server and client. */
+  custom?: Record<string, any>
   /**
    * Default columns to show in list view
    */
@@ -284,7 +332,6 @@ export type CollectionAdminOptions = {
    * Custom description for collection
    */
   description?: EntityDescription
-  disableDuplicate?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -294,17 +341,11 @@ export type CollectionAdminOptions = {
   /**
    * Exclude the collection from the admin nav and routes
    */
-  hidden?: ((args: { user: User }) => boolean) | boolean
+  hidden?: ((args: { user: ClientUser }) => boolean) | boolean
   /**
    * Hide the API URL within the Edit view
    */
   hideAPIURL?: boolean
-  hooks?: {
-    /**
-     * Function that allows you to modify a document's data before it is duplicated
-     */
-    beforeDuplicate?: BeforeDuplicate
-  }
   /**
    * Additional fields to be searched via the full text search
    */
@@ -313,6 +354,7 @@ export type CollectionAdminOptions = {
    * Live preview options
    */
   livePreview?: LivePreviewConfig
+  meta?: MetaConfig
   pagination?: {
     defaultLimit?: number
     limits?: number[]
@@ -322,18 +364,18 @@ export type CollectionAdminOptions = {
    */
   preview?: GeneratePreviewURL
   /**
-   * Field to use as title in Edit view and first column in List view
+   * Field to use as title in Edit View and first column in List view
    */
   useAsTitle?: string
 }
 
 /** Manage all aspects of a data collection */
-export type CollectionConfig = {
+export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Access control
    */
   access?: {
-    admin?: (args?: any) => Promise<boolean> | boolean
+    admin?: ({ req }: { req: PayloadRequest }) => boolean | Promise<boolean>
     create?: Access
     delete?: Access
     read?: Access
@@ -350,17 +392,29 @@ export type CollectionConfig = {
    *
    * Use `true` to enable with default options
    */
-  auth?: IncomingAuthType | boolean
-  /** Extension point to add your custom data. */
+  auth?: boolean | IncomingAuthType
+  /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+  /**
+   * Used to override the default naming of the database table or collection with your using a function or string
+   * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
+   */
+  dbName?: DBIdentifierName
+  defaultPopulate?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectType
+    : SelectFromCollectionSlug<TSlug>
   /**
    * Default field to sort by in collection list view
    */
-  defaultSort?: string
+  defaultSort?: Sort
+  /**
+   * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
+   */
+  disableDuplicate?: boolean
   /**
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */
-  endpoints?: Omit<Endpoint, 'root'>[] | false
+  endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
    * GraphQL configuration
@@ -377,12 +431,12 @@ export type CollectionConfig = {
   hooks?: {
     afterChange?: AfterChangeHook[]
     afterDelete?: AfterDeleteHook[]
-    afterError?: AfterErrorHook
+    afterError?: AfterErrorHook[]
     afterForgotPassword?: AfterForgotPasswordHook[]
     afterLogin?: AfterLoginHook[]
     afterLogout?: AfterLogoutHook[]
     afterMe?: AfterMeHook[]
-    afterOperation?: AfterOperationHook[]
+    afterOperation?: AfterOperationHook<TSlug>[]
     afterRead?: AfterReadHook[]
     afterRefresh?: AfterRefreshHook[]
     beforeChange?: BeforeChangeHook[]
@@ -391,14 +445,36 @@ export type CollectionConfig = {
     beforeOperation?: BeforeOperationHook[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
+    /**
+    /**
+     * Use the `me` hook to control the `me` operation.
+     * Here, you can optionally instruct the me operation to return early,
+     * and skip its default logic.
+     */
+    me?: MeHook[]
+    /**
+     * Use the `refresh` hook to control the refresh operation.
+     * Here, you can optionally instruct the refresh operation to return early,
+     * and skip its default logic.
+     */
+    refresh?: RefreshHook[]
   }
   /**
    * Label configuration
    */
   labels?: {
-    plural?: Record<string, string> | string
-    singular?: Record<string, string> | string
+    plural?: LabelFunction | StaticLabel
+    singular?: LabelFunction | StaticLabel
   }
+  /**
+   * Enables / Disables the ability to lock documents while editing
+   * @default true
+   */
+  lockDocuments?:
+    | {
+        duration: number
+      }
+    | false
   slug: string
   /**
    * Add `createdAt` and `updatedAt` fields
@@ -420,30 +496,62 @@ export type CollectionConfig = {
    *
    * @default false // disable uploads
    */
-  upload?: IncomingUploadType | boolean
+  upload?: boolean | UploadConfig
   /**
-   * Customize the handling of incoming file uploads
+   * Enable versioning. Set it to true to enable default versions settings,
+   * or customize versions options by setting the property equal to an object
+   * containing the version options.
    *
    * @default false // disable versioning
    */
-  versions?: IncomingCollectionVersions | boolean
+  versions?: boolean | IncomingCollectionVersions
+}
+
+export type SanitizedJoin = {
+  /**
+   * The field configuration defining the join
+   */
+  field: JoinField
+  /**
+   * The path of the join field in dot notation
+   */
+  joinPath: string
+  targetField: RelationshipField | UploadField
+}
+
+export type SanitizedJoins = {
+  [collectionSlug: string]: SanitizedJoin[]
 }
 
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
+    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
   auth: Auth
-  endpoints: Omit<Endpoint, 'root'>[] | false
+  endpoints: Endpoint[] | false
   fields: Field[]
-  upload: Upload
+
+  /**
+   * Fields in the database schema structure
+   * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
+   */
+  flattenedFields: FlattenedField[]
+
+  /**
+   * Object of collections to join 'Join Fields object keyed by collection
+   */
+  joins: SanitizedJoins
+  slug: CollectionSlug
+  upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }
 
 export type Collection = {
   config: SanitizedCollectionConfig
+  customIDType?: 'number' | 'text'
   graphQL?: {
+    countType: GraphQLObjectType
     JWT: GraphQLObjectType
     mutationInputType: GraphQLNonNull<any>
     paginatedType: GraphQLObjectType
@@ -454,10 +562,10 @@ export type Collection = {
   }
 }
 
-export type BulkOperationResult<TSlug extends keyof GeneratedTypes['collections']> = {
-  docs: GeneratedTypes['collections'][TSlug][]
+export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+  docs: TransformCollectionWithSelect<TSlug, TSelect>[]
   errors: {
-    id: GeneratedTypes['collections'][TSlug]['id']
+    id: DataFromCollectionSlug<TSlug>['id']
     message: string
   }[]
 }
@@ -467,6 +575,7 @@ export type AuthCollection = {
 }
 
 export type TypeWithID = {
+  docId?: any
   id: number | string
 }
 

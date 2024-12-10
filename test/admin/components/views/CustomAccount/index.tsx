@@ -1,8 +1,8 @@
+import type { AdminViewComponent, PayloadServerReactComponent } from 'payload'
+
 import React, { Fragment } from 'react'
 
-import type { AdminViewComponent } from '../../../../../packages/payload/src/config/types'
-
-const CustomAccountView: AdminViewComponent = () => {
+export const CustomAccountView: PayloadServerReactComponent<AdminViewComponent> = () => {
   return (
     <Fragment>
       <div
@@ -23,5 +23,3 @@ const CustomAccountView: AdminViewComponent = () => {
     </Fragment>
   )
 }
-
-export default CustomAccountView

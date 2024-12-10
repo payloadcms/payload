@@ -1,16 +1,14 @@
-/* eslint-disable no-underscore-dangle */
-import type { FindGlobalVersionsArgs } from '../../database/types'
-import type { PayloadRequest } from '../../express/types'
-import type { TypeWithVersion } from '../../versions/types'
-import type { SanitizedGlobalConfig } from '../config/types'
+import type { FindGlobalVersionsArgs } from '../../database/types.js'
+import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
+import type { TypeWithVersion } from '../../versions/types.js'
+import type { SanitizedGlobalConfig } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess'
-import { combineQueries } from '../../database/combineQueries'
-import { Forbidden, NotFound } from '../../errors'
-import { afterRead } from '../../fields/hooks/afterRead'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
+import executeAccess from '../../auth/executeAccess.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { Forbidden, NotFound } from '../../errors/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
   currentDepth?: number
@@ -19,11 +17,15 @@ export type Arguments = {
   globalConfig: SanitizedGlobalConfig
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
+export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = any>(
+  args: Arguments,
+): Promise<T> => {
   const {
     id,
     currentDepth,
@@ -31,14 +33,14 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     disableErrors,
     globalConfig,
     overrideAccess,
-    req: { locale, payload, t },
+    populate,
+    req: { fallbackLocale, locale, payload },
     req,
+    select,
     showHiddenFields,
   } = args
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -48,7 +50,9 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       : true
 
     // If errors are disabled, and access returns false, return null
-    if (accessResults === false) return null
+    if (accessResults === false) {
+      return null
+    }
 
     const hasWhereAccess = typeof accessResults === 'object'
 
@@ -57,6 +61,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       limit: 1,
       locale,
       req,
+      select,
       where: combineQueries({ id: { equals: id } }, accessResults),
     }
 
@@ -64,20 +69,30 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findGlobalVersionsArgs.where.and[0].id) throw new NotFound(t)
+    if (!findGlobalVersionsArgs.where.and[0].id) {
+      throw new NotFound(req.t)
+    }
 
     const { docs: results } = await payload.db.findGlobalVersions(findGlobalVersionsArgs)
     if (!results || results?.length === 0) {
       if (!disableErrors) {
-        if (!hasWhereAccess) throw new NotFound(t)
-        if (hasWhereAccess) throw new Forbidden(t)
+        if (!hasWhereAccess) {
+          throw new NotFound(req.t)
+        }
+        if (hasWhereAccess) {
+          throw new Forbidden(req.t)
+        }
       }
 
       return null
     }
 
     // Clone the result - it may have come back memoized
-    let result = JSON.parse(JSON.stringify(results[0]))
+    let result: any = deepCopyObjectSimple(results[0])
+
+    if (!result.version) {
+      result.version = {}
+    }
 
     // Patch globalType onto version doc
     result.version.globalType = globalConfig.slug
@@ -108,9 +123,14 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       currentDepth,
       depth,
       doc: result.version,
+      draft: undefined,
+      fallbackLocale,
       global: globalConfig,
+      locale,
       overrideAccess,
+      populate,
       req,
+      select: typeof select?.version === 'object' ? select.version : undefined,
       showHiddenFields,
     })
 
@@ -131,17 +151,9 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
         })) || result.version
     }, Promise.resolve())
 
-    // /////////////////////////////////////
-    // Return results
-    // /////////////////////////////////////
-
-    if (shouldCommit) await commitTransaction(req)
-
     return result
   } catch (error: unknown) {
     await killTransaction(req)
     throw error
   }
 }
-
-export default findVersionByID

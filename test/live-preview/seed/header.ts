@@ -1,4 +1,4 @@
-import type { Header } from '../payload-types'
+import type { Header } from '../payload-types.js'
 
 export const header: Partial<Header> = {
   navItems: [

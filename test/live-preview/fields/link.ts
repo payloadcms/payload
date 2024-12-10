@@ -1,6 +1,7 @@
-import type { Field } from '../../../packages/payload/src/fields/config/types'
+import type { Field } from 'payload'
 
-import deepMerge from '../utilities/deepMerge'
+import { pagesSlug, postsSlug } from '../shared.js'
+import deepMerge from '../utilities/deepMerge.js'
 
 export const appearanceOptions = {
   primary: {
@@ -76,7 +77,7 @@ const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = 
       name: 'reference',
       label: 'Document to link to',
       type: 'relationship',
-      relationTo: ['posts', 'pages'],
+      relationTo: [postsSlug, pagesSlug],
       required: true,
       maxDepth: 1,
       admin: {
@@ -136,7 +137,7 @@ const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = 
     linkResult.fields.push({
       name: 'appearance',
       type: 'select',
-      defaultValue: 'default',
+      defaultValue: appearanceOptionsToUse[0].value,
       options: appearanceOptionsToUse,
       admin: {
         description: 'Choose how the link should be rendered.',

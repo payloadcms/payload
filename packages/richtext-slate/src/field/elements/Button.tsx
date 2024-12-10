@@ -1,22 +1,33 @@
 'use client'
 import type { ElementType } from 'react'
 
-import { Tooltip } from 'payload/components'
+import { Tooltip } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 import { useSlate } from 'slate-react'
 
-import type { ButtonProps } from './types'
+import type { ButtonProps } from './types.js'
 
 import '../buttons.scss'
-import isElementActive from './isActive'
-import toggleElement from './toggle'
+import { useElementButton } from '../providers/ElementButtonProvider.js'
+import { isElementActive } from './isActive.js'
+import { toggleElement } from './toggle.js'
 
 export const baseClass = 'rich-text__button'
 
-const ElementButton: React.FC<ButtonProps> = (props) => {
-  const { children, className, el = 'button', format, onClick, tooltip, type = 'type' } = props
+export const ElementButton: React.FC<ButtonProps> = (props) => {
+  const {
+    type = 'type',
+    children,
+    className,
+    disabled: disabledFromProps,
+    el = 'button',
+    format,
+    onClick,
+    tooltip,
+  } = props
 
   const editor = useSlate()
+  const { disabled: disabledFromContext } = useElementButton()
   const [showTooltip, setShowTooltip] = useState(false)
 
   const defaultOnClick = useCallback(
@@ -30,9 +41,11 @@ const ElementButton: React.FC<ButtonProps> = (props) => {
 
   const Tag: ElementType = el
 
+  const disabled = disabledFromProps || disabledFromContext
+
   return (
     <Tag
-      {...(el === 'button' && { type: 'button' })}
+      {...(el === 'button' && { type: 'button', disabled })}
       className={[
         baseClass,
         className,
@@ -41,13 +54,11 @@ const ElementButton: React.FC<ButtonProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
       onClick={onClick || defaultOnClick}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
+      onPointerEnter={() => setShowTooltip(true)}
+      onPointerLeave={() => setShowTooltip(false)}
     >
       {tooltip && <Tooltip show={showTooltip}>{tooltip}</Tooltip>}
       {children}
     </Tag>
   )
 }
-
-export default ElementButton

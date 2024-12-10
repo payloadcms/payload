@@ -1,12 +1,20 @@
+import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+import type { SQLiteAdapter } from '@payloadcms/db-sqlite/types'
 import type { PgTable } from 'drizzle-orm/pg-core'
+import type { SQLiteTable } from 'drizzle-orm/sqlite-core'
+import type { Payload } from 'payload'
 
+import { GenericTable } from '@payloadcms/drizzle/types'
 import { sql } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
-import type { Payload } from '../../packages/payload/src'
+import { isMongoose } from './isMongoose.js'
 
-import { isMongoose } from './isMongoose'
-
+export const uploadsDirCache: {
+  [key: string]: {
+    cacheDir: string
+    originalDir: string
+  }[]
+} = {}
 export const dbSnapshot = {}
 
 async function createMongooseSnapshot(collectionsObj, snapshotKey: string) {
@@ -37,10 +45,10 @@ async function restoreFromMongooseSnapshot(collectionsObj, snapshotKey: string) 
   }
 }
 
-async function createDrizzleSnapshot(db: PostgresAdapter, snapshotKey: string) {
+async function createDrizzleSnapshot(db: PostgresAdapter | SQLiteAdapter, snapshotKey: string) {
   const snapshot = {}
 
-  const schema: Record<string, PgTable> = db.drizzle._.schema
+  const schema: Record<string, PgTable | SQLiteTable> = db.drizzle._.schema
   if (!schema) {
     return
   }
@@ -54,34 +62,53 @@ async function createDrizzleSnapshot(db: PostgresAdapter, snapshotKey: string) {
   dbSnapshot[snapshotKey] = snapshot
 }
 
-async function restoreFromDrizzleSnapshot(db: PostgresAdapter, snapshotKey: string) {
+async function restoreFromDrizzleSnapshot(
+  adapter: PostgresAdapter | SQLiteAdapter,
+  snapshotKey: string,
+) {
   if (!dbSnapshot[snapshotKey]) {
     throw new Error('No snapshot found to restore from.')
   }
+  const db = adapter.name === 'postgres' ? (adapter as PostgresAdapter) : (adapter as SQLiteAdapter)
+  let disableFKConstraintChecksQuery
+  let enableFKConstraintChecksQuery
 
-  const disableFKConstraintChecksQuery = sql.raw('SET session_replication_role = replica;')
-  const enableFKConstraintChecksQuery = sql.raw('SET session_replication_role = DEFAULT;')
+  if (db.name === 'sqlite') {
+    disableFKConstraintChecksQuery = 'PRAGMA foreign_keys = off'
+    enableFKConstraintChecksQuery = 'PRAGMA foreign_keys = on'
+  }
+  if (db.name === 'postgres') {
+    disableFKConstraintChecksQuery = 'SET session_replication_role = replica;'
+    enableFKConstraintChecksQuery = 'SET session_replication_role = DEFAULT;'
+  }
 
-  await db.drizzle.transaction(async (trx) => {
-    // Temporarily disable foreign key constraint checks
-    await trx.execute(disableFKConstraintChecksQuery)
-    try {
-      for (const tableName in dbSnapshot[snapshotKey]) {
-        const table = db.drizzle.query[tableName]['fullSchema'][tableName]
-        await trx.delete(table).execute() // This deletes all records from the table. Probably not necessary, as I'm deleting the table before restoring anyways
+  // Temporarily disable foreign key constraint checks
+  try {
+    await db.execute({
+      drizzle: db.drizzle,
+      raw: disableFKConstraintChecksQuery,
+    })
+    for (const tableName in dbSnapshot[snapshotKey]) {
+      const table = db.drizzle.query[tableName]['fullSchema'][tableName]
+      await db.execute({
+        drizzle: db.drizzle,
+        sql: sql`DELETE FROM ${table}`,
+      }) // This deletes all records from the table. Probably not necessary, as I'm deleting the table before restoring anyways
 
-        const records = dbSnapshot[snapshotKey][tableName]
-        if (records.length > 0) {
-          await trx.insert(table).values(records).execute()
-        }
+      const records = dbSnapshot[snapshotKey][tableName]
+      if (records.length > 0) {
+        await db.drizzle.insert(table).values(records).execute()
       }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      // Re-enable foreign key constraint checks
-      await trx.execute(enableFKConstraintChecksQuery)
     }
-  })
+  } catch (e) {
+    console.error(e)
+  } finally {
+    // Re-enable foreign key constraint checks
+    await db.execute({
+      drizzle: db.drizzle,
+      raw: enableFKConstraintChecksQuery,
+    })
+  }
 }
 
 export async function createSnapshot(
@@ -89,7 +116,7 @@ export async function createSnapshot(
   snapshotKey: string,
   collectionSlugs: string[],
 ) {
-  if (isMongoose(_payload)) {
+  if (isMongoose(_payload) && 'collections' in _payload.db) {
     const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
 
     await createMongooseSnapshot(mongooseCollections, snapshotKey)
@@ -108,7 +135,7 @@ export async function restoreFromSnapshot(
   snapshotKey: string,
   collectionSlugs: string[],
 ) {
-  if (isMongoose(_payload)) {
+  if (isMongoose(_payload) && 'collections' in _payload.db) {
     const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
     await restoreFromMongooseSnapshot(mongooseCollections, snapshotKey)
   } else {

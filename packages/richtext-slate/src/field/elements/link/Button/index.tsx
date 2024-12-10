@@ -1,45 +1,41 @@
 'use client'
 
-import type { Fields } from 'payload/types'
+import type { FormState } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
-import { useDrawerSlug } from 'payload/components/elements'
-import { reduceFieldsToValues } from 'payload/components/forms'
 import {
-  buildStateFromSchema,
-  useAuth,
-  useConfig,
   useDocumentInfo,
-  useLocale,
-} from 'payload/components/utilities'
-import { sanitizeFields } from 'payload/config'
+  useDrawerSlug,
+  useModal,
+  useServerFunctions,
+  useTranslation,
+} from '@payloadcms/ui'
+import { reduceFieldsToValues } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import type { FieldProps } from '../../../../types'
-
-import LinkIcon from '../../../icons/Link'
-import ElementButton from '../../Button'
-import isElementActive from '../../isActive'
-import { LinkDrawer } from '../LinkDrawer'
-import { transformExtraFields, unwrapLink } from '../utilities'
+import { LinkIcon } from '../../../icons/Link/index.js'
+import { useElementButton } from '../../../providers/ElementButtonProvider.js'
+import { ElementButton } from '../../Button.js'
+import { isElementActive } from '../../isActive.js'
+import { LinkDrawer } from '../LinkDrawer/index.js'
+import { linkFieldsSchemaPath } from '../shared.js'
+import { unwrapLink } from '../utilities.js'
 
 /**
- * This function is called when an new link is created - not when an existing link is edited.
+ * This function is called when a new link is created - not when an existing link is edited.
  */
 const insertLink = (editor, fields) => {
   const isCollapsed = editor.selection && Range.isCollapsed(editor.selection)
   const data = reduceFieldsToValues(fields, true)
 
   const newLink = {
+    type: 'link',
     children: [],
     doc: data.doc,
     fields: data.fields, // Any custom user-added fields are part of data.fields
     linkType: data.linkType,
     newTab: data.newTab,
-    type: 'link',
     url: data.url,
   }
 
@@ -65,34 +61,22 @@ const insertLink = (editor, fields) => {
 }
 
 export const LinkButton: React.FC<{
-  fieldProps: FieldProps
-  path: string
-}> = ({ fieldProps }) => {
-  const customFieldSchema = fieldProps?.admin?.link?.fields
-  const { user } = useAuth()
-  const { code: locale } = useLocale()
-  const [initialState, setInitialState] = useState<Fields>({})
+  schemaPath: string
+}> = ({ schemaPath }) => {
+  const { fieldProps } = useElementButton()
+  const [initialState, setInitialState] = useState<FormState>({})
 
-  const { i18n, t } = useTranslation(['upload', 'general'])
+  const { t } = useTranslation()
   const editor = useSlate()
-  const config = useConfig()
-
-  const [fieldSchema] = useState(() => {
-    const fieldsUnsanitized = transformExtraFields(customFieldSchema, config, i18n)
-    // Sanitize custom fields here
-    const validRelationships = config.collections.map((c) => c.slug) || []
-    const fields = sanitizeFields({
-      config: config,
-      fields: fieldsUnsanitized,
-      validRelationships,
-    })
-
-    return fields
-  })
+  const { getFormState } = useServerFunctions()
+  const { collectionSlug, docPermissions, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
-  const { getDocPreferences } = useDocumentInfo()
+
+  const { componentMap } = fieldProps
+
+  const fields = componentMap[linkFieldsSchemaPath]
 
   return (
     <Fragment>
@@ -104,7 +88,6 @@ export const LinkButton: React.FC<{
             unwrapLink(editor)
           } else {
             openModal(drawerSlug)
-
             const isCollapsed = editor.selection && Range.isCollapsed(editor.selection)
 
             if (!isCollapsed) {
@@ -112,17 +95,19 @@ export const LinkButton: React.FC<{
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               }
 
-              const preferences = await getDocPreferences()
-              const state = await buildStateFromSchema({
-                config,
+              const { state } = await getFormState({
+                collectionSlug,
                 data,
-                fieldSchema,
-                locale,
-                operation: 'create',
-                preferences,
-                t,
-                user,
+                docPermissions,
+                docPreferences: await getDocPreferences(),
+                globalSlug,
+                operation: 'update',
+                renderAllFields: true,
+                schemaPath: [...schemaPath.split('.'), ...linkFieldsSchemaPath.split('.')].join(
+                  '.',
+                ),
               })
+
               setInitialState(state)
             }
           }
@@ -133,7 +118,7 @@ export const LinkButton: React.FC<{
       </ElementButton>
       <LinkDrawer
         drawerSlug={drawerSlug}
-        fieldSchema={fieldSchema}
+        fields={Array.isArray(fields) ? fields : []}
         handleClose={() => {
           closeModal(drawerSlug)
         }}
@@ -142,6 +127,7 @@ export const LinkButton: React.FC<{
           closeModal(drawerSlug)
         }}
         initialState={initialState}
+        schemaPath={schemaPath}
       />
     </Fragment>
   )

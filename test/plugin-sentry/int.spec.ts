@@ -1,8 +1,24 @@
-import { initPayloadTest } from '../helpers/configHelpers'
+import type { Payload } from 'payload'
 
-describe('plugin-sentry', () => {
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+
+let payload: Payload
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+describe('@payloadcms/plugin-sentry', () => {
   beforeAll(async () => {
-    await initPayloadTest({ __dirname, init: { local: true } })
+    ;({ payload } = await initPayloadInt(dirname))
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   describe('tests', () => {

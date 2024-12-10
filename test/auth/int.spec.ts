@@ -1,37 +1,38 @@
-import { GraphQLClient } from 'graphql-request'
-import jwtDecode from 'jwt-decode'
+import type { FieldAffectingData, Payload, User } from 'payload'
 
-import type { User } from '../../packages/payload/src/auth'
+import { jwtDecode } from 'jwt-decode'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { v4 as uuid } from 'uuid'
 
-import payload from '../../packages/payload/src'
-import configPromise from '../collections-graphql/config'
-import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
-require('isomorphic-fetch')
+import { devUser } from '../credentials.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import {
+  apiKeysSlug,
+  namedSaveToJWTValue,
+  partialDisableLocaleStrategiesSlug,
+  saveToJWTKey,
+  slug,
+} from './shared.js'
 
-let apiUrl
-let client: GraphQLClient
-
-const headers = {
-  'Content-Type': 'application/json',
-}
+let restClient: NextRESTClient
+let payload: Payload
 
 const { email, password } = devUser
 
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('Auth', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    apiUrl = `${serverURL}/api`
-    const config = await configPromise
-    const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`
-    client = new GraphQLClient(url)
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 
@@ -39,28 +40,33 @@ describe('Auth', () => {
     let token
     let user
     beforeAll(async () => {
-      // language=graphQL
-      const query = `mutation {
-          loginUser(email: "${devUser.email}", password: "${devUser.password}") {
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `mutation {
+            loginUser(email: "${devUser.email}", password: "${devUser.password}") {
               token
               user {
                   id
                   email
               }
-          }
-      }`
-      const response = await client.request(query)
-      user = response.loginUser.user
-      token = response.loginUser.token
+            }
+          }`,
+          }),
+        })
+        .then((res) => res.json())
+
+      user = data.loginUser.user
+      token = data.loginUser.token
     })
 
-    it('should login', async () => {
+    it('should login', () => {
       expect(user.id).toBeDefined()
       expect(user.email).toEqual(devUser.email)
       expect(token).toBeDefined()
     })
 
-    it('should have fields saved to JWT', async () => {
+    it('should have fields saved to JWT', () => {
       const decoded = jwtDecode<User>(token)
       const { collection, email: jwtEmail, exp, iat, roles } = decoded
 
@@ -73,38 +79,24 @@ describe('Auth', () => {
   })
 
   describe('REST - admin user', () => {
-    beforeAll(async () => {
-      await fetch(`${apiUrl}/${slug}/first-register`, {
+    it('should prevent registering a new first user', async () => {
+      const response = await restClient.POST(`/${slug}/first-register`, {
         body: JSON.stringify({
+          'confirm-password': password,
           email,
           password,
         }),
-        headers,
-        method: 'post',
-      })
-    })
-
-    it('should prevent registering a new first user', async () => {
-      const response = await fetch(`${apiUrl}/${slug}/first-register`, {
-        body: JSON.stringify({
-          email: 'thisuser@shouldbeprevented.com',
-          password: 'get-out',
-        }),
-        headers,
-        method: 'post',
       })
 
       expect(response.status).toBe(403)
     })
 
     it('should login a user successfully', async () => {
-      const response = await fetch(`${apiUrl}/${slug}/login`, {
+      const response = await restClient.POST(`/${slug}/login`, {
         body: JSON.stringify({
           email,
           password,
         }),
-        headers,
-        method: 'post',
       })
 
       const data = await response.json()
@@ -115,16 +107,14 @@ describe('Auth', () => {
 
     describe('logged in', () => {
       let token: string | undefined
-      let loggedInUser: User | undefined
+      let loggedInUser: undefined | User
 
       beforeAll(async () => {
-        const response = await fetch(`${apiUrl}/${slug}/login`, {
+        const response = await restClient.POST(`/${slug}/login`, {
           body: JSON.stringify({
             email,
             password,
           }),
-          headers,
-          method: 'post',
         })
 
         const data = await response.json()
@@ -146,20 +136,21 @@ describe('Auth', () => {
       })
 
       it('should return a logged in user from /me', async () => {
-        const response = await fetch(`${apiUrl}/${slug}/me`, {
+        const response = await restClient.GET(`/${slug}/me`, {
           headers: {
-            ...headers,
             Authorization: `JWT ${token}`,
           },
         })
 
         const data = await response.json()
 
+        expect(data.strategy).toBeDefined()
+        expect(typeof data.exp).toBe('number')
         expect(response.status).toBe(200)
         expect(data.user.email).toBeDefined()
       })
 
-      it('should have fields saved to JWT', async () => {
+      it('should have fields saved to JWT', () => {
         const decoded = jwtDecode<User>(token)
         const {
           collection,
@@ -209,9 +200,8 @@ describe('Auth', () => {
           },
         })
 
-        const response = await fetch(`${apiUrl}/${slug}/me`, {
+        const response = await restClient.GET(`/${slug}/me`, {
           headers: {
-            ...headers,
             Authorization: `${slug} API-Key ${user?.apiKey}`,
           },
         })
@@ -224,11 +214,10 @@ describe('Auth', () => {
       })
 
       it('should refresh a token and reset its expiration', async () => {
-        const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
+        const response = await restClient.POST(`/${slug}/refresh-token`, {
           headers: {
             Authorization: `JWT ${token}`,
           },
-          method: 'post',
         })
 
         const data = await response.json()
@@ -248,11 +237,10 @@ describe('Auth', () => {
           },
         })
 
-        const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
+        const response = await restClient.POST(`/${slug}/refresh-token`, {
           headers: {
             Authorization: `JWT ${token}`,
           },
-          method: 'post',
         })
 
         const data = await response.json()
@@ -262,7 +250,7 @@ describe('Auth', () => {
       })
 
       it('should allow a user to be created', async () => {
-        const response = await fetch(`${apiUrl}/${slug}`, {
+        const response = await restClient.POST(`/${slug}`, {
           body: JSON.stringify({
             email: 'name@test.com',
             password,
@@ -270,9 +258,7 @@ describe('Auth', () => {
           }),
           headers: {
             Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
           },
-          method: 'post',
         })
 
         const data = await response.json()
@@ -290,7 +276,7 @@ describe('Auth', () => {
 
       it('should allow verification of a user', async () => {
         const emailToVerify = 'verify@me.com'
-        const response = await fetch(`${apiUrl}/public-users`, {
+        const response = await restClient.POST(`/public-users`, {
           body: JSON.stringify({
             email: emailToVerify,
             password,
@@ -298,9 +284,7 @@ describe('Auth', () => {
           }),
           headers: {
             Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
           },
-          method: 'post',
         })
 
         expect(response.status).toBe(201)
@@ -321,14 +305,8 @@ describe('Auth', () => {
         expect(_verified).toBe(false)
         expect(_verificationToken).toBeDefined()
 
-        const verificationResponse = await fetch(
-          `${apiUrl}/public-users/verify/${_verificationToken}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            method: 'post',
-          },
+        const verificationResponse = await restClient.POST(
+          `/public-users/verify/${_verificationToken}`,
         )
 
         expect(verificationResponse.status).toBe(200)
@@ -356,31 +334,27 @@ describe('Auth', () => {
         let data
 
         beforeAll(async () => {
-          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+          const response = await restClient.POST(`/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property },
             }),
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'post',
           })
           data = await response.json()
         })
 
-        it('should create', async () => {
+        it('should create', () => {
           expect(data.doc.key).toStrictEqual(key)
           expect(data.doc.value.property).toStrictEqual(property)
         })
 
         it('should read', async () => {
-          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+          const response = await restClient.GET(`/payload-preferences/${key}`, {
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'get',
           })
           data = await response.json()
           expect(data.key).toStrictEqual(key)
@@ -388,15 +362,13 @@ describe('Auth', () => {
         })
 
         it('should update', async () => {
-          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+          const response = await restClient.POST(`/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property: 'updated', property2: 'test' },
             }),
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'post',
           })
 
           data = await response.json()
@@ -405,7 +377,21 @@ describe('Auth', () => {
             collection: 'payload-preferences',
             depth: 0,
             where: {
-              key: { equals: key },
+              and: [
+                {
+                  key: { equals: key },
+                },
+                {
+                  'user.relationTo': {
+                    equals: 'users',
+                  },
+                },
+                {
+                  'user.value': {
+                    equals: loggedInUser.id,
+                  },
+                },
+              ],
             },
           })
 
@@ -416,22 +402,79 @@ describe('Auth', () => {
           expect(result.docs).toHaveLength(1)
         })
 
-        it('should delete', async () => {
-          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+        it('should only have one preference per user per key', async () => {
+          await restClient.POST(`/payload-preferences/${key}`, {
+            body: JSON.stringify({
+              value: { property: 'test', property2: 'test' },
+            }),
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'delete',
+          })
+          await restClient.POST(`/payload-preferences/${key}`, {
+            body: JSON.stringify({
+              value: { property: 'updated', property2: 'updated' },
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
           })
 
+          const result = await payload.find({
+            collection: 'payload-preferences',
+            depth: 0,
+            where: {
+              and: [
+                {
+                  key: { equals: key },
+                },
+                {
+                  'user.relationTo': {
+                    equals: 'users',
+                  },
+                },
+                {
+                  'user.value': {
+                    equals: loggedInUser.id,
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(result.docs[0].value.property).toStrictEqual('updated')
+          expect(result.docs[0].value.property2).toStrictEqual('updated')
+
+          expect(result.docs).toHaveLength(1)
+        })
+
+        it('should delete', async () => {
+          const response = await restClient.DELETE(`/payload-preferences/${key}`, {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
           data = await response.json()
 
           const result = await payload.find({
             collection: 'payload-preferences',
             depth: 0,
             where: {
-              key: { equals: key },
+              and: [
+                {
+                  key: { equals: key },
+                },
+                {
+                  'user.relationTo': {
+                    equals: 'users',
+                  },
+                },
+                {
+                  'user.value': {
+                    equals: loggedInUser.id,
+                  },
+                },
+              ],
             },
           })
 
@@ -443,49 +486,41 @@ describe('Auth', () => {
         const userEmail = 'lock@me.com'
 
         const tryLogin = async () => {
-          await fetch(`${apiUrl}/${slug}/login`, {
+          await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify({
               email: userEmail,
               password: 'bad',
             }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            method: 'post',
           })
-          // expect(loginRes.status).toEqual(401);
         }
 
         beforeAll(async () => {
-          const response = await fetch(`${apiUrl}/${slug}/login`, {
+          const response = await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify({
               email,
               password,
             }),
-            headers,
-            method: 'post',
           })
 
           const data = await response.json()
           token = data.token
 
           // New user to lock
-          await fetch(`${apiUrl}/${slug}`, {
+          await restClient.POST(`/${slug}`, {
             body: JSON.stringify({
               email: userEmail,
               password,
             }),
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'post',
           })
         })
 
         it('should lock the user after too many attempts', async () => {
           await tryLogin()
           await tryLogin()
+          await tryLogin() // Let it call multiple times, therefore the unlock condition has no bug.
 
           const userResult = await payload.find({
             collection: slug,
@@ -509,11 +544,25 @@ describe('Auth', () => {
           await tryLogin()
           await tryLogin()
 
-          await payload.update({
+          const loginAfterLimit = await restClient
+            .POST(`/${slug}/login`, {
+              body: JSON.stringify({
+                email: userEmail,
+                password,
+              }),
+              headers: {
+                Authorization: `JWT ${token}`,
+                'Content-Type': 'application/json',
+              },
+              method: 'post',
+            })
+            .then((res) => res.json())
+
+          expect(loginAfterLimit.errors.length).toBeGreaterThan(0)
+
+          const lockedUser = await payload.find({
             collection: slug,
-            data: {
-              lockUntil: Date.now() - 605 * 1000,
-            },
+            showHiddenFields: true,
             where: {
               email: {
                 equals: userEmail,
@@ -521,17 +570,34 @@ describe('Auth', () => {
             },
           })
 
+          expect(lockedUser.docs[0].loginAttempts).toBe(2)
+          expect(lockedUser.docs[0].lockUntil).toBeDefined()
+
+          const manuallyReleaseLock = new Date(Date.now() - 605 * 1000).toISOString()
+          const userLockElapsed = await payload.update({
+            collection: slug,
+            data: {
+              lockUntil: manuallyReleaseLock,
+            },
+            showHiddenFields: true,
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          })
+
+          expect(userLockElapsed.docs[0].lockUntil).toEqual(manuallyReleaseLock)
+
           // login
-          await fetch(`${apiUrl}/${slug}/login`, {
+          await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify({
               email: userEmail,
               password,
             }),
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'post',
           })
 
           const userResult = await payload.find({
@@ -555,16 +621,11 @@ describe('Auth', () => {
 
     it('should allow forgot-password by email', async () => {
       // TODO: Spy on payload sendEmail function
-      const response = await fetch(`${apiUrl}/${slug}/forgot-password`, {
+      const response = await restClient.POST(`/${slug}/forgot-password`, {
         body: JSON.stringify({
           email,
         }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'post',
       })
-
       // expect(mailSpy).toHaveBeenCalled();
 
       expect(response.status).toBe(200)
@@ -604,21 +665,22 @@ describe('Auth', () => {
         },
       })
 
-      const response = await fetch(`${apiUrl}/${slug}/login`, {
+      const response = await restClient.POST(`/${slug}/login`, {
         body: JSON.stringify({
           email: 'insecure@me.com',
           password: 'test',
         }),
-        headers,
-        method: 'post',
       })
 
       const data = await response.json()
-      const adminMe = await fetch(`${apiUrl}/${slug}/me`, {
-        headers: {
-          Authorization: `JWT ${data.token}`,
-        },
-      }).then((res) => res.json())
+      const adminMe = await restClient
+        .GET(`/${slug}/me`, {
+          headers: {
+            Authorization: `JWT ${data.token}`,
+          },
+        })
+        .then((res) => res.json())
+
       expect(adminMe.user.adminOnlyField).toEqual('admin secret')
 
       await payload.update({
@@ -629,27 +691,91 @@ describe('Auth', () => {
         },
       })
 
-      const editorMe = await fetch(`${apiUrl}/${slug}/me`, {
-        headers: {
-          Authorization: `JWT ${adminMe?.token}`,
-        },
-      }).then((res) => res.json())
+      const editorMe = await restClient
+        .GET(`/${slug}/me`, {
+          headers: {
+            Authorization: `JWT ${data.token}`,
+          },
+        })
+        .then((res) => res.json())
       expect(editorMe.user.adminOnlyField).toBeUndefined()
     })
 
     it('should not allow refreshing an invalid token', async () => {
-      const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
+      const response = await restClient.POST(`/${slug}/refresh-token`, {
         body: JSON.stringify({
           token: 'INVALID',
         }),
-        headers,
-        method: 'post',
       })
 
       const data = await response.json()
 
       expect(response.status).toBe(403)
       expect(data.token).toBeUndefined()
+    })
+  })
+
+  describe('disableLocalStrategy', () => {
+    it('should allow create of a user with disableLocalStrategy', async () => {
+      const email = 'test@example.com'
+      const user = await payload.create({
+        collection: partialDisableLocaleStrategiesSlug,
+        data: {
+          email,
+          // password is not required
+        },
+      })
+      expect(user.email).toStrictEqual(email)
+    })
+
+    it('should retain fields when auth.disableLocalStrategy.enableFields is true', () => {
+      const authFields = payload.collections[partialDisableLocaleStrategiesSlug].config.fields
+        // eslint-disable-next-line jest/no-conditional-in-test
+        .filter((field) => 'name' in field && field.name)
+        .map((field) => (field as FieldAffectingData).name)
+
+      expect(authFields).toMatchObject([
+        'updatedAt',
+        'createdAt',
+        'email',
+        'resetPasswordToken',
+        'resetPasswordExpiration',
+        'salt',
+        'hash',
+        'loginAttempts',
+        'lockUntil',
+      ])
+    })
+
+    it('should prevent login of user with disableLocalStrategy.', async () => {
+      await payload.create({
+        collection: partialDisableLocaleStrategiesSlug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await expect(async () => {
+        await payload.login({
+          collection: partialDisableLocaleStrategiesSlug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        })
+      }).rejects.toThrow('You are not allowed to perform this action.')
+    })
+
+    it('rest - should prevent login', async () => {
+      const response = await restClient.POST(`/${partialDisableLocaleStrategiesSlug}/login`, {
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
+
+      expect(response.status).toBe(403)
     })
   })
 
@@ -661,23 +787,150 @@ describe('Auth', () => {
 
       const [user1, user2] = usersQuery.docs
 
-      const success = await fetch(`${apiUrl}/api-keys/${user2.id}`, {
-        headers: {
-          Authorization: `api-keys API-Key ${user2.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      }).then((res) => res.json())
+      const success = await restClient
+        .GET(`/api-keys/${user2.id}`, {
+          headers: {
+            Authorization: `api-keys API-Key ${user2.apiKey}`,
+          },
+        })
+        .then((res) => res.json())
 
       expect(success.apiKey).toStrictEqual(user2.apiKey)
 
-      const fail = await fetch(`${apiUrl}/api-keys/${user1.id}`, {
+      const fail = await restClient.GET(`/api-keys/${user1.id}`, {
         headers: {
           Authorization: `api-keys API-Key ${user2.apiKey}`,
-          'Content-Type': 'application/json',
         },
       })
 
       expect(fail.status).toStrictEqual(404)
+    })
+
+    it('should not remove an API key from a user when updating other fields', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: 'api-keys',
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: 'api-keys',
+        data: {
+          enableAPIKey: true,
+        },
+      })
+
+      const userResult = await payload.find({
+        collection: 'api-keys',
+        where: {
+          id: {
+            equals: user.id,
+          },
+        },
+      })
+
+      expect(updatedUser.apiKey).toStrictEqual(user.apiKey)
+      expect(userResult.docs[0].apiKey).toStrictEqual(user.apiKey)
+    })
+
+    it('should disable api key after updating apiKey: null', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: apiKeysSlug,
+        data: {
+          apiKey: null,
+        },
+      })
+
+      // use the api key in a fetch to assert that it is disabled
+      const response = await restClient
+        .GET(`/api-keys/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(updatedUser.apiKey).toBeNull()
+      expect(response.user).toBeNull()
+    })
+
+    it('should disable api key after updating with enableAPIKey:false', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: apiKeysSlug,
+        data: {
+          enableAPIKey: false,
+        },
+      })
+
+      // use the api key in a fetch to assert that it is disabled
+      const response = await restClient
+        .GET(`/api-keys/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(updatedUser.apiKey).toStrictEqual(apiKey)
+      expect(response.user).toBeNull()
+    })
+  })
+
+  describe('Local API', () => {
+    it('should login via the local API', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      expect(authenticated.token).toBeTruthy()
+    })
+
+    it('should forget and reset password', async () => {
+      const forgot = await payload.forgotPassword({
+        collection: 'users',
+        data: {
+          email: 'dev@payloadcms.com',
+        },
+      })
+
+      const reset = await payload.resetPassword({
+        collection: 'users',
+        data: {
+          password: 'test',
+          token: forgot,
+        },
+        overrideAccess: true,
+      })
+
+      expect(reset.user.email).toStrictEqual('dev@payloadcms.com')
     })
   })
 })

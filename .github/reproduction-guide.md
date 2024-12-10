@@ -40,7 +40,7 @@ There are a couple ways run integration tests:
 
 - **Granularly** - you can run individual tests in vscode by installing the Jest Runner plugin and using that to run individual tests. Clicking the `debug` button will run the test in debug mode allowing you to set break points.
 
-  <img src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/github/int-debug.png" />
+  <img src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/assets/images/github/int-debug.png" />
 
 - **Manually** - you can run all int tests in the `/test/_community/int.spec.ts` file by running the following command:
 
@@ -57,8 +57,8 @@ The easiest way to run E2E tests is to install
 
 Once they are installed you can open the `testing` tab in vscode sidebar and drill down to the test you want to run, i.e. `/test/_community/e2e.spec.ts`
 
-<img src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/github/e2e-debug.png" />
+<img src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/assets/images/github/e2e-debug.png" />
 
 #### Notes
 
-- It is recommended to add the test credentials (located in `test/credentials.ts`) to your autofill for `localhost:3000/admin` as this will be required on every nodemon restart. The default credentials are `dev@payloadcms.com` as email and `test` as password.
+The default credentials are `dev@payloadcms.com` as email and `test` as password. They can be found in `test/credentials.ts`. By default, these will be autofilled, so no log-in is required.

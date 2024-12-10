@@ -1,9 +1,11 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequest } from '../../express/types'
-import type { BaseDatabaseAdapter } from '../types'
+import type { PayloadRequest } from '../../types/index.js'
+import type { BaseDatabaseAdapter } from '../types.js'
 
-import { getMigrations } from './getMigrations'
-import { readMigrationFiles } from './readMigrationFiles'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { getMigrations } from './getMigrations.js'
+import { readMigrationFiles } from './readMigrationFiles.js'
 
 export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
   const { payload } = this
@@ -22,19 +24,21 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
     msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  for (const migration of existingMigrations) {
+  const latestBatchMigrations = existingMigrations.filter(({ batch }) => batch === latestBatch)
+
+  for (const migration of latestBatchMigrations) {
     const migrationFile = migrationFiles.find((m) => m.name === migration.name)
     if (!migrationFile) {
       throw new Error(`Migration ${migration.name} not found locally.`)
     }
 
     const start = Date.now()
-    let transactionID
+    const req = { payload } as PayloadRequest
 
     try {
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })
-      transactionID = await this.beginTransaction()
-      await migrationFile.down({ payload })
+      await initTransaction(req)
+      await migrationFile.down({ payload, req })
       payload.logger.info({
         msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,
       })
@@ -42,13 +46,12 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
       await payload.delete({
         id: migration.id,
         collection: 'payload-migrations',
-        req: {
-          transactionID,
-        } as PayloadRequest,
+        req,
       })
-      await this.commitTransaction(transactionID)
+
+      await commitTransaction(req)
     } catch (err: unknown) {
-      await this.rollbackTransaction(transactionID)
+      await killTransaction(req)
       payload.logger.error({
         err,
         msg: `Error running migration ${migrationFile.name}`,

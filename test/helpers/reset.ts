@@ -1,15 +1,13 @@
-import { sql } from 'drizzle-orm'
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { Payload } from 'payload'
 
-import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
-import type { Payload } from '../../packages/payload/src'
-
-import { isMongoose } from './isMongoose'
+import { isMongoose } from './isMongoose.js'
 
 export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
-  if (isMongoose(_payload)) {
+  if (isMongoose(_payload) && 'collections' in _payload.db && collectionSlugs.length > 0) {
     await _payload.db.collections[collectionSlugs[0]].db.dropDatabase()
-  } else {
-    const db: PostgresAdapter = _payload.db as unknown as PostgresAdapter
+  } else if ('drizzle' in _payload.db) {
+    const db = _payload.db as unknown as DrizzleAdapter
 
     // Alternative to: await db.drizzle.execute(sql`drop schema public cascade; create schema public;`)
 
@@ -19,18 +17,16 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
     if (!schema) {
       return
     }
-    const queries = Object.values(schema).map((table: any) => {
-      return sql.raw(`DELETE FROM ${table.dbName}`)
-    })
 
-    await db.drizzle.transaction(async (trx) => {
-      await Promise.all(
-        queries.map(async (query) => {
-          if (query) {
-            await trx.execute(query)
-          }
-        }),
-      )
+    const queries = Object.values(schema)
+      .map((table: any) => {
+        return `DELETE FROM ${db.schemaName ? db.schemaName + '.' : ''}${table.dbName};`
+      })
+      .join('')
+
+    await db.execute({
+      drizzle: db.drizzle,
+      raw: queries,
     })
   }
 }

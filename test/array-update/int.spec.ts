@@ -1,19 +1,24 @@
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
-import configPromise from './config'
+import type { Payload } from 'payload'
 
-let collection: string
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { arraySlug } from './shared.js'
+
+let payload: Payload
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 describe('array-update', () => {
   beforeAll(async () => {
-    const config = await configPromise
-    collection = config.collections[0]?.slug
-    await initPayloadTest({ __dirname })
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 
@@ -21,16 +26,16 @@ describe('array-update', () => {
     const originalText = 'some optional text'
 
     const doc = await payload.create({
-      collection,
+      collection: arraySlug,
       data: {
         arrayOfFields: [
           {
-            required: 'a required field here',
             optional: originalText,
+            required: 'a required field here',
           },
           {
-            required: 'another required field here',
             optional: 'this is cool',
+            required: 'another required field here',
           },
         ],
       },
@@ -47,15 +52,15 @@ describe('array-update', () => {
 
     const updatedDoc = await payload.update({
       id: doc.id,
-      collection,
+      collection: arraySlug,
       data: {
         arrayOfFields: arrayWithExistingValues,
       },
     })
 
     expect(updatedDoc.arrayOfFields?.[0]).toMatchObject({
-      required: updatedText,
       optional: originalText,
+      required: updatedText,
     })
   })
 
@@ -63,17 +68,17 @@ describe('array-update', () => {
     const updatedText = 'here is some new text'
 
     const secondArrayItem = {
-      required: 'test',
       optional: 'optional test',
+      required: 'test',
     }
 
     const doc = await payload.create({
-      collection,
+      collection: arraySlug,
       data: {
         arrayOfFields: [
           {
-            required: 'a required field here',
             optional: 'some optional text',
+            required: 'a required field here',
           },
           secondArrayItem,
         ],
@@ -82,7 +87,7 @@ describe('array-update', () => {
 
     const updatedDoc = await payload.update({
       id: doc.id,
-      collection,
+      collection: arraySlug,
       data: {
         arrayOfFields: [
           {
@@ -90,7 +95,7 @@ describe('array-update', () => {
           },
           {
             id: doc.arrayOfFields?.[1].id,
-            required: doc.arrayOfFields?.[1].required as string,
+            required: doc.arrayOfFields?.[1].required,
             // NOTE - not passing optional field. It should persist
             // because we're passing ID
           },

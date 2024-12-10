@@ -1,12 +1,16 @@
 import { Editor, Element } from 'slate'
 
-import { getCommonBlock } from './getCommonBlock'
+import { getCommonBlock } from './getCommonBlock.js'
 
-const isListActive = (editor: Editor, format: string): boolean => {
-  if (!editor.selection) return false
+export const isListActive = (editor: Editor, format: string): boolean => {
+  if (!editor.selection) {
+    return false
+  }
   const [topmostSelectedNode, topmostSelectedNodePath] = getCommonBlock(editor)
 
-  if (Editor.isEditor(topmostSelectedNode)) return false
+  if (Editor.isEditor(topmostSelectedNode)) {
+    return false
+  }
 
   const [match] = Array.from(
     Editor.nodes(editor, {
@@ -25,5 +29,3 @@ const isListActive = (editor: Editor, format: string): boolean => {
 
   return !!match
 }
-
-export default isListActive

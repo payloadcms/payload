@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { relationshipFieldsSlug } from '../../slugs'
+import { relationshipFieldsSlug } from '../../slugs.js'
 
 const RelationshipFields: CollectionConfig = {
   fields: [
@@ -38,10 +38,25 @@ const RelationshipFields: CollectionConfig = {
     },
     {
       name: 'relationToSelfSelectOnly',
+      relationTo: relationshipFieldsSlug,
+      type: 'relationship',
+    },
+    {
+      name: 'relationWithAllowCreateToFalse',
       admin: {
         allowCreate: false,
       },
-      relationTo: relationshipFieldsSlug,
+      defaultValue: ({ user }) => user?.id,
+      relationTo: 'users',
+      type: 'relationship',
+    },
+    {
+      name: 'relationWithAllowEditToFalse',
+      admin: {
+        allowEdit: false,
+      },
+      defaultValue: ({ user }) => user?.id,
+      relationTo: 'users',
       type: 'relationship',
     },
     {

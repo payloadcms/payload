@@ -1,17 +1,14 @@
-/* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from '../../express/types'
-import type { TypeWithVersion } from '../../versions/types'
-import type { Collection, TypeWithID } from '../config/types'
+import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
+import type { TypeWithVersion } from '../../versions/types.js'
+import type { Collection, TypeWithID } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess'
-import { combineQueries } from '../../database/combineQueries'
-import { APIError, Forbidden, NotFound } from '../../errors'
-import { afterRead } from '../../fields/hooks/afterRead'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
+import executeAccess from '../../auth/executeAccess.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { APIError, Forbidden, NotFound } from '../../errors/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
   collection: Collection
@@ -20,13 +17,15 @@ export type Arguments = {
   disableErrors?: boolean
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-async function findVersionByID<T extends TypeWithID = any>(
+export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   args: Arguments,
-): Promise<TypeWithVersion<T>> {
+): Promise<TypeWithVersion<TData>> => {
   const {
     id,
     collection: { config: collectionConfig },
@@ -34,8 +33,10 @@ async function findVersionByID<T extends TypeWithID = any>(
     depth,
     disableErrors,
     overrideAccess,
-    req: { locale, payload, t },
+    populate,
+    req: { fallbackLocale, locale, payload },
     req,
+    select,
     showHiddenFields,
   } = args
 
@@ -44,8 +45,6 @@ async function findVersionByID<T extends TypeWithID = any>(
   }
 
   try {
-    const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -55,7 +54,9 @@ async function findVersionByID<T extends TypeWithID = any>(
       : true
 
     // If errors are disabled, and access returns false, return null
-    if (accessResults === false) return null
+    if (accessResults === false) {
+      return null
+    }
 
     const hasWhereAccess = typeof accessResults === 'object'
 
@@ -65,12 +66,13 @@ async function findVersionByID<T extends TypeWithID = any>(
     // Find by ID
     // /////////////////////////////////////
 
-    const versionsQuery = await payload.db.findVersions<T>({
+    const versionsQuery = await payload.db.findVersions<TData>({
       collection: collectionConfig.slug,
       limit: 1,
       locale,
       pagination: false,
       req,
+      select,
       where: fullWhere,
     })
 
@@ -78,11 +80,20 @@ async function findVersionByID<T extends TypeWithID = any>(
 
     if (!result) {
       if (!disableErrors) {
-        if (!hasWhereAccess) throw new NotFound(t)
-        if (hasWhereAccess) throw new Forbidden(t)
+        if (!hasWhereAccess) {
+          throw new NotFound(req.t)
+        }
+        if (hasWhereAccess) {
+          throw new Forbidden(req.t)
+        }
       }
 
       return null
+    }
+
+    if (!result.version) {
+      // Fallback if not selected
+      ;(result as any).version = {}
     }
 
     // /////////////////////////////////////
@@ -112,9 +123,14 @@ async function findVersionByID<T extends TypeWithID = any>(
       currentDepth,
       depth,
       doc: result.version,
+      draft: undefined,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
+      populate,
       req,
+      select: typeof select?.version === 'object' ? select.version : undefined,
       showHiddenFields,
     })
 
@@ -139,13 +155,9 @@ async function findVersionByID<T extends TypeWithID = any>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
-
     return result
   } catch (error: unknown) {
     await killTransaction(req)
     throw error
   }
 }
-
-export default findVersionByID

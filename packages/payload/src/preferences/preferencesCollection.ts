@@ -1,17 +1,22 @@
-import type { CollectionConfig } from '../collections/config/types'
-import type { Access, Config } from '../config/types'
+import type { CollectionConfig } from '../collections/config/types.js'
+import type { Access, Config } from '../config/types.js'
 
-import deleteHandler from './requestHandlers/delete'
-import findOne from './requestHandlers/findOne'
-import update from './requestHandlers/update'
+import { deleteHandler } from './requestHandlers/delete.js'
+import { findByIDHandler } from './requestHandlers/findOne.js'
+import { updateHandler } from './requestHandlers/update.js'
 
-const preferenceAccess: Access = ({ req }) => ({
-  'user.value': {
-    equals: req?.user?.id,
-  },
-})
+const preferenceAccess: Access = ({ req }) => {
+  if (!req.user) return false
+
+  return {
+    'user.value': {
+      equals: req?.user?.id,
+    },
+  }
+}
 
 const getPreferencesCollection = (config: Config): CollectionConfig => ({
+  slug: 'payload-preferences',
   access: {
     delete: preferenceAccess,
     read: preferenceAccess,
@@ -21,7 +26,7 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
   },
   endpoints: [
     {
-      handler: findOne,
+      handler: findByIDHandler,
       method: 'get',
       path: '/:key',
     },
@@ -31,7 +36,7 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
       path: '/:key',
     },
     {
-      handler: update,
+      handler: updateHandler,
       method: 'post',
       path: '/:key',
     },
@@ -39,6 +44,7 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
   fields: [
     {
       name: 'user',
+      type: 'relationship',
       hooks: {
         beforeValidate: [
           ({ req }) => {
@@ -52,22 +58,23 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
           },
         ],
       },
+      index: true,
       relationTo: config.collections
         .filter((collectionConfig) => collectionConfig.auth)
         .map((collectionConfig) => collectionConfig.slug),
       required: true,
-      type: 'relationship',
     },
     {
       name: 'key',
       type: 'text',
+      index: true,
     },
     {
       name: 'value',
       type: 'json',
     },
   ],
-  slug: 'payload-preferences',
+  lockDocuments: false,
 })
 
 export default getPreferencesCollection

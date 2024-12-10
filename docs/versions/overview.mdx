@@ -3,7 +3,7 @@ title: Versions
 label: Overview
 order: 10
 desc: Keep a version history or audit log of changes and publish collection documents and globals.
-keywords: version history, revisions, audit log, draft, publish, restore, autosave, Content Management System, cms, headless, javascript, node, react, express
+keywords: version history, revisions, audit log, draft, publish, restore, autosave, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 <Banner>
@@ -31,25 +31,25 @@ _Comparing an old version to a newer version of a document_
   discretion.
 </Banner>
 
-### Options
+## Options
 
 Versions support a few different levels of functionality that each come with their own impacts to document workflow.
 
-##### Versions enabled, drafts disabled
+### Versions enabled, drafts disabled
 
 If you enable versions but keep draft mode disabled, Payload will simply create a new version of a document each time you update a document. This is great for use cases where you need to retain a history of all document updates over time, but always want to treat the newest document version as the version that is "published".
 
 For example, a use case for "versions enabled, drafts disabled" could be on a collection of users, where you might want to keep a version history (or audit log) of all changes ever made to users - but any changes to users should _always_ be treated as "published" and you have no need to maintain a "draft" version of a user.
 
-##### Versions and drafts enabled
+### Versions and drafts enabled
 
-If you have versions _and_ drafts enabled, you are able to control which documents are published, and which are considered draft. That lets you write [access control](/docs/access-control/overview) to control who can see published documents, and who can see draft documents. It also lets you save versions (drafts) that are _newer_ than your most recently published document, which is helpful if you want to draft changes and maybe even preview them before you publish the changes. Read more about Drafts [here](/docs/versions/drafts).
+If you have versions _and_ drafts enabled, you are able to control which documents are published, and which are considered draft. That lets you write [Access Control](../access-control/overview) to control who can see published documents, and who can see draft documents. It also lets you save versions (drafts) that are _newer_ than your most recently published document, which is helpful if you want to draft changes and maybe even preview them before you publish the changes. Read more about Drafts [here](/docs/versions/drafts).
 
-##### Versions, drafts, and autosave enabled
+### Versions, drafts, and autosave enabled
 
 When you have versions, drafts, _and_ `autosave` enabled, the Admin UI will automatically save changes that you make to a new `draft` version as you edit a document, which makes sure that you never lose your changes ever again. Autosave will not affect your published post at all—instead, it'll just save your changes and let you publish them whenever you or your editors are ready to do so. Read more about Autosave [here](/docs/versions/autosave).
 
-### Collection config
+## Collection config
 
 Configuring Versions is done by adding the `versions` key to your Collection configs. Set it to `true` to enable default Versions settings, or customize versions options by setting the property equal to an object containing the following available options:
 
@@ -58,7 +58,7 @@ Configuring Versions is done by adding the `versions` key to your Collection con
 | `maxPerDoc` | Use this setting to control how many versions to keep on a document by document basis. Must be an integer. Defaults to 100, use 0 to save all versions.            |
 | `drafts `   | Enable [Drafts](/docs/versions/drafts) mode for this collection. To enable, set to `true` or pass an object with `draft` [options](/docs/versions/drafts#options). |
 
-### Global config
+## Global config
 
 Global versions work similarly to Collection versions but have a slightly different set of config properties supported.
 
@@ -67,7 +67,7 @@ Global versions work similarly to Collection versions but have a slightly differ
 | `max`    | Use this setting to control how many versions to keep on a global by global basis. Must be an integer.                                                        |
 | `drafts` | Enable [Drafts](/docs/versions/drafts) mode for this global. To enable, set to `true` or pass an object with `draft` [options](/docs/versions/drafts#options) |
 
-#### Database impact
+### Database impact
 
 By enabling `versions`, a new database collection will be made to store versions for your collection or global. The collection will be named based off the `slug` of the collection or global and will follow this pattern (where `slug` is replaced with the `slug` of your collection or global):
 
@@ -93,7 +93,7 @@ Each document in this new `versions` collection will store a set of meta propert
 
 Global versions are stored the same as the collection version shown above, except they do not feature the `parent` property, as each Global receives its own `versions` collection. That means we know that all versions in that collection correspond to that specific global.
 
-### Version operations
+## Version operations
 
 Versions expose new operations for both collections and globals. They allow you to find and query versions, find a single version by ID, and publish (or restore) a version by ID. Both Collections and Globals support the same new operations. They are used primarily by the admin UI, but if you are writing custom logic in your app and would like to utilize them, they're available for you to use as well via REST, GraphQL, and Local APIs.
 
@@ -120,7 +120,7 @@ Versions expose new operations for both collections and globals. They allow you 
 
 **Collection Local API methods:**
 
-#### Find
+### Find
 
 ```js
 // Result will be a paginated set of Versions.
@@ -140,7 +140,7 @@ const result = await payload.findVersions({
 })
 ```
 
-#### Find by ID
+### Find by ID
 
 ```js
 // Result will be a Post document.
@@ -156,7 +156,7 @@ const result = await payload.findVersionByID({
 })
 ```
 
-#### Restore
+### Restore
 
 ```js
 // Result will be the restored global document.
@@ -193,7 +193,7 @@ const result = await payload.restoreVersion({
 
 **Global Local API methods:**
 
-#### Find
+### Find
 
 ```js
 // Result will be a paginated set of Versions.
@@ -213,7 +213,7 @@ const result = await payload.findGlobalVersions({
 })
 ```
 
-#### Find by ID
+### Find by ID
 
 ```js
 // Result will be a Post document.
@@ -229,7 +229,7 @@ const result = await payload.findGlobalVersionByID({
 })
 ```
 
-#### Restore
+### Restore
 
 ```js
 // Result will be the restored global document.
@@ -243,12 +243,12 @@ const result = await payload.restoreGlobalVersion({
 })
 ```
 
-### Access Control
+## Access Control
 
-Versions expose a new access control function on both Collections and Globals that allow for you to control who can see versions of documents, and who can't.
-
-**New version access control:**
+Versions expose a new [Access Control](../access-control/overview) function on both [Collections](../configuration/collections) and [Globals](../configuration/globals) that allow for you to control who can see versions of documents, and who can't.
 
 | Function           | Allows/Denies Access                                                                                                   |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | **`readVersions`** | Used to control who can read versions, and who can't. Will automatically restrict the Admin UI version viewing access. |
+
+For full details on how to use Access Control with Versions, see the [Access Control](../access-control/overview) documentation.

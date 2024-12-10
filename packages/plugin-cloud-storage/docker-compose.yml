@@ -1,0 +1,52 @@
+version: '3.2'
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack_demo
+    ports:
+      - '4563-4599:4563-4599'
+      - '8055:8080'
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+    volumes:
+      - './.localstack:/var/lib/localstack'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+
+  azure-storage:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    platform: linux/amd64
+    restart: always
+    command: 'azurite --loose --blobHost 0.0.0.0 --tableHost 0.0.0.0 --queueHost 0.0.0.0'
+    ports:
+      - '10000:10000'
+      - '10001:10001'
+      - '10002:10002'
+    volumes:
+      - ./azurestoragedata:/data"
+
+  google-cloud-storage:
+    image: fsouza/fake-gcs-server
+    restart: always
+    command:
+      [
+        '-scheme',
+        'http',
+        '-port',
+        '4443',
+        '-public-host',
+        'http://localhost:4443',
+        '-external-url',
+        'http://localhost:4443',
+        '-backend',
+        'memory',
+      ]
+    ports:
+      - '4443:4443'
+    volumes:
+      - ./google-cloud-storage/payload-bucket:/data/payload-bucket
+
+volumes:
+  google-cloud-storage:
+  azurestoragedata:

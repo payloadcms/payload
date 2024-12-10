@@ -1,0 +1,59 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .condition {
+    &__wrap {
+      display: flex;
+      align-items: center;
+      gap: var(--base);
+    }
+
+    &__inputs {
+      display: flex;
+      flex-grow: 1;
+      align-items: center;
+      gap: var(--base);
+
+      > div {
+        flex-basis: 100%;
+      }
+    }
+
+    &__field {
+      .field-label {
+        padding-bottom: 0;
+      }
+    }
+
+    &__actions {
+      flex-shrink: 0;
+      display: flex;
+      gap: calc(var(--base) / 2);
+      padding: calc(var(--base) / 2) 0;
+    }
+
+    .btn {
+      vertical-align: middle;
+      margin: 0;
+    }
+
+    @include mid-break {
+      &__wrap {
+        align-items: initial;
+        gap: calc(var(--base) / 2);
+      }
+
+      &__inputs {
+        flex-direction: column;
+        gap: calc(var(--base) / 2);
+        align-items: stretch;
+      }
+
+      &__actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+    }
+  }
+}

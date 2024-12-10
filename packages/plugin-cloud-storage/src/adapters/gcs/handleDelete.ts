@@ -2,7 +2,7 @@ import type { Storage } from '@google-cloud/storage'
 
 import path from 'path'
 
-import type { HandleDelete } from '../../types'
+import type { HandleDelete } from '../../types.js'
 
 interface Args {
   bucket: string

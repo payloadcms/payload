@@ -6,7 +6,7 @@ desc: Manage your Payload Cloud projects.
 keywords: cloud, payload cloud, projects, project, overview, database, file storage, build settings, environment variables, custom domains, email, developing locally
 ---
 
-### Overview
+## Overview
 
 <Banner>
   The overview tab shows your most recent deployment, along with build and deployment logs. From
@@ -18,33 +18,51 @@ keywords: cloud, payload cloud, projects, project, overview, database, file stor
 ![Payload Cloud Overview Page](https://payloadcms.com/images/docs/cloud/overview-page.jpg)
 _A screenshot of the Overview page for a Cloud project._
 
-### Database
+## Database
 
 Your Payload Cloud project comes with a MongoDB serverless Atlas DB instance or a Dedicated Atlas cluster, depending on your plan. To interact with your cloud database, you will be provided with a MongoDB connection string. This can be found under the **Database** tab of your project.
 
 `mongodb+srv://your_connection_string`
 
-### File Storage
+## File Storage
 
 Payload Cloud gives you S3 file storage backed by Cloudflare as a CDN, and this plugin extends Payload so that all of your media will be stored in S3 rather than locally.
 
-AWS Cognito is used for authentication to your S3 bucket. The [Payload Cloud Plugin](https://github.com/payloadcms/plugin-cloud) will automatically pick up these values. These values are only if you'd like to access your files directly, outside of Payload Cloud.
+AWS Cognito is used for authentication to your S3 bucket. The [Payload Cloud Plugin](https://github.com/payloadcms/payload/tree/main/packages/payload-cloud) will automatically pick up these values. These values are only if you'd like to access your files directly, outside of Payload Cloud.
 
-### Build Settings
+### Accessing Files Outside of Payload Cloud
+
+If you'd like to access your files outside of Payload Cloud, you'll need to retrieve some values from your project's settings and put them into your environment variables. In Payload Cloud, navigate to the File Storage tab and copy the values using the copy button. Put these values in your .env file. Also copy the Cognito Password value separately and put into your .env file as well.
+
+When you are done, you should have the following values in your .env file:
+
+```env
+PAYLOAD_CLOUD=true
+PAYLOAD_CLOUD_ENVIRONMENT=prod
+PAYLOAD_CLOUD_COGNITO_USER_POOL_CLIENT_ID=
+PAYLOAD_CLOUD_COGNITO_USER_POOL_ID=
+PAYLOAD_CLOUD_COGNITO_IDENTITY_POOL_ID=
+PAYLOAD_CLOUD_PROJECT_ID=
+PAYLOAD_CLOUD_BUCKET=
+PAYLOAD_CLOUD_BUCKET_REGION=
+PAYLOAD_CLOUD_COGNITO_PASSWORD=
+```
+
+The plugin will pick up these values and use them to access your files.
+
+## Build Settings
 
 You can update settings from your Project’s Settings tab. Changes to your build settings will trigger a redeployment of your project.
 
-### Environment Variables
+## Environment Variables
 
 From the Environment Variables page of the Settings tab, you can add, update and delete variables for use in your project. Like build settings, these changes will trigger a redeployment of your project.
 
 <Banner>
-  Note: For security reasons, any variables you wish to provide to the Admin panel must be prefixed
-  with `PAYLOAD_PUBLIC_`.  Learn more
-  [here](https://payloadcms.com/docs/admin/webpack#admin-environment-vars).
+  Note: For security reasons, any variables you wish to provide to the [Admin Panel](../admin/overview) must be prefixed with `NEXT_PUBLIC_`. [More details](../configuration/environment-vars).
 </Banner>
 
-### Custom Domains
+## Custom Domains
 
 With Payload Cloud, you can add custom domain names to your project. To do so, first go to the Domains page of the Settings tab of your project. Here you can see your default domain. To add a new domain, type in the domain name you wish to use.
 
@@ -64,40 +82,45 @@ export default buildConfig({
 })
 ```
 
-### Email
+## Email
 
-Powered by [Resend](https://resend.com), Payload Cloud comes with integrated email support out of the box. No configuration is needed, and you can use `payload.sendEmail()` to send email right from your Payload app. To learn more about sending email with Payload, checkout the [Email Configuration](https://payloadcms.com/docs/email/overview) overview.
+Powered by [Resend](https://resend.com), Payload Cloud comes with integrated email support out of the box. No configuration is needed, and you can use `payload.sendEmail()` to send email right from your Payload app. To learn more about sending email with Payload, checkout the [Email Configuration](../email/overview) overview.
 
 If you are on the Pro or Enterprise plan, you can add your own custom Email domain name. From the Email page of your project’s Settings, add the domain you wish to use for email delivery. This will generate a set of DNS records. Add these records to your DNS provider and click verify to check that your records are resolving properly. Once verified, your emails will now be sent from your custom domain name.
 
-### Developing Locally
+## Developing Locally
 
 To make changes to your project, you will need to clone the repository defined in your project settings to your local machine. In order to run your project locally, you will need configure your local environment first. Refer to your repository’s `README.md` file to see the steps needed for your specific template.
 
 From there, you are ready to make updates to your project. When you are ready to make your changes live, commit your changes to the branch you specified in your Project settings, and your application will automatically trigger a redeploy and build from your latest commit.
 
-### Cloud Plugin
+## Cloud Plugin
 
-Projects generated from a template will come pre-configured with the official Cloud Plugin, but if you are using your own repository you will need to add this into your project. To do so, add the plugin to your Payload config:
+Projects generated from a template will come pre-configured with the official Cloud Plugin, but if you are using your own repository you will need to add this into your project. To do so, add the plugin to your Payload Config:
 
-`yarn add @payloadcms/plugin-cloud`
+`pnpm add @payloadcms/payload-cloud`
 
 ```js
-import { payloadCloud } from '@payloadcms/plugin-cloud'
-import { buildConfig } from 'payload/config'
+import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
-  plugins: [payloadCloud()],
+  plugins: [payloadCloudPlugin()],
   // rest of config
 })
 ```
 
 <Banner type="warning">
-  **Note:** If your Payload config already has an email with transport, this will take precedence
+  **Note:** If your Payload Config already has an email with transport, this will take precedence
   over Payload Cloud's email service.
 </Banner>
 
-##### **Optional configuration**
+<Banner type="info">
+  Good to know: the Payload Cloud Plugin was previously named `@payloadcms/plugin-cloud`. If you are
+  using this plugin, you should update to the new package name.
+</Banner>
+
+#### **Optional configuration**
 
 If you wish to opt-out of any Payload cloud features, the plugin also accepts options to do so.
 

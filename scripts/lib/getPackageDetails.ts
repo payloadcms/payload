@@ -1,97 +1,53 @@
-import path from 'path'
 import fse from 'fs-extra'
-import chalk from 'chalk'
-import chalkTemplate from 'chalk-template'
-import simpleGit from 'simple-git'
+import globby from 'globby'
+import path, { dirname } from 'path'
+import { fileURLToPath } from 'url'
 
-const git = simpleGit()
-const packagesDir = path.resolve(__dirname, '../../packages')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const projectRoot = path.resolve(__dirname, '../../')
 
 export type PackageDetails = {
-  commitMessage: string
+  /** Name in package.json / npm registry */
   name: string
-  newCommits: number
+  /** Full path to package relative to project root */
+  packagePath: `packages/${string}`
+  /** Short name is the directory name */
   shortName: string
-  packagePath: string
-  prevGitTag: string
-  prevGitTagHash: string
-  publishedVersion: string
-  publishDate: string
+  /** Version in package.json */
   version: string
 }
 
-export const getPackageDetails = async (pkg?: string): Promise<PackageDetails[]> => {
-  let packageDirs: string[] = []
-  if (pkg) {
-    packageDirs = fse.readdirSync(packagesDir).filter((d) => d === pkg)
-  } else {
-    packageDirs = fse.readdirSync(packagesDir).filter((d) => d !== 'eslint-config-payload')
-  }
+/**
+ * Accepts package whitelist (directory names inside packages dir) and returns details for each package
+ */
+export const getPackageDetails = async (packages: string[]): Promise<PackageDetails[]> => {
+  // Fetch all package.json files, filter out packages not in the whitelist
+  const packageJsons = await globby('packages/*/package.json', {
+    cwd: projectRoot,
+    absolute: true,
+  })
 
   const packageDetails = await Promise.all(
-    packageDirs.map(async (dirName) => {
-      const packageJson = await fse.readJson(`${packagesDir}/${dirName}/package.json`)
+    packageJsons.map(async (packageJsonPath) => {
+      const packageJson = await fse.readJson(packageJsonPath)
       const isPublic = packageJson.private !== true
       if (!isPublic) return null
 
-      // Get published version from npm
-      const json = await fetch(`https://registry.npmjs.org/${packageJson.name}`).then((res) =>
-        res.json(),
-      )
-
-      const publishedVersion = json?.['dist-tags']?.latest
-      const publishDate = json?.time?.[publishedVersion]
-
-      const prevGitTag =
-        dirName === 'payload' ? `v${packageJson.version}` : `${dirName}/${packageJson.version}`
-      const prevGitTagHash = await git.revparse(prevGitTag)
-
-      const newCommits = await git.log({
-        from: prevGitTagHash,
-        file: `packages/${dirName}`,
-      })
+      const isInWhitelist = packages
+        ? packages.includes(path.basename(path.dirname(packageJsonPath)))
+        : true
+      if (!isInWhitelist) return null
 
       return {
-        commitMessage: newCommits.latest?.message ?? '',
         name: packageJson.name as string,
-        newCommits: newCommits.total,
-        shortName: dirName,
-        packagePath: `packages/${dirName}`,
-        prevGitTag,
-        prevGitTagHash,
-        publishedVersion,
-        publishDate,
+        packagePath: path.relative(projectRoot, dirname(packageJsonPath)),
+        shortName: path.dirname(packageJsonPath),
         version: packageJson.version,
-      }
+      } as PackageDetails
     }),
   )
 
   return packageDetails.filter((p): p is Exclude<typeof p, null> => p !== null)
-}
-
-export const showPackageDetails = (details: PackageDetails[]) => {
-  console.log(chalkTemplate`
-
-  {bold Packages:}
-
-${details
-  .map((p) => {
-    const name = p?.newCommits
-      ? chalk.bold.green(p?.shortName.padEnd(28))
-      : chalk.dim(p?.shortName.padEnd(28))
-    const publishData = `${p?.publishedVersion.padEnd(8)}${p?.publishDate.split('T')[0]}`
-    const newCommits = p?.newCommits ? chalk.bold.green(`⇡${p?.newCommits}  `) : '    '
-    const commitMessage = p?.commitMessage
-      ? chalk.dim(
-          p.commitMessage.length < 57
-            ? p.commitMessage
-            : p.commitMessage.substring(0, 60).concat('...'),
-        )
-      : ''
-
-    return `  ${name}${newCommits}${publishData}    ${commitMessage}`
-  })
-  .join('\n')}
-
-`)
 }

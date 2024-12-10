@@ -1,65 +1,75 @@
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 import { v4 as uuid } from 'uuid'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { AuthDebug } from './AuthDebug'
-import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import {
+  apiKeysSlug,
+  namedSaveToJWTValue,
+  partialDisableLocaleStrategiesSlug,
+  saveToJWTKey,
+  slug,
+} from './shared.js'
 
 export default buildConfigWithDefaults({
   admin: {
-    user: 'users',
     autoLogin: {
       email: devUser.email,
       password: devUser.password,
       prefillOnly: true,
     },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+    user: 'users',
   },
   collections: [
     {
       slug,
+      admin: {
+        useAsTitle: 'custom',
+      },
       auth: {
-        tokenExpiration: 7200, // 2 hours
-        verify: false,
-        maxLoginAttempts: 2,
-        lockTime: 600 * 1000, // lock time in ms
-        useAPIKey: true,
-        depth: 0,
         cookies: {
-          secure: false,
-          sameSite: 'lax',
           domain: undefined,
+          sameSite: 'Lax',
+          secure: false,
         },
+        depth: 0,
+        lockTime: 600 * 1000, // lock time in ms
+        maxLoginAttempts: 2,
+        tokenExpiration: 7200, // 2 hours
+        useAPIKey: true,
+        verify: false,
       },
       fields: [
         {
           name: 'adminOnlyField',
           type: 'text',
           access: {
-            read: ({
-              req: {
-                user: { roles = [] },
-              },
-            }) => {
-              return roles.includes('admin')
+            read: ({ req: { user } }) => {
+              return user?.roles?.includes('admin')
             },
           },
         },
         {
           name: 'roles',
-          label: 'Role',
           type: 'select',
-          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
           defaultValue: ['user'],
+          hasMany: true,
+          label: 'Role',
+          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
           required: true,
           saveToJWT: true,
-          hasMany: true,
         },
         {
           name: 'namedSaveToJWT',
-          label: 'Named Save To JWT',
           type: 'text',
           defaultValue: namedSaveToJWTValue,
+          label: 'Named Save To JWT',
           saveToJWT: saveToJWTKey,
         },
         {
@@ -68,55 +78,53 @@ export default buildConfigWithDefaults({
           fields: [
             {
               name: 'liftedSaveToJWT',
-              label: 'Lifted Save To JWT',
               type: 'text',
-              saveToJWT: 'x-lifted-from-group',
               defaultValue: 'lifted from group',
+              label: 'Lifted Save To JWT',
+              saveToJWT: 'x-lifted-from-group',
             },
           ],
         },
         {
           name: 'groupSaveToJWT',
-          label: 'Group Save To JWT',
           type: 'group',
-          saveToJWT: 'x-group',
           fields: [
             {
               name: 'saveToJWTString',
-              label: 'Save To JWT String',
               type: 'text',
-              saveToJWT: 'x-test',
               defaultValue: 'nested property',
+              label: 'Save To JWT String',
+              saveToJWT: 'x-test',
             },
             {
               name: 'saveToJWTFalse',
-              label: 'Save To JWT False',
               type: 'text',
-              saveToJWT: false,
               defaultValue: 'nested property',
+              label: 'Save To JWT False',
+              saveToJWT: false,
             },
           ],
+          label: 'Group Save To JWT',
+          saveToJWT: 'x-group',
         },
         {
           type: 'tabs',
           tabs: [
             {
               name: 'saveToJWTTab',
-              label: 'Save To JWT Tab',
-              saveToJWT: true,
               fields: [
                 {
                   name: 'test',
                   type: 'text',
-                  saveToJWT: 'x-field',
                   defaultValue: 'yes',
+                  saveToJWT: 'x-field',
                 },
               ],
+              label: 'Save To JWT Tab',
+              saveToJWT: true,
             },
             {
               name: 'tabSaveToJWTString',
-              label: 'Tab Save To JWT String',
-              saveToJWT: 'tab-test',
               fields: [
                 {
                   name: 'includedByDefault',
@@ -124,61 +132,81 @@ export default buildConfigWithDefaults({
                   defaultValue: 'yes',
                 },
               ],
+              label: 'Tab Save To JWT String',
+              saveToJWT: 'tab-test',
             },
             {
-              label: 'No Name',
               fields: [
                 {
                   name: 'tabLiftedSaveToJWT',
-                  label: 'Tab Lifted Save To JWT',
                   type: 'text',
-                  saveToJWT: true,
                   defaultValue: 'lifted from unnamed tab',
+                  label: 'Tab Lifted Save To JWT',
+                  saveToJWT: true,
                 },
                 {
                   name: 'unnamedTabSaveToJWTString',
-                  label: 'Unnamed Tab Save To JWT String',
                   type: 'text',
-                  saveToJWT: 'x-tab-field',
                   defaultValue: 'text',
+                  label: 'Unnamed Tab Save To JWT String',
+                  saveToJWT: 'x-tab-field',
                 },
                 {
                   name: 'unnamedTabSaveToJWTFalse',
-                  label: 'Unnamed Tab Save To JWT False',
                   type: 'text',
-                  saveToJWT: false,
                   defaultValue: 'false',
+                  label: 'Unnamed Tab Save To JWT False',
+                  saveToJWT: false,
                 },
               ],
+              label: 'No Name',
             },
           ],
         },
         {
           name: 'custom',
-          label: 'Custom',
           type: 'text',
+          label: 'Custom',
         },
         {
           name: 'authDebug',
-          label: 'Auth Debug',
           type: 'ui',
           admin: {
             components: {
-              Field: AuthDebug,
+              Field: '/AuthDebug.js#AuthDebug',
             },
           },
+          label: 'Auth Debug',
         },
       ],
     },
     {
-      slug: 'api-keys',
-      labels: {
-        singular: 'API Key',
-        plural: 'API Keys',
+      slug: partialDisableLocaleStrategiesSlug,
+      auth: {
+        disableLocalStrategy: {
+          // optionalPassword: true,
+          enableFields: true,
+        },
       },
+      fields: [
+        // with `enableFields: true`, the following DB columns will be created:
+        // email
+        // reset_password_token
+        // reset_password_expiration
+        // salt
+        // hash
+        // login_attempts
+        // lock_until
+      ],
+    },
+    {
+      slug: apiKeysSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user.collection === 'api-keys') {
+          if (!user) {
+            return false
+          }
+          if (user?.collection === 'api-keys') {
             return {
               id: {
                 equals: user.id,
@@ -193,6 +221,10 @@ export default buildConfigWithDefaults({
         useAPIKey: true,
       },
       fields: [],
+      labels: {
+        plural: 'API Keys',
+        singular: 'API Key',
+      },
     },
     {
       slug: 'public-users',
@@ -201,25 +233,49 @@ export default buildConfigWithDefaults({
       },
       fields: [],
     },
+    {
+      slug: 'relationsCollection',
+      fields: [
+        {
+          name: 'rel',
+          type: 'relationship',
+          relationTo: 'users',
+        },
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
+        custom: 'Hello, world!',
         email: devUser.email,
         password: devUser.password,
-        custom: 'Hello, world!',
+        roles: ['admin'],
       },
     })
 
-    await mapAsync([...Array(2)], async () => {
-      await payload.create({
-        collection: 'api-keys',
-        data: {
-          apiKey: uuid(),
-          enableAPIKey: true,
-        },
-      })
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
     })
+
+    await payload.create({
+      collection: 'api-keys',
+      data: {
+        apiKey: uuid(),
+        enableAPIKey: true,
+      },
+    })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

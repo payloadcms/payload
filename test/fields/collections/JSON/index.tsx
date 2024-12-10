@@ -1,15 +1,9 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { jsonFieldsSlug } from '../../slugs'
-
-type JSONField = {
-  createdAt: string
-  id: string
-  json?: any
-  updatedAt: string
-}
+import { jsonFieldsSlug } from '../../slugs.js'
 
 const JSON: CollectionConfig = {
+  slug: jsonFieldsSlug,
   access: {
     read: () => true,
   },
@@ -17,9 +11,63 @@ const JSON: CollectionConfig = {
     {
       name: 'json',
       type: 'json',
+      admin: {
+        maxHeight: 542,
+      },
+      jsonSchema: {
+        fileMatch: ['a://b/foo.json'],
+        schema: {
+          type: 'object',
+          properties: {
+            array: {
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  object: {
+                    type: 'object',
+                    additionalProperties: false,
+                    properties: {
+                      array: {
+                        type: 'array',
+                        items: {
+                          type: 'number',
+                        },
+                      },
+                      text: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                  text: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            foo: {
+              enum: ['bar', 'foobar'],
+            },
+            number: {
+              enum: [10, 5],
+            },
+          },
+        },
+        uri: 'a://b/foo.json',
+      },
+    },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'jsonWithinGroup',
+          type: 'json',
+        },
+      ],
     },
   ],
-  slug: jsonFieldsSlug,
   versions: {
     maxPerDoc: 1,
   },

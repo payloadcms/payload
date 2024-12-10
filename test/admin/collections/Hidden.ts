@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { hiddenCollectionSlug } from '../slugs'
+import { hiddenCollectionSlug } from '../slugs.js'
 
 export const CollectionHidden: CollectionConfig = {
   slug: hiddenCollectionSlug,

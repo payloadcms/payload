@@ -1,47 +1,31 @@
-import type { Response } from 'express'
-
 import httpStatus from 'http-status'
 
-import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
+import type { Collection } from '../../collections/config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
 
-import { APIError } from '../../errors'
+import { APIError } from '../../errors/index.js'
 
 export type Arguments = {
   collection: Collection
   req: PayloadRequest
-  res: Response
 }
 
-async function logout(incomingArgs: Arguments): Promise<string> {
+export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean> => {
   let args = incomingArgs
   const {
-    collection,
     collection: { config: collectionConfig },
+    req: { user },
     req,
-    req: {
-      payload: { config },
-      user,
-    },
-    res,
   } = incomingArgs
 
-  if (!user) throw new APIError('No User', httpStatus.BAD_REQUEST)
-  if (user.collection !== collectionConfig.slug)
+  if (!user) {
+    throw new APIError('No User', httpStatus.BAD_REQUEST)
+  }
+  if (user.collection !== collectionConfig.slug) {
     throw new APIError('Incorrect collection', httpStatus.FORBIDDEN)
-
-  const cookieOptions = {
-    domain: undefined,
-    httpOnly: true,
-    path: '/',
-    sameSite: collectionConfig.auth.cookies.sameSite,
-    secure: collectionConfig.auth.cookies.secure,
   }
 
-  if (collectionConfig.auth.cookies.domain)
-    cookieOptions.domain = collectionConfig.auth.cookies.domain
-
-  await collection.config.hooks.afterLogout.reduce(async (priorHook, hook) => {
+  await collectionConfig.hooks.afterLogout.reduce(async (priorHook, hook) => {
     await priorHook
 
     args =
@@ -49,13 +33,8 @@ async function logout(incomingArgs: Arguments): Promise<string> {
         collection: args.collection?.config,
         context: req.context,
         req,
-        res,
       })) || args
   }, Promise.resolve())
 
-  res.clearCookie(`${config.cookiePrefix}-token`, cookieOptions)
-
-  return req.t('authentication:loggedOutSuccessfully')
+  return true
 }
-
-export default logout

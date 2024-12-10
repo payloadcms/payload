@@ -1,28 +1,27 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
-import type { Field } from '../../../../packages/payload/src/fields/config/types'
+import type { CollectionConfig, Field } from 'payload'
 
 export const errorFieldsSlug = 'error-fields'
 
 const errorFields: Field[] = [
   {
-    type: 'text',
     name: 'tabText',
+    type: 'text',
     required: true,
   },
   {
     type: 'collapsible',
-    label: 'Collapse me',
     fields: [
       {
-        type: 'text',
         name: 'text',
+        type: 'text',
         required: true,
       },
     ],
+    label: 'Collapse me',
   },
   {
-    type: 'array',
     name: 'array',
+    type: 'array',
     fields: [
       {
         name: 'requiredArrayText',
@@ -35,30 +34,29 @@ const errorFields: Field[] = [
       },
       {
         type: 'collapsible',
-        label: 'Collapse me',
         fields: [
           {
-            type: 'group',
             name: 'group',
+            type: 'group',
             fields: [
               {
-                type: 'text',
                 name: 'text',
+                type: 'text',
                 required: true,
               },
               {
-                type: 'number',
                 name: 'number',
+                type: 'number',
                 required: true,
               },
               {
-                type: 'date',
                 name: 'date',
+                type: 'date',
                 required: true,
               },
               {
-                type: 'checkbox',
                 name: 'checkbox',
+                type: 'checkbox',
                 required: true,
                 validate: (value) => {
                   if (!value) {
@@ -73,31 +71,30 @@ const errorFields: Field[] = [
             type: 'row',
             fields: [
               {
-                type: 'code',
                 name: 'code',
+                type: 'code',
                 required: true,
               },
               {
-                type: 'json',
                 name: 'json',
+                type: 'json',
                 required: true,
               },
             ],
           },
           {
-            type: 'email',
             name: 'email',
+            type: 'email',
             required: true,
           },
           {
-            type: 'point',
             name: 'point',
+            type: 'point',
             required: true,
           },
           {
-            type: 'radio',
             name: 'radio',
-            required: true,
+            type: 'radio',
             options: [
               {
                 label: 'Mint',
@@ -108,22 +105,22 @@ const errorFields: Field[] = [
                 value: 'dark_gray',
               },
             ],
+            required: true,
           },
           {
-            type: 'relationship',
             name: 'relationship',
+            type: 'relationship',
             relationTo: 'users',
             required: true,
           },
           {
-            type: 'richText',
             name: 'richtext',
+            type: 'richText',
             required: true,
           },
           {
-            type: 'select',
             name: 'select',
-            required: true,
+            type: 'select',
             options: [
               {
                 label: 'Mint',
@@ -134,24 +131,26 @@ const errorFields: Field[] = [
                 value: 'dark_gray',
               },
             ],
+            required: true,
           },
           {
-            type: 'upload',
             name: 'upload',
-            required: true,
+            type: 'upload',
             relationTo: 'uploads',
-          },
-          {
-            type: 'text',
-            name: 'text',
             required: true,
           },
           {
-            type: 'textarea',
+            name: 'text',
+            type: 'text',
+            required: true,
+          },
+          {
             name: 'textarea',
+            type: 'textarea',
             required: true,
           },
         ],
+        label: 'Collapse me',
       },
     ],
   },
@@ -161,21 +160,21 @@ export const ErrorFieldsCollection: CollectionConfig = {
   slug: errorFieldsSlug,
   fields: [
     {
-      type: 'array',
       name: 'parentArray',
+      type: 'array',
       fields: [
         {
-          type: 'array',
           name: 'childArray',
-          required: true,
-          minRows: 2,
+          type: 'array',
           fields: [
             {
-              type: 'text',
               name: 'childArrayText',
+              type: 'text',
               required: true,
             },
           ],
+          minRows: 2,
+          required: true,
         },
       ],
     },
@@ -183,19 +182,19 @@ export const ErrorFieldsCollection: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Home',
           name: 'home',
           fields: errorFields,
+          label: 'Home',
         },
         {
-          label: 'Hero',
           fields: errorFields,
+          label: 'Hero',
         },
       ],
     },
     {
-      type: 'blocks',
       name: 'layout',
+      type: 'blocks',
       blocks: [
         {
           slug: 'block1',
@@ -204,16 +203,16 @@ export const ErrorFieldsCollection: CollectionConfig = {
       ],
     },
     {
-      type: 'group',
       name: 'group',
-      label: 'Group Field',
+      type: 'group',
       fields: [
         {
-          type: 'text',
           name: 'text',
+          type: 'text',
           required: true,
         },
       ],
+      label: 'Group Field',
     },
   ],
 }

@@ -1,20 +1,20 @@
 import type { PaginateOptions, Schema } from 'mongoose'
-import type { SanitizedConfig } from 'payload/config'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { Payload, SanitizedCollectionConfig } from 'payload'
 
+import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
 
-import getBuildQueryPlugin from '../queries/buildQuery'
-import buildSchema from './buildSchema'
+import { getBuildQueryPlugin } from '../queries/buildQuery.js'
+import { buildSchema } from './buildSchema.js'
 
-const buildCollectionSchema = (
+export const buildCollectionSchema = (
   collection: SanitizedCollectionConfig,
-  config: SanitizedConfig,
+  payload: Payload,
   schemaOptions = {},
 ): Schema => {
-  const schema = buildSchema(config, collection.fields, {
+  const schema = buildSchema(payload, collection.fields, {
     draftsEnabled: Boolean(typeof collection?.versions === 'object' && collection.versions.drafts),
-    indexSortableFields: config.indexSortableFields,
+    indexSortableFields: payload.config.indexSortableFields,
     options: {
       minimize: false,
       timestamps: collection.timestamps !== false,
@@ -22,7 +22,19 @@ const buildCollectionSchema = (
     },
   })
 
-  if (config.indexSortableFields && collection.timestamps !== false) {
+  if (Array.isArray(collection.upload.filenameCompoundIndex)) {
+    const indexDefinition: Record<string, 1> = collection.upload.filenameCompoundIndex.reduce(
+      (acc, index) => {
+        acc[index] = 1
+        return acc
+      },
+      {},
+    )
+
+    schema.index(indexDefinition, { unique: true })
+  }
+
+  if (payload.config.indexSortableFields && collection.timestamps !== false) {
     schema.index({ updatedAt: 1 })
     schema.index({ createdAt: 1 })
   }
@@ -31,7 +43,9 @@ const buildCollectionSchema = (
     .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
     .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }))
 
+  if (Object.keys(collection.joins).length > 0) {
+    schema.plugin(mongooseAggregatePaginate)
+  }
+
   return schema
 }
-
-export default buildCollectionSchema

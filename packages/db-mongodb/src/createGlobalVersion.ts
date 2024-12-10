@@ -1,32 +1,51 @@
-import type { CreateGlobalVersion } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
-import type { Document } from 'payload/types'
+import {
+  buildVersionGlobalFields,
+  type CreateGlobalVersion,
+  type Document,
+  type PayloadRequest,
+} from 'payload'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { withSession } from './withSession.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: MongooseAdapter,
-  { autosave, createdAt, globalSlug, parent, req = {} as PayloadRequest, updatedAt, versionData },
+  {
+    autosave,
+    createdAt,
+    globalSlug,
+    parent,
+    publishedLocale,
+    req = {} as PayloadRequest,
+    snapshot,
+    updatedAt,
+    versionData,
+  },
 ) {
   const VersionModel = this.versions[globalSlug]
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
-  const [doc] = await VersionModel.create(
-    [
-      {
-        autosave,
-        createdAt,
-        latest: true,
-        parent,
-        updatedAt,
-        version: versionData,
-      },
-    ],
-    options,
-    req,
-  )
+  const data = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data: {
+      autosave,
+      createdAt,
+      latest: true,
+      parent,
+      publishedLocale,
+      snapshot,
+      updatedAt,
+      version: versionData,
+    },
+    fields: buildVersionGlobalFields(
+      this.payload.config,
+      this.payload.config.globals.find((global) => global.slug === globalSlug),
+    ),
+  })
+
+  const [doc] = await VersionModel.create([data], options, req)
 
   await VersionModel.updateMany(
     {
@@ -49,6 +68,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
       ],
     },
     { $unset: { latest: 1 } },
+    options,
   )
 
   const result: Document = JSON.parse(JSON.stringify(doc))

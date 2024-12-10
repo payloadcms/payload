@@ -1,70 +1,70 @@
-import type { UploadedFile } from 'express-fileupload'
-import type { MarkOptional } from 'ts-essentials'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../../types/index.js'
+import type { File } from '../../../uploads/types.js'
+import type {
+  RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../../config/types.js'
 
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Document } from '../../../types'
-import type { File } from '../../../uploads/types'
+import { APIError } from '../../../errors/index.js'
+import { getFileByPath } from '../../../uploads/getFileByPath.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createOperation } from '../create.js'
 
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import getFileByPath from '../../../uploads/getFileByPath'
-import { getDataLoader } from '../../dataloader'
-import create from '../create'
-
-export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
-  data: MarkOptional<
-    GeneratedTypes['collections'][TSlug],
-    'createdAt' | 'id' | 'sizes' | 'updatedAt'
-  >
+  data: RequiredDataFromCollectionSlug<TSlug>
   depth?: number
+  disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: false | TypedLocale
   file?: File
   filePath?: string
-  locale?: string
+  locale?: TypedLocale
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: TSelect
   showHiddenFields?: boolean
   user?: Document
 }
 
-export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(
+// eslint-disable-next-line no-restricted-exports
+export default async function createLocal<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
   payload: Payload,
-  options: Options<TSlug>,
-): Promise<GeneratedTypes['collections'][TSlug]> {
+  options: Options<TSlug, TSelect>,
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
   const {
     collection: collectionSlug,
-    context,
     data,
     depth,
+    disableTransaction,
     disableVerificationEmail,
     draft,
-    fallbackLocale,
     file,
     filePath,
-    locale = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
-    req = {} as PayloadRequest,
+    populate,
+    select,
     showHiddenFields,
-    user,
   } = options
-  setRequestContext(req, context)
-
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -72,29 +72,21 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     )
   }
 
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.locale = locale ?? req?.locale ?? defaultLocale
-  req.fallbackLocale = fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale
-  req.payload = payload
-  req.i18n = i18nInit(payload.config.i18n)
-  req.files = {
-    file: (file ?? (await getFileByPath(filePath))) as UploadedFile,
-  }
+  const req = await createLocalReq(options, payload)
+  req.file = file ?? (await getFileByPath(filePath))
 
-  if (typeof user !== 'undefined') req.user = user
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
-  return create<TSlug>({
+  return createOperation<TSlug, TSelect>({
     collection,
     data,
     depth,
+    disableTransaction,
     disableVerificationEmail,
     draft,
     overrideAccess,
     overwriteExistingFiles,
+    populate,
     req,
+    select,
     showHiddenFields,
   })
 }

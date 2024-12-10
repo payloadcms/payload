@@ -1,10 +1,9 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
+
+import { usersSlug } from '../shared.js'
 
 export const Users: CollectionConfig = {
-  slug: 'users',
+  slug: usersSlug,
   auth: true,
-  admin: {
-    useAsTitle: 'title',
-  },
   fields: [],
 }

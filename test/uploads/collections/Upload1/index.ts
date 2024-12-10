@@ -1,16 +1,30 @@
-import path from 'path'
+import type { CollectionConfig } from 'payload'
 
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const Uploads1: CollectionConfig = {
   slug: 'uploads-1',
   upload: {
-    staticDir: path.resolve(__dirname, './uploads'),
+    staticDir: path.resolve(dirname, 'uploads'),
   },
   fields: [
     {
       type: 'upload',
-      name: 'media',
+      name: 'hasManyUpload',
+      relationTo: 'uploads-2',
+      filterOptions: {
+        mimeType: {
+          equals: 'image/png',
+        },
+      },
+      hasMany: true,
+    },
+    {
+      type: 'upload',
+      name: 'singleUpload',
       relationTo: 'uploads-2',
       filterOptions: {
         mimeType: {

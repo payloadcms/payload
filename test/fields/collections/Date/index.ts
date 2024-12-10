@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { dateFieldsSlug } from '../../slugs'
+import { dateFieldsSlug } from '../../slugs.js'
 
 export const defaultText = 'default-text'
 

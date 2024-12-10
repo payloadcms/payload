@@ -1,13 +1,18 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  graphQL: {
-    schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   typescript: {
-    outputFile: path.resolve(__dirname, 'schema.ts'),
+    outputFile: path.resolve(dirname, 'schema.ts'),
   },
   collections: [
     {
@@ -91,7 +96,7 @@ export default buildConfigWithDefaults({
       fields: [
         {
           type: 'array',
-          name: 'meta',
+          name: 'metaArray',
           interfaceName: 'SharedMetaArray',
           fields: [
             {
@@ -106,7 +111,7 @@ export default buildConfigWithDefaults({
         },
         {
           type: 'group',
-          name: 'meta',
+          name: 'metaGroup',
           interfaceName: 'SharedMeta',
           fields: [
             {

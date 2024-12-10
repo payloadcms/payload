@@ -1,6 +1,10 @@
-import type { i18n as Ii18n } from 'i18next'
-import type { SanitizedConfig } from 'payload/config'
-import type { Field, RichTextFieldProps } from 'payload/types'
+import type {
+  ClientField,
+  Field,
+  PayloadComponent,
+  RichTextFieldClientProps,
+  SanitizedConfig,
+} from 'payload'
 import type { Editor } from 'slate'
 
 export type TextNode = { [x: string]: unknown; text: string }
@@ -11,20 +15,21 @@ export function nodeIsTextNode(node: ElementNode | TextNode): node is TextNode {
   return 'text' in node
 }
 
-type RichTextPlugin = (editor: Editor) => Editor
+export type RichTextPluginComponent = PayloadComponent
+export type RichTextPlugin = (editor: Editor) => Editor
 
 export type RichTextCustomElement = {
-  Button: React.ComponentType<any>
-  Element: React.ComponentType<any>
+  Button?: PayloadComponent
+  Element: PayloadComponent
   name: string
-  plugins?: RichTextPlugin[]
+  plugins?: RichTextPluginComponent[]
 }
 
 export type RichTextCustomLeaf = {
-  Button: React.ComponentType<any>
-  Leaf: React.ComponentType<any>
+  Button: PayloadComponent
+  Leaf: PayloadComponent
   name: string
-  plugins?: RichTextPlugin[]
+  plugins?: RichTextPluginComponent[]
 }
 
 export type RichTextElement =
@@ -57,9 +62,7 @@ export type AdapterArguments = {
     hideGutter?: boolean
     leaves?: RichTextLeaf[]
     link?: {
-      fields?:
-        | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: Ii18n }) => Field[])
-        | Field[]
+      fields?: ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[]) | Field[]
     }
     placeholder?: Record<string, string> | string
     rtl?: boolean
@@ -73,4 +76,8 @@ export type AdapterArguments = {
   }
 }
 
-export type FieldProps = RichTextFieldProps<any, AdapterArguments, AdapterArguments>
+export type SlateFieldProps = {
+  componentMap: {
+    [x: string]: ClientField[] | React.ReactNode
+  }
+} & RichTextFieldClientProps<any[], AdapterArguments, AdapterArguments>

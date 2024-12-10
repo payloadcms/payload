@@ -1,11 +1,21 @@
+export const usersSlug = 'users'
 export const mediaSlug = 'media'
-
 export const relationSlug = 'relation'
-
 export const audioSlug = 'audio'
-
 export const enlargeSlug = 'enlarge'
-
+export const focalNoSizesSlug = 'focal-no-sizes'
+export const focalOnlySlug = 'focal-only'
 export const reduceSlug = 'reduce'
-
-export const adminThumbnailSlug = 'admin-thumbnail'
+export const relationPreviewSlug = 'relation-preview'
+export const mediaWithRelationPreviewSlug = 'media-with-relation-preview'
+export const mediaWithoutRelationPreviewSlug = 'media-without-relation-preview'
+export const adminThumbnailFunctionSlug = 'admin-thumbnail-function'
+export const adminThumbnailSizeSlug = 'admin-thumbnail-size'
+export const unstoredMediaSlug = 'unstored-media'
+export const versionSlug = 'versions'
+export const animatedTypeMedia = 'animated-type-media'
+export const customUploadFieldSlug = 'custom-upload-field'
+export const withMetadataSlug = 'with-meta-data'
+export const withoutMetadataSlug = 'without-meta-data'
+export const withOnlyJPEGMetadataSlug = 'with-only-jpeg-meta-data'
+export const customFileNameMediaSlug = 'custom-file-name-media'

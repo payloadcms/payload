@@ -1,15 +1,15 @@
-import type { Field } from '../../fields/config/types'
+import type { Field } from '../../fields/config/types.js'
 
-export default [
+export const accountLockFields: Field[] = [
   {
     name: 'loginAttempts',
+    type: 'number',
     defaultValue: 0,
     hidden: true,
-    type: 'number',
   },
   {
     name: 'lockUntil',
-    hidden: true,
     type: 'date',
+    hidden: true,
   },
 ] as Field[]

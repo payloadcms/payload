@@ -1,24 +1,41 @@
-import type { UpdateGlobal } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { QueryOptions } from 'mongoose'
+import type { PayloadRequest, UpdateGlobal } from 'payload'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.js'
 
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { withSession } from './withSession.js'
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: MongooseAdapter,
-  { data, req = {} as PayloadRequest, slug },
+  { slug, data, options: optionsArgs = {}, req = {} as PayloadRequest, select },
 ) {
   const Model = this.globals
-  const options = {
-    ...withSession(this, req.transactionID),
+  const fields = this.payload.config.globals.find((global) => global.slug === slug).fields
+
+  const options: QueryOptions = {
+    ...optionsArgs,
+    ...(await withSession(this, req)),
     lean: true,
     new: true,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: this.payload.config.globals.find((global) => global.slug === slug).flattenedFields,
+      select,
+    }),
   }
 
   let result
-  result = await Model.findOneAndUpdate({ globalType: slug }, data, options)
+
+  const sanitizedData = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data,
+    fields,
+  })
+
+  result = await Model.findOneAndUpdate({ globalType: slug }, sanitizedData, options)
 
   result = JSON.parse(JSON.stringify(result))
 

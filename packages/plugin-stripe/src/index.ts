@@ -1,29 +1,25 @@
-import type { NextFunction, Response } from 'express'
-import type { Config, Endpoint } from 'payload/config'
-import type { PayloadRequest } from 'payload/types'
+import type { Config, Endpoint } from 'payload'
 
-import express from 'express'
+import type { SanitizedStripePluginConfig, StripePluginConfig } from './types.js'
 
-import type { SanitizedStripeConfig, StripeConfig } from './types'
+import { getFields } from './fields/getFields.js'
+import { createNewInStripe } from './hooks/createNewInStripe.js'
+import { deleteFromStripe } from './hooks/deleteFromStripe.js'
+import { syncExistingWithStripe } from './hooks/syncExistingWithStripe.js'
+import { stripeREST } from './routes/rest.js'
+import { stripeWebhooks } from './routes/webhooks.js'
 
-import { extendWebpackConfig } from './extendWebpackConfig'
-import { getFields } from './fields/getFields'
-import { createNewInStripe } from './hooks/createNewInStripe'
-import { deleteFromStripe } from './hooks/deleteFromStripe'
-import { syncExistingWithStripe } from './hooks/syncExistingWithStripe'
-import { stripeREST } from './routes/rest'
-import { stripeWebhooks } from './routes/webhooks'
+export { stripeProxy } from './utilities/stripeProxy.js'
 
-const stripePlugin =
-  (incomingStripeConfig: StripeConfig) =>
+export const stripePlugin =
+  (incomingStripeConfig: StripePluginConfig) =>
   (config: Config): Config => {
     const { collections } = config
 
     // set config defaults here
-    const stripeConfig: SanitizedStripeConfig = {
+    const pluginConfig: SanitizedStripePluginConfig = {
       ...incomingStripeConfig,
-      // TODO: in the next major version, default this to `false`
-      rest: incomingStripeConfig?.rest ?? true,
+      rest: incomingStripeConfig?.rest ?? false,
       sync: incomingStripeConfig?.sync || [],
     }
 
@@ -31,21 +27,49 @@ const stripePlugin =
     // unfortunately we must set the 'isTestKey' property on the config instead of using the following code:
     // const isTestKey = stripeConfig.stripeSecretKey?.startsWith('sk_test_');
 
+    const endpoints: Endpoint[] = [
+      ...(config?.endpoints || []),
+      {
+        handler: async (req) => {
+          const res = await stripeWebhooks({
+            config,
+            pluginConfig,
+            req,
+          })
+
+          return res
+        },
+        method: 'post',
+        path: '/stripe/webhooks',
+      },
+    ]
+
+    if (incomingStripeConfig?.rest) {
+      endpoints.push({
+        handler: async (req) => {
+          const res = await stripeREST({
+            pluginConfig,
+            req,
+          })
+
+          return res
+        },
+        method: 'post' as Endpoint['method'],
+        path: '/stripe/rest',
+      })
+    }
+
     return {
       ...config,
-      admin: {
-        ...config.admin,
-        webpack: extendWebpackConfig(config),
-      },
       collections: collections?.map((collection) => {
         const { hooks: existingHooks } = collection
 
-        const syncConfig = stripeConfig.sync?.find((sync) => sync.collection === collection.slug)
+        const syncConfig = pluginConfig.sync?.find((sync) => sync.collection === collection.slug)
 
         if (syncConfig) {
           const fields = getFields({
             collection,
-            stripeConfig,
+            pluginConfig,
             syncConfig,
           })
           return {
@@ -59,7 +83,7 @@ const stripePlugin =
                   deleteFromStripe({
                     ...args,
                     collection,
-                    stripeConfig,
+                    pluginConfig,
                   }),
               ],
               beforeChange: [
@@ -68,7 +92,7 @@ const stripePlugin =
                   syncExistingWithStripe({
                     ...args,
                     collection,
-                    stripeConfig,
+                    pluginConfig,
                   }),
               ],
               beforeValidate: [
@@ -77,7 +101,7 @@ const stripePlugin =
                   createNewInStripe({
                     ...args,
                     collection,
-                    stripeConfig,
+                    pluginConfig,
                   }),
               ],
             },
@@ -86,43 +110,6 @@ const stripePlugin =
 
         return collection
       }),
-      endpoints: [
-        ...(config?.endpoints || []),
-        {
-          handler: [
-            express.raw({ type: 'application/json' }),
-            async (req, res, next) => {
-              await stripeWebhooks({
-                config,
-                next,
-                req,
-                res,
-                stripeConfig,
-              })
-            },
-          ],
-          method: 'post',
-          path: '/stripe/webhooks',
-          root: true,
-        },
-        ...(incomingStripeConfig?.rest
-          ? [
-              {
-                handler: async (req: PayloadRequest, res: Response, next: NextFunction) => {
-                  await stripeREST({
-                    next,
-                    req,
-                    res,
-                    stripeConfig,
-                  })
-                },
-                method: 'post' as Endpoint['method'],
-                path: '/stripe/rest',
-              },
-            ]
-          : []),
-      ],
+      endpoints,
     }
   }
-
-export default stripePlugin

@@ -1,6 +1,6 @@
-import type { Block } from 'payload/types'
+import type { Block } from 'payload'
 
-import { invertBackground } from '../../fields/invertBackground'
+import { invertBackground } from '../../fields/invertBackground.js'
 
 export const MediaBlock: Block = {
   slug: 'mediaBlock',

@@ -1,1 +1,2 @@
-export * from './dist/adapters/azure'
+export { azureBlobStorageAdapter } from './dist/adapters/azure/index.js'
+//# sourceMappingURL=azure.d.ts.map

@@ -1,19 +1,16 @@
-import type { UIField } from 'payload/dist/fields/config/types'
+'use client'
+import type { UIFieldClientComponent } from 'payload'
 
-import { useFormFields } from 'payload/components/forms'
-import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
+import { CopyToClipboard, useFormFields } from '@payloadcms/ui'
 import React from 'react'
 
-export const LinkToDoc: React.FC<
-  UIField & {
-    isTestKey: boolean
-    nameOfIDField: string
-    stripeResourceType: string
-  }
-> = (props) => {
-  const { isTestKey, nameOfIDField, stripeResourceType } = props
+export const LinkToDoc: UIFieldClientComponent = (props) => {
+  const {
+    field: { admin: { custom = {} } = {} },
+  } = props
+  const { isTestKey, nameOfIDField, stripeResourceType } = custom
 
-  const field = useFormFields(([fields]) => fields[nameOfIDField])
+  const field = useFormFields(([fields]) => (fields && fields?.[nameOfIDField]) || null)
   const { value: stripeID } = field || {}
 
   const stripeEnv = isTestKey ? 'test/' : ''
@@ -31,7 +28,6 @@ export const LinkToDoc: React.FC<
           >
             View in Stripe
           </span>
-          {/* @ts-ignore */}
           <CopyToClipboard value={href} />
         </div>
         <div

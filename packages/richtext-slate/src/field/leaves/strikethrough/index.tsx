@@ -1,17 +1,7 @@
-import React from 'react'
+import type { RichTextCustomLeaf } from '../../../types.js'
 
-import StrikethroughIcon from '../../icons/Strikethrough'
-import LeafButton from '../Button'
-
-const Strikethrough = ({ attributes, children }) => <del {...attributes}>{children}</del>
-
-const strikethrough = {
-  Button: () => (
-    <LeafButton format="strikethrough">
-      <StrikethroughIcon />
-    </LeafButton>
-  ),
-  Leaf: Strikethrough,
+export const strikethrough: RichTextCustomLeaf = {
+  name: 'strikethrough',
+  Button: '@payloadcms/richtext-slate/client#StrikethroughLeafButton',
+  Leaf: '@payloadcms/richtext-slate/client#StrikethroughLeaf',
 }
-
-export default strikethrough

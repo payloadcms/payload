@@ -1,0 +1,48 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .per-page {
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) / 4);
+    }
+
+    &__base-button {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+    }
+
+    &__button {
+      @extend %btn-reset;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      color: var(--theme-elevation-500);
+
+      &:hover,
+      &:focus-visible {
+        text-decoration: underline;
+      }
+
+      svg .stroke {
+        stroke: currentColor;
+      }
+    }
+
+    &__chevron {
+      padding-left: calc(var(--base) / 4);
+    }
+
+    &__button-active {
+      font-weight: bold;
+      color: var(--theme-text);
+    }
+  }
+}

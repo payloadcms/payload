@@ -1,25 +1,40 @@
-import type { UpdateOne } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { QueryOptions } from 'mongoose'
+import type { PayloadRequest, UpdateOne } from 'payload'
 
-import { ValidationError } from 'payload/errors'
-import { i18nInit } from 'payload/utilities'
+import type { MongooseAdapter } from './index.js'
 
-import type { MongooseAdapter } from '.'
-
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { handleError } from './utilities/handleError.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { withSession } from './withSession.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
-  { id, collection, data, locale, options, req = {} as PayloadRequest, where: whereArg },
+  {
+    id,
+    collection,
+    data,
+    locale,
+    options: optionsArgs = {},
+    req = {} as PayloadRequest,
+    select,
+    where: whereArg,
+  },
 ) {
   const where = id ? { id: { equals: id } } : whereArg
   const Model = this.collections[collection]
-  const mongooseOptions = {
-    ...withSession(this, req.transactionID),
+  const fields = this.payload.collections[collection].config.fields
+  const options: QueryOptions = {
+    ...optionsArgs,
+    ...(await withSession(this, req)),
     lean: true,
-    new: options?.new ?? true,
-    upsert: options?.upsert ?? false,
+    new: true,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: this.payload.collections[collection].config.flattenedFields,
+      select,
+    }),
   }
 
   const query = await Model.buildQuery({
@@ -29,21 +44,17 @@ export const updateOne: UpdateOne = async function updateOne(
   })
 
   let result
+
+  const sanitizedData = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data,
+    fields,
+  })
+
   try {
-    result = await Model.findOneAndUpdate(query, data, mongooseOptions)
+    result = await Model.findOneAndUpdate(query, sanitizedData, options)
   } catch (error) {
-    // Handle uniqueness error from MongoDB
-    throw error.code === 11000 && error.keyValue
-      ? new ValidationError(
-          [
-            {
-              field: Object.keys(error.keyValue)[0],
-              message: 'Value must be unique',
-            },
-          ],
-          req?.t ?? i18nInit(this.payload.config.i18n).t,
-        )
-      : error
+    handleError({ collection, error, req })
   }
 
   result = JSON.parse(JSON.stringify(result))

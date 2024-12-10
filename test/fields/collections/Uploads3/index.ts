@@ -1,13 +1,16 @@
+import type { CollectionConfig } from 'payload'
+
 import path from 'path'
+import { fileURLToPath } from 'url'
 
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
-
-import { uploads3Slug } from '../../slugs'
+import { uploads3Slug } from '../../slugs.js'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const Uploads3: CollectionConfig = {
   slug: uploads3Slug,
   upload: {
-    staticDir: path.resolve(__dirname, './uploads3'),
+    staticDir: path.resolve(dirname, './uploads3'),
   },
   labels: {
     singular: 'Upload 3',
@@ -22,10 +25,10 @@ const Uploads3: CollectionConfig = {
       name: 'media',
       relationTo: uploads3Slug,
     },
-    {
-      type: 'richText',
-      name: 'richText',
-    },
+    // {
+    //   type: 'richText',
+    //   name: 'richText',
+    // },
   ],
 }
 

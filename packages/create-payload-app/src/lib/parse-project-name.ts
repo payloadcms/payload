@@ -1,24 +1,26 @@
-import prompts from 'prompts'
+import * as p from '@clack/prompts'
+import slugify from '@sindresorhus/slugify'
 
-import type { CliArgs } from '../types'
+import type { CliArgs } from '../types.js'
 
 export async function parseProjectName(args: CliArgs): Promise<string> {
-  if (args['--name']) return args['--name']
-  if (args._[0]) return args._[0]
+  if (args['--name']) {
+    return slugify(args['--name'])
+  }
+  if (args._[0]) {
+    return slugify(args._[0])
+  }
 
-  const response = await prompts(
-    {
-      name: 'value',
-      message: 'Project name?',
-      type: 'text',
-      validate: (value: string) => !!value.length,
+  const projectName = await p.text({
+    message: 'Project name?',
+    validate: (value) => {
+      if (!value) {
+        return 'Please enter a project name.'
+      }
     },
-    {
-      onCancel: () => {
-        process.exit(0)
-      },
-    },
-  )
-
-  return response.value
+  })
+  if (p.isCancel(projectName)) {
+    process.exit(0)
+  }
+  return slugify(projectName)
 }

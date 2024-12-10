@@ -1,6 +1,6 @@
-import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { PayloadRequest } from '../express/types'
-import type { Payload } from '../index'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { Payload } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig

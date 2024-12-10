@@ -1,0 +1,46 @@
+@import '../../../../scss/styles';
+
+@layer payload-default {
+  .toolbar-popup__button {
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    justify-content: center;
+    height: 30px;
+    width: 30px;
+    border: 0;
+    background: none;
+    border-radius: $style-radius-m;
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
+
+    &.spaced {
+      margin-right: 2px;
+    }
+
+    &:hover:not(.disabled) {
+      background-color: var(--theme-elevation-100);
+    }
+
+    &.active {
+      background-color: var(--theme-elevation-150);
+      color: var(--theme-text);
+      &:hover {
+        background-color: var(--theme-elevation-200);
+      }
+
+      .icon {
+        opacity: 1;
+      }
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+
+      .icon {
+        opacity: 0.2;
+      }
+    }
+  }
+}

@@ -1,54 +1,40 @@
-import type { Config } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { Field, SanitizedConfig, User } from 'payload'
 
-import { extractTranslations } from 'payload/utilities'
-
-const translations = extractTranslations([
-  'fields:textToDisplay',
-  'fields:linkType',
-  'fields:chooseBetweenCustomTextOrDocument',
-  'fields:customURL',
-  'fields:internalLink',
-  'fields:enterURL',
-  'fields:chooseDocumentToLink',
-  'fields:openInNewTab',
-])
-
-export const getBaseFields = (config: Config): Field[] => [
+export const getBaseFields = (config: SanitizedConfig): Field[] => [
   {
     name: 'text',
-    label: translations['fields:textToDisplay'],
-    required: true,
     type: 'text',
+    label: ({ t }) => t('fields:textToDisplay'),
+    required: true,
   },
   {
     name: 'linkType',
+    type: 'radio',
     admin: {
-      description: translations['fields:chooseBetweenCustomTextOrDocument'],
+      description: ({ t }) => t('fields:chooseBetweenCustomTextOrDocument'),
     },
     defaultValue: 'custom',
-    label: translations['fields:linkType'],
+    label: ({ t }) => t('fields:linkType'),
     options: [
       {
-        label: translations['fields:customURL'],
+        label: ({ t }) => t('fields:customURL'),
         value: 'custom',
       },
       {
-        label: translations['fields:internalLink'],
+        label: ({ t }) => t('fields:internalLink'),
         value: 'internal',
       },
     ],
     required: true,
-    type: 'radio',
   },
   {
     name: 'url',
+    type: 'text',
     admin: {
       condition: ({ linkType }) => linkType !== 'internal',
     },
-    label: translations['fields:enterURL'],
+    label: ({ t }) => t('fields:enterURL'),
     required: true,
-    type: 'text',
   },
   {
     name: 'doc',
@@ -57,16 +43,28 @@ export const getBaseFields = (config: Config): Field[] => [
         return linkType === 'internal'
       },
     },
-    label: translations['fields:chooseDocumentToLink'],
+    // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
+    type: 'relationship',
+    filterOptions: ({ relationTo, user }) => {
+      const hidden = config.collections.find(({ slug }) => slug === relationTo).admin.hidden
+      if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
+        return false
+      }
+    },
+    label: ({ t }) => t('fields:chooseDocumentToLink'),
     relationTo: config.collections
-      .filter(({ admin: { enableRichTextLink } }) => enableRichTextLink)
+      .filter(({ admin: { enableRichTextLink, hidden } }) => {
+        if (typeof hidden !== 'function' && hidden) {
+          return false
+        }
+        return enableRichTextLink
+      })
       .map(({ slug }) => slug),
     required: true,
-    type: 'relationship',
   },
   {
     name: 'newTab',
-    label: translations['fields:openInNewTab'],
     type: 'checkbox',
+    label: ({ t }) => t('fields:openInNewTab'),
   },
 ]

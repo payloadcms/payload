@@ -1,0 +1,68 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .live-preview {
+    width: 100%;
+    display: flex;
+    --gradient: linear-gradient(to left, rgba(0, 0, 0, 0.04) 0%, transparent 100%);
+
+    [dir='rtl'] & {
+      flex-direction: row-reverse;
+    }
+
+    &--popup-open {
+      .live-preview {
+        &__edit {
+          padding-right: var(--gutter-h);
+        }
+      }
+    }
+
+    &__main {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      position: relative;
+
+      &--popup-open {
+        width: 100%;
+      }
+
+      &::after {
+        content: ' ';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: calc(var(--base) * 2);
+        height: 100%;
+        background: var(--gradient);
+        pointer-events: none;
+        z-index: -1;
+      }
+    }
+
+    @include mid-break {
+      flex-direction: column;
+
+      &__main {
+        min-height: initial;
+        width: 100%;
+
+        &::after {
+          display: none;
+        }
+      }
+
+      &__form {
+        display: block;
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .live-preview {
+      --gradient: linear-gradient(to left, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%);
+    }
+  }
+}

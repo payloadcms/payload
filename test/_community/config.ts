@@ -1,24 +1,29 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { MediaCollection } from './collections/Media'
-import { PostsCollection, postsSlug } from './collections/Posts'
-import { MenuGlobal } from './globals/Menu'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { MediaCollection } from './collections/Media/index.js'
+import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import { MenuGlobal } from './globals/Menu/index.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [
-    PostsCollection,
-    MediaCollection,
-    // ...add more collections here
-  ],
-  globals: [
-    MenuGlobal,
-    // ...add more globals here
-  ],
-  graphQL: {
-    schemaOutputFile: './test/_community/schema.graphql',
+  collections: [PostsCollection, MediaCollection],
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
-
+  editor: lexicalEditor({}),
+  globals: [
+    // ...add more globals here
+    MenuGlobal,
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -31,8 +36,11 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: postsSlug,
       data: {
-        text: 'example post',
+        title: 'example post',
       },
     })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

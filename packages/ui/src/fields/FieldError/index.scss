@@ -1,0 +1,18 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .field-error.tooltip {
+    font-family: var(--font-body);
+    left: auto;
+    max-width: 75%;
+    right: 0;
+    transform: translateY(calc(var(--caret-size) * -1));
+    color: var(--theme-error-950);
+    background-color: var(--theme-error-300);
+
+    &::after {
+      border-top-color: var(--theme-error-300);
+      border-bottom-color: var(--theme-error-300);
+    }
+  }
+}

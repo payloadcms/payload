@@ -1,74 +1,131 @@
-import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
-import type { Payload } from 'payload'
-import type { BaseDatabaseAdapter } from 'payload/database'
+import type { CollationOptions, TransactionOptions } from 'mongodb'
+import type { MongoMemoryReplSet } from 'mongodb-memory-server'
+import type { ClientSession, Connection, ConnectOptions, QueryOptions } from 'mongoose'
+import type {
+  BaseDatabaseAdapter,
+  DatabaseAdapterObj,
+  Payload,
+  TypeWithID,
+  TypeWithVersion,
+  UpdateGlobalArgs,
+  UpdateGlobalVersionArgs,
+  UpdateOneArgs,
+  UpdateVersionArgs,
+} from 'payload'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
 import path from 'path'
-import { createDatabaseAdapter } from 'payload/database'
+import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 
-export type { MigrateDownArgs, MigrateUpArgs } from './types'
+import type { CollectionModel, GlobalModel, MigrateDownArgs, MigrateUpArgs } from './types.js'
 
-import type { CollectionModel, GlobalModel } from './types'
+import { connect } from './connect.js'
+import { count } from './count.js'
+import { countGlobalVersions } from './countGlobalVersions.js'
+import { countVersions } from './countVersions.js'
+import { create } from './create.js'
+import { createGlobal } from './createGlobal.js'
+import { createGlobalVersion } from './createGlobalVersion.js'
+import { createMigration } from './createMigration.js'
+import { createVersion } from './createVersion.js'
+import { deleteMany } from './deleteMany.js'
+import { deleteOne } from './deleteOne.js'
+import { deleteVersions } from './deleteVersions.js'
+import { destroy } from './destroy.js'
+import { find } from './find.js'
+import { findGlobal } from './findGlobal.js'
+import { findGlobalVersions } from './findGlobalVersions.js'
+import { findOne } from './findOne.js'
+import { findVersions } from './findVersions.js'
+import { init } from './init.js'
+import { migrateFresh } from './migrateFresh.js'
+import { queryDrafts } from './queryDrafts.js'
+import { beginTransaction } from './transactions/beginTransaction.js'
+import { commitTransaction } from './transactions/commitTransaction.js'
+import { rollbackTransaction } from './transactions/rollbackTransaction.js'
+import { updateGlobal } from './updateGlobal.js'
+import { updateGlobalVersion } from './updateGlobalVersion.js'
+import { updateOne } from './updateOne.js'
+import { updateVersion } from './updateVersion.js'
+import { upsert } from './upsert.js'
 
-import { connect } from './connect'
-import { create } from './create'
-import { createGlobal } from './createGlobal'
-import { createGlobalVersion } from './createGlobalVersion'
-import { createMigration } from './createMigration'
-import { createVersion } from './createVersion'
-import { deleteMany } from './deleteMany'
-import { deleteOne } from './deleteOne'
-import { deleteVersions } from './deleteVersions'
-import { destroy } from './destroy'
-import { extendViteConfig } from './extendViteConfig'
-import { extendWebpackConfig } from './extendWebpackConfig'
-import { find } from './find'
-import { findGlobal } from './findGlobal'
-import { findGlobalVersions } from './findGlobalVersions'
-import { findOne } from './findOne'
-import { findVersions } from './findVersions'
-import { init } from './init'
-import { migrateFresh } from './migrateFresh'
-import { queryDrafts } from './queryDrafts'
-import { beginTransaction } from './transactions/beginTransaction'
-import { commitTransaction } from './transactions/commitTransaction'
-import { rollbackTransaction } from './transactions/rollbackTransaction'
-import { updateGlobal } from './updateGlobal'
-import { updateGlobalVersion } from './updateGlobalVersion'
-import { updateOne } from './updateOne'
-import { updateVersion } from './updateVersion'
+export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+  /**
+   * If enabled, collation allows for language-specific rules for string comparison.
+   * This configuration can include the following options:
+   *
+   * - `strength` (number): Comparison level (1: Primary, 2: Secondary, 3: Tertiary (default), 4: Quaternary, 5: Identical)
+   * - `caseLevel` (boolean): Include case comparison at strength level 1 or 2.
+   * - `caseFirst` (string): Sort order of case differences during tertiary level comparisons ("upper", "lower", "off").
+   * - `numericOrdering` (boolean): Compare numeric strings as numbers.
+   * - `alternate` (string): Consider whitespace and punctuation as base characters ("non-ignorable", "shifted").
+   * - `maxVariable` (string): Characters considered ignorable when `alternate` is "shifted" ("punct", "space").
+   * - `backwards` (boolean): Sort strings with diacritics from back of the string.
+   * - `normalization` (boolean): Check if text requires normalization and perform normalization.
+   *
+   * Available on MongoDB version 3.4 and up.
+   * The locale that gets passed is your current project's locale but defaults to "en".
+   *
+   * Example:
+   * {
+   *   strength: 3
+   * }
+   *
+   * Defaults to disabled.
+   */
+  collation?: Omit<CollationOptions, 'locale'>
   /** Extra configuration options */
-  connectOptions?: ConnectOptions & {
+  connectOptions?: {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
-  }
+  } & ConnectOptions
+
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
+  /**
+   * Set to `true` to ensure that indexes are ready before completing connection.
+   * NOTE: not recommended for production. This can slow down the initialization of Payload.
+   */
+  ensureIndexes?: boolean
   migrationDir?: string
+  /**
+   * typed as any to avoid dependency
+   */
+  mongoMemoryServer?: MongoMemoryReplSet
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
+  transactionOptions?: false | TransactionOptions
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
 }
 
-export type MongooseAdapter = BaseDatabaseAdapter &
-  Args & {
-    collections: {
-      [slug: string]: CollectionModel
-    }
-    connection: Connection
-    globals: GlobalModel
-    mongoMemoryServer: any
-    sessions: Record<number | string, ClientSession>
-    versions: {
-      [slug: string]: CollectionModel
-    }
+export type MongooseAdapter = {
+  collections: {
+    [slug: string]: CollectionModel
   }
-
-type MongooseAdapterResult = (args: { payload: Payload }) => MongooseAdapter
+  connection: Connection
+  ensureIndexes: boolean
+  globals: GlobalModel
+  mongoMemoryServer: MongoMemoryReplSet
+  prodMigrations?: {
+    down: (args: MigrateDownArgs) => Promise<void>
+    name: string
+    up: (args: MigrateUpArgs) => Promise<void>
+  }[]
+  sessions: Record<number | string, ClientSession>
+  versions: {
+    [slug: string]: CollectionModel
+  }
+} & Args &
+  BaseDatabaseAdapter
 
 declare module 'payload' {
   export interface DatabaseAdapter
@@ -78,9 +135,26 @@ declare module 'payload' {
       [slug: string]: CollectionModel
     }
     connection: Connection
+    ensureIndexes: boolean
     globals: GlobalModel
-    mongoMemoryServer: any
+    mongoMemoryServer: MongoMemoryReplSet
+    prodMigrations?: {
+      down: (args: MigrateDownArgs) => Promise<void>
+      name: string
+      up: (args: MigrateUpArgs) => Promise<void>
+    }[]
     sessions: Record<number | string, ClientSession>
+    transactionOptions: TransactionOptions
+    updateGlobal: <T extends Record<string, unknown>>(
+      args: { options?: QueryOptions } & UpdateGlobalArgs<T>,
+    ) => Promise<T>
+    updateGlobalVersion: <T extends TypeWithID = TypeWithID>(
+      args: { options?: QueryOptions } & UpdateGlobalVersionArgs<T>,
+    ) => Promise<TypeWithVersion<T>>
+    updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
+    updateVersion: <T extends TypeWithID = TypeWithID>(
+      args: { options?: QueryOptions } & UpdateVersionArgs<T>,
+    ) => Promise<TypeWithVersion<T>>
     versions: {
       [slug: string]: CollectionModel
     }
@@ -91,15 +165,16 @@ export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
   disableIndexHints = false,
+  ensureIndexes,
   migrationDir: migrationDirArg,
+  mongoMemoryServer,
+  prodMigrations,
+  transactionOptions = {},
   url,
-}: Args): MongooseAdapterResult {
+}: Args): DatabaseAdapterObj {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
     mongoose.set('strictQuery', false)
-
-    extendWebpackConfig(payload.config)
-    extendViteConfig(payload.config)
 
     return createDatabaseAdapter<MongooseAdapter>({
       name: 'mongoose',
@@ -107,19 +182,23 @@ export function mongooseAdapter({
       // Mongoose-specific
       autoPluralization,
       collections: {},
-      connectOptions: connectOptions || {},
       connection: undefined,
+      connectOptions: connectOptions || {},
       disableIndexHints,
+      ensureIndexes,
       globals: undefined,
-      mongoMemoryServer: undefined,
+      mongoMemoryServer,
       sessions: {},
+      transactionOptions: transactionOptions === false ? undefined : transactionOptions,
       url,
       versions: {},
-
       // DatabaseAdapter
-      beginTransaction,
+      beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
+      count,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,
@@ -138,17 +217,23 @@ export function mongooseAdapter({
       init,
       migrateFresh,
       migrationDir,
+      packageName: '@payloadcms/db-mongodb',
       payload,
+      prodMigrations,
       queryDrafts,
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert,
     })
   }
 
-  return adapter
+  return {
+    defaultIDType: 'text',
+    init: adapter,
+  }
 }
 
 /**
@@ -172,7 +257,9 @@ function findMigrationDir(migrationDir?: string): string {
   const relativeMigrations = path.resolve(cwd, 'migrations')
 
   // Use arg if provided
-  if (migrationDir) return migrationDir
+  if (migrationDir) {
+    return migrationDir
+  }
 
   // Check other common locations
   if (fs.existsSync(srcDir)) {

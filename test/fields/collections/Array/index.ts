@@ -1,7 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { arrayFieldsSlug } from '../../slugs'
-import { ArrayRowLabel } from './LabelComponent'
+import { arrayFieldsSlug } from '../../slugs.js'
 
 export const arrayDefaultValue = [{ text: 'row one' }, { text: 'row two' }]
 
@@ -21,8 +20,26 @@ const ArrayFields: CollectionConfig = {
       fields: [
         {
           name: 'text',
-          required: true,
           type: 'text',
+          required: true,
+        },
+        {
+          name: 'anotherText',
+          type: 'text',
+        },
+        {
+          name: 'uiField',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: './collections/Array/LabelComponent.js#ArrayRowLabel',
+            },
+          },
+        },
+        {
+          name: 'localizedText',
+          type: 'text',
+          localized: true,
         },
         {
           name: 'subArray',
@@ -108,26 +125,10 @@ const ArrayFields: CollectionConfig = {
       type: 'array',
     },
     {
-      name: 'rowLabelAsFunction',
-      admin: {
-        components: {
-          RowLabel: ({ data }) => data.title,
-        },
-        description: 'Row labels rendered from a function.',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-      type: 'array',
-    },
-    {
       name: 'rowLabelAsComponent',
       admin: {
         components: {
-          RowLabel: ArrayRowLabel,
+          RowLabel: '/collections/Array/LabelComponent.js#ArrayRowLabel',
         },
         description: 'Row labels rendered as react components.',
       },
@@ -149,6 +150,62 @@ const ArrayFields: CollectionConfig = {
       ],
       minRows: 2,
       type: 'array',
+    },
+    {
+      name: 'disableSort',
+      defaultValue: arrayDefaultValue,
+      admin: {
+        isSortable: false,
+      },
+      fields: [
+        {
+          name: 'text',
+          required: true,
+          type: 'text',
+        },
+      ],
+      type: 'array',
+    },
+    {
+      name: 'nestedArrayLocalized',
+      type: 'array',
+      fields: [
+        {
+          type: 'array',
+          name: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'externallyUpdatedArray',
+      type: 'array',
+      fields: [
+        {
+          name: 'customField',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '/collections/Array/CustomField.js#CustomField',
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'ui',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Array/AddRowButton.js',
+        },
+      },
     },
   ],
   slug: arrayFieldsSlug,

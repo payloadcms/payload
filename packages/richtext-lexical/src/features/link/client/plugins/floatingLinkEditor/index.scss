@@ -1,0 +1,92 @@
+@import '../../../../../scss/styles.scss';
+
+@layer payload-default {
+  .link-editor {
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    background: var(--theme-input-bg);
+    padding: 4px 4px 4px 12px;
+    vertical-align: middle;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    border-radius: $style-radius-m;
+    transition: opacity 0.2s;
+    will-change: transform;
+    box-shadow:
+      0px 1px 2px 1px rgba(0, 0, 0, 0.1),
+      0px 4px 16px 0px rgba(0, 0, 0, 0.1),
+      0px -4px 16px 0px rgba(0, 0, 0, 0.1);
+
+    .link-input {
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      min-height: 28px;
+      box-sizing: border-box;
+      @extend %body;
+      border: 0;
+      outline: 0;
+      position: relative;
+      font-family: var(--font-body);
+
+      .icon--externalLink {
+        margin-right: 5px;
+      }
+
+      &__label-pure {
+        color: var(--theme-elevation-1000);
+        margin-right: 15px;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      a {
+        text-decoration: underline;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        margin-right: base(0.4);
+        text-overflow: ellipsis;
+        color: var(--theme-success-750);
+
+        &:hover {
+          color: var(--theme-success-850);
+        }
+      }
+    }
+
+    button {
+      all: unset;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-size: 16px;
+      background-position: center;
+      background-repeat: no-repeat;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      color: var(--theme-elevation-600);
+      border-radius: $style-radius-m;
+
+      &:hover:not([disabled]) {
+        color: var(--theme-elevation-800);
+        background-color: var(--theme-elevation-100);
+      }
+    }
+  }
+
+  html[data-theme='light'] {
+    .link-editor {
+      box-shadow:
+        0px 1px 2px 1px rgba(0, 0, 0, 0.05),
+        0px 4px 8px 0px rgba(0, 0, 0, 0.05),
+        0px -4px 16px 0px rgba(0, 0, 0, 0.05);
+    }
+  }
+}

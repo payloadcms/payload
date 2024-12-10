@@ -1,16 +1,15 @@
-import type { TFunction } from 'i18next'
+import type { TFunction } from '@payloadcms/translations'
 
+import { en } from '@payloadcms/translations/languages/en'
 import httpStatus from 'http-status'
 
-import APIError from './APIError'
+import { APIError } from './APIError.js'
 
-class FileUploadError extends APIError {
+export class FileUploadError extends APIError {
   constructor(t?: TFunction) {
     super(
-      t ? t('error:problemUploadingFile') : 'There was a problem while uploading the file.',
+      t ? t('error:problemUploadingFile') : en.translations.error.problemUploadingFile,
       httpStatus.BAD_REQUEST,
     )
   }
 }
-
-export default FileUploadError

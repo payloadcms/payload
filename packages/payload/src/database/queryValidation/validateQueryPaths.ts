@@ -1,23 +1,19 @@
-/* eslint-disable no-restricted-syntax */
-import type { SanitizedCollectionConfig } from '../../collections/config/types'
-import type { Field, FieldAffectingData } from '../../fields/config/types'
-import type { SanitizedGlobalConfig } from '../../globals/config/types'
-/* eslint-disable no-await-in-loop */
-import type { Operator, PayloadRequest, Where, WhereField } from '../../types'
-import type { EntityPolicies } from './types'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { FlattenedField } from '../../fields/config/types.js'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
+import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
+import type { EntityPolicies } from './types.js'
 
-import QueryError from '../../errors/QueryError'
-import { validOperators } from '../../types/constants'
-import { deepCopyObject } from '../../utilities/deepCopyObject'
-import flattenFields from '../../utilities/flattenTopLevelFields'
-import { validateSearchParam } from './validateSearchParams'
+import { QueryError } from '../../errors/QueryError.js'
+import { validOperators } from '../../types/constants.js'
+import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
   errors?: { path: string }[]
   overrideAccess: boolean
   policies?: EntityPolicies
   req: PayloadRequest
-  versionFields?: Field[]
+  versionFields?: FlattenedField[]
   where: Where
 } & (
   | {
@@ -56,23 +52,22 @@ export async function validateQueryPaths({
   versionFields,
   where,
 }: Args): Promise<void> {
-  const fields = flattenFields(
-    versionFields || (globalConfig || collectionConfig).fields,
-  ) as FieldAffectingData[]
+  const fields = versionFields || (globalConfig || collectionConfig).flattenedFields
+
   if (typeof where === 'object') {
     const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
     const promises = []
-    whereFields.map(async (constraint) => {
-      Object.keys(constraint).map(async (path) => {
-        Object.entries(constraint[path]).map(async ([operator, val]) => {
+    void whereFields.map((constraint) => {
+      void Object.keys(constraint).map((path) => {
+        void Object.entries(constraint[path]).map(([operator, val]) => {
           if (validOperators.includes(operator as Operator)) {
             promises.push(
               validateSearchParam({
-                collectionConfig: deepCopyObject(collectionConfig),
+                collectionConfig,
                 errors,
-                fields: fields as Field[],
-                globalConfig: deepCopyObject(globalConfig),
+                fields,
+                globalConfig,
                 operator,
                 overrideAccess,
                 path,

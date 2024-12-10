@@ -1,17 +1,20 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import CustomEditView from '../components/views/CustomEdit'
-import { customViews1CollectionSlug } from '../slugs'
+import { customViews1CollectionSlug } from '../slugs.js'
 
 export const CustomViews1: CollectionConfig = {
   slug: customViews1CollectionSlug,
-  versions: true,
   admin: {
     components: {
+      Description: '/components/ViewDescription/index.js#ViewDescription',
       views: {
-        // This will override the entire Edit view including all nested views, i.e. `/edit/:id/*`
+        // This will override the entire Edit View including all nested views, i.e. `/edit/:id/*`
         // To override one specific nested view, use the nested view's slug as the key
-        Edit: CustomEditView,
+        edit: {
+          root: {
+            Component: '/components/views/CustomEdit/index.js#CustomEditView',
+          },
+        },
       },
     },
   },
@@ -21,4 +24,5 @@ export const CustomViews1: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: true,
 }

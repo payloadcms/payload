@@ -1,12 +1,12 @@
 import httpStatus from 'http-status'
 
-import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
+import type { Collection } from '../../collections/config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
 
-import { APIError } from '../../errors'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
+import { APIError, Forbidden } from '../../errors/index.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Args = {
   collection: Collection
@@ -14,8 +14,12 @@ export type Args = {
   token: string
 }
 
-async function verifyEmail(args: Args): Promise<boolean> {
+export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
   const { collection, req, token } = args
+
+  if (collection.config.auth.disableLocalStrategy) {
+    throw new Forbidden(req.t)
+  }
   if (!Object.prototype.hasOwnProperty.call(args, 'token')) {
     throw new APIError('Missing required data.', httpStatus.BAD_REQUEST)
   }
@@ -31,9 +35,9 @@ async function verifyEmail(args: Args): Promise<boolean> {
       },
     })
 
-    if (!user) throw new APIError('Verification token is invalid.', httpStatus.BAD_REQUEST)
-    if (user && user._verified === true)
-      throw new APIError('This account has already been activated.', httpStatus.ACCEPTED)
+    if (!user) {
+      throw new APIError('Verification token is invalid.', httpStatus.FORBIDDEN)
+    }
 
     await req.payload.db.updateOne({
       id: user.id,
@@ -46,7 +50,9 @@ async function verifyEmail(args: Args): Promise<boolean> {
       req,
     })
 
-    if (shouldCommit) await commitTransaction(req)
+    if (shouldCommit) {
+      await commitTransaction(req)
+    }
 
     return true
   } catch (error: unknown) {
@@ -55,4 +61,4 @@ async function verifyEmail(args: Args): Promise<boolean> {
   }
 }
 
-export default verifyEmail
+export default verifyEmailOperation

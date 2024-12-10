@@ -1,42 +1,72 @@
 {
   "name": "@payloadcms/plugin-nested-docs",
-  "version": "1.0.9",
+  "version": "3.5.0",
   "description": "The official Nested Docs plugin for Payload",
-  "repository": "https://github.com/payloadcms/payload",
-  "license": "MIT",
   "homepage": "https://payloadcms.com",
-  "author": "Payload CMS, Inc.",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-nested-docs"
+  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "import": "./src/exports/types.ts",
+      "types": "./src/exports/types.ts",
+      "default": "./src/exports/types.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "prepublishOnly": "pnpm clean && pnpm build"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"
   },
-  "exports": {
-    ".": {
-      "default": "./src/index.ts",
-      "types": "./src/index.ts"
-    }
+  "peerDependencies": {
+    "payload": "workspace:*"
   },
   "publishConfig": {
-    "exports": null,
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./types": {
+        "import": "./dist/exports/types.js",
+        "types": "./dist/exports/types.d.ts",
+        "default": "./dist/exports/types.js"
+      }
+    },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  },
-  "files": [
-    "dist",
-    "fields.js",
-    "fields.d.ts",
-    "types.js",
-    "types.d.ts"
-  ]
+  }
 }

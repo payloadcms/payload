@@ -1,107 +1,176 @@
-import path from 'path'
+import type { Config, SanitizedConfig } from 'payload'
 
-import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
+import {
+  AlignFeature,
+  BlockquoteFeature,
+  BlocksFeature,
+  BoldFeature,
+  ChecklistFeature,
+  HeadingFeature,
+  IndentFeature,
+  InlineCodeFeature,
+  InlineToolbarFeature,
+  ItalicFeature,
+  lexicalEditor,
+  LinkFeature,
+  OrderedListFeature,
+  ParagraphFeature,
+  RelationshipFeature,
+  StrikethroughFeature,
+  SubscriptFeature,
+  SuperscriptFeature,
+  TreeViewFeature,
+  UnderlineFeature,
+  UnorderedListFeature,
+  UploadFeature,
+} from '@payloadcms/richtext-lexical'
+// import { slateEditor } from '@payloadcms/richtext-slate'
+import { buildConfig } from 'payload'
+import { de } from 'payload/i18n/de'
+import { en } from 'payload/i18n/en'
+import { es } from 'payload/i18n/es'
+import sharp from 'sharp'
 
-import { viteBundler } from '../packages/bundler-vite/src'
-import { webpackBundler } from '../packages/bundler-webpack/src'
-import { mongooseAdapter } from '../packages/db-mongodb/src'
-import { postgresAdapter } from '../packages/db-postgres/src'
-import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
-import { slateEditor } from '../packages/richtext-slate/src'
+import { databaseAdapter } from './databaseAdapter.js'
+import { reInitEndpoint } from './helpers/reInit.js'
+import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
+import { testEmailAdapter } from './testEmailAdapter.js'
 
+// process.env.POSTGRES_URL = 'postgres://postgres:postgres@127.0.0.1:5432/payloadtests'
 // process.env.PAYLOAD_DATABASE = 'postgres'
+// process.env.PAYLOAD_DATABASE = 'sqlite'
 
-const bundlerAdapters = {
-  vite: viteBundler(),
-  webpack: webpackBundler(),
-}
-
-const databaseAdapters = {
-  mongoose: mongooseAdapter({
-    migrationDir: path.resolve(__dirname, '../packages/db-mongodb/migrations'),
-    url: 'mongodb://127.0.0.1/payloadtests',
-  }),
-  postgres: postgresAdapter({
-    migrationDir: path.resolve(__dirname, '../packages/db-postgres/migrations'),
-    pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-    },
-  }),
-}
-
-export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
-  const [name] = process.argv.slice(2)
-
+export async function buildConfigWithDefaults(
+  testConfig?: Partial<Config>,
+  options?: {
+    disableAutoLogin?: boolean
+  },
+): Promise<SanitizedConfig> {
   const config: Config = {
-    editor: slateEditor({}),
-    rateLimit: {
-      max: 9999999999,
-      window: 15 * 60 * 1000, // 15min default,
-    },
+    db: databaseAdapter,
+    editor: lexicalEditor({
+      features: [
+        ParagraphFeature(),
+        RelationshipFeature(),
+        LinkFeature({
+          fields: ({ defaultFields }) => [
+            ...defaultFields,
+            {
+              name: 'description',
+              type: 'text',
+            },
+          ],
+        }),
+        ChecklistFeature(),
+        UnorderedListFeature(),
+        OrderedListFeature(),
+        AlignFeature(),
+        BlockquoteFeature(),
+        BoldFeature(),
+        ItalicFeature(),
+        UploadFeature({
+          collections: {
+            media: {
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'text',
+                },
+              ],
+            },
+          },
+        }),
+        UnderlineFeature(),
+        StrikethroughFeature(),
+        SubscriptFeature(),
+        SuperscriptFeature(),
+        InlineCodeFeature(),
+        InlineToolbarFeature(),
+        TreeViewFeature(),
+        HeadingFeature(),
+        IndentFeature(),
+        BlocksFeature({
+          blocks: [
+            {
+              slug: 'myBlock',
+              fields: [
+                {
+                  name: 'someText',
+                  type: 'text',
+                },
+                {
+                  name: 'someTextRequired',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'radios',
+                  type: 'radio',
+                  options: [
+                    {
+                      label: 'Option 1',
+                      value: 'option1',
+                    },
+                    {
+                      label: 'Option 2',
+                      value: 'option2',
+                    },
+                    {
+                      label: 'Option 3',
+                      value: 'option3',
+                    },
+                  ],
+                  validate: (value) => {
+                    return value !== 'option2' ? true : 'Cannot be option2'
+                  },
+                },
+              ],
+            },
+          ],
+        }),
+      ],
+    }),
+    email: testEmailAdapter,
+    endpoints: [localAPIEndpoint, reInitEndpoint],
+    secret: 'TEST_SECRET',
+    sharp,
     telemetry: false,
     ...testConfig,
-    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
+    i18n: {
+      supportedLanguages: {
+        de,
+        en,
+        es,
+      },
+      ...(testConfig?.i18n || {}),
+    },
+    typescript: {
+      declare: {
+        ignoreTSError: true,
+      },
+      ...testConfig?.typescript,
+    },
   }
 
-  config.admin = {
-    autoLogin:
-      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
+  if (!config.admin) {
+    config.admin = {}
+  }
+
+  if (config.admin.autoLogin === undefined) {
+    config.admin.autoLogin =
+      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' || options?.disableAutoLogin
         ? false
         : {
             email: 'dev@payloadcms.com',
-            password: 'test',
-          },
-    ...(config.admin || {}),
-    buildPath: path.resolve(__dirname, '../build'),
-    bundler: bundlerAdapters[process.env.PAYLOAD_BUNDLER || 'webpack'],
-    webpack: (webpackConfig) => {
-      const existingConfig =
-        typeof testConfig?.admin?.webpack === 'function'
-          ? testConfig.admin.webpack(webpackConfig)
-          : webpackConfig
-      return {
-        ...existingConfig,
-        name,
-        cache: process.env.NODE_ENV === 'test' ? { type: 'memory' } : existingConfig.cache,
-        entry: {
-          main: [
-            `webpack-hot-middleware/client?path=${
-              testConfig?.routes?.admin || '/admin'
-            }/__webpack_hmr`,
-            path.resolve(__dirname, '../packages/payload/src/admin'),
-          ],
-        },
-        resolve: {
-          ...existingConfig.resolve,
-          alias: {
-            ...existingConfig.resolve?.alias,
-            [path.resolve(__dirname, '../packages/bundler-vite/src/index')]: path.resolve(
-              __dirname,
-              '../packages/bundler-vite/mock.js',
-            ),
-            [path.resolve(__dirname, '../packages/bundler-webpack/src/index')]: path.resolve(
-              __dirname,
-              '../packages/bundler-webpack/src/mocks/emptyModule.js',
-            ),
-            [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(
-              __dirname,
-              '../packages/db-mongodb/mock.js',
-            ),
-            [path.resolve(__dirname, '../packages/db-postgres/src/index')]: path.resolve(
-              __dirname,
-              '../packages/db-postgres/mock.js',
-            ),
-            react: path.resolve(__dirname, '../packages/payload/node_modules/react'),
-          },
-        },
-      }
-    },
+          }
   }
 
   if (process.env.PAYLOAD_DISABLE_ADMIN === 'true') {
-    if (typeof config.admin !== 'object') config.admin = {}
+    if (typeof config.admin !== 'object') {
+      config.admin = {}
+    }
     config.admin.disable = true
   }
 
-  return buildPayloadConfig(config)
+  return await buildConfig(config)
 }

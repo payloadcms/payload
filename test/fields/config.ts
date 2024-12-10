@@ -1,40 +1,57 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+import type { CollectionConfig } from 'payload'
+
+import { fileURLToPath } from 'node:url'
 import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
-import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
-
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import ArrayFields from './collections/Array'
-import BlockFields from './collections/Blocks'
-import CheckboxFields from './collections/Checkbox'
-import CodeFields from './collections/Code'
-import CollapsibleFields from './collections/Collapsible'
-import ConditionalLogic from './collections/ConditionalLogic'
-import DateFields from './collections/Date'
-import GroupFields from './collections/Group'
-import IndexedFields from './collections/Indexed'
-import JSONFields from './collections/JSON'
-import { LexicalFields } from './collections/Lexical'
-import { LexicalMigrateFields } from './collections/LexicalMigrate'
-import NumberFields from './collections/Number'
-import PointFields from './collections/Point'
-import RadioFields from './collections/Radio'
-import RelationshipFields from './collections/Relationship'
-import RichTextFields from './collections/RichText'
-import RowFields from './collections/Row'
-import SelectFields from './collections/Select'
-import TabsFields from './collections/Tabs'
-import TextFields from './collections/Text'
-import Uploads from './collections/Upload'
-import Uploads2 from './collections/Upload2'
-import Uploads3 from './collections/Uploads3'
-import TabsWithRichText from './globals/TabsWithRichText'
-import { clearAndSeedEverything } from './seed'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import ArrayFields from './collections/Array/index.js'
+import BlockFields from './collections/Blocks/index.js'
+import CheckboxFields from './collections/Checkbox/index.js'
+import CodeFields from './collections/Code/index.js'
+import CollapsibleFields from './collections/Collapsible/index.js'
+import ConditionalLogic from './collections/ConditionalLogic/index.js'
+import { CustomIdCollection } from './collections/CustomID/index.js'
+import DateFields from './collections/Date/index.js'
+import EmailFields from './collections/Email/index.js'
+import GroupFields from './collections/Group/index.js'
+import IndexedFields from './collections/Indexed/index.js'
+import JSONFields from './collections/JSON/index.js'
+import { LexicalFields } from './collections/Lexical/index.js'
+import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
+import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
+import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
+import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
+import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
+import NumberFields from './collections/Number/index.js'
+import PointFields from './collections/Point/index.js'
+import RadioFields from './collections/Radio/index.js'
+import RelationshipFields from './collections/Relationship/index.js'
+import RichTextFields from './collections/RichText/index.js'
+import RowFields from './collections/Row/index.js'
+import SelectFields from './collections/Select/index.js'
+import TabsFields from './collections/Tabs/index.js'
+import { TabsFields2 } from './collections/Tabs2/index.js'
+import TextFields from './collections/Text/index.js'
+import UIFields from './collections/UI/index.js'
+import Uploads from './collections/Upload/index.js'
+import Uploads2 from './collections/Upload2/index.js'
+import UploadsMulti from './collections/UploadMulti/index.js'
+import UploadsMultiPoly from './collections/UploadMultiPoly/index.js'
+import UploadsPoly from './collections/UploadPoly/index.js'
+import UploadRestricted from './collections/UploadRestricted/index.js'
+import Uploads3 from './collections/Uploads3/index.js'
+import TabsWithRichText from './globals/TabsWithRichText.js'
+import { clearAndSeedEverything } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
   LexicalFields,
   LexicalMigrateFields,
+  LexicalLocalizedFields,
+  LexicalObjectReferenceBugCollection,
   {
+    slug: 'users',
     admin: {
       useAsTitle: 'email',
     },
@@ -42,19 +59,22 @@ export const collectionSlugs: CollectionConfig[] = [
     fields: [
       {
         name: 'canViewConditionalField',
-        defaultValue: true,
         type: 'checkbox',
+        defaultValue: true,
       },
     ],
-    slug: 'users',
   },
+  LexicalInBlock,
+
   ArrayFields,
   BlockFields,
   CheckboxFields,
   CodeFields,
   CollapsibleFields,
   ConditionalLogic,
+  CustomIdCollection,
   DateFields,
+  EmailFields,
   RadioFields,
   GroupFields,
   RowFields,
@@ -63,36 +83,57 @@ export const collectionSlugs: CollectionConfig[] = [
   NumberFields,
   PointFields,
   RelationshipFields,
+  LexicalRelationshipsFields,
   RichTextFields,
   SelectFields,
+  TabsFields2,
   TabsFields,
   TextFields,
   Uploads,
   Uploads2,
   Uploads3,
+  UploadsMulti,
+  UploadsPoly,
+  UploadsMultiPoly,
+  UploadRestricted,
+  UIFields,
 ]
 
 export default buildConfigWithDefaults({
-  admin: {
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
-        },
-      },
-    }),
-  },
   collections: collectionSlugs,
   globals: [TabsWithRichText],
+  custom: {
+    client: {
+      'new-value': 'client available',
+    },
+    server: {
+      'new-server-value': 'only available on server',
+    },
+  },
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+    components: {
+      afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
+    },
+    custom: {
+      client: {
+        'new-value': 'client available',
+      },
+    },
+  },
   localization: {
     defaultLocale: 'en',
     fallback: true,
     locales: ['en', 'es'],
   },
   onInit: async (payload) => {
-    await clearAndSeedEverything(payload)
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await clearAndSeedEverything(payload)
+    }
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

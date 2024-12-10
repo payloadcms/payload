@@ -5,21 +5,21 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
+      "source.fixAll.eslint": "explicit"
     }
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
+      "source.fixAll.eslint": "explicit"
     }
   },
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
+      "source.fixAll.eslint": "explicit"
     }
   },
   "[json]": {
@@ -31,9 +31,26 @@
     "editor.formatOnSave": true
   },
   "editor.formatOnSaveMode": "file",
-  // All ESLint rules to 'warn' to differentate from TypeScript's 'error' level
-  "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
+  "eslint.rules.customizations": [
+    // Defaultt all ESLint errors to 'warn' to differentate from TypeScript's 'error' level
+    { "rule": "*", "severity": "warn" },
+
+    // Silence some warnings that will get auto-fixed
+    { "rule": "perfectionist/*", "severity": "off", "fixable": true },
+    { "rule": "curly", "severity": "off", "fixable": true },
+    { "rule": "object-shorthand", "severity": "off", "fixable": true }
+  ],
   "typescript.tsdk": "node_modules/typescript/lib",
   // Load .git-blame-ignore-revs file
-  "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"]
+  "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
+  "[javascript][typescript][typescriptreact]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
+  "files.insertFinalNewline": true,
+  "jestrunner.jestCommand": "pnpm exec cross-env NODE_OPTIONS=\"--no-deprecation\" node 'node_modules/jest/bin/jest.js'",
+  "jestrunner.debugOptions": {
+    "runtimeArgs": ["--no-deprecation"]
+  }
 }

@@ -1,17 +1,7 @@
-import React from 'react'
+import type { RichTextCustomLeaf } from '../../../types.js'
 
-import ItalicIcon from '../../icons/Italic'
-import LeafButton from '../Button'
-
-const Italic = ({ attributes, children }) => <em {...attributes}>{children}</em>
-
-const italic = {
-  Button: () => (
-    <LeafButton format="italic">
-      <ItalicIcon />
-    </LeafButton>
-  ),
-  Leaf: Italic,
+export const italic: RichTextCustomLeaf = {
+  name: 'italic',
+  Button: '@payloadcms/richtext-slate/client#ItalicLeafButton',
+  Leaf: '@payloadcms/richtext-slate/client#ItalicLeaf',
 }
-
-export default italic

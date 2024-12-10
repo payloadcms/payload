@@ -1,73 +1,59 @@
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
-import type { Document } from '../../../types'
-import type { TypeWithVersion } from '../../../versions/types'
+import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
+import type { TypeWithVersion } from '../../../versions/types.js'
+import type { DataFromGlobalSlug } from '../../config/types.js'
 
-import { getDataLoader } from '../../../collections/dataloader'
-import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import findVersionByID from '../findVersionByID'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { findVersionByIDOperation } from '../findVersionByID.js'
 
-export type Options<T extends keyof GeneratedTypes['globals']> = {
+export type Options<TSlug extends GlobalSlug> = {
+  context?: RequestContext
   depth?: number
   disableErrors?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: false | TypedLocale
   id: string
-  locale?: string
+  locale?: 'all' | TypedLocale
   overrideAccess?: boolean
+  populate?: PopulateType
   req?: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
-  slug: T
+  slug: TSlug
   user?: Document
 }
 
-export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['globals']>(
+// eslint-disable-next-line no-restricted-exports
+export default async function findVersionByIDLocal<TSlug extends GlobalSlug>(
   payload: Payload,
-  options: Options<T>,
-): Promise<TypeWithVersion<GeneratedTypes['globals'][T]>> {
+  options: Options<TSlug>,
+): Promise<TypeWithVersion<DataFromGlobalSlug<TSlug>>> {
   const {
     id,
+    slug: globalSlug,
     depth,
     disableErrors = false,
-    fallbackLocale = null,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
+    populate,
+    select,
     showHiddenFields,
-    slug: globalSlug,
-    user,
-    req: incomingReq,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
-  const i18n = i18nInit(payload.config.i18n)
 
   if (!globalConfig) {
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
-  const req = {
-    fallbackLocale,
-    i18n,
-    locale,
-    payload,
-    payloadAPI: 'local',
-    t: i18n.t,
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req)
-
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
-  return findVersionByID({
+  return findVersionByIDOperation({
     id,
     depth,
     disableErrors,
     globalConfig,
     overrideAccess,
-    req,
+    populate,
+    req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
   })
 }

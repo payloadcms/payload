@@ -1,88 +1,109 @@
-import * as dotenv from 'dotenv'
-import express from 'express'
-import fs from 'fs'
-import path from 'path'
-import { v4 as uuid } from 'uuid'
+import chalk from 'chalk'
+import { createServer } from 'http'
+import minimist from 'minimist'
+import nextImport from 'next'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import open from 'open'
+import { loadEnv } from 'payload/node'
+import { parse } from 'url'
 
-import payload from '../packages/payload/src'
-import { prettySyncLoggerDestination } from '../packages/payload/src/utilities/logger'
-import { startLivePreviewDemo } from './live-preview/startLivePreviewDemo'
+import { getNextRootDir } from './helpers/getNextRootDir.js'
+import startMemoryDB from './helpers/startMemoryDB.js'
+import { runInit } from './runInit.js'
+import { child, safelyRunScriptFunction } from './safelyRunScript.js'
+import { createTestHooks } from './testHooks.js'
 
-dotenv.config()
-
-const [testSuiteDir] = process.argv.slice(4)
-
-/**
- * The default logger's options did not allow for forcing sync logging
- * Using these options, to force both pretty print and sync logging
- */
-const prettySyncLogger = {
-  loggerDestination: prettySyncLoggerDestination,
-  loggerOptions: {},
+const prod = process.argv.includes('--prod')
+if (prod) {
+  process.argv = process.argv.filter((arg) => arg !== '--prod')
+  process.env.PAYLOAD_TEST_PROD = 'true'
 }
 
-if (!testSuiteDir) {
-  console.error('ERROR: You must provide an argument for "testSuiteDir"')
-  process.exit(1)
+const shouldStartMemoryDB =
+  process.argv.includes('--start-memory-db') || process.env.START_MEMORY_DB === 'true'
+if (shouldStartMemoryDB) {
+  process.argv = process.argv.filter((arg) => arg !== '--start-memory-db')
+  process.env.START_MEMORY_DB = 'true'
 }
 
-const configPath = path.resolve(__dirname, testSuiteDir, 'config.ts')
+loadEnv()
 
-if (!fs.existsSync(configPath)) {
-  console.error('ERROR: You must pass a valid directory under test/ that contains a config.ts')
-  process.exit(1)
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+const {
+  _: [testSuiteArg],
+  ...args
+} = minimist(process.argv.slice(2))
+
+if (!fs.existsSync(path.resolve(dirname, testSuiteArg))) {
+  console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
+  process.exit(0)
 }
 
-process.env.PAYLOAD_CONFIG_PATH = configPath
-
-// Default to true unless explicitly set to false
-if (process.env.PAYLOAD_DROP_DATABASE === 'false') {
-  process.env.PAYLOAD_DROP_DATABASE = 'false'
-} else {
-  process.env.PAYLOAD_DROP_DATABASE = 'true'
+if (args.turbo === true) {
+  process.env.TURBOPACK = '1'
 }
 
-if (process.argv.includes('--no-auto-login') && process.env.NODE_ENV !== 'production') {
-  process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN = 'true'
+const { beforeTest } = await createTestHooks(testSuiteArg)
+await beforeTest()
+
+const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
+
+await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
+
+if (shouldStartMemoryDB) {
+  await startMemoryDB()
 }
 
-const expressApp = express()
+// Open the admin if the -o flag is passed
+if (args.o) {
+  await open(`http://localhost:3000${adminRoute}`)
+}
 
-const startDev = async () => {
-  await payload.init({
-    email: {
-      fromAddress: 'hello@payloadcms.com',
-      fromName: 'Payload',
-      logMockCredentials: false,
-    },
-    express: expressApp,
-    secret: uuid(),
-    ...prettySyncLogger,
-    onInit: async (payload) => {
-      payload.logger.info('Payload Dev Server Initialized')
-    },
+const port = process.env.PORT ? Number(process.env.PORT) : 3000
+
+// @ts-expect-error the same as in test/helpers/initPayloadE2E.ts
+const app = nextImport({
+  dev: true,
+  hostname: 'localhost',
+  port,
+  dir: rootDir,
+})
+
+const handle = app.getRequestHandler()
+
+let resolveServer
+
+const serverPromise = new Promise((res) => (resolveServer = res))
+
+void app.prepare().then(() => {
+  createServer(async (req, res) => {
+    const parsedUrl = parse(req.url, true)
+    await handle(req, res, parsedUrl)
+  }).listen(port, () => {
+    resolveServer()
   })
+})
 
-  // Redirect root to Admin panel
-  expressApp.get('/', (_, res) => {
-    res.redirect('/admin')
-  })
+await serverPromise
+process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false' ? 'false' : 'true'
 
-  const externalRouter = express.Router()
-
-  externalRouter.use(payload.authenticate)
-
-  if (testSuiteDir === 'live-preview') {
-    await startLivePreviewDemo({
-      payload,
-    })
+// fetch the admin url to force a render
+void fetch(`http://localhost:${port}${adminRoute}`)
+void fetch(`http://localhost:${port}/api/access`)
+// This ensures that the next-server process is killed when this process is killed and doesn't linger around.
+process.on('SIGINT', () => {
+  if (child) {
+    child.kill('SIGINT')
   }
-
-  expressApp.listen(3000, async () => {
-    payload.logger.info(`Admin URL on http://localhost:3000${payload.getAdminURL()}`)
-    payload.logger.info(`API URL on http://localhost:3000${payload.getAPIURL()}`)
-  })
-}
-
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-startDev()
+  process.exit(0)
+})
+process.on('SIGTERM', () => {
+  if (child) {
+    child.kill('SIGINT')
+  }
+  process.exit(0) // Exit the parent process
+})

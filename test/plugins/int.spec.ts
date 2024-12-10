@@ -1,18 +1,25 @@
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
-import configPromise, { pagesSlug } from './config'
+import type { Payload } from 'payload'
 
-require('isomorphic-fetch')
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-let client
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { pagesSlug } from './config.js'
+
+let payload: Payload
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 describe('Collections - Plugins', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    const config = await configPromise
-    client = new RESTClient(config, { serverURL, defaultSlug: pagesSlug })
-    await client.login()
+    ;({ payload } = await initPayloadInt(dirname))
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   it('created pages collection', async () => {

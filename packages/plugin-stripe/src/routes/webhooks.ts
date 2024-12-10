@@ -1,26 +1,24 @@
-import type { Response } from 'express'
-import type { Config as PayloadConfig } from 'payload/config'
-import type { PayloadRequest } from 'payload/dist/types'
+import type { Config as PayloadConfig, PayloadRequest } from 'payload'
 
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types'
+import type { StripePluginConfig } from '../types.js'
 
-import { handleWebhooks } from '../webhooks'
+import { handleWebhooks } from '../webhooks/index.js'
 
 export const stripeWebhooks = async (args: {
   config: PayloadConfig
-  next: any
+  pluginConfig: StripePluginConfig
   req: PayloadRequest
-  res: Response
-  stripeConfig: StripeConfig
 }): Promise<any> => {
-  const { config, req, res, stripeConfig } = args
+  const { config, pluginConfig, req } = args
+  let returnStatus = 200
 
-  const { stripeSecretKey, stripeWebhooksEndpointSecret, webhooks } = stripeConfig
+  const { stripeSecretKey, stripeWebhooksEndpointSecret, webhooks } = pluginConfig
 
   if (stripeWebhooksEndpointSecret) {
     const stripe = new Stripe(stripeSecretKey, {
+      // api version can only be the latest, stripe recommends ts ignoring it
       apiVersion: '2022-08-01',
       appInfo: {
         name: 'Stripe Payload Plugin',
@@ -28,21 +26,18 @@ export const stripeWebhooks = async (args: {
       },
     })
 
-    const stripeSignature = req.headers['stripe-signature']
+    const body = await req.text()
+    const stripeSignature = req.headers.get('stripe-signature')
 
     if (stripeSignature) {
       let event: Stripe.Event | undefined
 
       try {
-        event = stripe.webhooks.constructEvent(
-          req.body,
-          stripeSignature,
-          stripeWebhooksEndpointSecret,
-        )
+        event = stripe.webhooks.constructEvent(body, stripeSignature, stripeWebhooksEndpointSecret)
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : err
+        const msg: string = err instanceof Error ? err.message : JSON.stringify(err)
         req.payload.logger.error(`Error constructing Stripe event: ${msg}`)
-        res.status(400)
+        returnStatus = 400
       }
 
       if (event) {
@@ -50,8 +45,9 @@ export const stripeWebhooks = async (args: {
           config,
           event,
           payload: req.payload,
+          pluginConfig,
+          req,
           stripe,
-          stripeConfig,
         })
 
         // Fire external webhook handlers if they exist
@@ -60,8 +56,9 @@ export const stripeWebhooks = async (args: {
             config,
             event,
             payload: req.payload,
+            pluginConfig,
+            req,
             stripe,
-            stripeConfig,
           })
         }
 
@@ -72,8 +69,9 @@ export const stripeWebhooks = async (args: {
               config,
               event,
               payload: req.payload,
+              pluginConfig,
+              req,
               stripe,
-              stripeConfig,
             })
           }
         }
@@ -81,5 +79,10 @@ export const stripeWebhooks = async (args: {
     }
   }
 
-  res.json({ received: true })
+  return Response.json(
+    { received: true },
+    {
+      status: returnStatus,
+    },
+  )
 }

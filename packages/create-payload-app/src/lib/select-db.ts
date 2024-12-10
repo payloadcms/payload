@@ -1,10 +1,11 @@
+import * as p from '@clack/prompts'
 import slugify from '@sindresorhus/slugify'
-import prompts from 'prompts'
 
-import type { CliArgs, DbDetails, DbType } from '../types'
+import type { CliArgs, DbDetails, DbType } from '../types.js'
 
 type DbChoice = {
   dbConnectionPrefix: `${string}/`
+  dbConnectionSuffix?: string
   title: string
   value: DbType
 }
@@ -16,14 +17,25 @@ const dbChoiceRecord: Record<DbType, DbChoice> = {
     value: 'mongodb',
   },
   postgres: {
-    dbConnectionPrefix: 'postgres://127.0.0.1:5432/',
-    title: 'PostgreSQL (beta)',
+    dbConnectionPrefix: 'postgres://postgres:<password>@127.0.0.1:5432/',
+    title: 'PostgreSQL',
     value: 'postgres',
+  },
+  sqlite: {
+    dbConnectionPrefix: 'file:./',
+    dbConnectionSuffix: '.db',
+    title: 'SQLite',
+    value: 'sqlite',
+  },
+  'vercel-postgres': {
+    dbConnectionPrefix: 'postgres://postgres:<password>@127.0.0.1:5432/',
+    title: 'Vercel Postgres',
+    value: 'vercel-postgres',
   },
 }
 
 export async function selectDb(args: CliArgs, projectName: string): Promise<DbDetails> {
-  let dbType: DbType | undefined = undefined
+  let dbType: DbType | symbol | undefined = undefined
   if (args['--db']) {
     if (!Object.values(dbChoiceRecord).some((dbChoice) => dbChoice.value === args['--db'])) {
       throw new Error(
@@ -34,50 +46,43 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
     }
     dbType = args['--db'] as DbType
   } else {
-    const dbTypeRes = await prompts(
-      {
-        name: 'value',
-        choices: Object.values(dbChoiceRecord).map((dbChoice) => {
-          return {
-            title: dbChoice.title,
-            value: dbChoice.value,
-          }
-        }),
-        message: 'Select a database',
-        type: 'select',
-        validate: (value: string) => !!value.length,
-      },
-      {
-        onCancel: () => {
-          process.exit(0)
-        },
-      },
-    )
-    dbType = dbTypeRes.value
+    dbType = await p.select<{ label: string; value: DbType }[], DbType>({
+      initialValue: 'mongodb',
+      message: `Select a database`,
+      options: Object.values(dbChoiceRecord).map((dbChoice) => ({
+        label: dbChoice.title,
+        value: dbChoice.value,
+      })),
+    })
+    if (p.isCancel(dbType)) {
+      process.exit(0)
+    }
   }
 
   const dbChoice = dbChoiceRecord[dbType]
 
-  const dbUriRes = await prompts(
-    {
-      name: 'value',
-      initial: `${dbChoice.dbConnectionPrefix}${
-        projectName === '.' ? `payload-${getRandomDigitSuffix()}` : slugify(projectName)
-      }`,
+  let dbUri: string | symbol | undefined = undefined
+  const initialDbUri = `${dbChoice.dbConnectionPrefix}${
+    projectName === '.' ? `payload-${getRandomDigitSuffix()}` : slugify(projectName)
+  }${dbChoice.dbConnectionSuffix || ''}`
+
+  if (args['--db-accept-recommended']) {
+    dbUri = initialDbUri
+  } else if (args['--db-connection-string']) {
+    dbUri = args['--db-connection-string']
+  } else {
+    dbUri = await p.text({
+      initialValue: initialDbUri,
       message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
-      type: 'text',
-      validate: (value: string) => !!value.length,
-    },
-    {
-      onCancel: () => {
-        process.exit(0)
-      },
-    },
-  )
+    })
+    if (p.isCancel(dbUri)) {
+      process.exit(0)
+    }
+  }
 
   return {
-    dbUri: dbUriRes.value,
     type: dbChoice.value,
+    dbUri,
   }
 }
 

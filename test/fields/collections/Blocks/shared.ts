@@ -1,4 +1,4 @@
-import type { BlockField } from '../../payload-types'
+import type { BlockField } from '../../payload-types.js'
 
 export const getBlocksFieldSeedData = (prefix?: string): any => [
   {
@@ -31,11 +31,6 @@ export const getBlocksFieldSeedData = (prefix?: string): any => [
         text: 'second sub block',
       },
     ],
-  },
-  {
-    blockName: 'I18n Block',
-    blockType: 'i18n-text',
-    text: 'first block',
   },
 ]
 

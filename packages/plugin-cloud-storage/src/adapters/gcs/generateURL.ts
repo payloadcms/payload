@@ -2,7 +2,7 @@ import type { Storage } from '@google-cloud/storage'
 
 import path from 'path'
 
-import type { GenerateURL } from '../../types'
+import type { GenerateURL } from '../../types.js'
 
 interface Args {
   bucket: string

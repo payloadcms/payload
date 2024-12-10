@@ -1,30 +1,27 @@
 import type { SerializedEditorState } from 'lexical'
-import type { RichTextField, Validate } from 'payload/types'
+import type { RichTextField, Validate } from 'payload'
 
-import type { SanitizedEditorConfig } from '../field/lexical/config/types'
+import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 
-import { defaultRichTextValue, defaultRichTextValueV2 } from '../populate/defaultValue'
-import { validateNodes } from './validateNodes'
+import { hasText } from './hasText.js'
+import { validateNodes } from './validateNodes.js'
 
-export const richTextValidateHOC = ({ editorConfig }: { editorConfig: SanitizedEditorConfig }) => {
-  const richTextValidate: Validate<
-    SerializedEditorState,
-    SerializedEditorState,
-    unknown,
-    RichTextField
-  > = async (value, options) => {
-    const { required, t } = options
+export const richTextValidateHOC = ({
+  editorConfig,
+}: {
+  editorConfig: SanitizedServerEditorConfig
+}) => {
+  const richTextValidate: Validate<SerializedEditorState, unknown, unknown, RichTextField> = async (
+    value,
+    options,
+  ) => {
+    const {
+      req: { t },
+      required,
+    } = options
 
-    if (required) {
-      if (
-        !value ||
-        !value?.root?.children ||
-        !value?.root?.children?.length ||
-        JSON.stringify(value) === JSON.stringify(defaultRichTextValue) ||
-        JSON.stringify(value) === JSON.stringify(defaultRichTextValueV2)
-      ) {
-        return t('validation:required')
-      }
+    if (required && hasText(value) === false) {
+      return t('validation:required')
     }
 
     // Traverse through nodes and validate them. Just like a node can hook into the population process (e.g. link or relationship nodes),
@@ -33,9 +30,8 @@ export const richTextValidateHOC = ({ editorConfig }: { editorConfig: SanitizedE
     const rootNodes = value?.root?.children
     if (rootNodes && Array.isArray(rootNodes) && rootNodes?.length) {
       return await validateNodes({
-        nodeValidations: editorConfig.features.validations,
         nodes: rootNodes,
-        payloadConfig: options.config,
+        nodeValidations: editorConfig.features.validations,
         validation: {
           options,
           value,

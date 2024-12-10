@@ -1,26 +1,34 @@
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types'
-import type { Operation } from '../../../types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { ValidationFieldError } from '../../../errors/index.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
 
-import { ValidationError } from '../../../errors'
-import { deepCopyObject } from '../../../utilities/deepCopyObject'
-import { traverseFields } from './traverseFields'
-
-type Args<T> = {
-  collection: SanitizedCollectionConfig | null
+import { ValidationError } from '../../../errors/index.js'
+import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
+import { traverseFields } from './traverseFields.js'
+export type Args<T extends JsonObject> = {
+  collection: null | SanitizedCollectionConfig
   context: RequestContext
-  data: Record<string, unknown> | T
-  doc: Record<string, unknown> | T
-  docWithLocales: Record<string, unknown>
-  global: SanitizedGlobalConfig | null
+  data: T
+  doc: T
+  docWithLocales: JsonObject
+  global: null | SanitizedGlobalConfig
   id?: number | string
   operation: Operation
   req: PayloadRequest
   skipValidation?: boolean
 }
 
-export const beforeChange = async <T extends Record<string, unknown>>({
+/**
+ * This function is responsible for the following actions, in order:
+ * - Run condition
+ * - Execute field hooks
+ * - Validate data
+ * - Transform data for storage
+ * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
+ */
+export const beforeChange = async <T extends JsonObject>({
   id,
   collection,
   context,
@@ -32,9 +40,9 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   req,
   skipValidation,
 }: Args<T>): Promise<T> => {
-  const data = deepCopyObject(incomingData)
+  const data = deepCopyObjectSimple(incomingData)
   const mergeLocaleActions = []
-  const errors: { field: string; message: string }[] = []
+  const errors: ValidationFieldError[] = []
 
   await traverseFields({
     id,
@@ -48,8 +56,9 @@ export const beforeChange = async <T extends Record<string, unknown>>({
     global,
     mergeLocaleActions,
     operation,
-    path: '',
+    path: [],
     req,
+    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
@@ -57,10 +66,21 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   })
 
   if (errors.length > 0) {
-    throw new ValidationError(errors, req.t)
+    throw new ValidationError(
+      {
+        id,
+        collection: collection?.slug,
+        errors,
+        global: global?.slug,
+      },
+      req.t,
+    )
   }
 
-  mergeLocaleActions.forEach((action) => action())
+  await mergeLocaleActions.reduce(async (priorAction, action) => {
+    await priorAction
+    await action()
+  }, Promise.resolve())
 
   return data
 }

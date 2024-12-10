@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload'
 
-import { radioFieldsSlug } from '../../slugs'
+import { radioFieldsSlug } from '../../slugs.js'
 
 const RadioFields: CollectionConfig = {
   slug: radioFieldsSlug,

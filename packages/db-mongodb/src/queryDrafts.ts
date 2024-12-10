@@ -1,22 +1,34 @@
 import type { PaginateOptions } from 'mongoose'
-import type { QueryDrafts } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequest, QueryDrafts } from 'payload'
 
-import { combineQueries, flattenWhereToOperators } from 'payload/database'
+import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.js'
 
-import { buildSortParam } from './queries/buildSortParam'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
+import { buildSortParam } from './queries/buildSortParam.js'
+import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { withSession } from './withSession.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
-  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
+  {
+    collection,
+    joins,
+    limit,
+    locale,
+    page,
+    pagination,
+    req = {} as PayloadRequest,
+    select,
+    sort: sortArg,
+    where,
+  },
 ) {
   const VersionModel = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   let hasNearConstraint
   let sort
@@ -29,7 +41,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
-      fields: collectionConfig.fields,
+      fields: collectionConfig.flattenedFields,
       locale,
       sort: sortArg || collectionConfig.defaultSort,
       timestamps: true,
@@ -44,22 +56,42 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     where: combinedWhere,
   })
 
+  const projection = buildProjectionFromSelect({
+    adapter: this,
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
+    select,
+  })
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
     options,
     page,
     pagination,
+    projection,
     sort,
     useEstimatedCount,
   }
 
-  if (!useEstimatedCount && this.disableIndexHints !== true) {
-    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding a hint.
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
+  }
+
+  if (
+    !useEstimatedCount &&
+    Object.keys(versionQuery).length === 0 &&
+    this.disableIndexHints !== true
+  ) {
+    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
+    // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
+    // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
+    // the correct indexed field
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         VersionModel.countDocuments(versionQuery, {
@@ -75,19 +107,38 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     paginationOptions.options.limit = limit
   }
 
-  const result = await VersionModel.paginate(versionQuery, paginationOptions)
+  let result
+
+  const aggregate = await buildJoinAggregation({
+    adapter: this,
+    collection,
+    collectionConfig,
+    joins,
+    locale,
+    projection,
+    query: versionQuery,
+    versions: true,
+  })
+
+  // build join aggregation
+  if (aggregate) {
+    result = await VersionModel.aggregatePaginate(
+      VersionModel.aggregate(aggregate),
+      paginationOptions,
+    )
+  } else {
+    result = await VersionModel.paginate(versionQuery, paginationOptions)
+  }
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,
     docs: docs.map((doc) => {
-      // eslint-disable-next-line no-param-reassign
       doc = {
         _id: doc.parent,
         id: doc.parent,
         ...doc.version,
-        createdAt: doc.createdAt,
-        updatedAt: doc.updatedAt,
       }
 
       return sanitizeInternalFields(doc)

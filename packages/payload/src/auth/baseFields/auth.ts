@@ -1,44 +1,24 @@
-import type { Field } from '../../fields/config/types'
+import type { Field } from '../../fields/config/types.js'
 
-import { email } from '../../fields/validations'
-import { extractTranslations } from '../../translations/extractTranslations'
-
-const labels = extractTranslations(['general:email'])
-
-const baseAuthFields: Field[] = [
-  {
-    name: 'email',
-    admin: {
-      components: {
-        Field: () => null,
-      },
-    },
-    label: labels['general:email'],
-    required: true,
-    type: 'email',
-    unique: true,
-    validate: email,
-  },
+export const baseAuthFields: Field[] = [
   {
     name: 'resetPasswordToken',
-    hidden: true,
     type: 'text',
+    hidden: true,
   },
   {
     name: 'resetPasswordExpiration',
-    hidden: true,
     type: 'date',
+    hidden: true,
   },
   {
     name: 'salt',
-    hidden: true,
     type: 'text',
+    hidden: true,
   },
   {
     name: 'hash',
-    hidden: true,
     type: 'text',
+    hidden: true,
   },
 ]
-
-export default baseAuthFields

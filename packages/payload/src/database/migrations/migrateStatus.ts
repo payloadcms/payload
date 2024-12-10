@@ -1,9 +1,9 @@
 import { Table } from 'console-table-printer'
 
-import type { BaseDatabaseAdapter } from '../types'
+import type { BaseDatabaseAdapter } from '../types.js'
 
-import { getMigrations } from './getMigrations'
-import { readMigrationFiles } from './readMigrationFiles'
+import { getMigrations } from './getMigrations.js'
+import { readMigrationFiles } from './readMigrationFiles.js'
 
 export async function migrateStatus(this: BaseDatabaseAdapter): Promise<void> {
   const { payload } = this
@@ -25,7 +25,7 @@ export async function migrateStatus(this: BaseDatabaseAdapter): Promise<void> {
     const existingMigration = existingMigrations.find((m) => m.name === migration.name)
     return {
       Name: migration.name,
-      // eslint-disable-next-line perfectionist/sort-objects
+
       Batch: existingMigration?.batch,
       Ran: existingMigration ? 'Yes' : 'No',
     }

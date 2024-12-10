@@ -1,32 +1,22 @@
-import type { SingleRelationshipField } from 'payload/types'
+import type { SingleRelationshipField } from 'payload'
 
-const createParentField = (
+export const createParentField = (
   relationTo: string,
   overrides?: Partial<
-    SingleRelationshipField & {
+    {
       hasMany: false
-    }
+    } & SingleRelationshipField
   >,
 ): SingleRelationshipField => ({
   name: 'parent',
-  relationTo,
-  type: 'relationship',
-  maxDepth: 1,
-  filterOptions: ({ id }) => {
-    if (id) {
-      return {
-        id: { not_equals: id },
-        'breadcrumbs.doc': { not_in: [id] },
-      }
-    }
-
-    return null
-  },
   admin: {
     position: 'sidebar',
     ...(overrides?.admin || {}),
   },
+  // filterOptions are assigned dynamically based on the pluginConfig
+  // filterOptions: parentFilterOptions(),
+  type: 'relationship',
+  maxDepth: 1,
+  relationTo,
   ...(overrides || {}),
 })
-
-export default createParentField

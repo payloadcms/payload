@@ -1,19 +1,27 @@
-/* eslint-disable no-underscore-dangle */
-import memoize from 'micro-memoize'
+import type { FindOneArgs } from '../../database/types.js'
+import type { CollectionSlug, JoinQuery } from '../../index.js'
+import type {
+  ApplyDisableErrors,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../config/types.js'
 
-import type { FindOneArgs } from '../../database/types'
-import type { PayloadRequest } from '../../express/types'
-import type { Collection, TypeWithID } from '../config/types'
-
-import executeAccess from '../../auth/executeAccess'
-import { combineQueries } from '../../database/combineQueries'
-import { NotFound } from '../../errors'
-import { afterRead } from '../../fields/hooks/afterRead'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable'
-import { buildAfterOperation } from './utils'
+import executeAccess from '../../auth/executeAccess.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
+import { NotFound } from '../../errors/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { validateQueryPaths } from '../../index.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
   collection: Collection
@@ -22,46 +30,58 @@ export type Arguments = {
   disableErrors?: boolean
   draft?: boolean
   id: number | string
+  includeLockStatus?: boolean
+  joins?: JoinQuery
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<T> {
+export const findByIDOperation = async <
+  TSlug extends CollectionSlug,
+  TDisableErrors extends boolean,
+  TSelect extends SelectFromCollectionSlug<TSlug>,
+>(
+  incomingArgs: Arguments,
+): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection.config,
-        context: args.req.context,
-        operation: 'read',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    id,
-    collection: { config: collectionConfig },
-    currentDepth,
-    depth,
-    disableErrors,
-    draft: draftEnabled = false,
-    overrideAccess = false,
-    req: { locale, t },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
-    const { transactionID } = req
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection.config,
+          context: args.req.context,
+          operation: 'read',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      id,
+      collection: { config: collectionConfig },
+      currentDepth,
+      depth,
+      disableErrors,
+      draft: draftEnabled = false,
+      includeLockStatus,
+      joins,
+      overrideAccess = false,
+      populate,
+      req: { fallbackLocale, locale, t },
+      req,
+      select,
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Access
@@ -72,53 +92,113 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
       : true
 
     // If errors are disabled, and access returns false, return null
-    if (accessResult === false) return null
+    if (accessResult === false) {
+      return null
+    }
+
+    const where = { id: { equals: id } }
+
+    const fullWhere = combineQueries(where, accessResult)
+
+    const sanitizedJoins = await sanitizeJoinQuery({
+      collectionConfig,
+      joins,
+      overrideAccess,
+      req,
+    })
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
+      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
       locale,
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
-      where: combineQueries({ id: { equals: id } }, accessResult),
+      select,
+      where: fullWhere,
     }
 
+    // execute only if there's a custom ID and potentially overwriten access on id
+    if (req.payload.collections[collectionConfig.slug].customIDType) {
+      await validateQueryPaths({
+        collectionConfig,
+        overrideAccess,
+        req,
+        where,
+      })
+    }
     // /////////////////////////////////////
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findOneArgs.where.and[0].id) throw new NotFound(t)
-
-    if (!req.findByID) {
-      req.findByID = { [transactionID]: {} }
-    } else if (!req.findByID[transactionID]) {
-      req.findByID[transactionID] = {}
+    if (!findOneArgs.where.and[0].id) {
+      throw new NotFound(t)
     }
 
-    if (!req.findByID[transactionID][collectionConfig.slug]) {
-      const nonMemoizedFindByID = async (query: FindOneArgs) => req.payload.db.findOne(query)
-
-      req.findByID[transactionID][collectionConfig.slug] = memoize(nonMemoizedFindByID, {
-        isPromise: true,
-        maxSize: 100,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore This is straight from their docs, bad typings
-        transformKey: JSON.stringify,
-      })
-    }
-
-    let result = (await req.findByID[transactionID][collectionConfig.slug](findOneArgs)) as T
+    let result: DataFromCollectionSlug<TSlug> = await req.payload.db.findOne(findOneArgs)
 
     if (!result) {
       if (!disableErrors) {
-        throw new NotFound(t)
+        throw new NotFound(req.t)
       }
 
       return null
     }
 
-    // Clone the result - it may have come back memoized
-    result = JSON.parse(JSON.stringify(result))
+    // /////////////////////////////////////
+    // Include Lock Status if required
+    // /////////////////////////////////////
+
+    if (includeLockStatus && id) {
+      let lockStatus = null
+
+      try {
+        const lockDocumentsProp = collectionConfig?.lockDocuments
+
+        const lockDurationDefault = 300 // Default 5 minutes in seconds
+        const lockDuration =
+          typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
+        const lockDurationInMilliseconds = lockDuration * 1000
+
+        const lockedDocument = await req.payload.find({
+          collection: 'payload-locked-documents',
+          depth: 1,
+          limit: 1,
+          overrideAccess: false,
+          pagination: false,
+          req,
+          where: {
+            and: [
+              {
+                'document.relationTo': {
+                  equals: collectionConfig.slug,
+                },
+              },
+              {
+                'document.value': {
+                  equals: id,
+                },
+              },
+              // Query where the lock is newer than the current time minus lock time
+              {
+                updatedAt: {
+                  greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
+                },
+              },
+            ],
+          },
+        })
+
+        if (lockedDocument && lockedDocument.docs.length > 0) {
+          lockStatus = lockedDocument.docs[0]
+        }
+      } catch {
+        // swallow error
+      }
+
+      result._isLocked = !!lockStatus
+      result._userEditing = lockStatus?.user?.value ?? null
+    }
 
     // /////////////////////////////////////
     // Replace document with draft if available
@@ -132,6 +212,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
         entityType: 'collection',
         overrideAccess,
         req,
+        select,
       })
     }
 
@@ -162,9 +243,14 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
       currentDepth,
       depth,
       doc: result,
+      draft: draftEnabled,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
+      populate,
       req,
+      select,
       showHiddenFields,
     })
 
@@ -189,24 +275,23 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     // afterOperation - Collection
     // /////////////////////////////////////
 
-    result = await buildAfterOperation<T>({
+    result = await buildAfterOperation({
       args,
       collection: collectionConfig,
       operation: 'findByID',
-      result: result as any,
-    }) // TODO: fix this typing
+      result,
+    })
 
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await commitTransaction(req)
-
-    return result
+    return result as ApplyDisableErrors<
+      TransformCollectionWithSelect<TSlug, TSelect>,
+      TDisableErrors
+    >
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }
-
-export default findByID

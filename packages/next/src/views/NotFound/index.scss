@@ -1,0 +1,57 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .not-found {
+    margin-top: var(--base);
+    display: flex;
+
+    & > * {
+      &:first-child {
+        margin-top: 0;
+      }
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    &__wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: base(0.8);
+      max-width: base(36);
+    }
+
+    &__content {
+      display: flex;
+      flex-direction: column;
+      gap: base(0.4);
+
+      > * {
+        margin: 0;
+      }
+    }
+
+    &__button {
+      margin: 0;
+    }
+
+    &--margin-top-large {
+      margin-top: calc(var(--base) * 2);
+    }
+
+    @include large-break {
+      &--margin-top-large {
+        margin-top: var(--base);
+      }
+    }
+
+    @include small-break {
+      margin-top: calc(var(--base) / 2);
+
+      &--margin-top-large {
+        margin-top: calc(var(--base) / 2);
+      }
+    }
+  }
+}
