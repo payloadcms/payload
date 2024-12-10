@@ -25,25 +25,20 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
       headers.Authorization = `JWT ${jwt}`
     }
 
-    try {
-      const json: T = await fetch(`${this.serverURL}/api/local-api`, {
-        method: 'post',
-        headers,
-        body: JSON.stringify({
-          args,
-          operation,
-        }),
-      }).then((res) => res.json())
+    const json: T = await fetch(`${this.serverURL}/api/local-api`, {
+      method: 'post',
+      headers,
+      body: JSON.stringify({
+        args,
+        operation,
+      }),
+    }).then((res) => res.json())
 
-      if (reduceJSON) {
-        return reduceJSON<T>(json)
-      }
-
-      return json
-    } catch (error) {
-      console.error('error', error)
-      throw error
+    if (reduceJSON) {
+      return reduceJSON<T>(json)
     }
+
+    return json
   }
 
   create = async <T extends keyof TGeneratedTypes['collections']>({

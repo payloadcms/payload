@@ -10,11 +10,9 @@ export const handler: PayloadHandler = async (req) => {
 
   const operation = data?.operation ? String(data.operation) : undefined
 
-  const foundOperation = payload?.[operation]
-
-  if (data?.operation && typeof foundOperation === 'function') {
+  if (data?.operation && payload?.[operation]) {
     try {
-      const result = await foundOperation({
+      const result = await payload[operation]({
         ...(typeof data.args === 'object' ? data.args : {}),
         user,
       })

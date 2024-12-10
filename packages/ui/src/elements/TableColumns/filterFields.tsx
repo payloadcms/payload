@@ -1,6 +1,6 @@
 import type { ClientField, Field } from 'payload'
 
-import { fieldIsHiddenOrDisabled } from 'payload/shared'
+import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
 
 /**
  * Filters fields based on the following criteria:
@@ -9,7 +9,7 @@ import { fieldIsHiddenOrDisabled } from 'payload/shared'
  */
 export const filterFields = <T extends ClientField | Field>(incomingFields: T[]): T[] => {
   const shouldSkipField = (field: T): boolean =>
-    (field.type !== 'ui' && fieldIsHiddenOrDisabled(field)) ||
+    (field.type !== 'ui' && fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
     field?.admin?.disableListColumn === true
 
   const fields: T[] = incomingFields?.reduce((formatted, field) => {
