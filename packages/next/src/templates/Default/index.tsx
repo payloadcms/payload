@@ -48,10 +48,8 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     } = {},
   } = payload.config || {}
 
-  const { Actions } = React.useMemo<{
-    Actions: Record<string, React.ReactNode>
-  }>(() => {
-    const viewActionServerProps = {
+  const serverProps = React.useMemo<ServerProps>(
+    () => ({
       i18n,
       locale,
       params,
@@ -59,7 +57,13 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       permissions,
       searchParams,
       user,
-    }
+    }),
+    [i18n, locale, params, payload, permissions, searchParams, user],
+  )
+
+  const { Actions } = React.useMemo<{
+    Actions: Record<string, React.ReactNode>
+  }>(() => {
     return {
       Actions: viewActions
         ? viewActions.reduce((acc, action) => {
@@ -68,13 +72,13 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                 acc[action.path] = RenderServerComponent({
                   Component: action,
                   importMap: payload.importMap,
-                  serverProps: viewActionServerProps,
+                  serverProps,
                 })
               } else {
                 acc[action] = RenderServerComponent({
                   Component: action,
                   importMap: payload.importMap,
-                  serverProps: viewActionServerProps,
+                  serverProps,
                 })
               }
             }
@@ -83,7 +87,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           }, {})
         : undefined,
     }
-  }, [i18n, locale, params, payload, permissions, searchParams, user, viewActions])
+  }, [payload, serverProps, viewActions])
 
   const NavComponent = RenderServerComponent({
     clientProps: { clientProps: { visibleEntities } },
@@ -91,13 +95,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     Fallback: DefaultNav,
     importMap: payload.importMap,
     serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
+      ...serverProps,
       visibleEntities,
     },
   })
@@ -111,13 +109,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             Component: CustomHeader,
             importMap: payload.importMap,
             serverProps: {
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
+              ...serverProps,
               visibleEntities,
             },
           })}
