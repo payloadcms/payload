@@ -448,6 +448,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Предишно публикувано',
     problemRestoringVersion: 'Имаше проблем при възстановяването на тази версия',
     publish: 'Публикувай',
+    publishAllLocales: 'Публикувайте всички локали',
     publishChanges: 'Публикувай промените',
     published: 'Публикувано',
     publishIn: 'Публикувайте в {{locale}}',
