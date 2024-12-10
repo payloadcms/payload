@@ -28,6 +28,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
+  duplicateFromId?: number | string
   fallbackLocale?: false | TypedLocale
   file?: File
   filePath?: string
@@ -56,6 +57,7 @@ export default async function createLocal<
     disableTransaction,
     disableVerificationEmail,
     draft,
+    duplicateFromId,
     file,
     filePath,
     overrideAccess = true,
@@ -82,6 +84,7 @@ export default async function createLocal<
     disableTransaction,
     disableVerificationEmail,
     draft,
+    duplicateFromId,
     overrideAccess,
     overwriteExistingFiles,
     populate,

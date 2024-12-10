@@ -29,6 +29,7 @@ export const duplicate: CollectionRouteHandlerWithID = async ({
   const doc = await duplicateOperation({
     id,
     collection,
+    data: req.data,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
     populate: sanitizePopulate(req.query.populate),

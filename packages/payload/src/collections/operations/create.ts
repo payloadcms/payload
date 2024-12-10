@@ -21,6 +21,7 @@ import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
+import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -43,6 +44,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
+  duplicateFromId?: number | string
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
@@ -97,6 +99,7 @@ export const createOperation = async <
       depth,
       disableVerificationEmail,
       draft = false,
+      duplicateFromId,
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
@@ -115,6 +118,23 @@ export const createOperation = async <
 
     const shouldSaveDraft = Boolean(draft && collectionConfig.versions.drafts)
 
+    let duplicatedFromDocWithLocales: JsonObject = {}
+    let duplicatedFromDoc: JsonObject = {}
+
+    if (duplicateFromId) {
+      const duplicateResult = await getDuplicateDocumentData({
+        id: duplicateFromId,
+        collectionConfig,
+        draftArg: shouldSaveDraft,
+        overrideAccess,
+        req,
+        shouldSaveDraft,
+      })
+
+      duplicatedFromDoc = duplicateResult.duplicatedFromDoc
+      duplicatedFromDocWithLocales = duplicateResult.duplicatedFromDocWithLocales
+    }
+
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -132,6 +152,7 @@ export const createOperation = async <
       config,
       data,
       operation: 'create',
+      originalDoc: duplicatedFromDoc,
       overwriteExistingFiles,
       req,
       throwOnMissingFile:
@@ -148,7 +169,7 @@ export const createOperation = async <
       collection: collectionConfig,
       context: req.context,
       data,
-      doc: {},
+      doc: duplicatedFromDoc,
       global: null,
       operation: 'create',
       overrideAccess,
@@ -169,6 +190,7 @@ export const createOperation = async <
             context: req.context,
             data,
             operation: 'create',
+            originalDoc: duplicatedFromDoc,
             req,
           })) || data
       },
@@ -188,6 +210,7 @@ export const createOperation = async <
           context: req.context,
           data,
           operation: 'create',
+          originalDoc: duplicatedFromDoc,
           req,
         })) || data
     }, Promise.resolve())
@@ -200,8 +223,8 @@ export const createOperation = async <
       collection: collectionConfig,
       context: req.context,
       data,
-      doc: {},
-      docWithLocales: {},
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
       global: null,
       operation: 'create',
       req,
