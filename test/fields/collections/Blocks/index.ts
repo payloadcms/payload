@@ -11,6 +11,8 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
   blocks: [
     {
       slug: prefix ? `${prefix}Content` : 'content',
+      // non in pascal case should be still handled
+      interfaceName: 'contentBlock',
       fields: [
         {
           name: 'text',
@@ -26,6 +28,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
     },
     {
       slug: prefix ? `${prefix}Number` : 'number',
+      interfaceName: 'NumberBlock',
       fields: [
         {
           name: 'number',
@@ -36,6 +39,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
     },
     {
       slug: prefix ? `${prefix}SubBlocks` : 'subBlocks',
+      interfaceName: 'SubBlocksBlock',
       fields: [
         {
           type: 'collapsible',
@@ -73,6 +77,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
     },
     {
       slug: prefix ? `${prefix}Tabs` : 'tabs',
+      interfaceName: 'TabsBlock',
       fields: [
         {
           type: 'tabs',
