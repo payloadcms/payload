@@ -55,14 +55,13 @@ export const getPredefinedMigration = async ({
     }
   } else if (importPath) {
     try {
-      const im = await eval(`import('${importPath}')`)
-      const { downSQL, imports, upSQL } = im
+      const { downSQL, imports, upSQL } = await eval(`import('${importPath}')`)
       return {
         downSQL,
         imports,
         upSQL,
       }
-    } catch (err) {
+    } catch (_err) {
       // Silently fail. If the migration cannot be imported, it will be created as a blank migration and the import path will be used as the migration name.
       return {}
     }
