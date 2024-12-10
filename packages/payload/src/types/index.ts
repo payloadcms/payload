@@ -264,17 +264,15 @@ type ApplyDepthProcessKey<T, Depth extends AllowedDepth> =
   // HAS ONE
   HasCollectionType<T> extends true
     ? ApplyDepthOnRelationship<T, Depth>
-    : T extends any[]
+    : T extends (infer U)[]
       ? // HAS MANY
-        HasCollectionType<NonNullable<T>[number]> extends true
-        ? ApplyDepthOnRelationship<NonNullable<T>[number], Depth>[]
+        HasCollectionType<U> extends true
+        ? ApplyDepthOnRelationship<U, Depth>[]
         : // HAS MANY POLY
-          T extends (infer U)[]
-          ? TypeIsPolymorphicRelationship<U> extends true
-            ? (U extends Record<string, unknown> ? ApplyDepthOnPolyRelationship<U, Depth> : U)[]
-            : // JUST ARRAY / BLOCKS
-              (U extends Record<string, unknown> ? Prettify<ApplyDepth<U, Depth>> : U)[]
-          : T
+          TypeIsPolymorphicRelationship<U> extends true
+          ? (U extends Record<string, unknown> ? ApplyDepthOnPolyRelationship<U, Depth> : U)[]
+          : // JUST ARRAY / BLOCKS
+            (U extends Record<string, unknown> ? ApplyDepth<U, Depth> : U)[]
       : // HAS ONE POLY
         TypeIsPolymorphicRelationship<T> extends true
         ? T extends Record<string, unknown>
@@ -282,7 +280,7 @@ type ApplyDepthProcessKey<T, Depth extends AllowedDepth> =
           : T
         : // OBJECT (NAMED TAB OR GROUP)
           T extends Record<string, unknown>
-          ? Prettify<ApplyDepth<T, Depth>>
+          ? ApplyDepth<T, Depth>
           : T
 
 export type ApplyDepth<T extends object, Depth extends AllowedDepth> = {
