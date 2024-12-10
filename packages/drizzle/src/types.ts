@@ -27,6 +27,7 @@ import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
 export { BuildQueryJoinAliases }
 
 import type { ResultSet } from '@libsql/client'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { QueryResult } from 'pg'
 
@@ -117,7 +118,10 @@ export type Insert = (args: {
 }) => Promise<Record<string, unknown>[]>
 
 export type RequireDrizzleKit = () => {
-  generateDrizzleJson: (args: { schema: Record<string, unknown> }) => unknown
+  generateDrizzleJson: (
+    args: Record<string, unknown>,
+  ) => DrizzleSnapshotJSON | Promise<DrizzleSnapshotJSON>
+  generateMigration: (prev: DrizzleSnapshotJSON, cur: DrizzleSnapshotJSON) => Promise<string[]>
   pushSchema: (
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
@@ -125,6 +129,7 @@ export type RequireDrizzleKit = () => {
     tablesFilter?: string[],
     extensionsFilter?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
+  upSnapshot?: (snapshot: Record<string, unknown>) => DrizzleSnapshotJSON
 }
 
 export type Migration = {
@@ -177,7 +182,6 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  getMigrationTemplate: (args: MigrationTemplateArgs) => string
   idType: 'serial' | 'uuid'
   indexes: Set<string>
   initializing: Promise<void>
