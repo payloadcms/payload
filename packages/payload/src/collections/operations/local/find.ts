@@ -1,12 +1,15 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type {
+  AllowedDepth,
   CollectionSlug,
+  DefaultDepth,
   JoinQuery,
   Payload,
   RequestContext,
   TypedLocale,
 } from '../../../index.js'
 import type {
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -21,14 +24,18 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOperation } from '../find.js'
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
   currentDepth?: number
-  depth?: number
+  depth?: TDepth
   disableErrors?: boolean
   draft?: boolean
   fallbackLocale?: false | TypedLocale
@@ -51,10 +58,13 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
 export async function findLocal<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> {
+  options: Options<TSlug, TSelect, TDepth>,
+): Promise<
+  PaginatedDocs<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>>
+> {
   const {
     collection: collectionSlug,
     currentDepth,
