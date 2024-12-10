@@ -6,6 +6,7 @@ import {
   type PayloadRequest,
   type RunningJob,
   type TypedJobs,
+  type Where,
 } from '../index.js'
 import { runJobs } from './operations/runJobs/index.js'
 
@@ -70,6 +71,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     overrideAccess?: boolean
     queue?: string
     req?: PayloadRequest
+    where?: Where
   }): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
     const result = await runJobs({
@@ -77,6 +79,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       overrideAccess: args?.overrideAccess !== false,
       queue: args?.queue,
       req: newReq,
+      where: args?.where,
     })
     return result
   },
