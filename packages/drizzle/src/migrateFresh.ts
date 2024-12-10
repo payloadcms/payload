@@ -59,8 +59,7 @@ export async function migrateFresh(
     try {
       const start = Date.now()
       await initTransaction(req)
-      const adapter = payload.db as DrizzleAdapter
-      const db = adapter?.sessions[await req.transactionID]?.db || adapter.drizzle
+      const db = this.sessions[await req.transactionID]?.db || this.drizzle
       await migration.up({ db, payload, req })
       await payload.create({
         collection: 'payload-migrations',

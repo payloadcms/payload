@@ -1,21 +1,18 @@
-import type { TransactionPg } from '@payloadcms/drizzle/types'
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
-import { createRequire } from 'module'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { TransactionPg } from '../../../types.js'
+import type { BasePostgresAdapter } from '../../types.js'
 import type { PathsToQuery } from './types.js'
 
 import { groupUpSQLStatements } from './groupUpSQLStatements.js'
 import { migrateRelationships } from './migrateRelationships.js'
 import { traverseFields } from './traverseFields.js'
-
-const require = createRequire(import.meta.url)
 
 type Args = {
   debug?: boolean
@@ -38,13 +35,13 @@ type Args = {
  * @param req
  */
 export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
-  const adapter = payload.db as unknown as PostgresAdapter
+  const adapter = payload.db as unknown as BasePostgresAdapter
   const db = adapter.sessions[await req.transactionID].db as TransactionPg
   const dir = payload.db.migrationDir
 
   // get the drizzle migrateUpSQL from drizzle using the last schema
-  const { generateDrizzleJson, generateMigration, upPgSnapshot } = require('drizzle-kit/api')
-  const drizzleJsonAfter = generateDrizzleJson(adapter.schema)
+  const { generateDrizzleJson, generateMigration, upSnapshot } = adapter.requireDrizzleKit()
+  const drizzleJsonAfter = generateDrizzleJson(adapter.schema) as DrizzleSnapshotJSON
 
   // Get the previous migration snapshot
   const previousSnapshot = fs
@@ -63,8 +60,8 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
     fs.readFileSync(`${dir}/${previousSnapshot}`, 'utf8'),
   ) as DrizzleSnapshotJSON
 
-  if (drizzleJsonBefore.version < drizzleJsonAfter.version) {
-    drizzleJsonBefore = upPgSnapshot(drizzleJsonBefore)
+  if (upSnapshot && drizzleJsonBefore.version < drizzleJsonAfter.version) {
+    drizzleJsonBefore = upSnapshot(drizzleJsonBefore)
   }
 
   const generatedSQL = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
