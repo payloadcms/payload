@@ -20,7 +20,7 @@ export type RunJobsArgs = {
   /**
    * ID of the job to run
    */
-  id?: string
+  id?: number | string
   limit?: number
   overrideAccess?: boolean
   queue?: string

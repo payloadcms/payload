@@ -82,7 +82,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   },
 
   runByID: async (args: {
-    id: string
+    id: number | string
     overrideAccess?: boolean
     req?: PayloadRequest
   }): Promise<ReturnType<typeof runJobs>> => {
