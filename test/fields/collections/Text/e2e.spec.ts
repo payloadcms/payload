@@ -3,7 +3,7 @@ import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
 import { openListColumns, toggleColumn } from 'helpers/e2e/toggleColumn.js'
-import { upsertPrefs } from 'helpers/e2e/updatePrefs.js'
+import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
