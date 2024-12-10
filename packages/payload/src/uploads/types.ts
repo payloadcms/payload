@@ -156,7 +156,7 @@ export type UploadConfig = {
       doc: TypeWithID
       params: { collection: string; filename: string }
     },
-  ) => Promise<Response> | Promise<void> | Response | void)[]
+  ) => Promise<Response | void | null> | Response | void | null)[]
   imageSizes?: ImageSize[]
   /**
    * Restrict mimeTypes in the file picker. Array of valid mime types or mimetype wildcards
