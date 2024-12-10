@@ -233,7 +233,9 @@ describe('Text', () => {
     await openListFilters(page, {})
 
     const condition = page.locator('.condition__field')
-    await expect(condition).toBeDisabled()
+    await expect(condition.locator('input.rs__input')).toBeDisabled()
+    await expect(page.locator('.condition__operator input.rs__input')).toBeDisabled()
+    await expect(page.locator('.condition__value input.condition-value-text')).toBeDisabled()
     await expect(condition.locator('.rs__single-value')).toHaveText('Disable List Filter Text')
     await page.locator('button.condition__actions-add').click()
     const condition2 = page.locator('.condition__field').nth(1)
