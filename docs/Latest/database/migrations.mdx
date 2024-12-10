@@ -51,7 +51,7 @@ export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
 
 ## Using Transactions
 
-When migrations are run, each migration is performed in a new [transactions](/docs/database/transactions) for you. All
+When migrations are run, each migration is performed in a new [transaction](/docs/database/transactions) for you. All
 you need to do is pass the `req` object to any [local API](/docs/local-api/overview) or direct database calls, such as
 `payload.db.updateMany()`, to make database changes inside the transaction. Assuming no errors were thrown, the transaction is committed
 after your `up` or `down` function runs. If the migration errors at any point or fails to commit, it is caught and the

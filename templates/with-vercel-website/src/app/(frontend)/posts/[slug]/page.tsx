@@ -13,6 +13,7 @@ import type { Post } from '@/payload-types'
 import { PostHero } from '@/heros/PostHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
+import { LivePreviewListener } from '@/components/LivePreviewListener'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -53,6 +54,8 @@ export default async function Post({ params: paramsPromise }: Args) {
 
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
+
+      <LivePreviewListener />
 
       <PostHero post={post} />
 
