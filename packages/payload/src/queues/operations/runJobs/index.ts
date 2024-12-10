@@ -17,6 +17,10 @@ import { runJob } from './runJob/index.js'
 import { runJSONJob } from './runJSONJob/index.js'
 
 export type RunJobsArgs = {
+  /**
+   * ID of the job to run
+   */
+  id?: number | string
   limit?: number
   overrideAccess?: boolean
   queue?: string
@@ -36,6 +40,7 @@ export type RunJobsResult = {
 }
 
 export const runJobs = async ({
+  id,
   limit = 10,
   overrideAccess,
   queue,
@@ -91,18 +96,36 @@ export const runJobs = async ({
 
   // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
   // the same job being picked up by another worker
-  const jobsQuery = (await req.payload.update({
-    collection: 'payload-jobs',
-    data: {
-      processing: true,
-      seenByWorker: true,
-    },
-    depth: req.payload.config.jobs.depth,
-    disableTransaction: true,
-    limit,
-    showHiddenFields: true,
-    where,
-  })) as unknown as PaginatedDocs<BaseJob>
+  const jobsQuery: {
+    docs: BaseJob[]
+  } = id
+    ? {
+        docs: [
+          (await req.payload.update({
+            id,
+            collection: 'payload-jobs',
+            data: {
+              processing: true,
+              seenByWorker: true,
+            },
+            depth: req.payload.config.jobs.depth,
+            disableTransaction: true,
+            showHiddenFields: true,
+          })) as BaseJob,
+        ],
+      }
+    : ((await req.payload.update({
+        collection: 'payload-jobs',
+        data: {
+          processing: true,
+          seenByWorker: true,
+        },
+        depth: req.payload.config.jobs.depth,
+        disableTransaction: true,
+        limit,
+        showHiddenFields: true,
+        where,
+      })) as unknown as PaginatedDocs<BaseJob>)
 
   /**
    * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
