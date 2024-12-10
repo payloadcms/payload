@@ -101,7 +101,7 @@ describe('Email', () => {
     ).toBeVisible()
   })
 
-  test('should display field in list view column selector if admin.disableListColumn is false and admin.disableListFilter is true', async () => {
+  test('should display field in list view column selector despite admin.disableListFilter', async () => {
     await page.goto(url.list)
     await page.locator('.list-controls__toggle-columns').click()
 

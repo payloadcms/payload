@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import type { FieldCondition } from '../types.js'
 
@@ -69,17 +69,6 @@ export const Condition: React.FC<Props> = (props) => {
     fields.find((field) => fieldName === field.value),
   )
 
-  const hasInitialized = useRef(false)
-
-  // ensure updates to `fields` updates the `internalField`
-  useEffect(() => {
-    if (hasInitialized.current) {
-      setInternalField(fields.find((field) => fieldName === field.value))
-    }
-
-    hasInitialized.current = true
-  }, [fields, fieldName])
-
   const { t } = useTranslation()
   const [internalOperatorOption, setInternalOperatorOption] = useState<Operator>(operator)
   const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
@@ -139,7 +128,11 @@ export const Condition: React.FC<Props> = (props) => {
                 setInternalQueryValue(undefined)
               }}
               options={fields}
-              value={fields.find((field) => internalField?.value === field.value)}
+              value={
+                fields.find((field) => internalField?.value === field.value) || {
+                  value: internalField?.value,
+                }
+              }
             />
           </div>
           <div className={`${baseClass}__operator`}>

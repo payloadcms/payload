@@ -192,7 +192,7 @@ describe('Text', () => {
     ).toBeVisible()
   })
 
-  test('should display field in list view column selector if admin.disableListColumn is false and admin.disableListFilter is true', async () => {
+  test('should display field in list view column selector despite admin.disableListFilter', async () => {
     await page.goto(url.list)
     await page.locator('.list-controls__toggle-columns').click()
 
@@ -206,10 +206,10 @@ describe('Text', () => {
     ).toBeVisible()
   })
 
-  test('should respect admin.disableListFilter despite query', async () => {
+  test('should disable field when admin.disableListFilter is true but still exists in the query', async () => {
     await page.goto(
-      `${url.list}${
-        (qs.stringify({
+      `${url.list}${qs.stringify(
+        {
           where: {
             or: [
               {
@@ -223,10 +223,17 @@ describe('Text', () => {
               },
             ],
           },
-        }),
-        { addQueryPrefix: true })
-      }`,
+        },
+        { addQueryPrefix: true },
+      )}`,
     )
+
+    await openListFilters(page, {})
+
+    const initialField = page.locator('.condition__field')
+    await expect(initialField.locator('.rs__single-value')).toBeHidden()
+    await expect(initialField.locator('.rs__placeholder')).toHaveText('Select a value')
+    await expect(initialField).toBeDisabled()
   })
 
   test('should hide field in filter when admin.disableListFilter is true', async () => {
