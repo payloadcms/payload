@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { CollectionSlug, TypedUser, Where } from 'payload'
-import type { Config } from 'payload'
-import type { PaginatedDocs } from 'payload'
+import type { Config, PaginatedDocs, TypedUser, Where } from 'payload'
 
 import * as qs from 'qs-esm'
 
@@ -410,23 +408,5 @@ export class RESTClient {
     const { status } = response
     const json = await response.json()
     return { docs: json.docs, errors: json.errors, status }
-  }
-
-  async upsert<T = any>(args: CreateArgs<T>): Promise<DocResponse<T>> {
-    const options = {
-      body: JSON.stringify(args.data),
-      headers: { ...headers },
-      method: 'PUT',
-    }
-
-    if (args?.auth !== false && this.token) {
-      options.headers.Authorization = `JWT ${this.token}`
-    }
-
-    const slug = args.slug || this.defaultSlug
-    const response = await fetch(`${this.serverURL}/api/${slug}`, options)
-    const { status } = response
-    const { doc } = await response.json()
-    return { doc, status }
   }
 }

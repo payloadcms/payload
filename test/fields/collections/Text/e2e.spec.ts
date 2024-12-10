@@ -1,7 +1,9 @@
 import type { Page } from '@playwright/test'
+import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
 import { openListColumns, toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { upsertPrefs } from 'helpers/e2e/updatePrefs.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -204,37 +206,18 @@ describe('Text', () => {
   })
 
   test('should respect admin.disableListColumn despite preferences', async () => {
-    // update prefs with a disabled column
-    console.log(client.user)
-    // set the preferences to have the column enabled
-    const prefsRes = await payload.upsert({
-      collection: 'payload-preferences',
-      depth: 0,
-      where: {
-        and: [
-          { key: { equals: 'text-fields-list' } },
-          { 'user.value': { equals: client.user.id } },
-          { 'user.relationTo': { equals: client.user.collection } },
+    await upsertPrefs<Config, GeneratedTypes<any>>({
+      payload,
+      user: client.user,
+      value: {
+        columns: [
+          {
+            accessor: 'disableListColumnText',
+            active: true,
+          },
         ],
       },
-      data: {
-        key: 'text-fields-list',
-        user: {
-          relationTo: client.user.collection,
-          value: client.user.id,
-        },
-        value: {
-          columns: [
-            {
-              accessor: 'disableListColumnText',
-              active: true,
-            },
-          ],
-        },
-      },
     })
-
-    console.log('existingPrefs', prefsRes)
 
     await page.goto(url.list)
     await openListColumns(page, {})
@@ -243,6 +226,9 @@ describe('Text', () => {
         hasText: exactText('Disable List Column Text'),
       }),
     ).toBeHidden()
+
+    await expect(page.locator('#heading-disableListColumnText')).toBeHidden()
+    await expect(page.locator('table .row-1 .cell-disableListColumnText')).toBeHidden()
   })
 
   test('should hide field in filter when admin.disableListFilter is true', async () => {

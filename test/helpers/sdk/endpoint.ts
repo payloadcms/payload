@@ -7,9 +7,10 @@ export const handler: PayloadHandler = async (req) => {
   await addDataAndFileToRequest(req)
 
   const { data, payload, user } = req
+
   const operation = data?.operation ? String(data.operation) : undefined
 
-  const foundOperation = payload?.[operation] || payload.db?.[operation]
+  const foundOperation = payload?.[operation]
 
   if (data?.operation && typeof foundOperation === 'function') {
     try {

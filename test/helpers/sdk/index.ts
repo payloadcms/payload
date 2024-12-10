@@ -9,7 +9,6 @@ import type {
   LoginArgs,
   UpdateArgs,
   UpdateGlobalArgs,
-  UpsertArgs,
 } from './types.js'
 
 type Args = {
@@ -26,20 +25,25 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
       headers.Authorization = `JWT ${jwt}`
     }
 
-    const json: T = await fetch(`${this.serverURL}/api/local-api`, {
-      method: 'post',
-      headers,
-      body: JSON.stringify({
-        args,
-        operation,
-      }),
-    }).then((res) => res.json())
+    try {
+      const json: T = await fetch(`${this.serverURL}/api/local-api`, {
+        method: 'post',
+        headers,
+        body: JSON.stringify({
+          args,
+          operation,
+        }),
+      }).then((res) => res.json())
 
-    if (reduceJSON) {
-      return reduceJSON<T>(json)
+      if (reduceJSON) {
+        return reduceJSON<T>(json)
+      }
+
+      return json
+    } catch (error) {
+      console.error('error', error)
+      throw error
     }
-
-    return json
   }
 
   create = async <T extends keyof TGeneratedTypes['collections']>({
@@ -124,17 +128,6 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
   }: UpdateGlobalArgs<TGeneratedTypes, T>) => {
     return this.fetch<TGeneratedTypes['collections'][T]>({
       operation: 'updateGlobal',
-      args,
-      jwt,
-    })
-  }
-
-  upsert = async <T extends keyof TGeneratedTypes['collections']>({
-    jwt,
-    ...args
-  }: UpsertArgs<TGeneratedTypes, T>) => {
-    return this.fetch<TGeneratedTypes['collections'][T]>({
-      operation: 'upsert',
       args,
       jwt,
     })
