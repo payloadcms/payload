@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
+import { fieldIsHiddenOrDisabled } from 'payload/shared'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
@@ -16,7 +16,6 @@ import type { ColumnPreferences } from '../providers/ListQuery/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
-import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
@@ -78,9 +77,12 @@ export const renderTable = ({
   columnState: Column[]
   Table: React.ReactNode
 } => {
-  const columns =
-    columnsFromArgs ||
-    getInitialColumns(filterFields(fields), useAsTitle, collectionConfig?.admin?.defaultColumns)
+  // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
+  const columns = columnsFromArgs
+    ? columnsFromArgs?.filter((column) =>
+        fields?.some((field) => 'name' in field && field.name === column.accessor),
+      )
+    : getInitialColumns(fields, useAsTitle, collectionConfig?.admin?.defaultColumns)
 
   const columnState = buildColumnState({
     beforeRows: renderRowTypes

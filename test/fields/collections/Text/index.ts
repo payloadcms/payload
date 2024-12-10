@@ -156,14 +156,12 @@ const TextFields: CollectionConfig = {
       type: 'text',
       admin: {
         disableListColumn: true,
-        disableListFilter: false,
       },
     },
     {
       name: 'disableListFilterText',
       type: 'text',
       admin: {
-        disableListColumn: false,
         disableListFilter: true,
       },
     },
