@@ -516,9 +516,14 @@ export interface BlockField {
   id: string;
   blocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
   duplicate: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
-  collapsedByDefaultBlocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
-  disableSort: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
-  localizedBlocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  collapsedByDefaultBlocks: (
+    | LocalizedContentBlock
+    | LocalizedNumberBlock
+    | LocalizedSubBlocksBlock
+    | LocalizedTabsBlock
+  )[];
+  disableSort: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
+  localizedBlocks: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
   i18nBlocks?:
     | {
         text?: string | null;
@@ -634,7 +639,7 @@ export interface BlockField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "contentBlock".
+ * via the `definition` "ContentBlock".
  */
 export interface ContentBlock {
   text: string;
@@ -692,6 +697,67 @@ export interface TabsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'tabs';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedContentBlock".
+ */
+export interface LocalizedContentBlock {
+  text: string;
+  richText?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedContent';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedNumberBlock".
+ */
+export interface LocalizedNumberBlock {
+  number: number;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedNumber';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedSubBlocksBlock".
+ */
+export interface LocalizedSubBlocksBlock {
+  subBlocks?:
+    | (
+        | {
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            number: number;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'number';
+          }
+      )[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedSubBlocks';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedTabsBlock".
+ */
+export interface LocalizedTabsBlock {
+  textInCollapsible?: string | null;
+  textInRow?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTabs';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1984,26 +2050,26 @@ export interface BlockFieldsSelect<T extends boolean = true> {
   collapsedByDefaultBlocks?:
     | T
     | {
-        localizedContent?: T | ContentBlockSelect<T>;
-        localizedNumber?: T | NumberBlockSelect<T>;
-        localizedSubBlocks?: T | SubBlocksBlockSelect<T>;
-        localizedTabs?: T | TabsBlockSelect<T>;
+        localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNumber?: T | LocalizedNumberBlockSelect<T>;
+        localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
+        localizedTabs?: T | LocalizedTabsBlockSelect<T>;
       };
   disableSort?:
     | T
     | {
-        localizedContent?: T | ContentBlockSelect<T>;
-        localizedNumber?: T | NumberBlockSelect<T>;
-        localizedSubBlocks?: T | SubBlocksBlockSelect<T>;
-        localizedTabs?: T | TabsBlockSelect<T>;
+        localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNumber?: T | LocalizedNumberBlockSelect<T>;
+        localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
+        localizedTabs?: T | LocalizedTabsBlockSelect<T>;
       };
   localizedBlocks?:
     | T
     | {
-        localizedContent?: T | ContentBlockSelect<T>;
-        localizedNumber?: T | NumberBlockSelect<T>;
-        localizedSubBlocks?: T | SubBlocksBlockSelect<T>;
-        localizedTabs?: T | TabsBlockSelect<T>;
+        localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNumber?: T | LocalizedNumberBlockSelect<T>;
+        localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
+        localizedTabs?: T | LocalizedTabsBlockSelect<T>;
       };
   i18nBlocks?:
     | T
@@ -2143,7 +2209,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "contentBlock_select".
+ * via the `definition` "ContentBlock_select".
  */
 export interface ContentBlockSelect<T extends boolean = true> {
   text?: T;
@@ -2191,6 +2257,61 @@ export interface SubBlocksBlockSelect<T extends boolean = true> {
  * via the `definition` "TabsBlock_select".
  */
 export interface TabsBlockSelect<T extends boolean = true> {
+  textInCollapsible?: T;
+  textInRow?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedContentBlock_select".
+ */
+export interface LocalizedContentBlockSelect<T extends boolean = true> {
+  text?: T;
+  richText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedNumberBlock_select".
+ */
+export interface LocalizedNumberBlockSelect<T extends boolean = true> {
+  number?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedSubBlocksBlock_select".
+ */
+export interface LocalizedSubBlocksBlockSelect<T extends boolean = true> {
+  subBlocks?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        number?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedTabsBlock_select".
+ */
+export interface LocalizedTabsBlockSelect<T extends boolean = true> {
   textInCollapsible?: T;
   textInRow?: T;
   id?: T;
