@@ -117,11 +117,11 @@ For all Pull Requests, you should be extremely descriptive about both your probl
 This is how you can preview changes you made locally to the docs:
 
 1. Clone our [website repository](https://github.com/payloadcms/website)
-2. Run `yarn install`
+2. Run `pnpm install`
 3. Duplicate the `.env.example` file and rename it to `.env`
 4. Add a `DOCS_DIR` environment variable to the `.env` file which points to the absolute path of your modified docs folder. For example `DOCS_DIR=/Users/yourname/Documents/GitHub/payload/docs`
-5. Run `yarn run fetchDocs:local`. If this was successful, you should see no error messages and the following output: _Docs successfully written to /.../website/src/app/docs.json_. There could be error messages if you have incorrect markdown in your local docs folder. In this case, it will tell you how you can fix it
-6. You're done! Now you can start the website locally using `yarn run dev` and preview the docs under [http://localhost:3000/docs/](http://localhost:3000/docs/)
+5. Run `pnpm run fetchDocs:local`. If this was successful, you should see no error messages and the following output: _Docs successfully written to /.../website/src/app/docs.json_. There could be error messages if you have incorrect markdown in your local docs folder. In this case, it will tell you how you can fix it
+6. You're done! Now you can start the website locally using `pnpm run dev` and preview the docs under [http://localhost:3000/docs/](http://localhost:3000/docs/)
 
 ## Internationalization (i18n)
 
