@@ -26,7 +26,8 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
-import { goToFirstCell, navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -278,9 +279,7 @@ describe('admin2', () => {
 
         await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
-        await page.locator('.list-controls__toggle-where').click()
-        // wait until the filter UI is visible and fully expanded
-        await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+        await openListFilters(page, {})
 
         await page.locator('.where-builder__add-first-filter').click()
 
@@ -318,8 +317,7 @@ describe('admin2', () => {
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
-        await page.locator('.list-controls__toggle-where').click()
-        await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+        await openListFilters(page, {})
         await page.locator('.where-builder__add-first-filter').click()
 
         const operatorField = page.locator('.condition__operator')
@@ -466,7 +464,7 @@ describe('admin2', () => {
         await page.goto(`${postsUrl.list}?limit=10&page=2`)
 
         // add filter
-        await page.locator('.list-controls__toggle-where').click()
+        await openListFilters(page, {})
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
@@ -782,7 +780,7 @@ describe('admin2', () => {
         ).toHaveText('Title')
 
         // filters
-        await page.locator('.list-controls__toggle-where').click()
+        await openListFilters(page, {})
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')

@@ -1,9 +1,12 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { openListColumns, toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { openListColumns } from 'helpers/e2e/openListColumns.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
+import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
 import { wait } from 'payload/shared'
+import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -178,7 +181,7 @@ describe('Text', () => {
 
   test('should show field in filter when admin.disableListColumn is true', async () => {
     await page.goto(url.list)
-    await page.locator('.list-controls__toggle-where').click()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const initialField = page.locator('.condition__field')
@@ -203,9 +206,32 @@ describe('Text', () => {
     ).toBeVisible()
   })
 
+  test('should respect admin.disableListFilter despite query', async () => {
+    await page.goto(
+      `${url.list}${
+        (qs.stringify({
+          where: {
+            or: [
+              {
+                and: [
+                  {
+                    disableListFilterText: {
+                      equals: 'Disable List Filter Text',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+        { addQueryPrefix: true })
+      }`,
+    )
+  })
+
   test('should hide field in filter when admin.disableListFilter is true', async () => {
     await page.goto(url.list)
-    await page.locator('.list-controls__toggle-where').click()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const initialField = page.locator('.condition__field')
@@ -270,8 +296,7 @@ describe('Text', () => {
     await page.goto(url.list)
 
     // open the first filter options
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const firstInitialField = page.locator('.condition__field')
@@ -312,8 +337,7 @@ describe('Text', () => {
     await page.goto(url.list)
 
     // open the first filter options
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const firstInitialField = page.locator('.condition__field')
@@ -343,8 +367,7 @@ describe('Text', () => {
     await page.goto(url.list)
 
     // open the first filter options
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const firstInitialField = page.locator('.condition__field')

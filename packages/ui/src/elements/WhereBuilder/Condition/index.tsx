@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import type { FieldCondition } from '../types.js'
 
@@ -64,9 +64,21 @@ export const Condition: React.FC<Props> = (props) => {
     RenderedFilter,
     updateCondition,
   } = props
+
   const [internalField, setInternalField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldName === field.value),
   )
+
+  const hasInitialized = useRef(false)
+
+  // ensure updates to `fields` updates the `internalField`
+  useEffect(() => {
+    if (hasInitialized.current) {
+      setInternalField(fields.find((field) => fieldName === field.value))
+    }
+
+    hasInitialized.current = true
+  }, [fields, fieldName])
 
   const { t } = useTranslation()
   const [internalOperatorOption, setInternalOperatorOption] = useState<Operator>(operator)
@@ -119,6 +131,7 @@ export const Condition: React.FC<Props> = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
+              disabled={!internalField?.value && typeof internalField?.value !== 'number'}
               isClearable={false}
               onChange={(field: Option) => {
                 setInternalField(fields.find((f) => f.value === field.value))
@@ -126,7 +139,7 @@ export const Condition: React.FC<Props> = (props) => {
                 setInternalQueryValue(undefined)
               }}
               options={fields}
-              value={fields.find((field) => internalField?.value === field.value) || fields[0]}
+              value={fields.find((field) => internalField?.value === field.value)}
             />
           </div>
           <div className={`${baseClass}__operator`}>
