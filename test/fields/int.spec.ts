@@ -1089,6 +1089,30 @@ describe('Fields', () => {
       expect(doc.localized).toEqual(localized)
       expect(doc.group).toMatchObject(group)
     })
+
+    it('should clear a point field', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+
+      const doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          point: [7, -7],
+          group: {
+            point: [7, -7],
+          },
+        },
+      })
+
+      const res = await payload.update({
+        collection: 'point-fields',
+        id: doc.id,
+        data: { group: { point: null } },
+      })
+
+      expect(res.group.point).toBeFalsy()
+    })
   })
 
   describe('unique indexes', () => {

@@ -1359,7 +1359,10 @@ export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
 export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
 export { traverseFields } from './utilities/traverseFields.js'
-export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
+export type {
+  TraverseFieldsCallback,
+  TraverseFlattenedFieldsCallback,
+} from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { versionDefaults } from './versions/defaults.js'
