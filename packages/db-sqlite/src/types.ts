@@ -158,6 +158,8 @@ export type MigrateUpArgs = {
    * The SQLite Drizzle instance that you can use to execute SQL directly within the current transaction.
    * @example
    * ```ts
+   * import { type MigrateUpArgs, sql } from '@payloadcms/db-sqlite'
+   *
    * export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
    *   const { rows: posts } = await db.run(sql`SELECT * FROM posts`)
    * }
@@ -169,6 +171,8 @@ export type MigrateUpArgs = {
    * To use the current transaction you must pass `req` to arguments
    * @example
    * ```ts
+   * import { type MigrateUpArgs } from '@payloadcms/db-sqlite'
+   *
    * export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
    *   const posts = await payload.find({ collection: 'posts', req })
    * }
@@ -185,7 +189,9 @@ export type MigrateDownArgs = {
    * The SQLite Drizzle instance that you can use to execute SQL directly within the current transaction.
    * @example
    * ```ts
-   * export async function down({ db, payload, req }: MigrateUpArgs): Promise<void> {
+   * import { type MigrateDownArgs, sql } from '@payloadcms/db-sqlite'
+   *
+   * export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
    *   const { rows: posts } = await db.run(sql`SELECT * FROM posts`)
    * }
    * ```
@@ -196,7 +202,9 @@ export type MigrateDownArgs = {
    * To use the current transaction you must pass `req` to arguments
    * @example
    * ```ts
-   * export async function down({ db, payload, req }: MigrateUpArgs): Promise<void> {
+   * import { type MigrateDownArgs } from '@payloadcms/db-sqlite'
+   *
+   * export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
    *   const posts = await payload.find({ collection: 'posts', req })
    * }
    * ```

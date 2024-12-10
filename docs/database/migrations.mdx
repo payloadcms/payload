@@ -63,12 +63,16 @@ Additionally, you can bypass Payload's layer entirely and perform operations dir
 
 ### MongoDB:
 ```ts
+import { type MigrateUpArgs } from '@payloadcms/db-mongodb'
+
 export async function up({ session, payload, req }: MigrateUpArgs): Promise<void> {
   const posts = await payload.db.collections.posts.collection.find({ session }).toArray()
 }
 ```
 ### Postgres:
 ```ts
+import { type MigrateUpArgs, sql } from '@payloadcms/db-postgres'
+
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   const { rows: posts } = await db.execute(sql`SELECT * from posts`)
 }
@@ -76,6 +80,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
 
 ### SQLite:
 ```ts
+import { type MigrateUpArgs, sql } from '@payloadcms/db-sqlite'
+
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   const { rows: posts } = await db.run(sql`SELECT * from posts`)
 }
