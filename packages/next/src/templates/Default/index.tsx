@@ -51,6 +51,15 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   const { Actions } = React.useMemo<{
     Actions: Record<string, React.ReactNode>
   }>(() => {
+    const viewActionServerProps = {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    }
     return {
       Actions: viewActions
         ? viewActions.reduce((acc, action) => {
@@ -59,11 +68,13 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                 acc[action.path] = RenderServerComponent({
                   Component: action,
                   importMap: payload.importMap,
+                  serverProps: viewActionServerProps,
                 })
               } else {
                 acc[action] = RenderServerComponent({
                   Component: action,
                   importMap: payload.importMap,
+                  serverProps: viewActionServerProps,
                 })
               }
             }
@@ -72,7 +83,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           }, {})
         : undefined,
     }
-  }, [viewActions, payload])
+  }, [i18n, locale, params, payload, permissions, searchParams, user, viewActions])
 
   const NavComponent = RenderServerComponent({
     clientProps: { clientProps: { visibleEntities } },
