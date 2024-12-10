@@ -18,7 +18,7 @@ import type { Payload } from '../../types/index.js'
 
 import { getFromImportMap } from '../../bin/generateImportMap/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
-import { fieldAffectsData } from '../../fields/config/types.js'
+import { fieldAffectsData, fieldIsHiddenOrDisabled } from '../../fields/config/types.js'
 import { flattenTopLevelFields, type ImportMap } from '../../index.js'
 import { removeUndefined } from '../../utilities/removeUndefined.js'
 
@@ -74,6 +74,24 @@ export const createClientField = ({
   importMap: ImportMap
 }): ClientField => {
   const clientField: ClientField = {} as ClientField
+
+  if (fieldAffectsData(incomingField) && fieldIsHiddenOrDisabled(incomingField)) {
+    clientField.type = incomingField.type
+
+    if (incomingField.hidden) {
+      clientField.hidden = true
+    }
+
+    if (incomingField.admin?.disabled) {
+      if (!clientField.admin) {
+        clientField.admin = {} as AdminClient
+      }
+
+      clientField.admin.disabled = true
+    }
+
+    return clientField
+  }
 
   for (const key in incomingField) {
     if (serverOnlyFieldProperties.includes(key as any)) {
