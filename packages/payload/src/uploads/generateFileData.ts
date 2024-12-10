@@ -61,6 +61,7 @@ export const generateFileData = async <T>({
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,
+    isDuplicating,
     operation,
     originalDoc,
     req,
