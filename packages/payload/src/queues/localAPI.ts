@@ -80,4 +80,18 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     })
     return result
   },
+
+  runByID: async (args: {
+    id: string
+    overrideAccess?: boolean
+    req?: PayloadRequest
+  }): Promise<ReturnType<typeof runJobs>> => {
+    const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
+    const result = await runJobs({
+      id: args.id,
+      overrideAccess: args?.overrideAccess !== false,
+      req: newReq,
+    })
+    return result
+  },
 })
