@@ -44,6 +44,7 @@
     "@payloadcms/plugin-search": "workspace:*",
     "@payloadcms/plugin-sentry": "workspace:*",
     "@payloadcms/plugin-seo": "workspace:*",
+    "@payloadcms/plugin-visual-jobs": "workspace:*",
     "@payloadcms/plugin-stripe": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/richtext-slate": "workspace:*",
