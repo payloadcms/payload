@@ -12,7 +12,7 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
 
   try {
     data = await incomingReq.json()
-  } catch (error) {
+  } catch (_err) {
     data = {}
   }
 
@@ -23,7 +23,7 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
     reqWithData.json = () => Promise.resolve(data)
   }
 
-  const doc = await update({
+  const doc = await update(incomingReq.payload, {
     key: reqWithData.routeParams?.key as string,
     req: reqWithData,
     user: reqWithData?.user,

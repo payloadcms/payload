@@ -1,16 +1,23 @@
-import type { Where } from '../../types/index.js'
+import type { Payload, Where } from '../../types/index.js'
 import type { PreferenceUpdateRequest } from '../types.js'
 
-import { UnauthorizedError } from '../../errors/UnathorizedError.js'
+import { UnauthorizedError } from '../../errors/UnauthorizedError.js'
+import { createLocalReq, type TypedCollection } from '../../index.js'
 
-export async function update(args: PreferenceUpdateRequest) {
-  const {
-    key,
-    req: { payload },
-    req,
-    user,
-    value,
-  } = args
+export async function update(
+  payload: Payload,
+  args: PreferenceUpdateRequest,
+): Promise<TypedCollection['_preference']> {
+  const { key, req: reqFromArgs, user, value } = args
+
+  const req =
+    reqFromArgs ||
+    (await createLocalReq(
+      {
+        user,
+      },
+      payload,
+    ))
 
   if (!user) {
     throw new UnauthorizedError(req.t)

@@ -12,7 +12,7 @@ export const deleteHandler: PayloadHandler = async (incomingReq): Promise<Respon
 
   try {
     data = await incomingReq.json()
-  } catch (error) {
+  } catch (_err) {
     data = {}
   }
 
@@ -23,7 +23,7 @@ export const deleteHandler: PayloadHandler = async (incomingReq): Promise<Respon
     reqWithData.json = () => Promise.resolve(data)
   }
 
-  const result = await deleteOperation({
+  const result = await deleteOperation(incomingReq.payload, {
     key: reqWithData.routeParams?.key as string,
     req: reqWithData,
     user: reqWithData.user,

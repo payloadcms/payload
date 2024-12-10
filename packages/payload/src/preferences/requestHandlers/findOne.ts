@@ -12,7 +12,7 @@ export const findByIDHandler: PayloadHandler = async (incomingReq): Promise<Resp
 
   try {
     data = await incomingReq.json()
-  } catch (error) {
+  } catch (_err) {
     data = {}
   }
 
@@ -23,7 +23,7 @@ export const findByIDHandler: PayloadHandler = async (incomingReq): Promise<Resp
     reqWithData.json = () => Promise.resolve(data)
   }
 
-  const result = await findOne({
+  const result = await findOne(incomingReq.payload, {
     key: reqWithData.routeParams?.key as string,
     req: reqWithData,
     user: reqWithData.user,
