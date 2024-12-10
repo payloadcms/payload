@@ -4,6 +4,7 @@ import type { Connect } from 'payload'
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { sql, VercelPool } from '@vercel/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import pg from 'pg'
 
 import type { VercelPostgresAdapter } from './types.js'
 
@@ -24,10 +25,30 @@ export const connect: Connect = async function connect(
 
   try {
     const logger = this.logger || false
+
+    let client: pg.Pool | VercelPool
+
+    const connectionString = this.poolOptions?.connectionString ?? process.env.POSTGRES_URL
+
+    // Use non-vercel postgres for local database
+    if (
+      !this.disableUsePgForLocalDatabase &&
+      connectionString &&
+      ['127.0.0.1', 'localhost'].includes(new URL(connectionString).hostname)
+    ) {
+      client = new pg.Pool(
+        this.poolOptions ?? {
+          connectionString,
+        },
+      )
+    } else {
+      client = this.poolOptions ? new VercelPool(this.poolOptions) : sql
+    }
+
     // Passed the poolOptions if provided,
     // else have vercel/postgres detect the connection string from the environment
     this.drizzle = drizzle({
-      client: this.poolOptions ? new VercelPool(this.poolOptions) : sql,
+      client,
       logger,
       schema: this.schema,
     })
