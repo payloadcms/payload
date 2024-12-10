@@ -54,19 +54,18 @@ export const Posts: CollectionConfig<'posts'> = {
         const path = generatePreviewPath({
           slug: typeof data?.slug === 'string' ? data.slug : '',
           collection: 'posts',
+          // req, TODO: thread `req` once 3.5.1 is out, see notes in `generatePreviewPath`
         })
 
         return path
       },
     },
-    preview: (data) => {
-      const path = generatePreviewPath({
+    preview: (data, { req }) =>
+      generatePreviewPath({
         slug: typeof data?.slug === 'string' ? data.slug : '',
         collection: 'posts',
-      })
-
-      return path
-    },
+        req,
+      }),
     useAsTitle: 'title',
   },
   fields: [
