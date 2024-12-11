@@ -40,6 +40,7 @@ import {
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
   globalSlug,
+  notInViewCollectionSlug,
   postsCollectionSlug,
   settingsGlobalSlug,
 } from '../../slugs.js'
@@ -66,6 +67,7 @@ const dirname = path.resolve(currentFolder, '../../')
 describe('admin1', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
+  let notInViewUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
@@ -83,6 +85,7 @@ describe('admin1', () => {
       prebuild,
     }))
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
+    notInViewUrl = new AdminUrlUtil(serverURL, notInViewCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
@@ -449,6 +452,28 @@ describe('admin1', () => {
       await expect(page.locator('.not-found')).toContainText('Nothing found')
       await page.goto(postsUrl.global('hidden-global'))
       await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
+    test('nav — should not show group: false collections and globals', async () => {
+      await page.goto(notInViewUrl.admin)
+      // nav menu
+      await expect(page.locator('#nav-not-in-view-collection')).toBeHidden()
+      await expect(page.locator('#nav-global-not-in-view-global')).toBeHidden()
+    })
+
+    test('dashboard — should not show group: false collections and globals', async () => {
+      await page.goto(notInViewUrl.admin)
+      // dashboard
+      await expect(page.locator('#card-not-in-view-collection')).toBeHidden()
+      await expect(page.locator('#card-not-in-view-global')).toBeHidden()
+    })
+
+    test('routing — should not 404 on group: false collections and globals', async () => {
+      // routing
+      await page.goto(notInViewUrl.collection('not-in-view-collection'))
+      await expect(page.locator('.list-header h1')).toContainText('Not In View Collections')
+      await page.goto(notInViewUrl.global('not-in-view-global'))
+      await expect(page.locator('.render-title')).toContainText('Not In View Global')
     })
   })
 
