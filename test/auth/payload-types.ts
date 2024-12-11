@@ -35,7 +35,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {};
   globalsSelect: {};
@@ -135,7 +135,7 @@ export interface PublicUserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   adminOnlyField?: string | null;
   roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   namedSaveToJWT?: string | null;
@@ -175,7 +175,7 @@ export interface User {
  * via the `definition` "partial-disable-locale-strategies".
  */
 export interface PartialDisableLocaleStrategy {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -192,7 +192,7 @@ export interface PartialDisableLocaleStrategy {
  * via the `definition` "api-keys".
  */
 export interface ApiKey {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -204,7 +204,7 @@ export interface ApiKey {
  * via the `definition` "public-users".
  */
 export interface PublicUser {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -223,8 +223,8 @@ export interface PublicUser {
  * via the `definition` "relationsCollection".
  */
 export interface RelationsCollection {
-  id: number;
-  rel?: (number | null) | User;
+  id: string;
+  rel?: (string | null) | User;
   text?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -234,45 +234,45 @@ export interface RelationsCollection {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'partial-disable-locale-strategies';
-        value: number | PartialDisableLocaleStrategy;
+        value: string | PartialDisableLocaleStrategy;
       } | null)
     | ({
         relationTo: 'api-keys';
-        value: number | ApiKey;
+        value: string | ApiKey;
       } | null)
     | ({
         relationTo: 'public-users';
-        value: number | PublicUser;
+        value: string | PublicUser;
       } | null)
     | ({
         relationTo: 'relationsCollection';
-        value: number | RelationsCollection;
+        value: string | RelationsCollection;
       } | null);
   globalSlug?: string | null;
   user:
     | {
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       }
     | {
         relationTo: 'partial-disable-locale-strategies';
-        value: number | PartialDisableLocaleStrategy;
+        value: string | PartialDisableLocaleStrategy;
       }
     | {
         relationTo: 'api-keys';
-        value: number | ApiKey;
+        value: string | ApiKey;
       }
     | {
         relationTo: 'public-users';
-        value: number | PublicUser;
+        value: string | PublicUser;
       };
   updatedAt: string;
   createdAt: string;
@@ -282,23 +282,23 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user:
     | {
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       }
     | {
         relationTo: 'partial-disable-locale-strategies';
-        value: number | PartialDisableLocaleStrategy;
+        value: string | PartialDisableLocaleStrategy;
       }
     | {
         relationTo: 'api-keys';
-        value: number | ApiKey;
+        value: string | ApiKey;
       }
     | {
         relationTo: 'public-users';
-        value: number | PublicUser;
+        value: string | PublicUser;
       };
   key?: string | null;
   value?:
@@ -318,7 +318,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
