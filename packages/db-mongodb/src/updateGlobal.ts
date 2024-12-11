@@ -1,47 +1,39 @@
-import type { QueryOptions } from 'mongoose'
 import type { PayloadRequest, UpdateGlobal } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getSession } from './getSession.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
+import { transform } from './utilities/transform.js'
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: MongooseAdapter,
   { slug, data, options: optionsArgs = {}, req = {} as PayloadRequest, select },
 ) {
   const Model = this.globals
-  const fields = this.payload.config.globals.find((global) => global.slug === slug).fields
+  const fields = this.payload.config.globals.find((global) => global.slug === slug).flattenedFields
 
-  const options: QueryOptions = {
-    ...optionsArgs,
-    ...(await withSession(this, req)),
-    lean: true,
-    new: true,
-    projection: buildProjectionFromSelect({
-      adapter: this,
-      fields: this.payload.config.globals.find((global) => global.slug === slug).flattenedFields,
-      select,
-    }),
-  }
+  const session = await getSession(this, req)
 
-  let result
+  transform({ adapter: this, data, fields, operation: 'update' })
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data,
+  const result: any = await Model.collection.findOneAndUpdate(
+    { globalType: slug },
+    { $set: data },
+    {
+      ...optionsArgs,
+      projection: buildProjectionFromSelect({ adapter: this, fields, select }),
+      returnDocument: 'after',
+      session,
+    },
+  )
+
+  transform({
+    adapter: this,
+    data: result,
     fields,
+    operation: 'read',
   })
-
-  result = await Model.findOneAndUpdate({ globalType: slug }, sanitizedData, options)
-
-  result = JSON.parse(JSON.stringify(result))
-
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
 
   return result
 }

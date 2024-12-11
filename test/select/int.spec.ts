@@ -1537,7 +1537,10 @@ describe('Select', () => {
         },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with updateByID', async () => {
@@ -1550,13 +1553,18 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with updateBulk', async () => {
       const post = await createPost()
 
-      const res = await payload.update({
+      const {
+        docs: [res],
+      } = await payload.update({
         collection: 'posts',
         where: {
           id: {
@@ -1567,7 +1575,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res.docs[0])).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with deleteByID', async () => {
@@ -1579,13 +1590,18 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with deleteBulk', async () => {
       const post = await createPost()
 
-      const res = await payload.delete({
+      const {
+        docs: [res],
+      } = await payload.delete({
         collection: 'posts',
         where: {
           id: {
@@ -1595,7 +1611,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res.docs[0])).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with duplicate', async () => {
@@ -1607,7 +1626,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
   })
 
