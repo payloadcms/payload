@@ -62,8 +62,12 @@ export const migrateRelationships = async ({
 
     offset += 1
 
+    const parentIds = paginationResult.rows.map(({ parent_id }) =>
+      typeof parent_id === 'string' ? `'${parent_id}'` : parent_id,
+    )
+
     const statement = `SELECT * FROM ${tableName}${adapter.relationshipsSuffix} WHERE
-    (${where}) AND parent_id IN (${paginationResult.rows.map((row) => row.parent_id).join(', ')});
+    (${where}) AND parent_id IN (${parentIds.join(', ')});
 `
     if (debug) {
       payload.logger.info('FINDING ROWS TO MIGRATE')
