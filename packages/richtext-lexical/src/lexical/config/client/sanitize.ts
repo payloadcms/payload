@@ -2,12 +2,16 @@
 
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
+import { TextNode as LexicalTextNode } from 'lexical'
+
 import type {
   ResolvedClientFeatureMap,
   SanitizedClientFeatures,
 } from '../../../features/typesClient.js'
 import type { LexicalFieldAdminProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
+
+import { TextNode } from '../../nodes/TextNode.js'
 
 export const sanitizeClientFeatures = (
   features: ResolvedClientFeatureMap,
@@ -16,7 +20,10 @@ export const sanitizeClientFeatures = (
     enabledFeatures: [],
     enabledFormats: [],
     markdownTransformers: [],
-    nodes: [],
+    nodes: [
+      TextNode,
+      { replace: LexicalTextNode, with: (node) => new TextNode(node.__text), withKlass: TextNode },
+    ],
     plugins: [],
     providers: [],
     slashMenu: {
