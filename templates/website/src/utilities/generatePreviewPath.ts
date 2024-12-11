@@ -26,7 +26,11 @@ export const generatePreviewPath = ({ collection, slug, req }: Props) => {
     encodedParams.append(key, value)
   })
 
-  let url = `${req.protocol}//${req.host}/next/preview?${encodedParams.toString()}`
+  const isProduction =
+    process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL_PROJECT_PRODUCTION_URL)
+  const protocol = isProduction ? 'https:' : req.protocol
+
+  let url = `${protocol}//${req.host}/next/preview?${encodedParams.toString()}`
 
   return url
 }
