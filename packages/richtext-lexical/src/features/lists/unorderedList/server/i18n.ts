@@ -19,6 +19,9 @@ export const i18n: Partial<GenericLanguages> = {
   de: {
     label: 'Ungeordnete Liste',
   },
+  el: {
+    label: 'Μη ταξινομημένη λίστα',
+  },
   en: {
     label: 'Unordered List',
   },
