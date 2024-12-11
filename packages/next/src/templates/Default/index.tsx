@@ -48,6 +48,19 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     } = {},
   } = payload.config || {}
 
+  const serverProps = React.useMemo<ServerProps>(
+    () => ({
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    }),
+    [i18n, locale, params, payload, permissions, searchParams, user],
+  )
+
   const { Actions } = React.useMemo<{
     Actions: Record<string, React.ReactNode>
   }>(() => {
@@ -59,11 +72,13 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                 acc[action.path] = RenderServerComponent({
                   Component: action,
                   importMap: payload.importMap,
+                  serverProps,
                 })
               } else {
                 acc[action] = RenderServerComponent({
                   Component: action,
                   importMap: payload.importMap,
+                  serverProps,
                 })
               }
             }
@@ -72,7 +87,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           }, {})
         : undefined,
     }
-  }, [viewActions, payload])
+  }, [payload, serverProps, viewActions])
 
   const NavComponent = RenderServerComponent({
     clientProps: { clientProps: { visibleEntities } },
@@ -80,13 +95,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     Fallback: DefaultNav,
     importMap: payload.importMap,
     serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
+      ...serverProps,
       visibleEntities,
     },
   })
@@ -100,13 +109,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             Component: CustomHeader,
             importMap: payload.importMap,
             serverProps: {
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
+              ...serverProps,
               visibleEntities,
             },
           })}
