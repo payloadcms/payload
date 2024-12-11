@@ -11,7 +11,7 @@ import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { DocumentDrawerContent } from './DrawerContent.js'
 import './index.scss'
 
-export const baseClass = 'doc-drawer'
+export const documentDrawerBaseClass = 'doc-drawer'
 
 const formatDocumentDrawerSlug = ({
   id,
@@ -43,7 +43,7 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
       aria-label={t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
         label: collectionConfig?.labels.singular,
       })}
-      className={[className, `${baseClass}__toggler`].filter(Boolean).join(' ')}
+      className={[className, `${documentDrawerBaseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}
       onClick={onClick}
       slug={drawerSlug}
@@ -58,7 +58,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
   const { drawerSlug } = props
 
   return (
-    <Drawer className={baseClass} gutter={false} Header={null} slug={drawerSlug}>
+    <Drawer className={documentDrawerBaseClass} gutter={false} Header={null} slug={drawerSlug}>
       <DocumentDrawerContent {...props} />
     </Drawer>
   )

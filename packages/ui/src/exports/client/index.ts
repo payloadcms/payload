@@ -24,7 +24,7 @@ export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 export { DocumentLocked } from '../../elements/DocumentLocked/index.js'
-export { useTableColumns } from '../../elements/TableColumns/index.js'
+export { TableColumnsProvider, useTableColumns } from '../../elements/TableColumns/index.js'
 export {
   RenderDefaultCell,
   useCellProps,
@@ -51,7 +51,7 @@ export { CopyToClipboard } from '../../elements/CopyToClipboard/index.js'
 export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
 export { Dropzone } from '../../elements/Dropzone/index.js'
-export { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+export { documentDrawerBaseClass, useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 export type {
   DocumentDrawerProps,
   DocumentTogglerProps,
@@ -269,6 +269,7 @@ export { DateField as DateCondition } from '../../elements/WhereBuilder/Conditio
 export { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 export { SelectAll } from '../../elements/SelectAll/index.js'
 export { SelectRow } from '../../elements/SelectRow/index.js'
+export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export {
   DefaultListView,
