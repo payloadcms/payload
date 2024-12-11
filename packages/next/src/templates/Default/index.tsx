@@ -57,8 +57,9 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       permissions,
       searchParams,
       user,
+      visibleEntities,
     }),
-    [i18n, locale, params, payload, permissions, searchParams, user],
+    [i18n, locale, params, payload, permissions, searchParams, user, visibleEntities],
   )
 
   const { Actions } = React.useMemo<{
@@ -94,10 +95,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     Component: CustomNav,
     Fallback: DefaultNav,
     importMap: payload.importMap,
-    serverProps: {
-      ...serverProps,
-      visibleEntities,
-    },
+    serverProps,
   })
 
   return (
@@ -108,10 +106,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             clientProps: { clientProps: { visibleEntities } },
             Component: CustomHeader,
             importMap: payload.importMap,
-            serverProps: {
-              ...serverProps,
-              visibleEntities,
-            },
+            serverProps,
           })}
           <div style={{ position: 'relative' }}>
             <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
@@ -130,6 +125,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                       ? RenderServerComponent({
                           Component: avatar.Component,
                           importMap: payload.importMap,
+                          serverProps,
                         })
                       : undefined
                   }
@@ -138,6 +134,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                       ? RenderServerComponent({
                           Component: components.graphics.Icon,
                           importMap: payload.importMap,
+                          serverProps,
                         })
                       : undefined
                   }
