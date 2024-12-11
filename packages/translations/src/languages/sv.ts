@@ -141,7 +141,7 @@ export const svTranslations: DefaultTranslationsObject = {
     chooseDocumentToLink: 'Välj ett dokument att länka till',
     chooseFromExisting: 'Välj bland befintliga',
     chooseLabel: 'Välj {{label}}',
-    collapseAll: 'kollapsa Alla',
+    collapseAll: 'Kollapsa Alla',
     customURL: 'Anpassad URL',
     editLabelData: 'Redigera {{label}} data',
     editLink: 'Redigera Länk',
