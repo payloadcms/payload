@@ -1,6 +1,8 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { JsonObject, Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { RequestContext } from '../../../index.js'
+import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -17,7 +19,7 @@ type Args = {
    * The original data with locales (not modified by any hooks)
    */
   docWithLocales: JsonObject
-  errors: { field: string; message: string }[]
+  errors: ValidationFieldError[]
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
@@ -68,7 +70,7 @@ export const traverseFields = async ({
 }: Args): Promise<void> => {
   const promises = []
 
-  fields.forEach((field) => {
+  fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
         id,
@@ -79,6 +81,7 @@ export const traverseFields = async ({
         docWithLocales,
         errors,
         field,
+        fieldIndex,
         global,
         mergeLocaleActions,
         operation,

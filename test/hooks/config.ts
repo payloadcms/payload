@@ -8,6 +8,7 @@ import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { AfterOperationCollection } from './collections/AfterOperation/index.js'
+import { BeforeValidateCollection } from './collections/BeforeValidate/index.js'
 import ChainingHooks from './collections/ChainingHooks/index.js'
 import ContextHooks from './collections/ContextHooks/index.js'
 import { DataHooks } from './collections/Data/index.js'
@@ -24,6 +25,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     },
   },
   collections: [
+    BeforeValidateCollection,
     AfterOperationCollection,
     ContextHooks,
     TransformHooks,
@@ -52,7 +54,6 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     await payload.create({
       collection: hooksSlug,
       data: {
-        check: true,
         fieldBeforeValidate: false,
         collectionBeforeValidate: false,
         fieldBeforeChange: false,

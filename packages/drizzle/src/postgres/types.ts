@@ -106,7 +106,7 @@ export type CreateDatabase = (args?: {
 type Schema =
   | {
       enum: typeof pgEnum
-      table: PgTableFn
+      table: PgTableFn<string>
     }
   | PgSchema
 
@@ -131,6 +131,7 @@ export type BasePostgresAdapter = {
   beforeSchemaInit: PostgresSchemaHook[]
   countDistinct: CountDistinct
   createDatabase: CreateDatabase
+  createExtensions: () => Promise<void>
   defaultDrizzleSnapshot: DrizzleSnapshotJSON
   deleteWhere: DeleteWhere
   disableCreateDatabase: boolean
@@ -138,6 +139,7 @@ export type BasePostgresAdapter = {
   dropDatabase: DropDatabase
   enums: Record<string, GenericEnum>
   execute: Execute<unknown>
+  extensions: Record<string, boolean>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
@@ -149,7 +151,7 @@ export type BasePostgresAdapter = {
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
-  pgSchema?: Schema
+  pgSchema: Schema
   poolOptions?: ClientConfig
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
@@ -171,6 +173,7 @@ export type BasePostgresAdapter = {
   }
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable>
+  tablesFilter?: string[]
   versionsSuffix?: string
 } & PostgresDrizzleAdapter
 
@@ -188,5 +191,66 @@ export type PostgresDrizzleAdapter = Omit<
 
 export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
 
-export type MigrateUpArgs = { payload: Payload; req: PayloadRequest }
-export type MigrateDownArgs = { payload: Payload; req: PayloadRequest }
+export type MigrateUpArgs = {
+  /**
+   * The Postgres Drizzle instance that you can use to execute SQL directly within the current transaction.
+   * @example
+   * ```ts
+   * import { type MigrateUpArgs, sql } from '@payloadcms/db-postgres'
+   *
+   * export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+   *   const { rows: posts } = await db.execute(sql`SELECT * FROM posts`)
+   * }
+   * ```
+   */
+  db: PostgresDB
+  /**
+   * The Payload instance that you can use to execute Local API methods
+   * To use the current transaction you must pass `req` to arguments
+   * @example
+   * ```ts
+   * import { type MigrateUpArgs, sql } from '@payloadcms/db-postgres'
+   *
+   * export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+   *   const posts = await payload.find({ collection: 'posts', req })
+   * }
+   * ```
+   */
+  payload: Payload
+  /**
+   * The `PayloadRequest` object that contains the current transaction
+   */
+  req: PayloadRequest
+}
+
+export type MigrateDownArgs = {
+  /**
+   * The Postgres Drizzle instance that you can use to execute SQL directly within the current transaction.
+   * @example
+   * ```ts
+   * import { type MigrateDownArgs, sql } from '@payloadcms/db-postgres'
+   *
+   * export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+   *   const { rows: posts } = await db.execute(sql`SELECT * FROM posts`)
+   * }
+   * ```
+   */
+  db: PostgresDB
+  /**
+   * The Payload instance that you can use to execute Local API methods
+   * To use the current transaction you must pass `req` to arguments
+   * @example
+   * ```ts
+   * import { type MigrateDownArgs } from '@payloadcms/db-postgres'
+   *
+   * export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+   *   const posts = await payload.find({ collection: 'posts', req })
+   * }
+   * ```
+   */
+  payload: Payload
+  /**
+   * The `PayloadRequest` object that contains the current transaction
+   */
+  req: PayloadRequest
+}

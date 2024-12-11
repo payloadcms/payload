@@ -12,14 +12,17 @@ import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import ConditionalLogic from './collections/ConditionalLogic/index.js'
+import { CustomIdCollection } from './collections/CustomID/index.js'
 import DateFields from './collections/Date/index.js'
 import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
 import { LexicalFields } from './collections/Lexical/index.js'
+import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
+import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
 import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import NumberFields from './collections/Number/index.js'
 import PointFields from './collections/Point/index.js'
@@ -46,6 +49,7 @@ export const collectionSlugs: CollectionConfig[] = [
   LexicalFields,
   LexicalMigrateFields,
   LexicalLocalizedFields,
+  LexicalObjectReferenceBugCollection,
   {
     slug: 'users',
     admin: {
@@ -60,12 +64,15 @@ export const collectionSlugs: CollectionConfig[] = [
       },
     ],
   },
+  LexicalInBlock,
+
   ArrayFields,
   BlockFields,
   CheckboxFields,
   CodeFields,
   CollapsibleFields,
   ConditionalLogic,
+  CustomIdCollection,
   DateFields,
   EmailFields,
   RadioFields,

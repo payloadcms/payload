@@ -1,23 +1,21 @@
-import type { MappedComponent } from 'payload'
-
 import type { RichTextPlugin, SlateFieldProps } from '../types.js'
 
 export type EnabledFeatures = {
   elements: {
     [name: string]: {
-      Button: MappedComponent
-      Element: MappedComponent
+      Button: React.ReactNode
+      Element: React.ReactNode
       name: string
     }
   }
   leaves: {
     [name: string]: {
-      Button: MappedComponent
-      Leaf: MappedComponent
+      Button: React.ReactNode
+      Leaf: React.ReactNode
       name: string
     }
   }
-  plugins: MappedComponent[]
+  plugins: React.ReactNode[]
 }
 
 export type LoadedSlateFieldProps = {

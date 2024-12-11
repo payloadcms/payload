@@ -1,5 +1,3 @@
-import jwt from 'jsonwebtoken'
-
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
@@ -12,10 +10,13 @@ import type { User } from '../types.js'
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { AuthenticationError, LockedAuth, ValidationError } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { Forbidden } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
+import { getLoginOptions } from '../getLoginOptions.js'
 import isLocked from '../isLocked.js'
+import { jwtSign } from '../jwt.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
@@ -39,6 +40,10 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> => {
   let args = incomingArgs
+
+  if (args.collection.config.auth.disableLocalStrategy) {
+    throw new Forbidden(args.req.t)
+  }
 
   try {
     // /////////////////////////////////////
@@ -88,14 +93,13 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         ? data.username.toLowerCase().trim()
         : null
 
-    const canLoginWithUsername = Boolean(loginWithUsername)
-    const canLoginWithEmail = !loginWithUsername || loginWithUsername.allowEmailLogin
+    const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
     // cannot login with email, did not provide username
     if (!canLoginWithEmail && !sanitizedUsername) {
       throw new ValidationError({
         collection: collectionConfig.slug,
-        errors: [{ field: 'username', message: req.i18n.t('validation:required') }],
+        errors: [{ message: req.i18n.t('validation:required'), path: 'username' }],
       })
     }
 
@@ -103,7 +107,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     if (!canLoginWithUsername && !sanitizedEmail) {
       throw new ValidationError({
         collection: collectionConfig.slug,
-        errors: [{ field: 'email', message: req.i18n.t('validation:required') }],
+        errors: [{ message: req.i18n.t('validation:required'), path: 'email' }],
       })
     }
 
@@ -112,8 +116,8 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       throw new ValidationError({
         collection: collectionConfig.slug,
         errors: [
-          { field: 'email', message: req.i18n.t('validation:required') },
-          { field: 'username', message: req.i18n.t('validation:required') },
+          { message: req.i18n.t('validation:required'), path: 'email' },
+          { message: req.i18n.t('validation:required'), path: 'username' },
         ],
       })
     }
@@ -122,7 +126,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     if (typeof password !== 'string' || password.trim() === '') {
       throw new ValidationError({
         collection: collectionConfig.slug,
-        errors: [{ field: 'password', message: req.i18n.t('validation:required') }],
+        errors: [{ message: req.i18n.t('validation:required'), path: 'password' }],
       })
     }
 
@@ -234,8 +238,10 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         })) || user
     }, Promise.resolve())
 
-    const token = jwt.sign(fieldsToSign, secret, {
-      expiresIn: collectionConfig.auth.tokenExpiration,
+    const { exp, token } = await jwtSign({
+      fieldsToSign,
+      secret,
+      tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
 
     req.user = user
@@ -291,24 +297,8 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
         })) || user
     }, Promise.resolve())
 
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      user =
-        (await hook({
-          collection: args.collection?.config,
-          context: req.context,
-          doc: user,
-          req,
-        })) || user
-    }, Promise.resolve())
-
     let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
-      exp: (jwt.decode(token) as jwt.JwtPayload).exp,
+      exp,
       token,
       user,
     }

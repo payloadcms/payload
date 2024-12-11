@@ -7,12 +7,12 @@ import path from 'path'
 
 type StaticHandlerArgs = {
   baseUrl: string
-  token: string
   cacheControlMaxAge?: number
+  token: string
 }
 
 export const getStaticHandler = (
-  { baseUrl, token, cacheControlMaxAge = 0 }: StaticHandlerArgs,
+  { baseUrl, cacheControlMaxAge = 0, token }: StaticHandlerArgs,
   collection: CollectionConfig,
 ): StaticHandler => {
   return async (req, { params: { filename } }) => {
@@ -38,10 +38,10 @@ export const getStaticHandler = (
 
       return new Response(bodyBuffer, {
         headers: new Headers({
+          'Cache-Control': `public, max-age=${cacheControlMaxAge}`,
           'Content-Disposition': contentDisposition,
           'Content-Length': String(size),
           'Content-Type': contentType,
-          'Cache-Control': `public, max-age=${cacheControlMaxAge}`
         }),
         status: 200,
       })

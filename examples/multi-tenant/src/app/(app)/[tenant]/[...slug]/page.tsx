@@ -1,16 +1,23 @@
 import type { Where } from 'payload'
 
 import configPromise from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { headers as getHeaders } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import { RenderPage } from '../../../components/RenderPage'
 
-export default async function Page({ params }: { params: { slug?: string[]; tenant: string } }) {
+// eslint-disable-next-line no-restricted-exports
+export default async function Page({
+  params: paramsPromise,
+}: {
+  params: Promise<{ slug?: string[]; tenant: string }>
+}) {
+  const params = await paramsPromise
+
   const headers = await getHeaders()
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
 
   const tenantsQuery = await payload.find({

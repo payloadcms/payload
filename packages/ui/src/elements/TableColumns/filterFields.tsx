@@ -1,20 +1,23 @@
-'use client'
+import type { ClientField, Field } from 'payload'
 
-import type { ClientField } from 'payload'
+import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
 
-// 1. Skips fields that are hidden, disabled, or presentational-only (i.e. `ui` fields)
-// 2. Maps through top-level `tabs` fields and filters out the same
-export const filterFields = (incomingFields: ClientField[]): ClientField[] => {
-  const shouldSkipField = (field: ClientField): boolean =>
-    (field.type !== 'ui' && field.admin?.disabled === true) ||
+/**
+ * Filters fields that are hidden, disabled, or have `disableListColumn` set to `true`
+ * Does so recursively for `tabs` fields.
+ */
+export const filterFields = <T extends ClientField | Field>(incomingFields: T[]): T[] => {
+  const shouldSkipField = (field: T): boolean =>
+    (field.type !== 'ui' && fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
     field?.admin?.disableListColumn === true
 
-  const fields: ClientField[] = incomingFields.reduce((formatted, field) => {
+  const fields: T[] = incomingFields?.reduce((acc, field) => {
     if (shouldSkipField(field)) {
-      return formatted
+      return acc
     }
 
-    const formattedField: ClientField =
+    // extract top-level `tabs` fields and filter out the same
+    const formattedField: T =
       field.type === 'tabs' && 'tabs' in field
         ? {
             ...field,
@@ -25,7 +28,9 @@ export const filterFields = (incomingFields: ClientField[]): ClientField[] => {
           }
         : field
 
-    return [...formatted, formattedField]
+    acc.push(formattedField)
+
+    return acc
   }, [])
 
   return fields

@@ -34,11 +34,11 @@ export const rule = {
         if (isPayloadLoggerError(callee)) {
           const args = node.arguments
 
-          // Case 1: Single string is passed as the argument
+          // Case 1: Single string / templated string is passed as the argument
           if (
             args.length === 1 &&
-            args[0].type === 'Literal' &&
-            typeof args[0].value === 'string'
+            ((args[0].type === 'Literal' && typeof args[0].value === 'string') ||
+              args[0].type === 'TemplateLiteral')
           ) {
             return // Valid: single string argument
           }
@@ -67,11 +67,11 @@ export const rule = {
             return // Valid object, checked for 'err'/'error' keys
           }
 
-          // Case 3: Improper usage (string + error or additional err/error)
+          // Case 3: Improper usage (string / templated string + error or additional err/error)
           if (
             args.length > 1 &&
-            args[0].type === 'Literal' &&
-            typeof args[0].value === 'string' &&
+            ((args[0].type === 'Literal' && typeof args[0].value === 'string') ||
+              args[0].type === 'TemplateLiteral') &&
             args[1].type === 'Identifier' &&
             (args[1].name === 'err' || args[1].name === 'error')
           ) {

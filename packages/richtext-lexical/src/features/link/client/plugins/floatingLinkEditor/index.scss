@@ -33,6 +33,10 @@
       position: relative;
       font-family: var(--font-body);
 
+      .icon--externalLink {
+        margin-right: 5px;
+      }
+
       &__label-pure {
         color: var(--theme-elevation-1000);
         margin-right: 15px;

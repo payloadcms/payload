@@ -1,5 +1,6 @@
 'use client'
 import type {
+  ClientCollectionConfig,
   DefaultCellComponentProps,
   JoinFieldClient,
   RelationshipFieldClient,
@@ -23,13 +24,12 @@ const baseClass = 'relationship-cell'
 const totalToShow = 3
 
 export type RelationshipCellProps = DefaultCellComponentProps<
-  any,
   JoinFieldClient | RelationshipFieldClient | UploadFieldClient
 >
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData: cellDataFromProps,
-  customCellContext,
+  customCellProps: customCellContext,
   field,
   field: { label },
 }) => {
@@ -42,7 +42,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
     return 'collection' in field ? cellDataFromProps?.docs : cellDataFromProps
   }, [cellDataFromProps, field])
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { collections, routes } = config
   const [intersectionRef, entry] = useIntersect()
   const [values, setValues] = useState<Value[]>([])
@@ -96,7 +96,9 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
     <div className={baseClass} ref={intersectionRef}>
       {values.map(({ relationTo, value }, i) => {
         const document = documents[relationTo][value]
-        const relatedCollection = collections.find(({ slug }) => slug === relationTo)
+        const relatedCollection = getEntityConfig({
+          collectionSlug: relationTo,
+        }) as ClientCollectionConfig
 
         const label = formatDocTitle({
           collectionConfig: relatedCollection,
@@ -117,7 +119,8 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
             fileField = (
               <FileCell
                 cellData={label}
-                customCellContext={customCellContext}
+                collectionConfig={relatedCollection}
+                customCellProps={customCellContext}
                 field={field}
                 rowData={document}
               />

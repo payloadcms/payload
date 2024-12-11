@@ -19,6 +19,7 @@ import type {
 type DateFieldClientWithoutType = MarkOptional<DateFieldClient, 'type'>
 
 type DateFieldBaseClientProps = {
+  readonly path: string
   readonly validate?: DateFieldValidation
 }
 

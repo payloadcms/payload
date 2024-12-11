@@ -3,8 +3,11 @@ import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
   beginTransaction,
+  buildCreateMigration,
   commitTransaction,
   count,
+  countGlobalVersions,
+  countVersions,
   create,
   createGlobal,
   createGlobalVersion,
@@ -35,6 +38,7 @@ import {
 } from '@payloadcms/drizzle'
 import { like } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { Args, SQLiteAdapter } from './types.js'
 
@@ -42,12 +46,10 @@ import { connect } from './connect.js'
 import { countDistinct } from './countDistinct.js'
 import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal.js'
 import { createJSONQuery } from './createJSONQuery/index.js'
-import { createMigration } from './createMigration.js'
 import { defaultDrizzleSnapshot } from './defaultSnapshot.js'
 import { deleteWhere } from './deleteWhere.js'
 import { dropDatabase } from './dropDatabase.js'
 import { execute } from './execute.js'
-import { getMigrationTemplate } from './getMigrationTemplate.js'
 import { init } from './init.js'
 import { insert } from './insert.js'
 import { requireDrizzleKit } from './requireDrizzleKit.js'
@@ -55,6 +57,8 @@ import { requireDrizzleKit } from './requireDrizzleKit.js'
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export { sql } from 'drizzle-orm'
+
+const filename = fileURLToPath(import.meta.url)
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -89,7 +93,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
         json: true,
       },
       fieldConstraints: {},
-      getMigrationTemplate,
       idType: postgresIDType,
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
@@ -114,11 +117,21 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       convertPathToJSONTraversal,
       count,
       countDistinct,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,
       createJSONQuery,
-      createMigration,
+      createMigration: buildCreateMigration({
+        executeMethod: 'run',
+        filename,
+        sanitizeStatements({ sqlExecute, statements }) {
+          return statements
+            .map((statement) => `${sqlExecute}${statement?.replaceAll('`', '\\`')}\`)`)
+            .join('\n')
+        },
+      }),
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,
@@ -133,6 +146,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       findGlobalVersions,
       findOne,
       findVersions,
+      indexes: new Set<string>(),
       init,
       insert,
       migrate,

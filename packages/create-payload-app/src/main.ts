@@ -8,17 +8,18 @@ import path from 'path'
 import type { CliArgs } from './types.js'
 
 import { configurePayloadConfig } from './lib/configure-payload-config.js'
+import { PACKAGE_VERSION } from './lib/constants.js'
 import { createProject } from './lib/create-project.js'
 import { generateSecret } from './lib/generate-secret.js'
 import { getPackageManager } from './lib/get-package-manager.js'
 import { getNextAppDetails, initNext } from './lib/init-next.js'
+import { manageEnvFiles } from './lib/manage-env-files.js'
 import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { updatePayloadInProject } from './lib/update-payload-in-project.js'
-import { writeEnvFile } from './lib/write-env-file.js'
-import { error, info } from './utils/log.js'
+import { debug, error, info } from './utils/log.js'
 import {
   feedbackOutro,
   helpMessage,
@@ -78,6 +79,8 @@ export class Main {
         helpMessage()
         process.exit(0)
       }
+
+      const debugFlag = this.args['--debug']
 
       // eslint-disable-next-line no-console
       console.log('\n')
@@ -178,8 +181,9 @@ export class Main {
           },
         })
 
-        await writeEnvFile({
+        await manageEnvFiles({
           cliArgs: this.args,
+          databaseType: dbDetails.type,
           databaseUri: dbDetails.dbUri,
           payloadSecret: generateSecret(),
           projectDir,
@@ -200,6 +204,10 @@ export class Main {
         }
       }
 
+      if (debugFlag) {
+        debug(`Using templates from git tag: v${PACKAGE_VERSION}`)
+      }
+
       const validTemplates = getValidTemplates()
       const template = await parseTemplate(this.args, validTemplates)
       if (!template) {
@@ -209,26 +217,6 @@ export class Main {
       }
 
       switch (template.type) {
-        case 'starter': {
-          const dbDetails = await selectDb(this.args, projectName)
-          const payloadSecret = generateSecret()
-          await createProject({
-            cliArgs: this.args,
-            dbDetails,
-            packageManager,
-            projectDir,
-            projectName,
-            template,
-          })
-          await writeEnvFile({
-            cliArgs: this.args,
-            databaseUri: dbDetails.dbUri,
-            payloadSecret,
-            projectDir,
-            template,
-          })
-          break
-        }
         case 'plugin': {
           await createProject({
             cliArgs: this.args,
@@ -237,6 +225,30 @@ export class Main {
             projectName,
             template,
           })
+          break
+        }
+        case 'starter': {
+          const dbDetails = await selectDb(this.args, projectName)
+          const payloadSecret = generateSecret()
+
+          await createProject({
+            cliArgs: this.args,
+            dbDetails,
+            packageManager,
+            projectDir,
+            projectName,
+            template,
+          })
+
+          await manageEnvFiles({
+            cliArgs: this.args,
+            databaseType: dbDetails.type,
+            databaseUri: dbDetails.dbUri,
+            payloadSecret,
+            projectDir,
+            template,
+          })
+
           break
         }
       }

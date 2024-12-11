@@ -5,7 +5,7 @@ import { CallToAction } from '../blocks/CallToAction/index.js'
 import { Content } from '../blocks/Content/index.js'
 import { MediaBlock } from '../blocks/MediaBlock/index.js'
 import { hero } from '../fields/hero.js'
-import { postsSlug, tenantsSlug } from '../shared.js'
+import { mediaSlug, postsSlug, tenantsSlug } from '../shared.js'
 
 export const Posts: CollectionConfig = {
   slug: postsSlug,
@@ -18,6 +18,7 @@ export const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
+    preview: (doc) => `/live-preview/posts/${doc?.slug}`,
   },
   fields: [
     {
@@ -71,6 +72,16 @@ export const Posts: CollectionConfig = {
             },
           ],
         },
+        {
+          label: 'Test',
+          fields: [
+            {
+              name: 'localizedTitle',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
       ],
     },
     {
@@ -88,7 +99,7 @@ export const Posts: CollectionConfig = {
         {
           name: 'image',
           type: 'upload',
-          relationTo: 'media',
+          relationTo: mediaSlug,
         },
       ],
     },

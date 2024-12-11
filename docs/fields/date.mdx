@@ -18,7 +18,7 @@ The Date Field saves a Date in the database and provides the [Admin Panel](../ad
 To add a Date Field, set the `type` to `date` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyDateField: Field = {
   // ...
@@ -53,7 +53,7 @@ _\* An asterisk denotes that a property is required._
 The customize the appearance and behavior of the Date Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyDateField: Field = {
   // ...
@@ -86,7 +86,7 @@ _\* This property is passed directly to [react-datepicker](https://github.com/Ha
 
 These properties only affect how the date is displayed in the UI. The full date is always stored in the format `YYYY-MM-DDTHH:mm:ss.SSSZ` (e.g. `1999-01-01T8:00:00.000+05:00`).
 
-`displayFormat` determines how the date is presented in the field **cell**, you can pass any valid (unicode date format)[https://date-fns.org/v2.29.3/docs/format].
+`displayFormat` determines how the date is presented in the field **cell**, you can pass any valid (unicode date format)[https://date-fns.org/v4.1.0/docs/format].
 
 `pickerAppearance` sets the appearance of the **react datepicker**, the options available are `dayAndTime`, `dayOnly`, `timeOnly`, and `monthOnly`. By default, the datepicker will display `dayOnly`.
 
@@ -97,7 +97,7 @@ When only `pickerAppearance` is set, an equivalent format will be rendered in th
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

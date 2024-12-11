@@ -2,7 +2,7 @@
 import type { LexicalEditor } from 'lexical'
 
 import { mergeRegister } from '@lexical/utils'
-import { $getSelection } from 'lexical'
+import { $addUpdateTag, $getSelection } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { ToolbarGroupItem } from '../../types.js'
@@ -84,9 +84,10 @@ export const ToolbarButton = ({
       className={className}
       onClick={() => {
         if (enabled !== false) {
-          editor._updateTags = new Set([...editor._updateTags, 'toolbar']) // without setting the tags, our onSelect will not be able to trigger our onChange as focus onChanges are ignored.
-
           editor.focus(() => {
+            editor.update(() => {
+              $addUpdateTag('toolbar')
+            })
             // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
             item.onSelect?.({
               editor,

@@ -1,4 +1,5 @@
 import type {
+  Column,
   ColumnBaseConfig,
   ColumnDataType,
   DrizzleConfig,
@@ -13,19 +14,14 @@ import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-post
 import type { PgColumn, PgTable, PgTransaction } from 'drizzle-orm/pg-core'
 import type { SQLiteColumn, SQLiteTable, SQLiteTransaction } from 'drizzle-orm/sqlite-core'
 import type { Result } from 'drizzle-orm/sqlite-core/session'
-import type {
-  BaseDatabaseAdapter,
-  MigrationData,
-  MigrationTemplateArgs,
-  Payload,
-  PayloadRequest,
-} from 'payload'
+import type { BaseDatabaseAdapter, MigrationData, Payload, PayloadRequest } from 'payload'
 
 import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
 
 export { BuildQueryJoinAliases }
 
 import type { ResultSet } from '@libsql/client'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { QueryResult } from 'pg'
 
@@ -116,12 +112,18 @@ export type Insert = (args: {
 }) => Promise<Record<string, unknown>[]>
 
 export type RequireDrizzleKit = () => {
-  generateDrizzleJson: (args: { schema: Record<string, unknown> }) => unknown
+  generateDrizzleJson: (
+    args: Record<string, unknown>,
+  ) => DrizzleSnapshotJSON | Promise<DrizzleSnapshotJSON>
+  generateMigration: (prev: DrizzleSnapshotJSON, cur: DrizzleSnapshotJSON) => Promise<string[]>
   pushSchema: (
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
     filterSchema?: string[],
+    tablesFilter?: string[],
+    extensionsFilter?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
+  upSnapshot?: (snapshot: Record<string, unknown>) => DrizzleSnapshotJSON
 }
 
 export type Migration = {
@@ -146,6 +148,7 @@ export type Migration = {
 } & MigrationData
 
 export type CreateJSONQueryArgs = {
+  column?: Column | string
   operator: string
   pathSegments: string[]
   table?: string
@@ -155,7 +158,7 @@ export type CreateJSONQueryArgs = {
 }
 
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
-  convertPathToJSONTraversal: (incomingSegments: string[]) => string
+  convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string
   defaultDrizzleSnapshot: Record<string, unknown>
@@ -164,6 +167,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
   execute: Execute<unknown>
+
   features: {
     json?: boolean
   }
@@ -172,8 +176,8 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  getMigrationTemplate: (args: MigrationTemplateArgs) => string
   idType: 'serial' | 'uuid'
+  indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
   localesSuffix?: string
@@ -186,6 +190,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   requireDrizzleKit: RequireDrizzleKit
   resolveInitializing: () => void
   schema: Record<string, unknown>
+
   schemaName?: string
   sessions: {
     [id: string]: {

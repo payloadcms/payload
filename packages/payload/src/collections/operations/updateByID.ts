@@ -5,11 +5,17 @@ import httpStatus from 'http-status'
 import type { FindOneArgs } from '../../database/types.js'
 import type { Args } from '../../fields/hooks/beforeChange/index.js'
 import type { CollectionSlug } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type {
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  TransformCollectionWithSelect,
+} from '../../types/index.js'
 import type {
   Collection,
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
 } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
@@ -39,24 +45,30 @@ export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
+  disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
+  populate?: PopulateType
   publishSpecificLocale?: string
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
-export const updateByIDOperation = async <TSlug extends CollectionSlug>(
+export const updateByIDOperation = async <
+  TSlug extends CollectionSlug,
+  TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,
+>(
   incomingArgs: Arguments<TSlug>,
-): Promise<DataFromCollectionSlug<TSlug>> => {
+): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
   try {
-    const shouldCommit = await initTransaction(args.req)
+    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -89,6 +101,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
+      populate,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -97,6 +110,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         payload,
       },
       req,
+      select,
       showHiddenFields,
     } = args
 
@@ -295,7 +309,12 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
     }
 
     if (publishSpecificLocale) {
-      publishedDocWithLocales = await getLatestCollectionVersion({
+      versionSnapshotResult = await beforeChange({
+        ...beforeChangeArgs,
+        docWithLocales,
+      })
+
+      const lastPublished = await getLatestCollectionVersion({
         id,
         config: collectionConfig,
         payload,
@@ -304,10 +323,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         req,
       })
 
-      versionSnapshotResult = await beforeChange({
-        ...beforeChangeArgs,
-        docWithLocales,
-      })
+      publishedDocWithLocales = lastPublished ? lastPublished : {}
     }
 
     let result = await beforeChange({
@@ -344,6 +360,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         data: dataToUpdate,
         locale,
         req,
+        select,
       })
     }
 
@@ -361,6 +378,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
         payload,
         publishSpecificLocale,
         req,
+        select,
         snapshot: versionSnapshotResult,
       })
     }
@@ -379,7 +397,9 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       global: null,
       locale,
       overrideAccess,
+      populate,
       req,
+      select,
       showHiddenFields,
     })
 
@@ -457,7 +477,7 @@ export const updateByIDOperation = async <TSlug extends CollectionSlug>(
       await commitTransaction(req)
     }
 
-    return result
+    return result as TransformCollectionWithSelect<TSlug, TSelect>
   } catch (error: unknown) {
     await killTransaction(args.req)
     throw error

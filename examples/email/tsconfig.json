@@ -1,24 +1,48 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "baseUrl": ".",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
     "allowJs": true,
-    "strict": false,
-    "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "jsx": "react",
-    "sourceMap": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
-      "payload/generated-types": ["./src/payload-types.ts"],
-      "node_modules/*": ["./node_modules/*"]
-    }
+      "@/*": [
+        "./src/*"
+      ],
+      "@payload-config": [
+        "src/payload.config.ts"
+      ],
+      "@payload-types": [
+        "src/payload-types.ts"
+      ]
+    },
+    "target": "ES2022",
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "build"],
-  "ts-node": {
-    "transpileOnly": true
-  }
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/mocks/emptyObject.js"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

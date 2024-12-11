@@ -1,7 +1,17 @@
 'use client'
-import type { FieldTypes } from 'payload'
+import type {
+  ClientFieldBase,
+  FieldTypes,
+  GenericDescriptionProps,
+  GenericErrorProps,
+  GenericLabelProps,
+  HiddenFieldProps,
+} from 'payload'
 import type React from 'react'
 
+import type { ConfirmPasswordFieldProps } from './ConfirmPassword/index.js'
+
+import { RowLabel } from '../forms/RowLabel/index.js'
 import { ArrayField } from './Array/index.js'
 import { BlocksField } from './Blocks/index.js'
 import { CheckboxField } from './Checkbox/index.js'
@@ -10,6 +20,9 @@ import { CollapsibleField } from './Collapsible/index.js'
 import { ConfirmPasswordField } from './ConfirmPassword/index.js'
 import { DateTimeField } from './DateTime/index.js'
 import { EmailField } from './Email/index.js'
+import { FieldDescription } from './FieldDescription/index.js'
+import { FieldError } from './FieldError/index.js'
+import { FieldLabel } from './FieldLabel/index.js'
 import { GroupField } from './Group/index.js'
 import { HiddenField } from './Hidden/index.js'
 import { JoinField } from './Join/index.js'
@@ -31,7 +44,10 @@ import { UploadField } from './Upload/index.js'
 export * from './shared/index.js'
 
 export type FieldTypesComponents = {
-  [K in 'confirmPassword' | 'hidden' | 'password' | FieldTypes]: React.FC
+  [K in 'password' | FieldTypes]: React.FC<ClientFieldBase>
+} & {
+  confirmPassword: React.FC<ConfirmPasswordFieldProps>
+  hidden: React.FC<HiddenFieldProps>
 }
 
 export const fieldComponents: FieldTypesComponents = {
@@ -60,4 +76,19 @@ export const fieldComponents: FieldTypesComponents = {
   textarea: TextareaField,
   ui: UIField,
   upload: UploadField,
+}
+
+export type FieldComponentsWithSlots = {
+  Description: React.FC<GenericDescriptionProps>
+  Error: React.FC<GenericErrorProps>
+  Label: React.FC<GenericLabelProps>
+  RowLabel: React.FC
+} & FieldTypesComponents
+
+export const allFieldComponents: FieldComponentsWithSlots = {
+  ...fieldComponents,
+  Description: FieldDescription,
+  Error: FieldError,
+  Label: FieldLabel,
+  RowLabel,
 }

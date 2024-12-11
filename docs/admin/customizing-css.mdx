@@ -8,7 +8,7 @@ keywords: admin, css, scss, documentation, Content Management System, cms, headl
 
 Customizing the Payload [Admin Panel](./overview) through CSS alone is one of the easiest and most powerful ways to customize the look and feel of the dashboard. To allow for this level of customization, Payload:
 
-1. Exposes a [root-level stylesheet](#global-css) for you to easily to inject custom selectors
+1. Exposes a [root-level stylesheet](#global-css) for you to inject custom selectors
 1. Provides a [CSS library](#css-library) that can be easily overridden or extended
 1. Uses [BEM naming conventions](http://getbem.com) so that class names are globally accessible
 
@@ -30,7 +30,7 @@ Here is an example of how you might target the Dashboard View and change the bac
 
 <Banner type="warning">
   <strong>Note:</strong>
-  If you are building [Custom Components](./overview), it is best to import your own stylesheets directly into your components, rather than using the global stylesheet. You can continue to use the [CSS library](#css-library) as needed.
+  If you are building [Custom Components](./components), it is best to import your own stylesheets directly into your components, rather than using the global stylesheet. You can continue to use the [CSS library](#css-library) as needed.
 </Banner>
 
 ### Specificity rules
@@ -62,13 +62,13 @@ You can also override Payload's built-in [CSS Variables](https://developer.mozil
 
 The following variables are defined and can be overridden:
 
-- [Breakpoints](https://github.com/payloadcms/payload/blob/beta/packages/ui/src/scss/queries.scss)
-- [Colors](https://github.com/payloadcms/payload/blob/beta/packages/ui/src/scss/colors.scss)
+- [Breakpoints](https://github.com/payloadcms/payload/blob/main/packages/ui/src/scss/queries.scss)
+- [Colors](https://github.com/payloadcms/payload/blob/main/packages/ui/src/scss/colors.scss)
   - Base color shades (white to black by default)
   - Success / warning / error color shades
   - Theme-specific colors (background, input background, text color, etc.)
   - Elevation colors (used to determine how "bright" something should be when compared to the background)
-- [Sizing](https://github.com/payloadcms/payload/blob/beta/packages/ui/src/scss/app.scss)
+- [Sizing](https://github.com/payloadcms/payload/blob/main/packages/ui/src/scss/app.scss)
   - Horizontal gutter
   - Transition speeds
   - Font sizes

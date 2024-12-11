@@ -1,10 +1,15 @@
 'use client'
 import type { I18nClient, Language } from '@payloadcms/translations'
-import type { ClientConfig, LanguageOptions, Permissions, User } from 'payload'
+import type {
+  ClientConfig,
+  LanguageOptions,
+  SanitizedPermissions,
+  ServerFunctionClient,
+  User,
+} from 'payload'
 
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
-import { WindowInfoProvider } from '@faceless-ui/window-info'
 import React, { Fragment } from 'react'
 
 import type { Theme } from '../Theme/index.js'
@@ -13,18 +18,17 @@ import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
-import { fieldComponents } from '../../fields/index.js'
-import { ActionsProvider } from '../Actions/index.js'
+import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
-import { FieldComponentsProvider } from '../FieldComponents/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
+import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
@@ -37,7 +41,8 @@ type Props = {
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
-  readonly permissions: Permissions
+  readonly permissions: SanitizedPermissions
+  readonly serverFunction: ServerFunctionClient
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
   readonly translations: I18nClient['translations']
@@ -53,6 +58,7 @@ export const RootProvider: React.FC<Props> = ({
   languageCode,
   languageOptions,
   permissions,
+  serverFunction,
   switchLanguageServerAction,
   theme,
   translations,
@@ -63,9 +69,9 @@ export const RootProvider: React.FC<Props> = ({
 
   return (
     <Fragment>
-      <RouteCacheComponent>
-        <ConfigProvider config={config}>
-          <FieldComponentsProvider fieldComponents={fieldComponents}>
+      <ServerFunctionsProvider serverFunction={serverFunction}>
+        <RouteCacheComponent>
+          <ConfigProvider config={config}>
             <ClientFunctionProvider>
               <TranslationProvider
                 dateFNSKey={dateFNSKey}
@@ -94,11 +100,9 @@ export const RootProvider: React.FC<Props> = ({
                                   <StepNavProvider>
                                     <LoadingOverlayProvider>
                                       <DocumentEventsProvider>
-                                        <ActionsProvider>
-                                          <NavProvider initialIsOpen={isNavOpen}>
-                                            {children}
-                                          </NavProvider>
-                                        </ActionsProvider>
+                                        <NavProvider initialIsOpen={isNavOpen}>
+                                          {children}
+                                        </NavProvider>
                                       </DocumentEventsProvider>
                                     </LoadingOverlayProvider>
                                   </StepNavProvider>
@@ -115,9 +119,9 @@ export const RootProvider: React.FC<Props> = ({
                 </WindowInfoProvider>
               </TranslationProvider>
             </ClientFunctionProvider>
-          </FieldComponentsProvider>
-        </ConfigProvider>
-      </RouteCacheComponent>
+          </ConfigProvider>
+        </RouteCacheComponent>
+      </ServerFunctionsProvider>
       <ToastContainer />
     </Fragment>
   )

@@ -21,6 +21,7 @@ export async function updateVersion<T extends TypeWithID>(
     collection,
     locale,
     req = {} as PayloadRequest,
+    select,
     versionData,
     where: whereArg,
   }: UpdateVersionArgs<T>,
@@ -32,7 +33,7 @@ export async function updateVersion<T extends TypeWithID>(
     `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
   const { where } = buildQuery({
     adapter: this,
@@ -48,8 +49,10 @@ export async function updateVersion<T extends TypeWithID>(
     data: versionData,
     db,
     fields,
+    joinQuery: false,
     operation: 'update',
     req,
+    select,
     tableName,
     where,
   })

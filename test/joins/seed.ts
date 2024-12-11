@@ -6,7 +6,13 @@ import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
-import { categoriesSlug, collectionSlugs, postsSlug, uploadsSlug } from './shared.js'
+import {
+  categoriesSlug,
+  collectionSlugs,
+  hiddenPostsSlug,
+  postsSlug,
+  uploadsSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,6 +31,14 @@ export const seed = async (_payload) => {
     data: {
       name: 'example',
       group: {},
+    },
+  })
+
+  await _payload.create({
+    collection: hiddenPostsSlug,
+    data: {
+      category: category.id,
+      title: 'Test Post 1',
     },
   })
 

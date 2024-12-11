@@ -1,7 +1,5 @@
 'use client'
 
-import type { MappedComponent } from 'payload'
-
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 
@@ -9,29 +7,31 @@ import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { PopupList } from '../Popup/index.js'
-export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+
+export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const {
     id,
     collectionSlug,
     docConfig,
     globalSlug,
+    hasPublishedDoc,
     hasPublishPermission,
-    publishedDoc,
-    unpublishedVersions,
+    setHasPublishedDoc,
+    setUnpublishedVersionCount,
+    unpublishedVersionCount,
   } = useDocumentInfo()
 
   const { config } = useConfig()
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
-  const { code: locale } = useLocale()
+  const { code: localeCode } = useLocale()
 
   const {
     localization,
@@ -40,11 +40,10 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
   } = config
 
   const { i18n, t } = useTranslation()
-  const { code } = useLocale()
   const label = labelProp || t('version:publishChanges')
 
-  const hasNewerVersions = unpublishedVersions?.totalDocs > 0
-  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !publishedDoc)
+  const hasNewerVersions = unpublishedVersionCount > 0
+  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !hasPublishedDoc)
   const operation = useOperation()
 
   const forceDisable = operation === 'update' && !modified
@@ -54,7 +53,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       return
     }
 
-    const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
+    const search = `?locale=${localeCode}&depth=0&fallback-locale=null&draft=true`
     let action
     let method = 'POST'
 
@@ -77,7 +76,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id, forceDisable])
+  }, [submit, collectionSlug, globalSlug, serverURL, api, localeCode, id, forceDisable])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -94,7 +93,10 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
         _status: 'published',
       },
     })
-  }, [submit])
+
+    setUnpublishedVersionCount(0)
+    setHasPublishedDoc(true)
+  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount])
 
   const publishSpecificLocale = useCallback(
     (locale) => {
@@ -112,8 +114,10 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
           _status: 'published',
         },
       })
+
+      setHasPublishedDoc(true)
     },
-    [api, collectionSlug, globalSlug, id, serverURL, submit],
+    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit],
   )
 
   if (!hasPublishPermission) {
@@ -128,40 +132,33 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       size="medium"
       SubMenuPopupContent={
         localization
-          ? localization.locales.map((locale) => {
-              const formattedLabel =
-                typeof locale.label === 'string'
-                  ? locale.label
-                  : locale.label && locale.label[i18n?.language]
+          ? ({ close }) =>
+              localization.locales.map((locale) => {
+                const formattedLabel =
+                  typeof locale.label === 'string'
+                    ? locale.label
+                    : locale.label && locale.label[i18n?.language]
 
-              const isActive = typeof locale === 'string' ? locale === code : locale.code === code
+                const isActive =
+                  typeof locale === 'string' ? locale === localeCode : locale.code === localeCode
 
-              if (isActive) {
-                return (
-                  <PopupList.ButtonGroup key={locale.code}>
-                    <PopupList.Button onClick={() => publishSpecificLocale(locale.code)}>
-                      {t('version:publishIn', { locale: formattedLabel || locale.code })}
-                    </PopupList.Button>
-                  </PopupList.ButtonGroup>
-                )
-              }
-            })
-          : null
+                if (isActive) {
+                  return (
+                    <PopupList.ButtonGroup key={locale.code}>
+                      <PopupList.Button
+                        onClick={() => [publishSpecificLocale(locale.code), close()]}
+                      >
+                        {t('version:publishIn', { locale: formattedLabel || locale.code })}
+                      </PopupList.Button>
+                    </PopupList.ButtonGroup>
+                  )
+                }
+              })
+          : undefined
       }
       type="button"
     >
       {label}
     </FormSubmit>
   )
-}
-
-type Props = {
-  CustomComponent?: MappedComponent
-}
-
-export const PublishButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) {
-    return <RenderComponent mappedComponent={CustomComponent} />
-  }
-  return <DefaultPublishButton />
 }

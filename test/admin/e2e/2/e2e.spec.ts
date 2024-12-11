@@ -26,7 +26,12 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
+import { openListColumns } from 'helpers/e2e/openListColumns.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
+import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -42,6 +47,7 @@ describe('admin2', () => {
   let page: Page
   let geoUrl: AdminUrlUtil
   let postsUrl: AdminUrlUtil
+  let baseListFiltersUrl: AdminUrlUtil
   let customViewsUrl: AdminUrlUtil
 
   let serverURL: string
@@ -60,15 +66,12 @@ describe('admin2', () => {
 
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
+    baseListFiltersUrl = new AdminUrlUtil(serverURL, 'base-list-filters')
     customViewsUrl = new AdminUrlUtil(serverURL, customViews1CollectionSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'adminTests2',
-    })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
@@ -77,7 +80,7 @@ describe('admin2', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests2',
+      snapshotKey: 'adminTests',
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
@@ -174,6 +177,17 @@ describe('admin2', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
+      test('search should persist through browser back button', async () => {
+        const url = `${postsUrl.list}?limit=10&page=1&search=post1`
+        await page.goto(url)
+        await page.waitForURL(url)
+        await expect(page.locator('#search-filter-input')).toHaveValue('post1')
+        await goToFirstCell(page, postsUrl)
+        await page.goBack()
+        await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
+        await page.waitForURL(url)
+      })
+
       test('search should not persist between navigation', async () => {
         const url = `${postsUrl.list}?limit=10&page=1&search=test`
         await page.goto(url)
@@ -194,33 +208,17 @@ describe('admin2', () => {
       test('should toggle columns', async () => {
         const columnCountLocator = 'table > thead > tr > th'
         await createPost()
-
-        await page.locator('.list-controls__toggle-columns').click()
-
-        // track the number of columns before manipulating toggling any
+        await openListColumns(page, {})
         const numberOfColumns = await page.locator(columnCountLocator).count()
-
-        // wait until the column toggle UI is visible and fully expanded
         await expect(page.locator('.column-selector')).toBeVisible()
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
-
-        const idButton = page.locator(`.column-selector .column-selector__column`, {
-          hasText: exactText('ID'),
-        })
-
-        // Remove ID column
-        await idButton.click()
-
-        // wait until .cell-id is not present on the page:
-        await page.locator('.cell-id').waitFor({ state: 'detached' })
-
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
+        await page.locator('#heading-id').waitFor({ state: 'detached' })
+        await page.locator('.cell-id').first().waitFor({ state: 'detached' })
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
-
-        // Add back ID column
-        await idButton.click()
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'on' })
         await expect(page.locator('.cell-id').first()).toBeVisible()
-
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
       })
@@ -229,27 +227,24 @@ describe('admin2', () => {
         const { id } = await createPost()
         await page.reload()
         const linkCell = page.locator(`${tableRowLocator} td`).nth(1).locator('a')
+
         await expect(linkCell).toHaveAttribute(
           'href',
           `${adminRoutes.routes.admin}/collections/posts/${id}`,
         )
 
-        // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
-        // wait until the column toggle UI is visible and fully expanded
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
-        // toggle off the ID column
         await page
           .locator('.column-selector .column-selector__column', {
             hasText: exactText('ID'),
           })
           .click()
 
-        // wait until .cell-id is not present on the page:
-        await page.locator('.cell-id').waitFor({ state: 'detached' })
+        await page.locator('#heading-id').waitFor({ state: 'detached' })
+        await page.locator('.cell-id').first().waitFor({ state: 'detached' })
 
-        // recheck that the 2nd cell is still a link
         await expect(linkCell).toHaveAttribute(
           'href',
           `${adminRoutes.routes.admin}/collections/posts/${id}`,
@@ -280,9 +275,7 @@ describe('admin2', () => {
 
         await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
-        await page.locator('.list-controls__toggle-where').click()
-        // wait until the filter UI is visible and fully expanded
-        await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+        await openListFilters(page, {})
 
         await page.locator('.where-builder__add-first-filter').click()
 
@@ -320,8 +313,7 @@ describe('admin2', () => {
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
-        await page.locator('.list-controls__toggle-where').click()
-        await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+        await openListFilters(page, {})
         await page.locator('.where-builder__add-first-filter').click()
 
         const operatorField = page.locator('.condition__operator')
@@ -468,7 +460,7 @@ describe('admin2', () => {
         await page.goto(`${postsUrl.list}?limit=10&page=2`)
 
         // add filter
-        await page.locator('.list-controls__toggle-where').click()
+        await openListFilters(page, {})
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
@@ -512,14 +504,14 @@ describe('admin2', () => {
         await expect(listDrawer).toBeVisible()
 
         const collectionSelector = page.locator(
-          '[id^=list-drawer_1_] .list-drawer__select-collection.react-select',
+          '[id^=list-drawer_1_] .list-header__select-collection.react-select',
         )
 
         // select the "Post" collection
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -551,7 +543,7 @@ describe('admin2', () => {
         await expect(listDrawer).toBeVisible()
 
         const collectionSelector = page.locator(
-          '[id^=list-drawer_1_] .list-drawer__select-collection.react-select',
+          '[id^=list-drawer_1_] .list-header__select-collection.react-select',
         )
         const columnSelector = page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns')
 
@@ -574,7 +566,7 @@ describe('admin2', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -595,7 +587,7 @@ describe('admin2', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('User'),
             },
@@ -616,7 +608,7 @@ describe('admin2', () => {
 
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            '[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option',
             {
               hasText: exactText('Post'),
             },
@@ -743,6 +735,25 @@ describe('admin2', () => {
         await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
         await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
       })
+
+      test('should sort with existing filters', async () => {
+        await page.goto(postsUrl.list)
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
+        await page.locator('#heading-id').waitFor({ state: 'detached' })
+        await page.locator('#heading-title button.sort-column__asc').click()
+        await page.waitForURL(/sort=title/)
+
+        const columnAfterSort = page.locator(
+          `.list-controls__columns .column-selector .column-selector__column`,
+          {
+            hasText: exactText('ID'),
+          },
+        )
+
+        await expect(columnAfterSort).not.toHaveClass('column-selector__column--active')
+        await expect(page.locator('#heading-id')).toBeHidden()
+        await expect(page.locator('.cell-id')).toHaveCount(0)
+      })
     })
 
     describe('i18n', () => {
@@ -764,7 +775,7 @@ describe('admin2', () => {
         ).toHaveText('Title')
 
         // filters
-        await page.locator('.list-controls__toggle-where').click()
+        await openListFilters(page, {})
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
@@ -792,6 +803,14 @@ describe('admin2', () => {
             hasText: exactText('Title'),
           }),
         ).toHaveText('Title')
+      })
+    })
+
+    describe('base list filters', () => {
+      test('should respect base list filters', async () => {
+        await page.goto(baseListFiltersUrl.list)
+        await page.waitForURL((url) => url.toString().startsWith(baseListFiltersUrl.list))
+        await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
     })
   })

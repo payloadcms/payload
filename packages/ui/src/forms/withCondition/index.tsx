@@ -1,19 +1,19 @@
 'use client'
+import type { FieldPaths } from 'payload'
+import type { MarkOptional } from 'ts-essentials'
+
 import React from 'react'
 
-import { useFieldProps } from '../FieldPropsProvider/index.js'
 import { WatchCondition } from './WatchCondition.js'
 
-export const withCondition = <P extends Record<string, unknown>>(
+export const withCondition = <P extends MarkOptional<FieldPaths, 'indexPath' | 'path'>>(
   Field: React.ComponentType<P>,
 ): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
-    const { name } = props
-    const { type, indexPath, path: pathFromContext } = useFieldProps()
-    const path = pathFromContext ?? name
+    const { indexPath, path } = props
 
     return (
-      <WatchCondition indexPath={indexPath} name={name as string} path={path as string} type={type}>
+      <WatchCondition indexPath={indexPath} path={path}>
         <Field {...props} />
       </WatchCondition>
     )

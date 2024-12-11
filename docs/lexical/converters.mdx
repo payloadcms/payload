@@ -6,14 +6,67 @@ desc: Conversion between lexical, markdown and html
 keywords: lexical, rich text, editor, headless cms, convert, html, mdx, markdown, md, conversion, export
 ---
 
+Lexical saves data in JSON - this is great for storage and flexibility and allows you to easily to convert it to other formats like JSX, HTML or Markdown.
+
+## Lexical => JSX
+
+If you have a React-based frontend, converting lexical to JSX is the recommended way to render rich text content in your frontend. To do that, import the `RichText` component from `@payloadcms/richtext-lexical/react` and pass the lexical content to it:
+
+```tsx
+import React from 'react'
+import { RichText } from '@payloadcms/richtext-lexical/react'
+
+export const MyComponent = ({ lexicalData }) => {
+  return (
+    <RichText data={lexicalData} />
+  )
+}
+```
+
+The `RichText` component will come with the most common serializers built-in, though you can also pass in your own serializers if you need to.
+
+<Banner type="default">
+  The JSX converter expects the input data to be fully populated. When fetching data, ensure the `depth` setting is high enough, to ensure that lexical nodes such as uploads are populated.
+</Banner>
+
+### Converting Lexical Blocks to JSX
+
+In order to convert lexical blocks or inline blocks to JSX, you will have to pass the converter for your block to the RichText component. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
+
+```tsx
+import React from 'react'
+import {
+  type JSXConvertersFunction,
+  RichText,
+} from '@payloadcms/richtext-lexical/react'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
+  ...defaultConverters,
+  blocks: {
+    // myTextBlock is the slug of the block
+    myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
+  },
+})
+
+export const MyComponent = ({ lexicalData }) => {
+  return (
+    <RichText
+      converters={jsxConverters}
+      data={lexicalData.lexicalWithBlocks as SerializedEditorState}
+    />
+  )
+}
+```
+
 ## Lexical => HTML
 
-Lexical saves data in JSON, but can also generate its HTML representation via two main methods:
+If you don't have a React-based frontend, or if you need to send the content to a third-party service, you can convert lexical to HTML. There are two ways to do this:
 
 1. **Outputting HTML from the Collection:** Create a new field in your collection to convert saved JSON content to HTML. Payload generates and outputs the HTML for use in your frontend.
 2. **Generating HTML on any server** Convert JSON to HTML on-demand on the server.
 
-The editor comes with built-in HTML serializers, simplifying the process of converting JSON to HTML.
+In both cases, the conversion needs to happen on a server, as the HTML converter will automatically fetch data for nodes that require it (e.g. uploads and internal links). The editor comes with built-in HTML serializers, simplifying the process of converting JSON to HTML.
 
 ### Outputting HTML from the Collection
 
@@ -200,7 +253,7 @@ Lexical provides a seamless way to perform conversions between various other for
 A headless editor can perform such conversions outside of the main editor instance. Follow this method to initiate a headless editor:
 
 ```ts
-import { createHeadlessEditor } from '@lexical/headless' // <= make sure this package is installed
+import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
 import { getEnabledNodes, sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
 
 const yourEditorConfig // <= your editor config here
@@ -237,7 +290,7 @@ If you have access to the sanitized collection config, you can get access to the
 
 ```ts
 import type { CollectionConfig, RichTextField } from 'payload'
-import { createHeadlessEditor } from '@lexical/headless'
+import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
 import type { LexicalRichTextAdapter, SanitizedServerEditorConfig } from '@payloadcms/richtext-lexical'
 import {
   getEnabledNodes,
@@ -292,8 +345,8 @@ export const MyCollection: CollectionConfig = {
 Once you have your headless editor instance, you can use it to convert HTML to Lexical:
 
 ```ts
-import { $generateNodesFromDOM } from '@lexical/html'
-import { $getRoot, $getSelection } from 'lexical'
+import { $generateNodesFromDOM } from '@payloadcms/richtext-lexical/lexical/html'
+import { $getRoot, $getSelection } from '@payloadcms/richtext-lexical/lexical'
 import { JSDOM } from 'jsdom'
 
 headlessEditor.update(
@@ -334,8 +387,7 @@ This has been taken from the [lexical serialization & deserialization docs](http
 Convert markdown content to the Lexical editor format with the following:
 
 ```ts
-import { $convertFromMarkdownString } from '@lexical/markdown'
-import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
+import { sanitizeServerEditorConfig, $convertFromMarkdownString } from '@payloadcms/richtext-lexical'
 
 const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & Payload Config here
 const markdown = `# Hello World`
@@ -361,16 +413,21 @@ Export content from the Lexical editor into Markdown format using these steps:
 Here's the code for it:
 
 ```ts
-import { $convertToMarkdownString } from '@lexical/markdown'
+import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
 import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from 'lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & Payload Config here
 const yourEditorState: SerializedEditorState // <= your current editor state here
 
 // Import editor state into your headless editor
 try {
-  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
+  headlessEditor.update(
+    () => {
+      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+    },
+    { discrete: true },  // This should commit the editor state immediately
+  )
 } catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
 }
@@ -382,8 +439,6 @@ headlessEditor.getEditorState().read(() => {
 })
 ```
 
-The `.setEditorState()` function immediately updates your editor state. Thus, there's no need for the `discrete: true` flag when reading the state afterward.
-
 ## Lexical => Plain Text
 
 Export content from the Lexical editor into plain text using these steps:
@@ -394,15 +449,20 @@ Export content from the Lexical editor into plain text using these steps:
 Here's the code for it:
 
 ```ts
-import type { SerializedEditorState } from 'lexical'
-import { $getRoot } from 'lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import { $getRoot } from '@payloadcms/richtext-lexical/lexical'
 
 const yourEditorState: SerializedEditorState // <= your current editor state here
 
 // Import editor state into your headless editor
 try {
-  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
-} catch (e) {
+    headlessEditor.update(
+    () => {
+      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+    },
+    { discrete: true },  // This should commit the editor state immediately
+  )
+  } catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
 }
 

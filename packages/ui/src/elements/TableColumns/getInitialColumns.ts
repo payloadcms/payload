@@ -1,12 +1,14 @@
-'use client'
-import type { ClientField } from 'payload'
+import type { ClientField, CollectionConfig, Field } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
 
-import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
+import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 
-const getRemainingColumns = (fields: ClientField[], useAsTitle: string): ColumnPreferences =>
-  fields.reduce((remaining, field) => {
+const getRemainingColumns = <T extends ClientField[] | Field[]>(
+  fields: T,
+  useAsTitle: string,
+): ColumnPreferences =>
+  fields?.reduce((remaining, field) => {
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
     }
@@ -31,10 +33,15 @@ const getRemainingColumns = (fields: ClientField[], useAsTitle: string): ColumnP
     return [...remaining, field.name]
   }, [])
 
-export const getInitialColumns = (
-  fields: ClientField[],
-  useAsTitle: string,
-  defaultColumns: string[],
+/**
+ * Returns the initial columns to display in the table based on the following criteria:
+ * 1. If `defaultColumns` is set in the collection config, use those columns
+ * 2. Otherwise take `useAtTitle, if set, and the next 3 fields that are not hidden or disabled
+ */
+export const getInitialColumns = <T extends ClientField[] | Field[]>(
+  fields: T,
+  useAsTitle: CollectionConfig['admin']['useAsTitle'],
+  defaultColumns: CollectionConfig['admin']['defaultColumns'],
 ): ColumnPreferences => {
   let initialColumns = []
 

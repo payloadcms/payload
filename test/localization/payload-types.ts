@@ -11,11 +11,13 @@ export interface Config {
     users: UserAuthOperations;
   };
   collections: {
+    richText: RichText;
     'blocks-fields': BlocksField;
     'nested-arrays': NestedArray;
     'nested-field-tables': NestedFieldTable;
     users: User;
     'localized-posts': LocalizedPost;
+    'no-localized-fields': NoLocalizedField;
     'array-fields': ArrayField;
     'localized-required': LocalizedRequired;
     'with-localized-relationship': WithLocalizedRelationship;
@@ -31,15 +33,48 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsJoins: {};
+  collectionsSelect: {
+    richText: RichTextSelect<false> | RichTextSelect<true>;
+    'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
+    'nested-arrays': NestedArraysSelect<false> | NestedArraysSelect<true>;
+    'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
+    'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
+    'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
+    'localized-required': LocalizedRequiredSelect<false> | LocalizedRequiredSelect<true>;
+    'with-localized-relationship': WithLocalizedRelationshipSelect<false> | WithLocalizedRelationshipSelect<true>;
+    'relationship-localized': RelationshipLocalizedSelect<false> | RelationshipLocalizedSelect<true>;
+    dummy: DummySelect<false> | DummySelect<true>;
+    nested: NestedSelect<false> | NestedSelect<true>;
+    groups: GroupsSelect<false> | GroupsSelect<true>;
+    tabs: TabsSelect<false> | TabsSelect<true>;
+    'localized-sort': LocalizedSortSelect<false> | LocalizedSortSelect<true>;
+    'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
+    'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
   db: {
     defaultIDType: string;
   };
   globals: {
     'global-array': GlobalArray;
+    'global-text': GlobalText;
+  };
+  globalsSelect: {
+    'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
+    'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
   };
   locale: 'en' | 'es' | 'pt' | 'ar' | 'hu';
   user: User & {
     collection: 'users';
+  };
+  jobs: {
+    tasks: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -59,6 +94,35 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText".
+ */
+export interface RichText {
+  id: string;
+  richText?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  lexical?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -214,6 +278,16 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-localized-fields".
+ */
+export interface NoLocalizedField {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -390,6 +464,13 @@ export interface Nested {
         blockType: 'block';
       }[]
     | null;
+  topLevelArray?:
+    | {
+        localizedText?: string | null;
+        notLocalizedText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -399,11 +480,11 @@ export interface Nested {
  */
 export interface Group {
   id: string;
-  groupLocalized?: {
-    title?: string | null;
-  };
   groupLocalizedRow?: {
     text?: string | null;
+  };
+  groupLocalized?: {
+    title?: string | null;
   };
   group?: {
     title?: string | null;
@@ -531,6 +612,10 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'richText';
+        value: string | RichText;
+      } | null)
+    | ({
         relationTo: 'blocks-fields';
         value: string | BlocksField;
       } | null)
@@ -549,6 +634,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized-posts';
         value: string | LocalizedPost;
+      } | null)
+    | ({
+        relationTo: 'no-localized-fields';
+        value: string | NoLocalizedField;
       } | null)
     | ({
         relationTo: 'array-fields';
@@ -638,6 +727,521 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText_select".
+ */
+export interface RichTextSelect<T extends boolean = true> {
+  richText?: T;
+  lexical?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-fields_select".
+ */
+export interface BlocksFieldsSelect<T extends boolean = true> {
+  content?:
+    | T
+    | {
+        blockInsideBlock?:
+          | T
+          | {
+              content?:
+                | T
+                | {
+                    textBlock?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              array?:
+                | T
+                | {
+                    link?:
+                      | T
+                      | {
+                          label?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-arrays_select".
+ */
+export interface NestedArraysSelect<T extends boolean = true> {
+  arrayWithBlocks?:
+    | T
+    | {
+        blocksWithinArray?:
+          | T
+          | {
+              someBlock?:
+                | T
+                | {
+                    relationWithinBlock?: T;
+                    myGroup?:
+                      | T
+                      | {
+                          text?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+        id?: T;
+      };
+  arrayWithLocalizedRelation?:
+    | T
+    | {
+        localizedRelation?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-field-tables_select".
+ */
+export interface NestedFieldTablesSelect<T extends boolean = true> {
+  array?:
+    | T
+    | {
+        relation?: T;
+        hasManyRelation?: T;
+        hasManyPolyRelation?: T;
+        select?: T;
+        number?: T;
+        text?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              nestedBlocks?:
+                | T
+                | {
+                    content?:
+                      | T
+                      | {
+                          relation?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              array?:
+                | T
+                | {
+                    relation?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  relation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts_select".
+ */
+export interface LocalizedPostsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  localizedDescription?: T;
+  localizedCheckbox?: T;
+  children?: T;
+  group?:
+    | T
+    | {
+        children?: T;
+      };
+  unique?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-localized-fields_select".
+ */
+export interface NoLocalizedFieldsSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-fields_select".
+ */
+export interface ArrayFieldsSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-required_select".
+ */
+export interface LocalizedRequiredSelect<T extends boolean = true> {
+  title?: T;
+  nav?:
+    | T
+    | {
+        layout?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    text?: T;
+                    nestedArray?:
+                      | T
+                      | {
+                          text?: T;
+                          l2?:
+                            | T
+                            | {
+                                l3?:
+                                  | T
+                                  | {
+                                      l4?:
+                                        | T
+                                        | {
+                                            superNestedText?: T;
+                                            id?: T;
+                                          };
+                                      id?: T;
+                                    };
+                                id?: T;
+                              };
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              number?:
+                | T
+                | {
+                    number?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
+  myTab?:
+    | T
+    | {
+        text?: T;
+        group?:
+          | T
+          | {
+              nestedArray2?:
+                | T
+                | {
+                    nestedText?: T;
+                    id?: T;
+                  };
+              nestedText?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with-localized-relationship_select".
+ */
+export interface WithLocalizedRelationshipSelect<T extends boolean = true> {
+  localizedRelationship?: T;
+  localizedRelationHasManyField?: T;
+  localizedRelationMultiRelationTo?: T;
+  localizedRelationMultiRelationToHasMany?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationship-localized_select".
+ */
+export interface RelationshipLocalizedSelect<T extends boolean = true> {
+  relationship?: T;
+  relationshipHasMany?: T;
+  relationMultiRelationTo?: T;
+  relationMultiRelationToHasMany?: T;
+  arrayField?:
+    | T
+    | {
+        nestedRelation?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dummy_select".
+ */
+export interface DummySelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested_select".
+ */
+export interface NestedSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              array?:
+                | T
+                | {
+                    text?: T;
+                    textNotLocalized?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  topLevelArray?:
+    | T
+    | {
+        localizedText?: T;
+        notLocalizedText?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "groups_select".
+ */
+export interface GroupsSelect<T extends boolean = true> {
+  groupLocalizedRow?:
+    | T
+    | {
+        text?: T;
+      };
+  groupLocalized?:
+    | T
+    | {
+        title?: T;
+      };
+  group?:
+    | T
+    | {
+        title?: T;
+      };
+  deep?:
+    | T
+    | {
+        array?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+            };
+        blocks?:
+          | T
+          | {
+              first?:
+                | T
+                | {
+                    title?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs_select".
+ */
+export interface TabsSelect<T extends boolean = true> {
+  tabLocalized?:
+    | T
+    | {
+        title?: T;
+      };
+  tab?:
+    | T
+    | {
+        title?: T;
+      };
+  deep?:
+    | T
+    | {
+        array?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+            };
+        blocks?:
+          | T
+          | {
+              first?:
+                | T
+                | {
+                    title?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-sort_select".
+ */
+export interface LocalizedSortSelect<T extends boolean = true> {
+  title?: T;
+  date?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-same-name_select".
+ */
+export interface BlocksSameNameSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        block_first?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        block_second?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-within-localized_select".
+ */
+export interface LocalizedWithinLocalizedSelect<T extends boolean = true> {
+  myTab?:
+    | T
+    | {
+        shouldNotBeLocalized?: T;
+      };
+  myArray?:
+    | T
+    | {
+        shouldNotBeLocalized?: T;
+        id?: T;
+      };
+  myBlocks?:
+    | T
+    | {
+        myBlock?:
+          | T
+          | {
+              shouldNotBeLocalized?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  myGroup?:
+    | T
+    | {
+        shouldNotBeLocalized?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array".
  */
 export interface GlobalArray {
@@ -650,6 +1254,41 @@ export interface GlobalArray {
     | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text".
+ */
+export interface GlobalText {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-array_select".
+ */
+export interface GlobalArraySelect<T extends boolean = true> {
+  array?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text_select".
+ */
+export interface GlobalTextSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

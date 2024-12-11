@@ -1,9 +1,0 @@
-@import '../css/queries.scss';
-
-.hero {
-  padding-top: calc(var(--base) * 1.5);
-
-  @include mid-break {
-    padding-top: var(--base);
-  }
-}

@@ -8,7 +8,7 @@ import { upsertRow } from './upsertRow/index.js'
 
 export const create: Create = async function create(
   this: DrizzleAdapter,
-  { collection: collectionSlug, data, req },
+  { collection: collectionSlug, data, req, select },
 ) {
   const db = this.sessions[await req?.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
@@ -19,9 +19,10 @@ export const create: Create = async function create(
     adapter: this,
     data,
     db,
-    fields: collection.fields,
+    fields: collection.flattenedFields,
     operation: 'create',
     req,
+    select,
     tableName,
   })
 

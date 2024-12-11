@@ -25,6 +25,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
     `${baseClass}--${buttonType}`,
     !noBackground && `${baseClass}--background`,
     size && `${baseClass}--size-${size}`,
+    disabled && `${baseClass}--disabled`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -60,6 +61,11 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
       className={classes}
       disabled={disabled}
       onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          handleClick()
+        }
+      }}
       tabIndex={0}
       type="button"
     >

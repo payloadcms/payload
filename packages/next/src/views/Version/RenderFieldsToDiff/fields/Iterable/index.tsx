@@ -17,6 +17,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
   field,
+  fieldPermissions,
   i18n,
   locale,
   locales,
@@ -87,7 +88,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
                 <RenderFieldsToDiff
                   comparison={comparisonRow}
                   diffComponents={diffComponents}
-                  fieldPermissions={permissions}
+                  fieldPermissions={fieldPermissions}
                   fields={fields}
                   i18n={i18n}
                   locales={locales}

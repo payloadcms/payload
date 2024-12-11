@@ -2,8 +2,11 @@ import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
   beginTransaction,
+  buildCreateMigration,
   commitTransaction,
   count,
+  countGlobalVersions,
+  countVersions,
   create,
   createGlobal,
   createGlobalVersion,
@@ -33,26 +36,27 @@ import {
   updateVersion,
 } from '@payloadcms/drizzle'
 import {
-  convertPathToJSONTraversal,
   countDistinct,
   createDatabase,
+  createExtensions,
   createJSONQuery,
-  createMigration,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
-  getMigrationTemplate,
   init,
   insert,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { Args, VercelPostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+
+const filename = fileURLToPath(import.meta.url)
 
 export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<VercelPostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -75,21 +79,28 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       adapterSchema = { enum: pgEnum, table: pgTable }
     }
 
+    const extensions = (args.extensions ?? []).reduce((acc, name) => {
+      acc[name] = true
+      return acc
+    }, {})
+
     return createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
+      createExtensions,
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
+      extensions,
       features: {
         json: true,
       },
       fieldConstraints: {},
-      getMigrationTemplate,
       idType: postgresIDType,
+      indexes: new Set<string>(),
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
@@ -106,6 +117,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
+      tablesFilter: args.tablesFilter,
       transactionOptions: args.transactionOptions || undefined,
       versionsSuffix: args.versionsSuffix || '_v',
 
@@ -114,14 +126,21 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
         args.transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
-      convertPathToJSONTraversal,
       count,
       countDistinct,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,
       createJSONQuery,
-      createMigration,
+      createMigration: buildCreateMigration({
+        executeMethod: 'execute',
+        filename,
+        sanitizeStatements({ sqlExecute, statements }) {
+          return `${sqlExecute}\n ${statements.join('\n')}\`)`
+        },
+      }),
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,

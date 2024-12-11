@@ -28,9 +28,9 @@ const ToolbarItem = ({
   enabled?: boolean
   item: ToolbarGroupItem
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
 
   if (item.Component) {
@@ -49,19 +49,31 @@ const ToolbarItem = ({
   }
 
   let title = item.key
+  let croppedTitle = item.key
   if (item.label) {
     title =
-      typeof item.label === 'function' ? item.label({ i18n, richTextComponentMap }) : item.label
+      typeof item.label === 'function'
+        ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+        : item.label
   }
   // Crop title to max. 25 characters
   if (title.length > 25) {
-    title = title.substring(0, 25) + '...'
+    croppedTitle = title.substring(0, 25) + '...'
+  } else {
+    croppedTitle = title
   }
 
   return (
-    <DropDownItem active={active} editor={editor} enabled={enabled} item={item} key={item.key}>
-      {item?.ChildComponent && <item.ChildComponent />}
-      <span className="text">{title}</span>
+    <DropDownItem
+      active={active}
+      editor={editor}
+      enabled={enabled}
+      Icon={item?.ChildComponent ? <item.ChildComponent /> : undefined}
+      item={item}
+      key={item.key}
+      tooltip={title}
+    >
+      <span className="text">{croppedTitle}</span>
     </DropDownItem>
   )
 }
@@ -161,19 +173,20 @@ export const ToolbarDropdown = ({
       key={groupKey}
       label={label}
     >
-      {items.length &&
-        items.map((item) => {
-          return (
-            <ToolbarItem
-              active={activeItemKeys.includes(item.key)}
-              anchorElem={anchorElem}
-              editor={editor}
-              enabled={enabledItemKeys.includes(item.key)}
-              item={item}
-              key={item.key}
-            />
-          )
-        })}
+      {items.length
+        ? items.map((item) => {
+            return (
+              <ToolbarItem
+                active={activeItemKeys.includes(item.key)}
+                anchorElem={anchorElem}
+                editor={editor}
+                enabled={enabledItemKeys.includes(item.key)}
+                item={item}
+                key={item.key}
+              />
+            )
+          })
+        : null}
     </DropDown>
   )
 }

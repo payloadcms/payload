@@ -4,12 +4,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig, OptionObject } from 'p
 import {
   CheckboxInput,
   Gutter,
-  SetViewActions,
-  useConfig,
-  useDocumentInfo,
-  usePayloadAPI,
-  useTranslation,
-} from '@payloadcms/ui'
+   useConfig, useDocumentInfo, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import React, { useState } from 'react'
 
@@ -76,7 +71,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const comparison = compareValue?.value && currentComparisonDoc?.version // the `version` key is only present on `versions` documents
 
-  const canUpdate = docPermissions?.update?.permission
+  const canUpdate = docPermissions?.update
 
   const localeValues = locales && locales.map((locale) => locale.value)
 
@@ -84,11 +79,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   return (
     <main className={baseClass}>
-      <SetViewActions
-        actions={
-          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.version?.actions
-        }
-      />
       <SetStepNav
         collectionConfig={collectionConfig}
         collectionSlug={collectionSlug}

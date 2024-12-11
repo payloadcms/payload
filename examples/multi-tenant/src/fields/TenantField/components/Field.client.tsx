@@ -23,11 +23,11 @@ export function TenantFieldComponentClient({ initialValue, path, readOnly }: Pro
       field={{
         name: path,
         type: 'relationship',
-        _path: path,
         label: 'Tenant',
         relationTo: 'tenants',
         required: true,
       }}
+      path={path}
       readOnly={readOnly}
     />
   )

@@ -13,6 +13,10 @@
   }
 
   .btn {
+    * {
+      pointer-events: none;
+    }
+
     // colors
     &--style-primary {
       --color: var(--theme-elevation-0);

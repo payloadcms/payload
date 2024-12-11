@@ -19,10 +19,12 @@ export async function seedDB({
    * Always seeds, instead of restoring from snapshot for consecutive test runs
    */
   alwaysSeed = false,
+  deleteOnly,
 }: {
   _payload: Payload
   alwaysSeed?: boolean
   collectionSlugs: string[]
+  deleteOnly?: boolean
   seedFunction: SeedFunction
   /**
    * Key to uniquely identify the kind of snapshot. Each test suite should pass in a unique key
@@ -64,7 +66,12 @@ export async function seedDB({
    * This does not work if I run payload.db.init or payload.db.connect anywhere. Thus, when resetting the database, we are not dropping the schema, but are instead only deleting the table values
    */
   let restored = false
-  if (!alwaysSeed && dbSnapshot[snapshotKey] && Object.keys(dbSnapshot[snapshotKey]).length) {
+  if (
+    !alwaysSeed &&
+    dbSnapshot[snapshotKey] &&
+    Object.keys(dbSnapshot[snapshotKey]).length &&
+    !deleteOnly
+  ) {
     await restoreFromSnapshot(_payload, snapshotKey, collectionSlugs)
 
     /**
@@ -116,12 +123,18 @@ export async function seedDB({
         await _payload.db.collections[collectionSlug].createIndexes()
       }),
     ])
+
+    await Promise.all(
+      _payload.config.collections.map(async (coll) => {
+        await _payload.db?.collections[coll.slug]?.ensureIndexes()
+      }),
+    )
   }
 
   /**
    * If a snapshot was restored, we don't need to seed the database
    */
-  if (restored) {
+  if (restored || deleteOnly) {
     return
   }
 

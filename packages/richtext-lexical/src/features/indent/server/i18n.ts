@@ -17,6 +17,10 @@ export const i18n: Partial<GenericLanguages> = {
     decreaseLabel: 'Zmenšit odsazení',
     increaseLabel: 'Zvětšit odsazení',
   },
+  da: {
+    decreaseLabel: 'Reducer Indrykning',
+    increaseLabel: 'Forøg indrykning',
+  },
   de: {
     decreaseLabel: 'Einzug verkleinern',
     increaseLabel: 'Einzug erhöhen',
@@ -86,8 +90,8 @@ export const i18n: Partial<GenericLanguages> = {
     increaseLabel: 'Crește indentarea',
   },
   rs: {
-    decreaseLabel: 'Smanji uvlačenje',
-    increaseLabel: 'Povećaj uvlačenje',
+    decreaseLabel: 'Смањи увлачење',
+    increaseLabel: 'Повећај увлачење',
   },
   'rs-latin': {
     decreaseLabel: 'Smanji uvlačenje',

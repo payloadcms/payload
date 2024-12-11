@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import { Types } from 'mongoose'
 import {
   buildVersionCollectionFields,
   type CreateVersion,
@@ -57,7 +57,7 @@ export const createVersion: CreateVersion = async function createVersion(
       },
     ],
   }
-  if (data.parent instanceof mongoose.Types.ObjectId) {
+  if (data.parent instanceof Types.ObjectId) {
     parentQuery.$or.push({
       parent: {
         $eq: data.parent.toString(),
@@ -77,6 +77,11 @@ export const createVersion: CreateVersion = async function createVersion(
         {
           latest: {
             $eq: true,
+          },
+        },
+        {
+          updatedAt: {
+            $lt: new Date(doc.updatedAt),
           },
         },
       ],
