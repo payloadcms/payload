@@ -25,6 +25,7 @@ export type RunJobsArgs = {
   overrideAccess?: boolean
   queue?: string
   req: PayloadRequest
+  where?: Where
 }
 
 export type RunJobsResult = {
@@ -45,6 +46,7 @@ export const runJobs = async ({
   overrideAccess,
   queue,
   req,
+  where: whereFromProps,
 }: RunJobsArgs): Promise<RunJobsResult> => {
   if (!overrideAccess) {
     const hasAccess = await req.payload.config.jobs.access.run({ req })
@@ -92,6 +94,10 @@ export const runJobs = async ({
         equals: queue,
       },
     })
+  }
+
+  if (whereFromProps) {
+    where.and.push(whereFromProps)
   }
 
   // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of

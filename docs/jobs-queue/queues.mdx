@@ -105,6 +105,9 @@ const results = await payload.jobs.run()
 
 // You can customize the queue name and limit by passing them as arguments:
 await payload.jobs.run({ queue: 'nightly', limit: 100 })
+
+// You can provide a where clause to filter the jobs that should be run:
+await payload.jobs.run({ where: { 'input.message': { equals: 'secret' } } })
 ```
 
 **Run a single job:**
