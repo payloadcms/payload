@@ -1,13 +1,16 @@
+import type { PipelineStage } from 'mongoose'
 import type { FlattenedField, Payload, Where } from 'payload'
 
 import { parseParams } from './parseParams.js'
 
-export async function buildAndOrConditions({
+export function buildAndOrConditions({
   collectionSlug,
   fields,
   globalSlug,
   locale,
   payload,
+  pipeline,
+  projection,
   where,
 }: {
   collectionSlug?: string
@@ -15,8 +18,10 @@ export async function buildAndOrConditions({
   globalSlug?: string
   locale?: string
   payload: Payload
+  pipeline: PipelineStage[]
+  projection?: Record<string, boolean>
   where: Where[]
-}): Promise<Record<string, unknown>[]> {
+}): Record<string, unknown>[] {
   const completedConditions = []
   // Loop over all AND / OR operations and add them to the AND / OR query param
   // Operations should come through as an array
@@ -24,12 +29,14 @@ export async function buildAndOrConditions({
   for (const condition of where) {
     // If the operation is properly formatted as an object
     if (typeof condition === 'object') {
-      const result = await parseParams({
+      const result = parseParams({
         collectionSlug,
         fields,
         globalSlug,
         locale,
         payload,
+        pipeline,
+        projection,
         where: condition,
       })
       if (Object.keys(result).length > 0) {

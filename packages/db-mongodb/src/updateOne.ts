@@ -40,6 +40,7 @@ export const updateOne: UpdateOne = async function updateOne(
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    session: options.session,
     where,
   })
 
