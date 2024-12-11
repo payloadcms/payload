@@ -30,7 +30,7 @@ export type Props = {
    * @default false
    */
   programmaticSubmit?: boolean
-  ref?: React.RefObject<HTMLAnchorElement | HTMLButtonElement>
+  ref?: React.RefObject<HTMLAnchorElement | HTMLButtonElement | null>
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
   size?: 'large' | 'medium' | 'small'
