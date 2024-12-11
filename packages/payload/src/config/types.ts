@@ -704,7 +704,7 @@ export type Config = {
       | 'default'
       | 'gravatar'
       | {
-          Component: PayloadComponent<never>
+          Component: CustomComponent
         }
     /**
      * Add extra and/or replace built-in components with custom components
