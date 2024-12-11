@@ -93,7 +93,12 @@ export const RootLayout = async ({
   })
 
   return (
-    <html data-theme={theme} dir={dir} lang={languageCode}>
+    <html
+      data-theme={theme}
+      dir={dir}
+      lang={languageCode}
+      suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
+    >
       <head>
         <style>{`@layer payload-default, payload;`}</style>
       </head>
