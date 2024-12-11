@@ -475,6 +475,11 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
         duration: number
       }
     | false
+  /**
+   * Schema configuration options for this collection
+   * @WARNING: If you change this property with existing data, you may need to handle the existing data in your database by using migrations
+   */
+  schemaOptions?: Record<string, any>
   slug: string
   /**
    * Add `createdAt` and `updatedAt` fields

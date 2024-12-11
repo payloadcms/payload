@@ -17,7 +17,7 @@ import { getDBName } from './utilities/getDBName.js'
 
 export const init: Init = function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const schema = buildCollectionSchema(collection, this.payload)
+    const schema = buildCollectionSchema(collection, this.payload, collection.schemaOptions)
 
     if (collection.versions) {
       const versionModelName = getDBName({ config: collection, versions: true })
@@ -32,6 +32,7 @@ export const init: Init = function init(this: MongooseAdapter) {
           minimize: false,
           timestamps: false,
         },
+        ...collection.schemaOptions,
       })
 
       versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
