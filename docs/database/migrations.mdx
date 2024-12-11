@@ -59,7 +59,7 @@ transaction gets aborted. This way no change is made to the database if the migr
 
 ### Using database directly with the transaction
 
-Additionally, you can bypass Payload's layer entirely and perform operations directly on your underlying database within the active transaction
+Additionally, you can bypass Payload's layer entirely and perform operations directly on your underlying database within the active transaction:
 
 ### MongoDB:
 ```ts
@@ -69,6 +69,7 @@ export async function up({ session, payload, req }: MigrateUpArgs): Promise<void
   const posts = await payload.db.collections.posts.collection.find({ session }).toArray()
 }
 ```
+
 ### Postgres:
 ```ts
 import { type MigrateUpArgs, sql } from '@payloadcms/db-postgres'
