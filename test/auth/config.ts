@@ -44,6 +44,9 @@ export default buildConfigWithDefaults({
         tokenExpiration: 7200, // 2 hours
         useAPIKey: true,
         verify: false,
+        forgotPassword: {
+          expiration: 300000, // 5 minutes
+        },
       },
       fields: [
         {

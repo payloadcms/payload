@@ -605,6 +605,43 @@ describe('Access Control', () => {
       expect(res).toBeTruthy()
     })
   })
+
+  describe('Auth - Local API', () => {
+    it('should not allow reset password if forgotPassword expiration token is expired', async () => {
+      // Mock Date.now() to simulate the forgotPassword call happening 1 hour ago (default is 1 hour)
+      const originalDateNow = Date.now
+      const mockDateNow = jest.spyOn(Date, 'now').mockImplementation(() => {
+        // Move the current time back by 1 hour
+        return originalDateNow() - 60 * 60 * 1000
+      })
+
+      let forgot
+      try {
+        // Call forgotPassword while the mocked Date.now() is active
+        forgot = await payload.forgotPassword({
+          collection: 'users',
+          data: {
+            email: 'dev@payloadcms.com',
+          },
+        })
+      } finally {
+        // Restore the original Date.now() after the forgotPassword call
+        mockDateNow.mockRestore()
+      }
+
+      // Attempt to reset password, which should fail because the token is expired
+      await expect(
+        payload.resetPassword({
+          collection: 'users',
+          data: {
+            password: 'test',
+            token: forgot,
+          },
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Token is either invalid or has expired.')
+    })
+  })
 })
 
 async function createDoc<TSlug extends CollectionSlug = 'posts'>(
