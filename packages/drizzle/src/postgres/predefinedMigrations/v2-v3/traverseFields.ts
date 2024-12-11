@@ -1,13 +1,13 @@
-import type { TransactionPg } from '@payloadcms/drizzle/types'
 import type { FlattenedField, Payload } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../../types.js'
+import type { TransactionPg } from '../../../types.js'
+import type { BasePostgresAdapter } from '../../types.js'
 import type { PathsToQuery } from './types.js'
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: BasePostgresAdapter
   collectionSlug?: string
   columnPrefix: string
   db: TransactionPg

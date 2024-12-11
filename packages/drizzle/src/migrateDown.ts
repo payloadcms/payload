@@ -44,7 +44,8 @@ export async function migrateDown(this: DrizzleAdapter): Promise<void> {
     try {
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })
       await initTransaction(req)
-      await migrationFile.down({ payload, req })
+      const db = this.sessions[await req.transactionID]?.db || this.drizzle
+      await migrationFile.down({ db, payload, req })
       payload.logger.info({
         msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,
       })
