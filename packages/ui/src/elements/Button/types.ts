@@ -5,6 +5,7 @@ type secondaryAction = {
   label: string
   onClick: (event: MouseEvent) => void
 }
+
 export type Props = {
   'aria-label'?: string
   buttonId?: string
@@ -29,6 +30,7 @@ export type Props = {
    * @default false
    */
   programmaticSubmit?: boolean
+  ref?: React.RefObject<HTMLAnchorElement | HTMLButtonElement>
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
   size?: 'large' | 'medium' | 'small'
