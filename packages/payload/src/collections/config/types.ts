@@ -338,7 +338,7 @@ export type CollectionAdminOptions = {
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
    * - Provide a record to define localized group names.
-   * - Set to `false` to exclude the entity from the sidebar without disabling its routes.
+   * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
    */
   group?: false | Record<string, string> | string
   /**
