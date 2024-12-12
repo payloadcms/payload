@@ -4,6 +4,7 @@ import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './ty
 
 import { createKey } from './utilities/createKey.js'
 import { getStorageClient } from './utilities/getStorageClient.js'
+import { refreshSession } from './utilities/refreshSession.js'
 
 interface Args {
   cachingOptions?: PluginOptions['uploadCaching']
@@ -46,10 +47,25 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         identityID,
       })
 
-      const object = await storageClient.getObject({
-        Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
-        Key,
-      })
+      let object
+      try {
+        object = await storageClient.getObject({
+          Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
+          Key,
+        })
+      } catch (err: any) {
+        if (err.code === 'ExpiredToken' || err.Code === 'ExpiredToken') {
+          await refreshSession()
+
+          const { storageClient: newStorageClient } = await getStorageClient()
+          object = await newStorageClient.getObject({
+            Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
+            Key,
+          })
+        } else {
+          throw err
+        }
+      }
 
       if (!object.Body) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
