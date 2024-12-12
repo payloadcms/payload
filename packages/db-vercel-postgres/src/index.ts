@@ -2,6 +2,7 @@ import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
   beginTransaction,
+  buildCreateMigration,
   commitTransaction,
   count,
   countGlobalVersions,
@@ -39,18 +40,15 @@ import {
   createDatabase,
   createExtensions,
   createJSONQuery,
-  createMigration,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
-  getMigrationTemplate,
   init,
   insert,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import path from 'path'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 import { fileURLToPath } from 'url'
 
@@ -59,7 +57,6 @@ import type { Args, VercelPostgresAdapter } from './types.js'
 import { connect } from './connect.js'
 
 const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<VercelPostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -102,7 +99,6 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
         json: true,
       },
       fieldConstraints: {},
-      getMigrationTemplate,
       idType: postgresIDType,
       indexes: new Set<string>(),
       initializing,
@@ -138,9 +134,13 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       createGlobal,
       createGlobalVersion,
       createJSONQuery,
-      createMigration(args) {
-        return createMigration.bind(this)({ ...args, dirname })
-      },
+      createMigration: buildCreateMigration({
+        executeMethod: 'execute',
+        filename,
+        sanitizeStatements({ sqlExecute, statements }) {
+          return `${sqlExecute}\n ${statements.join('\n')}\`)`
+        },
+      }),
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,

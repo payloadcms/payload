@@ -60,7 +60,7 @@ export type FormProps = {
 export type SubmitOptions = {
   action?: string
   method?: string
-  overrides?: Record<string, unknown>
+  overrides?: ((formState) => FormData) | Record<string, unknown>
   skipValidation?: boolean
 }
 
@@ -70,7 +70,14 @@ export type Submit = (
   e?: React.FormEvent<HTMLFormElement>,
 ) => Promise<void>
 export type ValidateForm = () => Promise<boolean>
-export type CreateFormData = (overrides?: any) => FormData
+export type CreateFormData = (
+  overrides?: Record<string, unknown>,
+  /**
+   * If mergeOverrideData true, the data will be merged with the existing data in the form state.
+   * @default true
+   */
+  options?: { mergeOverrideData?: boolean },
+) => FormData
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data

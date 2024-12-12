@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -73,8 +74,7 @@ describe('Number', () => {
   test('should filter Number fields in the collection view - greaterThanOrEqual', async () => {
     await page.goto(url.list)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
     const initialField = page.locator('.condition__field')
     const operatorField = page.locator('.condition__operator')

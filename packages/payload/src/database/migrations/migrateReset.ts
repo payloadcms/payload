@@ -31,7 +31,8 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
       try {
         const start = Date.now()
         await initTransaction(req)
-        await migration.down({ payload, req })
+        const session = payload.db.sessions?.[await req.transactionID]
+        await migration.down({ payload, req, session })
         await payload.delete({
           collection: 'payload-migrations',
           req,

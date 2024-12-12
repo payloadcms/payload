@@ -16,6 +16,7 @@ import type {
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
 import type {
+  DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../../config/types.js'
@@ -40,6 +41,7 @@ export type Options<
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
+  duplicateFromID?: DataFromCollectionSlug<TSlug>['id']
   fallbackLocale?: false | TypedLocale
   file?: File
   filePath?: string
@@ -69,6 +71,7 @@ export default async function createLocal<
     disableTransaction,
     disableVerificationEmail,
     draft,
+    duplicateFromID,
     file,
     filePath,
     overrideAccess = true,
@@ -95,6 +98,7 @@ export default async function createLocal<
     disableTransaction,
     disableVerificationEmail,
     draft,
+    duplicateFromID,
     overrideAccess,
     overwriteExistingFiles,
     populate,

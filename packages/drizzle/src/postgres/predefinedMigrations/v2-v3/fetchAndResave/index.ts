@@ -1,15 +1,14 @@
-import type { TransactionPg } from '@payloadcms/drizzle/types'
 import type { FlattenedField, Payload, PayloadRequest } from 'payload'
 
-import { upsertRow } from '@payloadcms/drizzle'
-
-import type { PostgresAdapter } from '../../../types.js'
+import type { TransactionPg } from '../../../../types.js'
+import type { BasePostgresAdapter } from '../../../types.js'
 import type { DocsToResave } from '../types.js'
 
+import { upsertRow } from '../../../../upsertRow/index.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
-  adapter: PostgresAdapter
+  adapter: BasePostgresAdapter
   collectionSlug?: string
   db: TransactionPg
   debug: boolean

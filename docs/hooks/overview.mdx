@@ -37,7 +37,7 @@ Root Hooks are not associated with any specific Collection, Global, or Field. Th
 To add Root Hooks, use the `hooks` property in your [Payload Config](/docs/configuration/config):
 
 ```ts
-import {  buildConfig } from 'payload'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
@@ -60,7 +60,7 @@ The following options are available:
 The `afterError` Hook is triggered when an error occurs in the Payload application. This can be useful for logging errors to a third-party service, sending an email to the development team, logging the error to Sentry or DataDog, etc. The output can be used to transform the result object / status code.
 
 ```ts
-import {  buildConfig } from 'payload'
+import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...

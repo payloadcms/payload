@@ -286,7 +286,6 @@ export const promise = async ({
     }
 
     case 'collapsible':
-
     case 'row': {
       await traverseFields({
         id,

@@ -98,11 +98,24 @@ After the project is deployed to Vercel, the Vercel Cron job will automatically 
 
 If you want to process jobs programmatically from your server-side code, you can use the Local API:
 
+**Run all jobs:**
+
 ```ts
 const results = await payload.jobs.run()
 
 // You can customize the queue name and limit by passing them as arguments:
 await payload.jobs.run({ queue: 'nightly', limit: 100 })
+
+// You can provide a where clause to filter the jobs that should be run:
+await payload.jobs.run({ where: { 'input.message': { equals: 'secret' } } })
+```
+
+**Run a single job:**
+
+```ts
+const results = await payload.jobs.runByID({
+  id: myJobID
+})
 ```
 
 #### Bin script

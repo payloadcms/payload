@@ -1,5 +1,5 @@
 'use client'
-import React, { forwardRef } from 'react'
+import React from 'react'
 
 import type { Props } from '../../elements/Button/types.js'
 
@@ -9,7 +9,7 @@ import './index.scss'
 
 const baseClass = 'form-submit'
 
-export const FormSubmit = forwardRef<HTMLButtonElement, Props>((props, ref) => {
+export const FormSubmit: React.FC<Props> = (props) => {
   const {
     type = 'submit',
     buttonId: id,
@@ -17,7 +17,9 @@ export const FormSubmit = forwardRef<HTMLButtonElement, Props>((props, ref) => {
     disabled: disabledFromProps,
     onClick,
     programmaticSubmit,
+    ref,
   } = props
+
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
   const { disabled, submit } = useForm()
@@ -46,4 +48,4 @@ export const FormSubmit = forwardRef<HTMLButtonElement, Props>((props, ref) => {
       </Button>
     </div>
   )
-})
+}

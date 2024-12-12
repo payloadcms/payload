@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Where } from 'payload'
-import type { Config } from 'payload'
-import type { PaginatedDocs } from 'payload'
+import type { Config, PaginatedDocs, TypedUser, Where } from 'payload'
 
 import * as qs from 'qs-esm'
 
@@ -119,6 +117,8 @@ export class RESTClient {
   private token: string
 
   serverURL: string
+
+  public user: TypedUser
 
   constructor(config: Config, args: Args) {
     this.config = config
@@ -254,7 +254,9 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/${slug}${whereQuery}`, options)
     const { status } = response
     const result = await response.json()
-    if (result.errors) throw new Error(result.errors[0].message)
+    if (result.errors) {
+      throw new Error(result.errors[0].message)
+    }
     return { result, status }
   }
 
@@ -310,7 +312,9 @@ export class RESTClient {
       method: 'POST',
     })
 
-    let { token } = await response.json()
+    const { user } = await response.json()
+
+    let token = user.token
 
     // If the token is not in the response body, then we can extract it from the cookies
     if (!token) {
@@ -319,6 +323,7 @@ export class RESTClient {
       token = tokenMatchResult?.groups?.token
     }
 
+    this.user = user
     this.token = token
 
     return token

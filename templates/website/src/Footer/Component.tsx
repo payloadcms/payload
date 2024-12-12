@@ -9,9 +9,9 @@ import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
 
 export async function Footer() {
-  const footer: Footer = await getCachedGlobal('footer', 1)()
+  const footerData: Footer = await getCachedGlobal('footer', 1)()
 
-  const navItems = footer?.navItems || []
+  const navItems = footerData?.navItems || []
 
   return (
     <footer className="border-t border-border bg-black dark:bg-card text-white">

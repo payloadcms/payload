@@ -15,8 +15,10 @@ This is where Payload's `select` feature comes in. Here, you can define exactly 
 To specify `select` in the [Local API](../local-api/overview), you can use the `select` option in your query:
 
 ```ts
+import type { Payload } from 'payload'
+
 // Include mode
-const getPosts = async () => {
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     select: {
@@ -34,7 +36,7 @@ const getPosts = async () => {
 }
 
 // Exclude mode
-const getPosts = async () => {
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     // Select everything except for array and group.number
@@ -73,8 +75,9 @@ For this reason, we recommend to use the extremely helpful and ubiquitous [`qs-e
 
 ```ts
 import { stringify } from 'qs-esm'
+import type { Where } from 'payload'
 
-const select = {
+const select: Where = {
   text: true,
   group: {
     number: true
@@ -116,9 +119,6 @@ Loading all of the page content, its related links, and everything else is going
 ```ts
 import type { CollectionConfig } from 'payload'
 
-import { lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
-import { slateEditor } from '@payloadcms/richtext-slate'
-
 // The TSlug generic can be passed to have type safety for `defaultPopulate`.
 // If avoided, the `defaultPopulate` type resolves to `SelectType`.
 export const Pages: CollectionConfig<'pages'> = {
@@ -144,7 +144,9 @@ Setting `defaultPopulate` will enforce that each time Payload performs a "popula
 **Local API:**
 
 ```ts
-const getPosts = async () => {
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     populate: {

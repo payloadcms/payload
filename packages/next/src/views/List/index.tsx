@@ -171,13 +171,13 @@ export const renderListView = async (
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
     const { columnState, Table } = renderTable({
-      collectionConfig: clientCollectionConfig,
+      clientCollectionConfig,
+      collectionConfig,
       columnPreferences: listPreferences?.columns,
       customCellProps,
       docs: data.docs,
       drawerSlug,
       enableRowSelections,
-      fields,
       i18n: req.i18n,
       payload,
       useAsTitle,

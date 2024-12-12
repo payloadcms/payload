@@ -117,9 +117,12 @@ export type GlobalAdminOptions = {
    */
   description?: EntityDescription
   /**
-   * Place globals into a navigational group
-   * */
-  group?: Record<string, string> | string
+   * Specify a navigational group for globals in the admin sidebar.
+   * - Provide a string to place the entity in a custom group.
+   * - Provide a record to define localized group names.
+   * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
+   */
+  group?: false | Record<string, string> | string
   /**
    * Exclude the global from the admin nav and routes
    */

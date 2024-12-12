@@ -35,7 +35,8 @@ export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
 
     try {
       await initTransaction(req)
-      await migration.up({ payload, req })
+      const session = payload.db.sessions?.[await req.transactionID]
+      await migration.up({ payload, req, session })
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
       await payload.create({
         collection: 'payload-migrations',

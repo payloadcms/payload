@@ -20,7 +20,9 @@ Because sorting is handled by the database, the field cannot be a [Virtual Field
 To sort Documents in the [Local API](../local-api/overview), you can use the `sort` option in your query:
 
 ```ts
-const getPosts = async () => {
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     sort: '-createdAt', // highlight-line
@@ -33,7 +35,9 @@ const getPosts = async () => {
 To sort by multiple fields, you can use the `sort` option with fields in an array:
 
 ```ts
-const getPosts = async () => {
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     sort: ['priority', '-createdAt'], // highlight-line

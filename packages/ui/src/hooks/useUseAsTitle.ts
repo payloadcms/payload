@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, ClientField } from 'payload'
 
-import { flattenFieldMap } from '../utilities/flattenFieldMap.js'
+import { flattenTopLevelFields } from 'payload/shared'
 
 export const useUseTitleField = (collection: ClientCollectionConfig): ClientField => {
   const {
@@ -9,6 +9,7 @@ export const useUseTitleField = (collection: ClientCollectionConfig): ClientFiel
     fields,
   } = collection
 
-  const topLevelFields = flattenFieldMap(fields)
+  const topLevelFields = flattenTopLevelFields(fields) as ClientField[]
+
   return topLevelFields?.find((field) => 'name' in field && field.name === useAsTitle)
 }

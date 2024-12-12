@@ -28,6 +28,8 @@ To pass data between hooks, you can assign values to context in an earlier hook 
 For example:
 
 ```ts
+import type { CollectionConfig } from 'payload'
+
 const Customer: CollectionConfig = {
   slug: 'customers',
   hooks: {
@@ -43,7 +45,6 @@ const Customer: CollectionConfig = {
       },
     ],
     afterChange: [
-
       async ({ context, doc, req }) => {
         // use context.customerData without needing to fetch it again
         if (context.customerData.contacted === false) {
@@ -65,6 +66,8 @@ Let's say you have an `afterChange` hook, and you want to do a calculation insid
 Bad example:
 
 ```ts
+import type { CollectionConfig } from 'payload'
+
 const Customer: CollectionConfig = {
   slug: 'customers',
   hooks: {
@@ -92,6 +95,8 @@ Instead of the above, we need to tell the `afterChange` hook to not run again if
 Fixed example:
 
 ```ts
+import type { CollectionConfig } from 'payload'
+
 const MyCollection: CollectionConfig = {
   slug: 'slug',
   hooks: {
@@ -125,7 +130,7 @@ const MyCollection: CollectionConfig = {
 
 The default TypeScript interface for `context` is `{ [key: string]: unknown }`. If you prefer a more strict typing in your project or when authoring plugins for others, you can override this using the `declare` syntax.
 
-This is known as "type augmentation", a TypeScript feature which allows us to add types to existing objects. Simply put this in any `.ts` or `.d.ts` file:
+This is known as "type augmentation", a TypeScript feature which allows us to add types to existing types. Simply put this in any `.ts` or `.d.ts` file:
 
 ```ts
 import { RequestContext as OriginalRequestContext } from 'payload'

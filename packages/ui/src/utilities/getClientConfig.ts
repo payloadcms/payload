@@ -15,6 +15,7 @@ export const getClientConfig = cache(
     if (cachedClientConfig && !global._payload_doNotCacheClientConfig) {
       return cachedClientConfig
     }
+
     const { config, i18n, importMap } = args
 
     cachedClientConfig = createClientConfig({
@@ -22,6 +23,7 @@ export const getClientConfig = cache(
       i18n,
       importMap,
     })
+
     global._payload_clientConfig = cachedClientConfig
 
     global._payload_doNotCacheClientConfig = false

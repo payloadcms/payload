@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -89,7 +90,7 @@ describe('Email', () => {
 
   test('should show field in filter when admin.disableListColumn is true', async () => {
     await page.goto(url.list)
-    await page.locator('.list-controls__toggle-where').click()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const initialField = page.locator('.condition__field')
@@ -100,7 +101,7 @@ describe('Email', () => {
     ).toBeVisible()
   })
 
-  test('should display field in list view column selector if admin.disableListColumn is false and admin.disableListFilter is true', async () => {
+  test('should display field in list view column selector despite admin.disableListFilter', async () => {
     await page.goto(url.list)
     await page.locator('.list-controls__toggle-columns').click()
 
@@ -116,7 +117,7 @@ describe('Email', () => {
 
   test('should hide field in filter when admin.disableListFilter is true', async () => {
     await page.goto(url.list)
-    await page.locator('.list-controls__toggle-where').click()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const initialField = page.locator('.condition__field')
@@ -188,8 +189,7 @@ describe('Email', () => {
     await page.goto(url.list)
 
     // open the first filter options
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const firstInitialField = page.locator('.condition__field')
@@ -230,8 +230,7 @@ describe('Email', () => {
     await page.goto(url.list)
 
     // open the first filter options
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const firstInitialField = page.locator('.condition__field')
@@ -261,8 +260,7 @@ describe('Email', () => {
     await page.goto(url.list)
 
     // open the first filter options
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const firstInitialField = page.locator('.condition__field')

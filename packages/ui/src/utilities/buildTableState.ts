@@ -198,8 +198,6 @@ export const buildTableState = async (
     }
   }
 
-  const fields = collectionConfig.fields
-
   let docs = docsFromArgs
   let data: PaginatedDocs
 
@@ -219,12 +217,12 @@ export const buildTableState = async (
   }
 
   const { columnState, Table } = renderTable({
-    collectionConfig: clientCollectionConfig,
+    clientCollectionConfig,
+    collectionConfig,
     columnPreferences: undefined, // TODO, might not be needed
     columns,
     docs,
     enableRowSelections,
-    fields,
     i18n: req.i18n,
     payload,
     renderRowTypes,
@@ -232,7 +230,7 @@ export const buildTableState = async (
     useAsTitle: collectionConfig.admin.useAsTitle,
   })
 
-  const renderedFilters = renderFilters(fields, req.payload.importMap)
+  const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
   return {
     data,

@@ -59,6 +59,12 @@ export const seed = async ({
     collections.map((collection) => payload.db.deleteMany({ collection, req, where: {} })),
   )
 
+  await Promise.all(
+    collections
+      .filter((collection) => Boolean(payload.collections[collection].config.versions))
+      .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
+  )
+
   payload.logger.info(`— Seeding demo author and user...`)
 
   await payload.delete({
@@ -234,29 +240,27 @@ export const seed = async ({
   })
 
   // update each post with related posts
-  await Promise.all([
-    payload.update({
-      id: post1Doc.id,
-      collection: 'posts',
-      data: {
-        relatedPosts: [post2Doc.id, post3Doc.id],
-      },
-    }),
-    payload.update({
-      id: post2Doc.id,
-      collection: 'posts',
-      data: {
-        relatedPosts: [post1Doc.id, post3Doc.id],
-      },
-    }),
-    payload.update({
-      id: post3Doc.id,
-      collection: 'posts',
-      data: {
-        relatedPosts: [post1Doc.id, post2Doc.id],
-      },
-    }),
-  ])
+  await payload.update({
+    id: post1Doc.id,
+    collection: 'posts',
+    data: {
+      relatedPosts: [post2Doc.id, post3Doc.id],
+    },
+  })
+  await payload.update({
+    id: post2Doc.id,
+    collection: 'posts',
+    data: {
+      relatedPosts: [post1Doc.id, post3Doc.id],
+    },
+  })
+  await payload.update({
+    id: post3Doc.id,
+    collection: 'posts',
+    data: {
+      relatedPosts: [post1Doc.id, post2Doc.id],
+    },
+  })
 
   payload.logger.info(`— Seeding contact form...`)
 

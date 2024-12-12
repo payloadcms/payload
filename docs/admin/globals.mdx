@@ -25,9 +25,9 @@ export const MyGlobal: GlobalConfig = {
 
 The following options are available:
 
-| Option        | Description                                                                                                                       |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **`group`**       | Text used as a label for grouping Collection and Global links together in the navigation.                                         |
+| Option            | Description                                                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **`group`**       | Text or localization object used to group Collection and Global links in the admin navigation. Set to `false` to hide the link from the navigation while keeping its routes accessible. |
 | **`hidden`**      | Set to true or a function, called with the current user, returning true to exclude this Global from navigation and admin routing. |
 | **`components`**  | Swap in your own React components to be used within this Global. [More details](#custom-components).                           |
 | **`preview`**     | Function to generate a preview URL within the Admin Panel for this Global that can point to your app. [More details](#preview).           |

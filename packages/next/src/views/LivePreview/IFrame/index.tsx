@@ -1,5 +1,5 @@
 'use client'
-import React, { forwardRef } from 'react'
+import React from 'react'
 
 import { useLivePreviewContext } from '../Context/context.js'
 import './index.scss'
@@ -7,12 +7,13 @@ import './index.scss'
 const baseClass = 'live-preview-iframe'
 
 type Props = {
+  ref: React.RefObject<HTMLIFrameElement>
   setIframeHasLoaded: (value: boolean) => void
   url: string
 }
 
-export const IFrame = forwardRef<HTMLIFrameElement, Props>((props, ref) => {
-  const { setIframeHasLoaded, url } = props
+export const IFrame: React.FC<Props> = (props) => {
+  const { ref, setIframeHasLoaded, url } = props
 
   const { zoom } = useLivePreviewContext()
 
@@ -30,4 +31,4 @@ export const IFrame = forwardRef<HTMLIFrameElement, Props>((props, ref) => {
       title={url}
     />
   )
-})
+}

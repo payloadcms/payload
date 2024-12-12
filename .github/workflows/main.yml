@@ -492,9 +492,12 @@ jobs:
     needs:
       - lint
       - build
+      - build-templates
       - tests-unit
       - tests-int
       - tests-e2e
+      - tests-types
+      - tests-type-generation
 
     steps:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
