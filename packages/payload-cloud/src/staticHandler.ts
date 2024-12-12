@@ -37,10 +37,11 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
     collCacheConfig?.enabled !== false
 
   return async (req, { params }) => {
+    let key = ''
     try {
       const { identityID, storageClient } = await getStorageClient()
 
-      const Key = createKey({
+      key = createKey({
         collection: collection.slug,
         filename: params.filename,
         identityID,
@@ -48,7 +49,7 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
 
       const object = await storageClient.getObject({
         Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
-        Key,
+        Key: key,
       })
 
       if (!object.Body) {
@@ -67,7 +68,13 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         status: 200,
       })
     } catch (err: unknown) {
-      req.payload.logger.error({ err, msg: 'Error getting file from cloud storage' })
+      req.payload.logger.error({
+        collectionSlug: collection.slug,
+        err,
+        msg: `Error getting file from cloud storage: ${params.filename}`,
+        params,
+        requestedKey: key,
+      })
       return new Response('Internal Server Error', { status: 500 })
     }
   }
