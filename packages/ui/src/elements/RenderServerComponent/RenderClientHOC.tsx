@@ -1,10 +1,9 @@
 'use client'
 
 /**
- * Client components cannot be invoked on the server (fn())
- * Instead, they must be rendered as a component (Component)
+ * Client components cannot be invoked on the server (fn()) and must be done on the client
  */
-export const RenderClientComponentWithHOC: React.FC<{
+export const RenderClientHOC: React.FC<{
   Component: React.ComponentType
   HOC?: (Component: React.ComponentType) => React.ComponentType
   key?: string

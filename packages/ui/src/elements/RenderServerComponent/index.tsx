@@ -4,7 +4,7 @@ import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } fro
 import React from 'react'
 
 import { removeUndefined } from '../../utilities/removeUndefined.js'
-import { RenderClientComponentWithHOC } from './RenderClientComponent.js'
+import { WithHOC } from './WithHOC.js'
 
 type RenderServerComponentFn = (args: {
   readonly clientProps?: object
@@ -53,24 +53,13 @@ export const RenderServerComponent: RenderServerComponentFn = ({
       ...(isRSC ? serverProps : {}),
     })
 
-    let ComponentToRender = Component
-
     if (HOC) {
-      if (isReactServerComponentOrFunction(HOC)) {
-        ComponentToRender = HOC(Component)
-      } else {
-        return (
-          <RenderClientComponentWithHOC
-            Component={Component}
-            HOC={HOC}
-            key={key}
-            props={sanitizedProps}
-          />
-        )
-      }
+      return (
+        <WithHOC Component={Component} HOC={HOC} isRSC={isRSC} key={key} props={sanitizedProps} />
+      )
     }
 
-    return <ComponentToRender key={key} {...sanitizedProps} />
+    return <Component key={key} {...sanitizedProps} />
   }
 
   if (typeof Component === 'string' || isPlainObject(Component)) {
@@ -93,33 +82,19 @@ export const RenderServerComponent: RenderServerComponentFn = ({
         ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
       })
 
-      let ComponentToRender = ResolvedComponent
-
       if (HOC) {
-        /**
-         *  if HOC is a client, component must also be a client
-         * if HOC is a server, component can be either
-         */
-        const HOCisRSC = isReactServerComponentOrFunction(HOC)
-        if (HOCisRSC) {
-          ComponentToRender = HOC(ResolvedComponent)
-        } else if (!HOCisRSC && !isRSC) {
-          return (
-            <RenderClientComponentWithHOC
-              Component={ResolvedComponent}
-              HOC={HOC}
-              key={key}
-              props={sanitizedProps}
-            />
-          )
-        } else {
-          console.warn(
-            'RenderServerComponent: HOC is a client component but Component is a server component. This is not allowed.',
-          )
-        }
+        return (
+          <WithHOC
+            Component={ResolvedComponent}
+            HOC={HOC}
+            isRSC={isRSC}
+            key={key}
+            props={sanitizedProps}
+          />
+        )
       }
 
-      return <ComponentToRender key={key} {...sanitizedProps} />
+      return <ResolvedComponent key={key} {...sanitizedProps} />
     }
   }
 
