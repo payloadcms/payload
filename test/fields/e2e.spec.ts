@@ -503,16 +503,42 @@ describe('fields', () => {
     test('should toggle conditional field when data changes', async () => {
       await page.goto(url.create)
       const toggleField = page.locator('label[for=field-toggleField]')
-      await toggleField.click()
+
+      // eslint-disable-next-line playwright/no-conditional-in-test
+      if (!(await toggleField.isChecked())) {
+        await toggleField.click()
+      }
+
+      await expect(page.locator('label[for=field-toggleField]')).toBeChecked()
       const fieldWithCondition = page.locator('input#field-fieldWithCondition')
       await expect(fieldWithCondition).toBeVisible()
     })
 
-    test('should toggle conditional custom field when data changes', async () => {
+    test('should toggle conditional custom client field', async () => {
       await page.goto(url.create)
       const toggleField = page.locator('label[for=field-toggleField]')
-      await toggleField.click()
-      const customFieldWithCondition = page.locator('#custom-field-schema-path')
+
+      // eslint-disable-next-line playwright/no-conditional-in-test
+      if (!(await toggleField.isChecked())) {
+        await toggleField.click()
+      }
+
+      await expect(page.locator('label[for=field-toggleField]')).toBeChecked()
+      const customFieldWithCondition = page.locator('#custom-client-field')
+      await expect(customFieldWithCondition).toBeVisible()
+    })
+
+    test('should toggle conditional custom server field', async () => {
+      await page.goto(url.create)
+      const toggleField = page.locator('label[for=field-toggleField]')
+
+      // eslint-disable-next-line playwright/no-conditional-in-test
+      if (!(await toggleField.isChecked())) {
+        await toggleField.click()
+      }
+
+      await expect(page.locator('label[for=field-toggleField]')).toBeChecked()
+      const customFieldWithCondition = page.locator('#custom-server-field')
       await expect(customFieldWithCondition).toBeVisible()
     })
 

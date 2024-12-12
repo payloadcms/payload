@@ -1,19 +1,18 @@
 'use client'
 
+import React from 'react'
+
 /**
  * Client components cannot be invoked on the server (fn()) and must be done on the client
  */
 export const RenderClientHOC: React.FC<{
   Component: React.ComponentType
-  HOC?: (Component: React.ComponentType) => React.ComponentType
+  HOC: (Component: React.ComponentType, RenderedComponent?: React.ReactNode) => React.ComponentType
   key?: string
   props: object
-}> = ({ Component, HOC, key, props }) => {
-  let ComponentToRender = Component
-
-  if (HOC) {
-    ComponentToRender = HOC(Component)
-  }
+  RenderedComponent?: React.ReactNode
+}> = ({ Component, HOC, key, props, RenderedComponent }) => {
+  const ComponentToRender = HOC(Component, RenderedComponent)
 
   return <ComponentToRender key={key} {...props} />
 }

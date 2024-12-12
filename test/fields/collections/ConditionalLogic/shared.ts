@@ -6,5 +6,6 @@ export const conditionalLogicDoc: RequiredDataFromCollection<ConditionalLogic> =
   text: 'Seeded conditional logic document',
   toggleField: true,
   fieldWithCondition: 'spiderman',
-  customFieldWithCondition: 'batman',
+  customClientFieldWithCondition: 'batman',
+  customServerFieldWithCondition: 'superman',
 }

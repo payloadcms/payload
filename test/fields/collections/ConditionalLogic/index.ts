@@ -26,12 +26,23 @@ const ConditionalLogic: CollectionConfig = {
       },
     },
     {
-      name: 'customFieldWithCondition',
+      name: 'customClientFieldWithCondition',
       type: 'text',
       required: true,
       admin: {
         components: {
-          Field: '/components/CustomField',
+          Field: '/collections/ConditionalLogic/CustomClientField#CustomClientField',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customServerFieldWithCondition',
+      type: 'text',
+      required: true,
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomServerField#CustomServerField',
         },
         condition: ({ toggleField }) => Boolean(toggleField),
       },
