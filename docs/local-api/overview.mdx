@@ -457,6 +457,35 @@ const result = await payload.updateGlobal({
 })
 ```
 
+## Preferences
+
+### Find Preference by Key
+
+```ts
+// Result will be the preference value.
+const result = await payload.findPreferenceByKey({
+  key: preferencesKey,
+  req,
+  user,
+})
+```
+
+### Update Preference
+
+The `updatePreference` method uses the `upsert` operation internally, which means it will create a new preference if it doesn't exist, or update the existing one if it does.
+
+```ts
+// Result will be the updated preference value.
+const result = await payload.updatePreference({
+  key: preferencesKey,
+  req,
+  user,
+  value: {
+    // ...some new or updated prefs
+  },
+})
+```
+
 ## TypeScript
 
 Local API calls will automatically infer your [generated types](/docs/typescript/generating-types).
