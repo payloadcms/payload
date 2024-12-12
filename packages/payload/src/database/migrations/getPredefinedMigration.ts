@@ -62,6 +62,10 @@ export const getPredefinedMigration = async ({
         upSQL,
       }
     } catch (_err) {
+      if (importPath?.includes('/')) {
+        // We can assume that the intent was to import a file, thus we throw an error.
+        throw new Error(`Error importing migration file from ${importPath}`)
+      }
       // Silently fail. If the migration cannot be imported, it will be created as a blank migration and the import path will be used as the migration name.
       return {}
     }
