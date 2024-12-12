@@ -772,6 +772,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         collectionIDFieldTypes,
         config,
         field,
+        i18n,
         interfaceNameDefinitions,
         isRequired,
       }) => {
@@ -838,6 +839,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             config,
             currentSchema: outputSchema,
             field,
+            i18n,
             interfaceNameDefinitions,
             isRequired,
           })
