@@ -4,6 +4,7 @@ import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } fro
 import React from 'react'
 
 import { removeUndefined } from '../../utilities/removeUndefined.js'
+import { RenderClientComponentWithHOC } from './RenderClientComponent.js'
 
 type RenderServerComponentFn = (args: {
   readonly clientProps?: object
@@ -55,7 +56,18 @@ export const RenderServerComponent: RenderServerComponentFn = ({
     let ComponentToRender = Component
 
     if (HOC) {
-      ComponentToRender = HOC(Component)
+      if (isReactServerComponentOrFunction(HOC)) {
+        ComponentToRender = HOC(Component)
+      } else {
+        return (
+          <RenderClientComponentWithHOC
+            Component={Component}
+            HOC={HOC}
+            key={key}
+            props={sanitizedProps}
+          />
+        )
+      }
     }
 
     return <ComponentToRender key={key} {...sanitizedProps} />
@@ -84,7 +96,27 @@ export const RenderServerComponent: RenderServerComponentFn = ({
       let ComponentToRender = ResolvedComponent
 
       if (HOC) {
-        ComponentToRender = HOC(ResolvedComponent)
+        /**
+         *  if HOC is a client, component must also be a client
+         * if HOC is a server, component can be either
+         */
+        const HOCisRSC = isReactServerComponentOrFunction(HOC)
+        if (HOCisRSC) {
+          ComponentToRender = HOC(ResolvedComponent)
+        } else if (!HOCisRSC && !isRSC) {
+          return (
+            <RenderClientComponentWithHOC
+              Component={ResolvedComponent}
+              HOC={HOC}
+              key={key}
+              props={sanitizedProps}
+            />
+          )
+        } else {
+          console.warn(
+            'RenderServerComponent: HOC is a client component but Component is a server component. This is not allowed.',
+          )
+        }
       }
 
       return <ComponentToRender key={key} {...sanitizedProps} />

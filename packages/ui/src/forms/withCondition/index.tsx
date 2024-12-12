@@ -12,6 +12,8 @@ export const withCondition = <P extends MarkOptional<FieldPaths, 'indexPath' | '
   const CheckForCondition: React.FC<P> = (props) => {
     const { indexPath, path } = props
 
+    console.log('?!', indexPath, path)
+
     return (
       <WatchCondition indexPath={indexPath} path={path}>
         <Field {...props} />
