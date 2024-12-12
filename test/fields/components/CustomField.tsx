@@ -7,3 +7,5 @@ import React from 'react'
 export const CustomField: TextFieldServerComponent = ({ schemaPath }) => {
   return <div id="custom-field-schema-path">{schemaPath}</div>
 }
+
+export default CustomField

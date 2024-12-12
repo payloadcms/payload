@@ -504,10 +504,16 @@ describe('fields', () => {
       await page.goto(url.create)
       const toggleField = page.locator('label[for=field-toggleField]')
       await toggleField.click()
+      const fieldWithCondition = page.locator('input#field-fieldWithCondition')
+      await expect(fieldWithCondition).toBeVisible()
+    })
 
-      const fieldToToggle = page.locator('input#field-fieldToToggle')
-
-      await expect(fieldToToggle).toBeVisible()
+    test('should toggle conditional custom field when data changes', async () => {
+      await page.goto(url.create)
+      const toggleField = page.locator('label[for=field-toggleField]')
+      await toggleField.click()
+      const customFieldWithCondition = page.locator('input#field-customFieldWithCondition')
+      await expect(customFieldWithCondition).toBeVisible()
     })
 
     test('should show conditional field based on user data', async () => {

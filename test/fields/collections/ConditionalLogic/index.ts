@@ -18,10 +18,21 @@ const ConditionalLogic: CollectionConfig = {
       type: 'checkbox',
     },
     {
-      name: 'fieldToToggle',
+      name: 'fieldWithCondition',
       type: 'text',
       required: true,
       admin: {
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customFieldWithCondition',
+      type: 'text',
+      required: true,
+      admin: {
+        components: {
+          Field: '/components/CustomField',
+        },
         condition: ({ toggleField }) => Boolean(toggleField),
       },
     },
