@@ -11,6 +11,8 @@ import { Uploads } from './collections/Uploads.js'
 import { Versions } from './collections/Versions.js'
 import { seed } from './seed.js'
 import {
+  categoriesJoinRestrictedSlug,
+  collectionRestrictedSlug,
   localizedCategoriesSlug,
   localizedPostsSlug,
   postsSlug,
@@ -96,6 +98,25 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: categoriesJoinRestrictedSlug,
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          // join collection with access.read: () => false which should not populate
+          name: 'collectionRestrictedJoin',
+          type: 'join',
+          collection: collectionRestrictedSlug,
+          on: 'category',
+        },
+      ],
+    },
+    {
       slug: restrictedPostsSlug,
       admin: {
         useAsTitle: 'title',
@@ -112,6 +133,31 @@ export default buildConfigWithDefaults({
             read: () => false,
             update: () => false,
           },
+        },
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: restrictedCategoriesSlug,
+        },
+      ],
+    },
+    {
+      slug: collectionRestrictedSlug,
+      admin: {
+        useAsTitle: 'title',
+      },
+      access: {
+        read: () => ({ canRead: { equals: true } }),
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'canRead',
+          type: 'checkbox',
+          defaultValue: false,
         },
         {
           name: 'category',

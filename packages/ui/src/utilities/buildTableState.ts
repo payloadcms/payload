@@ -208,6 +208,7 @@ export const buildTableState = async (
       collection: collectionSlug,
       depth: 0,
       limit: query?.limit ? parseInt(query.limit, 10) : undefined,
+      overrideAccess: false,
       page: query?.page ? parseInt(query.page, 10) : undefined,
       sort: query?.sort,
       where: query?.where,
