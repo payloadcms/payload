@@ -18,14 +18,14 @@ export const LinkToDocClient: React.FC = () => {
 
   const { value } = useField<{ relationTo?: string; value?: string }>({ path: 'doc' })
 
-  if (!value?.relationTo || !value?.value) {
-    return null
-  }
-
   const href = `${serverURL}${formatAdminURL({
     adminRoute,
     path: `/collections/${value.relationTo || ''}/${value.value || ''}`,
   })}`
+
+  if (!value.relationTo || !value.value) {
+    return null
+  }
 
   return (
     <div style={{ marginBottom: 'var(--spacing-field, 1rem)' }}>
