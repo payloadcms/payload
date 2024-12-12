@@ -15,7 +15,7 @@ import type { MarkOptional } from 'ts-essentials'
 
 import { useModal } from '@faceless-ui/modal'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { PopulateDocs, ReloadDoc } from './types.js'
@@ -120,6 +120,8 @@ export function UploadInput(props: UploadInputProps) {
   const { permissions } = useAuth()
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
+
+  const shouldSyncPopulatedToValueRef = useRef<boolean>(false)
 
   const filterOptions: FilterOptionsResult = useMemo(() => {
     return {
@@ -228,11 +230,7 @@ export function UploadInput(props: UploadInputProps) {
   const onUploadSuccess = useCallback(
     (newDocs: JsonObject[]) => {
       if (hasMany) {
-        const mergedValue = [
-          ...(Array.isArray(value) ? value : []),
-          ...newDocs.map((doc) => doc.id),
-        ]
-        onChange(mergedValue)
+        shouldSyncPopulatedToValueRef.current = true
         setPopulatedDocs((currentDocs) => [
           ...(currentDocs || []),
           ...newDocs.map((doc) => ({
@@ -427,6 +425,13 @@ export function UploadInput(props: UploadInputProps) {
       void loadInitialDocs()
     }
   }, [populateDocs, activeRelationTo, value])
+
+  useEffect(() => {
+    if (shouldSyncPopulatedToValueRef.current) {
+      onChange(populatedDocs.map((doc) => doc.value.id))
+      shouldSyncPopulatedToValueRef.current = false
+    }
+  }, [populatedDocs, onChange])
 
   const showDropzone =
     !value ||
