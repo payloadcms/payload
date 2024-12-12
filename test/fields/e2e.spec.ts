@@ -512,7 +512,7 @@ describe('fields', () => {
       await page.goto(url.create)
       const toggleField = page.locator('label[for=field-toggleField]')
       await toggleField.click()
-      const customFieldWithCondition = page.locator('input#field-customFieldWithCondition')
+      const customFieldWithCondition = page.locator('#custom-field-schema-path')
       await expect(customFieldWithCondition).toBeVisible()
     })
 
