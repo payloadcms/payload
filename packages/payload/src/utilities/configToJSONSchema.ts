@@ -285,7 +285,6 @@ export function fieldsToJSONSchema(
               interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
               fieldSchema = {
-                ...baseFieldSchema,
                 $ref: `#/definitions/${field.interfaceName}`,
               }
             }
@@ -374,7 +373,7 @@ export function fieldsToJSONSchema(
             if (field.interfaceName) {
               interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
-              fieldSchema = { ...baseFieldSchema, $ref: `#/definitions/${field.interfaceName}` }
+              fieldSchema = { $ref: `#/definitions/${field.interfaceName}` }
             }
             break
           }
@@ -489,9 +488,9 @@ export function fieldsToJSONSchema(
                 }
               } else {
                 fieldSchema = {
+                  ...baseFieldSchema,
                   oneOf: field.relationTo.map((relation) => {
                     return {
-                      ...baseFieldSchema,
                       type: withNullableJSONSchemaType('object', isRequired),
                       additionalProperties: false,
                       properties: {
@@ -531,15 +530,15 @@ export function fieldsToJSONSchema(
               }
             } else {
               fieldSchema = {
+                ...baseFieldSchema,
                 oneOf: [
                   {
-                    ...baseFieldSchema,
                     type: withNullableJSONSchemaType(
                       collectionIDFieldTypes[field.relationTo],
                       isRequired,
                     ),
                   },
-                  { ...baseFieldSchema, $ref: `#/definitions/${field.relationTo}` },
+                  { $ref: `#/definitions/${field.relationTo}` },
                 ],
               }
             }
