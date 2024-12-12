@@ -704,7 +704,7 @@ export type Config = {
       | 'default'
       | 'gravatar'
       | {
-          Component: PayloadComponent<never>
+          Component: PayloadComponent
         }
     /**
      * Add extra and/or replace built-in components with custom components
@@ -841,6 +841,12 @@ export type Config = {
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
+    /**
+     * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.
+     * Useful in scenarios where the server-rendered HTML might intentionally differ from the client-rendered DOM.
+     * @default false
+     */
+    suppressHydrationWarning?: boolean
     /**
      * Restrict the Admin Panel theme to use only one of your choice
      *

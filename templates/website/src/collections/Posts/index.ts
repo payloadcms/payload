@@ -50,11 +50,11 @@ export const Posts: CollectionConfig<'posts'> = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data }) => {
+      url: ({ data, req }) => {
         const path = generatePreviewPath({
           slug: typeof data?.slug === 'string' ? data.slug : '',
           collection: 'posts',
-          // req, TODO: thread `req` once 3.5.1 is out, see notes in `generatePreviewPath`
+          req,
         })
 
         return path

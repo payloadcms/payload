@@ -37,7 +37,10 @@ export type ServerOnlyFieldProperties =
   | 'validate'
   | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
 
-export type ServerOnlyFieldAdminProperties = keyof Pick<FieldBase['admin'], 'condition'>
+export type ServerOnlyFieldAdminProperties = keyof Pick<
+  FieldBase['admin'],
+  'components' | 'condition'
+>
 
 const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'hooks',
@@ -57,7 +60,10 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   // `tabs`
   // `admin`
 ]
-const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
+const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = [
+  'condition',
+  'components',
+]
 type FieldWithDescription = {
   admin: AdminClient
 } & ClientField

@@ -8,7 +8,7 @@ const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
 type Props = {
   collection: keyof typeof collectionPrefixMap
   slug: string
-  req?: PayloadRequest // TODO: make this required once 3.5.1 is out, it's a new argument in that version
+  req: PayloadRequest
 }
 
 export const generatePreviewPath = ({ collection, slug, req }: Props) => {
@@ -26,12 +26,11 @@ export const generatePreviewPath = ({ collection, slug, req }: Props) => {
     encodedParams.append(key, value)
   })
 
-  let url = `/next/preview?${encodedParams.toString()}`
+  const isProduction =
+    process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL_PROJECT_PRODUCTION_URL)
+  const protocol = isProduction ? 'https:' : req.protocol
 
-  // TODO: remove this check once 3.5.1 is out, see note above
-  if (req) {
-    url = `${req.protocol}//${req.host}${url}`
-  }
+  let url = `${protocol}//${req.host}/next/preview?${encodedParams.toString()}`
 
   return url
 }
