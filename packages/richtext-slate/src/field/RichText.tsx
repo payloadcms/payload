@@ -459,4 +459,4 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   )
 }
 
-export const RichText = withCondition(RichTextField)
+export const RichText = RichTextField

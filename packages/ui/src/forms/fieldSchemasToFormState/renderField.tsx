@@ -136,8 +136,10 @@ export const renderField: RenderFieldMethod = ({
       }
 
       fieldState.customComponents.Field = RenderServerComponent({
+        additionalHOCArgs: [path],
         clientProps,
         Component: fieldConfig.editor.FieldComponent,
+        HOC: withCondition,
         importMap: req.payload.importMap,
         serverProps,
       })

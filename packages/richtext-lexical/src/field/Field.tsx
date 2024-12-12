@@ -143,4 +143,4 @@ function fallbackRender({ error }: { error: Error }) {
   )
 }
 
-export const RichText: typeof RichTextComponent = withCondition(RichTextComponent)
+export const RichText: typeof RichTextComponent = RichTextComponent

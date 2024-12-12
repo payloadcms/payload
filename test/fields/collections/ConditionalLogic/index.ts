@@ -36,6 +36,7 @@ const ConditionalLogic: CollectionConfig = {
     },
     {
       name: 'customFieldWithHOC',
+      label: 'Custom Field With HOC (legacy)',
       type: 'text',
       admin: {
         components: {
