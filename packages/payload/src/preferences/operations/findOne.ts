@@ -7,20 +7,13 @@ export async function findOne(
   payload: Payload,
   args: PreferenceRequest,
 ): Promise<TypedCollection['_preference']> {
-  const { key, req: reqFromArgs, user } = args
+  const { key, user } = args
 
   if (!user) {
     return null
   }
 
-  const req =
-    reqFromArgs ||
-    (await createLocalReq(
-      {
-        user,
-      },
-      payload,
-    ))
+  const req = await createLocalReq(args, payload)
 
   const where: Where = {
     and: [

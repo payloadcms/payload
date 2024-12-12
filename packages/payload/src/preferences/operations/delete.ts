@@ -9,16 +9,9 @@ export async function deleteOperation(
   payload: Payload,
   args: PreferenceRequest,
 ): Promise<Document> {
-  const { key, req: reqFromArgs, user } = args
+  const { key, user } = args
 
-  const req =
-    reqFromArgs ||
-    (await createLocalReq(
-      {
-        user,
-      },
-      payload,
-    ))
+  const req = await createLocalReq(args, payload)
 
   if (!user) {
     throw new UnauthorizedError(req.t)

@@ -8,16 +8,9 @@ export async function update(
   payload: Payload,
   args: PreferenceUpdateRequest,
 ): Promise<TypedCollection['_preference']> {
-  const { key, req: reqFromArgs, user, value } = args
+  const { key, user, value } = args
 
-  const req =
-    reqFromArgs ||
-    (await createLocalReq(
-      {
-        user,
-      },
-      payload,
-    ))
+  const req = await createLocalReq(args, payload)
 
   if (!user) {
     throw new UnauthorizedError(req.t)
