@@ -653,11 +653,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
     })
   } else if (field.type === 'tabs') {
-    if (!filter || filter(args)) {
-      state[path] = fieldState
-      state[path].disableFormData = true
-    }
-
     const promises = field.tabs.map((tab, tabIndex) => {
       const isNamedTab = tabHasName(tab)
 

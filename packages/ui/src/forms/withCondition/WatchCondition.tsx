@@ -15,9 +15,9 @@ export const WatchCondition: React.FC<{
 
   const { passesCondition } = field || {}
 
-  if (passesCondition === true) {
-    return children
+  if (passesCondition === false) {
+    return null
   }
 
-  return null
+  return children
 }
