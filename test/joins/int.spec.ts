@@ -13,7 +13,6 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   categoriesJoinRestrictedSlug,
   categoriesSlug,
-  collectionRestrictedSlug,
   postsSlug,
   restrictedCategoriesSlug,
   restrictedPostsSlug,
@@ -557,37 +556,15 @@ describe('Joins Field', () => {
     })
 
     it('should respect access control for join collections', async () => {
-      const restrictedCategory = await payload.create({
+      const { docs } = await payload.find({
         collection: categoriesJoinRestrictedSlug,
-        data: {
-          name: 'restricted category',
-        },
-      })
-      await payload.create({
-        collection: collectionRestrictedSlug,
-        data: {
-          title: 'should not allow read',
-          canRead: false,
-          category: restrictedCategory.id,
-        },
-      })
-      await payload.create({
-        collection: collectionRestrictedSlug,
-        data: {
-          title: 'should allow read',
-          canRead: true,
-          category: restrictedCategory.id,
-        },
-      })
-      const categoryWithRestrictedPosts = await payload.findByID({
-        id: restrictedCategory.id,
-        collection: categoriesJoinRestrictedSlug,
-        joins: {
-          restrictedPosts: false,
+        where: {
+          name: { equals: 'categoryJoinRestricted' },
         },
         overrideAccess: false,
         user,
       })
+      const [categoryWithRestrictedPosts] = docs
       expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs).toHaveLength(1)
       expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs[0].title).toStrictEqual(
         'should allow read',
@@ -818,36 +795,15 @@ describe('Joins Field', () => {
     })
 
     it('should respect access control for join collections', async () => {
-      const restrictedCategory = await payload.create({
-        collection: categoriesJoinRestrictedSlug,
-        data: {
-          name: 'restricted category',
-        },
-      })
-      await payload.create({
-        collection: collectionRestrictedSlug,
-        data: {
-          title: 'should not allow read',
-          canRead: false,
-          category: restrictedCategory.id,
-        },
-      })
-      await payload.create({
-        collection: collectionRestrictedSlug,
-        data: {
-          title: 'should allow read',
-          canRead: true,
-          category: restrictedCategory.id,
-        },
-      })
-
       const query = `query {
-         CategoriesJoinRestricted(id: ${idToString(restrictedCategory.id, payload)}) {
-          name
-          collectionRestrictedJoin {
-            docs {
-              title
-              canRead
+        CategoriesJoinRestricteds {
+          docs {
+            name
+            collectionRestrictedJoin {
+              docs {
+                title
+                canRead
+              }
             }
           }
         }
@@ -856,11 +812,11 @@ describe('Joins Field', () => {
       const response = await restClient
         .GRAPHQL_POST({ body: JSON.stringify({ query }) })
         .then((res) => res.json())
-
-      expect(response.data.CategoriesJoinRestricted.collectionRestrictedJoin.docs).toHaveLength(1)
-      expect(
-        response.data.CategoriesJoinRestricted.collectionRestrictedJoin.docs[0].title,
-      ).toStrictEqual('should allow read')
+      const [categoryWithRestrictedPosts] = response.data.CategoriesJoinRestricteds.docs
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs).toHaveLength(1)
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs[0].title).toStrictEqual(
+        'should allow read',
+      )
     })
   })
 

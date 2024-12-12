@@ -18,7 +18,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
+import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,16 +30,16 @@ test.describe('Admin Panel', () => {
   let page: Page
   let categoriesURL: AdminUrlUtil
   let uploadsURL: AdminUrlUtil
-  let postsURL: AdminUrlUtil
+  let categoriesJoinRestrictedURL: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
-    postsURL = new AdminUrlUtil(serverURL, postsSlug)
     categoriesURL = new AdminUrlUtil(serverURL, categoriesSlug)
     uploadsURL = new AdminUrlUtil(serverURL, uploadsSlug)
+    categoriesJoinRestrictedURL = new AdminUrlUtil(serverURL, categoriesJoinRestrictedSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -309,5 +309,15 @@ test.describe('Admin Panel', () => {
         hasText: exactText('Edited title for upload'),
       }),
     ).toBeVisible()
+  })
+
+  test('should render initial rows within relationship table respecting access control', async () => {
+    await navigateToDoc(page, categoriesJoinRestrictedURL)
+    const joinField = page.locator('#field-collectionRestrictedJoin.field-type.join')
+    await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
+    const rows = joinField.locator('.relationship-table tbody tr')
+    await expect(rows).toHaveCount(1)
+    await expect(joinField.locator('.cell-canRead')).not.toContainText('false')
   })
 })
