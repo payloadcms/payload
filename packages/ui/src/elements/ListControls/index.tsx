@@ -1,12 +1,15 @@
 'use client'
 import type { ClientCollectionConfig, Where } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
+import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { Dots } from '../../icons/Dots/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -20,8 +23,9 @@ import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
-import './index.scss'
+import { ExportDrawer } from './ExportDrawer/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
+import './index.scss'
 
 const baseClass = 'list-controls'
 
@@ -56,12 +60,16 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     renderedFilters,
   } = props
 
+  const collectionLabel = (collectionConfig.labels?.plural as string) || collectionSlug || ''
   const { handleSearchChange, query } = useListQuery()
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
+  const { toggleModal } = useModal()
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
+
+  const exportDrawerSlug = `export-drawer-${collectionSlug}`
 
   const searchLabel =
     (titleField &&
@@ -193,6 +201,19 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {t('general:sort')}
               </Pill>
             )}
+            <Popup
+              button={<Dots />}
+              className={`${baseClass}__popup`}
+              horizontalAlign="right"
+              size="large"
+              verticalAlign="bottom"
+            >
+              <PopupList.ButtonGroup>
+                <PopupList.Button onClick={() => toggleModal(exportDrawerSlug)}>
+                  Export
+                </PopupList.Button>
+              </PopupList.ButtonGroup>
+            </Popup>
           </div>
         </div>
       </div>
@@ -232,6 +253,11 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           /> */}
         </AnimateHeight>
       )}
+      <ExportDrawer
+        collectionConfig={collectionConfig}
+        collectionLabel={collectionLabel}
+        drawerSlug={exportDrawerSlug}
+      />
     </div>
   )
 }

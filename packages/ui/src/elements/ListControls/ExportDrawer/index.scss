@@ -1,0 +1,25 @@
+@import '../../../scss/styles';
+
+@layer payload-default {
+  .export-drawer {
+    &__subheader {
+      padding: 0 var(--gutter-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--theme-border-color);
+    }
+
+    &__options,
+    &__preview {
+      padding: calc(var(--gutter-h) * 0.5) var(--gutter-h);
+    }
+
+    &__preview-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: calc(var(--gutter-h) * 0.5);
+    }
+  }
+}
