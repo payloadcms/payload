@@ -22,6 +22,7 @@ export interface Config {
     'localized-categories': LocalizedCategory;
     'restricted-categories': RestrictedCategory;
     'restricted-posts': RestrictedPost;
+    'collection-restricted': CollectionRestricted;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -49,6 +50,7 @@ export interface Config {
       relatedPosts: 'localized-posts';
     };
     'restricted-categories': {
+      collectionRestrictedJoin: 'collection-restricted';
       restrictedPosts: 'posts';
     };
   };
@@ -64,6 +66,7 @@ export interface Config {
     'localized-categories': LocalizedCategoriesSelect<false> | LocalizedCategoriesSelect<true>;
     'restricted-categories': RestrictedCategoriesSelect<false> | RestrictedCategoriesSelect<true>;
     'restricted-posts': RestrictedPostsSelect<false> | RestrictedPostsSelect<true>;
+    'collection-restricted': CollectionRestrictedSelect<false> | CollectionRestrictedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -271,10 +274,26 @@ export interface LocalizedCategory {
 export interface RestrictedCategory {
   id: string;
   name?: string | null;
+  collectionRestrictedJoin?: {
+    docs?: (string | CollectionRestricted)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   restrictedPosts?: {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-restricted".
+ */
+export interface CollectionRestricted {
+  id: string;
+  title?: string | null;
+  canRead?: boolean | null;
+  category?: (string | null) | RestrictedCategory;
   updatedAt: string;
   createdAt: string;
 }
@@ -357,6 +376,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'restricted-posts';
         value: string | RestrictedPost;
+      } | null)
+    | ({
+        relationTo: 'collection-restricted';
+        value: string | CollectionRestricted;
       } | null)
     | ({
         relationTo: 'users';
@@ -532,6 +555,7 @@ export interface LocalizedCategoriesSelect<T extends boolean = true> {
  */
 export interface RestrictedCategoriesSelect<T extends boolean = true> {
   name?: T;
+  collectionRestrictedJoin?: T;
   restrictedPosts?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -543,6 +567,17 @@ export interface RestrictedCategoriesSelect<T extends boolean = true> {
 export interface RestrictedPostsSelect<T extends boolean = true> {
   title?: T;
   restrictedField?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-restricted_select".
+ */
+export interface CollectionRestrictedSelect<T extends boolean = true> {
+  title?: T;
+  canRead?: T;
   category?: T;
   updatedAt?: T;
   createdAt?: T;
