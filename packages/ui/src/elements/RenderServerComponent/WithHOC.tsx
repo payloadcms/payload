@@ -9,11 +9,11 @@ import { RenderClientHOC } from './RenderClientHOC.js'
  */
 export const WithHOC: React.FC<{
   Component: React.ComponentType
+  componentKey?: string
   HOC?: (Component: React.ComponentType) => React.ComponentType
   isRSC: boolean
-  key?: string
   props: object
-}> = ({ Component, HOC, isRSC, key, props }) => {
+}> = ({ Component, componentKey, HOC, isRSC, props }) => {
   let ComponentToRender = Component
 
   const HOCisRSC = isReactServerComponentOrFunction(HOC)
@@ -21,12 +21,12 @@ export const WithHOC: React.FC<{
   if (HOCisRSC) {
     ComponentToRender = HOC(Component)
   } else if (!HOCisRSC && !isRSC) {
-    return <RenderClientHOC Component={Component} HOC={HOC} key={key} props={props} />
+    return <RenderClientHOC Component={Component} HOC={HOC} key={componentKey} props={props} />
   } else {
     console.warn(
       'RenderServerComponent: HOC is a client component but Component is a server component. This is not allowed.',
     )
   }
 
-  return <ComponentToRender key={key} {...props} />
+  return <ComponentToRender key={componentKey} {...props} />
 }

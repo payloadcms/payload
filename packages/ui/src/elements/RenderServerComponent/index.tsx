@@ -55,7 +55,13 @@ export const RenderServerComponent: RenderServerComponentFn = ({
 
     if (HOC) {
       return (
-        <WithHOC Component={Component} HOC={HOC} isRSC={isRSC} key={key} props={sanitizedProps} />
+        <WithHOC
+          Component={Component}
+          componentKey={key}
+          HOC={HOC}
+          isRSC={isRSC}
+          props={sanitizedProps}
+        />
       )
     }
 
@@ -86,9 +92,9 @@ export const RenderServerComponent: RenderServerComponentFn = ({
         return (
           <WithHOC
             Component={ResolvedComponent}
+            componentKey={key}
             HOC={HOC}
             isRSC={isRSC}
-            key={key}
             props={sanitizedProps}
           />
         )
