@@ -280,6 +280,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         type: collection.graphQL.type,
         args: {
           id: { type: new GraphQLNonNull(idType) },
+          ...(createMutationInputType
+            ? { data: { type: collection.graphQL.mutationInputType } }
+            : {}),
         },
         resolve: duplicateResolver(collection),
       }

@@ -10,10 +10,10 @@ import { Logo } from '@/components/Logo/Logo'
 import { HeaderNav } from './Nav'
 
 interface HeaderClientProps {
-  header: Header
+  data: Header
 }
 
-export const HeaderClient: React.FC<HeaderClientProps> = ({ header }) => {
+export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   /* Storing the value in a useState to avoid hydration errors */
   const [theme, setTheme] = useState<string | null>(null)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
@@ -35,7 +35,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ header }) => {
         <Link href="/">
           <Logo loading="eager" priority="high" className="invert dark:invert-0" />
         </Link>
-        <HeaderNav header={header} />
+        <HeaderNav data={data} />
       </div>
     </header>
   )

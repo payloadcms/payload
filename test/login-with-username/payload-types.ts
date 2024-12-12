@@ -10,10 +10,12 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
     'login-with-either': LoginWithEitherAuthOperations;
+    'require-email': RequireEmailAuthOperations;
   };
   collections: {
     users: User;
     'login-with-either': LoginWithEither;
+    'require-email': RequireEmail;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -22,6 +24,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'login-with-either': LoginWithEitherSelect<false> | LoginWithEitherSelect<true>;
+    'require-email': RequireEmailSelect<false> | RequireEmailSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -38,6 +41,9 @@ export interface Config {
       })
     | (LoginWithEither & {
         collection: 'login-with-either';
+      })
+    | (RequireEmail & {
+        collection: 'require-email';
       });
   jobs: {
     tasks: unknown;
@@ -98,6 +104,23 @@ export interface LoginWithEitherAuthOperations {
         username: string;
       };
 }
+export interface RequireEmailAuthOperations {
+  forgotPassword: {
+    username: string;
+  };
+  login: {
+    password: string;
+    username: string;
+  };
+  registerFirstUser: {
+    password: string;
+    username: string;
+    email: string;
+  };
+  unlock: {
+    username: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -136,6 +159,24 @@ export interface LoginWithEither {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "require-email".
+ */
+export interface RequireEmail {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  username: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -148,6 +189,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'login-with-either';
         value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
       } | null);
   globalSlug?: string | null;
   user:
@@ -158,6 +203,10 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'login-with-either';
         value: string | LoginWithEither;
+      }
+    | {
+        relationTo: 'require-email';
+        value: string | RequireEmail;
       };
   updatedAt: string;
   createdAt: string;
@@ -176,6 +225,10 @@ export interface PayloadPreference {
     | {
         relationTo: 'login-with-either';
         value: string | LoginWithEither;
+      }
+    | {
+        relationTo: 'require-email';
+        value: string | RequireEmail;
       };
   key?: string | null;
   value?:
@@ -222,6 +275,22 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "login-with-either_select".
  */
 export interface LoginWithEitherSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  username?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "require-email_select".
+ */
+export interface RequireEmailSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   email?: T;

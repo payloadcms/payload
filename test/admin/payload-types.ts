@@ -146,9 +146,31 @@ export interface Post {
         [k: string]: unknown;
       }[]
     | null;
+  arrayOfFields?:
+    | {
+        optional?: string | null;
+        innerArrayOfFields?:
+          | {
+              innerOptional?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   group?: {
+    defaultValueField?: string | null;
     title?: string | null;
   };
+  someBlock?:
+    | {
+        textFieldForBlock?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlock';
+      }[]
+    | null;
+  defaultValueField?: string | null;
   relationship?: (string | null) | Post;
   customCell?: string | null;
   sidebarField?: string | null;
@@ -492,11 +514,36 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   richText?: T;
+  arrayOfFields?:
+    | T
+    | {
+        optional?: T;
+        innerArrayOfFields?:
+          | T
+          | {
+              innerOptional?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   group?:
     | T
     | {
+        defaultValueField?: T;
         title?: T;
       };
+  someBlock?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              textFieldForBlock?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  defaultValueField?: T;
   relationship?: T;
   customCell?: T;
   sidebarField?: T;
