@@ -92,6 +92,23 @@ const ConditionalLogic: CollectionConfig = {
         condition: ({ groupSelection }) => groupSelection === 'group2',
       },
     },
+    {
+      name: 'enableArrayFields',
+      type: 'checkbox',
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'textWithCondition',
+          type: 'text',
+          admin: {
+            condition: (data) => data.enableArrayFields,
+          },
+        },
+      ],
+    },
   ],
 }
 
