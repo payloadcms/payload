@@ -26,7 +26,7 @@ import './index.scss'
 import { TabsProvider } from './provider.js'
 import { TabComponent } from './Tab/index.js'
 
-export const baseClass = 'tabs-field'
+const baseClass = 'tabs-field'
 
 export { TabsProvider }
 
@@ -225,7 +225,7 @@ type ActiveTabProps = {
   permissions: SanitizedFieldPermissions
   readOnly: boolean
 }
-export function ActiveTabContent({
+function ActiveTabContent({
   description,
   fields,
   forceRender,
