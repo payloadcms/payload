@@ -1,5 +1,3 @@
-'use client'
-
 import type { TextFieldServerComponent } from 'payload'
 
 import React from 'react'
