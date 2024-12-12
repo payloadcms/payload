@@ -1373,6 +1373,8 @@ export interface RelationshipField {
         value: string | TextField;
       }[]
     | null;
+  relationToRow?: (string | null) | RowField;
+  relationToRowMany?: (string | RowField)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2997,6 +2999,8 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
         id?: T;
       };
   relationshipWithMinRows?: T;
+  relationToRow?: T;
+  relationToRowMany?: T;
   updatedAt?: T;
   createdAt?: T;
 }
