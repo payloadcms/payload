@@ -237,6 +237,7 @@ export const renderField: RenderFieldMethod = ({
 
       if ('Field' in fieldConfig.admin.components) {
         fieldState.customComponents.Field = RenderServerComponent({
+          additionalHOCArgs: [path],
           clientProps,
           Component: fieldConfig.admin.components.Field,
           HOC: withCondition,
