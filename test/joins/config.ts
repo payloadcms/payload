@@ -162,7 +162,7 @@ export default buildConfigWithDefaults({
         {
           name: 'category',
           type: 'relationship',
-          relationTo: restrictedCategoriesSlug,
+          relationTo: categoriesJoinRestrictedSlug,
         },
       ],
     },
