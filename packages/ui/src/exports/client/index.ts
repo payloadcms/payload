@@ -119,6 +119,8 @@ import { toast } from 'sonner'
 export { toast }
 export { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 export { Upload } from '../../elements/Upload/index.js'
+export { SearchFilter } from '../../elements/SearchFilter/index.js'
+
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
 
