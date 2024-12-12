@@ -199,6 +199,32 @@ export function withNullableJSONSchemaType(
   return fieldTypes
 }
 
+function entityOrFieldToJsDocs({
+  config,
+  entity,
+  i18n,
+}: {
+  config: SanitizedConfig
+  entity: FlattenedField | SanitizedCollectionConfig | SanitizedGlobalConfig
+  i18n?: I18n
+}): string | undefined {
+  let description: string | undefined = undefined
+  if (entity?.admin?.description) {
+    if (typeof entity?.admin?.description === 'string') {
+      description = entity?.admin?.description
+    } else if (typeof entity?.admin?.description === 'object') {
+      const defaultLocale = config?.localization ? config?.localization?.defaultLocale : undefined
+      if (entity?.admin?.description?.en) {
+        description = entity?.admin?.description?.en
+      } else if (entity?.admin?.description?.[defaultLocale]) {
+        description = entity?.admin?.description?.[defaultLocale]
+      }
+    } else if (typeof entity?.admin?.description === 'function' && i18n) {
+      description = entity?.admin?.description(i18n)
+    }
+  }
+  return description
+}
 export function fieldsToJSONSchema(
   /**
    * Used for relationship fields, to determine whether to use a string or number type for the ID.
@@ -229,25 +255,10 @@ export function fieldsToJSONSchema(
           requiredFieldNames.add(field.name)
         }
 
-        let fieldDescription = undefined
-        if (field?.admin?.description) {
-          if (typeof field?.admin?.description === 'string') {
-            fieldDescription = field?.admin?.description
-          } else if (typeof field?.admin?.description === 'object') {
-            const defaultLocale = config?.localization
-              ? config?.localization?.defaultLocale
-              : undefined
-            if (field?.admin?.description?.en) {
-              fieldDescription = field?.admin?.description?.en
-            } else if (field?.admin?.description?.[defaultLocale]) {
-              fieldDescription = field?.admin?.description?.[defaultLocale]
-            }
-          } else if (typeof field?.admin?.description === 'function' && i18n) {
-            fieldDescription = field?.admin?.description(i18n)
-          }
-        }
-        const baseFieldSchema: JSONSchema4 = {
-          description: fieldDescription,
+        const fieldDescription = entityOrFieldToJsDocs({ config, entity: field, i18n })
+        const baseFieldSchema: JSONSchema4 = {}
+        if (fieldDescription) {
+          baseFieldSchema.description = fieldDescription
         }
 
         let fieldSchema: JSONSchema4
@@ -687,26 +698,9 @@ export function entityToJSONSchema(
     })
   }
 
-  let entityDescription = undefined
-  if (entity?.admin?.description) {
-    if (typeof entity?.admin?.description === 'string') {
-      entityDescription = entity?.admin?.description
-    } else if (typeof entity?.admin?.description === 'object') {
-      const defaultLocale = config?.localization ? config?.localization?.defaultLocale : undefined
-      if (entity?.admin?.description?.en) {
-        entityDescription = entity?.admin?.description?.en
-      } else if (entity?.admin?.description?.[defaultLocale]) {
-        entityDescription = entity?.admin?.description?.[defaultLocale]
-      }
-    } else if (typeof entity?.admin?.description === 'function' && i18n) {
-      entityDescription = entity?.admin?.description(i18n)
-    }
-  }
-
-  return {
+  const jsonSchema: JSONSchema4 = {
     type: 'object',
     additionalProperties: false,
-    description: entityDescription,
     title,
     ...fieldsToJSONSchema(
       collectionIDFieldTypes,
@@ -716,6 +710,14 @@ export function entityToJSONSchema(
       i18n,
     ),
   }
+
+  const entityDescription = entityOrFieldToJsDocs({ config, entity, i18n })
+
+  if (entityDescription) {
+    jsonSchema.description = entityDescription
+  }
+
+  return jsonSchema
 }
 
 export function fieldsToSelectJSONSchema({ fields }: { fields: FlattenedField[] }): JSONSchema4 {
