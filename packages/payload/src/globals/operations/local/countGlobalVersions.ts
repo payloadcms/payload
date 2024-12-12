@@ -15,7 +15,7 @@ export type CountGlobalVersionsOptions<TSlug extends GlobalSlug> = {
   global: TSlug
   locale?: TypedLocale
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   user?: Document
   where?: Where
 }

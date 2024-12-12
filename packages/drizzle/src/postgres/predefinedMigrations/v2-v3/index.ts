@@ -6,10 +6,10 @@ import fs from 'fs'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
-import type { TransactionPg } from '../../../types.js'
 import type { BasePostgresAdapter } from '../../types.js'
 import type { PathsToQuery } from './types.js'
 
+import { getTransaction } from '../../../utilities/getTransaction.js'
 import { groupUpSQLStatements } from './groupUpSQLStatements.js'
 import { migrateRelationships } from './migrateRelationships.js'
 import { traverseFields } from './traverseFields.js'
@@ -36,7 +36,7 @@ type Args = {
  */
 export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const adapter = payload.db as unknown as BasePostgresAdapter
-  const db = adapter.sessions[await req.transactionID].db as TransactionPg
+  const db = await getTransaction(adapter, req)
   const dir = payload.db.migrationDir
 
   // get the drizzle migrateUpSQL from drizzle using the last schema

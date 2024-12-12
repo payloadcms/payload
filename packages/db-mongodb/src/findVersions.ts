@@ -1,5 +1,5 @@
-import type { PaginateOptions } from 'mongoose'
-import type { FindVersions, PayloadRequest } from 'payload'
+import type { PaginateOptions, QueryOptions } from 'mongoose'
+import type { FindVersions } from 'payload'
 
 import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
 
@@ -7,29 +7,19 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
 
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
-  {
-    collection,
-    limit,
-    locale,
-    page,
-    pagination,
-    req = {} as PayloadRequest,
-    select,
-    skip,
-    sort: sortArg,
-    where,
-  },
+  { collection, limit, locale, page, pagination, req = {}, select, skip, sort: sortArg, where },
 ) {
   const Model = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = {
-    ...(await withSession(this, req)),
+  const session = await getSession(this, req)
+  const options: QueryOptions = {
     limit,
+    session,
     skip,
   }
 
@@ -91,8 +81,8 @@ export const findVersions: FindVersions = async function findVersions(
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
-          ...options,
           hint: { _id: 1 },
+          session,
         }),
       )
     }

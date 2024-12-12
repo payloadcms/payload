@@ -25,7 +25,7 @@ export type Options<TSlug extends GlobalSlug> = {
   overrideAccess?: boolean
   page?: number
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   showHiddenFields?: boolean
   slug: TSlug

@@ -1,4 +1,4 @@
-import type { DeleteMany, PayloadRequest } from 'payload'
+import type { DeleteMany } from 'payload'
 
 import { inArray } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
@@ -6,12 +6,13 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
+import { getTransaction } from './utilities/getTransaction.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: DrizzleAdapter,
-  { collection, req = {} as PayloadRequest, where },
+  { collection, req, where },
 ) {
-  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
+  const db = await getTransaction(this, req)
   const collectionConfig = this.payload.collections[collection].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
@@ -21,7 +22,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
     fields: collectionConfig.flattenedFields,
     joins: false,
     limit: 0,
-    locale: req.locale,
+    locale: req?.locale,
     page: 1,
     pagination: false,
     req,

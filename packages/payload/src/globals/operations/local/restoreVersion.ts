@@ -15,7 +15,7 @@ export type Options<TSlug extends GlobalSlug> = {
   locale?: TypedLocale
   overrideAccess?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   showHiddenFields?: boolean
   slug: TSlug
   user?: Document

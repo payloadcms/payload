@@ -1,25 +1,16 @@
 import type { QueryOptions } from 'mongoose'
 
-import { buildVersionCollectionFields, type PayloadRequest, type UpdateVersion } from 'payload'
+import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  {
-    id,
-    collection,
-    locale,
-    options: optionsArgs = {},
-    req = {} as PayloadRequest,
-    select,
-    versionData,
-    where,
-  },
+  { id, collection, locale, options: optionsArgs = {}, req, select, versionData, where },
 ) {
   const VersionModel = this.versions[collection]
   const whereToUse = where || { id: { equals: id } }
@@ -30,7 +21,6 @@ export const updateVersion: UpdateVersion = async function updateVersion(
 
   const options: QueryOptions = {
     ...optionsArgs,
-    ...(await withSession(this, req)),
     lean: true,
     new: true,
     projection: buildProjectionFromSelect({
@@ -42,6 +32,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
       ),
       select,
     }),
+    session: await getSession(this, req),
   }
 
   const query = await VersionModel.buildQuery({

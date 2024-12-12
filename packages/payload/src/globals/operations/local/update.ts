@@ -25,7 +25,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   overrideLock?: boolean
   populate?: PopulateType
   publishSpecificLocale?: TypedLocale
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: TSelect
   showHiddenFields?: boolean
   slug: TSlug

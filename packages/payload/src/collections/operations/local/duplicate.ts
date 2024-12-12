@@ -33,7 +33,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   locale?: TypedLocale
   overrideAccess?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: TSelect
   showHiddenFields?: boolean
   user?: Document
