@@ -40,8 +40,8 @@ export const updateOne: UpdateOne = async function updateOne(
   if (selectDistinctResult?.[0]?.id) {
     idToUpdate = selectDistinctResult?.[0]?.id
 
-    // If id wasn't passed but `where`, retrieve it with findFirst
-  } else if (!idToUpdate) {
+    // If id wasn't passed but `where` without any joins, retrieve it with findFirst
+  } else if (whereArg && !joins.length) {
     const findManyArgs = buildFindManyArgs({
       adapter: this,
       depth: 0,
