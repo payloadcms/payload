@@ -55,6 +55,7 @@ export const LoginForm: React.FC<{
   const initialState: FormState = {
     password: {
       initialValue: prefillPassword ?? undefined,
+      passesCondition: true,
       valid: true,
       value: prefillPassword ?? undefined,
     },
@@ -63,12 +64,14 @@ export const LoginForm: React.FC<{
   if (loginWithUsername) {
     initialState.username = {
       initialValue: prefillUsername ?? undefined,
+      passesCondition: true,
       valid: true,
       value: prefillUsername ?? undefined,
     }
   } else {
     initialState.email = {
       initialValue: prefillEmail ?? undefined,
+      passesCondition: true,
       valid: true,
       value: prefillEmail ?? undefined,
     }

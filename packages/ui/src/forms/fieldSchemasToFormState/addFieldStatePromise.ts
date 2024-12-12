@@ -142,6 +142,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   let fieldPermissions: SanitizedFieldPermissions = true
 
+  const fieldState: FormFieldWithoutComponents = {
+    errorPaths: [],
+    fieldSchema: includeSchema ? field : undefined,
+    initialValue: undefined,
+    isSidebar: fieldIsSidebar(field),
+    passesCondition,
+    valid: true,
+    value: undefined,
+  }
+
   if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field)) {
     fieldPermissions =
       parentPermissions === true
@@ -162,16 +172,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
 
     const validate = field.validate
-
-    const fieldState: FormFieldWithoutComponents = {
-      errorPaths: [],
-      fieldSchema: includeSchema ? field : undefined,
-      initialValue: undefined,
-      isSidebar: fieldIsSidebar(field),
-      passesCondition,
-      valid: true,
-      value: undefined,
-    }
 
     let validationResult: string | true = true
 
@@ -653,6 +653,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
     })
   } else if (field.type === 'tabs') {
+    if (!filter || filter(args)) {
+      state[path] = fieldState
+      state[path].disableFormData = true
+    }
+
     const promises = field.tabs.map((tab, tabIndex) => {
       const isNamedTab = tabHasName(tab)
 
@@ -672,7 +677,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       })
 
       let childPermissions: SanitizedFieldsPermissions = undefined
-      if (tabHasName(tab)) {
+
+      if (isNamedTab) {
         if (parentPermissions === true) {
           childPermissions = true
         } else {
@@ -721,16 +727,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     await Promise.all(promises)
   } else if (field.type === 'ui') {
     if (!filter || filter(args)) {
-      state[path] = {
-        disableFormData: true,
-        errorPaths: [],
-        fieldSchema: includeSchema ? field : undefined,
-        initialValue: undefined,
-        isSidebar: fieldIsSidebar(field),
-        passesCondition,
-        valid: true,
-        value: undefined,
-      }
+      state[path] = fieldState
+      state[path].disableFormData = true
     }
   }
 
