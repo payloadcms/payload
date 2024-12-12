@@ -340,6 +340,9 @@ export interface GifResize {
  */
 export interface FilenameCompoundIndex {
   id: string;
+  /**
+   * Alt text to be used for compound index
+   */
   alt?: string | null;
   updatedAt: string;
   createdAt: string;

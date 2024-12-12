@@ -90,6 +90,9 @@ export interface Page {
   meta: {
     title: string;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
     image?: (string | null) | Media;
     ogTitle?: string | null;
   };
@@ -146,6 +149,9 @@ export interface PagesWithImportedField {
       description?: string | null;
     };
     innerMedia?: {
+      /**
+       * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+       */
       image?: (string | null) | Media;
     };
   };
