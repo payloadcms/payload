@@ -76,29 +76,33 @@ describe('Conditional Logic', () => {
   test('should toggle conditional custom client field', async () => {
     await page.goto(url.create)
     const toggleField = page.locator('label[for=field-toggleField]')
+    const fieldID = '#custom-client-field'
 
-    // eslint-disable-next-line playwright/no-conditional-in-test
     if (!(await toggleField.isChecked())) {
+      await expect(page.locator(fieldID)).toBeHidden()
       await toggleField.click()
+      await expect(page.locator(fieldID)).toBeVisible()
+    } else {
+      await expect(page.locator(fieldID)).toBeVisible()
+      await toggleField.click()
+      await expect(page.locator(fieldID)).toBeHidden()
     }
-
-    await expect(page.locator('label[for=field-toggleField]')).toBeChecked()
-    const customFieldWithCondition = page.locator('#custom-client-field')
-    await expect(customFieldWithCondition).toBeVisible()
   })
 
   test('should toggle conditional custom server field', async () => {
     await page.goto(url.create)
     const toggleField = page.locator('label[for=field-toggleField]')
+    const fieldID = '#custom-server-field'
 
-    // eslint-disable-next-line playwright/no-conditional-in-test
     if (!(await toggleField.isChecked())) {
+      await expect(page.locator(fieldID)).toBeHidden()
       await toggleField.click()
+      await expect(page.locator(fieldID)).toBeVisible()
+    } else {
+      await expect(page.locator(fieldID)).toBeVisible()
+      await toggleField.click()
+      await expect(page.locator(fieldID)).toBeHidden()
     }
-
-    await expect(page.locator('label[for=field-toggleField]')).toBeChecked()
-    const customFieldWithCondition = page.locator('#custom-server-field')
-    await expect(customFieldWithCondition).toBeVisible()
   })
 
   test('should show conditional field based on user data', async () => {
