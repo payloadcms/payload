@@ -4,6 +4,8 @@ import type { TextFieldClientComponent } from 'payload'
 
 import React from 'react'
 
-export const CustomClientField: TextFieldClientComponent = () => {
+const CustomClientField: TextFieldClientComponent = () => {
   return <div id="custom-client-field">Custom Client Field</div>
 }
+
+export default CustomClientField

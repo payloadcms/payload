@@ -27,6 +27,20 @@ let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 let url: AdminUrlUtil
 
+const testConditionalLogic = async (triggerLocator: string, fieldLocator: string) => {
+  const conditionTrigger = page.locator(triggerLocator)
+
+  if (!(await conditionTrigger.isChecked())) {
+    await expect(page.locator(fieldLocator)).toBeHidden()
+    await conditionTrigger.click()
+    await expect(page.locator(fieldLocator)).toBeVisible()
+  } else {
+    await expect(page.locator(fieldLocator)).toBeVisible()
+    await conditionTrigger.click()
+    await expect(page.locator(fieldLocator)).toBeHidden()
+  }
+}
+
 describe('Conditional Logic', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -59,50 +73,55 @@ describe('Conditional Logic', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('should toggle conditional field when data changes', async () => {
+  test('should conditionally render field based on data', async () => {
     await page.goto(url.create)
-    const toggleField = page.locator('label[for=field-toggleField]')
 
-    // eslint-disable-next-line playwright/no-conditional-in-test
-    if (!(await toggleField.isChecked())) {
-      await toggleField.click()
-    }
+    await testConditionalLogic(
+      'label[for=field-toggleField]',
+      'label[for=field-fieldWithCondition]',
+    )
 
-    await expect(page.locator('label[for=field-toggleField]')).toBeChecked()
-    const fieldWithCondition = page.locator('input#field-fieldWithCondition')
-    await expect(fieldWithCondition).toBeVisible()
+    expect(true).toBe(true)
+  })
+
+  test('should conditionally render custom field that renders a Payload field', async () => {
+    await page.goto(url.create)
+
+    await testConditionalLogic(
+      'label[for=field-toggleField]',
+      'label[for=field-customFieldWithField]',
+    )
+
+    expect(true).toBe(true)
+  })
+
+  test('should conditionally render custom field that wraps itself with the withCondition HOC (legacy)', async () => {
+    await page.goto(url.create)
+
+    await testConditionalLogic(
+      'label[for=field-toggleField]',
+      'label[for=field-customFieldWithHOC]',
+    )
+
+    expect(true).toBe(true)
   })
 
   test('should toggle conditional custom client field', async () => {
     await page.goto(url.create)
-    const toggleField = page.locator('label[for=field-toggleField]')
-    const fieldID = '#custom-client-field'
-
-    if (!(await toggleField.isChecked())) {
-      await expect(page.locator(fieldID)).toBeHidden()
-      await toggleField.click()
-      await expect(page.locator(fieldID)).toBeVisible()
-    } else {
-      await expect(page.locator(fieldID)).toBeVisible()
-      await toggleField.click()
-      await expect(page.locator(fieldID)).toBeHidden()
-    }
+    await testConditionalLogic('label[for=field-toggleField]', '#custom-client-field')
+    expect(true).toBe(true)
   })
 
-  test('should toggle conditional custom server field', async () => {
+  test('should conditionally render custom server field', async () => {
     await page.goto(url.create)
-    const toggleField = page.locator('label[for=field-toggleField]')
-    const fieldID = '#custom-server-field'
+    await testConditionalLogic('label[for=field-toggleField]', '#custom-server-field')
+    expect(true).toBe(true)
+  })
 
-    if (!(await toggleField.isChecked())) {
-      await expect(page.locator(fieldID)).toBeHidden()
-      await toggleField.click()
-      await expect(page.locator(fieldID)).toBeVisible()
-    } else {
-      await expect(page.locator(fieldID)).toBeVisible()
-      await toggleField.click()
-      await expect(page.locator(fieldID)).toBeHidden()
-    }
+  test('should conditionally render rich text fields', async () => {
+    await page.goto(url.create)
+    await testConditionalLogic('label[for=field-toggleField]', '.field-type.rich-text-lexical')
+    expect(true).toBe(true)
   })
 
   test('should show conditional field based on user data', async () => {

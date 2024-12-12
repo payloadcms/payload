@@ -20,18 +20,36 @@ const ConditionalLogic: CollectionConfig = {
     {
       name: 'fieldWithCondition',
       type: 'text',
-      required: true,
       admin: {
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customFieldWithField',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomFieldWithField',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customFieldWithHOC',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomFieldWithHOC',
+        },
         condition: ({ toggleField }) => Boolean(toggleField),
       },
     },
     {
       name: 'customClientFieldWithCondition',
       type: 'text',
-      required: true,
       admin: {
         components: {
-          Field: '/collections/ConditionalLogic/CustomClientField#CustomClientField',
+          Field: '/collections/ConditionalLogic/CustomClientField',
         },
         condition: ({ toggleField }) => Boolean(toggleField),
       },
@@ -39,11 +57,17 @@ const ConditionalLogic: CollectionConfig = {
     {
       name: 'customServerFieldWithCondition',
       type: 'text',
-      required: true,
       admin: {
         components: {
-          Field: '/collections/ConditionalLogic/CustomServerField#CustomServerField',
+          Field: '/collections/ConditionalLogic/CustomServerField',
         },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'conditionalRichText',
+      type: 'richText',
+      admin: {
         condition: ({ toggleField }) => Boolean(toggleField),
       },
     },
