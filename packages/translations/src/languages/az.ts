@@ -13,7 +13,7 @@ export const azTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Başlamaq üçün ilk istifadəçinizi yaradın.',
     changePassword: 'Parolu dəyişdir',
     checkYourEmailForPasswordReset:
-      'Parolunuzu təhlükəsiz şəkildə sıfırlamağa imkan verəcək link üçün e-poçt ünvanınızı yoxlayın.',
+      'Əgər bu e-poçt ünvanı ilə bir hesab əlaqələndirilibsə, şifrəni sıfırlamaq üçün göstərişlər tez bir zamanda göndəriləcəkdir. Gələnlər qovluğunda e-poçtu görməsəniz, spam və ya zibil qovluğuna baxın.',
     confirmGeneration: 'Generasiyani təsdiqlə',
     confirmPassword: 'Şifrəni təsdiq et',
     createFirstUser: 'İlk istifadəçini yaradın',

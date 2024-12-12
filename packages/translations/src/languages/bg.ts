@@ -13,7 +13,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'За да започнеш, създай първия си потребител',
     changePassword: 'Промяна на паролата',
     checkYourEmailForPasswordReset:
-      'Провери имейла си за връзка, която ще ти позволи да промениш паролата си',
+      'Ако този имейл адрес е свързан с акаунт, ще получите инструкции за нулиране на паролата съвсем скоро. Моля, проверете папката със спам, ако не виждате имейла в пощенската си кутия.',
     confirmGeneration: 'Потвърди създаването',
     confirmPassword: 'Потвърди парола',
     createFirstUser: 'Създай първи потребител',

@@ -13,7 +13,7 @@ export const arTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'للبدء, قم بإنشاء المستخدم الأوّل.',
     changePassword: 'تغيير كلمة المرور',
     checkYourEmailForPasswordReset:
-      'تحقّق من بريدك الإلكتروني بحثًا عن رابط يسمح لك بإعادة تعيين كلمة المرور الخاصّة بك بشكل آمن.',
+      'إذا كان عنوان البريد الإلكتروني مرتبطًا بحساب، فستتلقى تعليمات لإعادة تعيين كلمة المرور قريبًا. يرجى التحقق من مجلد البريد العشوائي إذا لم تتمكن من رؤية الرسالة في علبة الوارد.',
     confirmGeneration: 'تأكيد التّوليد',
     confirmPassword: 'تأكيد كلمة المرور',
     createFirstUser: 'إنشاء المستخدم الأوّل',

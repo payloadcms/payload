@@ -13,7 +13,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'まずは、最初のユーザーを作成します。',
     changePassword: 'パスワードを変更',
     checkYourEmailForPasswordReset:
-      'パスワードを安全に再設定するためのリンクがメールで送られてくるので、確認してください。',
+      'このメールアドレスがアカウントに関連付けられている場合、パスワードのリセット手順がすぐに届きます。受信トレイにメールが表示されない場合は、迷惑メールフォルダを確認してください。',
     confirmGeneration: '生成の確認',
     confirmPassword: 'パスワードの確認',
     createFirstUser: '最初のユーザーを作成',

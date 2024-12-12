@@ -12,7 +12,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     backToLogin: '回到登录页面',
     beginCreateFirstUser: '首先，请创建您的第一个用户。',
     changePassword: '更改密码',
-    checkYourEmailForPasswordReset: '请查看您的电子邮件，以取得安全重置密码的链接。',
+    checkYourEmailForPasswordReset:
+      '如果该电子邮件地址与帐户相关联，您将在不久收到重置密码的说明。如果您在收件箱中未能看到该电子邮件，请检查您的垃圾邮件或未读邮件文件夹。',
     confirmGeneration: '确认生成',
     confirmPassword: '确认密码',
     createFirstUser: '创建第一个用户',

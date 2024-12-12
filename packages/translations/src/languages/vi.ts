@@ -12,7 +12,8 @@ export const viTranslations: DefaultTranslationsObject = {
     backToLogin: 'Quay lại đăng nhập.',
     beginCreateFirstUser: 'Để bắt đầu, hãy tạo người dùng đầu tiên.',
     changePassword: 'Đổi mật khẩu',
-    checkYourEmailForPasswordReset: 'Hãy kiểm tra email của bạn để lấy đường dẫn tạo lại mật khẩu.',
+    checkYourEmailForPasswordReset:
+      'Nếu địa chỉ email này liên kết với tài khoản, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu trong thời gian ngắn. Vui lòng kiểm tra thư mục thư rác hoặc thư chưa đọc nếu bạn không thấy email trong hộp thư đến của mình.',
     confirmGeneration: 'Xác nhận, tạo API Key',
     confirmPassword: 'Xác nhận mật khẩu',
     createFirstUser: 'Tạo người dùng đầu tiên',

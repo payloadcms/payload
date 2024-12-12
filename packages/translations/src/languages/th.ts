@@ -13,7 +13,7 @@ export const thTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'สร้างผู้ใช้แรกเพื่อเริ่มใช้งาน',
     changePassword: 'เปลี่ยนรหัสผ่าน',
     checkYourEmailForPasswordReset:
-      'ระบบได้ส่งอีเมลสำหรับรีเซ็ตรหัสผ่านไปที่อีเมลของคุณแล้ว โปรดเช็กอีเมลของคุณ',
+      'หากอีเมลนี้เชื่อมโยงกับบัญชี คุณจะได้รับคำแนะนำในการรีเซ็ตรหัสผ่านในไม่ช้า โปรดตรวจสอบโฟลเดอร์อีเมลขยะหากคุณไม่เห็นอีเมลในกล่องจดหมายของคุณ',
     confirmGeneration: 'ยืนยันการสร้าง',
     confirmPassword: 'ยืนยันรหัสผ่าน',
     createFirstUser: 'สร้างผู้ใช้แรก',
