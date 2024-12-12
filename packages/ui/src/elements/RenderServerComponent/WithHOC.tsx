@@ -21,15 +21,17 @@ export const WithHOC: React.FC<{
   if (HOCisRSC) {
     ComponentToRender = HOC(Component)
   } else if (!HOCisRSC) {
-    return (
-      <RenderClientHOC
-        Component={!isRSC ? Component : undefined}
-        HOC={HOC}
-        key={componentKey}
-        props={props}
-        RenderedComponent={isRSC ? <Component {...props} /> : undefined}
-      />
-    )
+    if (isRSC) {
+      return (
+        <RenderClientHOC
+          HOC={HOC}
+          key={componentKey}
+          RenderedComponent={<Component {...props} />}
+        />
+      )
+    } else {
+      return <RenderClientHOC Component={Component} HOC={HOC} key={componentKey} props={props} />
+    }
   }
 
   return <ComponentToRender key={componentKey} {...props} />
