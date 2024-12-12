@@ -13,7 +13,7 @@ export const daTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'For at starte, opret en bruger.',
     changePassword: 'Skift adgangskode',
     checkYourEmailForPasswordReset:
-      'Tjek din email for at finde linket der vil give adgang til at ændre din adgangskode',
+      'Hvis e-mailadressen er forbundet med en konto, vil du kort tid modtage instruktioner til at nulstille din adgangskode. Tjek venligst din spam- eller junkmail-mappe, hvis du ikke ser e-mailen i din indbakke.',
     confirmGeneration: 'Bekræft generering',
     confirmPassword: 'Bekræft adgangskode',
     createFirstUser: 'Opret bruger',

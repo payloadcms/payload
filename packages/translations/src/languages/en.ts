@@ -13,7 +13,7 @@ export const enTranslations = {
     beginCreateFirstUser: 'To begin, create your first user.',
     changePassword: 'Change Password',
     checkYourEmailForPasswordReset:
-      'Check your email for a link that will allow you to securely reset your password.',
+      "If the email address is associated with an account, you will receive instructions to reset your password shortly. Please check your spam or junk mail folder if you don't see the email in your inbox.",
     confirmGeneration: 'Confirm Generation',
     confirmPassword: 'Confirm Password',
     createFirstUser: 'Create first user',
