@@ -202,6 +202,13 @@ jobs:
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379 # Expose Redis on port 6379
+
+        options: --health-cmd "redis-cli ping" --health-timeout 30s --health-retries 3
+
     steps:
       - uses: actions/checkout@v4
 
@@ -251,6 +258,10 @@ jobs:
         run: |
           echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
         if: matrix.database == 'supabase'
+
+      - name: Configure Redis
+        run: |
+          echo  "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
 
       - name: Integration Tests
         uses: nick-fields/retry@v3

@@ -38,6 +38,7 @@ import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
+import type { KVAdapterResult } from '../kv/index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -974,6 +975,15 @@ export type Config = {
    * @experimental There may be frequent breaking changes to this API
    */
   jobs?: JobsConfig
+  /**
+   * Pass in a KV adapter for use on this project.
+   * @default `DatabaseKVAdapter` from:
+   * ```ts
+   * import { createDatabaseKVAdapter } from 'payload'
+   * createDatabaseKVAdapter()
+   * ```
+   */
+  kv?: KVAdapterResult
   /**
    * Translate your content to different languages/locales.
    *
