@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
 
-import React, { createContext, useCallback, useContext } from 'react'
+import React, { createContext, useCallback, useContext, useEffect } from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
@@ -75,7 +75,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
   }) as ClientCollectionConfig
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
-  const { getPreference, setPreference } = usePreferences()
+  const { getPreference } = usePreferences()
 
   const [tableColumns, setTableColumns] = React.useState(columnState)
   const tableStateControllerRef = React.useRef<AbortController>(null)
@@ -194,7 +194,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
             active: activeColumnAccessors.includes(col.accessor),
           }
         })
-        .toSorted((first, second) => {
+        .sort((first, second) => {
           const indexOfFirst = activeColumnAccessors.indexOf(first.accessor)
           const indexOfSecond = activeColumnAccessors.indexOf(second.accessor)
 
@@ -276,7 +276,11 @@ export const TableColumnsProvider: React.FC<Props> = ({
     sortColumnProps,
   ])
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setTableColumns(columnState)
+  }, [columnState])
+
+  useEffect(() => {
     return () => {
       abortAndIgnore(tableStateControllerRef.current)
     }

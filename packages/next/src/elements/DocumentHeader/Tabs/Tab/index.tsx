@@ -75,16 +75,16 @@ export const DocumentTab: React.FC<
           {Pill || Pill_Component ? (
             <Fragment>
               &nbsp;
-              <RenderServerComponent
-                Component={Pill}
-                Fallback={Pill_Component}
-                importMap={payload.importMap}
-                serverProps={{
+              {RenderServerComponent({
+                Component: Pill,
+                Fallback: Pill_Component,
+                importMap: payload.importMap,
+                serverProps: {
                   i18n,
                   payload,
                   permissions,
-                }}
-              />
+                },
+              })}
             </Fragment>
           ) : null}
         </span>

@@ -15,7 +15,7 @@ import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
-import validations from '../validations.js'
+import { validations } from '../validations.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
 import { fieldAffectsData, tabHasName } from './types.js'
 
@@ -173,10 +173,6 @@ export const sanitizeFields = async ({
         } else {
           field.validate = (): true => true
         }
-      }
-
-      if (typeof field.virtual === 'undefined') {
-        field.virtual = false
       }
 
       if (!field.hooks) {

@@ -1,4 +1,5 @@
 import type {
+  ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field,
@@ -11,6 +12,7 @@ import type {
 } from 'payload'
 
 export type RenderFieldArgs = {
+  clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug: string
   data: Data
   fieldConfig: Field
@@ -23,12 +25,7 @@ export type RenderFieldArgs = {
   parentPath: string
   parentSchemaPath: string
   path: string
-  permissions:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | null
-    | SanitizedFieldPermissions
+  permissions: SanitizedFieldPermissions
   preferences: DocumentPreferences
   previousFieldState: FieldState
   req: PayloadRequest

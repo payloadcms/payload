@@ -3,7 +3,7 @@ import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, fieldIsID } from 'payload/shared'
 import React from 'react' // TODO: abstract this out to support all routers
 
 import { useConfig } from '../../../providers/Config/index.js'
@@ -60,7 +60,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     wrapElementProps.href = collectionConfig?.slug
       ? formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
+          path: `/collections/${collectionConfig?.slug}/${encodeURIComponent(rowData.id)}`,
         })
       : ''
   }
@@ -77,7 +77,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     }
   }
 
-  if ('name' in field && field.name === 'id') {
+  if (fieldIsID(field)) {
     return (
       <WrapElement {...wrapElementProps}>
         <CodeCell

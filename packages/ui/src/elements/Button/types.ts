@@ -5,6 +5,7 @@ type secondaryAction = {
   label: string
   onClick: (event: MouseEvent) => void
 }
+
 export type Props = {
   'aria-label'?: string
   buttonId?: string
@@ -21,6 +22,15 @@ export type Props = {
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
   onMouseDown?: (event: MouseEvent) => void
+  /**
+   * Enables form submission via an onClick handler. This is only needed if
+   * type="submit" does not trigger form submission, e.g. if the button DOM
+   * element is not a direct child of the form element.
+   *
+   * @default false
+   */
+  programmaticSubmit?: boolean
+  ref?: React.RefObject<HTMLAnchorElement | HTMLButtonElement | null>
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
   size?: 'large' | 'medium' | 'small'

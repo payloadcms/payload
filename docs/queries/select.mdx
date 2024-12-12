@@ -15,8 +15,10 @@ This is where Payload's `select` feature comes in. Here, you can define exactly 
 To specify `select` in the [Local API](../local-api/overview), you can use the `select` option in your query:
 
 ```ts
+import type { Payload } from 'payload'
+
 // Include mode
-const getPosts = async () => {
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     select: {
@@ -34,7 +36,7 @@ const getPosts = async () => {
 }
 
 // Exclude mode
-const getPosts = async () => {
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     // Select everything except for array and group.number
@@ -73,8 +75,9 @@ For this reason, we recommend to use the extremely helpful and ubiquitous [`qs-e
 
 ```ts
 import { stringify } from 'qs-esm'
+import type { Where } from 'payload'
 
-const select = {
+const select: Where = {
   text: true,
   group: {
     number: true
@@ -107,17 +110,14 @@ const getPosts = async () => {
 The `defaultPopulate` property allows you specify which fields to select when populating the collection from another document.
 This is especially useful for links where only the `slug` is needed instead of the entire document.
 
-With this feature, you can dramatically reduce the amount of JSON that is populated from [Relationship](/docs/beta/fields/relationship) or [Upload](/docs/beta/fields/upload) fields.
+With this feature, you can dramatically reduce the amount of JSON that is populated from [Relationship](/docs/fields/relationship) or [Upload](/docs/fields/upload) fields.
 
-For example, in your content model, you might have a `Link` field which links out to a different page. When you go to retrieve these links, you really only need the `slug` of the page. 
+For example, in your content model, you might have a `Link` field which links out to a different page. When you go to retrieve these links, you really only need the `slug` of the page.
 
 Loading all of the page content, its related links, and everything else is going to be overkill and will bog down your Payload APIs. Instead, you can define the `defaultPopulate` property on your `Pages` collection, so that when Payload "populates" a related Page, it only selects the `slug` field and therefore returns significantly less JSON:
 
 ```ts
 import type { CollectionConfig } from 'payload'
-
-import { lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
-import { slateEditor } from '@payloadcms/richtext-slate'
 
 // The TSlug generic can be passed to have type safety for `defaultPopulate`.
 // If avoided, the `defaultPopulate` type resolves to `SelectType`.
@@ -144,7 +144,9 @@ Setting `defaultPopulate` will enforce that each time Payload performs a "popula
 **Local API:**
 
 ```ts
-const getPosts = async () => {
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     populate: {

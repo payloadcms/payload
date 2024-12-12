@@ -52,6 +52,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     schemaPath: schemaPathFromProps,
     validate,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
@@ -109,7 +110,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { Description, Error, Label, RowLabels } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
     errorPaths,
     rows: rowsData = [],
     showError,
@@ -129,13 +130,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         schemaPath,
       })
 
-      setModified(true)
-
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex}`)
       }, 0)
     },
-    [addFieldRow, path, schemaPath, setModified],
+    [addFieldRow, path, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -269,6 +268,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
+      {BeforeInput}
       {(rowsData?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
@@ -350,6 +350,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>
       )}
+      {AfterInput}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import type { SanitizedConfig } from '../../config/types.js'
 import type { JobsConfig } from './types/index.js'
 
 import { fieldsToJSONSchema } from '../../utilities/configToJSONSchema.js'
+import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 
 export function generateJobsJSONSchemas(
   config: SanitizedConfig,
@@ -39,7 +40,7 @@ export function generateJobsJSONSchemas(
       if (task?.inputSchema?.length) {
         const inputJsonSchema = fieldsToJSONSchema(
           collectionIDFieldTypes,
-          task.inputSchema,
+          flattenAllFields({ fields: task.inputSchema }),
           interfaceNameDefinitions,
           config,
         )
@@ -57,7 +58,7 @@ export function generateJobsJSONSchemas(
       if (task?.outputSchema?.length) {
         const outputJsonSchema = fieldsToJSONSchema(
           collectionIDFieldTypes,
-          task.outputSchema,
+          flattenAllFields({ fields: task.outputSchema }),
           interfaceNameDefinitions,
           config,
         )
@@ -105,7 +106,7 @@ export function generateJobsJSONSchemas(
           required: ['input', 'output'],
         },
       },
-      required: jobsConfig.tasks.map((task) => task.slug),
+      required: [...jobsConfig.tasks.map((task) => task.slug), 'inline'],
     }
   }
 
@@ -123,7 +124,7 @@ export function generateJobsJSONSchemas(
       if (workflow?.inputSchema?.length) {
         const inputJsonSchema = fieldsToJSONSchema(
           collectionIDFieldTypes,
-          workflow.inputSchema,
+          flattenAllFields({ fields: workflow.inputSchema }),
           interfaceNameDefinitions,
           config,
         )
@@ -161,7 +162,7 @@ export function generateJobsJSONSchemas(
             return [workflow.slug, toReturn]
           }),
         ),
-        required: jobsConfig.tasks.map((task) => task.slug),
+        required: jobsConfig.workflows.map((workflow) => workflow.slug),
       }
     }
   }

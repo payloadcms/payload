@@ -1,15 +1,14 @@
 'use client'
-import type { ControlProps } from 'react-select'
+import type { InputProps } from 'react-select'
 
 import React from 'react'
 import { components as SelectComponents } from 'react-select'
 
 import type { Option } from '../types.js'
 
-export const Input: React.FC<ControlProps<Option, any>> = (props) => {
+export const Input: React.FC<InputProps<Option, any>> = (props) => {
   return (
     <React.Fragment>
-      {/* @ts-expect-error // TODO Fix this - Broke with React 19 types */}
       <SelectComponents.Input
         {...props}
         /**

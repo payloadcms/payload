@@ -1,16 +1,9 @@
-import type {
-  AdminViewProps,
-  Data,
-  PayloadComponent,
-  ServerProps,
-  ServerSideEditViewProps,
-} from 'payload'
+import type { AdminViewProps, Data, PayloadComponent, ServerSideEditViewProps } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import { isRedirectError } from 'next/dist/client/components/redirect.js'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
@@ -39,17 +32,20 @@ export const renderDocument = async ({
   importMap,
   initialData,
   initPageResult,
+  overrideEntityVisibility,
   params,
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
-}: AdminViewProps): Promise<{
+}: {
+  overrideEntityVisibility?: boolean
+} & AdminViewProps): Promise<{
   data: Data
   Document: React.ReactNode
 }> => {
   const {
     collectionConfig,
-    docID: id,
+    docID: idFromArgs,
     globalConfig,
     locale,
     permissions,
@@ -72,7 +68,7 @@ export const renderDocument = async ({
   const segments = Array.isArray(params?.segments) ? params.segments : []
   const collectionSlug = collectionConfig?.slug || undefined
   const globalSlug = globalConfig?.slug || undefined
-  const isEditing = getIsEditing({ id, collectionSlug, globalSlug })
+  let isEditing = getIsEditing({ id: idFromArgs, collectionSlug, globalSlug })
 
   let RootViewOverride: PayloadComponent
   let CustomView: ViewFromConfig<ServerSideEditViewProps>
@@ -82,10 +78,10 @@ export const renderDocument = async ({
   let apiURL: string
 
   // Fetch the doc required for the view
-  const doc =
+  let doc =
     initialData ||
     (await getDocumentData({
-      id,
+      id: idFromArgs,
       collectionSlug,
       globalSlug,
       locale,
@@ -104,7 +100,7 @@ export const renderDocument = async ({
   ] = await Promise.all([
     // Get document preferences
     getDocPreferences({
-      id,
+      id: idFromArgs,
       collectionSlug,
       globalSlug,
       payload,
@@ -113,7 +109,7 @@ export const renderDocument = async ({
 
     // Get permissions
     getDocumentPermissions({
-      id,
+      id: idFromArgs,
       collectionConfig,
       data: doc,
       globalConfig,
@@ -122,7 +118,7 @@ export const renderDocument = async ({
 
     // Fetch document lock state
     getIsLocked({
-      id,
+      id: idFromArgs,
       collectionConfig,
       globalConfig,
       isEditing,
@@ -135,8 +131,9 @@ export const renderDocument = async ({
     { state: formState },
   ] = await Promise.all([
     getVersions({
-      id,
+      id: idFromArgs,
       collectionConfig,
+      doc,
       docPermissions,
       globalConfig,
       locale: locale?.code,
@@ -144,7 +141,7 @@ export const renderDocument = async ({
       user,
     }),
     buildFormState({
-      id,
+      id: idFromArgs,
       collectionSlug,
       data: doc,
       docPermissions,
@@ -152,14 +149,15 @@ export const renderDocument = async ({
       fallbackLocale: false,
       globalSlug,
       locale: locale?.code,
-      operation: (collectionSlug && id) || globalSlug ? 'update' : 'create',
+      operation: (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create',
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
     }),
   ])
 
-  const serverProps: ServerProps = {
+  const serverProps: ServerSideEditViewProps = {
+    doc,
     i18n,
     initPageResult,
     locale,
@@ -172,7 +170,10 @@ export const renderDocument = async ({
   }
 
   if (collectionConfig) {
-    if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
+    if (
+      !visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug) &&
+      !overrideEntityVisibility
+    ) {
       throw new Error('not-found')
     }
 
@@ -186,7 +187,7 @@ export const renderDocument = async ({
 
     const apiQueryParams = `?${params.toString()}`
 
-    apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}${apiQueryParams}`
+    apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${idFromArgs}${apiQueryParams}`
 
     RootViewOverride =
       collectionConfig?.admin?.components?.views?.edit?.root &&
@@ -273,8 +274,10 @@ export const renderDocument = async ({
   const validateDraftData =
     collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.validate
 
-  if (shouldAutosave && !validateDraftData && !id && collectionSlug) {
-    const doc = await payload.create({
+  let id = idFromArgs
+
+  if (shouldAutosave && !validateDraftData && !idFromArgs && collectionSlug) {
+    doc = await payload.create({
       collection: collectionSlug,
       data: initialData || {},
       depth: 0,
@@ -286,12 +289,18 @@ export const renderDocument = async ({
     })
 
     if (doc?.id) {
-      const redirectURL = formatAdminURL({
-        adminRoute,
-        path: `/collections/${collectionSlug}/${doc.id}`,
-        serverURL,
-      })
-      redirect(redirectURL)
+      id = doc.id
+      isEditing = getIsEditing({ id: doc.id, collectionSlug, globalSlug })
+
+      if (!drawerSlug) {
+        const redirectURL = formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}/${doc.id}`,
+          serverURL,
+        })
+
+        redirect(redirectURL)
+      }
     } else {
       throw new Error('not-found')
     }
@@ -344,27 +353,23 @@ export const renderDocument = async ({
         )}
         <HydrateAuthProvider permissions={permissions} />
         <EditDepthProvider>
-          {ErrorView ? (
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={ErrorView.ComponentConfig || ErrorView.Component}
-              importMap={importMap}
-              serverProps={serverProps}
-            />
-          ) : (
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={
-                RootViewOverride
+          {ErrorView
+            ? RenderServerComponent({
+                clientProps,
+                Component: ErrorView.ComponentConfig || ErrorView.Component,
+                importMap,
+                serverProps,
+              })
+            : RenderServerComponent({
+                clientProps,
+                Component: RootViewOverride
                   ? RootViewOverride
                   : CustomView?.ComponentConfig || CustomView?.Component
                     ? CustomView?.ComponentConfig || CustomView?.Component
-                    : DefaultView?.ComponentConfig || DefaultView?.Component
-              }
-              importMap={importMap}
-              serverProps={serverProps}
-            />
-          )}
+                    : DefaultView?.ComponentConfig || DefaultView?.Component,
+                importMap,
+                serverProps,
+              })}
         </EditDepthProvider>
       </DocumentInfoProvider>
     ),
@@ -376,7 +381,7 @@ export const Document: React.FC<AdminViewProps> = async (args) => {
     const { Document: RenderedDocument } = await renderDocument(args)
     return RenderedDocument
   } catch (error) {
-    if (isRedirectError(error)) {
+    if (error?.message === 'NEXT_REDIRECT') {
       throw error
     }
     args.initPageResult.req.payload.logger.error(error)

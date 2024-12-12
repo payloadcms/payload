@@ -198,6 +198,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...flattenRows(path, rows),
         [path]: {
           ...state[path],
+          requiresRender: true,
           rows: rowStateCopy,
         },
       }

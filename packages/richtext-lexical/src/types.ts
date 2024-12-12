@@ -80,10 +80,11 @@ export type LexicalRichTextAdapterProvider =
     parentIsLocalized: boolean
   }) => Promise<LexicalRichTextAdapter>
 
+export type SingleFeatureClientSchemaMap = {
+  [key: string]: ClientField[]
+}
 export type FeatureClientSchemaMap = {
-  [featureKey: string]: {
-    [key: string]: ClientField[]
-  }
+  [featureKey: string]: SingleFeatureClientSchemaMap
 }
 
 export type LexicalRichTextFieldProps = {
@@ -97,7 +98,7 @@ export type LexicalRichTextFieldProps = {
   }
   featureClientSchemaMap: FeatureClientSchemaMap
   initialLexicalFormState: InitialLexicalFormState
-  lexicalEditorConfig: LexicalEditorConfig
+  lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
 } & Pick<ServerFieldBase, 'permissions'> &
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 

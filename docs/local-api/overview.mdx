@@ -102,7 +102,7 @@ const post = await payload.find({
 
 The following Collection operations are available through the Local API:
 
-### Create
+### Create#collection-create
 
 ```js
 // The created Post document is returned
@@ -131,10 +131,13 @@ const post = await payload.create({
   // Alternatively, you can directly pass a File,
   // if file is provided, filePath will be omitted
   file: uploadedFile,
+
+  // If you want to create a document that is a duplicate of another document
+  duplicateFromID: 'document-id-to-duplicate',
 })
 ```
 
-### Find
+### Find#collection-find
 
 ```js
 // Result will be a paginated set of Posts.
@@ -155,7 +158,7 @@ const result = await payload.find({
 })
 ```
 
-### Find by ID
+### Find by ID#collection-find-by-id
 
 ```js
 // Result will be a Post document.
@@ -171,7 +174,7 @@ const result = await payload.findByID({
 })
 ```
 
-### Count
+### Count#collection-count
 
 ```js
 // Result will be an object with:
@@ -187,7 +190,7 @@ const result = await payload.count({
 })
 ```
 
-### Update by ID
+### Update by ID#collection-update-by-id
 
 ```js
 // Result will be the updated Post document.
@@ -219,7 +222,7 @@ const result = await payload.update({
 })
 ```
 
-### Update Many
+### Update Many#collection-update-many
 
 ```js
 // Result will be an object with:
@@ -258,7 +261,7 @@ const result = await payload.update({
 })
 ```
 
-### Delete
+### Delete#collection-delete
 
 ```js
 // Result will be the now-deleted Post document.
@@ -275,7 +278,7 @@ const result = await payload.delete({
 })
 ```
 
-### Delete Many
+### Delete Many#collection-delete-many
 
 ```js
 // Result will be an object with:
@@ -303,6 +306,27 @@ const result = await payload.delete({
 
 If a collection has [`Authentication`](/docs/authentication/overview) enabled, additional Local API operations will be
 available:
+
+### Auth
+
+```js
+// If you're using Next.js, you'll have to import headers from next/headers, like so:
+// import { headers as nextHeaders } from 'next/headers'
+
+// you'll also have to await headers inside your function, or component, like so:
+// const headers = await nextHeaders()
+
+// If you're using payload outside of Next.js, you'll have to provide headers accordingly.
+
+// result will be formatted as follows:
+// {
+//    permissions: { ... }, // object containing current user's permissions
+//    user: { ... }, // currently logged in user's document
+//    responseHeaders: { ... } // returned headers from the response
+// }
+
+const result = await payload.auth({headers})
+```
 
 ### Login
 
@@ -394,7 +418,7 @@ const result = await payload.verifyEmail({
 
 The following Global operations are available through the Local API:
 
-### Find
+### Find#global-find
 
 ```js
 // Result will be the Header Global.
@@ -409,7 +433,7 @@ const result = await payload.findGlobal({
 })
 ```
 
-### Update
+### Update#global-update
 
 ```js
 // Result will be the updated Header Global.

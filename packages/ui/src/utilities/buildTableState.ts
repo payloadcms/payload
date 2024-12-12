@@ -1,48 +1,20 @@
-import type { I18nClient } from '@payloadcms/translations'
 import type {
   BuildTableStateArgs,
   ClientCollectionConfig,
   ClientConfig,
   ErrorResult,
-  ImportMap,
   PaginatedDocs,
   SanitizedCollectionConfig,
-  SanitizedConfig,
 } from 'payload'
 
-import { dequal } from 'dequal' // TODO: Can we change this to dequal/lite ? If not, please add comment explaining why
-import { createClientConfig, formatErrors } from 'payload'
+import { dequal } from 'dequal/lite'
+import { formatErrors } from 'payload'
 
 import type { Column } from '../elements/Table/index.js'
 import type { ListPreferences } from '../elements/TableColumns/index.js'
 
+import { getClientConfig } from './getClientConfig.js'
 import { renderFilters, renderTable } from './renderTable.js'
-
-let cachedClientConfig = global._payload_clientConfig
-
-if (!cachedClientConfig) {
-  cachedClientConfig = global._payload_clientConfig = null
-}
-
-export const getClientConfig = (args: {
-  config: SanitizedConfig
-  i18n: I18nClient
-  importMap: ImportMap
-}): ClientConfig => {
-  const { config, i18n, importMap } = args
-
-  if (cachedClientConfig && process.env.NODE_ENV !== 'development') {
-    return cachedClientConfig
-  }
-
-  cachedClientConfig = createClientConfig({
-    config,
-    i18n,
-    importMap,
-  })
-
-  return cachedClientConfig
-}
 
 type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
@@ -128,6 +100,7 @@ export const buildTableState = async (
       if (!canAccessAdmin) {
         throw new Error('Unauthorized')
       }
+
       // Match the user collection to the global admin config
     } else if (adminUserSlug !== incomingUserSlug) {
       throw new Error('Unauthorized')
@@ -196,10 +169,6 @@ export const buildTableState = async (
   let newPrefs = preferencesResult.value
 
   if (!preferencesResult.id || !dequal(columns, preferencesResult?.columns)) {
-    const mergedPrefs = {
-      ...(preferencesResult || {}),
-      columns,
-    }
     const preferencesArgs = {
       collection: 'payload-preferences',
       data: {
@@ -208,7 +177,10 @@ export const buildTableState = async (
           collection: user.collection,
           value: user.id,
         },
-        value: mergedPrefs,
+        value: {
+          ...(preferencesResult?.value || {}),
+          columns,
+        },
       },
       depth: 0,
       req,
@@ -226,8 +198,6 @@ export const buildTableState = async (
     }
   }
 
-  const fields = collectionConfig.fields
-
   let docs = docsFromArgs
   let data: PaginatedDocs
 
@@ -238,6 +208,7 @@ export const buildTableState = async (
       collection: collectionSlug,
       depth: 0,
       limit: query?.limit ? parseInt(query.limit, 10) : undefined,
+      overrideAccess: false,
       page: query?.page ? parseInt(query.page, 10) : undefined,
       sort: query?.sort,
       where: query?.where,
@@ -247,12 +218,12 @@ export const buildTableState = async (
   }
 
   const { columnState, Table } = renderTable({
-    collectionConfig: clientCollectionConfig,
+    clientCollectionConfig,
+    collectionConfig,
     columnPreferences: undefined, // TODO, might not be needed
     columns,
     docs,
     enableRowSelections,
-    fields,
     i18n: req.i18n,
     payload,
     renderRowTypes,
@@ -260,7 +231,7 @@ export const buildTableState = async (
     useAsTitle: collectionConfig.admin.useAsTitle,
   })
 
-  const renderedFilters = renderFilters(fields, req.payload.importMap)
+  const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
   return {
     data,

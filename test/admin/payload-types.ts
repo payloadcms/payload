@@ -82,9 +82,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -138,9 +138,31 @@ export interface Post {
         [k: string]: unknown;
       }[]
     | null;
+  arrayOfFields?:
+    | {
+        optional?: string | null;
+        innerArrayOfFields?:
+          | {
+              innerOptional?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   group?: {
+    defaultValueField?: string | null;
     title?: string | null;
   };
+  someBlock?:
+    | {
+        textFieldForBlock?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlock';
+      }[]
+    | null;
+  defaultValueField?: string | null;
   relationship?: (string | null) | Post;
   customCell?: string | null;
   sidebarField?: string | null;
@@ -218,6 +240,27 @@ export interface CustomField {
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
+  relationshipFieldWithBeforeAfterInputs?: (string | null) | Post;
+  arrayFieldWithBeforeAfterInputs?:
+    | {
+        someTextField?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksFieldWithBeforeAfterInputs?:
+    | {
+        textField?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockFields';
+      }[]
+    | null;
+  text?: string | null;
+  groupFieldWithBeforeAfterInputs?: {
+    textOne?: string | null;
+    textTwo?: string | null;
+  };
+  radioFieldWithBeforeAfterInputs?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -280,8 +323,8 @@ export interface Geo {
  * via the `definition` "customIdTab".
  */
 export interface CustomIdTab {
-  id: string | null;
   title?: string | null;
+  id: string;
   description?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -292,8 +335,8 @@ export interface CustomIdTab {
  * via the `definition` "customIdRow".
  */
 export interface CustomIdRow {
-  id: string | null;
   title?: string | null;
+  id: string;
   description?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -463,12 +506,36 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   richText?: T;
-  demoUIField?: T;
+  arrayOfFields?:
+    | T
+    | {
+        optional?: T;
+        innerArrayOfFields?:
+          | T
+          | {
+              innerOptional?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   group?:
     | T
     | {
+        defaultValueField?: T;
         title?: T;
       };
+  someBlock?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              textFieldForBlock?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  defaultValueField?: T;
   relationship?: T;
   customCell?: T;
   sidebarField?: T;
@@ -539,6 +606,32 @@ export interface CustomFieldsSelect<T extends boolean = true> {
   descriptionAsFunction?: T;
   descriptionAsComponent?: T;
   customSelectField?: T;
+  relationshipFieldWithBeforeAfterInputs?: T;
+  arrayFieldWithBeforeAfterInputs?:
+    | T
+    | {
+        someTextField?: T;
+        id?: T;
+      };
+  blocksFieldWithBeforeAfterInputs?:
+    | T
+    | {
+        blockFields?:
+          | T
+          | {
+              textField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  text?: T;
+  groupFieldWithBeforeAfterInputs?:
+    | T
+    | {
+        textOne?: T;
+        textTwo?: T;
+      };
+  radioFieldWithBeforeAfterInputs?: T;
   updatedAt?: T;
   createdAt?: T;
 }

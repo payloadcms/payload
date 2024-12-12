@@ -1,20 +1,17 @@
 import type { PgColumnBuilder } from 'drizzle-orm/pg-core'
+import type { FlattenedField } from 'payload'
 
 import { numeric, serial, uuid, varchar } from 'drizzle-orm/pg-core'
-import { type Field, flattenTopLevelFields } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
 
 import type { BasePostgresAdapter, IDType } from '../types.js'
 
 type Args = {
   adapter: BasePostgresAdapter
   columns: Record<string, PgColumnBuilder>
-  fields: Field[]
+  fields: FlattenedField[]
 }
 export const setColumnID = ({ adapter, columns, fields }: Args): IDType => {
-  const idField = flattenTopLevelFields(fields).find(
-    (field) => fieldAffectsData(field) && field.name === 'id',
-  )
+  const idField = fields.find((field) => field.name === 'id')
   if (idField) {
     if (idField.type === 'number') {
       columns.id = numeric('id').primaryKey()

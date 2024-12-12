@@ -4,6 +4,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
+import { buildFindManyArgs } from './find/buildFindManyArgs.js'
 import buildQuery from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
@@ -20,7 +21,7 @@ export const updateOne: UpdateOne = async function updateOne(
 
   const { joins, selectFields, where } = buildQuery({
     adapter: this,
-    fields: collection.fields,
+    fields: collection.flattenedFields,
     locale,
     tableName,
     where: whereToUse,
@@ -38,6 +39,22 @@ export const updateOne: UpdateOne = async function updateOne(
 
   if (selectDistinctResult?.[0]?.id) {
     idToUpdate = selectDistinctResult?.[0]?.id
+
+    // If id wasn't passed but `where` without any joins, retrieve it with findFirst
+  } else if (whereArg && !joins.length) {
+    const findManyArgs = buildFindManyArgs({
+      adapter: this,
+      depth: 0,
+      fields: collection.flattenedFields,
+      joinQuery: false,
+      select: {},
+      tableName,
+    })
+
+    findManyArgs.where = where
+
+    const docToUpdate = await db.query[tableName].findFirst(findManyArgs)
+    idToUpdate = docToUpdate?.id
   }
 
   const result = await upsertRow({
@@ -45,7 +62,7 @@ export const updateOne: UpdateOne = async function updateOne(
     adapter: this,
     data,
     db,
-    fields: collection.fields,
+    fields: collection.flattenedFields,
     joinQuery,
     operation: 'update',
     req,

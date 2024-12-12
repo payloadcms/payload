@@ -1,4 +1,5 @@
 import type {
+  ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field,
@@ -8,12 +9,16 @@ import type {
   FormStateWithoutComponents,
   PayloadRequest,
   SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import {
+  deepCopyObjectSimple,
   fieldAffectsData,
   fieldHasSubFields,
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
   fieldIsSidebar,
   getFieldPaths,
   tabHasName,
@@ -33,6 +38,7 @@ export type AddFieldStatePromiseArgs = {
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
+  clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
   field: Field
@@ -59,14 +65,9 @@ export type AddFieldStatePromiseArgs = {
   operation: 'create' | 'update'
   parentIndexPath: string
   parentPath: string
+  parentPermissions: SanitizedFieldsPermissions
   parentSchemaPath: string
   passesCondition: boolean
-  permissions:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | null
-    | SanitizedFieldPermissions
   preferences: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
@@ -96,6 +97,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     id,
     addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
+    clientFieldSchemaMap,
     collectionSlug,
     data,
     field,
@@ -109,9 +111,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     operation,
     parentIndexPath,
     parentPath,
+    parentPermissions,
     parentSchemaPath,
     passesCondition,
-    permissions,
     preferences,
     previousFormState,
     renderAllFields,
@@ -121,6 +123,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     skipValidation = false,
     state,
   } = args
+
+  if (!args.clientFieldSchemaMap && args.renderFieldFn) {
+    console.warn(
+      'clientFieldSchemaMap is not passed to addFieldStatePromise - this will reduce performance',
+    )
+  }
 
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -132,13 +140,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
 
-  const isHiddenField = 'hidden' in field && field?.hidden
-  const disabledFromAdmin = field?.admin && 'disabled' in field.admin && field.admin.disabled
+  let fieldPermissions: SanitizedFieldPermissions = true
 
-  if (fieldAffectsData(field) && !(isHiddenField || disabledFromAdmin)) {
-    const fieldPermissions = permissions === true ? permissions : permissions?.[field.name]
+  if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field)) {
+    fieldPermissions =
+      parentPermissions === true
+        ? parentPermissions
+        : deepCopyObjectSimple(parentPermissions?.[field.name])
 
-    let hasPermission: boolean = fieldPermissions === true || fieldPermissions?.read
+    let hasPermission: boolean =
+      fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
       hasPermission = await field.access.read({ doc: fullData, req, siblingData: data })
@@ -222,7 +233,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             if (!omitParents && (!filter || filter(args))) {
               state[parentPath + '.id'] = {
                 fieldSchema: includeSchema
-                  ? field.fields.find((field) => 'name' in field && field.name === 'id')
+                  ? field.fields.find((field) => fieldIsID(field))
                   : undefined,
                 initialValue: row.id,
                 valid: true,
@@ -235,6 +246,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 id,
                 addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
+                clientFieldSchemaMap,
                 collectionSlug,
                 data: row,
                 fields: field.fields,
@@ -262,14 +274,26 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               }),
             )
 
-            const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
+            const previousRows = previousFormState?.[path]?.rows || []
+            const collapsedRowIDsFromPrefs = preferences?.fields?.[path]?.collapsed
 
             acc.rows.push({
               id: row.id,
-              collapsed:
-                collapsedRowIDs === undefined
-                  ? field.admin.initCollapsed
-                  : collapsedRowIDs.includes(row.id),
+              collapsed: (() => {
+                // First, check if `previousFormState` has a matching row
+                const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
+                if (previousRow?.collapsed !== undefined) {
+                  return previousRow.collapsed
+                }
+
+                // If previousFormState is undefined, check preferences
+                if (collapsedRowIDsFromPrefs !== undefined) {
+                  return collapsedRowIDsFromPrefs.includes(row.id) // Check if collapsed in preferences
+                }
+
+                // If neither exists, fallback to `field.admin.initCollapsed`
+                return field.admin.initCollapsed
+              })(),
             })
 
             return acc
@@ -331,9 +355,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               if (!omitParents && (!filter || filter(args))) {
                 state[parentPath + '.id'] = {
                   fieldSchema: includeSchema
-                    ? block.fields.find(
-                        (blockField) => 'name' in blockField && blockField.name === 'id',
-                      )
+                    ? block.fields.find((blockField) => fieldIsID(blockField))
                     : undefined,
                   initialValue: row.id,
                   valid: true,
@@ -368,6 +390,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   id,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
+                  clientFieldSchemaMap,
                   collectionSlug,
                   data: row,
                   fields: block.fields,
@@ -385,7 +408,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   permissions:
                     fieldPermissions === true
                       ? fieldPermissions
-                      : permissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
+                      : parentPermissions?.[field.name]?.blocks?.[block.slug] === true
+                        ? true
+                        : parentPermissions?.[field.name]?.blocks?.[block.slug]?.fields || {},
                   preferences,
                   previousFormState,
                   renderAllFields: requiresRender,
@@ -456,6 +481,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           id,
           addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
+          clientFieldSchemaMap,
           collectionSlug,
           data: data?.[field.name] || {},
           fields: field.fields,
@@ -470,7 +496,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           parentPassesCondition: passesCondition,
           parentPath: path,
           parentSchemaPath: schemaPath,
-          permissions: fieldPermissions ?? permissions?.[field.name]?.fields ?? {},
+          permissions:
+            typeof fieldPermissions === 'boolean' ? fieldPermissions : fieldPermissions?.fields,
           preferences,
           previousFormState,
           renderAllFields,
@@ -600,6 +627,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: field.localized || anyParentLocalized,
+      clientFieldSchemaMap,
       collectionSlug,
       data,
       fields: field.fields,
@@ -614,7 +642,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentPassesCondition: passesCondition,
       parentPath,
       parentSchemaPath,
-      permissions,
+      permissions: parentPermissions, // TODO: Verify this is correct
       preferences,
       previousFormState,
       renderAllFields,
@@ -643,10 +671,27 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         parentSchemaPath,
       })
 
+      let childPermissions: SanitizedFieldsPermissions = undefined
+      if (tabHasName(tab)) {
+        if (parentPermissions === true) {
+          childPermissions = true
+        } else {
+          const tabPermissions = parentPermissions?.[tab.name]
+          if (tabPermissions === true) {
+            childPermissions = true
+          } else {
+            childPermissions = tabPermissions?.fields
+          }
+        }
+      } else {
+        childPermissions = parentPermissions
+      }
+
       return iterateFields({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
+        clientFieldSchemaMap,
         collectionSlug,
         data: isNamedTab ? data?.[tab.name] || {} : data,
         fields: tab.fields,
@@ -661,11 +706,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         parentPassesCondition: passesCondition,
         parentPath: tabHasName(tab) ? tabPath : parentPath,
         parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
-        permissions: tabHasName(tab)
-          ? typeof permissions === 'boolean'
-            ? permissions
-            : permissions?.[tab.name] || {}
-          : permissions,
+        permissions: childPermissions,
         preferences,
         previousFormState,
         renderAllFields,
@@ -693,9 +734,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  const isDisabled = field?.admin && 'disabled' in field.admin && field.admin.disabled
-
-  if (requiresRender && !isDisabled && renderFieldFn) {
+  if (requiresRender && renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
     const fieldState = state[path]
 
     const fieldConfig = fieldSchemaMap.get(schemaPath)
@@ -716,6 +755,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     renderFieldFn({
       id,
+      clientFieldSchemaMap,
       collectionSlug,
       data: fullData,
       fieldConfig: fieldConfig as Field,
@@ -727,7 +767,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       parentPath,
       parentSchemaPath,
       path,
-      permissions,
+      permissions: fieldPermissions,
       preferences,
       previousFieldState: previousFormState?.[path],
       req,

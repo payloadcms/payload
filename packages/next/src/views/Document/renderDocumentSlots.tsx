@@ -5,12 +5,12 @@ import type {
   SanitizedCollectionConfig,
   SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
+  ServerProps,
   StaticDescription,
 } from 'payload'
 
 import { ViewDescription } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import React from 'react'
 
 import { getDocumentPermissions } from './getDocumentPermissions.js'
 
@@ -29,14 +29,23 @@ export const renderDocumentSlots: (args: {
 
   const isPreviewEnabled = collectionConfig?.admin?.preview || globalConfig?.admin?.preview
 
+  const serverProps: ServerProps = {
+    i18n: req.i18n,
+    payload: req.payload,
+    user: req.user,
+    // TODO: Add remaining serverProps
+  }
+
   const CustomPreviewButton =
     collectionConfig?.admin?.components?.edit?.PreviewButton ||
     globalConfig?.admin?.components?.elements?.PreviewButton
 
   if (isPreviewEnabled && CustomPreviewButton) {
-    components.PreviewButton = (
-      <RenderServerComponent Component={CustomPreviewButton} importMap={req.payload.importMap} />
-    )
+    components.PreviewButton = RenderServerComponent({
+      Component: CustomPreviewButton,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
   }
 
   const descriptionFromConfig =
@@ -54,14 +63,13 @@ export const renderDocumentSlots: (args: {
   const hasDescription = CustomDescription || staticDescription
 
   if (hasDescription) {
-    components.Description = (
-      <RenderServerComponent
-        clientProps={{ description: staticDescription }}
-        Component={CustomDescription}
-        Fallback={ViewDescription}
-        importMap={req.payload.importMap}
-      />
-    )
+    components.Description = RenderServerComponent({
+      clientProps: { description: staticDescription },
+      Component: CustomDescription,
+      Fallback: ViewDescription,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
   }
 
   if (hasSavePermission) {
@@ -71,12 +79,11 @@ export const renderDocumentSlots: (args: {
         globalConfig?.admin?.components?.elements?.PublishButton
 
       if (CustomPublishButton) {
-        components.PublishButton = (
-          <RenderServerComponent
-            Component={CustomPublishButton}
-            importMap={req.payload.importMap}
-          />
-        )
+        components.PublishButton = RenderServerComponent({
+          Component: CustomPublishButton,
+          importMap: req.payload.importMap,
+          serverProps,
+        })
       }
       const CustomSaveDraftButton =
         collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
@@ -87,12 +94,11 @@ export const renderDocumentSlots: (args: {
         (globalConfig?.versions?.drafts && !globalConfig?.versions?.drafts?.autosave)
 
       if ((draftsEnabled || unsavedDraftWithValidations) && CustomSaveDraftButton) {
-        components.SaveDraftButton = (
-          <RenderServerComponent
-            Component={CustomSaveDraftButton}
-            importMap={req.payload.importMap}
-          />
-        )
+        components.SaveDraftButton = RenderServerComponent({
+          Component: CustomSaveDraftButton,
+          importMap: req.payload.importMap,
+          serverProps,
+        })
       }
     } else {
       const CustomSaveButton =
@@ -100,9 +106,11 @@ export const renderDocumentSlots: (args: {
         globalConfig?.admin?.components?.elements?.SaveButton
 
       if (CustomSaveButton) {
-        components.SaveButton = (
-          <RenderServerComponent Component={CustomSaveButton} importMap={req.payload.importMap} />
-        )
+        components.SaveButton = RenderServerComponent({
+          Component: CustomSaveButton,
+          importMap: req.payload.importMap,
+          serverProps,
+        })
       }
     }
   }

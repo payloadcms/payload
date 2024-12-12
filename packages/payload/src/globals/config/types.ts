@@ -14,11 +14,13 @@ import type {
   EntityDescription,
   EntityDescriptionComponent,
   GeneratePreviewURL,
+  LabelFunction,
   LivePreviewConfig,
   MetaConfig,
+  StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { Field, FlattenedField } from '../../fields/config/types.js'
 import type { GlobalSlug, RequestContext, TypedGlobal, TypedGlobalSelect } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
@@ -115,9 +117,12 @@ export type GlobalAdminOptions = {
    */
   description?: EntityDescription
   /**
-   * Place globals into a navigational group
-   * */
-  group?: Record<string, string> | string
+   * Specify a navigational group for globals in the admin sidebar.
+   * - Provide a string to place the entity in a custom group.
+   * - Provide a record to define localized group names.
+   * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
+   */
+  group?: false | Record<string, string> | string
   /**
    * Exclude the global from the admin nav and routes
    */
@@ -165,7 +170,7 @@ export type GlobalConfig = {
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
   }
-  label?: Record<string, string> | string
+  label?: LabelFunction | StaticLabel
   /**
    * Enables / Disables the ability to lock documents while editing
    * @default true
@@ -191,7 +196,14 @@ export type GlobalConfig = {
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
   endpoints: Endpoint[] | false
+
   fields: Field[]
+
+  /**
+   * Fields in the database schema structure
+   * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
+   */
+  flattenedFields: FlattenedField[]
   slug: GlobalSlug
   versions: SanitizedGlobalVersions
 }

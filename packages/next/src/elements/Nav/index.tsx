@@ -59,13 +59,28 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
 
   const navPreferences = await getNavPrefs({ payload, user })
 
+  const LogoutComponent = RenderServerComponent({
+    Component: logout?.Button,
+    Fallback: Logout,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
-        <RenderServerComponent
-          Component={beforeNavLinks}
-          importMap={payload.importMap}
-          serverProps={{
+        {RenderServerComponent({
+          Component: beforeNavLinks,
+          importMap: payload.importMap,
+          serverProps: {
             i18n,
             locale,
             params,
@@ -73,13 +88,13 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
             permissions,
             searchParams,
             user,
-          }}
-        />
+          },
+        })}
         <DefaultNavClient groups={groups} navPreferences={navPreferences} />
-        <RenderServerComponent
-          Component={afterNavLinks}
-          importMap={payload.importMap}
-          serverProps={{
+        {RenderServerComponent({
+          Component: afterNavLinks,
+          importMap: payload.importMap,
+          serverProps: {
             i18n,
             locale,
             params,
@@ -87,24 +102,9 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
             permissions,
             searchParams,
             user,
-          }}
-        />
-        <div className={`${baseClass}__controls`}>
-          <RenderServerComponent
-            Component={logout?.Button}
-            Fallback={Logout}
-            importMap={payload.importMap}
-            serverProps={{
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
-            }}
-          />
-        </div>
+          },
+        })}
+        <div className={`${baseClass}__controls`}>{LogoutComponent}</div>
       </nav>
       <div className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-content`}>

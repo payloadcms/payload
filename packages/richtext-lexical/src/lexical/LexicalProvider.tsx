@@ -26,7 +26,14 @@ export type LexicalProviderProps = {
   value: SerializedEditorState
 }
 
-const NestProviders = ({ children, providers }) => {
+const NestProviders = ({
+  children,
+  providers,
+}: {
+  children: React.ReactNode
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  providers: any[]
+}) => {
   if (!providers?.length) {
     return children
   }
@@ -59,13 +66,13 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
     if (value && Array.isArray(value) && !('root' in value)) {
       throw new Error(
-        'You have tried to pass in data from the old Slate editor to the new Lexical editor. The data structure is different, thus you will have to migrate your data. We offer a one-line migration script which migrates all your rich text fields: https://payloadcms.com/docs/beta/lexical/migration#migration-via-migration-script-recommended',
+        'You have tried to pass in data from the old Slate editor to the new Lexical editor. The data structure is different, thus you will have to migrate your data. We offer a one-line migration script which migrates all your rich text fields: https://payloadcms.com/docs/lexical/migration#migration-via-migration-script-recommended',
       )
     }
 
     if (value && 'jsonContent' in value) {
       throw new Error(
-        'You have tried to pass in data from payload-plugin-lexical. The data structure is different, thus you will have to migrate your data. Migration guide: https://payloadcms.com/docs/beta/lexical/migration#migrating-from-payload-plugin-lexical',
+        'You have tried to pass in data from payload-plugin-lexical. The data structure is different, thus you will have to migrate your data. Migration guide: https://payloadcms.com/docs/lexical/migration#migrating-from-payload-plugin-lexical',
       )
     }
 

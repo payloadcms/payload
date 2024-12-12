@@ -895,7 +895,12 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
   return true
 }
 
-export default {
+/**
+ * Built-in field validations used by Payload
+ *
+ * These can be re-used in custom validations
+ */
+export const validations = {
   array,
   blocks,
   checkbox,

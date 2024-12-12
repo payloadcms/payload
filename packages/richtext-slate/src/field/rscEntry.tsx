@@ -4,10 +4,11 @@ import type {
   Field,
   FieldPaths,
   RichTextFieldClient,
- ServerComponentProps } from 'payload'
+  ServerComponentProps,
+} from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { createClientFields, deepCopyObjectSimple } from 'payload'
+import { createClientFields } from 'payload'
 import React from 'react'
 
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from '../types.js'
@@ -56,31 +57,31 @@ export const RscEntrySlateField: React.FC<
 
       componentMap.set(
         `leaf.button.${leafObject.name}`,
-        <RenderServerComponent
-          clientProps={clientProps}
-          Component={LeafButton}
-          importMap={payload.importMap}
-        />,
+        RenderServerComponent({
+          clientProps,
+          Component: LeafButton,
+          importMap: payload.importMap,
+        }),
       )
 
       componentMap.set(
         `leaf.component.${leafObject.name}`,
-        <RenderServerComponent
-          clientProps={clientProps}
-          Component={LeafComponent}
-          importMap={payload.importMap}
-        />,
+        RenderServerComponent({
+          clientProps,
+          Component: LeafComponent,
+          importMap: payload.importMap,
+        }),
       )
 
       if (Array.isArray(leafObject.plugins)) {
         leafObject.plugins.forEach((Plugin, i) => {
           componentMap.set(
             `leaf.plugin.${leafObject.name}.${i}`,
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={Plugin}
-              importMap={payload.importMap}
-            />,
+            RenderServerComponent({
+              clientProps,
+              Component: Plugin,
+              importMap: payload.importMap,
+            }),
           )
         })
       }
@@ -102,42 +103,38 @@ export const RscEntrySlateField: React.FC<
       if (ElementButton) {
         componentMap.set(
           `element.button.${element.name}`,
-          <RenderServerComponent
-            clientProps={clientProps}
-            Component={ElementButton}
-            importMap={payload.importMap}
-          />,
+          RenderServerComponent({
+            clientProps,
+            Component: ElementButton,
+            importMap: payload.importMap,
+          }),
         )
       }
       componentMap.set(
         `element.component.${element.name}`,
-        <RenderServerComponent
-          clientProps={clientProps}
-          Component={ElementComponent}
-          importMap={payload.importMap}
-        />,
+        RenderServerComponent({
+          clientProps,
+          Component: ElementComponent,
+          importMap: payload.importMap,
+        }),
       )
 
       if (Array.isArray(element.plugins)) {
         element.plugins.forEach((Plugin, i) => {
           componentMap.set(
             `element.plugin.${element.name}.${i}`,
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={Plugin}
-              importMap={payload.importMap}
-            />,
+            RenderServerComponent({
+              clientProps,
+              Component: Plugin,
+              importMap: payload.importMap,
+            }),
           )
         })
       }
 
       switch (element.name) {
         case 'link': {
-          let clientFields = deepCopyObjectSimple(
-            args.admin?.link?.fields,
-          ) as unknown as ClientField[]
-          clientFields = createClientFields({
-            clientFields,
+          const clientFields = createClientFields({
             defaultIDType: payload.config.db.defaultIDType,
             fields: args.admin?.link?.fields as Field[],
             i18n,
@@ -165,11 +162,7 @@ export const RscEntrySlateField: React.FC<
 
           uploadEnabledCollections.forEach((collection) => {
             if (args?.admin?.upload?.collections[collection.slug]?.fields) {
-              let clientFields = deepCopyObjectSimple(
-                args?.admin?.upload?.collections[collection.slug]?.fields,
-              ) as unknown as ClientField[]
-              clientFields = createClientFields({
-                clientFields,
+              const clientFields = createClientFields({
                 defaultIDType: payload.config.db.defaultIDType,
                 fields: args?.admin?.upload?.collections[collection.slug]?.fields,
                 i18n,

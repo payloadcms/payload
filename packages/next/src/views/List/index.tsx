@@ -23,6 +23,7 @@ type ListViewArgs = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections: boolean
+  overrideEntityVisibility?: boolean
   query: ListQuery
 } & AdminViewProps
 
@@ -39,6 +40,7 @@ export const renderListView = async (
     drawerSlug,
     enableRowSelections,
     initPageResult,
+    overrideEntityVisibility,
     params,
     query: queryFromArgs,
     searchParams,
@@ -111,7 +113,7 @@ export const renderListView = async (
   } = config
 
   if (collectionConfig) {
-    if (!visibleEntities.collections.includes(collectionSlug)) {
+    if (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) {
       throw new Error('not-found')
     }
 
@@ -169,13 +171,13 @@ export const renderListView = async (
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
     const { columnState, Table } = renderTable({
-      collectionConfig: clientCollectionConfig,
+      clientCollectionConfig,
+      collectionConfig,
       columnPreferences: listPreferences?.columns,
       customCellProps,
       docs: data.docs,
       drawerSlug,
       enableRowSelections,
-      fields,
       i18n: req.i18n,
       payload,
       useAsTitle,
@@ -243,18 +245,18 @@ export const renderListView = async (
             modifySearchParams={!isInDrawer}
             preferenceKey={preferenceKey}
           >
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={collectionConfig?.admin?.components?.views?.list?.Component}
-              Fallback={DefaultListView}
-              importMap={payload.importMap}
-              serverProps={{
+            {RenderServerComponent({
+              clientProps,
+              Component: collectionConfig?.admin?.components?.views?.list?.Component,
+              Fallback: DefaultListView,
+              importMap: payload.importMap,
+              serverProps: {
                 ...sharedServerProps,
                 data,
                 listPreferences,
                 listSearchableFields: collectionConfig.admin.listSearchableFields,
-              }}
-            />
+              },
+            })}
           </ListQueryProvider>
         </Fragment>
       ),

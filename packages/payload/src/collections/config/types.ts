@@ -31,7 +31,13 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
-import type { Field, JoinField, RelationshipField, UploadField } from '../../fields/config/types.js'
+import type {
+  Field,
+  FlattenedField,
+  JoinField,
+  RelationshipField,
+  UploadField,
+} from '../../fields/config/types.js'
 import type {
   CollectionSlug,
   JsonObject,
@@ -329,9 +335,12 @@ export type CollectionAdminOptions = {
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
-   * Place collections into a navigational group
-   * */
-  group?: Record<string, string> | string
+   * Specify a navigational group for collections in the admin sidebar.
+   * - Provide a string to place the entity in a custom group.
+   * - Provide a record to define localized group names.
+   * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
+   */
+  group?: false | Record<string, string> | string
   /**
    * Exclude the collection from the admin nav and routes
    */
@@ -525,11 +534,18 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
-  slug: CollectionSlug
+
+  /**
+   * Fields in the database schema structure
+   * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
+   */
+  flattenedFields: FlattenedField[]
+
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+  slug: CollectionSlug
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }

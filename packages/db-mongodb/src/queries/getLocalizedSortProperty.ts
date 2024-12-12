@@ -1,11 +1,10 @@
-import type { Field, SanitizedConfig } from 'payload'
+import type { FlattenedField, SanitizedConfig } from 'payload'
 
-import { flattenTopLevelFields } from 'payload'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
-  fields: Field[]
+  fields: FlattenedField[]
   locale: string
   result?: string
   segments: string[]
@@ -13,7 +12,7 @@ type Args = {
 
 export const getLocalizedSortProperty = ({
   config,
-  fields: incomingFields,
+  fields,
   locale,
   result: incomingResult,
   segments: incomingSegments,
@@ -23,9 +22,6 @@ export const getLocalizedSortProperty = ({
   if (!config.localization) {
     return incomingSegments.join('.')
   }
-
-  // Flatten incoming fields (row, etc)
-  const fields = flattenTopLevelFields(incomingFields)
 
   const segments = [...incomingSegments]
 
@@ -38,7 +34,7 @@ export const getLocalizedSortProperty = ({
   )
 
   if (matchedField && !fieldIsPresentationalOnly(matchedField)) {
-    let nextFields: Field[]
+    let nextFields: FlattenedField[]
     const remainingSegments = [...segments]
     let localizedSegment = matchedField.name
 
@@ -65,14 +61,14 @@ export const getLocalizedSortProperty = ({
       matchedField.type === 'group' ||
       matchedField.type === 'array'
     ) {
-      nextFields = matchedField.fields
+      nextFields = matchedField.flattenedFields
     }
 
     if (matchedField.type === 'blocks') {
       nextFields = matchedField.blocks.reduce((flattenedBlockFields, block) => {
         return [
           ...flattenedBlockFields,
-          ...block.fields.filter(
+          ...block.flattenedFields.filter(
             (blockField) =>
               (fieldAffectsData(blockField) &&
                 blockField.name !== 'blockType' &&

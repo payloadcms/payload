@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Nadpis {{headingLevel}}',
   },
+  da: {
+    label: 'Overskrift {{overskriftNiveau}}',
+  },
   de: {
     label: 'Überschrift {{headingLevel}}',
   },
@@ -65,7 +68,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Titlu {{headingLevel}}',
   },
   rs: {
-    label: 'Naslov {{headingLevel}}',
+    label: 'Наслов {{headingLevel}}',
   },
   'rs-latin': {
     label: 'Naslov {{headingLevel}}',
