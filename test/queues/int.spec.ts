@@ -925,4 +925,130 @@ describe('Queues', () => {
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0].title).toBe('externalWorkflow')
   })
+
+  it('ensure payload.jobs.runByID works and only runs the specified job', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    let lastJobID: string = null
+    for (let i = 0; i < 3; i++) {
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+      lastJobID = job.id
+    }
+
+    await payload.jobs.runByID({
+      id: lastJobID,
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task')
+
+    const allCompletedJobs = await payload.find({
+      collection: 'payload-jobs',
+      limit: 100,
+      where: {
+        completedAt: {
+          exists: true,
+        },
+      },
+    })
+
+    expect(allCompletedJobs.totalDocs).toBe(1)
+    expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
+  })
+
+  it('ensure where query for id in payload.jobs.run works and only runs the specified job', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    let lastJobID: string = null
+    for (let i = 0; i < 3; i++) {
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+      lastJobID = job.id
+    }
+
+    await payload.jobs.run({
+      where: {
+        id: {
+          equals: lastJobID,
+        },
+      },
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task')
+
+    const allCompletedJobs = await payload.find({
+      collection: 'payload-jobs',
+      limit: 100,
+      where: {
+        completedAt: {
+          exists: true,
+        },
+      },
+    })
+
+    expect(allCompletedJobs.totalDocs).toBe(1)
+    expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
+  })
+
+  it('ensure where query for input data in payload.jobs.run works and only runs the specified job', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    for (let i = 0; i < 3; i++) {
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: `from single task ${i}`,
+        },
+      })
+    }
+
+    await payload.jobs.run({
+      where: {
+        'input.message': {
+          equals: 'from single task 2',
+        },
+      },
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task 2')
+
+    const allCompletedJobs = await payload.find({
+      collection: 'payload-jobs',
+      limit: 100,
+      where: {
+        completedAt: {
+          exists: true,
+        },
+      },
+    })
+
+    expect(allCompletedJobs.totalDocs).toBe(1)
+    expect((allCompletedJobs.docs[0].input as any).message).toBe('from single task 2')
+  })
 })

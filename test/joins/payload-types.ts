@@ -21,7 +21,9 @@ export interface Config {
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     'restricted-categories': RestrictedCategory;
+    'categories-join-restricted': CategoriesJoinRestricted;
     'restricted-posts': RestrictedPost;
+    'collection-restricted': CollectionRestricted;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -51,6 +53,9 @@ export interface Config {
     'restricted-categories': {
       restrictedPosts: 'posts';
     };
+    'categories-join-restricted': {
+      collectionRestrictedJoin: 'collection-restricted';
+    };
   };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -63,7 +68,9 @@ export interface Config {
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'localized-categories': LocalizedCategoriesSelect<false> | LocalizedCategoriesSelect<true>;
     'restricted-categories': RestrictedCategoriesSelect<false> | RestrictedCategoriesSelect<true>;
+    'categories-join-restricted': CategoriesJoinRestrictedSelect<false> | CategoriesJoinRestrictedSelect<true>;
     'restricted-posts': RestrictedPostsSelect<false> | RestrictedPostsSelect<true>;
+    'collection-restricted': CollectionRestrictedSelect<false> | CollectionRestrictedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -280,6 +287,32 @@ export interface RestrictedCategory {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-join-restricted".
+ */
+export interface CategoriesJoinRestricted {
+  id: string;
+  name?: string | null;
+  collectionRestrictedJoin?: {
+    docs?: (string | CollectionRestricted)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-restricted".
+ */
+export interface CollectionRestricted {
+  id: string;
+  title?: string | null;
+  canRead?: boolean | null;
+  category?: (string | null) | RestrictedCategory;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "restricted-posts".
  */
 export interface RestrictedPost {
@@ -355,8 +388,16 @@ export interface PayloadLockedDocument {
         value: string | RestrictedCategory;
       } | null)
     | ({
+        relationTo: 'categories-join-restricted';
+        value: string | CategoriesJoinRestricted;
+      } | null)
+    | ({
         relationTo: 'restricted-posts';
         value: string | RestrictedPost;
+      } | null)
+    | ({
+        relationTo: 'collection-restricted';
+        value: string | CollectionRestricted;
       } | null)
     | ({
         relationTo: 'users';
@@ -538,11 +579,32 @@ export interface RestrictedCategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-join-restricted_select".
+ */
+export interface CategoriesJoinRestrictedSelect<T extends boolean = true> {
+  name?: T;
+  collectionRestrictedJoin?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "restricted-posts_select".
  */
 export interface RestrictedPostsSelect<T extends boolean = true> {
   title?: T;
   restrictedField?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-restricted_select".
+ */
+export interface CollectionRestrictedSelect<T extends boolean = true> {
+  title?: T;
+  canRead?: T;
   category?: T;
   updatedAt?: T;
   createdAt?: T;

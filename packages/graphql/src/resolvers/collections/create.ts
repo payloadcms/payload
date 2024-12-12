@@ -30,15 +30,13 @@ export function createResolver<TSlug extends CollectionSlug>(
       context.req.locale = args.locale
     }
 
-    const options = {
+    const result = await createOperation({
       collection,
       data: args.data,
       depth: 0,
       draft: args.draft,
       req: isolateObjectProperty(context.req, 'transactionID'),
-    }
-
-    const result = await createOperation(options)
+    })
 
     return result
   }

@@ -134,6 +134,33 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
+  tests-types:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Types Tests
+        run: pnpm test:types --target '>=5.7'
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+
   tests-int:
     runs-on: ubuntu-24.04
     needs: [changes, build]
@@ -465,9 +492,12 @@ jobs:
     needs:
       - lint
       - build
+      - build-templates
       - tests-unit
       - tests-int
       - tests-e2e
+      - tests-types
+      - tests-type-generation
 
     steps:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
