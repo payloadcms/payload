@@ -60,7 +60,14 @@ export type TaskHandlerResults = {
 // Helper type to create correct argument type for the function corresponding to each task.
 export type RunTaskFunctionArgs<TTaskSlug extends keyof TypedJobs['tasks']> = {
   input?: TaskInput<TTaskSlug>
-  retries?: number | RetryConfig
+  /**
+   * Specify the number of times that this task should be retried if it fails for any reason.
+   * If this is undefined, the task will either inherit the retries from the workflow or have no retries.
+   * If this is 0, the task will not be retried.
+   *
+   * @default By default, tasks are not retried and `retries` is `undefined`.
+   */
+  retries?: number | RetryConfig | undefined
 }
 
 export type RunTaskFunction<TTaskSlug extends keyof TypedJobs['tasks']> = (
@@ -76,7 +83,14 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
   taskID: string,
   taskArgs: {
     input?: TTaskInput
-    retries?: number | RetryConfig
+    /**
+     * Specify the number of times that this task should be retried if it fails for any reason.
+     * If this is undefined, the task will either inherit the retries from the workflow or have no retries.
+     * If this is 0, the task will not be retried.
+     *
+     * @default By default, tasks are not retried and `retries` is `undefined`.
+     */
+    retries?: number | RetryConfig | undefined
     // This is the same as TaskHandler, but typed out explicitly in order to improve type inference
     task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
       | {
@@ -133,7 +147,8 @@ export type TaskConfig<
    * You can either pass a string-based path to the job function file, or the job function itself.
    *
    * If you are using large dependencies within your job, you might prefer to pass the string path
-   * because that will avoid bundling large dependencies in your Next.js app.
+   * because that will avoid bundling large dependencies in your Next.js app. Passing a string path is an advanced feature
+   * that may require a sophisticated build pipeline in order to work.
    */
   handler: string | TaskHandler<TTaskSlugOrInputOutput>
   /**
@@ -162,8 +177,12 @@ export type TaskConfig<
   outputSchema?: Field[]
   /**
    * Specify the number of times that this step should be retried if it fails.
+   * If this is undefined, the task will either inherit the retries from the workflow or have no retries.
+   * If this is 0, the task will not be retried.
+   *
+   * @default By default, tasks are not retried and `retries` is `undefined`.
    */
-  retries?: number | RetryConfig
+  retries?: number | RetryConfig | undefined
   /**
    * Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.
    */

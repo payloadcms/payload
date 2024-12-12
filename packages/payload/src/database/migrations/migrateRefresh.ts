@@ -37,7 +37,8 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
         payload.logger.info({ msg: `Migrating down: ${migration.name}` })
         const start = Date.now()
         await initTransaction(req)
-        await migrationFile.down({ payload, req })
+        const session = payload.db.sessions?.[await req.transactionID]
+        await migrationFile.down({ payload, req, session })
         payload.logger.info({
           msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)`,
         })

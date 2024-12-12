@@ -68,7 +68,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Încarcă',
   },
   rs: {
-    label: 'Otpremi',
+    label: 'Отпреми',
   },
   'rs-latin': {
     label: 'Otpremi',

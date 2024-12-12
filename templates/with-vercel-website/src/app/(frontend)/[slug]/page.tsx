@@ -13,6 +13,7 @@ import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
+import { LivePreviewListener } from '@/components/LivePreviewListener'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -48,7 +49,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   const { slug = 'home' } = await paramsPromise
   const url = '/' + slug
 
-  let page: Pick<PageType, 'slug' | 'layout' | 'hero'> | null
+  let page: PageType | null
 
   page = await queryPageBySlug({
     slug,
@@ -70,6 +71,8 @@ export default async function Page({ params: paramsPromise }: Args) {
       <PageClient />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
+
+      <LivePreviewListener />
 
       <RenderHero {...hero} />
       <RenderBlocks blocks={layout} />
@@ -97,11 +100,6 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
     limit: 1,
     pagination: false,
     overrideAccess: draft,
-    select: {
-      slug: true,
-      hero: true,
-      layout: true,
-    },
     where: {
       slug: {
         equals: slug,

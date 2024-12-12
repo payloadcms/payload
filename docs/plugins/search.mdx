@@ -6,7 +6,7 @@ desc: Generates records of your documents that are extremely fast to search on.
 keywords: plugins, search, search plugin, search engine, search index, search results, search bar, search box, search field, search form, search input
 ---
 
-[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-search)](https://www.npmjs.com/package/@payloadcms/plugin-search)
+[![npm](https://img.shields.io/npm/v/@payloadcms/plugin-search)](https://www.npmjs.com/package/@payloadcms/plugin-search)
 
 This plugin generates records of your documents that are extremely fast to search on. It does so by creating a new `search` collection that is indexed in the database then saving a static copy of each of your documents using only search-critical data. Search records are automatically created, synced, and deleted behind-the-scenes as you manage your application's documents.
 
@@ -33,10 +33,11 @@ This plugin is a great way to implement a fast, immersive search experience such
 - Allows you to query search results using first-party Payload APIs
 - Allows you to query documents without triggering any of their underlying hooks
 - Allows you to easily prioritize search results by collection or document
+- Allows you to reindex search results by collection on demand
 
 ## Installation
 
-Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
 
 ```bash
   pnpm add @payloadcms/plugin-search
@@ -81,7 +82,7 @@ export default config
 
 The `collections` property is an array of collection slugs to enable syncing to search. Enabled collections receive a `beforeChange` and `afterDelete` hook that creates, updates, and deletes its respective search record as it changes over time.
 
-### `localize`
+#### `localize`
 
 By default, the search plugin will add `localization: true` to the `title` field of the newly added `search` collection if you have localization enabled. If you would like to disable this behavior, you can set this to `false`.
 
@@ -158,6 +159,14 @@ When `syncDrafts` is true, draft documents will be synced to search. This is fal
 #### `deleteDrafts`
 
 If true, will delete documents from search whose status changes to draft. This is true by default. You must have [Payload Drafts](https://payloadcms.com/docs/versions/drafts) enabled for this to apply.
+
+#### `reindexBatchSize`
+
+A number that, when specified, will be used as the value to determine how many search documents to fetch for reindexing at a time in each batch. If not set, this will default to `50`.
+
+### Collection reindexing
+
+Collection reindexing allows you to recreate search documents from your search-enabled collections on demand. This is useful if you have existing documents that don't already have search indexes, commonly when adding `plugin-search` to an existing project. To get started, navigate to your search collection and click the pill in the top right actions slot of the list view labelled `Reindex`. This will open a popup with options to select one of your search-enabled collections, or all, for reindexing.
 
 ## TypeScript
 

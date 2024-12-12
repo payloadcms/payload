@@ -14,6 +14,7 @@ import React, { useCallback, useEffect, useReducer, useRef, useState } from 'rea
 import { toast } from 'sonner'
 
 import type {
+  CreateFormData,
   Context as FormContextType,
   FormProps,
   GetDataByPath,
@@ -174,7 +175,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const {
         action: actionArg = action,
         method: methodToUse = method,
-        overrides = {},
+        overrides: overridesFromArgs = {},
         skipValidation,
       } = options
 
@@ -263,6 +264,14 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
+      let overrides = {}
+
+      if (typeof overridesFromArgs === 'function') {
+        overrides = overridesFromArgs(contextRef.current.fields)
+      } else if (typeof overridesFromArgs === 'object') {
+        overrides = overridesFromArgs
+      }
+
       // If submit handler comes through via props, run that
       if (onSubmit) {
         const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
@@ -270,10 +279,8 @@ export const Form: React.FC<FormProps> = (props) => {
         )
         const data = reduceFieldsToValues(serializableFields, true)
 
-        if (overrides) {
-          for (const [key, value] of Object.entries(overrides)) {
-            data[key] = value
-          }
+        for (const [key, value] of Object.entries(overrides)) {
+          data[key] = value
         }
 
         onSubmit(serializableFields, data)
@@ -288,7 +295,9 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
-      const formData = contextRef.current.createFormData(overrides)
+      const formData = contextRef.current.createFormData(overrides, {
+        mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
+      })
 
       try {
         let res
@@ -443,9 +452,8 @@ export const Form: React.FC<FormProps> = (props) => {
     [],
   )
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const createFormData = useCallback((overrides: any = {}) => {
-    const data = reduceFieldsToValues(contextRef.current.fields, true)
+  const createFormData = useCallback<CreateFormData>((overrides, { mergeOverrideData = true }) => {
+    let data = reduceFieldsToValues(contextRef.current.fields, true)
 
     const file = data?.file
 
@@ -453,13 +461,17 @@ export const Form: React.FC<FormProps> = (props) => {
       delete data.file
     }
 
-    const dataWithOverrides = {
-      ...data,
-      ...overrides,
+    if (mergeOverrideData) {
+      data = {
+        ...data,
+        ...overrides,
+      }
+    } else {
+      data = overrides
     }
 
     const dataToSerialize = {
-      _payload: JSON.stringify(dataWithOverrides),
+      _payload: JSON.stringify(data),
       file,
     }
 
@@ -485,6 +497,7 @@ export const Form: React.FC<FormProps> = (props) => {
         docPermissions,
         docPreferences,
         globalSlug,
+        locale,
         operation,
         renderAllFields: true,
         schemaPath: collectionSlug ? collectionSlug : globalSlug,
@@ -504,6 +517,7 @@ export const Form: React.FC<FormProps> = (props) => {
       getFormState,
       docPermissions,
       getDocPreferences,
+      locale,
     ],
   )
 

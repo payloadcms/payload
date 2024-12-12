@@ -23,11 +23,12 @@ env:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pull-requests: read
     outputs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
+      needs_tests: ${{ steps.filter.outputs.needs_tests }}
       templates: ${{ steps.filter.outputs.templates }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
@@ -35,8 +36,6 @@ jobs:
         run: sudo ethtool -K eth0 tx off rx off
 
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -48,53 +47,36 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
+            needs_tests:
+              - '.github/workflows/**'
+              - 'packages/**'
+              - 'test/**'
+              - 'pnpm-lock.yaml'
+              - 'package.json'
             templates:
               - 'templates/**'
       - name: Log all filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
+          echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
   lint:
     if: >
       github.event_name == 'pull_request' && !contains(github.event.pull_request.title, 'no-lint') && !contains(github.event.pull_request.title, 'skip-lint')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
-
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        timeout-minutes: 720
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
-            pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - run: pnpm install
       - name: Lint staged
         run: |
           git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...${GITHUB_SHA}
@@ -103,78 +85,46 @@ jobs:
   build:
     needs: changes
     if: ${{ needs.changes.outputs.needs_build == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
 
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
-
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        timeout-minutes: 720
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
-            pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - run: pnpm install
       - run: pnpm run build:all
         env:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 
       - name: Cache build
         uses: actions/cache@v4
-        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
   tests-unit:
-    runs-on: ubuntu-latest
-    needs: build
-
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v4
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
-        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -184,9 +134,37 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
+  tests-types:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Types Tests
+        run: pnpm test:types --target '>=5.7'
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+
   tests-int:
-    runs-on: ubuntu-latest
-    needs: build
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: int-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -222,24 +200,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Restore build
+        uses: actions/cache@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - run: pnpm install
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -274,15 +249,22 @@ jobs:
         if: matrix.database == 'supabase'
 
       - name: Integration Tests
-        run: pnpm test:int
+        uses: nick-fields/retry@v3
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
+        with:
+          retry_on: any
+          max_attempts: 5
+          timeout_minutes: 15
+          command: pnpm test:int
+          on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile
 
   tests-e2e:
-    runs-on: ubuntu-latest
-    needs: build
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     name: e2e-${{ matrix.suite }}
     strategy:
       fail-fast: false
@@ -325,24 +307,19 @@ jobs:
     env:
       SUITE_NAME: ${{ matrix.suite }}
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v4
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
-        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -374,7 +351,13 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
+        uses: nick-fields/retry@v3
+        with:
+          retry_on: any
+          max_attempts: 5
+          timeout_minutes: 20
+          command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
+          on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile && pnpm build:all
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
           NEXT_TELEMETRY_DISABLED: 1
@@ -396,7 +379,7 @@ jobs:
 
   # Build listed templates with packed local packages
   build-templates:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     strategy:
       matrix:
@@ -427,24 +410,19 @@ jobs:
       POSTGRES_DB: payloadtests
 
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v4
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
-        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -480,28 +458,23 @@ jobs:
           pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }} $POSTGRES_URL
 
   tests-type-generation:
-    runs-on: ubuntu-latest
-    needs: build
-
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v4
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Restore build
         uses: actions/cache@v4
-        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -515,13 +488,16 @@ jobs:
   all-green:
     name: All Green
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - lint
       - build
+      - build-templates
       - tests-unit
       - tests-int
       - tests-e2e
+      - tests-types
+      - tests-type-generation
 
     steps:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
@@ -529,7 +505,7 @@ jobs:
 
   publish-canary:
     name: Publish Canary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
     needs:
       - all-green

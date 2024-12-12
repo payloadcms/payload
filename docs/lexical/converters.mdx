@@ -10,20 +10,24 @@ Lexical saves data in JSON - this is great for storage and flexibility and allow
 
 ## Lexical => JSX
 
-If you have a React-based frontend, converting lexical to JSX is the recommended way to render rich text content in your frontend. To do that, import the `RichText` component from `@payloadcms/richtext-lexical/react` and pass the lexical content to it:
+If your frontend uses React, converting Lexical to JSX is the recommended way to render rich text content. Import the `RichText` component from `@payloadcms/richtext-lexical/react` and pass the Lexical content to it:
 
 ```tsx
 import React from 'react'
 import { RichText } from '@payloadcms/richtext-lexical/react'
+import { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-export const MyComponent = ({ lexicalData }) => {
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
   return (
-    <RichText data={lexicalData} />
+    <RichText data={data} />
   )
 }
 ```
 
-The `RichText` component will come with the most common serializers built-in, though you can also pass in your own serializers if you need to.
+The `RichText` component includes built-in serializers for common Lexical nodes but allows customization through the `converters` prop.
+
+In our website template [you have an example](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) of how to use `converters` to render custom blocks.
+
 
 <Banner type="default">
   The JSX converter expects the input data to be fully populated. When fetching data, ensure the `depth` setting is high enough, to ensure that lexical nodes such as uploads are populated.

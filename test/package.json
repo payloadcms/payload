@@ -56,9 +56,9 @@
     "@payloadcms/ui": "workspace:*",
     "@sentry/nextjs": "^8.33.1",
     "@sentry/react": "^7.77.0",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
-    "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
+    "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
     "dotenv": "16.4.5",
@@ -68,21 +68,17 @@
     "file-type": "19.3.0",
     "http-status": "1.6.2",
     "jwt-decode": "4.0.0",
-    "mongoose": "8.8.1",
-    "next": "15.0.0",
+    "mongoose": "8.8.3",
+    "next": "15.0.3",
     "payload": "workspace:*",
     "qs-esm": "7.0.2",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "server-only": "^0.0.1",
     "slate": "0.91.4",
     "tempy": "^1.0.1",
     "ts-essentials": "10.0.3",
     "typescript": "5.7.2",
     "uuid": "10.0.0"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

@@ -32,6 +32,7 @@ export const Pages: CollectionConfig = {
         },
       },
     },
+    preview: (doc) => `/live-preview/${doc?.slug}`,
   },
   fields: [
     {

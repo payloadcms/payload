@@ -10,9 +10,9 @@ keywords: documentation, getting started, guide, Content Management System, cms,
 
 Payload requires the following software:
 
-- Any JavaScript package manager (Yarn, NPM, or pnpm - pnpm is preferred)
+- Any JavaScript package manager (pnpm, npm, or yarn - pnpm is preferred)
 - Node.js version 20.9.0+
-- Any [compatible database](/docs/database/overview) (MongoDB or Postgres)
+- Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
 <Banner type="warning">
   <strong>Important:</strong>
@@ -49,7 +49,7 @@ pnpm i payload @payloadcms/next @payloadcms/richtext-lexical sharp graphql
 
 <Banner type="warning">
   <strong>Note:</strong>
-  Swap out `pnpm` for your package manager. If you are using NPM, you might need to install using legacy peer deps: `npm i --legacy-peer-deps`.
+  Swap out `pnpm` for your package manager. If you are using npm, you might need to install using legacy peer deps: `npm i --legacy-peer-deps`.
 </Banner>
 
 Next, install a [Database Adapter](/docs/database/overview). Payload requires a Database Adapter to establish a database connection. Payload works with all types of databases, but the most common are MongoDB and Postgres.
@@ -181,6 +181,6 @@ Once you have a Payload Config, update your `tsconfig` to include a `path` that 
 
 #### 5. Fire it up!
 
-After you've reached this point, it's time to boot up Payload. Start your project in your application's folder to get going. By default, the Next.js dev script is `pnpm dev` (or `npm run dev` if using NPM).
+After you've reached this point, it's time to boot up Payload. Start your project in your application's folder to get going. By default, the Next.js dev script is `pnpm dev` (or `npm run dev` if using npm).
 
 After it starts, you can go to `http://localhost:3000/admin` to create your first Payload user!

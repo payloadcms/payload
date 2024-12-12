@@ -1076,4 +1076,37 @@ describe('database', () => {
 
     expect(relationBDocs.docs).toHaveLength(0)
   })
+
+  it('should upsert', async () => {
+    const postShouldCreated = await payload.db.upsert({
+      req: {},
+      collection: 'posts',
+      data: {
+        title: 'some-title-here',
+      },
+      where: {
+        title: {
+          equals: 'some-title-here',
+        },
+      },
+    })
+
+    expect(postShouldCreated).toBeTruthy()
+
+    const postShouldUpdated = await payload.db.upsert({
+      req: {},
+      collection: 'posts',
+      data: {
+        title: 'some-title-here',
+      },
+      where: {
+        title: {
+          equals: 'some-title-here',
+        },
+      },
+    })
+
+    // Should stay the same ID
+    expect(postShouldCreated.id).toBe(postShouldUpdated.id)
+  })
 })

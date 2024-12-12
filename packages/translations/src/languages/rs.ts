@@ -478,6 +478,6 @@ export const rsTranslations: DefaultTranslationsObject = {
 }
 
 export const rs: Language = {
-  dateFNSKey: 'en-US',
+  dateFNSKey: 'rs',
   translations: rsTranslations,
 }

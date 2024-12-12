@@ -134,10 +134,10 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} activ',
   },
   rs: {
-    placeholder: "Počnite da kucate, ili pritisnite '/' za komande...",
-    slashMenuBasicGroupLabel: 'Osnovno',
-    slashMenuListGroupLabel: 'Liste',
-    toolbarItemsActive: '{{count}} aktivno',
+    placeholder: "Почните да куцате, или притисните '/' за команде...",
+    slashMenuBasicGroupLabel: 'Основно',
+    slashMenuListGroupLabel: 'Листе',
+    toolbarItemsActive: '{{count}} активно',
   },
   'rs-latin': {
     placeholder: "Počnite da kucate, ili pritisnite '/' za komande...",

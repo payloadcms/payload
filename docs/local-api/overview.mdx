@@ -131,6 +131,9 @@ const post = await payload.create({
   // Alternatively, you can directly pass a File,
   // if file is provided, filePath will be omitted
   file: uploadedFile,
+
+  // If you want to create a document that is a duplicate of another document
+  duplicateFromID: 'document-id-to-duplicate',
 })
 ```
 
@@ -303,6 +306,27 @@ const result = await payload.delete({
 
 If a collection has [`Authentication`](/docs/authentication/overview) enabled, additional Local API operations will be
 available:
+
+### Auth
+
+```js
+// If you're using Next.js, you'll have to import headers from next/headers, like so:
+// import { headers as nextHeaders } from 'next/headers'
+
+// you'll also have to await headers inside your function, or component, like so:
+// const headers = await nextHeaders()
+
+// If you're using payload outside of Next.js, you'll have to provide headers accordingly.
+
+// result will be formatted as follows:
+// {
+//    permissions: { ... }, // object containing current user's permissions
+//    user: { ... }, // currently logged in user's document
+//    responseHeaders: { ... } // returned headers from the response
+// }
+
+const result = await payload.auth({headers})
+```
 
 ### Login
 

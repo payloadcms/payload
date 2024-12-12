@@ -3,27 +3,23 @@ import type { Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 
 import { exactText } from '../../helpers.js'
+import { openListColumns } from './openListColumns.js'
 
 export const toggleColumn = async (
   page: Page,
   {
-    togglerSelector = '.list-controls__toggle-columns',
-    columnContainerSelector = '.list-controls__columns',
+    togglerSelector,
+    columnContainerSelector,
     columnLabel,
+    targetState: targetStateFromArgs,
   }: {
     columnContainerSelector?: string
     columnLabel: string
+    targetState?: 'off' | 'on'
     togglerSelector?: string
   },
 ): Promise<any> => {
-  const columnContainer = page.locator(columnContainerSelector).first()
-  const isAlreadyOpen = await columnContainer.isVisible()
-
-  if (!isAlreadyOpen) {
-    await page.locator(togglerSelector).first().click()
-  }
-
-  await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
+  const columnContainer = await openListColumns(page, { togglerSelector, columnContainerSelector })
 
   const column = columnContainer.locator(`.column-selector .column-selector__column`, {
     hasText: exactText(columnLabel),
@@ -33,16 +29,24 @@ export const toggleColumn = async (
     el.classList.contains('column-selector__column--active'),
   )
 
+  const targetState =
+    targetStateFromArgs !== undefined ? targetStateFromArgs : isActiveBeforeClick ? 'off' : 'on'
+
   await expect(column).toBeVisible()
 
-  await column.click()
+  if (
+    (isActiveBeforeClick && targetState === 'off') ||
+    (!isActiveBeforeClick && targetState === 'on')
+  ) {
+    await column.click()
+  }
 
-  if (isActiveBeforeClick) {
+  if (targetState === 'off') {
     // no class
-    await expect(column).not.toHaveClass('column-selector__column--active')
+    await expect(column).not.toHaveClass(/column-selector__column--active/)
   } else {
     // has class
-    await expect(column).toHaveClass('column-selector__column--active')
+    await expect(column).toHaveClass(/column-selector__column--active/)
   }
 
   return column

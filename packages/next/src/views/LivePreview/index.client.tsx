@@ -256,7 +256,7 @@ const PreviewView: React.FC<Props> = ({
       operation,
       schemaPath,
       setDocumentIsLocked,
-      user.id,
+      user?.id,
       setCurrentEditor,
     ],
   )

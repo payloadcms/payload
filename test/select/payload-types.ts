@@ -79,6 +79,8 @@ export interface Post {
   id: string;
   text?: string | null;
   number?: number | null;
+  select?: ('a' | 'b') | null;
+  selectMany?: ('a' | 'b')[] | null;
   group?: {
     text?: string | null;
     number?: number | null;
@@ -125,6 +127,8 @@ export interface LocalizedPost {
   id: string;
   text?: string | null;
   number?: number | null;
+  select?: ('a' | 'b') | null;
+  selectMany?: ('a' | 'b')[] | null;
   group?: {
     text?: string | null;
     number?: number | null;
@@ -305,6 +309,22 @@ export interface Page {
     | null;
   slug: string;
   additional?: string | null;
+  array?:
+    | {
+        title?: string | null;
+        other?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        title?: string | null;
+        other?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'some';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -424,6 +444,8 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  select?: T;
+  selectMany?: T;
   group?:
     | T
     | {
@@ -475,6 +497,8 @@ export interface PostsSelect<T extends boolean = true> {
 export interface LocalizedPostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  select?: T;
+  selectMany?: T;
   group?:
     | T
     | {
@@ -649,6 +673,25 @@ export interface PagesSelect<T extends boolean = true> {
       };
   slug?: T;
   additional?: T;
+  array?:
+    | T
+    | {
+        title?: T;
+        other?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        some?:
+          | T
+          | {
+              title?: T;
+              other?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }

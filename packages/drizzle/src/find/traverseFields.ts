@@ -540,16 +540,16 @@ export const traverseFields = ({
       }
 
       case 'select': {
-        if (field.hasMany) {
-          if (select) {
-            if (
-              (selectMode === 'include' && !select[field.name]) ||
-              (selectMode === 'exclude' && select[field.name] === false)
-            ) {
-              break
-            }
+        if (select && !selectAllOnCurrentLevel) {
+          if (
+            (selectMode === 'include' && !select[field.name]) ||
+            (selectMode === 'exclude' && select[field.name] === false)
+          ) {
+            break
           }
+        }
 
+        if (field.hasMany) {
           const withSelect: Result = {
             columns: {
               id: false,
@@ -560,6 +560,17 @@ export const traverseFields = ({
           }
 
           currentArgs.with[`${path}${field.name}`] = withSelect
+          break
+        }
+
+        if (select || selectAllOnCurrentLevel) {
+          const fieldPath = `${path}${field.name}`
+
+          if ((field.localized || withinLocalizedField) && _locales) {
+            _locales.columns[fieldPath] = true
+          } else if (adapter.tables[currentTableName]?.[fieldPath]) {
+            currentArgs.columns[fieldPath] = true
+          }
         }
 
         break
