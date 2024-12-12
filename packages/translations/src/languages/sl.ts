@@ -13,7 +13,7 @@ export const slTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Za začetek ustvarite prvega uporabnika.',
     changePassword: 'Spremeni geslo',
     checkYourEmailForPasswordReset:
-      'Če je ta e-poštni naslov povezan z računom, boste kmalu prejeli navodila za ponastavitev gesla. Prosimo, da preverite mapo s spanjem, če e-pošte ne vidite v svojem nabiralniku.',
+      'Če je e-poštni naslov povezan z računom, boste kmalu prejeli navodila za ponastavitev gesla. Prosimo, preverite mapo za neželeno pošto ali spam, če e-pošte ne vidite v vašem prejemu.',
     confirmGeneration: 'Potrdi generiranje',
     confirmPassword: 'Potrdi geslo',
     createFirstUser: 'Ustvari prvega uporabnika',

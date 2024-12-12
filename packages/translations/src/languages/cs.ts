@@ -13,7 +13,7 @@ export const csTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Začněte vytvořením svého prvního uživatele.',
     changePassword: 'Změnit heslo',
     checkYourEmailForPasswordReset:
-      'Pokud je tento e-mail spojen s účtem, obdržíte instrukce k resetování hesla brzy. Pokud e-mail nevidíte ve své schránce, zkontrolujte prosím složku se spamem.',
+      'Pokud je e-mailová adresa spojena s účtem, brzy obdržíte pokyny k resetování vašeho hesla. Pokud e-mail nenajdete ve vaší doručené poště, zkontrolujte prosím složku se spamem nebo nevyžádanou poštou.',
     confirmGeneration: 'Potvrdit generaci',
     confirmPassword: 'Potvrdit heslo',
     createFirstUser: 'Vytvořit prvního uživatele',

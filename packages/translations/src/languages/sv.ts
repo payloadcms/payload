@@ -13,7 +13,7 @@ export const svTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'För att börja, skapa din första användare.',
     changePassword: 'Byt Lösenord',
     checkYourEmailForPasswordReset:
-      'Om denna e-postadress är kopplad till ett konto, får du snart instruktioner för att återställa ditt lösenord. Vänligen kontrollera mappen med skräppost om du inte ser e-posten i din inkorg.',
+      'Om e-postadressen är kopplad till ett konto kommer du inom kort att få instruktioner för att återställa ditt lösenord. Vänligen kontrollera din skräppost eller junk mail-mapp om du inte ser e-postmeddelandet i din inkorg.',
     confirmGeneration: 'Bekräfta Generering',
     confirmPassword: 'Bekräfta Lösenord',
     createFirstUser: 'Skapa första användaren',

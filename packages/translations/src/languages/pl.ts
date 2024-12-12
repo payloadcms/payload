@@ -13,7 +13,7 @@ export const plTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Aby rozpocząć, utwórz pierwszego użytkownika',
     changePassword: 'Zmień hasło',
     checkYourEmailForPasswordReset:
-      'Jeśli ten adres e-mail jest powiązany z kontem, wkrótce otrzymasz instrukcje resetowania hasła. Proszę sprawdzić folder ze spamem lub niechcianą pocztą, jeśli nie widzisz e-maila w swojej skrzynce odbiorczej.',
+      'Jeśli adres e-mail jest powiązany z kontem, wkrótce otrzymasz instrukcje dotyczące zresetowania hasła. Sprawdź folder ze spamem lub niechcianą pocztą, jeśli nie widzisz e-maila w swojej skrzynce odbiorczej.',
     confirmGeneration: 'Potwierdź wygenerowanie',
     confirmPassword: 'Potwierdź hasło',
     createFirstUser: 'Utwórz pierwszego użytkownika',

@@ -13,7 +13,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Na samom početku kreiraj svog prvog korisnika',
     changePassword: 'Promeni lozinku',
     checkYourEmailForPasswordReset:
-      'Ako je ova adresa e-pošte povezana s nalogom, dobićete upute za resetovanje lozinke uskoro. Molimo vas da proverite fasciklu sa neželjenom poštom ako ne vidite e-poruku u vašem prijemnom sandučetu.',
+      'Ako je e-mail adresa povezana sa nekim nalozima, uskoro ćete dobiti uputstva za resetovanje lozinke. Ako ne vidite e-mail u svojoj prijemnoj pošti, proverite spam ili folder za neželjenu poštu.',
     confirmGeneration: 'Potvrdi kreiranje',
     confirmPassword: 'Potvrdi lozinku',
     createFirstUser: 'Kreiraj prvog korisnika',

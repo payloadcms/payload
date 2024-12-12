@@ -13,7 +13,7 @@ export const trTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Başlamak için ilk kullanıcı hesabını oluşturun.',
     changePassword: 'Parolayı Değiştir',
     checkYourEmailForPasswordReset:
-      'Bu e-posta adresi bir hesaba bağlıysa, şifre sıfırlama talimatlarını yakında alacaksınız. E-postayı gelen kutunuzda göremiyorsanız, lütfen spam veya junk klasörünü kontrol edin.',
+      'E-posta adresi bir hesapla ilişkiliyse, şifrenizi sıfırlama talimatlarınızı kısa süre içerisinde alacaksınız. E-postayı gelen kutunuzda görmüyorsanız, lütfen spam veya gereksiz posta klasörünüzü kontrol edin.',
     confirmGeneration: 'Oluştumayı Onayla',
     confirmPassword: 'Parolayı Onayla',
     createFirstUser: 'İlk kullanıcı oluştur',

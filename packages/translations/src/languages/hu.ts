@@ -13,7 +13,7 @@ export const huTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Kezdésként hozza létre az első felhasználót.',
     changePassword: 'Jelszó módosítása',
     checkYourEmailForPasswordReset:
-      'Ha ez az e-mail cím egy fiókhoz kapcsolódik, hamarosan instrukciókat kap a jelszó visszaállításához. Kérjük, ellenőrizze a spam vagy kéretlen e-mailek mappát, ha nem találja az e-mailt a beérkezett üzenetek között.',
+      'Ha az e-mail cím egy fiókhoz van társítva, hamarosan kapni fog utasításokat a jelszó visszaállításához. Kérjük, ellenőrizze a spam vagy a levélszemét mappát, ha nem látja az e-mailt a bejövő üzenetek között.',
     confirmGeneration: 'Generálás megerősítése',
     confirmPassword: 'Jelszó megerősítése',
     createFirstUser: 'Első felhasználó létrehozása',

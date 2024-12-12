@@ -13,7 +13,7 @@ export const deTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Erstelle deinen ersten Benutzer um zu beginnen',
     changePassword: 'Passwort ändern',
     checkYourEmailForPasswordReset:
-      'Wenn diese E-Mail-Adresse mit einem Konto verknüpft ist, erhalten Sie bald Anweisungen zur Passwortzurücksetzung. Bitte überprüfen Sie Ihren Spam- oder Junk-Ordner, wenn Sie die E-Mail nicht in Ihrem Posteingang sehen.',
+      'Wenn die E-Mail-Adresse mit einem Konto verknüpft ist, erhalten Sie in Kürze Anweisungen zur Zurücksetzung Ihres Passworts. Bitte überprüfen Sie Ihren Spam- oder Junk-Mail-Ordner, wenn Sie die E-Mail nicht in Ihrem Posteingang sehen.',
     confirmGeneration: 'Generierung bestätigen',
     confirmPassword: 'Passwort bestätigen',
     createFirstUser: 'Ersten Benutzer erstellen',

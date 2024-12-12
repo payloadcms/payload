@@ -13,7 +13,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Om te beginnen maakt u uw eerste gebruiker aan.',
     changePassword: 'Wachtwoord wijzigen',
     checkYourEmailForPasswordReset:
-      'Als dit e-mailadres aan een account is gekoppeld, ontvang je binnenkort instructies om je wachtwoord te resetten. Controleer je spam- of ongewenste map als je de e-mail niet in je inbox ziet.',
+      'Als het e-mailadres is gekoppeld aan een account, ontvangt u binnenkort instructies om uw wachtwoord opnieuw in te stellen. Controleer uw spam- of ongewenste e-mailmap als u de e-mail niet in uw inbox ziet.',
     confirmGeneration: 'Bevestigen',
     confirmPassword: 'Wachtwoord bevestigen',
     createFirstUser: 'Eerste gebruiker aanmaken',
