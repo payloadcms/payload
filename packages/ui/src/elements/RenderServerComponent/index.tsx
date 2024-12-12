@@ -13,6 +13,7 @@ type RenderServerComponentFn = (args: {
     | React.ComponentType
     | React.ComponentType[]
   readonly Fallback?: React.ComponentType
+  readonly HOC?: (Component: React.ComponentType) => React.ComponentType
   readonly importMap: ImportMap
   readonly key?: string
   readonly serverProps?: object
@@ -25,6 +26,7 @@ export const RenderServerComponent: RenderServerComponentFn = ({
   clientProps = {},
   Component,
   Fallback,
+  HOC,
   importMap,
   key,
   serverProps,
@@ -50,7 +52,13 @@ export const RenderServerComponent: RenderServerComponentFn = ({
       ...(isRSC ? serverProps : {}),
     })
 
-    return <Component key={key} {...sanitizedProps} />
+    let ComponentToRender = Component
+
+    if (HOC) {
+      ComponentToRender = HOC(Component)
+    }
+
+    return <ComponentToRender key={key} {...sanitizedProps} />
   }
 
   if (typeof Component === 'string' || isPlainObject(Component)) {
@@ -73,7 +81,13 @@ export const RenderServerComponent: RenderServerComponentFn = ({
         ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
       })
 
-      return <ResolvedComponent key={key} {...sanitizedProps} />
+      let ComponentToRender = ResolvedComponent
+
+      if (HOC) {
+        ComponentToRender = HOC(ResolvedComponent)
+      }
+
+      return <ComponentToRender key={key} {...sanitizedProps} />
     }
   }
 

@@ -9,7 +9,7 @@ import type { RenderFieldMethod } from './types.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- need this to reference already existing bundle. Otherwise, bundle size increases., payload/no-imports-from-exports-dir
-import { FieldDescription } from '../../exports/client/index.js'
+import { FieldDescription, withCondition } from '../../exports/client/index.js'
 
 const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
   'Cell',
@@ -239,6 +239,7 @@ export const renderField: RenderFieldMethod = ({
         fieldState.customComponents.Field = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.Field,
+          HOC: withCondition,
           importMap: req.payload.importMap,
           key: 'field.admin.components.Field',
           serverProps,
