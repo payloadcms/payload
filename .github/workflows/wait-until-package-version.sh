@@ -6,7 +6,7 @@ if [[ "$#" -ne 2 ]]; then
 fi
 
 PACKAGE_NAME="$1"
-TARGET_VERSION="$2"
+TARGET_VERSION=${2#v} # Git tag has leading 'v', npm version does not
 TIMEOUT=300  # 5 minutes in seconds
 INTERVAL=10  # 10 seconds
 ELAPSED=0
