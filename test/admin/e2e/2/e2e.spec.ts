@@ -464,7 +464,8 @@ describe('admin2', () => {
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
-        await options.locator('text=Tab 1 > Title').click()
+        await expect(options.first()).toHaveText('Title')
+        await options.first().click()
         await page.locator('.condition__operator .rs__control').click()
         await options.locator('text=equals').click()
         await page.locator('.condition__value input').fill('test')
@@ -780,7 +781,7 @@ describe('admin2', () => {
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
 
-        await expect(options.locator('text=Tab 1 > Title')).toHaveText('Tab 1 > Title')
+        await expect(options.first()).toHaveText('Title')
 
         // list columns
         await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title')
