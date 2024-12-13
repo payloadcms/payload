@@ -14,7 +14,7 @@ import {
   GraphQLString,
 } from 'graphql'
 import { buildVersionCollectionFields, flattenTopLevelFields, formatNames, toWords } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, getLoginOptions } from 'payload/shared'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'
 
@@ -126,12 +126,20 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
 
     const mutationInputFields = [...fields]
 
-    if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
+    if (
+      collectionConfig.auth &&
+      (!collectionConfig.auth.disableLocalStrategy ||
+        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.optionalPassword))
+    ) {
       mutationInputFields.push({
         name: 'password',
         type: 'text',
         label: 'Password',
-        required: true,
+        required: !(
+          typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.optionalPassword
+        ),
       })
     }
 
@@ -188,6 +196,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           : {}),
         limit: { type: GraphQLInt },
         page: { type: GraphQLInt },
+        pagination: { type: GraphQLBoolean },
         sort: { type: GraphQLString },
       },
       resolve: findResolver(collection),
@@ -272,6 +281,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         type: collection.graphQL.type,
         args: {
           id: { type: new GraphQLNonNull(idType) },
+          ...(createMutationInputType
+            ? { data: { type: collection.graphQL.mutationInputType } }
+            : {}),
         },
         resolve: duplicateResolver(collection),
       }
@@ -340,6 +352,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             : {}),
           limit: { type: GraphQLInt },
           page: { type: GraphQLInt },
+          pagination: { type: GraphQLBoolean },
           sort: { type: GraphQLString },
         },
         resolve: findVersionsResolver(collection),
@@ -442,10 +455,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       if (!collectionConfig.auth.disableLocalStrategy) {
         const authArgs = {}
 
-        const canLoginWithEmail =
-          !collectionConfig.auth.loginWithUsername ||
-          collectionConfig.auth.loginWithUsername?.allowEmailLogin
-        const canLoginWithUsername = collectionConfig.auth.loginWithUsername
+        const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(
+          collectionConfig.auth.loginWithUsername,
+        )
 
         if (canLoginWithEmail) {
           authArgs['email'] = { type: new GraphQLNonNull(GraphQLString) }

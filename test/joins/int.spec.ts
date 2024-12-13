@@ -11,6 +11,7 @@ import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
+  categoriesJoinRestrictedSlug,
   categoriesSlug,
   postsSlug,
   restrictedCategoriesSlug,
@@ -480,7 +481,20 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
 
-    it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
+    it('should populate joins with hasMany relationships when versions on both sides draft false', async () => {
+      const category = await payload.create({ collection: 'categories-versions', data: {} })
+
+      const version = await payload.create({
+        collection: 'versions',
+        data: { categoryVersions: [category.id] },
+      })
+
+      const res = await payload.find({ collection: 'categories-versions', draft: false })
+
+      expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
+    })
+
+    it('should populate joins with hasMany relationships when versions on both sides draft true payload.db.queryDrafts', async () => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 
       const version = await payload.create({
@@ -494,6 +508,22 @@ describe('Joins Field', () => {
       })
 
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
+    })
+
+    it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
+      const category = await payload.create({ collection: 'categories-versions', data: {} })
+
+      const version = await payload.create({
+        collection: 'versions',
+        data: { categoryVersions: [category.id] },
+      })
+
+      const res = await payload.find({
+        collection: 'categories-versions',
+        draft: true,
+      })
+
+      expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
     })
   })
 
@@ -525,6 +555,22 @@ describe('Joins Field', () => {
       expect(unlimited.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
+    it('should respect access control for join collections', async () => {
+      const { docs } = await payload.find({
+        collection: categoriesJoinRestrictedSlug,
+        where: {
+          name: { equals: 'categoryJoinRestricted' },
+        },
+        overrideAccess: false,
+        user,
+      })
+      const [categoryWithRestrictedPosts] = docs
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs).toHaveLength(1)
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs[0].title).toStrictEqual(
+        'should allow read',
+      )
+    })
+
     it('should respect access control for join request `where` queries', async () => {
       await expect(async () => {
         await payload.findByID({
@@ -550,7 +596,7 @@ describe('Joins Field', () => {
           name: 'restricted category',
         },
       })
-      const post = await createPost({
+      await createPost({
         collection: restrictedPostsSlug,
         data: {
           title: 'restricted post',
@@ -746,6 +792,31 @@ describe('Joins Field', () => {
         .GRAPHQL_POST({ body: JSON.stringify({ query }) })
         .then((res) => res.json())
       expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 3')
+    })
+
+    it('should respect access control for join collections', async () => {
+      const query = `query {
+        CategoriesJoinRestricteds {
+          docs {
+            name
+            collectionRestrictedJoin {
+              docs {
+                title
+                canRead
+              }
+            }
+          }
+        }
+      }`
+
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const [categoryWithRestrictedPosts] = response.data.CategoriesJoinRestricteds.docs
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs).toHaveLength(1)
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs[0].title).toStrictEqual(
+        'should allow read',
+      )
     })
   })
 

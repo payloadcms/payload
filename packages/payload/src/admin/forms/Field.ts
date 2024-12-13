@@ -6,6 +6,7 @@ import type { ClientBlock, ClientField, Field } from '../../fields/config/types.
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
 import type {
+  ClientFieldSchemaMap,
   ClientTab,
   Data,
   FieldSchemaMap,
@@ -67,6 +68,7 @@ export type FieldPaths = {
 
 export type ServerComponentProps = {
   clientField: ClientFieldWithOptionalType
+  clientFieldSchemaMap: ClientFieldSchemaMap
   collectionSlug: string
   data: Data
   field: Field

@@ -1,7 +1,16 @@
 'use client'
 import type { EditorState, SerializedEditorState } from 'lexical'
+import type { Validate } from 'payload'
 
-import { FieldLabel, useEditDepth, useField, withCondition } from '@payloadcms/ui'
+import {
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  RenderCustomComponent,
+  useEditDepth,
+  useField,
+  withCondition,
+} from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import React, { useCallback, useMemo } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -9,10 +18,10 @@ import { ErrorBoundary } from 'react-error-boundary'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 import type { LexicalRichTextFieldProps } from '../types.js'
 
-import { LexicalProvider } from '../lexical/LexicalProvider.js'
+import '../lexical/theme/EditorTheme.scss'
 import './bundled.css'
 import './index.scss'
-import '../lexical/theme/EditorTheme.scss'
+import { LexicalProvider } from '../lexical/LexicalProvider.js'
 
 const baseClass = 'rich-text-lexical'
 
@@ -26,7 +35,7 @@ const RichTextComponent: React.FC<
     field,
     field: {
       name,
-      admin: { className, readOnly: readOnlyFromAdmin } = {},
+      admin: { className, description, readOnly: readOnlyFromAdmin } = {},
       label,
       localized,
       required,
@@ -41,11 +50,13 @@ const RichTextComponent: React.FC<
 
   const editDepth = useEditDepth()
 
-  const memoizedValidate = useCallback(
+  const memoizedValidate = useCallback<Validate>(
     (value, validationOptions) => {
       if (typeof validate === 'function') {
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         return validate(value, { ...validationOptions, required })
       }
+      return true
     },
     // Important: do not add props to the dependencies array.
     // This would cause an infinite loop and endless re-rendering.
@@ -63,7 +74,6 @@ const RichTextComponent: React.FC<
     value,
   } = useField<SerializedEditorState>({
     path,
-    // @ts-expect-error: TODO: Fix this
     validate: memoizedValidate,
   })
 
@@ -93,7 +103,10 @@ const RichTextComponent: React.FC<
 
   return (
     <div className={classes} key={pathWithEditDepth} style={styles}>
-      {Error}
+      <RenderCustomComponent
+        CustomComponent={Error}
+        Fallback={<FieldError path={path} showError={showError} />}
+      />
       {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
@@ -110,12 +123,16 @@ const RichTextComponent: React.FC<
           {AfterInput}
         </ErrorBoundary>
         {Description}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )
 }
 
-function fallbackRender({ error }): React.ReactElement {
+function fallbackRender({ error }: { error: Error }) {
   // Call resetErrorBoundary() to reset the error boundary and retry the render.
 
   return (

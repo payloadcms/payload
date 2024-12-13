@@ -1,4 +1,3 @@
-import type { Transformer } from '@lexical/markdown'
 import type { GenericLanguages, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type {
@@ -13,7 +12,6 @@ import type {
   Field,
   FieldSchemaMap,
   JsonObject,
-  Payload,
   PayloadComponent,
   PayloadRequest,
   PopulateType,
@@ -27,6 +25,7 @@ import type {
 } from 'payload'
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
+import type { Transformer } from '../packages/@lexical/markdown/index.js'
 import type { AdapterProps } from '../types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
@@ -177,6 +176,7 @@ export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {
   operation: 'create' | 'delete' | 'read' | 'update'
   /** The value of the node before any changes. Not available in afterRead hooks */
   originalNode: T
+  previousNode: T
 }
 export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
@@ -200,6 +200,8 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
    * The original node with locales (not modified by any hooks).
    */
   originalNodeWithLocales?: T
+  previousNode: T
+
   skipValidation: boolean
 }
 

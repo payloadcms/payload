@@ -3,12 +3,12 @@ import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { getPayload, parseCookies } from 'payload'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -33,7 +33,7 @@ export const RootLayout = async ({
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
 }) => {
-  await checkDependencies()
+  checkDependencies()
 
   const config = await configPromise
 
@@ -86,14 +86,19 @@ export const RootLayout = async ({
 
   const navPrefs = await getNavPrefs({ payload, user })
 
-  const clientConfig = await getClientConfig({
+  const clientConfig = getClientConfig({
     config,
     i18n,
     importMap,
   })
 
   return (
-    <html data-theme={theme} dir={dir} lang={languageCode}>
+    <html
+      data-theme={theme}
+      dir={dir}
+      lang={languageCode}
+      suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
+    >
       <head>
         <style>{`@layer payload-default, payload;`}</style>
       </head>
@@ -117,6 +122,12 @@ export const RootLayout = async ({
             <NestProviders
               importMap={payload.importMap}
               providers={config.admin?.components?.providers}
+              serverProps={{
+                i18n,
+                payload,
+                permissions,
+                user,
+              }}
             >
               {children}
             </NestProviders>

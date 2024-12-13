@@ -57,6 +57,7 @@ export type DocumentInfoContext = {
   lastUpdateTime?: number
   mostRecentVersionIsAutosaved: boolean
   preferencesKey?: string
+  savedDocumentData?: Data
   setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
   setDocFieldPreferences: (
     field: string,
@@ -72,5 +73,6 @@ export type DocumentInfoContext = {
   unlockDocument: (docId: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
   updateDocumentEditor: (docId: number | string, slug: string, user: ClientUser) => Promise<void>
+  updateSavedDocumentData: (data: Data) => void
   versionCount: number
 } & DocumentInfoProps

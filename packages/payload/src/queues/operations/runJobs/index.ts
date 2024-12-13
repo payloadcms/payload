@@ -17,10 +17,15 @@ import { runJob } from './runJob/index.js'
 import { runJSONJob } from './runJSONJob/index.js'
 
 export type RunJobsArgs = {
+  /**
+   * ID of the job to run
+   */
+  id?: number | string
   limit?: number
   overrideAccess?: boolean
   queue?: string
   req: PayloadRequest
+  where?: Where
 }
 
 export type RunJobsResult = {
@@ -36,10 +41,12 @@ export type RunJobsResult = {
 }
 
 export const runJobs = async ({
+  id,
   limit = 10,
   overrideAccess,
   queue,
   req,
+  where: whereFromProps,
 }: RunJobsArgs): Promise<RunJobsResult> => {
   if (!overrideAccess) {
     const hasAccess = await req.payload.config.jobs.access.run({ req })
@@ -89,20 +96,42 @@ export const runJobs = async ({
     })
   }
 
+  if (whereFromProps) {
+    where.and.push(whereFromProps)
+  }
+
   // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
   // the same job being picked up by another worker
-  const jobsQuery = (await req.payload.update({
-    collection: 'payload-jobs',
-    data: {
-      processing: true,
-      seenByWorker: true,
-    },
-    depth: req.payload.config.jobs.depth,
-    disableTransaction: true,
-    limit,
-    showHiddenFields: true,
-    where,
-  })) as unknown as PaginatedDocs<BaseJob>
+  const jobsQuery: {
+    docs: BaseJob[]
+  } = id
+    ? {
+        docs: [
+          (await req.payload.update({
+            id,
+            collection: 'payload-jobs',
+            data: {
+              processing: true,
+              seenByWorker: true,
+            },
+            depth: req.payload.config.jobs.depth,
+            disableTransaction: true,
+            showHiddenFields: true,
+          })) as BaseJob,
+        ],
+      }
+    : ((await req.payload.update({
+        collection: 'payload-jobs',
+        data: {
+          processing: true,
+          seenByWorker: true,
+        },
+        depth: req.payload.config.jobs.depth,
+        disableTransaction: true,
+        limit,
+        showHiddenFields: true,
+        where,
+      })) as unknown as PaginatedDocs<BaseJob>)
 
   /**
    * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
@@ -130,6 +159,9 @@ export const runJobs = async ({
   if (jobsQuery?.docs?.length) {
     req.payload.logger.info(`Running ${jobsQuery.docs.length} jobs.`)
   }
+  const jobsToDelete: (number | string)[] | undefined = req.payload.config.jobs.deleteJobOnComplete
+    ? []
+    : undefined
 
   const jobPromises = jobsQuery.docs.map(async (job) => {
     if (!job.workflowSlug && !job.taskSlug) {
@@ -168,7 +200,8 @@ export const runJobs = async ({
       workflowHandler = await importHandlerPath<typeof workflowHandler>(workflowConfig.handler)
 
       if (!workflowHandler) {
-        const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${job.workflowSlug}.`
+        const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
+        const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
         req.payload.logger.error(errorMessage)
 
         await updateJob({
@@ -191,6 +224,11 @@ export const runJobs = async ({
         workflowConfig,
         workflowHandler,
       })
+
+      if (result.status !== 'error' && jobsToDelete) {
+        jobsToDelete.push(job.id)
+      }
+
       return { id: job.id, result }
     } else {
       const result = await runJSONJob({
@@ -200,11 +238,32 @@ export const runJobs = async ({
         workflowConfig,
         workflowHandler,
       })
+
+      if (result.status !== 'error' && jobsToDelete) {
+        jobsToDelete.push(job.id)
+      }
+
       return { id: job.id, result }
     }
   })
 
   const resultsArray = await Promise.all(jobPromises)
+
+  if (jobsToDelete && jobsToDelete.length > 0) {
+    try {
+      await req.payload.delete({
+        collection: 'payload-jobs',
+        req,
+        where: { id: { in: jobsToDelete } },
+      })
+    } catch (err) {
+      req.payload.logger.error({
+        err,
+        msg: `failed to delete jobs ${jobsToDelete.join(', ')} on complete`,
+      })
+    }
+  }
+
   const resultsObject: RunJobsResult['jobStatus'] = resultsArray.reduce((acc, cur) => {
     if (cur !== null) {
       // Check if there's a valid result to include

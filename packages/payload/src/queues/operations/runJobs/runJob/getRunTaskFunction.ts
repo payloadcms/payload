@@ -70,7 +70,7 @@ export async function handleTaskFailed({
   taskStatus: null | SingleTaskStatus<string>
   updateJob: UpdateJobFunction
 }): Promise<never> {
-  req.payload.logger.error({ err: error, job, msg: 'Error running task', taskSlug })
+  req.payload.logger.error({ err: error, job, msg: `Error running task ${taskID}`, taskSlug })
 
   if (taskConfig?.onFail) {
     await taskConfig.onFail()
@@ -79,9 +79,17 @@ export async function handleTaskFailed({
   if (!job.log) {
     job.log = []
   }
+  const errorJSON = error
+    ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      }
+    : runnerOutput.state
+
   job.log.push({
     completedAt: new Date().toISOString(),
-    error: error ?? runnerOutput.state,
+    error: errorJSON,
     executedAt: executedAt.toISOString(),
     input,
     output,
@@ -99,7 +107,7 @@ export async function handleTaskFailed({
     }
   }
 
-  if (taskStatus && !taskStatus.complete && taskStatus.totalTried >= maxRetries) {
+  if (!taskStatus?.complete && (taskStatus?.totalTried ?? 0) >= maxRetries) {
     state.reachedMaxRetries = true
 
     await updateJob({
@@ -174,8 +182,20 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           throw new Error(`Task ${taskSlug} not found in workflow ${job.workflowSlug}`)
         }
       }
-      const maxRetries: number =
+      let maxRetries: number =
         typeof retriesConfig === 'object' ? retriesConfig?.attempts : retriesConfig
+
+      if (maxRetries === undefined || maxRetries === null) {
+        // Inherit retries from workflow config, if they are undefined and the workflow config has retries configured
+        if (workflowConfig.retries !== undefined && workflowConfig.retries !== null) {
+          maxRetries =
+            typeof workflowConfig.retries === 'object'
+              ? workflowConfig.retries.attempts
+              : workflowConfig.retries
+        } else {
+          maxRetries = 0
+        }
+      }
 
       const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[taskSlug]
         ? job.taskStatus[taskSlug][taskID]
@@ -223,7 +243,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         return
       }
 
-      let output: object
+      let output: object = {}
 
       try {
         const runnerOutput = await runner({

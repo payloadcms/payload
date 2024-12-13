@@ -16,8 +16,8 @@ import type { PackageDetails } from './lib/getPackageDetails.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { getPackageRegistryVersions } from './lib/getPackageRegistryVersions.js'
 import { packagePublishList } from './lib/publishList.js'
+import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
-import { updateChangelog } from './utils/updateChangelog.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -126,20 +126,19 @@ async function main() {
   header(`${logPrefix}📝 Updating changelog...`)
   const {
     changelog: changelogContent,
-    releaseNotes,
     releaseUrl,
-  } = await updateChangelog({
+    releaseNotes,
+  } = await generateReleaseNotes({
     bump,
     dryRun,
     toVersion: 'HEAD',
     fromVersion,
     openReleaseUrl: true,
-    writeChangelog: changelog,
   })
 
-  console.log(chalk.green('\nChangelog Preview:\n'))
-  console.log(chalk.gray(changelogContent) + '\n\n')
-  console.log(`Release URL: ${chalk.dim(releaseUrl)}`)
+  console.log(chalk.green('\nFull Release Notes:\n\n'))
+  console.log(chalk.gray(releaseNotes) + '\n\n')
+  console.log(`\n\nRelease URL: ${chalk.dim(releaseUrl)}`)
 
   let packageDetails = await getPackageDetails(packagePublishList)
 
@@ -194,7 +193,7 @@ async function main() {
   header(`🧑‍💻 Committing changes...`)
 
   // Commit all staged changes
-  runCmd(`git add CHANGELOG.md packages/**/package.json package.json`, execOpts)
+  runCmd(`git add packages/**/package.json package.json`, execOpts)
 
   // Wait 500ms to avoid .git/index.lock errors
   await new Promise((resolve) => setTimeout(resolve, 500))

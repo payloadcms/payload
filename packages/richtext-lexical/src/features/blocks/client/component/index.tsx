@@ -67,7 +67,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     slug: `lexical-blocks-create-${uuidFromContext}-${formData.id}`,
     depth: editDepth,
   })
-  const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug)
 
   // Used for saving collapsed to preferences (and gettin' it from there again)
   // Remember, these preferences are scoped to the whole document, not just this form. This
@@ -90,6 +90,16 @@ export const BlockComponent: React.FC<Props> = (props) => {
           },
         }
       : false,
+  )
+
+  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    initialState?.['_components']?.customComponents?.BlockLabel,
+  )
+
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    initialState?.['_components']?.customComponents?.Block,
   )
 
   // Initial state for newly created blocks
@@ -124,6 +134,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
         }
 
         setInitialState(state)
+        setCustomLabel(state._components?.customComponents?.BlockLabel)
+        setCustomBlock(state._components?.customComponents?.Block)
       }
     }
 
@@ -162,7 +174,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation<object, string>()
 
   const onChange = useCallback(
-    async ({ formState: prevFormState, submit }) => {
+    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
       abortAndIgnore(onChangeAbortControllerRef.current)
 
       const controller = new AbortController()
@@ -178,6 +190,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         formState: prevFormState,
         globalSlug,
         operation: 'update',
+        renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
       })
@@ -199,16 +212,17 @@ export const BlockComponent: React.FC<Props> = (props) => {
         editor.update(() => {
           const node = $getNodeByKey(nodeKey)
           if (node && $isBlockNode(node)) {
-            const newData = {
-              ...newFormStateData,
-              blockType: formData.blockType,
-            }
+            const newData = newFormStateData
+            newData.blockType = formData.blockType
             node.setFields(newData)
           }
         })
       }, 0)
 
       if (submit) {
+        setCustomLabel(newFormState._components?.customComponents?.BlockLabel)
+        setCustomBlock(newFormState._components?.customComponents?.Block)
+
         let rowErrorCount = 0
         for (const formField of Object.values(newFormState)) {
           if (formField?.valid === false) {
@@ -246,9 +260,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     })
   }, [editor, nodeKey])
 
-  const CustomLabel = initialState?.['_components']?.customComponents?.BlockLabel
-  const CustomBlock = initialState?.['_components']?.customComponents?.Block
-
   const blockDisplayName = clientBlock?.labels?.singular
     ? getTranslation(clientBlock.labels.singular, i18n)
     : clientBlock?.slug
@@ -257,7 +268,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     (changedCollapsed: boolean) => {
       void getDocPreferences().then((currentDocPreferences) => {
         const currentFieldPreferences =
-          currentDocPreferences?.fields[parentLexicalRichTextField.name]
+          currentDocPreferences?.fields?.[parentLexicalRichTextField.name]
 
         const collapsedArray = currentFieldPreferences?.collapsed
 
@@ -289,10 +300,18 @@ export const BlockComponent: React.FC<Props> = (props) => {
         buttonStyle="icon-label"
         className={`${baseClass}__editButton`}
         disabled={readOnly}
-        el="div"
+        el="button"
         icon="edit"
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
           toggleDrawer()
+          return false
+        }}
+        onMouseDown={(e) => {
+          // Needed to preserve lexical selection for toggleDrawer lexical selection restore.
+          // I believe this is needed due to this button (usually) being inside of a collapsible.
+          e.preventDefault()
         }}
         round
         size="small"
@@ -424,7 +443,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
                 permissions={permissions}
                 readOnly={false}
               />
-              <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+              <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
             </>
           ) : null}
         </Drawer>
@@ -451,6 +470,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       <Form
         beforeSubmit={[
           async ({ formState }) => {
+            // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
             return await onChange({ formState, submit: true })
           },
         ]}
@@ -458,7 +478,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         initialState={initialState}
         onChange={[onChange]}
         onSubmit={(formState) => {
-          // THis is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+          // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
           const newData: any = reduceFieldsToValues(formState)
           newData.blockType = formData.blockType
           editor.update(() => {

@@ -4,16 +4,13 @@ import type { ClientCollectionConfig, Where } from 'payload'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
-import AnimateHeightImport from 'react-animate-height'
-
-const AnimateHeight = (AnimateHeightImport.default ||
-  AnimateHeightImport) as typeof AnimateHeightImport.default
 
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { DeleteMany } from '../DeleteMany/index.js'
 import { EditMany } from '../EditMany/index.js'
@@ -23,8 +20,8 @@ import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
-import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 import './index.scss'
+import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 
 const baseClass = 'list-controls'
 

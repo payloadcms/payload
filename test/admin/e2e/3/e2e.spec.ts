@@ -452,38 +452,46 @@ describe('admin3', () => {
       expect(page.url()).toContain(postsUrl.list)
     })
 
-    test('should bulk delete', async () => {
-      async function selectAndDeleteAll() {
-        await page.goto(postsUrl.list)
-        await page.locator('input#select-all').check()
-        await page.locator('.delete-documents__toggle').click()
-        await page.locator('#confirm-delete').click()
-      }
-
-      // First, delete all posts created by the seed
+    test('should bulk delete all on page', async () => {
       await deleteAllPosts()
-      await createPost()
-      await createPost()
-      await createPost()
-
+      await Promise.all([createPost(), createPost(), createPost()])
       await page.goto(postsUrl.list)
-      await selectAndDeleteAll()
+      await page.locator('input#select-all').check()
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete').click()
+
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Deleted 3 Posts successfully.',
       )
+
       await expect(page.locator('.collection-list__no-results')).toBeVisible()
+    })
+
+    test('should bulk delete with filters and across pages', async () => {
+      await deleteAllPosts()
+      await Promise.all([createPost({ title: 'Post 1' }), createPost({ title: 'Post 2' })])
+      await page.goto(postsUrl.list)
+      await page.locator('#search-filter-input').fill('Post 1')
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await page.locator('input#select-all').check()
+      await page.locator('button.list-selection__button').click()
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+        'Deleted 1 Post successfully.',
+      )
+
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
     })
 
     test('should bulk update', async () => {
       // First, delete all posts created by the seed
       await deleteAllPosts()
-      await createPost()
-      await createPost()
-      await createPost()
-
-      const bulkTitle = 'Bulk update title'
+      const post1Title = 'Post'
+      const updatedPostTitle = `${post1Title} (Updated)`
+      await Promise.all([createPost({ title: post1Title }), createPost(), createPost()])
       await page.goto(postsUrl.list)
-
       await page.locator('input#select-all').check()
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
@@ -493,21 +501,114 @@ describe('admin3', () => {
       })
 
       await expect(titleOption).toBeVisible()
-
       await titleOption.click()
       const titleInput = page.locator('#field-title')
-
       await expect(titleInput).toBeVisible()
-
-      await titleInput.fill(bulkTitle)
-
+      await titleInput.fill(updatedPostTitle)
       await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Updated 3 Posts successfully.',
       )
-      await expect(page.locator('.row-1 .cell-title')).toContainText(bulkTitle)
-      await expect(page.locator('.row-2 .cell-title')).toContainText(bulkTitle)
-      await expect(page.locator('.row-3 .cell-title')).toContainText(bulkTitle)
+
+      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
+      await expect(page.locator('.row-2 .cell-title')).toContainText(updatedPostTitle)
+      await expect(page.locator('.row-3 .cell-title')).toContainText(updatedPostTitle)
+    })
+
+    test('should not override un-edited values in bulk edit if it has a defaultValue', async () => {
+      await deleteAllPosts()
+      const post1Title = 'Post'
+      const postData = {
+        title: 'Post',
+        arrayOfFields: [
+          {
+            optional: 'some optional array field',
+            innerArrayOfFields: [
+              {
+                innerOptional: 'some inner optional array field',
+              },
+            ],
+          },
+        ],
+        group: {
+          defaultValueField: 'not the group default value',
+          title: 'some title',
+        },
+        someBlock: [
+          {
+            textFieldForBlock: 'some text for block text',
+            blockType: 'textBlock',
+          },
+        ],
+        defaultValueField: 'not the default value',
+      }
+      const updatedPostTitle = `${post1Title} (Updated)`
+      await Promise.all([createPost(postData)])
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const titleOption = page.locator('.field-select .rs__option', {
+        hasText: exactText('Title'),
+      })
+
+      await expect(titleOption).toBeVisible()
+      await titleOption.click()
+      const titleInput = page.locator('#field-title')
+      await expect(titleInput).toBeVisible()
+      await titleInput.fill(updatedPostTitle)
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Updated 1 Post successfully.',
+      )
+
+      const updatedPost = await payload.find({
+        collection: 'posts',
+        limit: 1,
+      })
+
+      expect(updatedPost.docs[0].title).toBe(updatedPostTitle)
+      expect(updatedPost.docs[0].arrayOfFields.length).toBe(1)
+      expect(updatedPost.docs[0].arrayOfFields[0].optional).toBe('some optional array field')
+      expect(updatedPost.docs[0].arrayOfFields[0].innerArrayOfFields.length).toBe(1)
+      expect(updatedPost.docs[0].someBlock[0].textFieldForBlock).toBe('some text for block text')
+      expect(updatedPost.docs[0].defaultValueField).toBe('not the default value')
+    })
+
+    test('should bulk update with filters and across pages', async () => {
+      // First, delete all posts created by the seed
+      await deleteAllPosts()
+      const post1Title = 'Post 1'
+      await Promise.all([createPost({ title: post1Title }), createPost({ title: 'Post 2' })])
+      const updatedPostTitle = `${post1Title} (Updated)`
+      await page.goto(postsUrl.list)
+      await page.locator('#search-filter-input').fill('Post 1')
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await page.locator('input#select-all').check()
+      await page.locator('button.list-selection__button').click()
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const titleOption = page.locator('.field-select .rs__option', {
+        hasText: exactText('Title'),
+      })
+
+      await expect(titleOption).toBeVisible()
+      await titleOption.click()
+      const titleInput = page.locator('#field-title')
+      await expect(titleInput).toBeVisible()
+      await titleInput.fill(updatedPostTitle)
+
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Updated 1 Post successfully.',
+      )
+
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
     })
 
     test('should save globals', async () => {

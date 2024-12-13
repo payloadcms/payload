@@ -147,8 +147,8 @@ export const findOperation = async <
         collectionConfig: collection.config,
         overrideAccess,
         req,
-        versionFields: buildVersionCollectionFields(payload.config, collection.config),
-        where: fullWhere,
+        versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
+        where: appendVersionToQueryKey(where),
       })
 
       result = await payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({

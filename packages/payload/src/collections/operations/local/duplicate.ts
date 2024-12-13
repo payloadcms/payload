@@ -1,3 +1,5 @@
+import type { DeepPartial } from 'ts-essentials'
+
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
 import type { Payload, RequestContext } from '../../../index.js'
 import type {
@@ -7,7 +9,10 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
-import type { SelectFromCollectionSlug } from '../../config/types.js'
+import type {
+  RequiredDataFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -19,6 +24,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
+  data?: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
   disableTransaction?: boolean
   draft?: boolean
@@ -43,6 +49,7 @@ export async function duplicate<
   const {
     id,
     collection: collectionSlug,
+    data,
     depth,
     disableTransaction,
     draft,
@@ -71,6 +78,7 @@ export async function duplicate<
   return duplicateOperation<TSlug, TSelect>({
     id,
     collection,
+    data,
     depth,
     disableTransaction,
     draft,

@@ -135,6 +135,25 @@ const editorConfig: ServerEditorConfig = {
           ],
         },
         {
+          slug: 'BlockRSC',
+
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
           slug: 'myBlockWithBlockAndLabel',
           admin: {
             components: {
@@ -286,6 +305,15 @@ export const LexicalFields: CollectionConfig = {
       }),
       required: true,
     },
+    //{
+    //  name: 'rendered',
+    //  type: 'ui',
+    //  admin: {
+    //    components: {
+    //      Field: './collections/Lexical/LexicalRendered.js#LexicalRendered',
+    //    },
+    //  },
+    //},
     {
       name: 'lexicalWithBlocks_markdown',
       type: 'textarea',

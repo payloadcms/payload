@@ -1,3 +1,4 @@
+import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   CollectionSlug,
   DataFromCollectionSlug,
@@ -28,6 +29,7 @@ import {
 } from './shared.js'
 
 let payload: Payload
+let restClient: NextRESTClient
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 describe('Access Control', () => {
@@ -35,7 +37,7 @@ describe('Access Control', () => {
   let restricted: FullyRestricted
 
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
   })
 
   beforeEach(async () => {
@@ -512,6 +514,7 @@ describe('Access Control', () => {
           hidden: false,
         },
       })
+
       const { docs } = await payload.findVersions({
         collection: restrictedVersionsSlug,
         overrideAccess: false,
@@ -521,6 +524,122 @@ describe('Access Control', () => {
       })
 
       expect(docs).toHaveLength(1)
+    })
+
+    it('should ignore false access on query constraint added by top collection level access control', async () => {
+      await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: 'will-fail-access-read' },
+      })
+      const { id: hitID } = await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: 'will-success-access-read' },
+      })
+      await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: 'will-fail-access-read' },
+      })
+
+      // assert find, only will-success should be in the result
+      const resFind = await payload.find({
+        overrideAccess: false,
+        collection: 'fields-and-top-access',
+      })
+      expect(resFind.docs[0].id).toBe(hitID)
+      expect(resFind.docs).toHaveLength(1)
+
+      // assert find draft: true
+      const resFindDraft = await payload.find({
+        draft: true,
+        overrideAccess: false,
+        collection: 'fields-and-top-access',
+      })
+
+      expect(resFindDraft.docs).toHaveLength(1)
+      expect(resFind.docs[0].id).toBe(hitID)
+
+      // assert findByID
+      const res = await payload.findByID({
+        id: hitID,
+        collection: 'fields-and-top-access',
+        overrideAccess: false,
+      })
+
+      expect(res).toBeTruthy()
+    })
+
+    it('should ignore false access in versions on query constraint added by top collection level access control', async () => {
+      // clean up
+      await payload.delete({ collection: 'fields-and-top-access', where: {} })
+
+      await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: 'will-fail-access-read' },
+      })
+      const { id: hitID } = await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: 'will-success-access-read' },
+      })
+      await payload.create({
+        collection: 'fields-and-top-access',
+        data: { secret: 'will-fail-access-read' },
+      })
+
+      // Assert findVersions only will-success should be in the result
+      const resFind = await payload.findVersions({
+        overrideAccess: false,
+        collection: 'fields-and-top-access',
+      })
+      expect(resFind.docs).toHaveLength(1)
+
+      const version = resFind.docs[0]
+      expect(version.parent).toBe(hitID)
+
+      // Assert findVersionByID
+      const res = await payload.findVersionByID({
+        id: version.id,
+        collection: 'fields-and-top-access',
+        overrideAccess: false,
+      })
+
+      expect(res).toBeTruthy()
+    })
+  })
+
+  describe('Auth - Local API', () => {
+    it('should not allow reset password if forgotPassword expiration token is expired', async () => {
+      // Mock Date.now() to simulate the forgotPassword call happening 1 hour ago (default is 1 hour)
+      const originalDateNow = Date.now
+      const mockDateNow = jest.spyOn(Date, 'now').mockImplementation(() => {
+        // Move the current time back by 1 hour
+        return originalDateNow() - 60 * 60 * 1000
+      })
+
+      let forgot
+      try {
+        // Call forgotPassword while the mocked Date.now() is active
+        forgot = await payload.forgotPassword({
+          collection: 'users',
+          data: {
+            email: 'dev@payloadcms.com',
+          },
+        })
+      } finally {
+        // Restore the original Date.now() after the forgotPassword call
+        mockDateNow.mockRestore()
+      }
+
+      // Attempt to reset password, which should fail because the token is expired
+      await expect(
+        payload.resetPassword({
+          collection: 'users',
+          data: {
+            password: 'test',
+            token: forgot,
+          },
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Token is either invalid or has expired.')
     })
   })
 })

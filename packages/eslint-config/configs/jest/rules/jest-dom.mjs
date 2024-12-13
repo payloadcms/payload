@@ -1,4 +1,4 @@
-/** @type {import('eslint').Linter.FlatConfig} */
+/** @type {import('eslint').Linter.Config} */
 export const index = {
   'jest-dom/prefer-checked': 'error',
   'jest-dom/prefer-enabled-disabled': 'error',

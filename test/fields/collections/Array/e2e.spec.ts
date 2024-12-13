@@ -301,4 +301,12 @@ describe('Array', () => {
     await page.locator('#updateArrayExternally').click()
     await expect(page.locator('#custom-field')).toBeVisible()
   })
+
+  test('should not re-close initCollapsed true array rows on input in create new view', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-collapsedArray >> .array-field__add-row').click()
+    await page.locator('#field-collapsedArray__0__text').fill('test')
+    const collapsedArrayRow = page.locator('#collapsedArray-row-0 .collapsible--collapsed')
+    await expect(collapsedArrayRow).toBeHidden()
+  })
 })

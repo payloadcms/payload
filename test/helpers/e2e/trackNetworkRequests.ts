@@ -8,6 +8,7 @@ import { expect } from '@playwright/test'
 export const trackNetworkRequests = async (
   page: Page,
   url: string,
+  action: () => Promise<any>,
   options?: {
     allowedNumberOfRequests?: number
     beforePoll?: () => Promise<any> | void
@@ -25,6 +26,8 @@ export const trackNetworkRequests = async (
       matchedRequests.push(request)
     }
   })
+
+  await action()
 
   if (typeof beforePoll === 'function') {
     await beforePoll()

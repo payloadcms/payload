@@ -1,7 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerProps } from './types.js'
@@ -25,6 +25,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   onDelete: onDeleteFromProps,
   onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
+  overrideEntityVisibility = true,
   redirectAfterDelete,
   redirectAfterDuplicate,
 }) => {
@@ -45,6 +46,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
   const [isLoading, setIsLoading] = useState(true)
+  const hasRenderedDocument = useRef(false)
 
   const getDocumentView = useCallback(
     (docID?: number | string) => {
@@ -63,6 +65,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
             docID,
             drawerSlug,
             initialData,
+            overrideEntityVisibility,
             redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
             redirectAfterDuplicate:
               redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
@@ -91,6 +94,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterDuplicate,
       renderDocument,
       closeModal,
+      overrideEntityVisibility,
       t,
     ],
   )
@@ -142,8 +146,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   }, [getDocumentView])
 
   useEffect(() => {
-    if (!DocumentView) {
+    if (!DocumentView && !hasRenderedDocument.current) {
       getDocumentView(existingDocID)
+      hasRenderedDocument.current = true
     }
   }, [DocumentView, getDocumentView, existingDocID])
 

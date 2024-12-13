@@ -86,20 +86,21 @@ const config = buildConfig({
 
 The following options are available:
 
-| Option        | Description                                                                                                                                                           |
-|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`avatar`**      | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                              |
-| **`autoLogin`**   | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                                            |
-| **`buildPath`**   | Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                            |
-| **`components`**  | Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                        |
-| **`custom`**      | Any custom properties you wish to pass to the Admin Panel.                                                                                                            |
-| **`dateFormat`**  | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                       |
-| **`disable`**     | If set to `true`, the entire Admin Panel will be disabled.                                                                                                            |
-| **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                         |
-| **`meta`**        | Base metadata to use for the Admin Panel. [More details](./metadata). |
-| **`routes`**      | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                 |
-| **`theme`**       | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.
-| **`user`**        | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                          |
+| Option                         | Description                                                                                                                                                           |
+|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`avatar`**                   | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                              |
+| **`autoLogin`**                | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                                            |
+| **`buildPath`**                | Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                            |
+| **`components`**               | Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                        |
+| **`custom`**                   | Any custom properties you wish to pass to the Admin Panel.                                                                                                            |
+| **`dateFormat`**               | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                       |
+| **`disable`**                  | If set to `true`, the entire Admin Panel will be disabled.                                                                                                            |
+| **`livePreview`**              | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                         |
+| **`meta`**                     | Base metadata to use for the Admin Panel. [More details](./metadata).                                                                                                 |
+| **`routes`**                   | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                 |
+| **`suppressHydrationWarning`** | If set to `true`, suppresses React hydration mismatch warnings during the hydration of the root `<html>` tag. Defaults to `false`.                                      |
+| **`theme`**                    | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.                                                                                      |
+| **`user`**                     | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                          |
 
 <Banner type="success">
   <strong>Reminder:</strong>
@@ -143,7 +144,7 @@ It is also possible to allow multiple user types into the Admin Panel with limit
 - `super-admin` - full access to the Admin Panel to perform any action
 - `editor` - limited access to the Admin Panel to only manage content
 
-To do this, add a `roles` or similar field to your auth-enabled Collection, then use the `access.admin` property to grant or deny access based on the value of that field. See [Access Control](/docs/access-control/overview) for full details. For a complete, working example of role-based access control, check out the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/payload).
+To do this, add a `roles` or similar field to your auth-enabled Collection, then use the `access.admin` property to grant or deny access based on the value of that field. See [Access Control](/docs/access-control/overview) for full details. For a complete, working example of role-based access control, check out the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth).
 
 ## Customizing Routes
 

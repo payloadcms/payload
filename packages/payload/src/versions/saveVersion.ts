@@ -167,16 +167,15 @@ export const saveVersion = async ({
       }
     }
   } catch (err) {
-    let errorMessage: string
+    let errorMessage: string | undefined
 
     if (collection) {
-      errorMessage = `There was an error while saving a version for the ${collection.labels.singular} with ID ${id}.`
+      errorMessage = `There was an error while saving a version for the ${typeof collection.labels.singular === 'string' ? collection.labels.singular : collection.slug} with ID ${id}.`
     }
     if (global) {
-      errorMessage = `There was an error while saving a version for the global ${global.label}.`
+      errorMessage = `There was an error while saving a version for the global ${typeof global.label === 'string' ? global.label : global.slug}.`
     }
-    payload.logger.error(errorMessage)
-    payload.logger.error(err)
+    payload.logger.error({ err, msg: errorMessage })
     return
   }
 

@@ -21,11 +21,17 @@ export function parseJSXToAST({
   // Remove "position" keys
   const parseTree = (tree: object) => {
     for (const key in tree) {
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       if (key === 'position' && tree[key].start && tree[key].end) {
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         delete tree[key]
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       } else if (typeof tree[key] === 'object') {
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         parseTree(tree[key])
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       } else if (Array.isArray(tree[key])) {
+        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         for (const item of tree[key]) {
           parseTree(item)
         }

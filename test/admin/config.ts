@@ -17,6 +17,7 @@ import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
+import { CollectionNotInView } from './collections/NotInView.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
 import { Users } from './collections/Users.js'
@@ -27,6 +28,7 @@ import { GlobalGroup1A } from './globals/Group1A.js'
 import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
+import { GlobalNotInView } from './globals/NotInView.js'
 import { Settings } from './globals/Settings.js'
 import { seed } from './seed.js'
 import {
@@ -61,7 +63,7 @@ export default buildConfigWithDefaults({
         Button: '/components/Logout/index.js#Logout',
       },
       providers: [
-        '/components/CustomProvider/index.js#CustomProvider',
+        '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
       ],
       views: {
@@ -143,6 +145,7 @@ export default buildConfigWithDefaults({
     Posts,
     Users,
     CollectionHidden,
+    CollectionNotInView,
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
@@ -159,6 +162,7 @@ export default buildConfigWithDefaults({
   ],
   globals: [
     GlobalHidden,
+    GlobalNotInView,
     GlobalNoApiView,
     Global,
     CustomGlobalViews1,

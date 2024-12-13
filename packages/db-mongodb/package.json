@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "3.0.0",
+  "version": "3.7.0",
   "description": "The officially supported MongoDB database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "http-status": "1.6.2",
-    "mongoose": "8.8.1",
+    "mongoose": "8.8.3",
     "mongoose-aggregate-paginate-v2": "1.1.2",
     "mongoose-paginate-v2": "1.8.5",
     "prompts": "2.4.2",

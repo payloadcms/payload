@@ -29,6 +29,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
+        isLoading: true,
       }
 
       withNewRow.splice(rowIndex, 0, newRow)
@@ -43,6 +44,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       // add new row to array _field state_
       const { remainingFields, rows: siblingRows } = separateRows(path, state)
+
       siblingRows.splice(rowIndex, 0, subFieldState)
 
       const newState: FormState = {
@@ -198,6 +200,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...flattenRows(path, rows),
         [path]: {
           ...state[path],
+          requiresRender: true,
           rows: rowStateCopy,
         },
       }

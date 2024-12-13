@@ -17,6 +17,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Odkaz',
     loadingWithEllipsis: 'Načítání...',
   },
+  da: {
+    label: 'Link',
+    loadingWithEllipsis: 'Indlæser...',
+  },
   de: {
     label: 'Verknüpfung',
     loadingWithEllipsis: 'Laden...',
@@ -86,7 +90,7 @@ export const i18n: Partial<GenericLanguages> = {
     loadingWithEllipsis: 'Se încarcă...',
   },
   rs: {
-    label: 'Veza',
+    label: 'Веза',
     loadingWithEllipsis: 'Учитавање...',
   },
   'rs-latin': {

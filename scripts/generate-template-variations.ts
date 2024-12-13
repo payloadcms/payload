@@ -36,6 +36,10 @@ type TemplateVariations = {
   envNames?: {
     dbUri: string
   }
+  /**
+   * @default false
+   */
+  skipReadme?: boolean
   configureConfig?: boolean
   generateLockfile?: boolean
 }
@@ -92,6 +96,7 @@ async function main() {
         // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
+      skipReadme: true,
     },
     {
       name: 'payload-postgres-template',
@@ -124,6 +129,7 @@ async function main() {
       name: 'blank',
       dirname: 'blank',
       db: 'mongodb',
+      generateLockfile: true,
       storage: 'localDisk',
       sharp: true,
       // The blank template is used as a base for create-payload-app functionality,
@@ -151,6 +157,7 @@ async function main() {
     envNames,
     sharp,
     configureConfig,
+    skipReadme = false,
   } of variations) {
     header(`Generating ${name}...`)
     const destDir = path.join(templatesDir, dirname)
@@ -160,6 +167,7 @@ async function main() {
       '.next',
       '.env$',
       'pnpm-lock.yaml',
+      ...(skipReadme ? ['README.md'] : ['']),
     ])
 
     log(`Copied to ${destDir}`)
@@ -180,18 +188,30 @@ async function main() {
       await writeEnvExample({
         destDir,
         envNames,
+        dbType: db,
       })
     }
 
-    await generateReadme({
-      destDir,
-      data: {
-        name,
-        description: name, // TODO: Add descriptions
-        attributes: { db, storage },
-        ...(vercelDeployButtonLink && { vercelDeployButtonLink }),
-      },
-    })
+    if (!skipReadme) {
+      await generateReadme({
+        destDir,
+        data: {
+          name,
+          description: name, // TODO: Add descriptions
+          attributes: { db, storage },
+          ...(vercelDeployButtonLink && { vercelDeployButtonLink }),
+        },
+      })
+    }
+
+    if (generateLockfile) {
+      log('Generating pnpm-lock.yaml')
+      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
+    } else {
+      log('Installing dependencies without generating lockfile')
+      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
+      await fs.rm(`${destDir}/pnpm-lock.yaml`, { force: true })
+    }
 
     // Copy in initial migration if db is postgres. This contains user and media.
     if (db === 'postgres' || db === 'vercel-postgres') {
@@ -214,15 +234,11 @@ async function main() {
         cwd: destDir,
         env: {
           ...process.env,
+          PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
-          DATABASE_URI: 'postgres://localhost:5432/payloadtests',
+          DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/payloadtests',
         },
       })
-    }
-
-    if (generateLockfile) {
-      log('Generating pnpm-lock.yaml')
-      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
     }
 
     // TODO: Email?
@@ -273,22 +289,35 @@ ${description}
 async function writeEnvExample({
   destDir,
   envNames,
+  dbType,
 }: {
   destDir: string
   envNames?: TemplateVariations['envNames']
+  dbType: DbType
 }) {
   const envExamplePath = path.join(destDir, '.env.example')
   const envFileContents = await fs.readFile(envExamplePath, 'utf8')
+
   const fileContents = envFileContents
     .split('\n')
     .filter((e) => e)
-    .map((l) =>
-      envNames?.dbUri && l.startsWith('DATABASE_URI')
-        ? l.replace('DATABASE_URI', envNames.dbUri)
-        : l,
-    )
+    .map((l) => {
+      if (l.startsWith('DATABASE_URI')) {
+        // Use db-appropriate connection string
+        if (dbType.includes('postgres')) {
+          l = 'DATABASE_URI=postgresql://127.0.0.1:5432/payloadtests'
+        }
+
+        // Replace DATABASE_URI with the correct env name if set
+        if (envNames?.dbUri) {
+          l = l.replace('DATABASE_URI', envNames.dbUri)
+        }
+      }
+      return l
+    })
     .join('\n')
 
+  console.log(`Writing to ${envExamplePath}`)
   await fs.writeFile(envExamplePath, fileContents)
 }
 
@@ -302,7 +331,7 @@ function log(message: string) {
 function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1]) {
   try {
     console.log(`Executing: ${command}`)
-    execSync(command, options)
+    execSync(command, { stdio: 'inherit', ...options })
   } catch (error) {
     if (error instanceof Error) {
       const stderr = (error as any).stderr?.toString()

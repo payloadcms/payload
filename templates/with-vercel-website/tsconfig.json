@@ -2,11 +2,11 @@
   "compilerOptions": {
     "baseUrl": ".",
     "esModuleInterop": true,
-    "target": "es6",
+    "target": "ES2022",
     "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
     ],
     "allowJs": true,
     "skipLibCheck": true,
@@ -43,7 +43,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "redirects.js",
-    "next.config.js"
+    "next.config.js",
+    "next-sitemap.config.cjs"
   ],
   "exclude": [
     "node_modules"

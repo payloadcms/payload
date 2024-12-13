@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -19,6 +20,7 @@ import {
   arrayFieldsSlug,
   blockFieldsSlug,
   collapsibleFieldsSlug,
+  customIdSlug,
   tabsFields2Slug,
   tabsFieldsSlug,
 } from './slugs.js'
@@ -48,6 +50,7 @@ describe('fields', () => {
 
     await ensureCompilationIsDone({ page, serverURL })
   })
+
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
@@ -538,6 +541,26 @@ describe('fields', () => {
       const fieldRelyingOnSiblingData = page.locator('input#field-reliesOnParentGroup')
       await expect(fieldRelyingOnSiblingData).toBeVisible()
     })
+
+    test('should not render conditional fields when adding array rows', async () => {
+      await page.goto(url.create)
+      const addRowButton = page.locator('.array-field__add-row')
+      const fieldWithConditionSelector =
+        'input#field-arrayWithConditionalField__0__textWithCondition'
+      await addRowButton.click()
+
+      const wasFieldAttached = await page
+        .waitForSelector(fieldWithConditionSelector, {
+          state: 'attached',
+          timeout: 100, // A small timeout to catch any transient rendering
+        })
+        .catch(() => false) // If it doesn't appear, this resolves to `false`
+
+      expect(wasFieldAttached).toBeFalsy()
+      const fieldToToggle = page.locator('input#field-enableConditionalFields')
+      await fieldToToggle.click()
+      await expect(page.locator(fieldWithConditionSelector)).toBeVisible()
+    })
   })
 
   describe('tabs', () => {
@@ -586,6 +609,33 @@ describe('fields', () => {
       await expect(async () => await expect(tab2).toHaveClass(/--active/)).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
+    })
+  })
+
+  describe('id', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, customIdSlug)
+    })
+
+    function createCustomIDDoc(id: string) {
+      return payload.create({
+        collection: customIdSlug,
+        data: {
+          id,
+        },
+      })
+    }
+
+    test('allow create of non standard ID', async () => {
+      await createCustomIDDoc('id 1')
+      await page.goto(url.list)
+
+      await navigateToDoc(page, url)
+
+      // Page should load and ID should be correct
+      await expect(page.locator('#field-id')).toHaveValue('id 1')
+      await expect(page.locator('.id-label')).toContainText('id 1')
     })
   })
 })

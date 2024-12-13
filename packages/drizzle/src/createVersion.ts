@@ -49,7 +49,7 @@ export async function createVersion<T extends TypeWithID>(
     adapter: this,
     data,
     db,
-    fields: buildVersionCollectionFields(this.payload.config, collection),
+    fields: buildVersionCollectionFields(this.payload.config, collection, true),
     operation: 'create',
     req,
     select,
@@ -66,6 +66,7 @@ export async function createVersion<T extends TypeWithID>(
         SET latest = false
         WHERE ${table.id} != ${result.id}
           AND ${table.parent} = ${parent}
+          AND ${table.updatedAt} < ${result.updatedAt}
       `,
     })
   }

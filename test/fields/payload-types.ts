@@ -33,12 +33,14 @@ export interface Config {
     'lexical-localized-fields': LexicalLocalizedField;
     lexicalObjectReferenceBug: LexicalObjectReferenceBug;
     users: User;
+    LexicalInBlock: LexicalInBlock;
     'array-fields': ArrayField;
     'block-fields': BlockField;
     'checkbox-fields': CheckboxField;
     'code-fields': CodeField;
     'collapsible-fields': CollapsibleField;
     'conditional-logic': ConditionalLogic;
+    'custom-id': CustomId;
     'date-fields': DateField;
     'email-fields': EmailField;
     'radio-fields': RadioField;
@@ -74,12 +76,14 @@ export interface Config {
     'lexical-localized-fields': LexicalLocalizedFieldsSelect<false> | LexicalLocalizedFieldsSelect<true>;
     lexicalObjectReferenceBug: LexicalObjectReferenceBugSelect<false> | LexicalObjectReferenceBugSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    LexicalInBlock: LexicalInBlockSelect<false> | LexicalInBlockSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'block-fields': BlockFieldsSelect<false> | BlockFieldsSelect<true>;
     'checkbox-fields': CheckboxFieldsSelect<false> | CheckboxFieldsSelect<true>;
     'code-fields': CodeFieldsSelect<false> | CodeFieldsSelect<true>;
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
     'conditional-logic': ConditionalLogicSelect<false> | ConditionalLogicSelect<true>;
+    'custom-id': CustomIdSelect<false> | CustomIdSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
@@ -121,9 +125,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -391,6 +395,37 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalInBlock".
+ */
+export interface LexicalInBlock {
+  id: string;
+  blocks?:
+    | {
+        lexical?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'lexicalInBlock2';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -834,6 +869,9 @@ export interface BlockField {
 export interface TextField {
   id: string;
   text: string;
+  hiddenTextField?: string | null;
+  adminHiddenTextField?: string | null;
+  disabledTextField?: string | null;
   localizedText?: string | null;
   i18nText?: string | null;
   defaultString?: string | null;
@@ -945,6 +983,15 @@ export interface ConditionalLogic {
   group2?: {
     group2Field?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id".
+ */
+export interface CustomId {
+  id: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1560,20 +1607,7 @@ export interface TabsField {
     | number
     | boolean
     | null;
-  tab: {
-    array: {
-      text: string;
-      id?: string | null;
-    }[];
-    text?: string | null;
-    defaultValue?: string | null;
-    arrayInRow?:
-      | {
-          textInArrayInRow?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
+  tab: TabWithName;
   namedTabWithDefaultValue?: {
     defaultValue?: string | null;
   };
@@ -1610,6 +1644,24 @@ export interface TabsField {
   };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TabWithName".
+ */
+export interface TabWithName {
+  array: {
+    text: string;
+    id?: string | null;
+  }[];
+  text?: string | null;
+  defaultValue?: string | null;
+  arrayInRow?:
+    | {
+        textInArrayInRow?: string | null;
+        id?: string | null;
+      }[]
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1773,6 +1825,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'LexicalInBlock';
+        value: string | LexicalInBlock;
+      } | null)
+    | ({
         relationTo: 'array-fields';
         value: string | ArrayField;
       } | null)
@@ -1795,6 +1851,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditional-logic';
         value: string | ConditionalLogic;
+      } | null)
+    | ({
+        relationTo: 'custom-id';
+        value: string | CustomId;
       } | null)
     | ({
         relationTo: 'date-fields';
@@ -2012,6 +2072,25 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalInBlock_select".
+ */
+export interface LexicalInBlockSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        lexicalInBlock2?:
+          | T
+          | {
+              lexical?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "array-fields_select".
  */
 export interface ArrayFieldsSelect<T extends boolean = true> {
@@ -2021,7 +2100,6 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
         anotherText?: T;
-        uiField?: T;
         localizedText?: T;
         subArray?:
           | T
@@ -2092,10 +2170,8 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
   externallyUpdatedArray?:
     | T
     | {
-        customField?: T;
         id?: T;
       };
-  ui?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2481,7 +2557,6 @@ export interface BlockFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  ui?: T;
   relationshipBlocks?:
     | T
     | {
@@ -2584,6 +2659,15 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
     | {
         group2Field?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id_select".
+ */
+export interface CustomIdSelect<T extends boolean = true> {
+  id?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3015,7 +3099,6 @@ export interface TabsFields2Select<T extends boolean = true> {
  */
 export interface TabsFieldsSelect<T extends boolean = true> {
   sidebarField?: T;
-  demoUIField?: T;
   array?:
     | T
     | {
@@ -3154,6 +3237,9 @@ export interface TabsFieldsSelect<T extends boolean = true> {
  */
 export interface TextFieldsSelect<T extends boolean = true> {
   text?: T;
+  hiddenTextField?: T;
+  adminHiddenTextField?: T;
+  disabledTextField?: T;
   localizedText?: T;
   i18nText?: T;
   defaultString?: T;
@@ -3294,7 +3380,6 @@ export interface UploadsRestrictedSelect<T extends boolean = true> {
  */
 export interface UiFieldsSelect<T extends boolean = true> {
   text?: T;
-  uiCustomClient?: T;
   updatedAt?: T;
   createdAt?: T;
 }

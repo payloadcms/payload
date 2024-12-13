@@ -92,6 +92,49 @@ const ConditionalLogic: CollectionConfig = {
         condition: ({ groupSelection }) => groupSelection === 'group2',
       },
     },
+    {
+      name: 'enableConditionalFields',
+      type: 'checkbox',
+    },
+    {
+      name: 'arrayWithConditionalField',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'textWithCondition',
+          type: 'text',
+          admin: {
+            condition: (data) => data.enableConditionalFields,
+          },
+        },
+      ],
+    },
+    {
+      name: 'blocksWithConditionalField',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'blockWithConditionalField',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+            {
+              name: 'textWithCondition',
+              type: 'text',
+              admin: {
+                condition: (data) => data.enableConditionalFields,
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

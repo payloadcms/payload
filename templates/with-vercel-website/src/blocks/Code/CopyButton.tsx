@@ -1,6 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { CopyIcon } from '@payloadcms/ui'
+import { CopyIcon } from '@payloadcms/ui/icons/Copy'
 import { useState } from 'react'
 
 export function CopyButton({ code }: { code: string }) {
@@ -26,10 +26,7 @@ export function CopyButton({ code }: { code: string }) {
         }}
       >
         <p>{text}</p>
-
-        <div className="w-6 h-6 dark:invert">
-          <CopyIcon />
-        </div>
+        <CopyIcon />
       </Button>
     </div>
   )

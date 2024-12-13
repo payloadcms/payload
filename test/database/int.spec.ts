@@ -13,7 +13,13 @@ import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
 import { Types } from 'mongoose'
 import path from 'path'
-import { commitTransaction, initTransaction, killTransaction, QueryError } from 'payload'
+import {
+  commitTransaction,
+  initTransaction,
+  isolateObjectProperty,
+  killTransaction,
+  QueryError,
+} from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
@@ -252,9 +258,26 @@ describe('database', () => {
 
     it('should run migrate:down', async () => {
       // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (!isMongoose(payload)) {
         return
       }
+
+      // migrate existing if there any
+      await payload.db.migrate()
+
+      await payload.db.createMigration({
+        forceAcceptWarning: true,
+        migrationName: 'migration_to_down',
+        payload,
+      })
+
+      // migrate current to test
+      await payload.db.migrate()
+
+      const { docs } = await payload.find({ collection: 'payload-migrations' })
+      expect(docs.some((doc) => doc.name.includes('migration_to_down'))).toBeTruthy()
+
       let error
       try {
         await payload.db.migrateDown()
@@ -267,7 +290,9 @@ describe('database', () => {
       })
 
       expect(error).toBeUndefined()
-      expect(migrations.docs).toHaveLength(0)
+      expect(migrations.docs.some((doc) => doc.name.includes('migration_to_down'))).toBeFalsy()
+
+      await payload.delete({ collection: 'payload-migrations', where: {} })
     })
 
     it('should run migrate:refresh', async () => {
@@ -571,7 +596,7 @@ describe('database', () => {
               data: {
                 title,
               },
-              req,
+              req: isolateObjectProperty(req, 'transactionID'),
             })
             .then((res) => {
               first = res
@@ -583,7 +608,7 @@ describe('database', () => {
               data: {
                 title,
               },
-              req,
+              req: isolateObjectProperty(req, 'transactionID'),
             })
             .then((res) => {
               second = res
@@ -591,18 +616,15 @@ describe('database', () => {
 
           await Promise.all([firstReq, secondReq])
 
-          await commitTransaction(req)
           expect(req.transactionID).toBeUndefined()
 
           const firstResult = await payload.findByID({
             id: first.id,
             collection,
-            req,
           })
           const secondResult = await payload.findByID({
             id: second.id,
             collection,
-            req,
           })
 
           expect(firstResult.id).toStrictEqual(first.id)
@@ -1053,5 +1075,38 @@ describe('database', () => {
     })
 
     expect(relationBDocs.docs).toHaveLength(0)
+  })
+
+  it('should upsert', async () => {
+    const postShouldCreated = await payload.db.upsert({
+      req: {},
+      collection: 'posts',
+      data: {
+        title: 'some-title-here',
+      },
+      where: {
+        title: {
+          equals: 'some-title-here',
+        },
+      },
+    })
+
+    expect(postShouldCreated).toBeTruthy()
+
+    const postShouldUpdated = await payload.db.upsert({
+      req: {},
+      collection: 'posts',
+      data: {
+        title: 'some-title-here',
+      },
+      where: {
+        title: {
+          equals: 'some-title-here',
+        },
+      },
+    })
+
+    // Should stay the same ID
+    expect(postShouldCreated.id).toBe(postShouldUpdated.id)
   })
 })

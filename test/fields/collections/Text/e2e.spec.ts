@@ -1,8 +1,14 @@
 import type { Page } from '@playwright/test'
+import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
+import { openListColumns } from 'helpers/e2e/openListColumns.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
+import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
 import path from 'path'
 import { wait } from 'payload/shared'
+import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -13,6 +19,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  selectTableRow,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -67,6 +74,93 @@ describe('Text', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  describe('hidden and disabled fields', () => {
+    test('should not render top-level hidden fields in the UI', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('#field-hiddenTextField')).toBeHidden()
+      await page.goto(url.list)
+      await expect(page.locator('.cell-hiddenTextField')).toBeHidden()
+      await expect(page.locator('#heading-hiddenTextField')).toBeHidden()
+
+      const columnContainer = await openListColumns(page, {})
+
+      await expect(
+        columnContainer.locator('.column-selector__column', {
+          hasText: exactText('Hidden Text Field'),
+        }),
+      ).toBeHidden()
+
+      await selectTableRow(page, 'Seeded text document')
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const hiddenFieldOption = page.locator('.rs__option', {
+        hasText: exactText('Hidden Text Field'),
+      })
+
+      await expect(hiddenFieldOption).toBeHidden()
+    })
+
+    test('should not show disabled fields in the UI', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('#field-disabledTextField')).toHaveCount(0)
+      await page.goto(url.list)
+      await expect(page.locator('.cell-disabledTextField')).toBeHidden()
+      await expect(page.locator('#heading-disabledTextField')).toBeHidden()
+
+      const columnContainer = await openListColumns(page, {})
+
+      await expect(
+        columnContainer.locator('.column-selector__column', {
+          hasText: exactText('Disabled Text Field'),
+        }),
+      ).toBeHidden()
+
+      await selectTableRow(page, 'Seeded text document')
+
+      await page.locator('.edit-many__toggle').click()
+
+      await page.locator('.field-select .rs__control').click()
+
+      const disabledFieldOption = page.locator('.rs__option', {
+        hasText: exactText('Disabled Text Field'),
+      })
+
+      await expect(disabledFieldOption).toBeHidden()
+    })
+
+    test('should render hidden input for admin.hidden fields', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('#field-adminHiddenTextField')).toHaveAttribute('type', 'hidden')
+      await page.goto(url.list)
+      await expect(page.locator('.cell-adminHiddenTextField').first()).toBeVisible()
+      await expect(page.locator('#heading-adminHiddenTextField')).toBeVisible()
+
+      const columnContainer = await openListColumns(page, {})
+
+      await expect(
+        columnContainer.locator('.column-selector__column', {
+          hasText: exactText('Admin Hidden Text Field'),
+        }),
+      ).toBeVisible()
+
+      await selectTableRow(page, 'Seeded text document')
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const adminHiddenFieldOption = page.locator('.rs__option', {
+        hasText: exactText('Admin Hidden Text Field'),
+      })
+
+      await expect(adminHiddenFieldOption).toBeVisible()
+    })
+
+    test('hidden and disabled fields should not break subsequent field paths', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('#custom-field-schema-path')).toHaveText('text-fields._index-4')
+    })
+  })
+
   test('should display field in list view', async () => {
     await page.goto(url.list)
     const textCell = page.locator('.row-1 .cell-text')
@@ -89,7 +183,7 @@ describe('Text', () => {
 
   test('should show field in filter when admin.disableListColumn is true', async () => {
     await page.goto(url.list)
-    await page.locator('.list-controls__toggle-where').click()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const initialField = page.locator('.condition__field')
@@ -100,7 +194,7 @@ describe('Text', () => {
     ).toBeVisible()
   })
 
-  test('should display field in list view column selector if admin.disableListColumn is false and admin.disableListFilter is true', async () => {
+  test('should display field in list view column selector despite admin.disableListFilter', async () => {
     await page.goto(url.list)
     await page.locator('.list-controls__toggle-columns').click()
 
@@ -114,9 +208,72 @@ describe('Text', () => {
     ).toBeVisible()
   })
 
+  test('should disable field when admin.disableListFilter is true but still exists in the query', async () => {
+    await page.goto(
+      `${url.list}${qs.stringify(
+        {
+          where: {
+            or: [
+              {
+                and: [
+                  {
+                    disableListFilterText: {
+                      equals: 'Disable List Filter Text',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        { addQueryPrefix: true },
+      )}`,
+    )
+
+    await openListFilters(page, {})
+
+    const condition = page.locator('.condition__field')
+    await expect(condition.locator('input.rs__input')).toBeDisabled()
+    await expect(page.locator('.condition__operator input.rs__input')).toBeDisabled()
+    await expect(page.locator('.condition__value input.condition-value-text')).toBeDisabled()
+    await expect(condition.locator('.rs__single-value')).toHaveText('Disable List Filter Text')
+    await page.locator('button.condition__actions-add').click()
+    const condition2 = page.locator('.condition__field').nth(1)
+    await condition2.click()
+    await expect(
+      condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
+    ).toBeHidden()
+  })
+
+  test('should respect admin.disableListColumn despite preferences', async () => {
+    await upsertPrefs<Config, GeneratedTypes<any>>({
+      payload,
+      user: client.user,
+      value: {
+        columns: [
+          {
+            accessor: 'disableListColumnText',
+            active: true,
+          },
+        ],
+      },
+    })
+
+    await page.goto(url.list)
+    await openListColumns(page, {})
+    await expect(
+      page.locator(`.column-selector .column-selector__column`, {
+        hasText: exactText('Disable List Column Text'),
+      }),
+    ).toBeHidden()
+
+    await expect(page.locator('#heading-disableListColumnText')).toBeHidden()
+    await expect(page.locator('table .row-1 .cell-disableListColumnText')).toBeHidden()
+  })
+
   test('should hide field in filter when admin.disableListFilter is true', async () => {
     await page.goto(url.list)
-    await page.locator('.list-controls__toggle-where').click()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const initialField = page.locator('.condition__field')
@@ -129,7 +286,15 @@ describe('Text', () => {
 
   test('should display i18n label in cells when missing field data', async () => {
     await page.goto(url.list)
+    await page.waitForURL(new RegExp(`${url.list}.*\\?.*`))
+
+    await toggleColumn(page, {
+      targetState: 'on',
+      columnLabel: 'Text en',
+    })
+
     const textCell = page.locator('.row-1 .cell-i18nText')
+
     await expect(textCell).toHaveText('<No Text en>')
   })
 
@@ -173,8 +338,7 @@ describe('Text', () => {
     await page.goto(url.list)
 
     // open the first filter options
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const firstInitialField = page.locator('.condition__field')
@@ -215,8 +379,7 @@ describe('Text', () => {
     await page.goto(url.list)
 
     // open the first filter options
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const firstInitialField = page.locator('.condition__field')
@@ -246,8 +409,7 @@ describe('Text', () => {
     await page.goto(url.list)
 
     // open the first filter options
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const firstInitialField = page.locator('.condition__field')

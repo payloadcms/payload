@@ -39,7 +39,7 @@ import './index.scss'
 
 import { v4 as uuid } from 'uuid'
 
-import type { InlineBlockFields } from '../nodes/InlineBlocksNode.js'
+import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
@@ -86,8 +86,18 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     initialLexicalFormState?.[formData.id]?.formState,
   )
 
+  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    initialState?.['_components']?.customComponents?.BlockLabel,
+  )
+
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    initialState?.['_components']?.customComponents?.Block,
+  )
+
   const drawerSlug = formatDrawerSlug({
-    slug: `lexical-inlineBlocks-create-` + uuidFromContext,
+    slug: `lexical-inlineBlocks-create-${uuidFromContext}-${formData.id}`,
     depth: editDepth,
   })
   const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
@@ -194,6 +204,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
       if (state) {
         setInitialState(state)
+        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+        setCustomBlock(state['_components']?.customComponents?.Block)
       }
     }
 
@@ -219,7 +231,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
    * HANDLE ONCHANGE
    */
   const onChange = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
       abortAndIgnore(onChangeAbortControllerRef.current)
 
       const controller = new AbortController()
@@ -235,12 +247,18 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         formState: prevFormState,
         globalSlug,
         operation: 'update',
+        renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
       })
 
       if (!state) {
         return prevFormState
+      }
+
+      if (submit) {
+        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+        setCustomBlock(state['_components']?.customComponents?.Block)
       }
 
       return state
@@ -258,7 +276,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
    * HANDLE FORM SUBMIT
    */
   const onFormSubmit = useCallback(
-    (formState) => {
+    (formState: FormState) => {
       const newData: any = reduceFieldsToValues(formState)
       newData.blockType = formData.blockType
       editor.update(() => {
@@ -270,9 +288,6 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     },
     [editor, nodeKey, formData],
   )
-
-  const CustomLabel = initialState?.['_components']?.customComponents?.BlockLabel
-  const CustomBlock = initialState?.['_components']?.customComponents?.Block
 
   const RemoveButton = useMemo(
     () => () => (
@@ -299,7 +314,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         buttonStyle="icon-label"
         className={`${baseClass}__editButton`}
         disabled={readOnly}
-        el="div"
+        el="button"
         icon="edit"
         onClick={() => {
           toggleDrawer()
@@ -314,7 +329,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const InlineBlockContainer = useMemo(
     () =>
-      ({ children }) => (
+      ({ children }: { children: React.ReactNode }) => (
         <div
           className={[
             baseClass,
@@ -341,7 +356,12 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   return (
     <Form
-      beforeSubmit={[onChange]}
+      beforeSubmit={[
+        async ({ formState }) => {
+          // This is only called when form is submitted from drawer
+          return await onChange({ formState, submit: true })
+        },
+      ]}
       disableValidationOnSubmit
       fields={clientBlock.fields}
       initialState={initialState || {}}
@@ -371,7 +391,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
                 permissions={permissions}
                 readOnly={false}
               />
-              <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+              <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
             </>
           ) : null}
         </Drawer>
