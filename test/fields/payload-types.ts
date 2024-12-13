@@ -969,7 +969,7 @@ export interface ConditionalLogic {
   id: string;
   text: string;
   toggleField?: boolean | null;
-  fieldToToggle?: string | null;
+  fieldWithCondition?: string | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
@@ -983,6 +983,23 @@ export interface ConditionalLogic {
   group2?: {
     group2Field?: string | null;
   };
+  enableConditionalFields?: boolean | null;
+  arrayWithConditionalField?:
+    | {
+        text?: string | null;
+        textWithCondition?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksWithConditionalField?:
+    | {
+        text?: string | null;
+        textWithCondition?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockWithConditionalField';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2639,7 +2656,7 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
 export interface ConditionalLogicSelect<T extends boolean = true> {
   text?: T;
   toggleField?: T;
-  fieldToToggle?: T;
+  fieldWithCondition?: T;
   userConditional?: T;
   parentGroup?:
     | T
@@ -2658,6 +2675,26 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
     | T
     | {
         group2Field?: T;
+      };
+  enableConditionalFields?: T;
+  arrayWithConditionalField?:
+    | T
+    | {
+        text?: T;
+        textWithCondition?: T;
+        id?: T;
+      };
+  blocksWithConditionalField?:
+    | T
+    | {
+        blockWithConditionalField?:
+          | T
+          | {
+              text?: T;
+              textWithCondition?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;
