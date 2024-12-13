@@ -13,6 +13,7 @@ import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { conditionalLogicSlug } from '../../slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -49,7 +50,7 @@ describe('Conditional Logic', () => {
       // prebuild,
     }))
 
-    url = new AdminUrlUtil(serverURL, 'conditional-logic')
+    url = new AdminUrlUtil(serverURL, conditionalLogicSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()

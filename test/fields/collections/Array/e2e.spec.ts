@@ -309,4 +309,20 @@ describe('Array', () => {
     const collapsedArrayRow = page.locator('#collapsedArray-row-0 .collapsible--collapsed')
     await expect(collapsedArrayRow).toBeHidden()
   })
+
+  describe('sortable arrays', () => {
+    test('should have disabled admin sorting', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort > div > div > .array-actions__action-chevron')
+      expect(await field.count()).toEqual(0)
+    })
+
+    test('the drag handle should be hidden', async () => {
+      await page.goto(url.create)
+      const field = page.locator(
+        '#field-disableSort > .blocks-field__rows > div > div > .collapsible__drag',
+      )
+      expect(await field.count()).toEqual(0)
+    })
+  })
 })
