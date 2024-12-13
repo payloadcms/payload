@@ -9,6 +9,7 @@ import type { UseDraggableSortableReturn } from '../../elements/DraggableSortabl
 import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
@@ -25,6 +26,7 @@ type ArrayRowProps = {
   readonly fields: ClientField[]
   readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
+  readonly isLoading?: boolean
   readonly isSortable?: boolean
   readonly labels: Partial<ArrayField['labels']>
   readonly moveRow: (fromIndex: number, toIndex: number) => void
@@ -50,6 +52,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   forceRender = false,
   hasMaxRows,
   isDragging,
+  isLoading,
   isSortable,
   labels,
   listeners,
@@ -85,7 +88,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  console.log(fields)
   return (
     <div
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
@@ -137,17 +139,21 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fields={fields}
-          forceRender={forceRender}
-          margins="small"
-          parentIndexPath=""
-          parentPath={path}
-          parentSchemaPath={schemaPath}
-          permissions={permissions === true ? permissions : permissions?.fields}
-          readOnly={readOnly}
-        />
+        {isLoading ? (
+          <ShimmerEffect />
+        ) : (
+          <RenderFields
+            className={`${baseClass}__fields`}
+            fields={fields}
+            forceRender={forceRender}
+            margins="small"
+            parentIndexPath=""
+            parentPath={path}
+            parentSchemaPath={schemaPath}
+            permissions={permissions === true ? permissions : permissions?.fields}
+            readOnly={readOnly}
+          />
+        )}
       </Collapsible>
     </div>
   )

@@ -29,6 +29,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
+        isLoading: true,
       }
 
       withNewRow.splice(rowIndex, 0, newRow)
@@ -41,6 +42,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           value: blockType,
         }
       }
+
+      // NEED TO SET ALL ROWS TO `passesCondition: false` SO THAT FORM-STATE CAN DETERMINE WHICH ROWS TO RENDER
+      // TO DO THIS WE NEED TO GENERATE PATHS FOR EACH SUBFIELD AND SET THEM INTO STATE
 
       // add new row to array _field state_
       const { remainingFields, rows: siblingRows } = separateRows(path, state)
