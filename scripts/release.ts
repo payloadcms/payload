@@ -124,7 +124,11 @@ async function main() {
 
   // Preview/Update changelog
   header(`${logPrefix}📝 Updating changelog...`)
-  const { changelog: changelogContent, releaseUrl } = await generateReleaseNotes({
+  const {
+    changelog: changelogContent,
+    releaseUrl,
+    releaseNotes,
+  } = await generateReleaseNotes({
     bump,
     dryRun,
     toVersion: 'HEAD',
@@ -132,9 +136,9 @@ async function main() {
     openReleaseUrl: true,
   })
 
-  console.log(chalk.green('\nChangelog Preview:\n'))
-  console.log(chalk.gray(changelogContent) + '\n\n')
-  console.log(`Release URL: ${chalk.dim(releaseUrl)}`)
+  console.log(chalk.green('\nFull Release Notes:\n\n'))
+  console.log(chalk.gray(releaseNotes) + '\n\n')
+  console.log(`\n\nRelease URL: ${chalk.dim(releaseUrl)}`)
 
   let packageDetails = await getPackageDetails(packagePublishList)
 

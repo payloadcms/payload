@@ -19,7 +19,9 @@ Each of these APIs share the same underlying querying language, and fully suppor
 To query your Documents, you can send any number of [Operators](#operators) through your request:
 
 ```ts
-const query = {
+import type { Where } from 'payload'
+
+const query: Where = {
   color: {
     equals: 'blue',
   },
@@ -67,7 +69,9 @@ In addition to defining simple queries, you can join multiple queries together u
 To join queries, use the `and` or `or` keys in your query object:
 
 ```ts
-const query = {
+import type { Where } from 'payload'
+
+const query: Where = {
   or: [ // highlight-line
     {
       color: {
@@ -99,7 +103,9 @@ Written in plain English, if the above query were passed to a `find` operation, 
 When working with nested properties, which can happen when using relational fields, it is possible to use the dot notation to access the nested property. For example, when working with a `Song` collection that has a `artists` field which is related to an `Artists` collection using the `name: 'artists'`. You can access a property within the collection `Artists` like so:
 
 ```js
-const query = {
+import type { Where } from 'payload'
+
+const query: Where = {
   'artists.featured': {
     // nested property name to filter on
     exists: true, // operator to use and boolean value that needs to be true
@@ -116,7 +122,9 @@ Writing queries in Payload is simple and consistent across all APIs, with only m
 The [Local API](../local-api/overview) supports the `find` operation that accepts a raw query object:
 
 ```ts
-const getPosts = async () => {
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     where: {
@@ -157,19 +165,20 @@ For this reason, we recommend to use the extremely helpful and ubiquitous [`qs-e
 
 ```ts
 import { stringify } from 'qs-esm'
+import type { Where } from 'payload'
 
-const query = {
+const query: Where = {
   color: {
     equals: 'mint',
   },
   // This query could be much more complex
-  // and QS would handle it beautifully
+  // and qs-esm would handle it beautifully
 }
 
 const getPosts = async () => {
   const stringifiedQuery = stringify(
     {
-      where: query, // ensure that `qs` adds the `where` property, too!
+      where: query, // ensure that `qs-esm` adds the `where` property, too!
     },
     { addQueryPrefix: true },
   )

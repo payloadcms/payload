@@ -274,14 +274,26 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               }),
             )
 
-            const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
+            const previousRows = previousFormState?.[path]?.rows || []
+            const collapsedRowIDsFromPrefs = preferences?.fields?.[path]?.collapsed
 
             acc.rows.push({
               id: row.id,
-              collapsed:
-                collapsedRowIDs === undefined
-                  ? field.admin.initCollapsed
-                  : collapsedRowIDs.includes(row.id),
+              collapsed: (() => {
+                // First, check if `previousFormState` has a matching row
+                const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
+                if (previousRow?.collapsed !== undefined) {
+                  return previousRow.collapsed
+                }
+
+                // If previousFormState is undefined, check preferences
+                if (collapsedRowIDsFromPrefs !== undefined) {
+                  return collapsedRowIDsFromPrefs.includes(row.id) // Check if collapsed in preferences
+                }
+
+                // If neither exists, fallback to `field.admin.initCollapsed`
+                return field.admin.initCollapsed
+              })(),
             })
 
             return acc

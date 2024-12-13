@@ -1,4 +1,4 @@
-import type { RunningJobFromTask } from './config/types/workflowTypes.js'
+import type { BaseJob, RunningJobFromTask } from './config/types/workflowTypes.js'
 
 import {
   createLocalReq,
@@ -6,6 +6,7 @@ import {
   type PayloadRequest,
   type RunningJob,
   type TypedJobs,
+  type Where,
 } from '../index.js'
 import { runJobs } from './operations/runJobs/index.js'
 
@@ -22,6 +23,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           // TTaskOrWorkflowlug with keyof TypedJobs['workflows'] removed:
           task: TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] ? TTaskOrWorkflowSlug : never
           workflow?: never
+          waitUntil?: Date
         }
       | {
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
@@ -31,6 +33,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           workflow: TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
             ? TTaskOrWorkflowSlug
             : never
+          waitUntil?: Date
         },
   ): Promise<
     TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
@@ -58,7 +61,8 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         queue,
         taskSlug: 'task' in args ? args.task : undefined,
         workflowSlug: 'workflow' in args ? args.workflow : undefined,
-      },
+        waitUntil: args.waitUntil?.toISOString() ?? undefined,
+      } as BaseJob,
       req: args.req,
     })) as TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? RunningJob<TTaskOrWorkflowSlug>
@@ -70,12 +74,28 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     overrideAccess?: boolean
     queue?: string
     req?: PayloadRequest
+    where?: Where
   }): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
     const result = await runJobs({
       limit: args?.limit,
       overrideAccess: args?.overrideAccess !== false,
       queue: args?.queue,
+      req: newReq,
+      where: args?.where,
+    })
+    return result
+  },
+
+  runByID: async (args: {
+    id: number | string
+    overrideAccess?: boolean
+    req?: PayloadRequest
+  }): Promise<ReturnType<typeof runJobs>> => {
+    const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
+    const result = await runJobs({
+      id: args.id,
+      overrideAccess: args?.overrideAccess !== false,
       req: newReq,
     })
     return result

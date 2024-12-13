@@ -16,6 +16,12 @@ By default, Payload will use transactions for all data changing operations, as l
   MongoDB requires a connection to a replicaset in order to make use of transactions.
 </Banner>
 
+<Banner type="info">
+  <strong>Note:</strong>
+  <br />
+  Transactions in SQLite are disabled by default. You need to pass `transactionOptions: {}` to enable them.
+</Banner>
+
 The initial request made to Payload will begin a new transaction and attach it to the `req.transactionID`. If you have a `hook` that interacts with the database, you can opt in to using the same transaction by passing the `req` in the arguments. For example:
 
 ```ts

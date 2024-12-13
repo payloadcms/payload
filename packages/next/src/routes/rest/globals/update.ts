@@ -1,12 +1,10 @@
 import httpStatus from 'http-status'
-import { updateOperationGlobal } from 'payload'
+import { sanitizePopulateParam, sanitizeSelectParam, updateOperationGlobal } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { GlobalRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
-import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const update: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { searchParams } = req
@@ -22,10 +20,10 @@ export const update: GlobalRouteHandler = async ({ globalConfig, req }) => {
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
     globalConfig,
-    populate: sanitizePopulate(req.query.populate),
+    populate: sanitizePopulateParam(req.query.populate),
     publishSpecificLocale,
     req,
-    select: sanitizeSelect(req.query.select),
+    select: sanitizeSelectParam(req.query.select),
   })
 
   let message = req.t('general:updatedSuccessfully')
