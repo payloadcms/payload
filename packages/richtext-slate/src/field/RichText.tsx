@@ -14,7 +14,6 @@ import {
   useEditDepth,
   useField,
   useTranslation,
-  withCondition,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { isHotkey } from 'is-hotkey'

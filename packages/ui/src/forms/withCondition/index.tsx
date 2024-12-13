@@ -7,7 +7,7 @@ import React from 'react'
 import { WatchCondition } from './WatchCondition.js'
 
 export const withCondition = <P extends MarkOptional<FieldPaths, 'indexPath' | 'path'>>(
-  Field: React.ComponentType<P> | undefined,
+  Field: React.ComponentType<P>,
 ): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
     const { path } = props

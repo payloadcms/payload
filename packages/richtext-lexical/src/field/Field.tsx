@@ -9,7 +9,6 @@ import {
   RenderCustomComponent,
   useEditDepth,
   useField,
-  withCondition,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import React, { useCallback, useMemo } from 'react'
