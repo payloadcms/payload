@@ -939,6 +939,12 @@ export type Config = {
      * Filepath to write the generated schema to
      */
     schemaOutputFile?: string
+    /**
+     * Function that returns an array of validation rules to apply to the GraphQL schema
+     *
+     * @see https://payloadcms.com/docs/graphql/overview#custom-validation-rules
+     */
+    validationRules?: (args: GraphQL.ExecutionArgs) => GraphQL.ValidationRule[]
   }
   /**
    * Tap into Payload-wide hooks.

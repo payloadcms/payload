@@ -98,14 +98,12 @@ export function configToSchema(config: SanitizedConfig): {
   const query = new GraphQL.GraphQLObjectType(graphqlResult.Query)
   const mutation = new GraphQL.GraphQLObjectType(graphqlResult.Mutation)
 
-  const schemaToCreate = {
+  const schema = new GraphQL.GraphQLSchema({
     mutation,
     query,
-  }
+  })
 
-  const schema = new GraphQL.GraphQLSchema(schemaToCreate)
-
-  const validationRules = (args) => [
+  const validationRules = (args): GraphQL.ValidationRule[] => [
     createComplexityRule({
       estimators: [
         fieldExtensionsEstimator(),
@@ -115,6 +113,7 @@ export function configToSchema(config: SanitizedConfig): {
       variables: args.variableValues,
       // onComplete: (complexity) => { console.log('Query Complexity:', complexity); },
     }),
+    ...(config?.graphQL?.validationRules(args) || []),
   ]
 
   return {
