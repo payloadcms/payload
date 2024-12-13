@@ -18,7 +18,7 @@ const ConditionalLogic: CollectionConfig = {
       type: 'checkbox',
     },
     {
-      name: 'fieldToToggle',
+      name: 'fieldWithCondition',
       type: 'text',
       required: true,
       admin: {
