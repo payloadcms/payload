@@ -10,6 +10,15 @@ export const JobsView: React.FC<ServerSideEditViewProps> = (props) => {
   const { doc } = props
 
   const retrySequences = logsToRetrySequences(doc.log)
+
+  if (!retrySequences?.length) {
+    return (
+      <Gutter>
+        <p>No logs to display</p>
+      </Gutter>
+    )
+  }
+
   return (
     <Gutter>
       <br />
