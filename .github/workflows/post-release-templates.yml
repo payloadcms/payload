@@ -40,9 +40,9 @@ jobs:
 
       - name: Wait until latest versions resolve on npm registry
         run: |
-          ./wait-until-package-version.sh payload ${{ steps.determine_tag.outputs.release_tag }}
-          ./wait-until-package-version.sh @payloadcms/translations ${{ steps.determine_tag.outputs.release_tag }}
-          ./wait-until-package-version.sh @payloadcms/next ${{ steps.determine_tag.outputs.release_tag }}
+          ./.github/workflows/wait-until-package-version.sh payload ${{ steps.determine_tag.outputs.release_tag }}
+          ./.github/workflows/wait-until-package-version.sh @payloadcms/translations ${{ steps.determine_tag.outputs.release_tag }}
+          ./.github/workflows/wait-until-package-version.sh @payloadcms/next ${{ steps.determine_tag.outputs.release_tag }}
 
   update_templates:
     needs: wait_for_release
