@@ -13,8 +13,9 @@ import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
+import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import './index.scss'
+import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'array-field'
 
@@ -52,7 +53,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   forceRender = false,
   hasMaxRows,
   isDragging,
-  isLoading,
+  isLoading: isLoadingFromProps,
   isSortable,
   labels,
   listeners,
@@ -71,6 +72,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   transform,
   transition,
 }) => {
+  const isLoading = useThrottledValue(isLoadingFromProps, 500)
+
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 

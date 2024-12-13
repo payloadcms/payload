@@ -13,6 +13,7 @@ import { Pill } from '../../elements/Pill/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
@@ -53,7 +54,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   errorCount,
   fields,
   hasMaxRows,
-  isLoading,
+  isLoading: isLoadingFromProps,
   isSortable,
   Label,
   labels,
@@ -72,6 +73,8 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   setNodeRef,
   transform,
 }) => {
+  const isLoading = useThrottledValue(isLoadingFromProps, 500)
+
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 

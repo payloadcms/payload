@@ -93,19 +93,45 @@ const ConditionalLogic: CollectionConfig = {
       },
     },
     {
-      name: 'enableArrayFields',
+      name: 'enableConditionalFields',
       type: 'checkbox',
     },
     {
-      name: 'array',
+      name: 'arrayWithConditionalField',
       type: 'array',
       fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
         {
           name: 'textWithCondition',
           type: 'text',
           admin: {
-            condition: (data) => data.enableArrayFields,
+            condition: (data) => data.enableConditionalFields,
           },
+        },
+      ],
+    },
+    {
+      name: 'blocksWithConditionalField',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'blockWithConditionalField',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+            {
+              name: 'textWithCondition',
+              type: 'text',
+              admin: {
+                condition: (data) => data.enableConditionalFields,
+              },
+            },
+          ],
         },
       ],
     },

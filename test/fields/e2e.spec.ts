@@ -545,7 +545,8 @@ describe('fields', () => {
     test('should not render conditional fields when adding array rows', async () => {
       await page.goto(url.create)
       const addRowButton = page.locator('.array-field__add-row')
-      const fieldWithConditionSelector = 'input#field-array__0__textWithCondition'
+      const fieldWithConditionSelector =
+        'input#field-arrayWithConditionalField__0__textWithCondition'
       await addRowButton.click()
 
       const wasFieldAttached = await page
@@ -556,7 +557,7 @@ describe('fields', () => {
         .catch(() => false) // If it doesn't appear, this resolves to `false`
 
       expect(wasFieldAttached).toBeFalsy()
-      const fieldToToggle = page.locator('input#field-enableArrayFields')
+      const fieldToToggle = page.locator('input#field-enableConditionalFields')
       await fieldToToggle.click()
       await expect(page.locator(fieldWithConditionSelector)).toBeVisible()
     })

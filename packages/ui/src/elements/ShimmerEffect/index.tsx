@@ -7,14 +7,22 @@ import './index.scss'
 export type ShimmerEffectProps = {
   readonly animationDelay?: string
   readonly height?: number | string
+  readonly renderDelay?: number
   readonly width?: number | string
 }
 
 export const ShimmerEffect: React.FC<ShimmerEffectProps> = ({
   animationDelay = '0ms',
   height = '60px',
+  renderDelay = 0,
   width = '100%',
 }) => {
+  const [hasDelayed] = useDelay(renderDelay, true)
+
+  if (!hasDelayed) {
+    return null
+  }
+
   return (
     <div
       className="shimmer-effect"
