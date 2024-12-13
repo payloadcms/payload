@@ -7,7 +7,6 @@ import './index.scss'
 export type ShimmerEffectProps = {
   readonly animationDelay?: string
   readonly height?: number | string
-  readonly renderDelay?: number
   readonly width?: number | string
 }
 
