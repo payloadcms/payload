@@ -13,7 +13,7 @@ export interface Config {
   collections: {
     users: User;
     pages: Page;
-    redirects: Redirect;
+    exports: Export;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -22,7 +22,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
-    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
+    exports: ExportsSelect<false> | ExportsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -90,23 +90,27 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects".
+ * via the `definition` "exports".
  */
-export interface Redirect {
+export interface Export {
   id: string;
-  from: string;
-  to?: {
-    type?: ('reference' | 'custom') | null;
-    reference?: {
-      relationTo: 'pages';
-      value: string | Page;
-    } | null;
-    url?: string | null;
-  };
-  type: '301' | '302';
-  customField?: string | null;
+  collections: {
+    slug?: string | null;
+    id?: string | null;
+  }[];
+  globals?: string[] | null;
+  format: 'json' | 'csv';
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -124,8 +128,8 @@ export interface PayloadLockedDocument {
         value: string | Page;
       } | null)
     | ({
-        relationTo: 'redirects';
-        value: string | Redirect;
+        relationTo: 'exports';
+        value: string | Export;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -197,21 +201,28 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects_select".
+ * via the `definition` "exports_select".
  */
-export interface RedirectsSelect<T extends boolean = true> {
-  from?: T;
-  to?:
+export interface ExportsSelect<T extends boolean = true> {
+  collections?:
     | T
     | {
-        type?: T;
-        reference?: T;
-        url?: T;
+        slug?: T;
+        id?: T;
       };
-  type?: T;
-  customField?: T;
+  globals?: T;
+  format?: T;
   updatedAt?: T;
   createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

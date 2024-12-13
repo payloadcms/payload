@@ -300,6 +300,7 @@ jobs:
           - i18n
           - plugin-cloud-storage
           - plugin-form-builder
+          - plugin-import-export
           - plugin-nested-docs
           - plugin-seo
           - versions
