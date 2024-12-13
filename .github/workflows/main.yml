@@ -285,18 +285,28 @@ jobs:
           - auth-basic
           - field-error-states
           - fields-relationship
-          - fields
-          - fields__collections__Blocks
           - fields__collections__Array
-          - fields__collections__Relationship
-          - fields__collections__RichText
+          - fields__collections__Blocks
+          - fields__collections__Collapsible
+          - fields__collections__ConditionalLogic
+          - fields__collections__CustomID
+          - fields__collections__Date
+          - fields__collections__Email
+          - fields__collections__Indexed
+          - fields__collections__JSON
           - fields__collections__Lexical__e2e__main
           - fields__collections__Lexical__e2e__blocks
-          - fields__collections__Date
           - fields__collections__Number
           - fields__collections__Point
+          - fields__collections__Radio
+          - fields__collections__Relationship
+          - fields__collections__RichText
+          - fields__collections__Row
+          - fields__collections__Select
           - fields__collections__Tabs
+          - fields__collections__Tabs2
           - fields__collections__Text
+          - fields__collections__UI
           - fields__collections__Upload
           - live-preview
           - localization
