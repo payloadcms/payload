@@ -32,6 +32,7 @@
     "build:payload-cloud": "turbo build --filter \"@payloadcms/payload-cloud\"",
     "build:plugin-cloud-storage": "turbo build --filter \"@payloadcms/plugin-cloud-storage\"",
     "build:plugin-form-builder": "turbo build --filter \"@payloadcms/plugin-form-builder\"",
+    "build:plugin-import-export": "turbo build --filter \"@payloadcms/plugin-import-export\"",
     "build:plugin-nested-docs": "turbo build --filter \"@payloadcms/plugin-nested-docs\"",
     "build:plugin-redirects": "turbo build --filter \"@payloadcms/plugin-redirects\"",
     "build:plugin-search": "turbo build --filter \"@payloadcms/plugin-search\"",

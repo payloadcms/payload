@@ -75,6 +75,9 @@
       "@payloadcms/richtext-slate/client": [
         "./packages/richtext-slate/src/exports/client/index.ts"
       ],
+      "@payloadcms/plugin-import-export/client": [
+        "./packages/plugin-seo/src/exports/client.ts"
+      ],
       "@payloadcms/plugin-seo/client": [
         "./packages/plugin-seo/src/exports/client.ts"
       ],
@@ -153,6 +156,9 @@
     },
     {
       "path": "./packages/plugin-seo"
+    },
+    {
+      "path": "./packages/plugin-import-export"
     },
     {
       "path": "./packages/plugin-stripe"

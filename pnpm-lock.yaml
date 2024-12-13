@@ -1037,6 +1037,19 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/plugin-import-export:
+    dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/plugin-nested-docs:
     devDependencies:
       '@payloadcms/eslint-config':
@@ -1661,6 +1674,9 @@ importers:
       '@payloadcms/plugin-form-builder':
         specifier: workspace:*
         version: link:../packages/plugin-form-builder
+      '@payloadcms/plugin-import-export':
+        specifier: workspace:*
+        version: link:../packages/plugin-import-export
       '@payloadcms/plugin-nested-docs':
         specifier: workspace:*
         version: link:../packages/plugin-nested-docs
