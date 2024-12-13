@@ -18,7 +18,7 @@ const ConditionalLogic: CollectionConfig = {
       type: 'checkbox',
     },
     {
-      name: 'fieldToToggle',
+      name: 'fieldWithCondition',
       type: 'text',
       required: true,
       admin: {
@@ -91,6 +91,49 @@ const ConditionalLogic: CollectionConfig = {
       admin: {
         condition: ({ groupSelection }) => groupSelection === 'group2',
       },
+    },
+    {
+      name: 'enableConditionalFields',
+      type: 'checkbox',
+    },
+    {
+      name: 'arrayWithConditionalField',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'textWithCondition',
+          type: 'text',
+          admin: {
+            condition: (data) => data.enableConditionalFields,
+          },
+        },
+      ],
+    },
+    {
+      name: 'blocksWithConditionalField',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'blockWithConditionalField',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+            {
+              name: 'textWithCondition',
+              type: 'text',
+              admin: {
+                condition: (data) => data.enableConditionalFields,
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
 }
