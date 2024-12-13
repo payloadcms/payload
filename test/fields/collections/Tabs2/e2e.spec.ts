@@ -65,7 +65,7 @@ describe('Tabs', () => {
   })
 
   test('should correctly save nested unnamed and named tabs', async () => {
-    await page.goto(tabsFieldsUrl2.create)
+    await page.goto(url.create)
 
     await page.locator('#field-tabsInArray .array-field__add-row').click()
     await page.locator('#field-tabsInArray__0__text').fill('tab 1 text')
