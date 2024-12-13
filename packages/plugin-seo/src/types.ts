@@ -1,5 +1,12 @@
 import type { DocumentInfoContext } from '@payloadcms/ui'
-import type { CollectionConfig, Field, GlobalConfig, PayloadRequest } from 'payload'
+import type {
+  CollectionConfig,
+  CollectionSlug,
+  Field,
+  GlobalConfig,
+  GlobalSlug,
+  PayloadRequest,
+} from 'payload'
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
@@ -63,7 +70,7 @@ export type SEOPluginConfig = {
   /**
    * Collections to include the SEO fields in
    */
-  collections?: string[]
+  collections?: CollectionSlug[]
   /**
    * Override the default fields inserted by the SEO plugin via a function that receives the default fields and returns the new fields
    *
@@ -80,7 +87,7 @@ export type SEOPluginConfig = {
   /**
    * Globals to include the SEO fields in
    */
-  globals?: string[]
+  globals?: GlobalSlug[]
   interfaceName?: string
   /**
    * Group fields into tabs, your content will be automatically put into a general tab and the SEO fields into an SEO tab
@@ -91,7 +98,7 @@ export type SEOPluginConfig = {
   /**
    * The slug of the collection used to handle image uploads
    */
-  uploadsCollection?: string
+  uploadsCollection?: CollectionSlug
 }
 
 export type Meta = {
