@@ -8,15 +8,13 @@ import { WatchCondition } from './WatchCondition.js'
 
 export const withCondition = <P extends MarkOptional<FieldPaths, 'indexPath' | 'path'>>(
   Field: React.ComponentType<P> | undefined,
-  RenderedField?: React.ReactNode,
-  pathFromArgs?: string,
 ): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
-    const { path: pathFromProps } = props
+    const { path } = props
 
     return (
-      <WatchCondition path={pathFromProps || pathFromArgs}>
-        {Field ? <Field {...props} /> : RenderedField || null}
+      <WatchCondition path={path}>
+        <Field {...props} />
       </WatchCondition>
     )
   }

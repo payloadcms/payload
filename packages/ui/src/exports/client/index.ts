@@ -190,6 +190,7 @@ export { useField } from '../../forms/useField/index.js'
 export type { FieldType, Options } from '../../forms/useField/types.js'
 
 export { withCondition } from '../../forms/withCondition/index.js'
+export { WatchCondition } from '../../forms/withCondition/WatchCondition.js'
 
 // graphics
 export { Account } from '../../graphics/Account/index.js'

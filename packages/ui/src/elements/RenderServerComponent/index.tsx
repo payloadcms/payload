@@ -3,13 +3,9 @@ import type { ImportMap, PayloadComponent } from 'payload'
 import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
-import type { additionalHOCArgs, HOC } from './WithHOC.js'
-
 import { removeUndefined } from '../../utilities/removeUndefined.js'
-import { WithHOC } from './WithHOC.js'
 
 type RenderServerComponentFn = (args: {
-  readonly additionalHOCArgs?: additionalHOCArgs
   readonly clientProps?: object
   readonly Component?:
     | PayloadComponent
@@ -17,7 +13,6 @@ type RenderServerComponentFn = (args: {
     | React.ComponentType
     | React.ComponentType[]
   readonly Fallback?: React.ComponentType
-  readonly HOC?: HOC
   readonly importMap: ImportMap
   readonly key?: string
   readonly serverProps?: object
@@ -27,11 +22,9 @@ type RenderServerComponentFn = (args: {
  * Can be used to render both MappedComponents and React Components.
  */
 export const RenderServerComponent: RenderServerComponentFn = ({
-  additionalHOCArgs,
   clientProps = {},
   Component,
   Fallback,
-  HOC,
   importMap,
   key,
   serverProps,
@@ -57,17 +50,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
       ...(isRSC ? serverProps : {}),
     })
 
-    if (HOC) {
-      return WithHOC({
-        additionalHOCArgs,
-        Component,
-        componentKey: key,
-        HOC,
-        isRSC,
-        props: sanitizedProps,
-      })
-    }
-
     return <Component key={key} {...sanitizedProps} />
   }
 
@@ -90,17 +72,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
           : {}),
         ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
       })
-
-      if (HOC) {
-        return WithHOC({
-          additionalHOCArgs,
-          Component: ResolvedComponent,
-          componentKey: key,
-          HOC,
-          isRSC,
-          props: sanitizedProps,
-        })
-      }
 
       return <ResolvedComponent key={key} {...sanitizedProps} />
     }
