@@ -1,12 +1,5 @@
 'use client'
-import type {
-  ClientBlock,
-  ClientField,
-  Labels,
-  Row,
-  SanitizedFieldPermissions,
-  SanitizedFieldsPermissions,
-} from 'payload'
+import type { ClientBlock, ClientField, Labels, Row, SanitizedFieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -17,6 +10,7 @@ import type { RenderFieldsProps } from '../../forms/RenderFields/types.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
+import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -33,6 +27,7 @@ type BlocksFieldProps = {
   errorCount: number
   fields: ClientField[]
   hasMaxRows?: boolean
+  isLoading?: boolean
   isSortable?: boolean
   Label?: React.ReactNode
   labels: Labels
@@ -58,6 +53,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   errorCount,
   fields,
   hasMaxRows,
+  isLoading,
   isSortable,
   Label,
   labels,
@@ -161,16 +157,20 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fields={fields}
-          margins="small"
-          parentIndexPath=""
-          parentPath={path}
-          parentSchemaPath={schemaPath}
-          permissions={blockPermissions}
-          readOnly={readOnly}
-        />
+        {isLoading ? (
+          <ShimmerEffect />
+        ) : (
+          <RenderFields
+            className={`${baseClass}__fields`}
+            fields={fields}
+            margins="small"
+            parentIndexPath=""
+            parentPath={path}
+            parentSchemaPath={schemaPath}
+            permissions={blockPermissions}
+            readOnly={readOnly}
+          />
+        )}
       </Collapsible>
     </div>
   )
