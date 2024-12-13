@@ -541,6 +541,26 @@ describe('fields', () => {
       const fieldRelyingOnSiblingData = page.locator('input#field-reliesOnParentGroup')
       await expect(fieldRelyingOnSiblingData).toBeVisible()
     })
+
+    test('should not render conditional fields when adding array rows', async () => {
+      await page.goto(url.create)
+      const addRowButton = page.locator('.array-field__add-row')
+      const fieldWithConditionSelector =
+        'input#field-arrayWithConditionalField__0__textWithCondition'
+      await addRowButton.click()
+
+      const wasFieldAttached = await page
+        .waitForSelector(fieldWithConditionSelector, {
+          state: 'attached',
+          timeout: 100, // A small timeout to catch any transient rendering
+        })
+        .catch(() => false) // If it doesn't appear, this resolves to `false`
+
+      expect(wasFieldAttached).toBeFalsy()
+      const fieldToToggle = page.locator('input#field-enableConditionalFields')
+      await fieldToToggle.click()
+      await expect(page.locator(fieldWithConditionSelector)).toBeVisible()
+    })
   })
 
   describe('tabs', () => {
