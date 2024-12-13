@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
+import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 let payload: Payload
@@ -61,7 +62,7 @@ describe('graphql', () => {
       })
 
       const query = `query {
-        Post(id: "${post.id}") {
+        Post(id: ${idToString(post.id, payload)}) {
           title
           relationToSelf {
             id
