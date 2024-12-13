@@ -162,3 +162,19 @@ const NoProductionIntrospection: GraphQL.ValidationRule = (context) => ({
 ## Query complexity limits
 
 Payload comes with a built-in query complexity limiter to prevent bad people from trying to slow down your server by running massive queries. To learn more, [click here](/docs/production/preventing-abuse#limiting-graphql-complexity).
+
+## Field complexity
+
+You can define custom complexity for `relationship`, `upload` and `join` type fields. This is useful if you want to assign a higher complexity to a field that is more expensive to resolve. This can help prevent users from running queries that are too complex.
+
+```ts
+
+const fieldWithComplexity = {
+  name: 'authors',
+  type: 'relationship',
+  relationship: 'authors',
+  graphQL: {
+    complexity: 10, // highlight-line
+  }
+}
+```

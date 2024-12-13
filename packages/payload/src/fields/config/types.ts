@@ -370,6 +370,17 @@ export type OptionObject = {
 
 export type Option = OptionObject | string
 
+export type FieldGraphQLType = {
+  graphQL?: {
+    /**
+     * Complexity for the query. This is used to limit the complexity of the join query.
+     *
+     * @default 10
+     */
+    complexity?: number
+  }
+}
+
 export interface FieldBase {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
@@ -844,6 +855,7 @@ type SharedUploadProperties = {
       validate?: UploadFieldSingleValidation
     }
 ) &
+  FieldGraphQLType &
   Omit<FieldBase, 'validate'>
 
 type SharedUploadPropertiesClient = FieldBaseClient &
@@ -1023,6 +1035,7 @@ type SharedRelationshipProperties = {
       validate?: RelationshipFieldSingleValidation
     }
 ) &
+  FieldGraphQLType &
   Omit<FieldBase, 'validate'>
 
 type SharedRelationshipPropertiesClient = FieldBaseClient &
@@ -1405,7 +1418,8 @@ export type JoinField = {
   type: 'join'
   validate?: never
   where?: Where
-} & FieldBase
+} & FieldBase &
+  FieldGraphQLType
 
 export type JoinFieldClient = {
   admin?: AdminClient & Pick<JoinField['admin'], 'allowCreate' | 'disableBulkEdit' | 'readOnly'>

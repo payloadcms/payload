@@ -245,7 +245,10 @@ export function buildObjectType({
             type: graphqlResult.collections[field.collection].graphQL.whereInputType,
           },
         },
-        extensions: { complexity: 10 },
+        extensions: {
+          complexity:
+            typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        },
         async resolve(parent, args, context: Context) {
           const { collection } = field
           const { limit, sort, where } = args
@@ -416,7 +419,10 @@ export function buildObjectType({
           forceNullable,
         ),
         args: relationshipArgs,
-        extensions: { complexity: 10 },
+        extensions: {
+          complexity:
+            typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        },
         async resolve(parent, args, context: Context) {
           const value = parent[field.name]
           const locale = args.locale || context.req.locale
@@ -768,7 +774,10 @@ export function buildObjectType({
           forceNullable,
         ),
         args: relationshipArgs,
-        extensions: { complexity: 10 },
+        extensions: {
+          complexity:
+            typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        },
         async resolve(parent, args, context: Context) {
           const value = parent[field.name]
           const locale = args.locale || context.req.locale
