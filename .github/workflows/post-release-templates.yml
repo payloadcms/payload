@@ -18,6 +18,11 @@ jobs:
     outputs:
       release_tag: ${{ steps.determine_tag.outputs.release_tag }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+
       - name: Determine Release Tag
         id: determine_tag
         run: |
@@ -51,8 +56,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Needed for tags
 
       - name: Setup
         uses: ./.github/actions/setup
