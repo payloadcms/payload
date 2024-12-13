@@ -1132,6 +1132,9 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
+      '@payloadcms/richtext-lexical':
+        specifier: workspace:*
+        version: link:../richtext-lexical
       '@types/react':
         specifier: 19.0.1
         version: 19.0.1

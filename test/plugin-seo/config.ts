@@ -70,26 +70,8 @@ export default buildConfigWithDefaults({
     seoPlugin({
       collections: ['pages'],
       fields: ({ defaultFields }) => {
-        const modifiedFields = defaultFields.map((field) => {
-          if ('name' in field && field.name === 'title') {
-            return {
-              ...field,
-              required: true,
-              admin: {
-                ...field.admin,
-                components: {
-                  ...field.admin.components,
-                  afterInput: '/components/AfterInput.js#AfterInput',
-                  beforeInput: '/components/BeforeInput.js#BeforeInput',
-                },
-              },
-            } as Field
-          }
-          return field
-        })
-
         return [
-          ...modifiedFields,
+          ...defaultFields,
           {
             name: 'ogTitle',
             type: 'text',

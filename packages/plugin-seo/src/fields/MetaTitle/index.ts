@@ -1,4 +1,6 @@
-import type { TextField } from 'payload'
+import type { RichTextField, TextField } from 'payload'
+import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { SEOFeature } from './SEOFeature/index.js'
 
 interface FieldFunctionProps {
   /**
@@ -8,23 +10,65 @@ interface FieldFunctionProps {
   overrides?: Partial<TextField>
 }
 
-type FieldFunction = ({ hasGenerateFn, overrides }: FieldFunctionProps) => TextField
+type FieldFunction = ({ hasGenerateFn, overrides }: FieldFunctionProps) => RichTextField
 
 export const MetaTitleField: FieldFunction = ({ hasGenerateFn = false, overrides }) => {
   return {
     name: 'title',
-    type: 'text',
-    admin: {
-      components: {
-        Field: {
-          clientProps: {
-            hasGenerateTitleFn: hasGenerateFn,
-          },
-          path: '@payloadcms/plugin-seo/client#MetaTitleComponent',
-        },
+    type: 'richText',
+    editor: lexicalEditor({
+      admin: {
+        hideGutter: true,
       },
+      features: [
+        SEOFeature(),
+        FixedToolbarFeature(),
+        BlocksFeature({
+          inlineBlocks: [
+            {
+              slug: 'Product Name',
+              fields: [],
+              admin: {
+                components: {
+                  Block: '@payloadcms/plugin-seo/client#InlineBlockComponent',
+                },
+              },
+            },
+            {
+              slug: 'Collection Name',
+              fields: [],
+              admin: {
+                components: {
+                  Block: '@payloadcms/plugin-seo/client#InlineBlockComponent',
+                },
+              },
+            },
+            {
+              slug: 'City',
+              fields: [],
+              admin: {
+                components: {
+                  Block: '@payloadcms/plugin-seo/client#InlineBlockComponent',
+                },
+              },
+            },
+            {
+              slug: 'Florist Name',
+              fields: [],
+              admin: {
+                components: {
+                  Block: '@payloadcms/plugin-seo/client#InlineBlockComponent',
+                },
+              },
+            },
+          ],
+        }),
+      ],
+    }),
+    admin: {
+      components: {},
     },
     localized: true,
-    ...((overrides as unknown as TextField) ?? {}),
+    ...((overrides as unknown as RichTextField) ?? {}),
   }
 }

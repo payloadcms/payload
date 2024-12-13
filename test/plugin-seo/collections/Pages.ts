@@ -16,6 +16,22 @@ export const Pages: CollectionConfig = {
   },
   fields: [
     {
+      name: 'productName',
+      type: 'text',
+    },
+    {
+      name: 'collectionName',
+      type: 'text',
+    },
+    {
+      name: 'city',
+      type: 'text',
+    },
+    {
+      name: 'floristName',
+      type: 'text',
+    },
+    {
       type: 'tabs',
       tabs: [
         {

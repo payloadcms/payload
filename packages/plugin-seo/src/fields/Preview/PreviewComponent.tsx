@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormField, UIField } from 'payload'
+import type { FormField, TypeWithID, UIField } from 'payload'
 
 import {
   useAllFormFields,
@@ -15,6 +15,8 @@ import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 import type { GenerateURL } from '../../types.js'
+
+import { recurseEditorState } from './inlineBlockToText.js'
 
 type PreviewProps = {
   readonly descriptionPath?: string
@@ -91,6 +93,24 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
     }
   }, [fields, href, locale, docInfo, hasGenerateURLFn, getData, serverURL, api])
 
+  const metaTitleText = []
+
+  recurseEditorState(
+    (metaTitle as any)?.root?.children ?? [],
+    metaTitleText,
+    0,
+    docInfo.savedDocumentData as TypeWithID,
+  )
+
+  const metaDescriptionText = []
+
+  recurseEditorState(
+    (metaDescription as any)?.root?.children ?? [],
+    metaDescriptionText,
+    0,
+    docInfo.savedDocumentData as TypeWithID,
+  )
+
   return (
     <div
       style={{
@@ -138,7 +158,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
               textDecoration: 'none',
             }}
           >
-            {metaTitle as string}
+            {metaTitleText as React.ReactNode[]}
           </a>
         </h4>
         <p
@@ -146,7 +166,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
             margin: 0,
           }}
         >
-          {metaDescription as string}
+          {metaDescriptionText as any}
         </p>
       </div>
     </div>

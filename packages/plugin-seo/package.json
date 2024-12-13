@@ -72,7 +72,8 @@
     "@payloadcms/next": "workspace:*",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.1",
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "@payloadcms/richtext-lexical": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*",

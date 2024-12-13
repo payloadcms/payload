@@ -84,12 +84,44 @@ export interface User {
  */
 export interface Page {
   id: string;
+  productName?: string | null;
+  collectionName?: string | null;
+  city?: string | null;
+  floristName?: string | null;
   title: string;
   excerpt?: string | null;
   slug: string;
-  meta: {
-    title: string;
-    description?: string | null;
+  meta?: {
+    title?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    description?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     image?: (string | null) | Media;
     ogTitle?: string | null;
   };
@@ -141,9 +173,37 @@ export interface PagesWithImportedField {
   excerpt?: string | null;
   slug: string;
   metaAndSEO: {
-    title: string;
+    title: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
     innerMeta?: {
-      description?: string | null;
+      description?: {
+        root: {
+          type: string;
+          children: {
+            type: string;
+            version: number;
+            [k: string]: unknown;
+          }[];
+          direction: ('ltr' | 'rtl') | null;
+          format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+          indent: number;
+          version: number;
+        };
+        [k: string]: unknown;
+      } | null;
     };
     innerMedia?: {
       image?: (string | null) | Media;
@@ -238,6 +298,10 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
+  productName?: T;
+  collectionName?: T;
+  city?: T;
+  floristName?: T;
   title?: T;
   excerpt?: T;
   slug?: T;
