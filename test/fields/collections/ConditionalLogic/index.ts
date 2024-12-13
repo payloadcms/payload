@@ -20,7 +20,54 @@ const ConditionalLogic: CollectionConfig = {
     {
       name: 'fieldWithCondition',
       type: 'text',
-      required: true,
+      admin: {
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customFieldWithField',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomFieldWithField',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customFieldWithHOC',
+      label: 'Custom Field With HOC (legacy)',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomFieldWithHOC',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customClientFieldWithCondition',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomClientField',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customServerFieldWithCondition',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomServerField',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'conditionalRichText',
+      type: 'richText',
       admin: {
         condition: ({ toggleField }) => Boolean(toggleField),
       },

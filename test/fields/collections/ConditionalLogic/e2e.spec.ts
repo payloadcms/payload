@@ -84,6 +84,49 @@ describe('Conditional Logic', () => {
     expect(true).toBe(true)
   })
 
+  test('should conditionally render custom field that renders a Payload field', async () => {
+    await page.goto(url.create)
+
+    await toggleConditionAndCheckField(
+      'label[for=field-toggleField]',
+      'label[for=field-customFieldWithField]',
+    )
+
+    expect(true).toBe(true)
+  })
+
+  test('should conditionally render custom field that wraps itself with the withCondition HOC (legacy)', async () => {
+    await page.goto(url.create)
+
+    await toggleConditionAndCheckField(
+      'label[for=field-toggleField]',
+      'label[for=field-customFieldWithHOC]',
+    )
+
+    expect(true).toBe(true)
+  })
+
+  test('should toggle conditional custom client field', async () => {
+    await page.goto(url.create)
+    await toggleConditionAndCheckField('label[for=field-toggleField]', '#custom-client-field')
+    expect(true).toBe(true)
+  })
+
+  test('should conditionally render custom server field', async () => {
+    await page.goto(url.create)
+    await toggleConditionAndCheckField('label[for=field-toggleField]', '#custom-server-field')
+    expect(true).toBe(true)
+  })
+
+  test('should conditionally render rich text fields', async () => {
+    await page.goto(url.create)
+    await toggleConditionAndCheckField(
+      'label[for=field-toggleField]',
+      '.field-type.rich-text-lexical',
+    )
+    expect(true).toBe(true)
+  })
+
   test('should show conditional field based on user data', async () => {
     await page.goto(url.create)
     const userConditional = page.locator('input#field-userConditional')
