@@ -24,19 +24,18 @@ let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let page: Page
 let serverURL: string
-// If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 let url: AdminUrlUtil
 
-const testConditionalLogic = async (triggerLocator: string, fieldLocator: string) => {
-  const conditionTrigger = page.locator(triggerLocator)
+const toggleConditionAndCheckField = async (toggleLocator: string, fieldLocator: string) => {
+  const toggle = page.locator(toggleLocator)
 
-  if (!(await conditionTrigger.isChecked())) {
+  if (!(await toggle.isChecked())) {
     await expect(page.locator(fieldLocator)).toBeHidden()
-    await conditionTrigger.click()
+    await toggle.click()
     await expect(page.locator(fieldLocator)).toBeVisible()
   } else {
     await expect(page.locator(fieldLocator)).toBeVisible()
-    await conditionTrigger.click()
+    await toggle.click()
     await expect(page.locator(fieldLocator)).toBeHidden()
   }
 }
@@ -76,7 +75,7 @@ describe('Conditional Logic', () => {
   test("should conditionally render field based on another field's data", async () => {
     await page.goto(url.create)
 
-    await testConditionalLogic(
+    await toggleConditionAndCheckField(
       'label[for=field-toggleField]',
       'label[for=field-fieldWithCondition]',
     )
