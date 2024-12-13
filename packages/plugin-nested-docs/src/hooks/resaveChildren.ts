@@ -23,11 +23,10 @@ type ResaveArgs = {
 const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs) => {
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
   const parentDocIsPublished = doc._status === 'published'
-
   const children = await req.payload.find({
     collection: collection.slug,
     depth: 0,
-    draft,
+    draft: true,
     locale: req.locale,
     req,
     where: {
