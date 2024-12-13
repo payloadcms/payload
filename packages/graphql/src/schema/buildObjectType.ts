@@ -255,18 +255,17 @@ export function buildObjectType({
             [field.on]: { equals: parent._id ?? parent.id },
           })
 
-          const results = await req.payload.find({
+          return await req.payload.find({
             collection,
             depth: 0,
             fallbackLocale: req.fallbackLocale,
             limit,
             locale: req.locale,
+            overrideAccess: false,
             req,
             sort,
             where: fullWhere,
           })
-
-          return results
         },
       }
 

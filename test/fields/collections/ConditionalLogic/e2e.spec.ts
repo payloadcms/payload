@@ -13,6 +13,7 @@ import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { conditionalLogicSlug } from '../../slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -24,19 +25,18 @@ let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let page: Page
 let serverURL: string
-// If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 let url: AdminUrlUtil
 
-const testConditionalLogic = async (triggerLocator: string, fieldLocator: string) => {
-  const conditionTrigger = page.locator(triggerLocator)
+const toggleConditionAndCheckField = async (toggleLocator: string, fieldLocator: string) => {
+  const toggle = page.locator(toggleLocator)
 
-  if (!(await conditionTrigger.isChecked())) {
+  if (!(await toggle.isChecked())) {
     await expect(page.locator(fieldLocator)).toBeHidden()
-    await conditionTrigger.click()
+    await toggle.click()
     await expect(page.locator(fieldLocator)).toBeVisible()
   } else {
     await expect(page.locator(fieldLocator)).toBeVisible()
-    await conditionTrigger.click()
+    await toggle.click()
     await expect(page.locator(fieldLocator)).toBeHidden()
   }
 }
@@ -50,7 +50,7 @@ describe('Conditional Logic', () => {
       // prebuild,
     }))
 
-    url = new AdminUrlUtil(serverURL, 'conditional-logic')
+    url = new AdminUrlUtil(serverURL, conditionalLogicSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -73,10 +73,10 @@ describe('Conditional Logic', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('should conditionally render field based on data', async () => {
+  test("should conditionally render field based on another field's data", async () => {
     await page.goto(url.create)
 
-    await testConditionalLogic(
+    await toggleConditionAndCheckField(
       'label[for=field-toggleField]',
       'label[for=field-fieldWithCondition]',
     )
@@ -87,7 +87,7 @@ describe('Conditional Logic', () => {
   test('should conditionally render custom field that renders a Payload field', async () => {
     await page.goto(url.create)
 
-    await testConditionalLogic(
+    await toggleConditionAndCheckField(
       'label[for=field-toggleField]',
       'label[for=field-customFieldWithField]',
     )
@@ -98,7 +98,7 @@ describe('Conditional Logic', () => {
   test('should conditionally render custom field that wraps itself with the withCondition HOC (legacy)', async () => {
     await page.goto(url.create)
 
-    await testConditionalLogic(
+    await toggleConditionAndCheckField(
       'label[for=field-toggleField]',
       'label[for=field-customFieldWithHOC]',
     )
@@ -108,19 +108,22 @@ describe('Conditional Logic', () => {
 
   test('should toggle conditional custom client field', async () => {
     await page.goto(url.create)
-    await testConditionalLogic('label[for=field-toggleField]', '#custom-client-field')
+    await toggleConditionAndCheckField('label[for=field-toggleField]', '#custom-client-field')
     expect(true).toBe(true)
   })
 
   test('should conditionally render custom server field', async () => {
     await page.goto(url.create)
-    await testConditionalLogic('label[for=field-toggleField]', '#custom-server-field')
+    await toggleConditionAndCheckField('label[for=field-toggleField]', '#custom-server-field')
     expect(true).toBe(true)
   })
 
   test('should conditionally render rich text fields', async () => {
     await page.goto(url.create)
-    await testConditionalLogic('label[for=field-toggleField]', '.field-type.rich-text-lexical')
+    await toggleConditionAndCheckField(
+      'label[for=field-toggleField]',
+      '.field-type.rich-text-lexical',
+    )
     expect(true).toBe(true)
   })
 
@@ -130,7 +133,7 @@ describe('Conditional Logic', () => {
     await expect(userConditional).toBeVisible()
   })
 
-  test('should show conditional field based on fields nested within data', async () => {
+  test('should show conditional field based on nested field data', async () => {
     await page.goto(url.create)
 
     const parentGroupFields = page.locator(
@@ -146,7 +149,7 @@ describe('Conditional Logic', () => {
     await expect(toggledField).toBeVisible()
   })
 
-  test('should show conditional field based on fields nested within siblingData', async () => {
+  test('should show conditional field based on siblingData', async () => {
     await page.goto(url.create)
 
     const toggle = page.locator('label[for=field-parentGroup__enableParentGroupFields]')
@@ -154,5 +157,24 @@ describe('Conditional Logic', () => {
 
     const fieldRelyingOnSiblingData = page.locator('input#field-reliesOnParentGroup')
     await expect(fieldRelyingOnSiblingData).toBeVisible()
+  })
+
+  test('should not render fields when adding array or blocks rows until form state returns', async () => {
+    await page.goto(url.create)
+    const addRowButton = page.locator('.array-field__add-row')
+    const fieldWithConditionSelector = 'input#field-arrayWithConditionalField__0__textWithCondition'
+    await addRowButton.click()
+
+    const wasFieldAttached = await page
+      .waitForSelector(fieldWithConditionSelector, {
+        state: 'attached',
+        timeout: 100, // A small timeout to catch any transient rendering
+      })
+      .catch(() => false) // If it doesn't appear, this resolves to `false`
+
+    expect(wasFieldAttached).toBeFalsy()
+    const fieldToToggle = page.locator('input#field-enableConditionalFields')
+    await fieldToToggle.click()
+    await expect(page.locator(fieldWithConditionSelector)).toBeVisible()
   })
 })
