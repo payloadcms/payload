@@ -38,7 +38,7 @@ export interface Config {
   globalsSelect: {
     menu: MenuSelect<false> | MenuSelect<true>;
   };
-  locale: 'en' | 'es' | 'de' | 'fr';
+  locale: 'en' | 'es';
   user: User & {
     collection: 'users';
   };

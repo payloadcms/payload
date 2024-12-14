@@ -1,13 +1,11 @@
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { en } from '@payloadcms/translations/languages/en'
-import { es } from '@payloadcms/translations/languages/es'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { MediaCollection } from './collections/Media/index.js'
-import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import { PostsCollection } from './collections/Posts/index.js'
 import { TextsCollection } from './collections/Text/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
@@ -40,40 +38,8 @@ export default buildConfigWithDefaults({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   localization: {
-    locales: [
-      {
-        code: 'en',
-        label: {
-          en: 'English',
-          es: 'Inglés',
-        },
-      },
-      {
-        code: 'es',
-        label: {
-          en: 'Spanish',
-          es: 'Español',
-        },
-      },
-      {
-        code: 'de',
-        label: {
-          en: 'German',
-          es: 'Alemán',
-        },
-      },
-      {
-        code: 'fr',
-        label: {
-          en: 'French',
-          es: 'Francés',
-        },
-      },
-    ],
+    locales: ['en', 'es'],
     defaultLocale: 'en',
     fallback: true,
-  },
-  i18n: {
-    supportedLanguages: { en, es },
   },
 })
