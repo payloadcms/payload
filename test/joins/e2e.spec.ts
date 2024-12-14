@@ -230,6 +230,22 @@ test.describe('Join Field', () => {
     )
   })
 
+  test('should display relationship table with columns from admin.defaultColumns', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-group__relatedPosts.field-type.join')
+    const thead = joinField.locator('.relationship-table thead')
+    await expect(thead).toContainText('ID')
+    await expect(thead).toContainText('Created At')
+    await expect(thead).toContainText('Title')
+    const innerText = await thead.innerText()
+
+    // expect the order of columns to be 'ID', 'Created At', 'Title'
+    // eslint-disable-next-line payload/no-flaky-assertions
+    expect(innerText.indexOf('ID')).toBeLessThan(innerText.indexOf('Created At'))
+    // eslint-disable-next-line payload/no-flaky-assertions
+    expect(innerText.indexOf('Created At')).toBeLessThan(innerText.indexOf('Title'))
+  })
+
   test('should update relationship table when new document is created', async () => {
     await page.goto(categoriesURL.edit(categoryID))
     const joinField = page.locator('#field-relatedPosts.field-type.join')

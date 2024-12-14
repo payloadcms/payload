@@ -1390,6 +1390,7 @@ export type JoinField = {
       Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
       Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
     } & Admin['components']
+    defaultColumns?: string[]
     disableBulkEdit?: never
     readOnly?: never
   } & Admin
@@ -1422,7 +1423,8 @@ export type JoinField = {
   FieldGraphQLType
 
 export type JoinFieldClient = {
-  admin?: AdminClient & Pick<JoinField['admin'], 'allowCreate' | 'disableBulkEdit' | 'readOnly'>
+  admin?: AdminClient &
+    Pick<JoinField['admin'], 'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'>
 } & FieldBaseClient &
   Pick<
     JoinField,
