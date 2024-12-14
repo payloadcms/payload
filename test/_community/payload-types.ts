@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     posts: Post;
     media: Media;
+    texts: Text;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -22,6 +23,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    texts: TextsSelect<false> | TextsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -36,7 +38,7 @@ export interface Config {
   globalsSelect: {
     menu: MenuSelect<false> | MenuSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'es' | 'de' | 'fr';
   user: User & {
     collection: 'users';
   };
@@ -69,10 +71,19 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  title?: string | null;
+  title?: (string | null) | Text;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "texts".
+ */
+export interface Text {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -151,6 +162,10 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'texts';
+        value: string | Text;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -204,7 +219,6 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -256,6 +270,15 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "texts_select".
+ */
+export interface TextsSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
