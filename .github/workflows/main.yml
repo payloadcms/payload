@@ -283,6 +283,7 @@ jobs:
           - admin-root
           - auth
           - auth-basic
+          - joins
           - field-error-states
           - fields-relationship
           - fields__collections__Array
