@@ -56,6 +56,7 @@ describe('hooks', () => {
       .fill('should replace value with before validate response again')
     await saveDocAndAssert(page)
 
+    // TODO: this fails and seems to be an actual bug
     await expect(page.locator('#field-title')).toHaveValue('reset in beforeValidate')
   })
 })
