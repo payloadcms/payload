@@ -218,16 +218,12 @@ test.describe('Join Field', () => {
     const titleAscButton = titleColumn.locator('button.sort-column__asc')
     await expect(titleAscButton).toBeVisible()
     await titleAscButton.click()
-    await expect(joinField.locator('tbody tr:first-child td:nth-child(2)')).toHaveText(
-      'Test Post 1',
-    )
+    await expect(joinField.locator('tbody .row-1')).toContainText('Test Post 1')
 
     const titleDescButton = titleColumn.locator('button.sort-column__desc')
     await expect(titleDescButton).toBeVisible()
     await titleDescButton.click()
-    await expect(joinField.locator('tbody tr:first-child td:nth-child(2)')).toHaveText(
-      'Test Post 3',
-    )
+    await expect(joinField.locator('tbody .row-1')).toContainText('Test Post 3')
   })
 
   test('should display relationship table with columns from admin.defaultColumns', async () => {
@@ -292,9 +288,7 @@ test.describe('Join Field', () => {
     await titleField.fill('Test Post 1 Updated')
     await drawer.locator('button[id="action-save"]').click()
     await expect(drawer).toBeHidden()
-    await expect(joinField.locator('tbody tr:first-child td:nth-child(2)')).toHaveText(
-      'Test Post 1 Updated',
-    )
+    await expect(joinField.locator('tbody .row-1')).toContainText('Test Post 1 Updated')
   })
 
   test('should render empty relationship table when creating new document', async () => {
