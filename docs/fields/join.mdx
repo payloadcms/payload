@@ -145,10 +145,11 @@ _\* An asterisk denotes that a property is required._
 
 You can control the user experience of the join field using the `admin` config properties. The following options are supported:
 
-| Option                 | Description                                                                            |
-|------------------------|----------------------------------------------------------------------------------------|
-| **`allowCreate`**      | Set to `false` to remove the controls for making new related documents from this field. |
-| **`components.Label`** | Override the default Label of the Field Component. [More details](../admin/fields#label) |
+| Option                 | Description                                                                                                               |
+|------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| **`defaultColumns`**   | Array of field names that correspond to which columns to show in the relationship table. Default is the collection config. |
+| **`allowCreate`**      | Set to `false` to remove the controls for making new related documents from this field.                                   |
+| **`components.Label`** | Override the default Label of the Field Component. [More details](../admin/fields#label)                                  |
 
 ## Join Field Data
 
