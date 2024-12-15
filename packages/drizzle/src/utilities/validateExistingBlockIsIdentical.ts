@@ -3,12 +3,14 @@ import type { Block, Field } from 'payload'
 import { InvalidConfiguration } from 'payload'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/shared'
 
+import type { RawTable } from '../types.js'
+
 type Args = {
   block: Block
   localized: boolean
   rootTableName: string
-  table: Record<string, unknown>
-  tableLocales?: Record<string, unknown>
+  table: RawTable
+  tableLocales?: RawTable
 }
 
 const getFlattenedFieldNames = (
@@ -72,7 +74,7 @@ export const validateExistingBlockIsIdentical = ({
     // ensure every field from the config is in the matching table
     fieldNames.find(({ name, localized }) => {
       const fieldTable = localized && tableLocales ? tableLocales : table
-      return Object.keys(fieldTable).indexOf(name) === -1
+      return Object.keys(fieldTable.columns).indexOf(name) === -1
     }) ||
     // ensure every table column is matched for every field from the config
     Object.keys(table).find((fieldName) => {
@@ -91,7 +93,7 @@ export const validateExistingBlockIsIdentical = ({
     )
   }
 
-  if (Boolean(localized) !== Boolean(table._locale)) {
+  if (Boolean(localized) !== Boolean(table.columns._locale)) {
     throw new InvalidConfiguration(
       `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One is localized, but another is not. Block schemas of the same name must match exactly.`,
     )
