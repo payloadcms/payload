@@ -286,6 +286,14 @@ export type SetColumnID = (args: {
   fields: FlattenedField[]
 }) => IDType
 
+export type ColumnToCodeConverter = (args: {
+  adapter: DrizzleAdapter
+  addEnum: (name: string, options: string[]) => void
+  addImport: (from: string, name: string) => void
+  column: RawColumn
+  locales?: string[]
+}) => string
+
 export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args: {
   adapter: T
   locales: string[]

@@ -11,6 +11,7 @@ import {
   create,
   createGlobal,
   createGlobalVersion,
+  createSchemaGenerator,
   createVersion,
   deleteMany,
   deleteOne,
@@ -42,6 +43,7 @@ import { fileURLToPath } from 'url'
 
 import type { Args, SQLiteAdapter } from './types.js'
 
+import { columnToCodeConverter } from './columnToCodeConverter.js'
 import { connect } from './connect.js'
 import { countDistinct } from './countDistinct.js'
 import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal.js'
@@ -93,6 +95,12 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
         json: true,
       },
       fieldConstraints: {},
+      generateSchema: createSchemaGenerator({
+        columnToCodeConverter,
+        corePackageSuffix: 'sqlite-core',
+        defaultOutputFile: args.generateSchemaOutputFile,
+        tableImport: 'sqliteTable',
+      }),
       idType: sqliteIDType,
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
