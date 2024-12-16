@@ -599,6 +599,14 @@ export const traverseFields = <T extends Record<string, unknown>>({
           break
         }
 
+        case 'point': {
+          if (typeof fieldData === 'string') {
+            val = JSON.parse(fieldData)
+          }
+
+          break
+        }
+
         case 'relationship':
         case 'upload': {
           if (
