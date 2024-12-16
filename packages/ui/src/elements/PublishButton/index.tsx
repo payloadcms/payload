@@ -31,7 +31,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
-  const { code: locale } = useLocale()
+  const { code: localeCode } = useLocale()
 
   const {
     localization,
@@ -40,7 +40,6 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   } = config
 
   const { i18n, t } = useTranslation()
-  const { code } = useLocale()
   const label = labelProp || t('version:publishChanges')
 
   const hasNewerVersions = unpublishedVersionCount > 0
@@ -54,7 +53,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       return
     }
 
-    const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
+    const search = `?locale=${localeCode}&depth=0&fallback-locale=null&draft=true`
     let action
     let method = 'POST'
 
@@ -77,7 +76,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id, forceDisable])
+  }, [submit, collectionSlug, globalSlug, serverURL, api, localeCode, id, forceDisable])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -140,7 +139,8 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
                     ? locale.label
                     : locale.label && locale.label[i18n?.language]
 
-                const isActive = typeof locale === 'string' ? locale === code : locale.code === code
+                const isActive =
+                  typeof locale === 'string' ? locale === localeCode : locale.code === localeCode
 
                 if (isActive) {
                   return (

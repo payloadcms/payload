@@ -26,6 +26,8 @@ type DateFNSKeys =
   | 'pl'
   | 'pt'
   | 'ro'
+  | 'rs'
+  | 'rs-Latin'
   | 'ru'
   | 'sk'
   | 'sl-SI'

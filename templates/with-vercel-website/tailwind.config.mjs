@@ -58,7 +58,7 @@ export default {
           foreground: 'hsl(var(--accent-foreground))',
         },
         background: 'hsl(var(--background))',
-        border: 'hsl(var(--border))',
+        border: 'hsla(var(--border))',
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -106,15 +106,41 @@ export default {
       },
       typography: ({ theme }) => ({
         DEFAULT: {
-          css: {
-            '--tw-prose-body': 'var(--text)',
-            '--tw-prose-headings': 'var(--text)',
-            h1: {
-              fontSize: '4rem',
-              fontWeight: 'normal',
-              marginBottom: '0.25em',
+          css: [
+            {
+              '--tw-prose-body': 'var(--text)',
+              '--tw-prose-headings': 'var(--text)',
+              h1: {
+                fontWeight: 'normal',
+                marginBottom: '0.25em',
+              },
             },
-          },
+          ],
+        },
+        base: {
+          css: [
+            {
+              h1: {
+                fontSize: '2.5rem',
+              },
+              h2: {
+                fontSize: '1.25rem',
+                fontWeight: 600,
+              },
+            },
+          ],
+        },
+        md: {
+          css: [
+            {
+              h1: {
+                fontSize: '3.5rem',
+              },
+              h2: {
+                fontSize: '1.5rem',
+              },
+            },
+          ],
         },
       }),
     },

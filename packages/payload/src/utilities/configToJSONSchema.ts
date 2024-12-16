@@ -617,7 +617,13 @@ export function entityToJSONSchema(
     })
   }
 
-  if ('auth' in entity && entity.auth && !entity.auth?.disableLocalStrategy) {
+  if (
+    'auth' in entity &&
+    entity.auth &&
+    (!entity.auth?.disableLocalStrategy ||
+      (typeof entity.auth?.disableLocalStrategy === 'object' &&
+        entity.auth.disableLocalStrategy.enableFields))
+  ) {
     entity.flattenedFields.push({
       name: 'password',
       type: 'text',
@@ -637,7 +643,13 @@ export function entityToJSONSchema(
   }
 }
 
-export function fieldsToSelectJSONSchema({ fields }: { fields: FlattenedField[] }): JSONSchema4 {
+export function fieldsToSelectJSONSchema({
+  fields,
+  interfaceNameDefinitions,
+}: {
+  fields: FlattenedField[]
+  interfaceNameDefinitions: Map<string, JSONSchema4>
+}): JSONSchema4 {
   const schema: JSONSchema4 = {
     type: 'object',
     additionalProperties: false,
@@ -648,16 +660,32 @@ export function fieldsToSelectJSONSchema({ fields }: { fields: FlattenedField[] 
     switch (field.type) {
       case 'array':
       case 'group':
-      case 'tab':
+      case 'tab': {
+        let fieldSchema: JSONSchema4 = fieldsToSelectJSONSchema({
+          fields: field.flattenedFields,
+          interfaceNameDefinitions,
+        })
+
+        if (field.interfaceName) {
+          const definition = `${field.interfaceName}_select`
+          interfaceNameDefinitions.set(definition, fieldSchema)
+
+          fieldSchema = {
+            $ref: `#/definitions/${definition}`,
+          }
+        }
+
         schema.properties[field.name] = {
           oneOf: [
             {
               type: 'boolean',
             },
-            fieldsToSelectJSONSchema({ fields: field.flattenedFields }),
+            fieldSchema,
           ],
         }
+
         break
+      }
 
       case 'blocks': {
         const blocksSchema: JSONSchema4 = {
@@ -667,12 +695,25 @@ export function fieldsToSelectJSONSchema({ fields }: { fields: FlattenedField[] 
         }
 
         for (const block of field.blocks) {
+          let blockSchema = fieldsToSelectJSONSchema({
+            fields: block.flattenedFields,
+            interfaceNameDefinitions,
+          })
+
+          if (block.interfaceName) {
+            const definition = `${block.interfaceName}_select`
+            interfaceNameDefinitions.set(definition, blockSchema)
+            blockSchema = {
+              $ref: `#/definitions/${definition}`,
+            }
+          }
+
           blocksSchema.properties[block.slug] = {
             oneOf: [
               {
                 type: 'boolean',
               },
-              fieldsToSelectJSONSchema({ fields: block.flattenedFields }),
+              blockSchema,
             ],
           }
         }
@@ -894,7 +935,10 @@ export function configToJSONSchema(
         defaultIDType,
         collectionIDFieldTypes,
       )
-      const select = fieldsToSelectJSONSchema({ fields: entity.flattenedFields })
+      const select = fieldsToSelectJSONSchema({
+        fields: entity.flattenedFields,
+        interfaceNameDefinitions,
+      })
 
       if (type === 'global') {
         select.properties.globalType = {

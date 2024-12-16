@@ -24,7 +24,7 @@ export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 export { DocumentLocked } from '../../elements/DocumentLocked/index.js'
-export { useTableColumns } from '../../elements/TableColumns/index.js'
+export { TableColumnsProvider, useTableColumns } from '../../elements/TableColumns/index.js'
 export {
   RenderDefaultCell,
   useCellProps,
@@ -51,7 +51,7 @@ export { CopyToClipboard } from '../../elements/CopyToClipboard/index.js'
 export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
 export { Dropzone } from '../../elements/Dropzone/index.js'
-export { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+export { documentDrawerBaseClass, useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 export type {
   DocumentDrawerProps,
   DocumentTogglerProps,
@@ -119,6 +119,12 @@ import { toast } from 'sonner'
 export { toast }
 export { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 export { Upload } from '../../elements/Upload/index.js'
+export { SearchFilter } from '../../elements/SearchFilter/index.js'
+export { EditUpload } from '../../elements/EditUpload/index.js'
+export { FileDetails } from '../../elements/FileDetails/index.js'
+export { PreviewSizes } from '../../elements/PreviewSizes/index.js'
+export { PreviewButton } from '../../elements/PreviewButton/index.js'
+
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
 
@@ -128,6 +134,9 @@ export { ArrayField } from '../../fields/Array/index.js'
 export { BlocksField } from '../../fields/Blocks/index.js'
 export { CheckboxField, CheckboxInput } from '../../fields/Checkbox/index.js'
 export { CodeField } from '../../fields/Code/index.js'
+export { CodeEditor as CodeEditorLazy } from '../../elements/CodeEditor/index.js'
+export { default as CodeEdiftor } from '../../elements/CodeEditor/CodeEditor.js'
+
 export { CollapsibleField } from '../../fields/Collapsible/index.js'
 export { ConfirmPasswordField } from '../../fields/ConfirmPassword/index.js'
 export { DateTimeField } from '../../fields/DateTime/index.js'
@@ -145,7 +154,9 @@ export { RelationshipField } from '../../fields/Relationship/index.js'
 export { RichTextField } from '../../fields/RichText/index.js'
 export { RowField } from '../../fields/Row/index.js'
 export { SelectField, SelectInput } from '../../fields/Select/index.js'
-export { TabsField } from '../../fields/Tabs/index.js'
+export { TabsField, TabsProvider } from '../../fields/Tabs/index.js'
+export { TabComponent } from '../../fields/Tabs/Tab/index.js'
+
 export { TextField, TextInput } from '../../fields/Text/index.js'
 export { JoinField } from '../../fields/Join/index.js'
 export type { TextInputProps } from '../../fields/Text/index.js'
@@ -185,6 +196,7 @@ export { useField } from '../../forms/useField/index.js'
 export type { FieldType, Options } from '../../forms/useField/types.js'
 
 export { withCondition } from '../../forms/withCondition/index.js'
+export { WatchCondition } from '../../forms/withCondition/WatchCondition.js'
 
 // graphics
 export { Account } from '../../graphics/Account/index.js'
@@ -213,6 +225,10 @@ export { PlusIcon } from '../../icons/Plus/index.js'
 export { SearchIcon } from '../../icons/Search/index.js'
 export { SwapIcon } from '../../icons/Swap/index.js'
 export { XIcon } from '../../icons/X/index.js'
+export { Error as ErrorIcon } from '../../providers/ToastContainer/icons/Error.js'
+export { Info as InfoIcon } from '../../providers/ToastContainer/icons/Info.js'
+export { Success as SuccessIcon } from '../../providers/ToastContainer/icons/Success.js'
+export { Warning as WarningIcon } from '../../providers/ToastContainer/icons/Warning.js'
 
 // providers
 export {
@@ -264,6 +280,7 @@ export { DateField as DateCondition } from '../../elements/WhereBuilder/Conditio
 export { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 export { SelectAll } from '../../elements/SelectAll/index.js'
 export { SelectRow } from '../../elements/SelectRow/index.js'
+export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export {
   DefaultListView,

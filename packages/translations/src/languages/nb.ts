@@ -13,7 +13,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Opprett din første bruker for å fortsette.',
     changePassword: 'Endre passord',
     checkYourEmailForPasswordReset:
-      'Sjekk e-posten din for en lenke som lar deg tilbakestille passordet ditt.',
+      'Hvis e-postadressen er knyttet til en konto, vil du motta instruksjoner for å tilbakestille passordet ditt snart. Vennligst sjekk spam- eller junk mail-mappen din hvis du ikke ser e-posten i innboksen din.',
     confirmGeneration: 'Bekreft generering',
     confirmPassword: 'Bekreft passord',
     createFirstUser: 'Opprett første bruker',

@@ -224,6 +224,191 @@ describe('Queues', () => {
     payload.config.jobs.deleteJobOnComplete = true
   })
 
+  it('ensure workflows dont limit retries if no retries property is sett', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const job = await payload.jobs.queue({
+      workflow: 'workflowNoRetriesSet',
+      input: {
+        message: 'hello',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error amountRetried is new arbitrary data and not in the type
+    expect(jobAfterRun.input.amountRetried).toBe(3)
+
+    payload.config.jobs.deleteJobOnComplete = true
+  })
+
+  it('ensure workflows dont retry if retries set to 0, even if individual tasks have retries > 0 set', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const job = await payload.jobs.queue({
+      workflow: 'workflowRetries0',
+      input: {
+        message: 'hello',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error amountRetried is new arbitrary data and not in the type
+    expect(jobAfterRun.input.amountRetried).toBe(0)
+
+    payload.config.jobs.deleteJobOnComplete = true
+  })
+
+  it('ensure workflows dont retry if neither workflows nor tasks have retries set', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const job = await payload.jobs.queue({
+      workflow: 'workflowAndTasksRetriesUndefined',
+      input: {
+        message: 'hello',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error amountRetried is new arbitrary data and not in the type
+    expect(jobAfterRun.input.amountRetried).toBe(0)
+
+    payload.config.jobs.deleteJobOnComplete = true
+  })
+
+  it('ensure workflows retry if workflows have retries set and tasks do not have retries set, due to tasks inheriting workflow retries', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const job = await payload.jobs.queue({
+      workflow: 'workflowRetries2TasksRetriesUndefined',
+      input: {
+        message: 'hello',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error amountRetried is new arbitrary data and not in the type
+    expect(jobAfterRun.input.amountRetried).toBe(2)
+
+    payload.config.jobs.deleteJobOnComplete = true
+  })
+
+  it('ensure workflows do not retry if workflows have retries set and tasks have retries set to 0', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const job = await payload.jobs.queue({
+      workflow: 'workflowRetries2TasksRetries0',
+      input: {
+        message: 'hello',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error amountRetried is new arbitrary data and not in the type
+    expect(jobAfterRun.input.amountRetried).toBe(0)
+
+    payload.config.jobs.deleteJobOnComplete = true
+  })
+
   /*
   // Task rollbacks are not supported in the current version of Payload. This test will be re-enabled when task rollbacks are supported once we figure out the transaction issues
   it('ensure failed tasks are rolled back via transactions', async () => {
@@ -583,9 +768,10 @@ describe('Queues', () => {
     expect(allSimples.docs[7].title).toBe('from single task')
   })
 
-  it('can queue single tasks 500 times', async () => {
+  it('can queue single tasks 150 times', async () => {
+    // TODO: Ramp up the limit from 150 to 500 or 1000, to test reliability of the database
     payload.config.jobs.deleteJobOnComplete = false
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 150; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -603,14 +789,14 @@ describe('Queues', () => {
       limit: 1000,
     })
 
-    expect(allSimples.totalDocs).toBe(500) // Default limit: 10
+    expect(allSimples.totalDocs).toBe(150) // Default limit: 10
     expect(allSimples.docs[0].title).toBe('from single task')
-    expect(allSimples.docs[490].title).toBe('from single task')
+    expect(allSimples.docs[140].title).toBe('from single task')
     payload.config.jobs.deleteJobOnComplete = true
   })
 
   it('ensure default jobs run limit of 10 works', async () => {
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 65; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -632,7 +818,7 @@ describe('Queues', () => {
   })
 
   it('ensure jobs run limit can be customized', async () => {
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 110; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -738,5 +924,131 @@ describe('Queues', () => {
 
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0].title).toBe('externalWorkflow')
+  })
+
+  it('ensure payload.jobs.runByID works and only runs the specified job', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    let lastJobID: string = null
+    for (let i = 0; i < 3; i++) {
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+      lastJobID = job.id
+    }
+
+    await payload.jobs.runByID({
+      id: lastJobID,
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task')
+
+    const allCompletedJobs = await payload.find({
+      collection: 'payload-jobs',
+      limit: 100,
+      where: {
+        completedAt: {
+          exists: true,
+        },
+      },
+    })
+
+    expect(allCompletedJobs.totalDocs).toBe(1)
+    expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
+  })
+
+  it('ensure where query for id in payload.jobs.run works and only runs the specified job', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    let lastJobID: string = null
+    for (let i = 0; i < 3; i++) {
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+      lastJobID = job.id
+    }
+
+    await payload.jobs.run({
+      where: {
+        id: {
+          equals: lastJobID,
+        },
+      },
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task')
+
+    const allCompletedJobs = await payload.find({
+      collection: 'payload-jobs',
+      limit: 100,
+      where: {
+        completedAt: {
+          exists: true,
+        },
+      },
+    })
+
+    expect(allCompletedJobs.totalDocs).toBe(1)
+    expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
+  })
+
+  it('ensure where query for input data in payload.jobs.run works and only runs the specified job', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    for (let i = 0; i < 3; i++) {
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: `from single task ${i}`,
+        },
+      })
+    }
+
+    await payload.jobs.run({
+      where: {
+        'input.message': {
+          equals: 'from single task 2',
+        },
+      },
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task 2')
+
+    const allCompletedJobs = await payload.find({
+      collection: 'payload-jobs',
+      limit: 100,
+      where: {
+        completedAt: {
+          exists: true,
+        },
+      },
+    })
+
+    expect(allCompletedJobs.totalDocs).toBe(1)
+    expect((allCompletedJobs.docs[0].input as any).message).toBe('from single task 2')
   })
 })

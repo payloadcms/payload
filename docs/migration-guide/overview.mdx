@@ -10,6 +10,8 @@ keywords: local api, config, configuration, documentation, Content Management Sy
 
 Payload 3.0 completely replatforms the Admin Panel from a React Router single-page application onto the Next.js App Router with full support for React Server Components. This change completely separates Payload "core" from its rendering and HTTP layers, making it truly Node-safe and portable.
 
+If you are upgrading from a _previous beta_, please see the [Upgrade From Previous Beta](#upgrade-from-previous-beta) section.
+
 ## What has changed?
 
 The core logic and principles of Payload remain the same from 2.0 to 3.0, with the majority of changes affecting specifically the HTTP layer and the Admin Panel, which is now built upon Next.js. With this change, your entire application can be served within a single repo, with Payload endpoints are now opened within your own Next.js application, directly alongside your frontend. Payload is still headless, you will still be able to leverage it completely headlessly just as you do now with Sveltekit, etc. All Payload APIs remain exactly the same (with a few new features), and the Payload Config is generally the same, with the breaking changes detailed below.
@@ -26,6 +28,7 @@ All breaking changes are listed below. If you encounter changes that are not exp
 - [Types](#types)
 - [Email Adapters](#email-adapters)
 - [Plugins](#plugins)
+- [Upgrade From Previous Beta](#upgrade-from-previous-beta)
 
 ## Installation
 
@@ -37,7 +40,7 @@ Payload 3.0 requires a set of auto-generated files that you will need to bring i
 
 For more details, see the [Documentation](https://payloadcms.com/docs/getting-started/installation).
 
-1. **Install new dependencies of payload, next.js and react**:
+1. **Install new dependencies of Payload, Next.js and React**:
 
     Refer to the package.json file made in the create-payload-app, including peerDependencies, devDependencies, and dependencies. The core package and plugins require all versions to be synced. Previously, on 2.x it was possible to be running the latest version of payload 2.x with an older version of db-mongodb for example. This is no longer the case.
 
@@ -409,7 +412,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
       }
     })
     ```
-1. The `./src/public` directory is now located directly at root level `./public` [see nextJS docs for details](https://nextjs.org/docs/pages/building-your-application/optimizing/static-assets)
+1. The `./src/public` directory is now located directly at root level `./public` [see Next.js docs for details](https://nextjs.org/docs/pages/building-your-application/optimizing/static-assets)
 
 ## Custom Components
 
@@ -1100,3 +1103,9 @@ plugins: [
 ## `@payloadcms/richtext-lexical`
 
 If you have custom features for `@payloadcms/richtext-lexical` you will need to migrate your code to the new API. Read more about the new API in the [documentation](https://payloadcms.com/docs/lexical/building-custom-features).
+
+## Upgrade from previous beta
+
+Reference this [community-made site](https://payload-releases-filter.vercel.app/?version=3&from=152429656&to=188243150&sort=asc&breaking=on). Set your version, sort by oldest first, enable breaking changes only.
+
+Then go through each one of the breaking changes and make the adjustments. You can optionally reference the [blank template](https://github.com/payloadcms/payload/tree/main/templates/blank) for how things should end up.

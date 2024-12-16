@@ -133,8 +133,7 @@ export const copyDataFromLocaleHandler = async (args: CopyDataFromLocaleArgs) =>
   const { req } = args
 
   try {
-    const res = await copyDataFromLocale(args)
-    return res
+    return await copyDataFromLocale(args)
   } catch (err) {
     req.payload.logger.error({
       err,
@@ -161,6 +160,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       payload: { collections, globals },
       user,
     },
+    req,
     toLocale,
   } = args
 
@@ -189,6 +189,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     globalSlug
       ? payload.findGlobal({
           slug: globalSlug,
+          depth: 0,
           locale: fromLocale,
           overrideAccess: false,
           user,
@@ -197,6 +198,8 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       : payload.findByID({
           id: docID,
           collection: collectionSlug,
+          depth: 0,
+          joins: false,
           locale: fromLocale,
           overrideAccess: false,
           user,
@@ -205,6 +208,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     globalSlug
       ? payload.findGlobal({
           slug: globalSlug,
+          depth: 0,
           locale: toLocale,
           overrideAccess: false,
           user,
@@ -213,6 +217,8 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       : payload.findByID({
           id: docID,
           collection: collectionSlug,
+          depth: 0,
+          joins: false,
           locale: toLocale,
           overrideAccess: false,
           user,
@@ -228,7 +234,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     throw new Error(`Error fetching data from locale "${toLocale}"`)
   }
 
-  const newToLocaleData = globalSlug
+  return globalSlug
     ? await payload.updateGlobal({
         slug: globalSlug,
         data: overrideData
@@ -236,6 +242,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           : mergeData(fromLocaleData.value, toLocaleData.value, globals[globalSlug].config.fields),
         locale: toLocale,
         overrideAccess: false,
+        req,
         user,
       })
     : await payload.update({
@@ -250,8 +257,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
             ),
         locale: toLocale,
         overrideAccess: false,
+        req,
         user,
       })
-
-  return newToLocaleData
 }

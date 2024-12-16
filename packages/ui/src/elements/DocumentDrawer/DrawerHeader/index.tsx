@@ -7,7 +7,7 @@ import { XIcon } from '../../../icons/X/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { IDLabel } from '../../IDLabel/index.js'
-import { baseClass as docDrawerBaseClass } from '../index.js'
+import { documentDrawerBaseClass } from '../index.js'
 import './index.scss'
 
 export const DocumentDrawerHeader: React.FC<{
@@ -17,12 +17,14 @@ export const DocumentDrawerHeader: React.FC<{
   const { t } = useTranslation()
 
   return (
-    <Gutter className={`${docDrawerBaseClass}__header`}>
-      <div className={`${docDrawerBaseClass}__header-content`}>
-        <h2 className={`${docDrawerBaseClass}__header-text`}>{<RenderTitle element="span" />}</h2>
+    <Gutter className={`${documentDrawerBaseClass}__header`}>
+      <div className={`${documentDrawerBaseClass}__header-content`}>
+        <h2 className={`${documentDrawerBaseClass}__header-text`}>
+          {<RenderTitle element="span" />}
+        </h2>
         <button
           aria-label={t('general:close')}
-          className={`${docDrawerBaseClass}__header-close`}
+          className={`${documentDrawerBaseClass}__header-close`}
           onClick={() => closeModal(drawerSlug)}
           type="button"
         >

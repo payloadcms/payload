@@ -322,6 +322,7 @@ export const promise = async ({
       siblingDoc[field.name] = await getDefaultValue({
         defaultValue: field.defaultValue,
         locale,
+        req,
         user: req.user,
         value: siblingDoc[field.name],
       })
@@ -350,10 +351,13 @@ export const promise = async ({
     case 'array': {
       const rows = siblingDoc[field.name] as JsonObject
 
-      const arraySelect = select?.[field.name]
+      let arraySelect = select?.[field.name]
 
       if (selectMode === 'include' && typeof arraySelect === 'object') {
-        arraySelect.id = true
+        arraySelect = {
+          ...arraySelect,
+          id: true,
+        }
       }
 
       if (Array.isArray(rows)) {
@@ -427,7 +431,7 @@ export const promise = async ({
     case 'blocks': {
       const rows = siblingDoc[field.name]
 
-      const blocksSelect = select?.[field.name]
+      let blocksSelect = select?.[field.name]
 
       if (Array.isArray(rows)) {
         rows.forEach((row, i) => {
@@ -438,6 +442,10 @@ export const promise = async ({
           let blockSelectMode = selectMode
 
           if (typeof blocksSelect === 'object') {
+            blocksSelect = {
+              ...blocksSelect,
+            }
+
             // sanitize blocks: {cta: false} to blocks: {cta: {id: true, blockType: true}}
             if (selectMode === 'exclude' && blocksSelect[block.slug] === false) {
               blockSelectMode = 'include'
@@ -451,6 +459,10 @@ export const promise = async ({
               }
 
               if (typeof blocksSelect[block.slug] === 'object') {
+                blocksSelect[block.slug] = {
+                  ...(blocksSelect[block.slug] as object),
+                }
+
                 blocksSelect[block.slug]['id'] = true
                 blocksSelect[block.slug]['blockType'] = true
               }
@@ -535,7 +547,6 @@ export const promise = async ({
     }
 
     case 'collapsible':
-
     case 'row': {
       traverseFields({
         collection,

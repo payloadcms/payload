@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "3.2.1",
+  "version": "3.7.0",
   "description": "The officially supported Postgres database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -68,7 +68,7 @@
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/to-snake-case": "1.0.0",
-    "esbuild": "0.23.1",
+    "esbuild": "0.24.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {

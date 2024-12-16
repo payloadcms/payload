@@ -50,6 +50,11 @@ export default buildConfig({
 })
 ```
 
+<Banner type="info">
+  <strong>Note:</strong>
+  If when using `vercelPostgresAdapter` your `process.env.POSTGRES_URL` or `pool.connectionString` points to a local database (e.g hostname has `localhost` or `127.0.0.1`) we use the `pg` module for pooling instead of `@vercel/postgres`. This is because `@vercel/postgres` doesn't work with local databases, if you want to disable that behavior, you can pass `forceUseVercelPostgres: true` to adapter's 'args and follow [Vercel guide](https://vercel.com/docs/storage/vercel-postgres/local-development#option-2:-local-postgres-instance-with-docker) for a Docker Neon DB setup.
+</Banner>
+
 ## Options
 
 | Option                      | Description                                                                                                                                                                      |
@@ -60,7 +65,7 @@ export default buildConfig({
 | `schemaName` (experimental) | A string for the postgres schema to use, defaults to 'public'.                                                                                                                   |
 | `idType`                    | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                              |
 | `transactionOptions`        | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                       |
-| `disableCreateDatabase`     | Pass `true` to disale auto database creation if it doesn't exist. Defaults to `false`.                                                                                           |
+| `disableCreateDatabase`     | Pass `true` to disable auto database creation if it doesn't exist. Defaults to `false`.                                                                                           |
 | `localesSuffix`             | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                 |
 | `relationshipsSuffix`       | A string appended to the end of table names for storing relationships. Default is '_rels'.                                                                                       |
 | `versionsSuffix`            | A string appended to the end of table names for storing versions. Defaults to '_v'.                                                                                              |
@@ -178,7 +183,7 @@ postgresAdapter({
 })
 ```
 
-Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection. 
+Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection.
 
 
 ### afterSchemaInit

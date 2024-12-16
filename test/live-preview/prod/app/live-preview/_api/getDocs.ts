@@ -1,7 +1,7 @@
 import config from '@payload-config'
-import { getPayload } from 'payload'
+import { type CollectionSlug, getPayload } from 'payload'
 
-export const getDocs = async <T>(collection: string): Promise<T[]> => {
+export const getDocs = async <T>(collection: CollectionSlug): Promise<T[]> => {
   const payload = await getPayload({ config })
 
   try {
@@ -11,10 +11,12 @@ export const getDocs = async <T>(collection: string): Promise<T[]> => {
       limit: 100,
     })
 
-    return docs as T[]
+    if (docs) {
+      return docs as T[]
+    }
   } catch (err) {
-    console.error(err)
+    throw new Error(`Error getting docs: ${err.message}`)
   }
 
-  throw new Error('Error getting docs')
+  throw new Error('No docs found')
 }

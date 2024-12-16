@@ -12,7 +12,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     backToLogin: 'Nazad na prijavu',
     beginCreateFirstUser: 'Na samom početku kreiraj svog prvog korisnika',
     changePassword: 'Promeni lozinku',
-    checkYourEmailForPasswordReset: 'Proverite e-poštu i poruku sa linkom za promenu lozinke.',
+    checkYourEmailForPasswordReset:
+      'Ako je e-mail adresa povezana sa nekim nalozima, uskoro ćete dobiti uputstva za resetovanje lozinke. Ako ne vidite e-mail u svojoj prijemnoj pošti, proverite spam ili folder za neželjenu poštu.',
     confirmGeneration: 'Potvrdi kreiranje',
     confirmPassword: 'Potvrdi lozinku',
     createFirstUser: 'Kreiraj prvog korisnika',
@@ -479,6 +480,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
 }
 
 export const rsLatin: Language = {
-  dateFNSKey: 'en-US',
+  dateFNSKey: 'rs-Latin',
   translations: rsLatinTranslations,
 }

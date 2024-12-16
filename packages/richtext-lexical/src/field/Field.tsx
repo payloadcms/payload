@@ -2,7 +2,14 @@
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { Validate } from 'payload'
 
-import { FieldLabel, useEditDepth, useField, withCondition } from '@payloadcms/ui'
+import {
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  RenderCustomComponent,
+  useEditDepth,
+  useField,
+} from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import React, { useCallback, useMemo } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -10,10 +17,10 @@ import { ErrorBoundary } from 'react-error-boundary'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 import type { LexicalRichTextFieldProps } from '../types.js'
 
-import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import '../lexical/theme/EditorTheme.scss'
 import './bundled.css'
 import './index.scss'
+import { LexicalProvider } from '../lexical/LexicalProvider.js'
 
 const baseClass = 'rich-text-lexical'
 
@@ -27,7 +34,7 @@ const RichTextComponent: React.FC<
     field,
     field: {
       name,
-      admin: { className, readOnly: readOnlyFromAdmin } = {},
+      admin: { className, description, readOnly: readOnlyFromAdmin } = {},
       label,
       localized,
       required,
@@ -95,7 +102,10 @@ const RichTextComponent: React.FC<
 
   return (
     <div className={classes} key={pathWithEditDepth} style={styles}>
-      {Error}
+      <RenderCustomComponent
+        CustomComponent={Error}
+        Fallback={<FieldError path={path} showError={showError} />}
+      />
       {Label || <FieldLabel label={label} localized={localized} required={required} />}
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
@@ -112,6 +122,10 @@ const RichTextComponent: React.FC<
           {AfterInput}
         </ErrorBoundary>
         {Description}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )
@@ -128,4 +142,4 @@ function fallbackRender({ error }: { error: Error }) {
   )
 }
 
-export const RichText: typeof RichTextComponent = withCondition(RichTextComponent)
+export const RichText: typeof RichTextComponent = RichTextComponent
