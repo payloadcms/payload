@@ -215,6 +215,8 @@ export const post2: Partial<Post> = {
       version: 1,
     },
   },
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   heroImage: '{{IMAGE_1}}',
   meta: {
     description:

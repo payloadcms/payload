@@ -252,6 +252,8 @@ export const post3: Partial<Post> = {
       version: 1,
     },
   },
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   heroImage: '{{IMAGE_1}}',
   meta: {
     description: `Money isn't just currency; it's a language. Dive deep into its nuances, where strategy meets intuition in the vast sea of finance.`,
