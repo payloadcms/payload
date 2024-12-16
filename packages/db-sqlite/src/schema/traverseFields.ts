@@ -572,6 +572,7 @@ export const traverseFields = ({
       }
 
       case 'point': {
+        targetTable[fieldName] = withDefault(text(columnName, { mode: 'json' }), field)
         break
       }
 

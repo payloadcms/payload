@@ -9,6 +9,15 @@ export const withDefault = (
     return column
   }
 
+  if (field.type === 'point' && Array.isArray(field.defaultValue)) {
+    return column.default(
+      JSON.stringify({
+        type: 'Point',
+        coordinates: [field.defaultValue[0], field.defaultValue[1]],
+      }),
+    )
+  }
+
   if (typeof field.defaultValue === 'string' && field.defaultValue.includes("'")) {
     const escapedString = field.defaultValue.replaceAll("'", "''")
     return column.default(escapedString)
