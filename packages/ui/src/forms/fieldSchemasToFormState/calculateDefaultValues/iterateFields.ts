@@ -1,4 +1,4 @@
-import type { Data, Field, TabAsField, User } from 'payload'
+import type { Data, Field, PayloadRequest, TabAsField, User } from 'payload'
 
 import { defaultValuePromise } from './promise.js'
 
@@ -7,6 +7,7 @@ type Args<T> = {
   fields: (Field | TabAsField)[]
   id?: number | string
   locale: string | undefined
+  req: PayloadRequest
   siblingData: Data
   user: User
 }
@@ -16,6 +17,7 @@ export const iterateFields = async <T>({
   data,
   fields,
   locale,
+  req,
   siblingData,
   user,
 }: Args<T>): Promise<void> => {
@@ -28,6 +30,7 @@ export const iterateFields = async <T>({
         data,
         field,
         locale,
+        req,
         siblingData,
         user,
       }),

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.4.0",
+  "version": "3.7.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -104,11 +104,11 @@
     "@babel/preset-env": "7.26.0",
     "@babel/preset-react": "7.25.9",
     "@babel/preset-typescript": "7.26.0",
-    "@next/eslint-plugin-next": "15.0.3",
+    "@next/eslint-plugin-next": "15.0.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "esbuild": "0.24.0",
@@ -165,9 +165,5 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.js"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

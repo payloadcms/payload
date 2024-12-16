@@ -5,10 +5,6 @@ on:
     types:
       - published
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Release tag to process (optional)'
-        required: true
 
 env:
   NODE_VERSION: 22.6.0
@@ -17,8 +13,40 @@ env:
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
 jobs:
+  wait_for_release:
+    runs-on: ubuntu-24.04
+    outputs:
+      release_tag: ${{ steps.determine_tag.outputs.release_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout: .github/workflows
+
+      - name: Determine Release Tag
+        id: determine_tag
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            echo "Using tag from release event: ${{ github.event.release.tag_name }}"
+            echo "release_tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            # pull latest tag from github, must match any version except v2. Should match v3, v4, v99, etc.
+            echo "Fetching latest tag from github..."
+            LATEST_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude 'v2*')
+            echo "Latest tag: $LATEST_TAG"
+            echo "release_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Wait until latest versions resolve on npm registry
+        run: |
+          ./.github/workflows/wait-until-package-version.sh payload ${{ steps.determine_tag.outputs.release_tag }}
+          ./.github/workflows/wait-until-package-version.sh @payloadcms/translations ${{ steps.determine_tag.outputs.release_tag }}
+          ./.github/workflows/wait-until-package-version.sh @payloadcms/next ${{ steps.determine_tag.outputs.release_tag }}
+
   update_templates:
-    runs-on: ubuntu-latest
+    needs: wait_for_release
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       pull-requests: write
@@ -29,6 +57,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup
         uses: ./.github/actions/setup
         with:
@@ -61,17 +90,6 @@ jobs:
       - name: Update template lockfiles and migrations
         run: pnpm script:gen-templates
 
-      - name: Determine Release Tag
-        id: determine_tag
-        run: |
-          if [ "${{ github.event.inputs.tag }}" != "" ]; then
-            echo "Using tag from input: ${{ github.event.inputs.tag }}"
-            echo "release_tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "Using tag from release event: ${{ github.event.release.tag_name }}"
-            echo "release_tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Commit and push changes
         id: commit
         env:
@@ -83,7 +101,7 @@ jobs:
 
           git diff --name-only
 
-          export BRANCH_NAME=templates/bump-${{ steps.determine_tag.outputs.release_tag }}-$(date +%s)
+          export BRANCH_NAME=templates/bump-${{ needs.wait_for_release.outputs.release_tag }}-$(date +%s)
           echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
@@ -92,8 +110,12 @@ jobs:
           token: ${{ secrets.GH_TOKEN_POST_RELEASE_TEMPLATES }}
           labels: 'area: templates'
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
-          commit-message: 'templates: bump templates for ${{ steps.determine_tag.outputs.release_tag }}'
+          commit-message: 'templates: bump templates for ${{ needs.wait_for_release.outputs.release_tag }}'
           branch: ${{ steps.commit.outputs.branch }}
           base: main
-          title: 'templates: bump for ${{ steps.determine_tag.outputs.release_tag }}'
-          body: 'Automated bump of templates for ${{ steps.determine_tag.outputs.release_tag }}'
+          assignees: ${{ github.actor }}
+          title: 'templates: bump for ${{ needs.wait_for_release.outputs.release_tag }}'
+          body: |
+            🤖 Automated bump of templates for ${{ needs.wait_for_release.outputs.release_tag }}
+
+            Triggered by user: @${{ github.actor }}

@@ -18,6 +18,12 @@ export const Header: GlobalConfig = {
         }),
       ],
       maxRows: 6,
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: '@/Header/RowLabel#RowLabel',
+        },
+      },
     },
   ],
   hooks: {

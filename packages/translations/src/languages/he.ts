@@ -12,7 +12,8 @@ export const heTranslations: DefaultTranslationsObject = {
     backToLogin: 'חזרה להתחברות',
     beginCreateFirstUser: 'כדי להתחיל, יש ליצור את המשתמש הראשון שלך.',
     changePassword: 'שינוי סיסמה',
-    checkYourEmailForPasswordReset: 'בדוק את תיבת הדוא"ל לאיתור קישור איפוס הסיסמה בצורה מאובטחת.',
+    checkYourEmailForPasswordReset:
+      'אם כתובת הדוא"ל מקושרת לחשבון, תקבל הוראות לאיפוס הסיסמה שלך בקרוב. אנא בדוק את תיקיית הספאם או הדואר הזבל אם אתה לא רואה את הדוא"ל בתיבת הדואר הנכנס שלך.',
     confirmGeneration: 'אישור יצירה',
     confirmPassword: 'אישור סיסמה',
     createFirstUser: 'יצירת משתמש ראשון',

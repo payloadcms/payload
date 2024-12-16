@@ -301,4 +301,28 @@ describe('Array', () => {
     await page.locator('#updateArrayExternally').click()
     await expect(page.locator('#custom-field')).toBeVisible()
   })
+
+  test('should not re-close initCollapsed true array rows on input in create new view', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-collapsedArray >> .array-field__add-row').click()
+    await page.locator('#field-collapsedArray__0__text').fill('test')
+    const collapsedArrayRow = page.locator('#collapsedArray-row-0 .collapsible--collapsed')
+    await expect(collapsedArrayRow).toBeHidden()
+  })
+
+  describe('sortable arrays', () => {
+    test('should have disabled admin sorting', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort > div > div > .array-actions__action-chevron')
+      expect(await field.count()).toEqual(0)
+    })
+
+    test('the drag handle should be hidden', async () => {
+      await page.goto(url.create)
+      const field = page.locator(
+        '#field-disableSort > .blocks-field__rows > div > div > .collapsible__drag',
+      )
+      expect(await field.count()).toEqual(0)
+    })
+  })
 })
