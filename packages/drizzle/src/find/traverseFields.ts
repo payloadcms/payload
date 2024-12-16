@@ -373,11 +373,7 @@ export const traverseFields = ({
           adapter,
           fields,
           joins,
-          locale:
-            locale ||
-            (adapter.payload.config.localization &&
-              adapter.payload.config.localization.defaultLocale) ||
-            undefined,
+          locale,
           selectLocale: true,
           sort,
           tableName: joinCollectionTableName,
