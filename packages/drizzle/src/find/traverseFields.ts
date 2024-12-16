@@ -1,8 +1,7 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { FlattenedField, JoinQuery, SelectMode, SelectType, Where } from 'payload'
 
-import { randomUUID } from 'crypto'
-import { and, eq, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { fieldIsVirtual } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -406,7 +405,9 @@ export const traverseFields = ({
 
         const db = adapter.drizzle as LibSQLDatabase
 
-        const subQueryAs = randomUUID()
+        const columnName = `${path.replaceAll('.', '_')}${field.name}`
+
+        const subQueryAlias = `${columnName}_alias`
 
         const subQuery = chainMethods({
           methods: chainedMethods,
@@ -415,23 +416,21 @@ export const traverseFields = ({
             .from(adapter.tables[joinCollectionTableName])
             .where(subQueryWhere)
             .orderBy(() => orderBy.map(({ column, order }) => order(column))),
-        }).as(subQueryAs)
-
-        const columnName = `${path.replaceAll('.', '_')}${field.name}`
+        }).as(subQueryAlias)
 
         currentArgs.extras[columnName] = sql`${db
           .select({
             result: jsonAgg(
               adapter,
               jsonBuildObject(adapter, {
-                id: sql.raw(`"${subQueryAs}".id`),
+                id: sql.raw(`"${subQueryAlias}".id`),
                 ...(buildQueryResult.selectFields._locale && {
                   locale: sql.raw(buildQueryResult.selectFields._locale.name),
                 }),
               }),
             ),
           })
-          .from(sql`${subQuery}`)}`.as(randomUUID())
+          .from(sql`${subQuery}`)}`.as(columnName)
 
         break
       }
