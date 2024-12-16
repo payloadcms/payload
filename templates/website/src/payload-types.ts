@@ -391,6 +391,7 @@ export interface Post {
     };
     [k: string]: unknown;
   };
+  heroImage?: (string | null) | Media;
   relatedPosts?: (string | Post)[] | null;
   categories?: (string | Category)[] | null;
   meta?: {
@@ -900,6 +901,7 @@ export interface PagesSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  heroImage?: T;
   relatedPosts?: T;
   categories?: T;
   meta?:

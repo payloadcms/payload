@@ -103,6 +103,11 @@ export const Posts: CollectionConfig<'posts'> = {
         {
           fields: [
             {
+              name: 'heroImage',
+              type: 'upload',
+              relationTo: 'media',
+            },
+            {
               name: 'relatedPosts',
               type: 'relationship',
               admin: {
