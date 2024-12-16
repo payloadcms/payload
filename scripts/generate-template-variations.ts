@@ -104,6 +104,7 @@ async function main() {
         dbUri: 'POSTGRES_URL',
       },
       skipReadme: true,
+      skipDockerCompose: true,
     },
     {
       name: 'payload-postgres-template',
