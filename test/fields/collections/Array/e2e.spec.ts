@@ -84,11 +84,25 @@ describe('Array', () => {
     await page.goto(url.create)
     await page.locator('#field-rowLabelAsComponent >> .array-field__add-row').click()
 
+    // ensure the default label does not blink in before form state returns
+    const defaultRowLabelWasAttached = await page
+      .waitForSelector('#field-rowLabelAsComponent .array-field__row-header .row-label', {
+        state: 'attached',
+        timeout: 100, // A small timeout to catch any transient rendering
+      })
+      .catch(() => false) // If it doesn't appear, this resolves to `false`
+
+    expect(defaultRowLabelWasAttached).toBeFalsy()
+
+    await expect(page.locator('#custom-array-row-label-component')).toBeVisible()
+
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
     await wait(100)
+
     const customRowLabel = page.locator(
       '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("custom row label")',
     )
+
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
   })
 

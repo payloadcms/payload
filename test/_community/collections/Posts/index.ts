@@ -12,6 +12,21 @@ export const PostsCollection: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
+    {
+      name: 'myArray',
+      type: 'array',
+      admin: {
+        components: {
+          RowLabel: '/collections/Posts/RowLabel',
+        },
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'text',
+        },
+      ],
+    },
   ],
   versions: {
     drafts: true,
