@@ -74,9 +74,6 @@ export const sanitizeJoinField = ({
   if (!joinRelationship) {
     throw new InvalidFieldJoin(join.field)
   }
-  if (Array.isArray(joinRelationship.relationTo)) {
-    throw new APIError('Join fields cannot be used with polymorphic relationships.')
-  }
 
   join.targetField = joinRelationship
 
