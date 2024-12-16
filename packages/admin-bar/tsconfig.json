@@ -1,19 +1,9 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "allowJs": true,
-    "target": "es5",
-    "module": "commonjs",
-    "sourceMap": true,
-    "jsx": "react",
-    "esModuleInterop": true,
-    "declaration": true,
-    "declarationDir": "./dist",
+    /* TODO: remove the following lines */
+    "strict": false,
+    "noUncheckedIndexedAccess": false,
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "**/*.test.js"
-  ]
+  "references": [{ "path": "../payload" }]
 }
