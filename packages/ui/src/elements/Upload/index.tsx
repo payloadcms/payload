@@ -175,14 +175,20 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const handleUrlSubmit = async () => {
     if (fileUrl) {
       try {
-        const response = await fetch(fileUrl)
-        const data = await response.blob()
+        // Make a request to the Payload 'paste-url' endpoint - /api/paste-url
+        // Safely handles URLs with query parameters or special characters.
+        const response = await fetch(`/api/paste-url?src=${encodeURIComponent(fileUrl)}`)
 
-        // Extract the file name from the URL
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to fetch the file from the server')
+        }
+
+        const blob = await response.blob()
         const fileName = fileUrl.split('/').pop()
+        const file = new File([blob], fileName, { type: blob.type })
 
-        // Create a new File object from the Blob data
-        const file = new File([data], fileName, { type: data.type })
+        // Update the field with the new file
         handleFileChange(file)
       } catch (e) {
         toast.error(e.message)
