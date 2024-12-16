@@ -30,14 +30,14 @@ export type Args = {
    * @default false
    */
   disableCreateDatabase?: boolean
+  extensions?: string[]
   /**
    * By default, we connect to a local database using the `pg` module instead of `@vercel/postgres`.
    * This is because `@vercel/postgres` doesn't work with local databases.
    * If you still want to use `@vercel/postgres` even locally you can pass `true` here
    * and you'd to spin up the database with a special Neon's Docker Compose setup - https://vercel.com/docs/storage/vercel-postgres/local-development#option-2:-local-postgres-instance-with-docker
    */
-  disableUsePgForLocalDatabase?: boolean
-  extensions?: string[]
+  forceUseVercelPostgres?: boolean
   idType?: 'serial' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
@@ -65,7 +65,7 @@ export type Args = {
 }
 
 export type VercelPostgresAdapter = {
-  disableUsePgForLocalDatabase: boolean
+  forceUseVercelPostgres?: boolean
   pool?: VercelPool
   poolOptions?: Args['pool']
 } & BasePostgresAdapter

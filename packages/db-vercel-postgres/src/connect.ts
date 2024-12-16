@@ -32,7 +32,7 @@ export const connect: Connect = async function connect(
 
     // Use non-vercel postgres for local database
     if (
-      !this.disableUsePgForLocalDatabase &&
+      !this.forceUseVercelPostgres &&
       connectionString &&
       ['127.0.0.1', 'localhost'].includes(new URL(connectionString).hostname)
     ) {
