@@ -140,21 +140,23 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             : undefined
         }
         header={
-          Label || (
-            <div className={`${baseClass}__block-header`}>
-              <span className={`${baseClass}__block-number`}>
-                {String(rowIndex + 1).padStart(2, '0')}
-              </span>
-              <Pill
-                className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
-                pillStyle="white"
-              >
-                {getTranslation(block.labels.singular, i18n)}
-              </Pill>
-              <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
-              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-            </div>
-          )
+          isLoading
+            ? null
+            : Label || (
+                <div className={`${baseClass}__block-header`}>
+                  <span className={`${baseClass}__block-number`}>
+                    {String(rowIndex + 1).padStart(2, '0')}
+                  </span>
+                  <Pill
+                    className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
+                    pillStyle="white"
+                  >
+                    {getTranslation(block.labels.singular, i18n)}
+                  </Pill>
+                  <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+                  {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+                </div>
+              )
         }
         isCollapsed={row.collapsed}
         key={row.id}
