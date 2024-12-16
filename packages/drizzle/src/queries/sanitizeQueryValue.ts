@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from '../types.js'
 
 import { getCollectionIdType } from '../utilities/getCollectionIdType.js'
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+import { isRawConstraint } from '../utilities/rawConstraint.js'
 
 type SanitizeQueryValueArgs = {
   adapter: DrizzleAdapter
@@ -48,6 +49,9 @@ export const sanitizeQueryValue = ({
     return { operator, value: formattedValue }
   }
 
+  if (isRawConstraint(val)) {
+    return { operator, value: val.value }
+  }
   if (
     (field.type === 'relationship' || field.type === 'upload') &&
     !relationOrPath.endsWith('relationTo') &&

@@ -12,6 +12,7 @@ export function buildAndOrConditions({
   joins,
   locale,
   selectFields,
+  selectLocale,
   tableName,
   where,
 }: {
@@ -22,6 +23,7 @@ export function buildAndOrConditions({
   joins: BuildQueryJoinAliases
   locale?: string
   selectFields: Record<string, GenericColumn>
+  selectLocale?: boolean
   tableName: string
   where: Where[]
 }): SQL[] {
@@ -38,6 +40,7 @@ export function buildAndOrConditions({
         joins,
         locale,
         selectFields,
+        selectLocale,
         tableName,
         where: condition,
       })

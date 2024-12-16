@@ -1,6 +1,7 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { FlattenedField, JoinQuery, SelectMode, SelectType } from 'payload'
+import type { FlattenedField, JoinQuery, SelectMode, SelectType, Where } from 'payload'
 
+import { randomUUID } from 'crypto'
 import { and, eq, sql } from 'drizzle-orm'
 import { fieldIsVirtual } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
@@ -9,6 +10,8 @@ import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../t
 import type { Result } from './buildFindManyArgs.js'
 
 import buildQuery from '../queries/buildQuery.js'
+import { jsonAgg, jsonBuildObject } from '../utilities/json.js'
+import { rawConstraint } from '../utilities/rawConstraint.js'
 import { chainMethods } from './chainMethods.js'
 
 type TraverseFieldArgs = {
@@ -145,6 +148,7 @@ export const traverseFields = ({
           depth,
           fields: field.flattenedFields,
           joinQuery,
+          locale,
           path: '',
           select: typeof arraySelect === 'object' ? arraySelect : undefined,
           selectMode,
@@ -254,6 +258,7 @@ export const traverseFields = ({
               depth,
               fields: block.flattenedFields,
               joinQuery,
+              locale,
               path: '',
               select: typeof blockSelect === 'object' ? blockSelect : undefined,
               selectMode: blockSelectMode,
@@ -294,6 +299,7 @@ export const traverseFields = ({
           fields: field.flattenedFields,
           joinQuery,
           joins,
+          locale,
           path: `${path}${field.name}_`,
           select: typeof fieldSelect === 'object' ? fieldSelect : undefined,
           selectAllOnCurrentLevel:
@@ -348,96 +354,39 @@ export const traverseFields = ({
 
         const joins: BuildQueryJoinAliases = []
 
-        const buildQueryResult = buildQuery({
-          adapter,
-          fields,
-          joins,
-          locale,
-          sort,
-          tableName: joinCollectionTableName,
-          where,
-        })
-
-        let subQueryWhere = buildQueryResult.where
-        const orderBy = buildQueryResult.orderBy
-
-        let joinLocalesCollectionTableName: string | undefined
-
         const currentIDColumn = versions
           ? adapter.tables[currentTableName].parent
           : adapter.tables[currentTableName].id
 
-        // TODO: when the field `on` has an array we need to build the query to join on the target array table.
-        //  remove debugging breakpoint placeholder
-        if (field.name === 'arrayPosts') {
-          console.log('hi')
+        let joinQueryWhere: Where = {
+          [field.on]: {
+            equals: rawConstraint(currentIDColumn),
+          },
         }
-        // Handle hasMany _rels table
-        if (field.hasMany) {
-          const joinRelsCollectionTableName = `${joinCollectionTableName}${adapter.relationshipsSuffix}`
 
-          if (field.localized) {
-            joinLocalesCollectionTableName = joinRelsCollectionTableName
-          }
-
-          let columnReferenceToCurrentID: string
-
-          if (versions) {
-            columnReferenceToCurrentID = `${topLevelTableName
-              .replace('_', '')
-              .replace(new RegExp(`${adapter.versionsSuffix}$`), '')}_id`
-          } else {
-            columnReferenceToCurrentID = `${topLevelTableName}_id`
-          }
-
-          joins.push({
-            type: 'innerJoin',
-            condition: and(
-              eq(
-                adapter.tables[joinRelsCollectionTableName].parent,
-                adapter.tables[joinCollectionTableName].id,
-              ),
-              eq(
-                sql.raw(`"${joinRelsCollectionTableName}"."${columnReferenceToCurrentID}"`),
-                currentIDColumn,
-              ),
-              eq(adapter.tables[joinRelsCollectionTableName].path, field.on),
-            ),
-            table: adapter.tables[joinRelsCollectionTableName],
-          })
-        } else {
-          // Handle localized without hasMany
-
-          const foreignColumn = field.on.replaceAll('.', '_')
-
-          if (field.localized) {
-            joinLocalesCollectionTableName = `${joinCollectionTableName}${adapter.localesSuffix}`
-
-            joins.push({
-              type: 'innerJoin',
-              condition: and(
-                eq(
-                  adapter.tables[joinLocalesCollectionTableName]._parentID,
-                  adapter.tables[joinCollectionTableName].id,
-                ),
-                eq(adapter.tables[joinLocalesCollectionTableName][foreignColumn], currentIDColumn),
-              ),
-              table: adapter.tables[joinLocalesCollectionTableName],
-            })
-            // Handle without localized and without hasMany, just a condition append to where. With localized the inner join handles eq.
-          } else {
-            const constraint = eq(
-              adapter.tables[joinCollectionTableName][foreignColumn],
-              currentIDColumn,
-            )
-
-            if (subQueryWhere) {
-              subQueryWhere = and(subQueryWhere, constraint)
-            } else {
-              subQueryWhere = constraint
-            }
+        if (where) {
+          joinQueryWhere = {
+            and: [joinQueryWhere, where],
           }
         }
+
+        const buildQueryResult = buildQuery({
+          adapter,
+          fields,
+          joins,
+          locale:
+            locale ||
+            (adapter.payload.config.localization &&
+              adapter.payload.config.localization.defaultLocale) ||
+            undefined,
+          selectLocale: true,
+          sort,
+          tableName: joinCollectionTableName,
+          where: joinQueryWhere,
+        })
+
+        const subQueryWhere = buildQueryResult.where
+        const orderBy = buildQueryResult.orderBy
 
         const chainedMethods: ChainedMethods = []
 
@@ -457,49 +406,32 @@ export const traverseFields = ({
 
         const db = adapter.drizzle as LibSQLDatabase
 
+        const subQueryAs = randomUUID()
+
         const subQuery = chainMethods({
           methods: chainedMethods,
           query: db
-            .select({
-              id: adapter.tables[joinCollectionTableName].id,
-              ...(joinLocalesCollectionTableName && {
-                locale:
-                  adapter.tables[joinLocalesCollectionTableName].locale ||
-                  adapter.tables[joinLocalesCollectionTableName]._locale,
-              }),
-            })
+            .select(buildQueryResult.selectFields as any)
             .from(adapter.tables[joinCollectionTableName])
             .where(subQueryWhere)
             .orderBy(() => orderBy.map(({ column, order }) => order(column))),
-        })
+        }).as(subQueryAs)
 
         const columnName = `${path.replaceAll('.', '_')}${field.name}`
 
-        const jsonObjectSelect = field.localized
-          ? sql.raw(
-              `'_parentID', "id", '_locale', "${adapter.tables[joinLocalesCollectionTableName].locale ? 'locale' : '_locale'}"`,
-            )
-          : sql.raw(`'id', "id"`)
-
-        if (adapter.name === 'sqlite') {
-          currentArgs.extras[columnName] = sql`
-              COALESCE((
-                SELECT json_group_array(json_object(${jsonObjectSelect}))
-                FROM (
-                  ${subQuery}
-                ) AS ${sql.raw(`${columnName}_sub`)}
-              ), '[]')
-            `.as(columnName)
-        } else {
-          currentArgs.extras[columnName] = sql`
-              COALESCE((
-                SELECT json_agg(json_build_object(${jsonObjectSelect}))
-                FROM (
-                  ${subQuery}
-                ) AS ${sql.raw(`${columnName}_sub`)}
-              ), '[]'::json)
-            `.as(columnName)
-        }
+        currentArgs.extras[columnName] = sql`${db
+          .select({
+            result: jsonAgg(
+              adapter,
+              jsonBuildObject(adapter, {
+                id: sql.raw(`"${subQueryAs}".id`),
+                ...(buildQueryResult.selectFields._locale && {
+                  locale: sql.raw(buildQueryResult.selectFields._locale.name),
+                }),
+              }),
+            ),
+          })
+          .from(sql`${subQuery}`)}`.as(randomUUID())
 
         break
       }
