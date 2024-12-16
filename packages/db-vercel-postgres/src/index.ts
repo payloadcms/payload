@@ -99,6 +99,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
         json: true,
       },
       fieldConstraints: {},
+      forceUseVercelPostgres: args.forceUseVercelPostgres ?? false,
       idType: postgresIDType,
       indexes: new Set<string>(),
       initializing,
