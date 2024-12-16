@@ -66,7 +66,7 @@ export const PostHero: React.FC<{
         {heroImage && typeof heroImage !== 'string' && (
           <Media
             fill
-            priority={false}
+            priority
             loading="lazy"
             imgClassName="-z-10 object-cover"
             resource={heroImage}

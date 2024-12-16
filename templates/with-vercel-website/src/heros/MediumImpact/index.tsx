@@ -30,7 +30,7 @@ export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richTex
             <Media
               className="-mx-4 md:-mx-8 2xl:-mx-16"
               imgClassName=""
-              priority={false}
+              priority
               loading="lazy"
               resource={media}
             />
