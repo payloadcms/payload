@@ -11,8 +11,7 @@ import { parse } from 'url'
 
 import { getNextRootDir } from './helpers/getNextRootDir.js'
 import startMemoryDB from './helpers/startMemoryDB.js'
-import { runInit } from './runInit.js'
-import { child, safelyRunScriptFunction } from './safelyRunScript.js'
+import { initDevAndTest } from './initDevAndTest.js'
 import { createTestHooks } from './testHooks.js'
 
 const prod = process.argv.includes('--prod')
@@ -34,12 +33,12 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const {
-  _: [testSuiteArg],
+  _: [testSuite],
   ...args
 } = minimist(process.argv.slice(2))
 
-if (!fs.existsSync(path.resolve(dirname, testSuiteArg))) {
-  console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
+if (!fs.existsSync(path.resolve(dirname, testSuite))) {
+  console.log(chalk.red(`ERROR: The test folder "${testSuite}" does not exist`))
   process.exit(0)
 }
 
@@ -47,12 +46,12 @@ if (args.turbo === true) {
   process.env.TURBOPACK = '1'
 }
 
-const { beforeTest } = await createTestHooks(testSuiteArg)
+const { beforeTest } = await createTestHooks(testSuite)
 await beforeTest()
 
-const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
+const { rootDir, adminRoute } = getNextRootDir(testSuite)
 
-await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
+await initDevAndTest({ testSuite, writeDBAdapter: true })
 
 if (shouldStartMemoryDB) {
   await startMemoryDB()
@@ -94,16 +93,3 @@ process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false
 // fetch the admin url to force a render
 void fetch(`http://localhost:${port}${adminRoute}`)
 void fetch(`http://localhost:${port}/api/access`)
-// This ensures that the next-server process is killed when this process is killed and doesn't linger around.
-process.on('SIGINT', () => {
-  if (child) {
-    child.kill('SIGINT')
-  }
-  process.exit(0)
-})
-process.on('SIGTERM', () => {
-  if (child) {
-    child.kill('SIGINT')
-  }
-  process.exit(0) // Exit the parent process
-})
