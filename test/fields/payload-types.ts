@@ -783,6 +783,7 @@ export interface TextField {
   localizedHasMany?: string[] | null;
   withMinRows?: string[] | null;
   withMaxRows?: string[] | null;
+  defaultValueFromReq?: string | null;
   disableListColumnText?: string | null;
   disableListFilterText?: string | null;
   array?:
@@ -2997,6 +2998,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   localizedHasMany?: T;
   withMinRows?: T;
   withMaxRows?: T;
+  defaultValueFromReq?: T;
   disableListColumnText?: T;
   disableListFilterText?: T;
   array?:
