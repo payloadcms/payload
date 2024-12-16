@@ -1,65 +1,49 @@
-import type { Relation } from 'drizzle-orm'
-import type { IndexBuilder, PgColumnBuilder } from 'drizzle-orm/pg-core'
 import type { FlattenedField } from 'payload'
 
-import { relations } from 'drizzle-orm'
-import {
-  boolean,
-  foreignKey,
-  index,
-  integer,
-  jsonb,
-  numeric,
-  PgNumericBuilder,
-  PgUUIDBuilder,
-  PgVarcharBuilder,
-  text,
-  timestamp,
-  varchar,
-} from 'drizzle-orm/pg-core'
 import { InvalidConfiguration } from 'payload'
 import { fieldAffectsData, fieldIsVirtual, optionIsObject } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type {
-  BaseExtraConfig,
-  BasePostgresAdapter,
-  GenericColumns,
+  DrizzleAdapter,
   IDType,
+  RawColumn,
+  RawForeignKey,
+  RawIndex,
+  RawRelation,
   RelationMap,
+  SetColumnID,
 } from '../types.js'
 
-import { createTableName } from '../../createTableName.js'
-import { buildIndexName } from '../../utilities/buildIndexName.js'
-import { hasLocalesTable } from '../../utilities/hasLocalesTable.js'
-import { validateExistingBlockIsIdentical } from '../../utilities/validateExistingBlockIsIdentical.js'
+import { createTableName } from '../createTableName.js'
+import { buildIndexName } from '../utilities/buildIndexName.js'
+import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
+import { validateExistingBlockIsIdentical } from '../utilities/validateExistingBlockIsIdentical.js'
 import { buildTable } from './build.js'
-import { createIndex } from './createIndex.js'
-import { geometryColumn } from './geometryColumn.js'
 import { idToUUID } from './idToUUID.js'
-import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { withDefault } from './withDefault.js'
 
 type Args = {
-  adapter: BasePostgresAdapter
+  adapter: DrizzleAdapter
   columnPrefix?: string
-  columns: Record<string, PgColumnBuilder>
+  columns: Record<string, RawColumn>
   disableNotNull: boolean
   disableRelsTableUnique?: boolean
   disableUnique?: boolean
   fieldPrefix?: string
   fields: FlattenedField[]
   forceLocalized?: boolean
-  indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
-  localesColumns: Record<string, PgColumnBuilder>
-  localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
+  indexes: Record<string, RawIndex>
+  localesColumns: Record<string, RawColumn>
+  localesIndexes: Record<string, RawIndex>
   newTableName: string
   parentTableName: string
   relationships: Set<string>
   relationsToBuild: RelationMap
   rootRelationsToBuild?: RelationMap
-  rootTableIDColType: string
+  rootTableIDColType: IDType
   rootTableName: string
+  setColumnID: SetColumnID
   uniqueRelationships: Set<string>
   versions: boolean
   /**
@@ -98,6 +82,7 @@ export const traverseFields = ({
   rootRelationsToBuild,
   rootTableIDColType,
   rootTableName,
+  setColumnID,
   uniqueRelationships,
   versions,
   withinLocalizedArrayOrBlock,
@@ -111,14 +96,11 @@ export const traverseFields = ({
   let hasLocalizedManyNumberField = false
 
   let parentIDColType: IDType = 'integer'
-  if (columns.id instanceof PgUUIDBuilder) {
-    parentIDColType = 'uuid'
-  }
-  if (columns.id instanceof PgNumericBuilder) {
-    parentIDColType = 'numeric'
-  }
-  if (columns.id instanceof PgVarcharBuilder) {
-    parentIDColType = 'varchar'
+
+  const idColumn = columns.id
+
+  if (idColumn && ['numeric', 'text', 'uuid', 'varchar'].includes(idColumn.type)) {
+    parentIDColType = idColumn.type as IDType
   }
 
   fields.forEach((field) => {
@@ -168,11 +150,11 @@ export const traverseFields = ({
 
       const indexName = buildIndexName({ name: `${newTableName}_${columnName}`, adapter })
 
-      targetIndexes[indexName] = createIndex({
-        name: field.localized ? [fieldName, '_locale'] : fieldName,
-        indexName,
+      targetIndexes[indexName] = {
+        name: indexName,
+        on: field.localized ? [fieldName, '_locale'] : fieldName,
         unique,
-      })
+      }
     }
 
     switch (field.type) {
@@ -188,20 +170,42 @@ export const traverseFields = ({
           versionsCustomName: versions,
         })
 
-        const baseColumns: Record<string, PgColumnBuilder> = {
-          _order: integer('_order').notNull(),
-          _parentID: parentIDColumnMap[parentIDColType]('_parent_id').notNull(),
+        const baseColumns: Record<string, RawColumn> = {
+          _order: {
+            name: '_order',
+            type: 'integer',
+            notNull: true,
+          },
+          _parentID: {
+            name: '_parent_id',
+            type: parentIDColType,
+            notNull: true,
+          },
         }
 
-        const baseExtraConfig: BaseExtraConfig = {
-          _orderIdx: (cols) => index(`${arrayTableName}_order_idx`).on(cols._order),
-          _parentIDFk: (cols) =>
-            foreignKey({
-              name: `${arrayTableName}_parent_id_fk`,
-              columns: [cols['_parentID']],
-              foreignColumns: [adapter.tables[parentTableName].id],
-            }).onDelete('cascade'),
-          _parentIDIdx: (cols) => index(`${arrayTableName}_parent_id_idx`).on(cols._parentID),
+        const baseIndexes: Record<string, RawIndex> = {
+          _orderIdx: {
+            name: `${arrayTableName}_order_idx`,
+            on: ['_order'],
+          },
+          _parentIDIdx: {
+            name: `${arrayTableName}_parent_id_idx`,
+            on: '_parentID',
+          },
+        }
+
+        const baseForeignKeys: Record<string, RawForeignKey> = {
+          _parentIDFk: {
+            name: `${arrayTableName}_parent_id_fk`,
+            columns: ['_parentID'],
+            foreignColumns: [
+              {
+                name: 'id',
+                table: parentTableName,
+              },
+            ],
+            onDelete: 'cascade',
+          },
         }
 
         const isLocalized =
@@ -210,9 +214,17 @@ export const traverseFields = ({
           forceLocalized
 
         if (isLocalized) {
-          baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
-          baseExtraConfig._localeIdx = (cols) =>
-            index(`${arrayTableName}_locale_idx`).on(cols._locale)
+          baseColumns._locale = {
+            name: '_locale',
+            type: 'enum',
+            locale: true,
+            notNull: true,
+          }
+
+          baseIndexes._localeIdx = {
+            name: `${arrayTableName}_locale_idx`,
+            on: '_locale',
+          }
         }
 
         const {
@@ -225,7 +237,8 @@ export const traverseFields = ({
         } = buildTable({
           adapter,
           baseColumns,
-          baseExtraConfig,
+          baseForeignKeys,
+          baseIndexes,
           disableNotNull: disableNotNullFromHere,
           disableRelsTableUnique: true,
           disableUnique,
@@ -235,6 +248,7 @@ export const traverseFields = ({
           rootTableIDColType,
           rootTableName,
           rootUniqueRelationships: uniqueRelationships,
+          setColumnID,
           tableName: arrayTableName,
           versions,
           withinLocalizedArrayOrBlock: isLocalized,
@@ -270,42 +284,59 @@ export const traverseFields = ({
           target: arrayTableName,
         })
 
-        adapter.relations[`relations_${arrayTableName}`] = relations(
-          adapter.tables[arrayTableName],
-          ({ many, one }) => {
-            const result: Record<string, Relation<string>> = {
-              _parentID: one(adapter.tables[parentTableName], {
-                fields: [adapter.tables[arrayTableName]._parentID],
-                references: [adapter.tables[parentTableName].id],
-                relationName: fieldName,
-              }),
-            }
-
-            if (hasLocalesTable(field.fields)) {
-              result._locales = many(adapter.tables[`${arrayTableName}${adapter.localesSuffix}`], {
-                relationName: '_locales',
-              })
-            }
-
-            subRelationsToBuild.forEach(({ type, localized, target }, key) => {
-              if (type === 'one') {
-                const arrayWithLocalized = localized
-                  ? `${arrayTableName}${adapter.localesSuffix}`
-                  : arrayTableName
-                result[key] = one(adapter.tables[target], {
-                  fields: [adapter.tables[arrayWithLocalized][key]],
-                  references: [adapter.tables[target].id],
-                  relationName: key,
-                })
-              }
-              if (type === 'many') {
-                result[key] = many(adapter.tables[target], { relationName: key })
-              }
-            })
-
-            return result
+        const arrayRelations: Record<string, RawRelation> = {
+          _parentID: {
+            type: 'one',
+            fields: [
+              {
+                name: '_parentID',
+                table: arrayTableName,
+              },
+            ],
+            references: ['id'],
+            relationName: fieldName,
+            to: parentTableName,
           },
-        )
+        }
+
+        if (hasLocalesTable(field.fields)) {
+          arrayRelations._locales = {
+            type: 'many',
+            relationName: '_locales',
+            to: `${arrayTableName}${adapter.localesSuffix}`,
+          }
+        }
+
+        subRelationsToBuild.forEach(({ type, localized, target }, key) => {
+          if (type === 'one') {
+            const arrayWithLocalized = localized
+              ? `${arrayTableName}${adapter.localesSuffix}`
+              : arrayTableName
+
+            arrayRelations[key] = {
+              type: 'one',
+              fields: [
+                {
+                  name: key,
+                  table: arrayWithLocalized,
+                },
+              ],
+              references: ['id'],
+              relationName: key,
+              to: target,
+            }
+          }
+
+          if (type === 'many') {
+            arrayRelations[key] = {
+              type: 'many',
+              relationName: key,
+              to: target,
+            }
+          }
+        })
+
+        adapter.rawRelations[arrayTableName] = arrayRelations
 
         break
       }
@@ -321,23 +352,52 @@ export const traverseFields = ({
             throwValidationError,
             versionsCustomName: versions,
           })
-          if (!adapter.tables[blockTableName]) {
-            const baseColumns: Record<string, PgColumnBuilder> = {
-              _order: integer('_order').notNull(),
-              _parentID: parentIDColumnMap[rootTableIDColType]('_parent_id').notNull(),
-              _path: text('_path').notNull(),
+          if (!adapter.rawTables[blockTableName]) {
+            const baseColumns: Record<string, RawColumn> = {
+              _order: {
+                name: '_order',
+                type: 'integer',
+                notNull: true,
+              },
+              _parentID: {
+                name: '_parent_id',
+                type: rootTableIDColType,
+                notNull: true,
+              },
+              _path: {
+                name: '_path',
+                type: 'text',
+                notNull: true,
+              },
             }
 
-            const baseExtraConfig: BaseExtraConfig = {
-              _orderIdx: (cols) => index(`${blockTableName}_order_idx`).on(cols._order),
-              _parentIdFk: (cols) =>
-                foreignKey({
-                  name: `${blockTableName}_parent_id_fk`,
-                  columns: [cols._parentID],
-                  foreignColumns: [adapter.tables[rootTableName].id],
-                }).onDelete('cascade'),
-              _parentIDIdx: (cols) => index(`${blockTableName}_parent_id_idx`).on(cols._parentID),
-              _pathIdx: (cols) => index(`${blockTableName}_path_idx`).on(cols._path),
+            const baseIndexes: Record<string, RawIndex> = {
+              _orderIdx: {
+                name: `${blockTableName}_order_idx`,
+                on: '_order',
+              },
+              _parentIDIdx: {
+                name: `${blockTableName}_parent_id_idx`,
+                on: ['_parentID'],
+              },
+              _pathIdx: {
+                name: `${blockTableName}_path_idx`,
+                on: '_path',
+              },
+            }
+
+            const baseForeignKeys: Record<string, RawForeignKey> = {
+              _parentIdFk: {
+                name: `${blockTableName}_parent_id_fk`,
+                columns: ['_parentID'],
+                foreignColumns: [
+                  {
+                    name: 'id',
+                    table: rootTableName,
+                  },
+                ],
+                onDelete: 'cascade',
+              },
             }
 
             const isLocalized =
@@ -346,9 +406,17 @@ export const traverseFields = ({
               forceLocalized
 
             if (isLocalized) {
-              baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
-              baseExtraConfig._localeIdx = (cols) =>
-                index(`${blockTableName}_locale_idx`).on(cols._locale)
+              baseColumns._locale = {
+                name: '_locale',
+                type: 'enum',
+                locale: true,
+                notNull: true,
+              }
+
+              baseIndexes._localeIdx = {
+                name: `${blockTableName}_locale_idx`,
+                on: '_locale',
+              }
             }
 
             const {
@@ -361,7 +429,8 @@ export const traverseFields = ({
             } = buildTable({
               adapter,
               baseColumns,
-              baseExtraConfig,
+              baseForeignKeys,
+              baseIndexes,
               disableNotNull: disableNotNullFromHere,
               disableRelsTableUnique: true,
               disableUnique,
@@ -371,6 +440,7 @@ export const traverseFields = ({
               rootTableIDColType,
               rootTableName,
               rootUniqueRelationships: uniqueRelationships,
+              setColumnID,
               tableName: blockTableName,
               versions,
               withinLocalizedArrayOrBlock: isLocalized,
@@ -400,50 +470,66 @@ export const traverseFields = ({
               }
             }
 
-            adapter.relations[`relations_${blockTableName}`] = relations(
-              adapter.tables[blockTableName],
-              ({ many, one }) => {
-                const result: Record<string, Relation<string>> = {
-                  _parentID: one(adapter.tables[rootTableName], {
-                    fields: [adapter.tables[blockTableName]._parentID],
-                    references: [adapter.tables[rootTableName].id],
-                    relationName: `_blocks_${block.slug}`,
-                  }),
-                }
-
-                if (hasLocalesTable(block.fields)) {
-                  result._locales = many(
-                    adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
-                    { relationName: '_locales' },
-                  )
-                }
-
-                subRelationsToBuild.forEach(({ type, localized, target }, key) => {
-                  if (type === 'one') {
-                    const blockWithLocalized = localized
-                      ? `${blockTableName}${adapter.localesSuffix}`
-                      : blockTableName
-                    result[key] = one(adapter.tables[target], {
-                      fields: [adapter.tables[blockWithLocalized][key]],
-                      references: [adapter.tables[target].id],
-                      relationName: key,
-                    })
-                  }
-                  if (type === 'many') {
-                    result[key] = many(adapter.tables[target], { relationName: key })
-                  }
-                })
-
-                return result
+            const blockRelations: Record<string, RawRelation> = {
+              _parentID: {
+                type: 'one',
+                fields: [
+                  {
+                    name: '_parentID',
+                    table: blockTableName,
+                  },
+                ],
+                references: ['id'],
+                relationName: `_blocks_${block.slug}`,
+                to: rootTableName,
               },
-            )
+            }
+
+            if (hasLocalesTable(block.fields)) {
+              blockRelations._locales = {
+                type: 'many',
+                relationName: '_locales',
+                to: `${blockTableName}${adapter.localesSuffix}`,
+              }
+            }
+
+            subRelationsToBuild.forEach(({ type, localized, target }, key) => {
+              if (type === 'one') {
+                const blockWithLocalized = localized
+                  ? `${blockTableName}${adapter.localesSuffix}`
+                  : blockTableName
+
+                blockRelations[key] = {
+                  type: 'one',
+                  fields: [
+                    {
+                      name: key,
+                      table: blockWithLocalized,
+                    },
+                  ],
+                  references: ['id'],
+                  relationName: key,
+                  to: target,
+                }
+              }
+
+              if (type === 'many') {
+                blockRelations[key] = {
+                  type: 'many',
+                  relationName: key,
+                  to: target,
+                }
+              }
+            })
+
+            adapter.rawRelations[blockTableName] = blockRelations
           } else if (process.env.NODE_ENV !== 'production' && !versions) {
             validateExistingBlockIsIdentical({
               block,
               localized: field.localized,
               rootTableName,
-              table: adapter.tables[blockTableName],
-              tableLocales: adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
+              table: adapter.rawTables[blockTableName],
+              tableLocales: adapter.rawTables[`${blockTableName}${adapter.localesSuffix}`],
             })
           }
           // blocks relationships are defined from the collection or globals table down to the block, bypassing any subBlocks
@@ -458,26 +544,43 @@ export const traverseFields = ({
         break
       }
       case 'checkbox': {
-        targetTable[fieldName] = withDefault(boolean(columnName), field)
+        targetTable[fieldName] = withDefault(
+          {
+            name: columnName,
+            type: 'boolean',
+          },
+          field,
+        )
+
         break
       }
 
       case 'code':
       case 'email':
       case 'textarea': {
-        targetTable[fieldName] = withDefault(varchar(columnName), field)
+        targetTable[fieldName] = withDefault(
+          {
+            name: columnName,
+            type: 'varchar',
+          },
+          field,
+        )
+
         break
       }
 
       case 'date': {
         targetTable[fieldName] = withDefault(
-          timestamp(columnName, {
+          {
+            name: columnName,
+            type: 'timestamp',
             mode: 'string',
             precision: 3,
             withTimezone: true,
-          }),
+          },
           field,
         )
+
         break
       }
 
@@ -511,6 +614,7 @@ export const traverseFields = ({
           rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
+          setColumnID,
           uniqueRelationships,
           versions,
           withinLocalizedArrayOrBlock: withinLocalizedArrayOrBlock || field.localized,
@@ -539,7 +643,14 @@ export const traverseFields = ({
 
       case 'json':
       case 'richText': {
-        targetTable[fieldName] = withDefault(jsonb(columnName), field)
+        targetTable[fieldName] = withDefault(
+          {
+            name: columnName,
+            type: 'jsonb',
+          },
+          field,
+        )
+
         break
       }
 
@@ -566,16 +677,27 @@ export const traverseFields = ({
             )
           }
         } else {
-          targetTable[fieldName] = withDefault(numeric(columnName), field)
+          targetTable[fieldName] = withDefault(
+            {
+              name: columnName,
+              type: 'numeric',
+            },
+            field,
+          )
         }
+
         break
       }
 
       case 'point': {
-        targetTable[fieldName] = withDefault(geometryColumn(columnName), field)
-        if (!adapter.extensions.postgis) {
-          adapter.extensions.postgis = true
-        }
+        targetTable[fieldName] = withDefault(
+          {
+            name: columnName,
+            type: 'geometry',
+          },
+          field,
+        )
+
         break
       }
 
@@ -590,16 +712,13 @@ export const traverseFields = ({
           throwValidationError,
         })
 
-        adapter.enums[enumName] = adapter.pgSchema.enum(
-          enumName,
-          field.options.map((option) => {
-            if (optionIsObject(option)) {
-              return option.value
-            }
+        const options = field.options.map((option) => {
+          if (optionIsObject(option)) {
+            return option.value
+          }
 
-            return option
-          }) as [string, ...string[]],
-        )
+          return option
+        })
 
         if (field.type === 'select' && field.hasMany) {
           const selectTableName = createTableName({
@@ -610,21 +729,56 @@ export const traverseFields = ({
             throwValidationError,
             versionsCustomName: versions,
           })
-          const baseColumns: Record<string, PgColumnBuilder> = {
-            order: integer('order').notNull(),
-            parent: parentIDColumnMap[parentIDColType]('parent_id').notNull(),
-            value: adapter.enums[enumName]('value'),
+
+          const baseColumns: Record<string, RawColumn> = {
+            order: {
+              name: 'order',
+              type: 'integer',
+              notNull: true,
+            },
+            parent: {
+              name: 'parent_id',
+              type: parentIDColType,
+              notNull: true,
+            },
+            value: {
+              name: 'value',
+              type: 'enum',
+              enumName: createTableName({
+                adapter,
+                config: field,
+                parentTableName: newTableName,
+                prefix: `enum_${newTableName}_`,
+                target: 'enumName',
+                throwValidationError,
+              }),
+              options,
+            },
           }
 
-          const baseExtraConfig: BaseExtraConfig = {
-            orderIdx: (cols) => index(`${selectTableName}_order_idx`).on(cols.order),
-            parentFk: (cols) =>
-              foreignKey({
-                name: `${selectTableName}_parent_fk`,
-                columns: [cols.parent],
-                foreignColumns: [adapter.tables[parentTableName].id],
-              }).onDelete('cascade'),
-            parentIdx: (cols) => index(`${selectTableName}_parent_idx`).on(cols.parent),
+          const baseIndexes: Record<string, RawIndex> = {
+            orderIdx: {
+              name: `${selectTableName}_order_idx`,
+              on: 'order',
+            },
+            parentIdx: {
+              name: `${selectTableName}_parent_idx`,
+              on: 'parent',
+            },
+          }
+
+          const baseForeignKeys: Record<string, RawForeignKey> = {
+            parentFk: {
+              name: `${selectTableName}_parent_fk`,
+              columns: ['parent'],
+              foreignColumns: [
+                {
+                  name: 'id',
+                  table: parentTableName,
+                },
+              ],
+              onDelete: 'cascade',
+            },
           }
 
           const isLocalized =
@@ -633,23 +787,36 @@ export const traverseFields = ({
             forceLocalized
 
           if (isLocalized) {
-            baseColumns.locale = adapter.enums.enum__locales('locale').notNull()
-            baseExtraConfig.localeIdx = (cols) =>
-              index(`${selectTableName}_locale_idx`).on(cols.locale)
+            baseColumns.locale = {
+              name: 'locale',
+              type: 'enum',
+              locale: true,
+              notNull: true,
+            }
+
+            baseIndexes.localeIdx = {
+              name: `${selectTableName}_locale_idx`,
+              on: 'locale',
+            }
           }
 
           if (field.index) {
-            baseExtraConfig.value = (cols) => index(`${selectTableName}_value_idx`).on(cols.value)
+            baseIndexes.value = {
+              name: `${selectTableName}_value_idx`,
+              on: 'value',
+            }
           }
 
           buildTable({
             adapter,
             baseColumns,
-            baseExtraConfig,
+            baseForeignKeys,
+            baseIndexes,
             disableNotNull,
             disableUnique,
             fields: [],
             rootTableName,
+            setColumnID,
             tableName: selectTableName,
             versions,
           })
@@ -661,18 +828,30 @@ export const traverseFields = ({
             target: selectTableName,
           })
 
-          adapter.relations[`relations_${selectTableName}`] = relations(
-            adapter.tables[selectTableName],
-            ({ one }) => ({
-              parent: one(adapter.tables[parentTableName], {
-                fields: [adapter.tables[selectTableName].parent],
-                references: [adapter.tables[parentTableName].id],
-                relationName: fieldName,
-              }),
-            }),
-          )
+          adapter.rawRelations[selectTableName] = {
+            parent: {
+              type: 'one',
+              fields: [
+                {
+                  name: 'parent',
+                  table: selectTableName,
+                },
+              ],
+              references: ['id'],
+              relationName: fieldName,
+              to: parentTableName,
+            },
+          }
         } else {
-          targetTable[fieldName] = withDefault(adapter.enums[enumName](columnName), field)
+          targetTable[fieldName] = withDefault(
+            {
+              name: columnName,
+              type: 'enum',
+              enumName,
+              options,
+            },
+            field,
+          )
         }
         break
       }
@@ -698,7 +877,7 @@ export const traverseFields = ({
           const tableName = adapter.tableNameMap.get(toSnakeCase(field.relationTo))
 
           // get the id type of the related collection
-          let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
+          let colType: IDType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
           const relatedCollectionCustomID = relationshipConfig.fields.find(
             (field) => fieldAffectsData(field) && field.name === 'id',
           )
@@ -710,10 +889,15 @@ export const traverseFields = ({
           }
 
           // make the foreign key column for relationship using the correct id column type
-          targetTable[fieldName] = parentIDColumnMap[colType](`${columnName}_id`).references(
-            () => adapter.tables[tableName].id,
-            { onDelete: 'set null' },
-          )
+          targetTable[fieldName] = {
+            name: `${columnName}_id`,
+            type: colType,
+            reference: {
+              name: 'id',
+              onDelete: 'set null',
+              table: tableName,
+            },
+          }
 
           // add relationship to table
           relationsToBuild.set(fieldName, {
@@ -724,7 +908,7 @@ export const traverseFields = ({
 
           // add notNull when not required
           if (!disableNotNull && field.required && !field.admin?.condition) {
-            targetTable[fieldName].notNull()
+            targetTable[fieldName].notNull = true
           }
           break
         }
@@ -761,7 +945,13 @@ export const traverseFields = ({
             )
           }
         } else {
-          targetTable[fieldName] = withDefault(varchar(columnName), field)
+          targetTable[fieldName] = withDefault(
+            {
+              name: columnName,
+              type: 'varchar',
+            },
+            field,
+          )
         }
         break
       }
@@ -779,7 +969,7 @@ export const traverseFields = ({
       field.required &&
       !condition
     ) {
-      targetTable[fieldName].notNull()
+      targetTable[fieldName].notNull = true
     }
   })
 

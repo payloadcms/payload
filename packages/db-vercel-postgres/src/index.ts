@@ -110,6 +110,8 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       poolOptions: args.pool,
       prodMigrations: args.prodMigrations,
       push: args.push,
+      rawRelations: {},
+      rawTables: {},
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},
