@@ -121,6 +121,15 @@ export type Where = {
 
 export type Sort = Array<string> | string
 
+type SerializableValue = boolean | number | object | string
+export type DefaultValue =
+  | ((args: {
+      locale?: TypedLocale
+      req: PayloadRequest
+      user: PayloadRequest['user']
+    }) => SerializableValue)
+  | SerializableValue
+
 /**
  * Applies pagination for join fields for including collection relationships
  */

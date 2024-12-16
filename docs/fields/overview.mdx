@@ -212,6 +212,7 @@ Functions can be written to make use of the following argument properties:
 
 - `user` - the authenticated user object
 - `locale` - the currently selected locale string
+- `req` - the `PayloadRequest` object
 
 Here is an example of a `defaultValue` function:
 
@@ -227,7 +228,7 @@ export const myField: Field = {
   name: 'attribution',
   type: 'text',
   // highlight-start
-  defaultValue: ({ user, locale }) =>
+  defaultValue: ({ user, locale, req }) =>
     `${translation[locale]} ${user.name}`,
   // highlight-end
 }
@@ -235,7 +236,7 @@ export const myField: Field = {
 
 <Banner type="success">
   <strong>Tip:</strong>
-  You can use async `defaultValue` functions to fill fields with data from API requests.
+  You can use async `defaultValue` functions to fill fields with data from API requests or Local API using `req.payload`.
 </Banner>
 
 ### Validation
