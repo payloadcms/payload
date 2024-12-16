@@ -30,13 +30,24 @@ export const getFileFromURL = async (wrapperReq: WrapperRequest) => {
     src = decodeURIComponent(src)
     const validatedUrl = new URL(src)
 
-    const response = await fetch(validatedUrl.href)
+    // Fetch the file with no compression
+    const response = await fetch(validatedUrl.href, {
+      headers: {
+        'Accept-Encoding': 'identity',
+      },
+    })
 
     if (!response.ok) {
       throw new APIError(`Failed to fetch file from ${validatedUrl.href}`, response.status)
     }
 
-    return response
+    // Return the raw response
+    return new Response(response.body, {
+      headers: {
+        'Content-Length': response.headers.get('content-length') || '',
+        'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
+      },
+    })
   } catch (error) {
     throw new APIError(`Error fetching file: ${error.message}`, 500)
   }
