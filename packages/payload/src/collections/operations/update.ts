@@ -185,7 +185,10 @@ export const updateOperation = async <
       }
 
       try {
-        return updateDocument({
+        // ///////////////////////////////////////////////
+        // Update document, runs all document level hooks
+        // ///////////////////////////////////////////////
+        const updatedDoc = await updateDocument({
           id,
           accessResults: accessResult,
           autosave: false,
@@ -207,6 +210,8 @@ export const updateOperation = async <
           select,
           showHiddenFields,
         })
+
+        return updatedDoc
       } catch (error) {
         errors.push({
           id,

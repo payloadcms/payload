@@ -107,9 +107,6 @@ export const updateByIDOperation = async <
     }
 
     const { data } = args
-    const password = data?.password
-    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
-    const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
 
     // /////////////////////////////////////
     // Access
