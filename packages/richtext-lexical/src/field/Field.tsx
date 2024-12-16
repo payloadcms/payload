@@ -9,7 +9,6 @@ import {
   RenderCustomComponent,
   useEditDepth,
   useField,
-  withCondition,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import React, { useCallback, useMemo } from 'react'
@@ -143,4 +142,4 @@ function fallbackRender({ error }: { error: Error }) {
   )
 }
 
-export const RichText: typeof RichTextComponent = withCondition(RichTextComponent)
+export const RichText: typeof RichTextComponent = RichTextComponent

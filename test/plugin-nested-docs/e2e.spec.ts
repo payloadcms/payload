@@ -136,5 +136,18 @@ describe('Nested Docs Plugin', () => {
       // TODO: add back when error states are fixed
       // await expect(parentSlugInChild).toHaveValue('/parent-slug-draft')
     })
+
+    test('Publishing parent doc should not publish child', async () => {
+      await page.goto(url.edit(childId))
+      await page.locator(slugClass).nth(0).fill('child-updated-draft')
+      await page.locator(draftButtonClass).nth(0).click()
+
+      await page.goto(url.edit(parentId))
+      await page.locator(slugClass).nth(0).fill('parent-updated-published')
+      await page.locator(publishButtonClass).nth(0).click()
+
+      await page.goto(url.edit(childId))
+      await expect(page.locator(slugClass).nth(0)).toHaveValue('child-updated-draft')
+    })
   })
 })

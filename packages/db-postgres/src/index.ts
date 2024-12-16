@@ -167,6 +167,8 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       packageName: '@payloadcms/db-postgres',
       payload,
       queryDrafts,
+      rawRelations: {},
+      rawTables: {},
       rejectInitializing,
       requireDrizzleKit,
       resolveInitializing,

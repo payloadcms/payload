@@ -754,6 +754,17 @@ describe('database', () => {
       expect(helloDocs).toHaveLength(5)
       expect(worldDocs).toHaveLength(5)
     })
+
+    it('should CRUD point field', async () => {
+      const result = await payload.create({
+        collection: 'default-values',
+        data: {
+          point: [5, 10],
+        },
+      })
+
+      expect(result.point).toEqual([5, 10])
+    })
   })
 
   describe('defaultValue', () => {
@@ -773,12 +784,10 @@ describe('database', () => {
       expect(result.array[0].defaultValue).toStrictEqual('default value from database')
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
-      // eslint-disable-next-line jest/no-conditional-in-test
-      if (payload.db.name !== 'sqlite') {
-        expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
-      }
+      expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
     })
   })
+
   describe('drizzle: schema hooks', () => {
     it('should add tables with hooks', async () => {
       // eslint-disable-next-line jest/no-conditional-in-test

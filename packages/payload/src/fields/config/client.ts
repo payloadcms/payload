@@ -32,6 +32,7 @@ export type ServerOnlyFieldProperties =
   | 'editor' // This is a `richText` only property
   | 'enumName' // can be a function
   | 'filterOptions' // This is a `relationship` and `upload` only property
+  | 'graphQL'
   | 'label'
   | 'typescriptSchema'
   | 'validate'
@@ -53,6 +54,7 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'typescriptSchema',
   'dbName', // can be a function
   'enumName', // can be a function
+  'graphQL', // client does not need graphQL
   // the following props are handled separately (see below):
   // `label`
   // `fields`

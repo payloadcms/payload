@@ -172,7 +172,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   config.i18n = i18nConfig
 
   // Need to add default jobs collection before locked documents collections
-  if (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs.tasks.length > 0) {
+  if (
+    (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs?.tasks?.length) ||
+    (Array.isArray(configWithDefaults.jobs?.workflows) &&
+      configWithDefaults.jobs?.workflows?.length)
+  ) {
     let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
 
     if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
