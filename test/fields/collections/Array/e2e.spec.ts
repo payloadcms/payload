@@ -94,7 +94,7 @@ describe('Array', () => {
 
     expect(defaultRowLabelWasAttached).toBeFalsy()
 
-    await expect(page.locator('#custom-array-row-label')).toBeVisible()
+    await expect(page.locator('#field-rowLabelAsComponent #custom-array-row-label')).toBeVisible()
 
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
     await wait(100)
