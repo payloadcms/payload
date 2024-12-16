@@ -80,6 +80,11 @@ export const Posts: CollectionConfig<'posts'> = {
         {
           fields: [
             {
+              name: 'heroImage',
+              type: 'upload',
+              relationTo: 'media',
+            },
+            {
               name: 'content',
               type: 'richText',
               editor: lexicalEditor({
@@ -102,11 +107,6 @@ export const Posts: CollectionConfig<'posts'> = {
         },
         {
           fields: [
-            {
-              name: 'heroImage',
-              type: 'upload',
-              relationTo: 'media',
-            },
             {
               name: 'relatedPosts',
               type: 'relationship',
