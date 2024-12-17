@@ -1,5 +1,5 @@
 {
-  "id": "ea96ca46-b715-43f9-8f77-7518afa91ecd",
+  "id": "89be6945-b93b-4f4e-a970-5a021f6b9652",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8175,11 +8175,6 @@
     }
   },
   "enums": {
-    "public.enum_pages_hero_type": {
-      "name": "enum_pages_hero_type",
-      "schema": "public",
-      "values": ["none", "highImpact", "mediumImpact", "lowImpact"]
-    },
     "public.enum_pages_hero_links_link_type": {
       "name": "enum_pages_hero_links_link_type",
       "schema": "public",
@@ -8225,15 +8220,15 @@
       "schema": "public",
       "values": ["posts"]
     },
+    "public.enum_pages_hero_type": {
+      "name": "enum_pages_hero_type",
+      "schema": "public",
+      "values": ["none", "highImpact", "mediumImpact", "lowImpact"]
+    },
     "public.enum_pages_status": {
       "name": "enum_pages_status",
       "schema": "public",
       "values": ["draft", "published"]
-    },
-    "public.enum__pages_v_version_hero_type": {
-      "name": "enum__pages_v_version_hero_type",
-      "schema": "public",
-      "values": ["none", "highImpact", "mediumImpact", "lowImpact"]
     },
     "public.enum__pages_v_version_hero_links_link_type": {
       "name": "enum__pages_v_version_hero_links_link_type",
@@ -8279,6 +8274,11 @@
       "name": "enum__pages_v_blocks_archive_relation_to",
       "schema": "public",
       "values": ["posts"]
+    },
+    "public.enum__pages_v_version_hero_type": {
+      "name": "enum__pages_v_version_hero_type",
+      "schema": "public",
+      "values": ["none", "highImpact", "mediumImpact", "lowImpact"]
     },
     "public.enum__pages_v_version_status": {
       "name": "enum__pages_v_version_status",
