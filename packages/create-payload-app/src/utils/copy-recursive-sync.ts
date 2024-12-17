@@ -13,10 +13,16 @@ export function copyRecursiveSync(src: string, dest: string, ignoreRegex?: strin
   if (isDirectory) {
     fs.mkdirSync(dest, { recursive: true })
     fs.readdirSync(src).forEach((childItemName) => {
-      if (ignoreRegex && ignoreRegex.some((regex) => new RegExp(regex).test(childItemName))) {
+      if (
+        ignoreRegex &&
+        ignoreRegex.some((regex) => {
+          return new RegExp(regex).test(childItemName)
+        })
+      ) {
+        console.log(`Ignoring ${childItemName} due to regex: ${ignoreRegex}`)
         return
       }
-      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName))
+      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName), ignoreRegex)
     })
   } else {
     fs.copyFileSync(src, dest)
