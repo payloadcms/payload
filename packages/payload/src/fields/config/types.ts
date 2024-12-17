@@ -1451,6 +1451,10 @@ export type FlattenedTabAsField = {
   flattenedFields: FlattenedField[]
 } & MarkRequired<TabAsField, 'name'>
 
+export type FlattenedJoinField = {
+  targetField: RelationshipField | UploadField
+} & JoinField
+
 export type FlattenedField =
   | CheckboxField
   | CodeField
@@ -1459,8 +1463,8 @@ export type FlattenedField =
   | FlattenedArrayField
   | FlattenedBlocksField
   | FlattenedGroupField
+  | FlattenedJoinField
   | FlattenedTabAsField
-  | JoinField
   | JSONField
   | NumberField
   | PointField

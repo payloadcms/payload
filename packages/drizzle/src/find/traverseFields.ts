@@ -16,6 +16,7 @@ import { chainMethods } from './chainMethods.js'
 type TraverseFieldArgs = {
   _locales: Result
   adapter: DrizzleAdapter
+  collectionSlug?: string
   currentArgs: Result
   currentTableName: string
   depth?: number
@@ -42,6 +43,7 @@ type TraverseFieldArgs = {
 export const traverseFields = ({
   _locales,
   adapter,
+  collectionSlug,
   currentArgs,
   currentTableName,
   depth,
@@ -292,6 +294,7 @@ export const traverseFields = ({
         traverseFields({
           _locales,
           adapter,
+          collectionSlug,
           currentArgs,
           currentTableName,
           depth,
@@ -357,13 +360,26 @@ export const traverseFields = ({
           ? adapter.tables[currentTableName].parent
           : adapter.tables[currentTableName].id
 
-        let joinQueryWhere: Where = {
-          [field.on]: {
-            equals: rawConstraint(currentIDColumn),
-          },
+        let joinQueryWhere: Where
+
+        if (Array.isArray(field.targetField.relationTo)) {
+          joinQueryWhere = {
+            [field.on]: {
+              equals: {
+                relationTo: collectionSlug,
+                value: rawConstraint(currentIDColumn),
+              },
+            },
+          }
+        } else {
+          joinQueryWhere = {
+            [field.on]: {
+              equals: rawConstraint(currentIDColumn),
+            },
+          }
         }
 
-        if (where) {
+        if (where && Object.keys(where).length) {
           joinQueryWhere = {
             and: [joinQueryWhere, where],
           }
@@ -383,118 +399,6 @@ export const traverseFields = ({
           tableName: joinCollectionTableName,
           where: joinQueryWhere,
         })
-
-        // let subQueryWhere = buildQueryResult.where
-        // const orderBy = buildQueryResult.orderBy
-        //
-        // let joinLocalesCollectionTableName: string | undefined
-        //
-        // const currentIDColumn = versions
-        //   ? adapter.tables[currentTableName].parent
-        //   : adapter.tables[currentTableName].id
-        //
-        // // Handle hasMany _rels table
-        // if (field.hasMany) {
-        //   const joinRelsCollectionTableName = `${joinCollectionTableName}${adapter.relationshipsSuffix}`
-        //
-        //   if (field.localized) {
-        //     joinLocalesCollectionTableName = joinRelsCollectionTableName
-        //   }
-        //
-        //   let columnReferenceToCurrentID: string
-        //
-        //   if (versions) {
-        //     columnReferenceToCurrentID = `${topLevelTableName
-        //       .replace('_', '')
-        //       .replace(new RegExp(`${adapter.versionsSuffix}$`), '')}_id`
-        //   } else {
-        //     columnReferenceToCurrentID = `${topLevelTableName}_id`
-        //   }
-        //
-        //   joins.push({
-        //     type: 'innerJoin',
-        //     condition: and(
-        //       eq(
-        //         adapter.tables[joinRelsCollectionTableName].parent,
-        //         adapter.tables[joinCollectionTableName].id,
-        //       ),
-        //       eq(
-        //         sql.raw(`"${joinRelsCollectionTableName}"."${columnReferenceToCurrentID}"`),
-        //         currentIDColumn,
-        //       ),
-        //       eq(adapter.tables[joinRelsCollectionTableName].path, field.on),
-        //     ),
-        //     table: adapter.tables[joinRelsCollectionTableName],
-        //   })
-        // } else {
-        //   // Handle localized without hasMany
-        //
-        //   const foreignColumn = field.on.replaceAll('.', '_')
-        //
-        //   if (field.localized) {
-        //     joinLocalesCollectionTableName = `${joinCollectionTableName}${adapter.localesSuffix}`
-        //
-        //     if (!adapter.tables[joinLocalesCollectionTableName][foreignColumn]) {
-        //       // if the table name and column do not exist, query the rels table instead
-        //       const joinRelsCollectionTableName = `${joinCollectionTableName}${adapter.relationshipsSuffix}`
-        //       joinLocalesCollectionTableName = joinRelsCollectionTableName
-        //
-        //       joins.push({
-        //         type: 'innerJoin',
-        //         condition: and(
-        //           eq(
-        //             adapter.tables[joinRelsCollectionTableName].parent,
-        //             adapter.tables[joinCollectionTableName].id,
-        //           ),
-        //           eq(adapter.tables[joinRelsCollectionTableName].path, field.on),
-        //         ),
-        //         table: adapter.tables[joinRelsCollectionTableName],
-        //       })
-        //     } else {
-        //       joins.push({
-        //         type: 'innerJoin',
-        //         condition: and(
-        //           eq(
-        //             adapter.tables[joinLocalesCollectionTableName]._parentID,
-        //             adapter.tables[joinCollectionTableName].id,
-        //           ),
-        //           eq(
-        //             adapter.tables[joinLocalesCollectionTableName][foreignColumn],
-        //             currentIDColumn,
-        //           ),
-        //         ),
-        //         table: adapter.tables[joinLocalesCollectionTableName],
-        //       })
-        //     }
-        //     // Handle without localized and without hasMany, just a condition append to where. With localized the inner join handles eq.
-        //   } else {
-        //     // if the table name and column do not exist, query the rels table instead
-        //     if (!adapter.tables[joinCollectionTableName][foreignColumn]) {
-        //       const joinRelsCollectionTableName = `${joinCollectionTableName}${adapter.relationshipsSuffix}`
-        //
-        //       if (field.localized) {
-        //         joinLocalesCollectionTableName = joinRelsCollectionTableName
-        //       }
-        //
-        //       joins.push({
-        //         type: 'innerJoin',
-        //         condition: and(
-        //           eq(
-        //             adapter.tables[joinRelsCollectionTableName].parent,
-        //             adapter.tables[joinCollectionTableName].id,
-        //           ),
-        //           eq(adapter.tables[joinRelsCollectionTableName].path, field.on),
-        //         ),
-        //         table: adapter.tables[joinRelsCollectionTableName],
-        //       })
-        //     } else {
-        //       subQueryWhere = and(
-        //         subQueryWhere,
-        //         eq(adapter.tables[joinCollectionTableName][foreignColumn], currentIDColumn),
-        //       )
-        //     }
-        //   }
-        // }
 
         const chainedMethods: ChainedMethods = []
 

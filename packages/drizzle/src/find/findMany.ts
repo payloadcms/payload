@@ -12,6 +12,7 @@ import { buildFindManyArgs } from './buildFindManyArgs.js'
 
 type Args = {
   adapter: DrizzleAdapter
+  collectionSlug?: string
   fields: FlattenedField[]
   tableName: string
   versions?: boolean
@@ -19,6 +20,7 @@ type Args = {
 
 export const findMany = async function find({
   adapter,
+  collectionSlug,
   fields,
   joins: joinQuery,
   limit: limitArg,
@@ -69,6 +71,7 @@ export const findMany = async function find({
 
   const findManyArgs = buildFindManyArgs({
     adapter,
+    collectionSlug,
     depth: 0,
     fields,
     joinQuery,

@@ -32,6 +32,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const result = await findMany({
     adapter: this,
+    collectionSlug: collection,
     fields,
     joins,
     limit,
