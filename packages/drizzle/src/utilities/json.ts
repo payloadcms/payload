@@ -35,3 +35,10 @@ export function jsonBuildObject<T extends Record<string, Column | SQL>>(
 
   return sql`json_build_object(${sql.join(chunks)})`
 }
+
+export const jsonAggBuildObject = <T extends Record<string, Column | SQL>>(
+  adapter: DrizzleAdapter,
+  shape: T,
+) => {
+  return jsonAgg(adapter, jsonBuildObject(adapter, shape))
+}

@@ -9,7 +9,7 @@ import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../t
 import type { Result } from './buildFindManyArgs.js'
 
 import buildQuery from '../queries/buildQuery.js'
-import { jsonAgg, jsonBuildObject } from '../utilities/json.js'
+import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
 import { chainMethods } from './chainMethods.js'
 
@@ -417,15 +417,12 @@ export const traverseFields = ({
 
         currentArgs.extras[columnName] = sql`${db
           .select({
-            result: jsonAgg(
-              adapter,
-              jsonBuildObject(adapter, {
-                id: sql.raw(`"${subQueryAlias}".id`),
-                ...(selectFields._locale && {
-                  locale: sql.raw(`"${subQueryAlias}".${selectFields._locale.name}`),
-                }),
+            result: jsonAggBuildObject(adapter, {
+              id: sql.raw(`"${subQueryAlias}".id`),
+              ...(selectFields._locale && {
+                locale: sql.raw(`"${subQueryAlias}".${selectFields._locale.name}`),
               }),
-            ),
+            }),
           })
           .from(sql`${subQuery}`)}`.as(columnName)
 
