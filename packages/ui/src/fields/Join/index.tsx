@@ -45,6 +45,7 @@ const getInitialDrawerData = ({
 
   if (field.type === 'relationship' || field.type === 'upload') {
     return {
+      // TODO: Handle polymorphic https://github.com/payloadcms/payload/pull/9990
       [field.name]: field.hasMany ? [docID] : docID,
     }
   }
