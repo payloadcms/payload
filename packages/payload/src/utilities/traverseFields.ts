@@ -36,7 +36,7 @@ const traverseArrayOrBlocksField = ({
     }
 
     if (fields) {
-      traverseFields({ callback, fields, parentRef, ref })
+      traverseFields({ callback, fields, fillEmpty, parentRef, ref })
     }
   }
 }
@@ -126,6 +126,7 @@ export const traverseFields = ({
                 traverseFields({
                   callback,
                   fields: tab.fields,
+                  fillEmpty,
                   parentRef: currentParentRef,
                   ref: tabRef[key],
                 })
@@ -150,6 +151,7 @@ export const traverseFields = ({
         traverseFields({
           callback,
           fields: tab.fields,
+          fillEmpty,
           parentRef: currentParentRef,
           ref: tabRef,
         })
@@ -190,6 +192,7 @@ export const traverseFields = ({
             traverseFields({
               callback,
               fields: field.fields,
+              fillEmpty,
               parentRef: currentParentRef,
               ref: currentRef[key],
             })
@@ -235,6 +238,7 @@ export const traverseFields = ({
         traverseFields({
           callback,
           fields: field.fields,
+          fillEmpty,
           parentRef: currentParentRef,
           ref: currentRef,
         })
