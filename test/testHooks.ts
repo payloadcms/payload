@@ -10,7 +10,12 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const createTestHooks = async (testSuiteName = '_community') => {
-  const tsConfigPath = path.resolve(getNextRootDir().rootDir, './tsconfig.json')
+  const rootDir = getNextRootDir().rootDir
+  const tsConfigBasePath = path.resolve(rootDir, './tsconfig.base.json')
+  const tsConfigPath = existsSync(tsConfigBasePath)
+    ? tsConfigBasePath
+    : path.resolve(rootDir, './tsconfig.json')
+
   const tsConfigContent = await readFile(tsConfigPath, 'utf8')
   const tsConfig = parse(tsConfigContent)
 
@@ -20,7 +25,7 @@ export const createTestHooks = async (testSuiteName = '_community') => {
      */
     beforeTest: async () => {
       // Delete entire .next cache folder
-      const nextCache = path.resolve(getNextRootDir().rootDir, './.next')
+      const nextCache = path.resolve(rootDir, './.next')
       if (existsSync(nextCache)) {
         await rm(nextCache, { recursive: true })
       }
