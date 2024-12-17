@@ -12,6 +12,16 @@ export const PostsCollection: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
   versions: {
     drafts: true,
