@@ -59,9 +59,8 @@ export const buildDrizzleTable: BuildDrizzleTable = ({ adapter, locales, rawTabl
         break
       }
 
-      // Not used yet in SQLite but ready here.
       case 'uuid': {
-        let builder = text(column.name)
+        let builder = text(column.name, { length: 36 })
 
         if (column.defaultRandom) {
           builder = builder.$defaultFn(() => uuidv4())

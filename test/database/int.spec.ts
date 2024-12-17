@@ -530,7 +530,7 @@ describe('database', () => {
   describe('transactions', () => {
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
-      if (!['sqlite'].includes(process.env.PAYLOAD_DATABASE)) {
+      if (!['sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)) {
         it('should commit multiple operations in isolation', async () => {
           const req = {
             payload,
@@ -1074,7 +1074,8 @@ describe('database', () => {
         data: { title: 'invalid', relationship: 'not-real-id' },
       })
     } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+      // instanceof checks don't work with libsql
+      expect(error).toBeTruthy()
     }
 
     expect(invalidDoc).toBeUndefined()

@@ -1,7 +1,7 @@
 import prompts from 'prompts'
 
 import type { BasePostgresAdapter } from '../postgres/types.js'
-import type { DrizzleAdapter } from '../types.js'
+import type { DrizzleAdapter, PostgresDB } from '../types.js'
 
 /**
  * Pushes the development schema to the database using Drizzle.
@@ -60,21 +60,24 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
     ? `"${adapter.schemaName}"."payload_migrations"`
     : '"payload_migrations"'
 
+  const drizzle = adapter.drizzle as PostgresDB
+
   const result = await adapter.execute({
-    drizzle: adapter.drizzle,
+    drizzle,
     raw: `SELECT * FROM ${migrationsTable} WHERE batch = '-1'`,
   })
 
   const devPush = result.rows
 
   if (!devPush.length) {
-    await adapter.execute({
-      drizzle: adapter.drizzle,
-      raw: `INSERT INTO ${migrationsTable} (name, batch) VALUES ('dev', '-1')`,
+    // Use drizzle for insert so $defaultFn's are called
+    drizzle.insert(adapter.tables.payload_migrations).values({
+      name: 'dev',
+      batch: -1,
     })
   } else {
     await adapter.execute({
-      drizzle: adapter.drizzle,
+      drizzle,
       raw: `UPDATE ${migrationsTable} SET updated_at = CURRENT_TIMESTAMP WHERE batch = '-1'`,
     })
   }

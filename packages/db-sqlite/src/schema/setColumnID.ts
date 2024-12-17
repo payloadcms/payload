@@ -1,6 +1,6 @@
 import type { SetColumnID } from '@payloadcms/drizzle/types'
 
-export const setColumnID: SetColumnID = ({ columns, fields }) => {
+export const setColumnID: SetColumnID = ({ adapter, columns, fields }) => {
   const idField = fields.find((field) => field.name === 'id')
   if (idField) {
     if (idField.type === 'number') {
@@ -20,6 +20,17 @@ export const setColumnID: SetColumnID = ({ columns, fields }) => {
       }
       return 'text'
     }
+  }
+
+  if (adapter.idType === 'uuid') {
+    columns.id = {
+      name: 'id',
+      type: 'uuid',
+      defaultRandom: true,
+      primaryKey: true,
+    }
+
+    return 'uuid'
   }
 
   columns.id = {
