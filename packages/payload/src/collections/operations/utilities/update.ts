@@ -90,7 +90,8 @@ export const updateDocument = async <
   showHiddenFields,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
-  const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
+  const shouldSaveDraft =
+    Boolean(draftArg && collectionConfig.versions.drafts) && data._status !== 'published'
   const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
 
   // /////////////////////////////////////
@@ -111,7 +112,7 @@ export const updateDocument = async <
     depth: 0,
     doc: docWithLocales,
     draft: draftArg,
-    fallbackLocale: null,
+    fallbackLocale,
     global: null,
     locale,
     overrideAccess: true,
@@ -223,8 +224,7 @@ export const updateDocument = async <
     skipValidation:
       shouldSaveDraft &&
       collectionConfig.versions.drafts &&
-      !collectionConfig.versions.drafts.validate &&
-      data._status !== 'published',
+      !collectionConfig.versions.drafts.validate,
   }
 
   if (publishSpecificLocale) {
@@ -277,7 +277,7 @@ export const updateDocument = async <
   // Update
   // /////////////////////////////////////
 
-  if (!shouldSaveDraft || data._status === 'published') {
+  if (!shouldSaveDraft) {
     result = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
