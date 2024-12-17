@@ -53,6 +53,14 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     validate,
   } = props
 
+  if (name === 'customArray') {
+    console.log('customArray', props)
+  }
+
+  if (name === 'defaultArray') {
+    console.log('defaultArray', props)
+  }
+
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
