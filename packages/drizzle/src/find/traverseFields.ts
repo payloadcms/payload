@@ -369,7 +369,11 @@ export const traverseFields = ({
           }
         }
 
-        const buildQueryResult = buildQuery({
+        const {
+          orderBy,
+          selectFields,
+          where: subQueryWhere,
+        } = buildQuery({
           adapter,
           fields,
           joins,
@@ -379,9 +383,6 @@ export const traverseFields = ({
           tableName: joinCollectionTableName,
           where: joinQueryWhere,
         })
-
-        const subQueryWhere = buildQueryResult.where
-        const orderBy = buildQueryResult.orderBy
 
         const chainedMethods: ChainedMethods = []
 
@@ -408,7 +409,7 @@ export const traverseFields = ({
         const subQuery = chainMethods({
           methods: chainedMethods,
           query: db
-            .select(buildQueryResult.selectFields as any)
+            .select(selectFields as any)
             .from(adapter.tables[joinCollectionTableName])
             .where(subQueryWhere)
             .orderBy(() => orderBy.map(({ column, order }) => order(column))),
@@ -420,8 +421,8 @@ export const traverseFields = ({
               adapter,
               jsonBuildObject(adapter, {
                 id: sql.raw(`"${subQueryAlias}".id`),
-                ...(buildQueryResult.selectFields._locale && {
-                  locale: sql.raw(buildQueryResult.selectFields._locale.name),
+                ...(selectFields._locale && {
+                  locale: sql.raw(`"${subQueryAlias}".${selectFields._locale.name}`),
                 }),
               }),
             ),
