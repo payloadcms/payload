@@ -49,7 +49,7 @@ export type ListQuery = {
 
 export type BuildTableStateArgs = {
   collectionSlug: string
-  columns?: any[] // TODO: type this (comes from ui pkg)
+  columns?: { accessor: string; active: boolean }[]
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
   query?: ListQuery

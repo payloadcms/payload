@@ -97,6 +97,20 @@ describe('Fields', () => {
       expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue)
     })
 
+    it('should populate function default values from req', async () => {
+      const text = await payload.create({
+        req: {
+          context: {
+            defaultValue: 'from-context',
+          },
+        },
+        collection: 'text-fields',
+        data: { text: 'required' },
+      })
+
+      expect(text.defaultValueFromReq).toBe('from-context')
+    })
+
     it('should localize an array of strings using hasMany', async () => {
       const localizedHasMany = ['hello', 'world']
       const { id } = await payload.create({

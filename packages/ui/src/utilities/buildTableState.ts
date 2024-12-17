@@ -211,6 +211,7 @@ export const buildTableState = async (
       overrideAccess: false,
       page: query?.page ? parseInt(query.page, 10) : undefined,
       sort: query?.sort,
+      user: req.user,
       where: query?.where,
     })
 

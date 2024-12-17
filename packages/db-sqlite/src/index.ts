@@ -100,6 +100,8 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       operators,
       prodMigrations: args.prodMigrations,
       push: args.push,
+      rawRelations: {},
+      rawTables: {},
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},

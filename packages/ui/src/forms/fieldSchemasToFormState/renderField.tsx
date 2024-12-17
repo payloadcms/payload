@@ -9,7 +9,7 @@ import type { RenderFieldMethod } from './types.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- need this to reference already existing bundle. Otherwise, bundle size increases., payload/no-imports-from-exports-dir
-import { FieldDescription } from '../../exports/client/index.js'
+import { FieldDescription, WatchCondition } from '../../exports/client/index.js'
 
 const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
   'Cell',
@@ -135,12 +135,16 @@ export const renderField: RenderFieldMethod = ({
         fieldConfig.admin.components = {}
       }
 
-      fieldState.customComponents.Field = RenderServerComponent({
-        clientProps,
-        Component: fieldConfig.editor.FieldComponent,
-        importMap: req.payload.importMap,
-        serverProps,
-      })
+      fieldState.customComponents.Field = (
+        <WatchCondition path={path}>
+          {RenderServerComponent({
+            clientProps,
+            Component: fieldConfig.editor.FieldComponent,
+            importMap: req.payload.importMap,
+            serverProps,
+          })}
+        </WatchCondition>
+      )
 
       break
     }
@@ -236,13 +240,17 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('Field' in fieldConfig.admin.components) {
-        fieldState.customComponents.Field = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.Field,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.Field',
-          serverProps,
-        })
+        fieldState.customComponents.Field = (
+          <WatchCondition path={path}>
+            {RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.Field,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.Field',
+              serverProps,
+            })}
+          </WatchCondition>
+        )
       }
     }
   }

@@ -91,6 +91,9 @@ export const Categories: CollectionConfig = {
           type: 'join',
           collection: postsSlug,
           on: 'group.category',
+          admin: {
+            defaultColumns: ['id', 'createdAt', 'title'],
+          },
         },
         {
           name: 'camelCasePosts',

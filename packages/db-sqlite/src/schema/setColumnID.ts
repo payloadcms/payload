@@ -1,28 +1,32 @@
-import type { SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
-import type { FlattenedField } from 'payload'
+import type { SetColumnID } from '@payloadcms/drizzle/types'
 
-import { integer, numeric, text } from 'drizzle-orm/sqlite-core'
-
-import type { IDType } from '../types.js'
-
-type Args = {
-  columns: Record<string, SQLiteColumnBuilder>
-  fields: FlattenedField[]
-}
-export const setColumnID = ({ columns, fields }: Args): IDType => {
+export const setColumnID: SetColumnID = ({ columns, fields }) => {
   const idField = fields.find((field) => field.name === 'id')
   if (idField) {
     if (idField.type === 'number') {
-      columns.id = numeric('id').primaryKey()
+      columns.id = {
+        name: 'id',
+        type: 'numeric',
+        primaryKey: true,
+      }
       return 'numeric'
     }
 
     if (idField.type === 'text') {
-      columns.id = text('id').primaryKey()
+      columns.id = {
+        name: 'id',
+        type: 'text',
+        primaryKey: true,
+      }
       return 'text'
     }
   }
 
-  columns.id = integer('id').primaryKey()
+  columns.id = {
+    name: 'id',
+    type: 'integer',
+    primaryKey: true,
+  }
+
   return 'integer'
 }

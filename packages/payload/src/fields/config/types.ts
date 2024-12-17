@@ -127,7 +127,7 @@ import type {
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequest, Where } from '../../types/index.js'
+import type { DefaultValue, Operation, PayloadRequest, Where } from '../../types/index.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -370,6 +370,17 @@ export type OptionObject = {
 
 export type Option = OptionObject | string
 
+export type FieldGraphQLType = {
+  graphQL?: {
+    /**
+     * Complexity for the query. This is used to limit the complexity of the join query.
+     *
+     * @default 10
+     */
+    complexity?: number
+  }
+}
+
 export interface FieldBase {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
@@ -384,7 +395,7 @@ export interface FieldBase {
   admin?: Admin
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-  defaultValue?: any
+  defaultValue?: DefaultValue
   hidden?: boolean
   hooks?: {
     afterChange?: FieldHook[]
@@ -647,7 +658,7 @@ export type RowField = {
   admin?: Omit<Admin, 'description'>
   fields: Field[]
   type: 'row'
-} & Omit<FieldBase, 'admin' | 'label' | 'name' | 'validate' | 'virtual'>
+} & Omit<FieldBase, 'admin' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
 
 export type RowFieldClient = {
   admin?: Omit<AdminClient, 'description'>
@@ -686,7 +697,7 @@ export type CollapsibleField = {
       label: Required<FieldBase['label']>
     }
 ) &
-  Omit<FieldBase, 'label' | 'name' | 'validate' | 'virtual'>
+  Omit<FieldBase, 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
 
 export type CollapsibleFieldClient = {
   admin?: {
@@ -844,6 +855,7 @@ type SharedUploadProperties = {
       validate?: UploadFieldSingleValidation
     }
 ) &
+  FieldGraphQLType &
   Omit<FieldBase, 'validate'>
 
 type SharedUploadPropertiesClient = FieldBaseClient &
@@ -1023,6 +1035,7 @@ type SharedRelationshipProperties = {
       validate?: RelationshipFieldSingleValidation
     }
 ) &
+  FieldGraphQLType &
   Omit<FieldBase, 'validate'>
 
 type SharedRelationshipPropertiesClient = FieldBaseClient &
@@ -1325,7 +1338,7 @@ export type BlocksField = {
     isSortable?: boolean
   } & Admin
   blocks: Block[]
-  defaultValue?: unknown
+  defaultValue?: DefaultValue
   labels?: Labels
   maxRows?: number
   minRows?: number
@@ -1377,6 +1390,7 @@ export type JoinField = {
       Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
       Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
     } & Admin['components']
+    defaultColumns?: string[]
     disableBulkEdit?: never
     readOnly?: never
   } & Admin
@@ -1405,10 +1419,12 @@ export type JoinField = {
   type: 'join'
   validate?: never
   where?: Where
-} & FieldBase
+} & FieldBase &
+  FieldGraphQLType
 
 export type JoinFieldClient = {
-  admin?: AdminClient & Pick<JoinField['admin'], 'allowCreate' | 'disableBulkEdit' | 'readOnly'>
+  admin?: AdminClient &
+    Pick<JoinField['admin'], 'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'>
 } & FieldBaseClient &
   Pick<
     JoinField,

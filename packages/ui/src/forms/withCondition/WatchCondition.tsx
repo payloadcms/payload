@@ -6,7 +6,6 @@ import { useFormFields } from '../Form/context.js'
 
 export const WatchCondition: React.FC<{
   children: React.ReactNode
-  indexPath: string
   path: string
 }> = (props) => {
   const { children, path } = props

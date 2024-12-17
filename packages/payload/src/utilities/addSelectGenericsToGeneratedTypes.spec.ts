@@ -178,6 +178,7 @@ export interface PayloadMigration {
 export interface PostsSelect {
   text?: boolean;
   number?: boolean;
+  sharedGroup?: boolean | SharedGroup;
   group?:
     | boolean
     | {
@@ -451,6 +452,7 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  sharedGroup?: T | SharedGroup<T>;
   group?:
     | T
     | {

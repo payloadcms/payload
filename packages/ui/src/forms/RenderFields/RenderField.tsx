@@ -51,10 +51,10 @@ export function RenderField({
   readOnly,
   schemaPath,
 }: RenderFieldProps) {
-  const Field = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
+  const CustomField = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
 
-  if (Field !== undefined) {
-    return Field || null
+  if (CustomField !== undefined) {
+    return CustomField || null
   }
 
   const baseFieldProps: Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'> = {

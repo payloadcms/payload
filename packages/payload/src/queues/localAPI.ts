@@ -22,18 +22,18 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           req?: PayloadRequest
           // TTaskOrWorkflowlug with keyof TypedJobs['workflows'] removed:
           task: TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] ? TTaskOrWorkflowSlug : never
-          workflow?: never
           waitUntil?: Date
+          workflow?: never
         }
       | {
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
           queue?: string
           req?: PayloadRequest
           task?: never
+          waitUntil?: Date
           workflow: TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
             ? TTaskOrWorkflowSlug
             : never
-          waitUntil?: Date
         },
   ): Promise<
     TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
@@ -60,8 +60,8 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         input: args.input,
         queue,
         taskSlug: 'task' in args ? args.task : undefined,
-        workflowSlug: 'workflow' in args ? args.workflow : undefined,
         waitUntil: args.waitUntil?.toISOString() ?? undefined,
+        workflowSlug: 'workflow' in args ? args.workflow : undefined,
       } as BaseJob,
       req: args.req,
     })) as TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']

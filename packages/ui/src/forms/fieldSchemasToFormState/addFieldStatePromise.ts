@@ -19,6 +19,7 @@ import {
   fieldHasSubFields,
   fieldIsHiddenOrDisabled,
   fieldIsID,
+  fieldIsLocalized,
   fieldIsSidebar,
   getFieldPaths,
   tabHasName,
@@ -626,7 +627,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       id,
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
-      anyParentLocalized: field.localized || anyParentLocalized,
+      anyParentLocalized: fieldIsLocalized(field) || anyParentLocalized,
       clientFieldSchemaMap,
       collectionSlug,
       data,

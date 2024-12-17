@@ -307,7 +307,7 @@ export interface CollectionRestricted {
   id: string;
   title?: string | null;
   canRead?: boolean | null;
-  category?: (string | null) | RestrictedCategory;
+  category?: (string | null) | CategoriesJoinRestricted;
   updatedAt: string;
   createdAt: string;
 }
