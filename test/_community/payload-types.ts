@@ -69,7 +69,6 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  title?: string | null;
   group?: {
     text?: string | null;
   };
@@ -204,7 +203,6 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  title?: T;
   group?:
     | T
     | {

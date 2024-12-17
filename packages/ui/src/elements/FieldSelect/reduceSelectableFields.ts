@@ -1,4 +1,4 @@
-import type { ClientField, FieldWithPathClient, FormState } from 'payload'
+import type { ClientField, FormState } from 'payload'
 
 import {
   fieldAffectsData,
@@ -8,6 +8,11 @@ import {
 } from 'payload/shared'
 
 import { combineLabel } from './index.js'
+
+export type FieldOption = {
+  label: React.ReactNode
+  value: string
+}
 
 export const reduceSelectableFields = ({
   fields,
@@ -23,7 +28,7 @@ export const reduceSelectableFields = ({
   parentIndexPath: string
   parentPath: string
   parentSchemaPath: string
-}): { label: React.ReactNode; value: FieldWithPathClient }[] => {
+}): FieldOption[] => {
   if (!fields) {
     return []
   }
@@ -108,16 +113,16 @@ export const reduceSelectableFields = ({
         default: {
           acc.push({
             label: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
-            value: {
-              ...field,
-              path,
-            },
+            value: path,
           })
 
           return acc
         }
       }
     },
-    [] as { label: React.ReactNode; value: FieldWithPathClient }[],
+    [] as {
+      label: React.ReactNode
+      value: string
+    }[],
   )
 }

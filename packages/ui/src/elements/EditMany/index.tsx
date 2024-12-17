@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, FieldWithPathClient, FormState } from 'payload'
+import type { ClientCollectionConfig, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -25,8 +25,8 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
-import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import './index.scss'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 
@@ -36,12 +36,12 @@ export type EditManyProps = {
   readonly collection: ClientCollectionConfig
 }
 
-const sanitizeUnselectedFields = (formState: FormState, selectedFields: FieldWithPathClient[]) => {
-  const filteredData = selectedFields.reduce((acc, field) => {
-    const foundState = formState?.[field.path]
+const sanitizeUnselectedFields = (formState: FormState, selectedFields: string[]) => {
+  const filteredData = selectedFields.reduce((acc, path) => {
+    const foundState = formState?.[path]
 
     if (foundState) {
-      acc[field.path] = formState?.[field.path]?.value
+      acc[path] = formState?.[path]?.value
     }
 
     return acc
@@ -53,7 +53,7 @@ const sanitizeUnselectedFields = (formState: FormState, selectedFields: FieldWit
 const Submit: React.FC<{
   readonly action: string
   readonly disabled: boolean
-  readonly selectedFields?: FieldWithPathClient[]
+  readonly selectedFields?: string[]
 }> = ({ action, disabled, selectedFields }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
@@ -77,7 +77,7 @@ const Submit: React.FC<{
 const PublishButton: React.FC<{
   action: string
   disabled: boolean
-  selectedFields?: FieldWithPathClient[]
+  selectedFields?: string[]
 }> = ({ action, disabled, selectedFields }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
@@ -104,7 +104,7 @@ const PublishButton: React.FC<{
 const SaveDraftButton: React.FC<{
   action: string
   disabled: boolean
-  selectedFields?: FieldWithPathClient[]
+  selectedFields?: string[]
 }> = ({ action, disabled, selectedFields }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
@@ -152,7 +152,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
-  const [selectedFields, setSelectedFields] = useState<FieldWithPathClient[]>([])
+  const [selectedFields, setSelectedFields] = useState<string[]>([])
   const searchParams = useSearchParams()
   const router = useRouter()
   const [initialState, setInitialState] = useState<FormState>()
@@ -254,8 +254,6 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     return null
   }
 
-  console.log(selectedFields)
-
   return (
     <div className={baseClass}>
       <DrawerToggler
@@ -308,7 +306,10 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                   <FieldSelect fields={fields} setSelected={setSelectedFields} />
                   {selectedFields.length === 0 ? null : (
                     <RenderFields
-                      fields={selectedFields}
+                      fields={fields}
+                      filterFields={({ path }) =>
+                        selectedFields.some((selectedPath) => selectedPath === path)
+                      }
                       parentIndexPath=""
                       parentPath=""
                       parentSchemaPath={collectionSlug}

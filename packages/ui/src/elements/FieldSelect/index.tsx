@@ -1,7 +1,9 @@
 'use client'
-import type { ClientField, FieldWithPathClient } from 'payload'
+import type { ClientField } from 'payload'
 
 import React, { Fragment, useState } from 'react'
+
+import type { FieldOption } from './reduceSelectableFields.js'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -15,7 +17,7 @@ const baseClass = 'field-select'
 
 export type FieldSelectProps = {
   readonly fields: ClientField[]
-  readonly setSelected: (fields: FieldWithPathClient[]) => void
+  readonly setSelected: (fields: string[]) => void
 }
 
 export const combineLabel = ({
@@ -49,7 +51,7 @@ export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected })
   const { t } = useTranslation()
   const { dispatchFields, getFields } = useForm()
 
-  const [options] = useState(() =>
+  const [options] = useState<FieldOption[]>(() =>
     reduceSelectableFields({
       fields,
       formState: getFields(),

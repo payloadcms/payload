@@ -3,6 +3,7 @@ import type { ClientField, SanitizedFieldPermissions } from 'payload'
 export type RenderFieldsProps = {
   readonly className?: string
   readonly fields: ClientField[]
+  readonly filterFields?: (args: { field: ClientField; path: string }) => boolean
   /**
    * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
    *

@@ -113,37 +113,40 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
-    <TextInput
-      AfterInput={AfterInput}
-      BeforeInput={BeforeInput}
-      className={className}
-      Description={Description}
-      description={description}
-      Error={Error}
-      hasMany={hasMany}
-      inputRef={inputRef}
-      Label={Label}
-      label={label}
-      localized={localized}
-      maxRows={maxRows}
-      minRows={minRows}
-      onChange={
-        hasMany
-          ? handleHasManyChange
-          : (e) => {
-              setValue(e.target.value)
-            }
-      }
-      path={path}
-      placeholder={placeholder}
-      readOnly={readOnly}
-      required={required}
-      rtl={renderRTL}
-      showError={showError}
-      style={styles}
-      value={(value as string) || ''}
-      valueToRender={valueToRender as Option[]}
-    />
+    <div>
+      <p>{path}</p>
+      <TextInput
+        AfterInput={AfterInput}
+        BeforeInput={BeforeInput}
+        className={className}
+        Description={Description}
+        description={description}
+        Error={Error}
+        hasMany={hasMany}
+        inputRef={inputRef}
+        Label={Label}
+        label={label}
+        localized={localized}
+        maxRows={maxRows}
+        minRows={minRows}
+        onChange={
+          hasMany
+            ? handleHasManyChange
+            : (e) => {
+                setValue(e.target.value)
+              }
+        }
+        path={path}
+        placeholder={placeholder}
+        readOnly={readOnly}
+        required={required}
+        rtl={renderRTL}
+        showError={showError}
+        style={styles}
+        value={(value as string) || ''}
+        valueToRender={valueToRender as Option[]}
+      />
+    </div>
   )
 }
 
