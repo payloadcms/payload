@@ -5,41 +5,65 @@ import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 
 import { debug, error } from '../utils/log.js'
 
-const updateEnvVariables = (
-  contents: string,
-  databaseType: DbType | undefined,
-  databaseUri: string,
-  payloadSecret: string,
-): string => {
+const updateEnvExampleVariables = (contents: string, databaseType: DbType | undefined): string => {
   return contents
     .split('\n')
-    .filter((e) => e)
     .map((line) => {
       if (line.startsWith('#') || !line.includes('=')) {
-        return line
+        return line // Preserve comments and unrelated lines
       }
 
-      const [key, ...valueParts] = line.split('=')
-      let value = valueParts.join('=')
+      const [key] = line.split('=')
 
-      if (
-        key === 'MONGODB_URI' ||
-        key === 'MONGO_URL' ||
-        key === 'DATABASE_URI' ||
-        key === 'POSTGRES_URL'
-      ) {
-        value = databaseUri
-        if (databaseType === 'vercel-postgres') {
-          value = databaseUri
+      // Handle placeholder connection strings based on databaseType
+      if (key === 'DATABASE_URI' || key === 'POSTGRES_URL' || key === 'MONGODB_URI') {
+        switch (databaseType) {
+          case 'mongodb':
+            return `DATABASE_URI=mongodb://your-connection-string-here`
+          case 'postgres':
+            return `DATABASE_URI=postgres://your-connection-string-here`
+          case 'sqlite':
+            return `DATABASE_URI=file:./your-database-file.db`
+          case 'vercel-postgres':
+            return `POSTGRES_URL=postgres://your-connection-string-here`
+          default:
+            return `DATABASE_URI=your-database-connection-here` // Fallback
         }
       }
 
       if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {
-        value = payloadSecret
+        return `PAYLOAD_SECRET=YOUR_SECRET_HERE`
       }
 
-      return `${key}=${value}`
+      return line
     })
+    .join('\n')
+}
+
+const generateEnvContent = (
+  existingEnv: string,
+  databaseType: DbType | undefined,
+  databaseUri: string,
+  payloadSecret: string,
+): string => {
+  const dbKey = databaseType === 'vercel-postgres' ? 'POSTGRES_URL' : 'DATABASE_URI'
+
+  const envVars: Record<string, string> = {}
+  existingEnv
+    .split('\n')
+    .filter((line) => line.includes('=') && !line.startsWith('#'))
+    .forEach((line) => {
+      const [key, value] = line.split('=')
+      envVars[key] = value
+    })
+
+  // Override specific keys
+  envVars[dbKey] = databaseUri
+  envVars['PAYLOAD_SECRET'] = payloadSecret
+
+  // Rebuild content
+  return Object.entries(envVars)
+    .map(([key, value]) => `${key}=${value}`)
     .join('\n')
 }
 
@@ -65,6 +89,7 @@ export async function manageEnvFiles(args: {
   try {
     let updatedExampleContents: string
 
+    // Update .env.example
     if (template?.type === 'starter') {
       if (!fs.existsSync(envExamplePath)) {
         error(`.env.example file not found at ${envExamplePath}`)
@@ -72,25 +97,25 @@ export async function manageEnvFiles(args: {
       }
 
       const envExampleContents = await fs.readFile(envExamplePath, 'utf8')
-      updatedExampleContents = updateEnvVariables(
-        envExampleContents,
-        databaseType,
-        databaseUri,
-        payloadSecret,
-      )
+      updatedExampleContents = updateEnvExampleVariables(envExampleContents, databaseType)
 
-      await fs.writeFile(envExamplePath, updatedExampleContents)
+      await fs.writeFile(envExamplePath, updatedExampleContents.trimEnd() + '\n')
       debug(`.env.example file successfully updated`)
     } else {
-      updatedExampleContents = `# Added by Payload\nDATABASE_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}\n`
+      updatedExampleContents = `# Added by Payload\nDATABASE_URI=your-connection-string-here\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n`
+      await fs.writeFile(envExamplePath, updatedExampleContents.trimEnd() + '\n')
     }
 
-    const existingEnvContents = fs.existsSync(envPath) ? await fs.readFile(envPath, 'utf8') : ''
-    const updatedEnvContents = existingEnvContents
-      ? `${existingEnvContents}\n# Added by Payload\n${updatedExampleContents}`
-      : `# Added by Payload\n${updatedExampleContents}`
+    // Merge existing variables and create or update .env
+    const envExampleContents = await fs.readFile(envExamplePath, 'utf8')
+    const envContent = generateEnvContent(
+      envExampleContents,
+      databaseType,
+      databaseUri,
+      payloadSecret,
+    )
+    await fs.writeFile(envPath, `# Added by Payload\n${envContent.trimEnd()}\n`)
 
-    await fs.writeFile(envPath, updatedEnvContents)
     debug(`.env file successfully created or updated`)
   } catch (err: unknown) {
     error('Unable to manage environment files')
