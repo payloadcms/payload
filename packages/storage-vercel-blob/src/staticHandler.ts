@@ -18,16 +18,29 @@ export const getStaticHandler = (
   return async (req, { params: { filename } }) => {
     try {
       const prefix = await getFilePrefix({ collection, filename, req })
+      const fileKey = path.posix.join(prefix, filename)
 
-      const fileUrl = `${baseUrl}/${path.posix.join(prefix, encodeURIComponent(filename))}`
+      const fileUrl = `${baseUrl}/${fileKey}`
+      const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
 
       const blobMetadata = await head(fileUrl, { token })
       if (!blobMetadata) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
+      const uploadedAtString = blobMetadata.uploadedAt.toISOString()
+      const ETag = `"${fileKey}-${uploadedAtString}"`
+
+      if (etagFromHeaders && etagFromHeaders === ETag) {
+        return new Response(null, { status: 304, statusText: 'Not Modified' })
+      }
+
       const { contentDisposition, contentType, size } = blobMetadata
-      const response = await fetch(fileUrl)
+
+      const response = await fetch(`${fileUrl}?${uploadedAtString}`, {
+        cache: 'no-store',
+      })
+
       const blob = await response.blob()
 
       if (!blob) {
@@ -42,6 +55,8 @@ export const getStaticHandler = (
           'Content-Disposition': contentDisposition,
           'Content-Length': String(size),
           'Content-Type': contentType,
+          ETag,
+          'Last-Modified': blobMetadata.uploadedAt.toUTCString(),
         }),
         status: 200,
       })
