@@ -15,7 +15,7 @@ import type { MarkOptional } from 'ts-essentials'
 
 import { useModal } from '@faceless-ui/modal'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { PopulateDocs, ReloadDoc } from './types.js'
@@ -120,8 +120,6 @@ export function UploadInput(props: UploadInputProps) {
   const { permissions } = useAuth()
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
-
-  const shouldSyncPopulatedToValueRef = useRef<boolean>(false)
 
   const filterOptions: FilterOptionsResult = useMemo(() => {
     return {
@@ -230,7 +228,11 @@ export function UploadInput(props: UploadInputProps) {
   const onUploadSuccess = useCallback(
     (newDocs: JsonObject[]) => {
       if (hasMany) {
-        shouldSyncPopulatedToValueRef.current = true
+        const mergedValue = [
+          ...(Array.isArray(value) ? value : []),
+          ...newDocs.map((doc) => doc.id),
+        ]
+        onChange(mergedValue)
         setPopulatedDocs((currentDocs) => [
           ...(currentDocs || []),
           ...newDocs.map((doc) => ({
@@ -264,7 +266,6 @@ export function UploadInput(props: UploadInputProps) {
         setInitialFiles(fileListToUse)
       }
       setCollectionSlug(relationTo)
-      setOnSuccess(onUploadSuccess)
       if (typeof maxRows === 'number') {
         setMaxFiles(maxRows)
       }
@@ -273,12 +274,10 @@ export function UploadInput(props: UploadInputProps) {
     [
       drawerSlug,
       hasMany,
-      onUploadSuccess,
       openModal,
       relationTo,
       setCollectionSlug,
       setInitialFiles,
-      setOnSuccess,
       maxRows,
       setMaxFiles,
     ],
@@ -427,11 +426,8 @@ export function UploadInput(props: UploadInputProps) {
   }, [populateDocs, activeRelationTo, value])
 
   useEffect(() => {
-    if (shouldSyncPopulatedToValueRef.current) {
-      onChange(populatedDocs.map((doc) => doc.value.id))
-      shouldSyncPopulatedToValueRef.current = false
-    }
-  }, [populatedDocs, onChange])
+    setOnSuccess(onUploadSuccess)
+  }, [value, onUploadSuccess, setOnSuccess])
 
   const showDropzone =
     !value ||
