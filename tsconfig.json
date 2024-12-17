@@ -2,7 +2,9 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "composite": false,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+
   },
   "references": [
     {
@@ -72,4 +74,8 @@
       "path": "./packages/ui"
     }
   ],
+  "include": [
+    "${configDir}/src",
+    ".next/types/**/*.ts"
+  ]
 }
