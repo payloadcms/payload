@@ -4,6 +4,7 @@ import path from 'path'
 import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 
 import { debug, error } from '../utils/log.js'
+import { dbChoiceRecord } from './select-db.js'
 
 const updateEnvExampleVariables = (contents: string, databaseType: DbType | undefined): string => {
   return contents
@@ -15,20 +16,19 @@ const updateEnvExampleVariables = (contents: string, databaseType: DbType | unde
 
       const [key] = line.split('=')
 
-      // Handle placeholder connection strings based on databaseType
       if (key === 'DATABASE_URI' || key === 'POSTGRES_URL' || key === 'MONGODB_URI') {
-        switch (databaseType) {
-          case 'mongodb':
-            return `DATABASE_URI=mongodb://your-connection-string-here`
-          case 'postgres':
-            return `DATABASE_URI=postgres://your-connection-string-here`
-          case 'sqlite':
-            return `DATABASE_URI=file:./your-database-file.db`
-          case 'vercel-postgres':
-            return `POSTGRES_URL=postgres://your-connection-string-here`
-          default:
-            return `DATABASE_URI=your-database-connection-here` // Fallback
+        const dbChoice = databaseType ? dbChoiceRecord[databaseType] : null
+
+        if (dbChoice) {
+          const placeholderUri = `${dbChoice.dbConnectionPrefix}your-database-name${
+            dbChoice.dbConnectionSuffix || ''
+          }`
+          return databaseType === 'vercel-postgres'
+            ? `POSTGRES_URL=${placeholderUri}`
+            : `DATABASE_URI=${placeholderUri}`
         }
+
+        return `DATABASE_URI=your-database-connection-here` // Fallback
       }
 
       if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {

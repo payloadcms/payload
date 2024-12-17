@@ -10,7 +10,7 @@ type DbChoice = {
   value: DbType
 }
 
-const dbChoiceRecord: Record<DbType, DbChoice> = {
+export const dbChoiceRecord: Record<DbType, DbChoice> = {
   mongodb: {
     dbConnectionPrefix: 'mongodb://127.0.0.1/',
     title: 'MongoDB',
