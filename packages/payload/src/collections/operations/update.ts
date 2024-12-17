@@ -165,7 +165,7 @@ export const updateOperation = async <
     // Generate data for all files and sizes
     // /////////////////////////////////////
 
-    const { data: newFileData, files: filesToUpload } = await generateFileData({
+    const { data, files: filesToUpload } = await generateFileData({
       collection,
       config,
       data: bulkUpdateData,
@@ -179,10 +179,6 @@ export const updateOperation = async <
 
     const promises = docs.map(async (docWithLocales) => {
       const { id } = docWithLocales
-      const data = {
-        ...newFileData,
-        ...bulkUpdateData,
-      }
 
       try {
         // ///////////////////////////////////////////////
