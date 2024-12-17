@@ -31,11 +31,20 @@ export const getStaticHandler = (
       const uploadedAtString = blobMetadata.uploadedAt.toISOString()
       const ETag = `"${fileKey}-${uploadedAtString}"`
 
-      if (etagFromHeaders && etagFromHeaders === ETag) {
-        return new Response(null, { status: 304, statusText: 'Not Modified' })
-      }
-
       const { contentDisposition, contentType, size } = blobMetadata
+
+      if (etagFromHeaders && etagFromHeaders === ETag) {
+        return new Response(null, {
+          headers: new Headers({
+            'Cache-Control': `public, max-age=${cacheControlMaxAge}`,
+            'Content-Disposition': contentDisposition,
+            'Content-Length': String(size),
+            'Content-Type': contentType,
+            ETag,
+          }),
+          status: 304,
+        })
+      }
 
       const response = await fetch(`${fileUrl}?${uploadedAtString}`, {
         cache: 'no-store',
