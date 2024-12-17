@@ -14,7 +14,6 @@ import {
   useEditDepth,
   useField,
   useTranslation,
-  withCondition,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { isHotkey } from 'is-hotkey'
@@ -459,4 +458,4 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   )
 }
 
-export const RichText = withCondition(RichTextField)
+export const RichText = RichTextField

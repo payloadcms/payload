@@ -11,10 +11,22 @@ import type {
 } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
-import type { PgColumn, PgTable, PgTransaction } from 'drizzle-orm/pg-core'
+import type {
+  PgColumn,
+  PgTable,
+  PgTransaction,
+  Precision,
+  UpdateDeleteAction,
+} from 'drizzle-orm/pg-core'
 import type { SQLiteColumn, SQLiteTable, SQLiteTransaction } from 'drizzle-orm/sqlite-core'
 import type { Result } from 'drizzle-orm/sqlite-core/session'
-import type { BaseDatabaseAdapter, MigrationData, Payload, PayloadRequest } from 'payload'
+import type {
+  BaseDatabaseAdapter,
+  FlattenedField,
+  MigrationData,
+  Payload,
+  PayloadRequest,
+} from 'payload'
 
 import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
 
@@ -157,6 +169,129 @@ export type CreateJSONQueryArgs = {
   value: boolean | number | string
 }
 
+/**
+ * Abstract relation link
+ */
+export type RawRelation =
+  | {
+      fields: { name: string; table: string }[]
+      references: string[]
+      relationName?: string
+      to: string
+      type: 'one'
+    }
+  | {
+      relationName?: string
+      to: string
+      type: 'many'
+    }
+
+/**
+ * Abstract SQL table that later gets converted by database specific implementation to Drizzle
+ */
+export type RawTable = {
+  columns: Record<string, RawColumn>
+  foreignKeys?: Record<string, RawForeignKey>
+  indexes?: Record<string, RawIndex>
+  name: string
+}
+
+/**
+ * Abstract SQL foreign key that later gets converted by database specific implementation to Drizzle
+ */
+export type RawForeignKey = {
+  columns: string[]
+  foreignColumns: { name: string; table: string }[]
+  name: string
+  onDelete?: UpdateDeleteAction
+  onUpdate?: UpdateDeleteAction
+}
+
+/**
+ * Abstract SQL index that later gets converted by database specific implementation to Drizzle
+ */
+export type RawIndex = {
+  name: string
+  on: string | string[]
+  unique?: boolean
+}
+
+/**
+ * Abstract SQL column that later gets converted by database specific implementation to Drizzle
+ */
+export type BaseRawColumn = {
+  default?: any
+  name: string
+  notNull?: boolean
+  primaryKey?: boolean
+  reference?: {
+    name: string
+    onDelete: UpdateDeleteAction
+    table: string
+  }
+}
+
+/**
+ * Postgres: native timestamp type
+ * SQLite: text column, defaultNow achieved through strftime('%Y-%m-%dT%H:%M:%fZ', 'now'). withTimezone/precision have no any effect.
+ */
+export type TimestampRawColumn = {
+  defaultNow?: boolean
+  mode: 'date' | 'string'
+  precision: Precision
+  type: 'timestamp'
+  withTimezone?: boolean
+} & BaseRawColumn
+
+/**
+ * Postgres: native UUID type and db lavel defaultRandom
+ * SQLite: text type and defaultRandom in the app level
+ */
+export type UUIDRawColumn = {
+  defaultRandom?: boolean
+  type: 'uuid'
+} & BaseRawColumn
+
+/**
+ * Accepts either `locale: true` to have options from locales or `options` string array
+ * Postgres: native enums
+ * SQLite: text column with checks.
+ */
+export type EnumRawColumn = (
+  | {
+      enumName: string
+      options: string[]
+      type: 'enum'
+    }
+  | {
+      locale: true
+      type: 'enum'
+    }
+) &
+  BaseRawColumn
+
+export type RawColumn =
+  | ({
+      type: 'boolean' | 'geometry' | 'integer' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
+    } & BaseRawColumn)
+  | EnumRawColumn
+  | TimestampRawColumn
+  | UUIDRawColumn
+
+export type IDType = 'integer' | 'numeric' | 'text' | 'uuid' | 'varchar'
+
+export type SetColumnID = (args: {
+  adapter: DrizzleAdapter
+  columns: Record<string, RawColumn>
+  fields: FlattenedField[]
+}) => IDType
+
+export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args: {
+  adapter: T
+  locales: string[]
+  rawTable: RawTable
+}) => void
+
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
   convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
@@ -184,7 +319,10 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   logger: DrizzleConfig['logger']
   operators: Operators
   push: boolean
+  rawRelations: Record<string, Record<string, RawRelation>>
+  rawTables: Record<string, RawTable>
   rejectInitializing: () => void
+
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   requireDrizzleKit: RequireDrizzleKit
@@ -204,3 +342,13 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   transactionOptions: unknown
   versionsSuffix?: string
 }
+
+export type RelationMap = Map<
+  string,
+  {
+    localized: boolean
+    relationName?: string
+    target: string
+    type: 'many' | 'one'
+  }
+>
