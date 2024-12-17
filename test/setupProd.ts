@@ -28,6 +28,7 @@ export const tgzToPkgNameMap = {
   '@payloadcms/plugin-search': 'payloadcms-plugin-search-*',
   '@payloadcms/plugin-sentry': 'payloadcms-plugin-sentry-*',
   '@payloadcms/plugin-seo': 'payloadcms-plugin-seo-*',
+  '@payloadcms/plugin-visual-jobs': 'payloadcms-plugin-visual-jobs-*',
   '@payloadcms/plugin-stripe': 'payloadcms-plugin-stripe-*',
   '@payloadcms/richtext-lexical': 'payloadcms-richtext-lexical-*',
   '@payloadcms/richtext-slate': 'payloadcms-richtext-slate-*',
