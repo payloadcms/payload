@@ -26,7 +26,7 @@ export type ClientTab =
   | ({ fields: ClientField[]; readonly path?: string } & Omit<NamedTab, 'fields'>)
   | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
 
-type TabsFieldBaseClientProps = FieldPaths & Pick<ServerFieldBase, 'permissions'>
+type TabsFieldBaseClientProps = FieldPaths
 
 type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 
