@@ -71,7 +71,7 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
 
   if (!devPush.length) {
     // Use drizzle for insert so $defaultFn's are called
-    drizzle.insert(adapter.tables.payload_migrations).values({
+    await drizzle.insert(adapter.tables.payload_migrations).values({
       name: 'dev',
       batch: -1,
     })
