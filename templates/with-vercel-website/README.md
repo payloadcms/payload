@@ -46,7 +46,13 @@ That's it! Changes made in `./src` will be reflected in your app. Follow the on-
 
 #### Docker (Optional)
 
-If you prefer to use Docker, the provided docker-compose.yml file can be used to spin up a local emulator of Vercel Postgres. Additional documentation can be found in Vercel's docs: [Local Development with Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres/local-development).
+If you prefer to use Docker for local development instead of a local Postgres instance, the provided docker-compose.yml file can be used.
+
+To do so, follow these steps:
+
+- Modify the `POSTGRES_URL` in your `.env` file to `postgres://postgres@postgres:54320/<dbname>`
+- Modify the `docker-compose.yml` file's `POSTGRES_DB` to match the above `<dbname>`
+- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
 
 ## How it works
 

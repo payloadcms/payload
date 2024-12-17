@@ -1,49 +1,13 @@
 version: '3'
 
 services:
-  payload:
-    image: node:22-alpine
-    ports:
-      - '3000:3000'
-    volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: >
-      sh -c "
-      npm install pnpm &&
-      pnpm install &&
-      pnpm install --platform=linuxmusl --arch=x64 --libc=musl &&
-      pnpm dev
-      "
-    depends_on:
-      - postgres
-    env_file:
-      - .env
-
   postgres:
     image: postgres
-    # Expose the Postgres port to the host machine,
-    # so you can inspect and administrate it
     ports:
       - '54320:5432'
-    env_file:
-      - .env
-
-  pg_proxy:
-    image: ghcr.io/neondatabase/wsproxy:latest
     environment:
-      APPEND_PORT: 'postgres:5432'
-      ALLOW_ADDR_REGEX: '.*'
-      LOG_TRAFFIC: 'true'
-    ports:
-      # Expose the WebSocket proxy port to the host machine,
-      # this is where @vercel/postgres will connect
-      - '54330:80'
-    depends_on:
-      - postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: payloadtests # THIS MUST MATCH YOUR DB NAME IN .env
+      POSTGRES_HOST_AUTH_METHOD: trust
     env_file:
       - .env
-
-volumes:
-  node_modules:
