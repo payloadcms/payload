@@ -19,7 +19,7 @@ export const getStaticHandler = (
     try {
       const prefix = await getFilePrefix({ collection, filename, req })
 
-      const fileUrl = `${baseUrl}/${path.posix.join(prefix, filename)}`
+      const fileUrl = `${baseUrl}/${path.posix.join(prefix, encodeURIComponent(filename))}`
 
       const blobMetadata = await head(fileUrl, { token })
       if (!blobMetadata) {
