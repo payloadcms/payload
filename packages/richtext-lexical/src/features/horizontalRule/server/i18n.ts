@@ -68,7 +68,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Linie orizontală',
   },
   rs: {
-    label: 'Horizontalna linija',
+    label: 'Хоризонтална линија',
   },
   'rs-latin': {
     label: 'Horizontalna linija',

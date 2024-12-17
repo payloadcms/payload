@@ -166,6 +166,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
             : {}),
           limit: { type: GraphQLInt },
           page: { type: GraphQLInt },
+          pagination: { type: GraphQLBoolean },
           sort: { type: GraphQLString },
         },
         resolve: findVersions(global),

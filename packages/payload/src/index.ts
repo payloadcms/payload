@@ -1299,6 +1299,7 @@ export type {
 } from './queues/config/types/taskTypes.js'
 export type {
   BaseJob,
+  JobLog,
   JobTaskStatus,
   RunningJob,
   SingleTaskStatus,
@@ -1306,6 +1307,7 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
@@ -1355,6 +1357,9 @@ export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
+export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
+export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
+export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'

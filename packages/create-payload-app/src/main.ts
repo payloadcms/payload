@@ -13,12 +13,12 @@ import { createProject } from './lib/create-project.js'
 import { generateSecret } from './lib/generate-secret.js'
 import { getPackageManager } from './lib/get-package-manager.js'
 import { getNextAppDetails, initNext } from './lib/init-next.js'
+import { manageEnvFiles } from './lib/manage-env-files.js'
 import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { updatePayloadInProject } from './lib/update-payload-in-project.js'
-import { writeEnvFile } from './lib/write-env-file.js'
 import { debug, error, info } from './utils/log.js'
 import {
   feedbackOutro,
@@ -181,7 +181,7 @@ export class Main {
           },
         })
 
-        await writeEnvFile({
+        await manageEnvFiles({
           cliArgs: this.args,
           databaseType: dbDetails.type,
           databaseUri: dbDetails.dbUri,
@@ -230,6 +230,7 @@ export class Main {
         case 'starter': {
           const dbDetails = await selectDb(this.args, projectName)
           const payloadSecret = generateSecret()
+
           await createProject({
             cliArgs: this.args,
             dbDetails,
@@ -238,7 +239,8 @@ export class Main {
             projectName,
             template,
           })
-          await writeEnvFile({
+
+          await manageEnvFiles({
             cliArgs: this.args,
             databaseType: dbDetails.type,
             databaseUri: dbDetails.dbUri,
@@ -246,6 +248,7 @@ export class Main {
             projectDir,
             template,
           })
+
           break
         }
       }

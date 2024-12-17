@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.4.0",
+  "version": "3.7.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -117,8 +117,8 @@
     "qs-esm": "7.0.2",
     "react-datepicker": "7.5.0",
     "react-image-crop": "10.1.8",
-    "react-select": "5.8.3",
-    "scheduler": "0.25.0-rc-66855b96-20241106",
+    "react-select": "5.9.0",
+    "scheduler": "0.25.0",
     "sonner": "^1.7.0",
     "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
@@ -133,8 +133,8 @@
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "esbuild": "0.24.0",
@@ -241,9 +241,5 @@
     },
     "main": "./dist/exports/client/index.js",
     "types": "./dist/exports/client/index.d.ts"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

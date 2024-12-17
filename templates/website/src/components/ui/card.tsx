@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/heading-has-content */
 import { cn } from 'src/utilities/cn'
 import * as React from 'react'
 

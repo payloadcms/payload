@@ -90,8 +90,8 @@ export const i18n: Partial<GenericLanguages> = {
     increaseLabel: 'Crește indentarea',
   },
   rs: {
-    decreaseLabel: 'Smanji uvlačenje',
-    increaseLabel: 'Povećaj uvlačenje',
+    decreaseLabel: 'Смањи увлачење',
+    increaseLabel: 'Повећај увлачење',
   },
   'rs-latin': {
     decreaseLabel: 'Smanji uvlačenje',

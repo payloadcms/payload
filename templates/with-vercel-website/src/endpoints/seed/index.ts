@@ -5,6 +5,7 @@ import { contact as contactPageData } from './contact-page'
 import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
+import { imageHero1 } from './image-hero-1'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
@@ -38,6 +39,7 @@ export const seed = async ({
   // this is because while `yarn seed` drops the database
   // the custom `/api/seed` endpoint does not
   payload.logger.info(`— Clearing collections and globals...`)
+
   // clear the database
   await Promise.all(
     globals.map((global) =>
@@ -54,16 +56,15 @@ export const seed = async ({
     ),
   )
 
-  for (const collection of collections) {
-    await payload.delete({
-      collection: collection,
-      where: {},
-      depth: 0,
-      context: {
-        disableRevalidate: true,
-      },
-    })
-  }
+  await Promise.all(
+    collections.map((collection) => payload.db.deleteMany({ collection, req, where: {} })),
+  )
+
+  await Promise.all(
+    collections
+      .filter((collection) => Boolean(payload.collections[collection].config.versions))
+      .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
+  )
 
   payload.logger.info(`— Seeding demo author and user...`)
 
@@ -72,12 +73,13 @@ export const seed = async ({
     depth: 0,
     where: {
       email: {
-        equals: 'demo-author@payloadcms.com',
+        equals: 'demo-author@example.com',
       },
     },
   })
 
   payload.logger.info(`— Seeding media...`)
+
   const [image1Buffer, image2Buffer, image3Buffer, hero1Buffer] = await Promise.all([
     fetchFileByURL(
       'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-post1.webp',
@@ -102,12 +104,15 @@ export const seed = async ({
     technologyCategory,
     newsCategory,
     financeCategory,
+    designCategory,
+    softwareCategory,
+    engineeringCategory,
   ] = await Promise.all([
     payload.create({
       collection: 'users',
       data: {
         name: 'Demo Author',
-        email: 'demo-author@payloadcms.com',
+        email: 'demo-author@example.com',
         password: 'password',
       },
     }),
@@ -128,7 +133,7 @@ export const seed = async ({
     }),
     payload.create({
       collection: 'media',
-      data: image2,
+      data: imageHero1,
       file: hero1Buffer,
     }),
 
@@ -152,29 +157,29 @@ export const seed = async ({
         title: 'Finance',
       },
     }),
+    payload.create({
+      collection: 'categories',
+      data: {
+        title: 'Design',
+      },
+    }),
+
+    payload.create({
+      collection: 'categories',
+      data: {
+        title: 'Software',
+      },
+    }),
+
+    payload.create({
+      collection: 'categories',
+      data: {
+        title: 'Engineering',
+      },
+    }),
   ])
+
   let demoAuthorID: number | string = demoAuthor.id
-
-  await payload.create({
-    collection: 'categories',
-    data: {
-      title: 'Design',
-    },
-  })
-
-  await payload.create({
-    collection: 'categories',
-    data: {
-      title: 'Software',
-    },
-  })
-
-  await payload.create({
-    collection: 'categories',
-    data: {
-      title: 'Engineering',
-    },
-  })
 
   let image1ID: number | string = image1Doc.id
   let image2ID: number | string = image2Doc.id

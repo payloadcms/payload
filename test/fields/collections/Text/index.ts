@@ -152,18 +152,23 @@ const TextFields: CollectionConfig = {
       maxRows: 4,
     },
     {
+      name: 'defaultValueFromReq',
+      type: 'text',
+      defaultValue: async ({ req }) => {
+        return Promise.resolve(req.context.defaultValue)
+      },
+    },
+    {
       name: 'disableListColumnText',
       type: 'text',
       admin: {
         disableListColumn: true,
-        disableListFilter: false,
       },
     },
     {
       name: 'disableListFilterText',
       type: 'text',
       admin: {
-        disableListColumn: false,
         disableListFilter: true,
       },
     },
