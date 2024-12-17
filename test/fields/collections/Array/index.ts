@@ -205,15 +205,6 @@ const ArrayFields: CollectionConfig = {
       ],
     },
     {
-      name: 'ui',
-      type: 'ui',
-      admin: {
-        components: {
-          Field: '/collections/Array/AddRowButton.js',
-        },
-      },
-    },
-    {
       name: 'customArrayField',
       type: 'array',
       admin: {
@@ -227,6 +218,15 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
         },
       ],
+    },
+    {
+      name: 'ui',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Array/AddRowButton.js',
+        },
+      },
     },
   ],
   slug: arrayFieldsSlug,
