@@ -15,6 +15,7 @@ import chalk from 'chalk'
 import { execSync } from 'child_process'
 import { configurePayloadConfig } from 'create-payload-app/lib/configure-payload-config.js'
 import { copyRecursiveSync } from 'create-payload-app/utils/copy-recursive-sync.js'
+import minimist from 'minimist'
 import * as fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -40,6 +41,11 @@ type TemplateVariations = {
    * @default false
    */
   skipReadme?: boolean
+  skipConfig?: boolean
+  /**
+   * @default false
+   */
+  skipDockerCompose?: boolean
   configureConfig?: boolean
   generateLockfile?: boolean
 }
@@ -50,12 +56,13 @@ main().catch((error) => {
 })
 
 async function main() {
+  const args = minimist(process.argv.slice(2))
+  const template = args['template'] // template directory name
   const templatesDir = path.resolve(dirname, '../templates')
 
-  // WARNING: This will need to be updated when this merges into main
   const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
 
-  const variations: TemplateVariations[] = [
+  let variations: TemplateVariations[] = [
     {
       name: 'payload-vercel-postgres-template',
       dirname: 'with-vercel-postgres',
@@ -132,19 +139,21 @@ async function main() {
       generateLockfile: true,
       storage: 'localDisk',
       sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
       configureConfig: false,
     },
-    {
-      name: 'payload-cloud-mongodb-template',
-      dirname: 'with-payload-cloud',
-      db: 'mongodb',
-      generateLockfile: true,
-      storage: 'payloadCloud',
-      sharp: true,
-    },
   ]
+
+  // If template is set, only generate that template
+  if (template) {
+    const variation = variations.find((v) => v.dirname === template)
+    if (!variation) {
+      throw new Error(`Variation not found: ${template}`)
+    }
+    variations = [variation]
+  }
 
   for (const {
     name,
@@ -158,6 +167,8 @@ async function main() {
     sharp,
     configureConfig,
     skipReadme = false,
+    skipConfig = false,
+    skipDockerCompose = false,
   } of variations) {
     header(`Generating ${name}...`)
     const destDir = path.join(templatesDir, dirname)
@@ -167,21 +178,24 @@ async function main() {
       '.next',
       '.env$',
       'pnpm-lock.yaml',
-      ...(skipReadme ? ['README.md'] : ['']),
+      ...(skipReadme ? ['README.md'] : []),
+      ...(skipDockerCompose ? ['docker-compose.yml'] : []),
+      ...(skipConfig ? ['payload.config.ts'] : []),
     ])
 
     log(`Copied to ${destDir}`)
 
     if (configureConfig !== false) {
       log('Configuring payload.config.ts')
-      await configurePayloadConfig({
+      const configureArgs = {
         dbType: db,
         packageJsonName: name,
         projectDirOrConfigPath: { projectDir: destDir },
         storageAdapter: storage,
         sharp,
         envNames,
-      })
+      }
+      await configurePayloadConfig(configureArgs)
 
       log('Configuring .env.example')
       // Replace DATABASE_URI with the correct env name if set
