@@ -39,37 +39,35 @@ const getInitialDrawerData = ({
 }) => {
   const flattenedFields = flattenTopLevelFields(fields)
 
-  for (let i = 0; i < segments.length; i++) {
-    const segment = segments[i]
+  const path = segments[0]
 
-    const field = flattenedFields.find((field) => field.name === segment)
+  const field = flattenedFields.find((field) => field.name === path)
 
-    if (field.type === 'relationship' || field.type === 'upload') {
-      return {
-        [field.name]: field.hasMany ? [docID] : docID,
-      }
+  if (field.type === 'relationship' || field.type === 'upload') {
+    return {
+      [field.name]: field.hasMany ? [docID] : docID,
     }
+  }
 
-    const nextSegments = segments.slice(i + 1, segments.length)
+  const nextSegments = segments.slice(1, segments.length)
 
-    if (field.type === 'tab' || field.type === 'group') {
-      return {
-        [field.name]: getInitialDrawerData({ docID, fields: field.fields, segments: nextSegments }),
-      }
+  if (field.type === 'tab' || field.type === 'group') {
+    return {
+      [field.name]: getInitialDrawerData({ docID, fields: field.fields, segments: nextSegments }),
     }
+  }
 
-    if (field.type === 'array') {
-      const initialData = getInitialDrawerData({
-        docID,
-        fields: field.fields,
-        segments: nextSegments,
-      })
+  if (field.type === 'array') {
+    const initialData = getInitialDrawerData({
+      docID,
+      fields: field.fields,
+      segments: nextSegments,
+    })
 
-      initialData.id = ObjectId().toHexString()
+    initialData.id = ObjectId().toHexString()
 
-      return {
-        [field.name]: [initialData],
-      }
+    return {
+      [field.name]: [initialData],
     }
   }
 }
