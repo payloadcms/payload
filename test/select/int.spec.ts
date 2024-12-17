@@ -2240,8 +2240,8 @@ function createDeepPost() {
   })
 }
 
-function createVersionedPost() {
-  return payload.create({
+async function createVersionedPost() {
+  const { id } = await payload.create({
     collection: 'versioned-posts',
     data: {
       number: 2,
@@ -2250,6 +2250,8 @@ function createVersionedPost() {
       blocks: [{ blockType: 'test', text: 'hela' }],
     },
   })
+
+  return payload.findByID({ collection: 'versioned-posts', id, draft: true })
 }
 
 function createPoint() {

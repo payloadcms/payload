@@ -355,7 +355,7 @@ describe('Versions', () => {
         // createdAt from non-versions should be the same as version_createdAt in versions
         expect(fromNonVersionsTable.createdAt).toBe(latestVersionData.version.createdAt)
         // When creating new version - updatedAt should match version.updatedAt
-        expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
+        expect(upd.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
     })
 
@@ -626,6 +626,33 @@ describe('Versions', () => {
         expect(updateManyResult.errors).toStrictEqual([
           { id: doc.id, message: 'The following field is invalid: title' },
         ])
+      })
+
+      it('should have correct updatedAt timestamps when saving drafts', async () => {
+        const created = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'desc',
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.update({
+          id: created.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
       })
     })
 
@@ -1447,7 +1474,7 @@ describe('Versions', () => {
         // createdAt from non-versions should be the same as version_createdAt in versions
         expect(fromNonVersionsTable.createdAt).toBe(latestVersionData.version.createdAt)
         // When creating a new version - updatedAt should match
-        expect(fromNonVersionsTable.updatedAt).toBe(latestVersionData.version.updatedAt)
+        expect(upd.updatedAt).toBe(latestVersionData.version.updatedAt)
       })
     })
 
