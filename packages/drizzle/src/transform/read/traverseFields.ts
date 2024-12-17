@@ -389,20 +389,25 @@ export const traverseFields = <T extends Record<string, unknown>>({
         | { docs: unknown[]; hasNextPage: boolean }
         | Record<string, { docs: unknown[]; hasNextPage: boolean }>
       if (Array.isArray(fieldData)) {
-        if (field.localized) {
-          fieldResult = fieldData.reduce((joinResult, row) => {
-            if (typeof row._locale === 'string') {
-              if (!joinResult[row._locale]) {
-                joinResult[row._locale] = {
-                  docs: [],
-                  hasNextPage: false,
-                }
+        if (field.localized && adapter.payload.config.localization) {
+          fieldResult = fieldData.reduce(
+            (joinResult, row) => {
+              if (typeof row.locale === 'string') {
+                joinResult[row.locale].docs.push(row.id)
               }
-              joinResult[row._locale].docs.push(row._parentID)
-            }
 
-            return joinResult
-          }, {})
+              return joinResult
+            },
+
+            // initialize with defaults so empty won't be undefined
+            adapter.payload.config.localization.localeCodes.reduce((acc, code) => {
+              acc[code] = {
+                docs: [],
+                hasNextPage: false,
+              }
+              return acc
+            }, {}),
+          )
           Object.keys(fieldResult).forEach((locale) => {
             fieldResult[locale].hasNextPage = fieldResult[locale].docs.length > limit
             fieldResult[locale].docs = fieldResult[locale].docs.slice(0, limit)

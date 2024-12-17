@@ -49,6 +49,7 @@ type Args = {
   pathSegments: string[]
   rootTableName?: string
   selectFields: Record<string, GenericColumn>
+  selectLocale?: boolean
   tableName: string
   /**
    * If creating a new table name for arrays and blocks, this suffix should be appended to the table name
@@ -77,6 +78,7 @@ export const getTableColumnFromPath = ({
   pathSegments: incomingSegments,
   rootTableName: incomingRootTableName,
   selectFields,
+  selectLocale,
   tableName,
   tableNameSuffix = '',
   value,
@@ -130,6 +132,10 @@ export const getTableColumnFromPath = ({
         if (locale && field.localized && adapter.payload.config.localization) {
           const conditions = [eq(arrayParentTable.id, adapter.tables[newTableName]._parentID)]
 
+          if (selectLocale) {
+            selectFields._locale = adapter.tables[newTableName]._locale
+          }
+
           if (locale !== 'all') {
             conditions.push(eq(adapter.tables[newTableName]._locale, locale))
           }
@@ -156,6 +162,7 @@ export const getTableColumnFromPath = ({
           pathSegments: pathSegments.slice(1),
           rootTableName,
           selectFields,
+          selectLocale,
           tableName: newTableName,
           value,
         })
@@ -213,6 +220,7 @@ export const getTableColumnFromPath = ({
               pathSegments: pathSegments.slice(1),
               rootTableName,
               selectFields: blockSelectFields,
+              selectLocale,
               tableName: newTableName,
               value,
             })
@@ -294,6 +302,7 @@ export const getTableColumnFromPath = ({
           pathSegments: pathSegments.slice(1),
           rootTableName,
           selectFields,
+          selectLocale,
           tableName: newTableName,
           tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
           value,
@@ -347,6 +356,7 @@ export const getTableColumnFromPath = ({
       case 'relationship':
       case 'upload': {
         const newCollectionPath = pathSegments.slice(1).join('.')
+
         if (Array.isArray(field.relationTo) || field.hasMany) {
           let relationshipFields
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
@@ -354,6 +364,10 @@ export const getTableColumnFromPath = ({
             newAliasTable: aliasRelationshipTable,
             newAliasTableName: aliasRelationshipTableName,
           } = getTableAlias({ adapter, tableName: relationTableName })
+
+          if (selectLocale && field.localized && adapter.payload.config.localization) {
+            selectFields._locale = aliasRelationshipTable.locale
+          }
 
           // Join in the relationships table
           if (locale && field.localized && adapter.payload.config.localization) {
@@ -365,6 +379,7 @@ export const getTableColumnFromPath = ({
             if (locale !== 'all') {
               conditions.push(eq(aliasRelationshipTable.locale, locale))
             }
+
             joins.push({
               condition: and(...conditions),
               table: aliasRelationshipTable,
@@ -523,6 +538,7 @@ export const getTableColumnFromPath = ({
             pathSegments: pathSegments.slice(1),
             rootTableName: newTableName,
             selectFields,
+            selectLocale,
             tableName: newTableName,
             value,
           })
@@ -544,6 +560,10 @@ export const getTableColumnFromPath = ({
             })
 
             const condtions = [eq(aliasLocaleTable._parentID, adapter.tables[rootTableName].id)]
+
+            if (selectLocale) {
+              selectFields._locale = aliasLocaleTable._locale
+            }
 
             if (locale !== 'all') {
               condtions.push(eq(aliasLocaleTable._locale, locale))
@@ -643,6 +663,7 @@ export const getTableColumnFromPath = ({
             pathSegments: pathSegments.slice(1),
             rootTableName,
             selectFields,
+            selectLocale,
             tableName: newTableName,
             tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
             value,
@@ -661,6 +682,7 @@ export const getTableColumnFromPath = ({
           pathSegments: pathSegments.slice(1),
           rootTableName,
           selectFields,
+          selectLocale,
           tableName: newTableName,
           tableNameSuffix,
           value,
@@ -687,6 +709,10 @@ export const getTableColumnFromPath = ({
 
       if (locale !== 'all') {
         condition = and(condition, eq(newTable._locale, locale))
+      }
+
+      if (selectLocale) {
+        selectFields._locale = newTable._locale
       }
 
       addJoinTable({
