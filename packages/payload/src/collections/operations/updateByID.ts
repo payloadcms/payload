@@ -21,6 +21,7 @@ import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -182,6 +183,12 @@ export const updateByIDOperation = async <
       req,
       select,
       showHiddenFields,
+    })
+
+    await unlinkTempFiles({
+      collectionConfig,
+      config,
+      req,
     })
 
     // /////////////////////////////////////

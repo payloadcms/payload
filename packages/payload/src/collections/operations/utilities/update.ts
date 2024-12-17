@@ -23,7 +23,6 @@ import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
-import { unlinkTempFiles } from '../../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
@@ -376,12 +375,6 @@ export const updateDocument = async <
         req,
       })) || result
   }, Promise.resolve())
-
-  await unlinkTempFiles({
-    collectionConfig,
-    config,
-    req,
-  })
 
   return result as TransformCollectionWithSelect<TSlug, TSelect>
 }

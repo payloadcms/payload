@@ -18,6 +18,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { APIError } from '../../errors/index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -215,6 +216,12 @@ export const updateOperation = async <
         })
       }
       return null
+    })
+
+    await unlinkTempFiles({
+      collectionConfig,
+      config,
+      req,
     })
 
     const awaitedDocs = await Promise.all(promises)
