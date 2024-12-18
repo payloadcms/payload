@@ -132,7 +132,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // as doing so could lead to the exposure of registered emails.
     // Therefore, we prefer to fail silently.
     if (!user) {
-      await killTransaction(args.req)
+      await commitTransaction(args.req)
       return null
     }
 
