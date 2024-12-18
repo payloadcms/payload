@@ -176,7 +176,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
     if (fileUrl) {
       try {
         // Make a request to the Payload 'paste-url' endpoint - /api/paste-url
-        // Safely handles URLs with query parameters or special characters.
         const response = await fetch(`/api/paste-url?src=${encodeURIComponent(fileUrl)}`)
 
         if (!response.ok) {
