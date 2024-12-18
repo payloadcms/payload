@@ -14,7 +14,8 @@ import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { customIdSlug } from '../../slugs.js'
+import { customIDSlug, customRowIDSlug, customTabIDSlug } from '../../slugs.js'
+import { customRowID, customTabID, nonStandardID } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -27,8 +28,10 @@ let client: RESTClient
 let page: Page
 let serverURL: string
 let url: AdminUrlUtil
+let customTabIDURL: AdminUrlUtil
+let customRowIDURL: AdminUrlUtil
 
-describe('Radio', () => {
+describe('Custom IDs', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
@@ -37,7 +40,9 @@ describe('Radio', () => {
       // prebuild,
     }))
 
-    url = new AdminUrlUtil(serverURL, customIdSlug)
+    url = new AdminUrlUtil(serverURL, customIDSlug)
+    customTabIDURL = new AdminUrlUtil(serverURL, customTabIDSlug)
+    customRowIDURL = new AdminUrlUtil(serverURL, customRowIDSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -60,23 +65,22 @@ describe('Radio', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  function createCustomIDDoc(id: string) {
-    return payload.create({
-      collection: customIdSlug,
-      data: {
-        id,
-      },
-    })
-  }
-
   test('allow create of non standard ID', async () => {
-    await createCustomIDDoc('id 1')
     await page.goto(url.list)
-
     await navigateToDoc(page, url)
+    await expect(page.locator('#field-id')).toHaveValue(nonStandardID)
+    await expect(page.locator('.id-label')).toContainText(nonStandardID)
+  })
 
-    // Page should load and ID should be correct
-    await expect(page.locator('#field-id')).toHaveValue('id 1')
-    await expect(page.locator('.id-label')).toContainText('id 1')
+  test('should use custom ID field nested within unnamed tab', async () => {
+    await page.goto(customTabIDURL.edit(customTabID))
+    const idField = page.locator('#field-id')
+    await expect(idField).toHaveValue(customTabID)
+  })
+
+  test('should use custom ID field nested within row', async () => {
+    await page.goto(customRowIDURL.edit(customRowID))
+    const idField = page.locator('#field-id')
+    await expect(idField).toHaveValue(customRowID)
   })
 })
