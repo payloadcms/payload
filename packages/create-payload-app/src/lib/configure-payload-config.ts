@@ -106,21 +106,37 @@ export async function configurePayloadConfig(args: {
     })
 
     // Storage Adapter Replacement
+    const STORAGE_ADAPTER_PLACEHOLDER = '// storage-adapter-placeholder'
+    const STORAGE_ADAPTER_IMPORT_PLACEHOLDER = '// storage-adapter-import-placeholder'
+
     if (args.storageAdapter) {
       const replacement = storageReplacements[args.storageAdapter]
       configLines = replaceInConfigLines({
         lines: configLines,
         replacement: replacement.configReplacement,
-        startMatch: '// storage-adapter-placeholder',
+        startMatch: STORAGE_ADAPTER_PLACEHOLDER,
       })
 
       if (replacement?.importReplacement !== undefined) {
         configLines = replaceInConfigLines({
           lines: configLines,
           replacement: [replacement.importReplacement],
-          startMatch: '// storage-adapter-import-placeholder',
+          startMatch: STORAGE_ADAPTER_IMPORT_PLACEHOLDER,
         })
       }
+    } else {
+      console.log('no storage adapter')
+      // Clean up both placeholders if no storage adapter
+      configLines = replaceInConfigLines({
+        lines: configLines,
+        replacement: [],
+        startMatch: STORAGE_ADAPTER_PLACEHOLDER,
+      })
+      configLines = replaceInConfigLines({
+        lines: configLines,
+        replacement: [],
+        startMatch: STORAGE_ADAPTER_IMPORT_PLACEHOLDER,
+      })
     }
 
     // Sharp Replacement (provided by default, only remove if explicitly set to false)
