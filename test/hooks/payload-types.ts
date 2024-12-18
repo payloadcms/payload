@@ -84,6 +84,7 @@ export interface HooksUserAuthOperations {
 export interface BeforeValidate {
   id: string;
   title?: string | null;
+  selection?: ('a' | 'b') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -318,6 +319,7 @@ export interface PayloadMigration {
  */
 export interface BeforeValidateSelect<T extends boolean = true> {
   title?: T;
+  selection?: T;
   updatedAt?: T;
   createdAt?: T;
 }

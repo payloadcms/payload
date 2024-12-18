@@ -57,8 +57,12 @@ export function RenderField({
     return CustomField || null
   }
 
-  const baseFieldProps: Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'> = {
+  const baseFieldProps: Pick<
+    ClientComponentProps,
+    'forceRender' | 'permissions' | 'readOnly' | 'schemaPath'
+  > = {
     forceRender,
+    permissions,
     readOnly,
     schemaPath,
   }
@@ -68,7 +72,6 @@ export function RenderField({
     indexPath,
     parentPath,
     parentSchemaPath,
-    permissions,
   }
 
   if (clientFieldConfig.admin?.hidden) {

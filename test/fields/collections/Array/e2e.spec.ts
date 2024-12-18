@@ -106,6 +106,12 @@ describe('Array', () => {
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
   })
 
+  test('should render default array field within custom component', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-customArrayField >> .array-field__add-row').click()
+    await expect(page.locator('#field-customArrayField__0__text')).toBeVisible()
+  })
+
   // eslint-disable-next-line playwright/expect-expect
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
@@ -313,7 +319,7 @@ describe('Array', () => {
   test('should externally update array rows and render custom fields', async () => {
     await page.goto(url.create)
     await page.locator('#updateArrayExternally').click()
-    await expect(page.locator('#custom-field')).toBeVisible()
+    await expect(page.locator('#custom-text-field')).toBeVisible()
   })
 
   test('should not re-close initCollapsed true array rows on input in create new view', async () => {

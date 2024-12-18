@@ -73,6 +73,7 @@ export const findMany = async function find({
     fields,
     joinQuery,
     joins,
+    locale,
     select,
     tableName,
     versions,
