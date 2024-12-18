@@ -8,7 +8,7 @@ import { fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
 import type { FieldCondition } from './types.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
-import { combineLabel } from '../FieldSelect/index.js'
+import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
 import fieldTypes from './field-types.js'
 
 export type ReduceClientFieldsArgs = {
@@ -142,7 +142,7 @@ export const reduceClientFields = ({
       const localizedLabel = getTranslation(field.label || '', i18n)
 
       const formattedLabel = labelPrefix
-        ? combineLabel({
+        ? combineFieldLabel({
             field,
             prefix: labelPrefix,
           })

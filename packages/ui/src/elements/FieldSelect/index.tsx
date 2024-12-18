@@ -1,16 +1,15 @@
 'use client'
 import type { ClientField } from 'payload'
 
-import React, { Fragment, useState } from 'react'
+import React, { useState } from 'react'
 
-import type { FieldOption, SelectedField } from './reduceSelectableFields.js'
+import type { FieldOption, SelectedField } from './reduceFieldOptions.js'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
-import { reduceSelectableFields } from './reduceSelectableFields.js'
+import { reduceFieldOptions } from './reduceFieldOptions.js'
 import './index.scss'
 
 const baseClass = 'field-select'
@@ -20,39 +19,12 @@ export type FieldSelectProps = {
   readonly setSelected: (fields: SelectedField[]) => void
 }
 
-export const combineLabel = ({
-  CustomLabel,
-  field,
-  prefix,
-}: {
-  CustomLabel?: React.ReactNode
-  field?: ClientField
-  prefix?: React.ReactNode
-}): React.ReactNode => {
-  return (
-    <Fragment>
-      {prefix ? (
-        <Fragment>
-          <span style={{ display: 'inline-block' }}>{prefix}</span>
-          {' > '}
-        </Fragment>
-      ) : null}
-      <span style={{ display: 'inline-block' }}>
-        <RenderCustomComponent
-          CustomComponent={CustomLabel}
-          Fallback={<FieldLabel label={'label' in field && field.label} />}
-        />
-      </span>
-    </Fragment>
-  )
-}
-
 export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected }) => {
   const { t } = useTranslation()
   const { dispatchFields, getFields } = useForm()
 
   const [options] = useState<FieldOption[]>(() =>
-    reduceSelectableFields({
+    reduceFieldOptions({
       fields,
       formState: getFields(),
       parentIndexPath: '',

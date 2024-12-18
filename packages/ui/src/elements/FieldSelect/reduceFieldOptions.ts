@@ -7,10 +7,9 @@ import {
   tabHasName,
 } from 'payload/shared'
 
-import { combineLabel } from './index.js'
+import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
 
 export type SelectedField = {
-  parentPath: string
   path: string
 }
 
@@ -19,7 +18,16 @@ export type FieldOption = {
   value: SelectedField
 }
 
-export const reduceSelectableFields = ({
+export const ignoreFromBulkEdit = (field: ClientField): boolean =>
+  Boolean(
+    (fieldAffectsData(field) || field.type === 'ui') &&
+      (field.admin.disableBulkEdit ||
+        field.unique ||
+        fieldIsHiddenOrDisabled(field) ||
+        ('readOnly' in field && field.readOnly)),
+  )
+
+export const reduceFieldOptions = ({
   fields,
   formState,
   labelPrefix = null,
@@ -40,14 +48,7 @@ export const reduceSelectableFields = ({
 
   return fields?.reduce(
     (acc, field, fieldIndex) => {
-      // escape for a variety of reasons, include ui fields as they have `name`.
-      if (
-        (fieldAffectsData(field) || field.type === 'ui') &&
-        (field.admin.disableBulkEdit ||
-          field.unique ||
-          fieldIsHiddenOrDisabled(field) ||
-          ('readOnly' in field && field.readOnly))
-      ) {
+      if (ignoreFromBulkEdit(field)) {
         return acc
       }
 
@@ -65,9 +66,9 @@ export const reduceSelectableFields = ({
         case 'group':
         case 'row': {
           acc.push(
-            ...reduceSelectableFields({
+            ...reduceFieldOptions({
               fields: field.fields,
-              labelPrefix: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
+              labelPrefix: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
               parentIndexPath: indexPath,
               parentPath: path,
               parentSchemaPath: schemaPath,
@@ -80,35 +81,33 @@ export const reduceSelectableFields = ({
         case 'tabs': {
           acc.push(
             ...field.tabs.reduce((tabFields, tab, tabIndex) => {
-              if ('fields' in tab) {
-                const isNamedTab = tabHasName(tab)
+              const isNamedTab = tabHasName(tab)
 
-                const {
-                  indexPath: tabIndexPath,
-                  path: tabPath,
-                  schemaPath: tabSchemaPath,
-                } = getFieldPaths({
-                  field: {
-                    ...tab,
-                    type: 'tab',
-                  },
-                  index: tabIndex,
-                  parentIndexPath: indexPath,
-                  parentPath,
-                  parentSchemaPath,
-                })
+              const {
+                indexPath: tabIndexPath,
+                path: tabPath,
+                schemaPath: tabSchemaPath,
+              } = getFieldPaths({
+                field: {
+                  ...tab,
+                  type: 'tab',
+                },
+                index: tabIndex,
+                parentIndexPath: indexPath,
+                parentPath,
+                parentSchemaPath,
+              })
 
-                return [
-                  ...tabFields,
-                  ...reduceSelectableFields({
-                    fields: tab.fields,
-                    labelPrefix,
-                    parentIndexPath: isNamedTab ? '' : tabIndexPath,
-                    parentPath: isNamedTab ? tabPath : parentPath,
-                    parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
-                  }),
-                ]
-              }
+              return [
+                ...tabFields,
+                ...reduceFieldOptions({
+                  fields: tab.fields,
+                  labelPrefix,
+                  parentIndexPath: isNamedTab ? '' : tabIndexPath,
+                  parentPath: isNamedTab ? tabPath : parentPath,
+                  parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+                }),
+              ]
             }, []),
           )
 
@@ -117,9 +116,8 @@ export const reduceSelectableFields = ({
 
         default: {
           acc.push({
-            label: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
+            label: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
             value: {
-              parentPath,
               path,
             },
           })

@@ -157,6 +157,9 @@ export interface Post {
   group?: {
     defaultValueField?: string | null;
     title?: string | null;
+    groupWithinGroup?: {
+      titleWithinNestedGroup?: string | null;
+    };
   };
   someBlock?:
     | {
@@ -541,6 +544,11 @@ export interface PostsSelect<T extends boolean = true> {
     | {
         defaultValueField?: T;
         title?: T;
+        groupWithinGroup?:
+          | T
+          | {
+              titleWithinNestedGroup?: T;
+            };
       };
   someBlock?:
     | T

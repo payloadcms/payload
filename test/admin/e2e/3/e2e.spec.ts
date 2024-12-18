@@ -486,7 +486,6 @@ describe('admin3', () => {
     })
 
     test('should bulk update', async () => {
-      // First, delete all posts created by the seed
       await deleteAllPosts()
       const post1Title = 'Post'
       const updatedPostTitle = `${post1Title} (Updated)`
@@ -517,6 +516,7 @@ describe('admin3', () => {
     })
 
     test('should edit fields with subfields', async () => {
+      await deleteAllPosts()
       await page.goto(postsUrl.list)
       await page.locator('input#select-all').check()
       await page.locator('.edit-many__toggle').click()
@@ -549,6 +549,7 @@ describe('admin3', () => {
     test('should only change selected fields', async () => {
       await deleteAllPosts()
       const post1Title = 'Post'
+
       const postData = {
         title: 'Post',
         arrayOfFields: [
@@ -573,6 +574,7 @@ describe('admin3', () => {
         ],
         defaultValueField: 'not the default value',
       }
+
       const updatedPostTitle = `${post1Title} (Updated)`
       await createPost(postData)
       await page.goto(postsUrl.list)
@@ -609,7 +611,6 @@ describe('admin3', () => {
     })
 
     test('should bulk update with filters and across pages', async () => {
-      // First, delete all posts created by the seed
       await deleteAllPosts()
       const post1Title = 'Post 1'
       await Promise.all([createPost({ title: post1Title }), createPost({ title: 'Post 2' })])
@@ -643,10 +644,8 @@ describe('admin3', () => {
 
     test('should save globals', async () => {
       await page.goto(postsUrl.global(globalSlug))
-
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-
       await expect(page.locator('#field-title')).toHaveValue(title)
     })
 
@@ -665,20 +664,12 @@ describe('admin3', () => {
       await page.locator('#field-title').fill(title)
       await saveDocHotkeyAndAssert(page)
       await expect(page.locator('#field-title')).toHaveValue(title)
-
       const newTitle = 'new title'
       await page.locator('#field-title').fill(newTitle)
-
       await page.locator('header.app-header a[href="/admin/collections/posts"]').click()
-
-      // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
       await expect(modalContainer).toBeVisible()
-
-      // Click the "Leave anyway" button
       await page.locator('.leave-without-saving__controls .btn--style-primary').click()
-
-      // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
     })
   })
@@ -686,17 +677,13 @@ describe('admin3', () => {
   describe('custom IDs', () => {
     test('unnamed tab — should allow custom ID field', async () => {
       await page.goto(postsUrl.collection('customIdTab') + '/' + customIdCollectionId)
-
       const idField = page.locator('#field-id')
-
       await expect(idField).toHaveValue(customIdCollectionId)
     })
 
     test('row — should allow custom ID field', async () => {
       await page.goto(postsUrl.collection('customIdRow') + '/' + customIdCollectionId)
-
       const idField = page.locator('#field-id')
-
       await expect(idField).toHaveValue(customIdCollectionId)
     })
   })

@@ -8,7 +8,6 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
-import type { SelectedField } from '../FieldSelect/reduceSelectableFields.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
@@ -25,11 +24,13 @@ import { SelectAllStatus, useSelection } from '../../providers/Selection/index.j
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
-import './index.scss'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
+import { type SelectedField } from '../FieldSelect/reduceFieldOptions.js'
+import { reduceSelectedFields } from './reduceSelectedFields.js'
+import './index.scss'
 
 const baseClass = 'edit-many'
 
@@ -164,6 +165,13 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const hasUpdatePermission = collectionPermissions?.update
 
   const drawerSlug = `edit-${collectionSlug}`
+
+  const fieldsToRender = React.useMemo(
+    () => reduceSelectedFields(fields, selectedFields),
+    [fields, selectedFields],
+  )
+
+  console.log(fieldsToRender)
 
   React.useEffect(() => {
     const controller = new AbortController()
@@ -307,7 +315,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                   <FieldSelect fields={fields} setSelected={setSelectedFields} />
                   {selectedFields.length === 0 ? null : (
                     <RenderFields
-                      fields={fields}
+                      fields={fieldsToRender}
                       parentIndexPath=""
                       parentPath=""
                       parentSchemaPath={collectionSlug}
