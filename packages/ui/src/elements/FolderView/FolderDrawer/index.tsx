@@ -3,21 +3,20 @@
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
-import { HiddenField } from '../../fields/Hidden/index.js'
-import { TextField } from '../../fields/Text/index.js'
-import { Form } from '../../forms/Form/index.js'
-import { useConfig } from '../../providers/Config/index.js'
-import { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
-import { FolderProvider, useFolder } from '../../providers/Folders/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import { strings } from '../../strings.js'
-import { Breadcrumbs } from '../Breadcrumbs/index.js'
-import { Button } from '../Button/index.js'
-import { Drawer } from '../Drawer/index.js'
-import { DrawerActionHeader } from '../DrawerActionHeader/index.js'
-import { DrawerContentContainer } from '../DrawerContentContainer/index.js'
-import { FolderList } from '../FolderList/index.js'
+import { HiddenField } from '../../../fields/Hidden/index.js'
+import { TextField } from '../../../fields/Text/index.js'
+import { Form } from '../../../forms/Form/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useFolder } from '../../../providers/Folders/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { strings } from '../../../strings.js'
+import { Button } from '../../Button/index.js'
+import { Drawer } from '../../Drawer/index.js'
+import { DrawerActionHeader } from '../../DrawerActionHeader/index.js'
+import { DrawerContentContainer } from '../../DrawerContentContainer/index.js'
+import { FolderBreadcrumbs } from '../Breadcrumbs/index.js'
 import './index.scss'
+import { FolderList } from '../List/index.js'
 
 const newFolderSlug = 'new-folder'
 
@@ -52,14 +51,19 @@ function FolderDrawerWithContext({
 
   return (
     <>
-      <DrawerActionHeader onCancel={handleOnCancel} onSave={handleOnSave} title={title} />
+      <DrawerActionHeader
+        onCancel={handleOnCancel}
+        onSave={handleOnSave}
+        saveLabel={strings.selectFolder}
+        title={title}
+      />
       <div className={`${baseClass}__subHeaderContainer`}>
         <div className={`${baseClass}__subHeaderContent`}>
-          {/* <Breadcrumbs
+          <FolderBreadcrumbs
             onClick={({ folderID }) => {
               void setFolderID({ folderID })
             }}
-          /> */}
+          />
           <Button buttonStyle="secondary" onClick={() => openModal(newFolderSlug)}>
             {strings.newFolder}
           </Button>
@@ -74,34 +78,10 @@ function FolderDrawerWithContext({
 }
 
 export function FolderDrawer(props: FolderDrawerArgs) {
-  const {
-    breadcrumbs,
-    collectionSlug,
-    docs,
-    folderCollectionSlug,
-    folderID,
-    moveToFolderIDs,
-    subfolders,
-  } = useFolder()
-  const currentDepth = useEditDepth()
-
   return (
-    <EditDepthProvider depth={currentDepth + 1}>
-      <Drawer gutter={false} Header={null} slug={props.drawerSlug}>
-        <FolderProvider
-          collectionSlug={collectionSlug}
-          folderCollectionSlug={folderCollectionSlug}
-          initialData={{
-            breadcrumbs,
-            docs,
-            folderID,
-            subfolders,
-          }}
-        >
-          <FolderDrawerWithContext {...props} disabledFolderIDs={moveToFolderIDs} />
-        </FolderProvider>
-      </Drawer>
-    </EditDepthProvider>
+    <Drawer gutter={false} Header={null} slug={props.drawerSlug}>
+      <FolderDrawerWithContext {...props} />
+    </Drawer>
   )
 }
 
@@ -156,10 +136,10 @@ function NewFolderDrawer() {
           <TextField
             field={{
               name: 'name',
-              _path: 'name',
               label: strings.folderName,
               required: true,
             }}
+            path="name"
             validate={(value) => {
               if (!value) {
                 return t('validation:required')
@@ -167,14 +147,7 @@ function NewFolderDrawer() {
               return true
             }}
           />
-          <HiddenField
-            field={{
-              name: 'parentFolder',
-              _path: 'parentFolder',
-            }}
-            key={parentFolderID}
-            value={parentFolderID || ''}
-          />
+          <HiddenField key={parentFolderID} path="parentFolder" value={parentFolderID || ''} />
         </DrawerContentContainer>
       </Form>
     </Drawer>

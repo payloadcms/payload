@@ -4,11 +4,11 @@ import type { Subfolder } from 'payload/shared'
 
 import React from 'react'
 
-import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { FolderIcon } from '../../icons/Folder/index.js'
-import { useFolder } from '../../providers/Folders/index.js'
-import { strings } from '../../strings.js'
-import { DrawerContentContainer } from '../DrawerContentContainer/index.js'
+import { ChevronIcon } from '../../../icons/Chevron/index.js'
+import { FolderIcon } from '../../../icons/Folder/index.js'
+import { useFolder } from '../../../providers/Folders/index.js'
+import { strings } from '../../../strings.js'
+import { DrawerContentContainer } from '../../DrawerContentContainer/index.js'
 import './index.scss'
 
 const baseClass = 'folderDrawerList'
@@ -30,7 +30,7 @@ export function FolderList({ disabledFolderIDs, folders, title }: FolderListArgs
           </h3>
         )}
         <div className={`${baseClass}__folders`}>
-          {folders.length > 0 ? (
+          {folders?.length > 0 ? (
             folders.map((folder) => (
               <FolderRow
                 disabled={disabledFolderIDs?.includes(folder.id)}

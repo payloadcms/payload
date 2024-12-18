@@ -19,6 +19,7 @@ export const updateDependentDocs = async ({
     const childDocPrefix = `${doc.prefix ? `${doc.prefix}/` : ''}${doc.name}`
 
     // folders that rely on this folder
+    console.log('Updating dependent folders', collection.slug)
     await req.payload.update({
       collection: collection.slug,
       data: {
@@ -32,6 +33,7 @@ export const updateDependentDocs = async ({
     })
 
     // files that rely on this folder
+    console.log('Updating dependent files', relatedCollectionSlug)
     await req.payload.update({
       collection: relatedCollectionSlug,
       data: {

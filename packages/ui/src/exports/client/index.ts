@@ -44,9 +44,6 @@ export {
 export { Breadcrumbs } from '../../elements/Breadcrumbs/index.js'
 export { DrawerActionHeader } from '../../elements/DrawerActionHeader/index.js'
 export { DrawerContentContainer } from '../../elements/DrawerContentContainer/index.js'
-export { FolderDrawer } from '../../elements/FolderDrawer/index.js'
-export { FolderList } from '../../elements/FolderList/index.js'
-export { MoveToFolderDrawer } from '../../elements/MoveToFolderDrawer/index.js'
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { Banner } from '../../elements/Banner/index.js'
 export { Button } from '../../elements/Button/index.js'
@@ -259,7 +256,13 @@ export {
   useEntityVisibility,
 } from '../../providers/EntityVisibility/index.js'
 export { UploadEditsProvider, useUploadEdits } from '../../providers/UploadEdits/index.js'
+export {
+  FolderListSettingsProvider,
+  useFolderListSettings,
+} from '../../providers/FolderListSettings/index.js'
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
+export { UploadWithFolderSelection } from '../../elements/FolderView/UploadWithFolder/index.js'
+export { FolderList } from '../../elements/FolderView/List/index.js'
 export {
   FolderAndDocumentSelectionsProvider,
   useFolderAndDocumentSelections,

@@ -2,8 +2,8 @@
 
 import React from 'react'
 
-import { useFolder } from '../../providers/Folders/index.js'
-import { strings } from '../../strings.js'
+import { useFolder } from '../../../providers/Folders/index.js'
+import { strings } from '../../../strings.js'
 import { FolderDrawer } from '../FolderDrawer/index.js'
 
 export function MoveToFolderDrawer() {

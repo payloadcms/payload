@@ -3,7 +3,6 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
@@ -15,8 +14,7 @@ import { defaultUserCollection } from '../auth/defaultUser.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { InvalidConfiguration } from '../errors/index.js'
-import { createFolderCollection } from '../folders/createFolderCollection.js'
-import { mutateRelatedFolderCollection } from '../folders/mutateRelatedCollection.js'
+import { addFolderCollections } from '../folders/addFolderCollections.js'
 import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
@@ -194,6 +192,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   configWithDefaults.collections.push(getLockedDocumentsCollection(config as unknown as Config))
   configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
+  addFolderCollections(configWithDefaults)
 
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
   for (let i = 0; i < config.collections.length; i++) {
@@ -218,34 +217,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   const uploadAdapters = new Set<string>()
-
   // interact with all collections
   for (const collection of config.collections) {
     // deduped upload adapters
     if (collection.upload?.adapter) {
       uploadAdapters.add(collection.upload.adapter)
-    }
-
-    // folder enabled collections
-    if (collection.admin.enableFolders) {
-      collection.admin.enableFolders = {
-        debug:
-          typeof collection.admin.enableFolders === 'boolean'
-            ? collection.admin.enableFolders
-            : false,
-      }
-      const relatedFolderCollection = createFolderCollection({
-        debug: collection.admin.enableFolders.debug,
-        relatedCollectionSlug: collection.slug,
-      }) as SanitizedCollectionConfig
-
-      config.collections.push(relatedFolderCollection)
-
-      mutateRelatedFolderCollection({
-        collectionConfig: collection,
-        debug: collection.admin.enableFolders.debug,
-        relatedFolderCollectionSlug: relatedFolderCollection.slug,
-      })
     }
   }
 

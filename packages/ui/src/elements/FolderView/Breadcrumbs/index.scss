@@ -1,0 +1,33 @@
+.folderBreadcrumbs {
+  display: flex;
+
+  &__crumb {
+    display: flex;
+    align-items: center;
+    font-size: var(--base);
+    font-weight: bold;
+  }
+
+  &__crumb-btn {
+    all: unset;
+    cursor: pointer;
+    font-size: var(--base);
+    font-weight: bold;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
+  &__crumb-chevron {
+    margin: 0 calc(var(--base) * 0.5);
+    position: relative;
+    top: 1px;
+    
+    .stroke {
+      stroke: var(--theme-border-color);
+      stroke-width: 2px;
+    }
+  }
+}

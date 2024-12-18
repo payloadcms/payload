@@ -35,22 +35,9 @@ export const populateFolderDataEndpoint = ({ mediaSlug }: PopulateBreadcrumbsArg
       )
     }
 
-    const folderID = req.searchParams.get('folderID')
-
-    if (!folderID) {
-      return Response.json(
-        {
-          message: 'folderID is required as a search param.',
-        },
-        {
-          status: httpStatus.BAD_REQUEST,
-        },
-      )
-    }
-
     const folderData = await populateFolderAndData({
       collectionConfig: folderEnabledCollectionConfig,
-      folderID,
+      folderID: req.searchParams.get('folderID'),
       i18n: req.i18n,
       payload: req.payload,
       user: req.user,

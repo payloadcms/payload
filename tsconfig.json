@@ -54,6 +54,9 @@
       "@payloadcms/ui/shared": [
         "./packages/ui/src/exports/shared/index.ts"
       ],
+      "@payloadcms/ui/rsc": [
+        "./packages/ui/src/exports/rsc/index.ts"
+      ],
       "@payloadcms/ui/scss": [
         "./packages/ui/src/scss.scss"
       ],

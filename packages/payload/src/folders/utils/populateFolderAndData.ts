@@ -143,7 +143,7 @@ export async function populateFolderAndData({
   i18n,
   payload,
   user,
-  withDocs = true,
+  withDocs = false,
 }: Args): Promise<FolderAndDocumentsResult> {
   const collectionSlug = collectionConfig.slug
   const folderCollectionSlug = collectionConfig.admin.custom.folderCollectionSlug

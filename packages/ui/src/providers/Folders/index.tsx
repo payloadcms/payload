@@ -2,14 +2,15 @@
 import type { Breadcrumb, FolderAndDocumentsResult, Subfolder } from 'payload/shared'
 
 import { useModal } from '@faceless-ui/modal'
+import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { MoveToFolderDrawer } from '../../elements/MoveToFolderDrawer/index.js'
+import { MoveToFolderDrawer } from '../../elements/FolderView/MoveToFolderDrawer/index.js'
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
 import { useEditDepth } from '../EditDepth/index.js'
-import { useSelections } from '../FolderAndDocumentSelections/index.js'
-import { useSearchParams } from '../SearchParams/index.js'
+import { useFolderAndDocumentSelections } from '../FolderAndDocumentSelections/index.js'
 
 const moveToDrawerSlug = 'move-to-folder'
 
@@ -80,12 +81,12 @@ export function FolderProvider({
 }: Props) {
   const { config } = useConfig()
   const { routes, serverURL } = config
-  const { clearSelections, selectedDocs, selectedFolders } = useSelections()
-  const { searchParams, stringifyParams } = useSearchParams()
+  const { clearSelections, selectedDocs, selectedFolders } = useFolderAndDocumentSelections()
+  const searchParams = useSearchParams()
   const currentEditDepth = useEditDepth()
   const { closeModal } = useModal()
 
-  const folderIDFromParams = searchParams.folderID ? searchParams.folderID : undefined
+  const folderIDFromParams = searchParams.get('folderID')
   const folderIDParamRef = React.useRef(folderIDFromParams)
 
   const [activeFolderID, setActiveFolderID] = React.useState<FolderContextValue['folderID']>(
@@ -101,12 +102,15 @@ export function FolderProvider({
 
   const populateFolderData = React.useCallback(
     async ({ folderID: folderToPopulate }) => {
+      const queryParams = qs.stringify(
+        {
+          ...parseSearchParams(searchParams),
+          folderID: folderToPopulate,
+        },
+        { addQueryPrefix: true },
+      )
       const folderDataReq = await fetch(
-        `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${stringifyParams({
-          params: {
-            folderID: folderToPopulate,
-          },
-        })}`,
+        `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${queryParams}`,
         {
           credentials: 'include',
           headers: {
@@ -134,7 +138,7 @@ export function FolderProvider({
         setDocs([])
       }
     },
-    [folderCollectionSlug, routes.api, serverURL, stringifyParams],
+    [folderCollectionSlug, routes.api, serverURL, searchParams],
   )
 
   const setNewActiveFolderID: FolderContextValue['setFolderID'] = React.useCallback(
@@ -300,7 +304,7 @@ export function FolderProvider({
   // we should not be updating it when inside a drawer
   React.useEffect(() => {
     if (folderIDParamRef.current !== folderIDFromParams) {
-      void setNewActiveFolderID({ folderID: folderIDFromParams as string })
+      void setNewActiveFolderID({ folderID: folderIDFromParams })
       folderIDParamRef.current = folderIDFromParams
     }
   }, [folderIDFromParams, setNewActiveFolderID])
