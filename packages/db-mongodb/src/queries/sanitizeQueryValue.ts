@@ -219,8 +219,11 @@ export const sanitizeQueryValue = ({
             {
               [localizedPath]: {
                 $eq: {
-                  relationTo: formattedValue.relationTo,
+                  // disable auto sort
+                  /* eslint-disable */
                   value: formattedValue.value,
+                  relationTo: formattedValue.relationTo,
+                  /* eslint-enable */
                 },
               },
             },
