@@ -88,6 +88,9 @@ export interface Page {
 export interface Category {
   id: string;
   name: string;
+  /**
+   * custom
+   */
   categorization?:
     | {
         doc?: (string | null) | Category;
@@ -97,6 +100,9 @@ export interface Category {
         id?: string | null;
       }[]
     | null;
+  /**
+   * custom
+   */
   owner?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;

@@ -306,6 +306,9 @@ export interface LexicalMigrateField {
 export interface LexicalLocalizedField {
   id: string;
   title: string;
+  /**
+   * Non-localized field with localized block subfields
+   */
   lexicalBlocksSubLocalized?: {
     root: {
       type: string;
@@ -321,6 +324,9 @@ export interface LexicalLocalizedField {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Localized field with localized block subfields
+   */
   lexicalBlocksLocalized?: {
     root: {
       type: string;
@@ -471,6 +477,9 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Row labels rendered as react components.
+   */
   rowLabelAsComponent?:
     | {
         title?: string | null;
@@ -585,6 +594,9 @@ export interface BlockField {
           }
       )[]
     | null;
+  /**
+   * The purpose of this field is to test validateExistingBlockIsIdentical works with similar blocks with group fields
+   */
   blocksWithSimilarGroup?:
     | (
         | {
@@ -773,9 +785,18 @@ export interface TextField {
   id: string;
   text: string;
   hiddenTextField?: string | null;
+  /**
+   * This field should be hidden
+   */
   adminHiddenTextField?: string | null;
+  /**
+   * This field should be disabled
+   */
   disabledTextField?: string | null;
   localizedText?: string | null;
+  /**
+   * en description
+   */
   i18nText?: string | null;
   defaultString?: string | null;
   defaultEmptyString?: string | null;
@@ -896,8 +917,14 @@ export interface ConditionalLogic {
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
+    /**
+     * Ensures we can rely on nested fields within `data`.
+     */
     siblingField?: string | null;
   };
+  /**
+   * Ensures we can rely on nested fields within `siblingsData`.
+   */
   reliesOnParentGroup?: string | null;
   groupSelection?: ('group1' | 'group2') | null;
   group1?: {
@@ -959,6 +986,9 @@ export interface EmailField {
   email: string;
   localizedEmail?: string | null;
   emailWithAutocomplete?: string | null;
+  /**
+   * en description
+   */
   i18nEmail?: string | null;
   defaultEmail?: string | null;
   defaultEmptyString?: string | null;
@@ -988,6 +1018,9 @@ export interface RadioField {
  */
 export interface GroupField {
   id: string;
+  /**
+   * This is a group.
+   */
   group: {
     text: string;
     defaultParent?: string | null;
@@ -1378,6 +1411,9 @@ export interface RichTextField {
     [k: string]: unknown;
   };
   lexicalCustomFields_html?: string | null;
+  /**
+   * This rich text field uses the lexical editor.
+   */
   lexical?: {
     root: {
       type: string;
@@ -1393,6 +1429,9 @@ export interface RichTextField {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * This select field is rendered here to ensure its options dropdown renders above the rich text toolbar.
+   */
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
   richText: {
     [k: string]: unknown;
@@ -1481,6 +1520,9 @@ export interface TabsFields2 {
  */
 export interface TabsField {
   id: string;
+  /**
+   * This should not collapse despite there being many tabs pushing the main fields open.
+   */
   sidebarField?: string | null;
   array: {
     text: string;

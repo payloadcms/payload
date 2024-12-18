@@ -15,6 +15,7 @@ export interface Config {
     posts: Post;
     users: User;
     'hidden-collection': HiddenCollection;
+    'not-in-view-collection': NotInViewCollection;
     'collection-no-api-view': CollectionNoApiView;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
@@ -38,6 +39,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'hidden-collection': HiddenCollectionSelect<false> | HiddenCollectionSelect<true>;
+    'not-in-view-collection': NotInViewCollectionSelect<false> | NotInViewCollectionSelect<true>;
     'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
@@ -60,6 +62,7 @@ export interface Config {
   };
   globals: {
     'hidden-global': HiddenGlobal;
+    'not-in-view-global': NotInViewGlobal;
     'global-no-api-view': GlobalNoApiView;
     global: Global;
     'custom-global-views-one': CustomGlobalViewsOne;
@@ -70,6 +73,7 @@ export interface Config {
   };
   globalsSelect: {
     'hidden-global': HiddenGlobalSelect<false> | HiddenGlobalSelect<true>;
+    'not-in-view-global': NotInViewGlobalSelect<false> | NotInViewGlobalSelect<true>;
     'global-no-api-view': GlobalNoApiViewSelect<false> | GlobalNoApiViewSelect<true>;
     global: GlobalSelect<false> | GlobalSelect<true>;
     'custom-global-views-one': CustomGlobalViewsOneSelect<false> | CustomGlobalViewsOneSelect<true>;
@@ -125,6 +129,8 @@ export interface Upload {
   focalY?: number | null;
 }
 /**
+ * This is a custom collection description.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
@@ -165,6 +171,9 @@ export interface Post {
   defaultValueField?: string | null;
   relationship?: (string | null) | Post;
   customCell?: string | null;
+  /**
+   * This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.
+   */
   sidebarField?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -194,6 +203,16 @@ export interface User {
  * via the `definition` "hidden-collection".
  */
 export interface HiddenCollection {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-collection".
+ */
+export interface NotInViewCollection {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -236,7 +255,13 @@ export interface CustomField {
   id: string;
   customTextServerField?: string | null;
   customTextClientField?: string | null;
+  /**
+   * Static field description.
+   */
   descriptionAsString?: string | null;
+  /**
+   * Function description
+   */
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
@@ -319,6 +344,8 @@ export interface Geo {
   createdAt: string;
 }
 /**
+ * Description
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "customIdTab".
  */
@@ -331,6 +358,8 @@ export interface CustomIdTab {
   createdAt: string;
 }
 /**
+ * Description
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "customIdRow".
  */
@@ -384,6 +413,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'hidden-collection';
         value: string | HiddenCollection;
+      } | null)
+    | ({
+        relationTo: 'not-in-view-collection';
+        value: string | NotInViewCollection;
       } | null)
     | ({
         relationTo: 'collection-no-api-view';
@@ -565,6 +598,15 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "hidden-collection_select".
  */
 export interface HiddenCollectionSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-collection_select".
+ */
+export interface NotInViewCollectionSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -766,6 +808,16 @@ export interface HiddenGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-global".
+ */
+export interface NotInViewGlobal {
+  id: string;
+  title?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-no-api-view".
  */
 export interface GlobalNoApiView {
@@ -840,6 +892,16 @@ export interface Setting {
  * via the `definition` "hidden-global_select".
  */
 export interface HiddenGlobalSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-global_select".
+ */
+export interface NotInViewGlobalSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

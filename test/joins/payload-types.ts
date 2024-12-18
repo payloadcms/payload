@@ -115,6 +115,9 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  /**
+   * Hides posts for the `filtered` join field in categories
+   */
   isFiltered?: boolean | null;
   restrictedField?: string | null;
   upload?: (string | null) | Upload;
@@ -161,6 +164,9 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  /**
+   * Static Description
+   */
   hasManyPosts?: {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
