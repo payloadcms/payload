@@ -41,7 +41,9 @@ jobs:
             db-vercel-postgres
             db-sqlite
             drizzle
+            email-\*
             email-nodemailer
+            email-resend
             eslint
             graphql
             live-preview
