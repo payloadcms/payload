@@ -16,10 +16,12 @@ import type {
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
+import type { FilterFields } from './index.js'
 
 type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 
 type RowFieldBaseClientProps = {
+  readonly filterFields?: FilterFields
   readonly forceRender?: boolean
 } & Omit<FieldPaths, 'path'>
 

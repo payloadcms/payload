@@ -9,6 +9,8 @@ import type {
 
 import React from 'react'
 
+import type { RenderFieldsProps } from './types.js'
+
 import { ArrayField } from '../../fields/Array/index.js'
 import { BlocksField } from '../../fields/Blocks/index.js'
 import { CheckboxField } from '../../fields/Checkbox/index.js'
@@ -36,12 +38,14 @@ import { useFormFields } from '../../forms/Form/index.js'
 
 type RenderFieldProps = {
   clientFieldConfig: ClientField
+  filterFields?: RenderFieldsProps['filterFields']
   permissions: SanitizedFieldPermissions
 } & FieldPaths &
   Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'>
 
 export function RenderField({
   clientFieldConfig,
+  filterFields,
   forceRender,
   indexPath,
   parentPath,
@@ -69,6 +73,7 @@ export function RenderField({
 
   const iterableFieldProps = {
     ...baseFieldProps,
+    filterFields,
     indexPath,
     parentPath,
     parentSchemaPath,

@@ -3,7 +3,7 @@ import type { ClientField } from 'payload'
 
 import React, { Fragment, useState } from 'react'
 
-import type { FieldOption } from './reduceSelectableFields.js'
+import type { FieldOption, SelectedField } from './reduceSelectableFields.js'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -17,7 +17,7 @@ const baseClass = 'field-select'
 
 export type FieldSelectProps = {
   readonly fields: ClientField[]
-  readonly setSelected: (fields: string[]) => void
+  readonly setSelected: (fields: SelectedField[]) => void
 }
 
 export const combineLabel = ({

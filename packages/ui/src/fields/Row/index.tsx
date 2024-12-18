@@ -14,6 +14,7 @@ const baseClass = 'row'
 const RowFieldComponent: RowFieldClientComponent = (props) => {
   const {
     field: { admin: { className } = {}, fields },
+    filterFields,
     forceRender = false,
     indexPath = '',
     parentPath = '',
@@ -28,6 +29,7 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
         <RenderFields
           className={`${baseClass}__fields`}
           fields={fields}
+          filterFields={filterFields}
           forceRender={forceRender}
           margins={false}
           parentIndexPath={indexPath}

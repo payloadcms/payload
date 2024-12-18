@@ -28,11 +28,13 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
     field,
     field: { name, admin: { className, description, hideGutter } = {}, fields, label },
+    filterFields,
     path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const { i18n } = useTranslation()
@@ -101,6 +103,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           {BeforeInput}
           <RenderFields
             fields={fields}
+            filterFields={filterFields}
             margins="small"
             parentIndexPath=""
             parentPath={path}

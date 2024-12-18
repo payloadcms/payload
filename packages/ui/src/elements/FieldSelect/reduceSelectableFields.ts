@@ -9,9 +9,14 @@ import {
 
 import { combineLabel } from './index.js'
 
+export type SelectedField = {
+  parentPath: string
+  path: string
+}
+
 export type FieldOption = {
   label: React.ReactNode
-  value: string
+  value: SelectedField
 }
 
 export const reduceSelectableFields = ({
@@ -113,7 +118,10 @@ export const reduceSelectableFields = ({
         default: {
           acc.push({
             label: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
-            value: path,
+            value: {
+              parentPath,
+              path,
+            },
           })
 
           return acc
@@ -122,7 +130,7 @@ export const reduceSelectableFields = ({
     },
     [] as {
       label: React.ReactNode
-      value: string
+      value: SelectedField
     }[],
   )
 }

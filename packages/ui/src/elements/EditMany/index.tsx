@@ -8,6 +8,7 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
+import type { SelectedField } from '../FieldSelect/reduceSelectableFields.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
@@ -24,8 +25,8 @@ import { SelectAllStatus, useSelection } from '../../providers/Selection/index.j
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
-import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import './index.scss'
+import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
@@ -36,8 +37,8 @@ export type EditManyProps = {
   readonly collection: ClientCollectionConfig
 }
 
-const sanitizeUnselectedFields = (formState: FormState, selectedFields: string[]) => {
-  const filteredData = selectedFields.reduce((acc, path) => {
+const sanitizeUnselectedFields = (formState: FormState, selectedFields: SelectedField[]) => {
+  const filteredData = selectedFields.reduce((acc, { path }) => {
     const foundState = formState?.[path]
 
     if (foundState) {
@@ -53,7 +54,7 @@ const sanitizeUnselectedFields = (formState: FormState, selectedFields: string[]
 const Submit: React.FC<{
   readonly action: string
   readonly disabled: boolean
-  readonly selectedFields?: string[]
+  readonly selectedFields?: SelectedField[]
 }> = ({ action, disabled, selectedFields }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
@@ -77,7 +78,7 @@ const Submit: React.FC<{
 const PublishButton: React.FC<{
   action: string
   disabled: boolean
-  selectedFields?: string[]
+  selectedFields?: SelectedField[]
 }> = ({ action, disabled, selectedFields }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
@@ -104,7 +105,7 @@ const PublishButton: React.FC<{
 const SaveDraftButton: React.FC<{
   action: string
   disabled: boolean
-  selectedFields?: string[]
+  selectedFields?: SelectedField[]
 }> = ({ action, disabled, selectedFields }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
@@ -152,7 +153,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
-  const [selectedFields, setSelectedFields] = useState<string[]>([])
+  const [selectedFields, setSelectedFields] = useState<SelectedField[]>([])
   const searchParams = useSearchParams()
   const router = useRouter()
   const [initialState, setInitialState] = useState<FormState>()
@@ -308,7 +309,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                     <RenderFields
                       fields={fields}
                       filterFields={({ path }) =>
-                        selectedFields.some((selectedPath) => selectedPath === path)
+                        selectedFields.some(({ path: selectedPath }) => selectedPath === path)
                       }
                       parentIndexPath=""
                       parentPath=""

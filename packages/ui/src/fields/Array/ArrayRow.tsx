@@ -5,6 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
+import type { RenderFieldsProps } from '../../forms/RenderFields/types.js'
 
 import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
@@ -13,8 +14,8 @@ import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
-import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import './index.scss'
+import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'array-field'
@@ -25,6 +26,7 @@ type ArrayRowProps = {
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
   readonly fields: ClientField[]
+  readonly filterFields?: RenderFieldsProps['filterFields']
   readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
   readonly isLoading?: boolean
@@ -50,6 +52,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   duplicateRow,
   errorCount,
   fields,
+  filterFields,
   forceRender = false,
   hasMaxRows,
   isDragging,
@@ -150,6 +153,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           <RenderFields
             className={`${baseClass}__fields`}
             fields={fields}
+            filterFields={filterFields}
             forceRender={forceRender}
             margins="small"
             parentIndexPath=""

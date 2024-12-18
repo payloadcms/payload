@@ -15,10 +15,13 @@ import type {
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
+import type { FilterFields } from './index.js'
 
 type GroupFieldClientWithoutType = MarkOptional<GroupFieldClient, 'type'>
 
-export type GroupFieldBaseClientProps = FieldPaths
+export type GroupFieldBaseClientProps = {
+  readonly filterFields?: FilterFields
+} & FieldPaths
 
 export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType> &
   GroupFieldBaseClientProps

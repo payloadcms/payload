@@ -16,10 +16,12 @@ import type {
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
+import type { FilterFields } from './index.js'
 
 type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
 
 type ArrayFieldBaseClientProps = {
+  readonly filterFields?: FilterFields
   readonly validate?: ArrayFieldValidation
 } & FieldPaths
 

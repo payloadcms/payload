@@ -21,12 +21,15 @@ import type {
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
+import type { FilterFields } from './index.js'
 
 export type ClientTab =
   | ({ fields: ClientField[]; readonly path?: string } & Omit<NamedTab, 'fields'>)
   | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
 
-type TabsFieldBaseClientProps = FieldPaths
+type TabsFieldBaseClientProps = {
+  readonly filterFields?: FilterFields
+} & FieldPaths
 
 type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 
