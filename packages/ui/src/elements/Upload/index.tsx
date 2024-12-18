@@ -9,6 +9,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
 import { useForm, useFormProcessing } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -90,6 +91,13 @@ export type UploadProps = {
 
 export const Upload: React.FC<UploadProps> = (props) => {
   const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
+
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
 
   const { t } = useTranslation()
   const { setModified } = useForm()
@@ -175,8 +183,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const handleUrlSubmit = async () => {
     if (fileUrl) {
       try {
-        // Make a request to the Payload 'paste-url' endpoint - /api/paste-url
-        const response = await fetch(`/api/paste-url?src=${encodeURIComponent(fileUrl)}`)
+        // Make a request to the Payload 'paste-url' endpoint
+        const pasteURL = `/paste-url?src=${encodeURIComponent(fileUrl)}`
+        const response = await fetch(`${serverURL}${api}${pasteURL}`)
 
         if (!response.ok) {
           const errorData = await response.json()
