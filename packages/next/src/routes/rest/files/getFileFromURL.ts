@@ -42,7 +42,6 @@ export const getFileFromURL = async (wrapperReq: WrapperRequest) => {
 
     const decodedFileName = decodeURIComponent(validatedUrl.pathname.split('/').pop() || '')
 
-    // Return the raw response
     return new Response(response.body, {
       headers: {
         'Content-Disposition': `attachment; filename="${decodedFileName}"`,
