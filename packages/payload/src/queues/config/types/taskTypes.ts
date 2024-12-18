@@ -1,5 +1,5 @@
 import type { Field, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
-import type { RunningJob, RunningJobSimple } from './workflowTypes.js'
+import type { BaseJob, RunningJob, RunningJobSimple, SingleTaskStatus } from './workflowTypes.js'
 
 export type TaskInputOutput = {
   input: object
@@ -101,8 +101,23 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
   },
 ) => Promise<TTaskOutput>
 
+export type ShouldRestoreFn = (args: {
+  /**
+   * Input data passed to the task
+   */
+  input: object
+  job: BaseJob
+  req: PayloadRequest
+  taskStatus: SingleTaskStatus<string>
+}) => boolean | Promise<boolean>
+
 export type RetryConfig = {
-  attempts: number
+  /**
+   * This controls how many times the task should be retried if it fails.
+   *
+   * @default undefined - attempts are either inherited from the workflow retry config or set to 0.
+   */
+  attempts?: number
   /**
    * The backoff strategy to use when retrying the task. This determines how long to wait before retrying the task.
    *
@@ -137,6 +152,19 @@ export type RetryConfig = {
      */
     type: 'exponential' | 'fixed'
   }
+  /**
+   * This controls whether the task output should be restored if the task previously succeeded and the workflow is being retried.
+   *
+   * If this is set to false, the task will be re-run even if it previously succeeded, ignoring the maximum number of retries.
+   *
+   * If this is set to true, the task will only be re-run if it previously failed.
+   *
+   * If this is a function, the return value of the function will determine whether the task should be re-run. This can be used for more complex restore logic,
+   * e.g you may want to re-run a task up until a certain point and then restore it, or only re-run a task if the input has changed.
+   *
+   * @default true - the task output will be restored if the task previously succeeded.
+   */
+  shouldRestore?: boolean | ShouldRestoreFn
 }
 
 export type TaskConfig<
