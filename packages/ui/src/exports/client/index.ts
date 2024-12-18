@@ -41,6 +41,12 @@ export {
   useBulkUpload,
   useBulkUploadDrawerSlug,
 } from '../../elements/BulkUpload/index.js'
+export { Breadcrumbs } from '../../elements/Breadcrumbs/index.js'
+export { DrawerActionHeader } from '../../elements/DrawerActionHeader/index.js'
+export { DrawerContentContainer } from '../../elements/DrawerContentContainer/index.js'
+export { FolderDrawer } from '../../elements/FolderDrawer/index.js'
+export { FolderList } from '../../elements/FolderList/index.js'
+export { MoveToFolderDrawer } from '../../elements/MoveToFolderDrawer/index.js'
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
 export { Banner } from '../../elements/Banner/index.js'
 export { Button } from '../../elements/Button/index.js'
@@ -225,6 +231,9 @@ export { PlusIcon } from '../../icons/Plus/index.js'
 export { SearchIcon } from '../../icons/Search/index.js'
 export { SwapIcon } from '../../icons/Swap/index.js'
 export { XIcon } from '../../icons/X/index.js'
+export { FolderIcon } from '../../icons/Folder/index.js'
+export { GridViewIcon } from '../../icons/GridView/index.js'
+export { ListViewIcon } from '../../icons/ListView/index.js'
 export { Error as ErrorIcon } from '../../providers/ToastContainer/icons/Error.js'
 export { Info as InfoIcon } from '../../providers/ToastContainer/icons/Info.js'
 export { Success as SuccessIcon } from '../../providers/ToastContainer/icons/Success.js'
@@ -240,18 +249,21 @@ export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
 export type { UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
-
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
-
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
 export {
   EntityVisibilityProvider,
   useEntityVisibility,
 } from '../../providers/EntityVisibility/index.js'
 export { UploadEditsProvider, useUploadEdits } from '../../providers/UploadEdits/index.js'
+export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
+export {
+  FolderAndDocumentSelectionsProvider,
+  useFolderAndDocumentSelections,
+} from '../../providers/FolderAndDocumentSelections/index.js'
 export {
   ListDrawerContextProvider,
   useListDrawerContext,
@@ -272,6 +284,7 @@ export { SelectionProvider, useSelection } from '../../providers/Selection/index
 export { defaultTheme, type Theme, ThemeProvider, useTheme } from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
+
 export { Text as TextCondition } from '../../elements/WhereBuilder/Condition/Text/index.js'
 export { Select as SelectCondition } from '../../elements/WhereBuilder/Condition/Select/index.js'
 export { RelationshipField as RelationshipCondition } from '../../elements/WhereBuilder/Condition/Relationship/index.js'

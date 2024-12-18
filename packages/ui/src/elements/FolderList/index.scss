@@ -1,0 +1,79 @@
+@import '~@payloadcms/ui/scss';
+
+.folderDrawerList {
+
+  &__listTitle {
+    margin: unset;
+    margin-bottom: var(--base);
+  }
+
+  &__folders {
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
+  }
+
+  &__folderRow,
+  &__noSubfolders {
+    @include btn-reset;
+    background-color: var(--theme-elevation-50);
+    display: flex;
+    align-items: center;
+    gap: var(--base);
+    padding: calc(var(--base) * 0.8);
+    width: 100%;
+    font-size: calc(var(--base) * 0.75);
+    border: 2px solid transparent;
+  }
+
+  &__folderRow {
+    cursor: pointer;
+
+    &:focus-visible,
+    &:hover {
+      background-color: var(--theme-success-50);
+      border-color: var(--theme-success-600);
+    }
+
+    &--disabled {
+      cursor: not-allowed;
+      background-color: var(--theme-elevation-50);
+      border-color: var(--theme-elevation-200);
+
+      &:focus-visible,
+      &:hover {
+        background-color: var(--theme-elevation-50);
+        border-color: var(--theme-elevation-200);
+      }
+
+      .folderDrawerList__folderName,
+      .folderDrawerList__folderCount {
+        color: var(--theme-elevation-300);
+      }
+    }
+  }
+
+  &__noSubfolders {
+    gap: unset;
+  }
+
+  &__noSubfolders__folderPath {
+    font-weight: bold;
+  }
+
+  &__folderName {
+    font-size: calc(var(--base) * 0.75);
+    font-weight: bold;
+    margin: 0;
+  }
+
+  &__folderCount {
+    color: var(--theme-elevation-400);
+    margin: 0;
+  }
+
+  &__subfolderChevron {
+    stroke: var(--theme-elevation-800);
+    margin-left: auto;
+  }
+}
