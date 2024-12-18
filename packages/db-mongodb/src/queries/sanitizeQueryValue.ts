@@ -215,12 +215,24 @@ export const sanitizeQueryValue = ({
 
       return {
         rawQuery: {
-          [localizedPath]: {
-            $eq: {
-              relationTo: formattedValue.relationTo,
-              value: formattedValue.value,
+          $or: [
+            {
+              [localizedPath]: {
+                $eq: {
+                  relationTo: formattedValue.relationTo,
+                  value: formattedValue.value,
+                },
+              },
             },
-          },
+            {
+              [localizedPath]: {
+                $eq: {
+                  relationTo: formattedValue.relationTo,
+                  value: formattedValue.value,
+                },
+              },
+            },
+          ],
         },
       }
     }
