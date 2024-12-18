@@ -15,6 +15,7 @@ import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { customIDSlug, customRowIDSlug, customTabIDSlug } from '../../slugs.js'
+import { customRowID, customTabID, nonStandardID } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -64,45 +65,22 @@ describe('Custom IDs', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  function createCustomIDDoc(id: string) {
-    return payload.create({
-      collection: customIDSlug,
-      data: {
-        id,
-      },
-    })
-  }
-
   test('allow create of non standard ID', async () => {
-    await createCustomIDDoc('id 1')
     await page.goto(url.list)
-
     await navigateToDoc(page, url)
-
-    // Page should load and ID should be correct
-    await expect(page.locator('#field-id')).toHaveValue('id 1')
-    await expect(page.locator('.id-label')).toContainText('id 1')
+    await expect(page.locator('#field-id')).toHaveValue(nonStandardID)
+    await expect(page.locator('.id-label')).toContainText(nonStandardID)
   })
 
   test('should use custom ID field nested within unnamed tab', async () => {
-    const customTabIDDoc = await payload.create({
-      collection: customTabIDSlug,
-      data: {},
-    })
-
-    await page.goto(customTabIDURL.edit(customTabIDDoc.id))
+    await page.goto(customTabIDURL.edit(customTabID))
     const idField = page.locator('#field-id')
-    await expect(idField).toHaveValue(customTabIDDoc.id)
+    await expect(idField).toHaveValue(customTabID)
   })
 
   test('should use custom ID field nested within row', async () => {
-    const customRowIDDoc = await payload.create({
-      collection: customRowIDSlug,
-      data: {},
-    })
-
-    await page.goto(customRowIDURL.edit(customRowIDDoc.id))
+    await page.goto(customRowIDURL.edit(customRowID))
     const idField = page.locator('#field-id')
-    await expect(idField).toHaveValue(customRowIDDoc.id)
+    await expect(idField).toHaveValue(customRowID)
   })
 })

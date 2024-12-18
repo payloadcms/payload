@@ -944,7 +944,6 @@ export interface CustomId {
  * via the `definition` "custom-tab-id".
  */
 export interface CustomTabId {
-  title?: string | null;
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -954,7 +953,6 @@ export interface CustomTabId {
  * via the `definition` "custom-row-id".
  */
 export interface CustomRowId {
-  title?: string | null;
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -2633,7 +2631,6 @@ export interface CustomIdSelect<T extends boolean = true> {
  * via the `definition` "custom-tab-id_select".
  */
 export interface CustomTabIdSelect<T extends boolean = true> {
-  title?: T;
   id?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2643,7 +2640,6 @@ export interface CustomTabIdSelect<T extends boolean = true> {
  * via the `definition` "custom-row-id_select".
  */
 export interface CustomRowIdSelect<T extends boolean = true> {
-  title?: T;
   id?: T;
   updatedAt?: T;
   createdAt?: T;

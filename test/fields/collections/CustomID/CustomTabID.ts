@@ -5,14 +5,9 @@ import { customTabIDSlug } from '../../slugs.js'
 export const CustomTabID: CollectionConfig = {
   slug: customTabIDSlug,
   admin: {
-    defaultColumns: ['title'],
     useAsTitle: 'id',
   },
   fields: [
-    {
-      name: 'title',
-      type: 'text',
-    },
     {
       type: 'tabs',
       tabs: [

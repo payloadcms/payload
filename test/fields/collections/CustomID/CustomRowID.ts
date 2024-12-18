@@ -5,14 +5,9 @@ import { customRowIDSlug } from '../../slugs.js'
 export const CustomRowID: CollectionConfig = {
   slug: customRowIDSlug,
   admin: {
-    defaultColumns: ['title'],
     useAsTitle: 'id',
   },
   fields: [
-    {
-      name: 'title',
-      type: 'text',
-    },
     {
       type: 'row',
       fields: [
