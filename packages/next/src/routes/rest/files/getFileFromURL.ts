@@ -21,13 +21,12 @@ export const getFileFromURL = async (wrapperReq: WrapperRequest) => {
     }
 
     const { searchParams } = new URL(request.url)
-    let src = searchParams.get('src')
+    const src = searchParams.get('src')
 
     if (!src || typeof src !== 'string') {
       throw new APIError('A valid URL string is required.', 400)
     }
 
-    src = decodeURIComponent(src)
     const validatedUrl = new URL(src)
 
     // Fetch the file with no compression
@@ -41,9 +40,12 @@ export const getFileFromURL = async (wrapperReq: WrapperRequest) => {
       throw new APIError(`Failed to fetch file from ${validatedUrl.href}`, response.status)
     }
 
+    const decodedFileName = decodeURIComponent(validatedUrl.pathname.split('/').pop() || '')
+
     // Return the raw response
     return new Response(response.body, {
       headers: {
+        'Content-Disposition': `attachment; filename="${decodedFileName}"`,
         'Content-Length': response.headers.get('content-length') || '',
         'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
       },
