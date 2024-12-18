@@ -313,7 +313,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
 
   return (
     <div className={classes} style={styles}>
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} path={path} required={required} />}
       <div className={`${baseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
