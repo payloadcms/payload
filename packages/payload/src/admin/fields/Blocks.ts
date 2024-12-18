@@ -16,12 +16,10 @@ import type {
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
-import type { FilterFields } from './index.js'
 
 type BlocksFieldClientWithoutType = MarkOptional<BlocksFieldClient, 'type'>
 
 type BlocksFieldBaseClientProps = {
-  readonly filterFields?: FilterFields
   readonly validate?: BlocksFieldValidation
 } & FieldPaths
 

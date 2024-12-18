@@ -45,7 +45,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
-    filterFields,
     forceRender = false,
     path,
     permissions,
@@ -295,7 +294,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
                     fields={fields}
-                    filterFields={filterFields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
                     isLoading={isLoading}

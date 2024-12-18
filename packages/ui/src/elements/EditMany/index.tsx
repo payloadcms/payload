@@ -308,9 +308,6 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                   {selectedFields.length === 0 ? null : (
                     <RenderFields
                       fields={fields}
-                      filterFields={({ path }) =>
-                        selectedFields.some(({ path: selectedPath }) => selectedPath === path)
-                      }
                       parentIndexPath=""
                       parentPath=""
                       parentSchemaPath={collectionSlug}

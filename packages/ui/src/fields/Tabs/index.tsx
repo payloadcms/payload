@@ -12,8 +12,6 @@ import { getTranslation } from '@payloadcms/translations'
 import { tabHasName, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { RenderFieldsProps } from '../../forms/RenderFields/types.js'
-
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
@@ -49,7 +47,6 @@ function generateTabPath({ activeTabConfig, path }: { activeTabConfig: ClientTab
 const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
     field: { admin: { className } = {}, tabs = [] },
-    filterFields,
     forceRender = false,
     indexPath = '',
     parentPath = '',
@@ -191,7 +188,6 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
             <ActiveTabContent
               description={activeTabStaticDescription}
               fields={activeTabConfig.fields}
-              filterFields={filterFields}
               forceRender={forceRender}
               parentIndexPath={
                 tabHasName(activeTabConfig)
@@ -220,7 +216,6 @@ export const TabsField = withCondition(TabsFieldComponent)
 type ActiveTabProps = {
   description: StaticDescription
   fields: ClientField[]
-  filterFields?: RenderFieldsProps['filterFields']
   forceRender?: boolean
   label?: string
   parentIndexPath: string
@@ -234,7 +229,6 @@ type ActiveTabProps = {
 function ActiveTabContent({
   description,
   fields,
-  filterFields,
   forceRender,
   label,
   parentIndexPath,
@@ -269,7 +263,6 @@ function ActiveTabContent({
       {BeforeInput}
       <RenderFields
         fields={fields}
-        filterFields={filterFields}
         forceRender={forceRender}
         parentIndexPath={parentIndexPath}
         parentPath={parentPath}

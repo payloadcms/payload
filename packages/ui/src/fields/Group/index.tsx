@@ -28,7 +28,6 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
     field,
     field: { name, admin: { className, description, hideGutter } = {}, fields, label },
-    filterFields,
     path,
     permissions,
     readOnly,
@@ -103,7 +102,6 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           {BeforeInput}
           <RenderFields
             fields={fields}
-            filterFields={filterFields}
             margins="small"
             parentIndexPath=""
             parentPath={path}

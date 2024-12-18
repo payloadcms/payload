@@ -15,11 +15,8 @@ import type {
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
-import type { FilterFields } from './index.js'
 
-type CollapsibleFieldBaseClientProps = {
-  readonly filterFields?: FilterFields
-} & FieldPaths
+type CollapsibleFieldBaseClientProps = FieldPaths
 
 type CollapsibleFieldClientWithoutType = MarkOptional<CollapsibleFieldClient, 'type'>
 

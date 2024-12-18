@@ -18,7 +18,6 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
   const {
     className,
     fields,
-    filterFields,
     forceRender,
     margins,
     parentIndexPath,
@@ -99,14 +98,9 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
             parentSchemaPath,
           })
 
-          if (filterFields && !filterFields({ field, parentPath, path })) {
-            return null
-          }
-
           return (
             <RenderField
               clientFieldConfig={field}
-              filterFields={filterFields}
               forceRender={forceRender}
               indexPath={indexPath}
               key={`${path}-${i}`}
