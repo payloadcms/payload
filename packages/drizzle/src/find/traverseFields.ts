@@ -526,7 +526,7 @@ export const traverseFields = ({
 
           if (
             !withTabledFields.rels &&
-            field.type === 'relationship' &&
+            (field.type === 'relationship' || field.type === 'upload') &&
             (field.hasMany || Array.isArray(field.relationTo))
           ) {
             withTabledFields.rels = true
