@@ -24,6 +24,7 @@ export const countVersions: CountVersions = async function countVersions(
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    session: options.session,
     where,
   })
 

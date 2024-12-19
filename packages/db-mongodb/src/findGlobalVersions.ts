@@ -1,4 +1,10 @@
-import type { PaginateOptions } from 'mongoose'
+import type { CountOptions } from 'mongodb'
+import type {
+  AggregatePaginateResult,
+  PaginateOptions,
+  PipelineStage,
+  QueryOptions,
+} from 'mongoose'
 import type { FindGlobalVersions, PayloadRequest } from 'payload'
 
 import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
@@ -7,6 +13,7 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { mergeProjections } from './utilities/mergeProjections.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -31,7 +38,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     this.payload.globals.config.find(({ slug }) => slug === global),
     true,
   )
-  const options = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     limit,
     skip,
@@ -55,10 +62,16 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     })
   }
 
+  const pipeline: PipelineStage[] = []
+  const queryProjection: Record<string, boolean> = {}
+
   const query = await Model.buildQuery({
     globalSlug: global,
     locale,
     payload: this.payload,
+    pipeline,
+    projection: queryProjection,
+    session: options.session,
     where,
   })
 
@@ -71,7 +84,10 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     options,
     page,
     pagination,
-    projection: buildProjectionFromSelect({ adapter: this, fields: versionFields, select }),
+    projection: mergeProjections({
+      queryProjection,
+      selectProjection: buildProjectionFromSelect({ adapter: this, fields: versionFields, select }),
+    }),
     sort,
     useEstimatedCount,
   }
@@ -92,7 +108,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
-          ...options,
+          ...(options as CountOptions),
           hint: { _id: 1 },
         }),
       )
@@ -110,7 +126,24 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  let result: AggregatePaginateResult<unknown>
+
+  if (pipeline.length) {
+    pipeline.push({ $sort: { createdAt: -1 } })
+
+    if (limit) {
+      pipeline.push({ $limit: limit })
+    }
+
+    if (Object.keys(queryProjection).length > 0) {
+      pipeline.push({ $project: queryProjection })
+    }
+
+    result = await Model.aggregatePaginate(Model.aggregate(pipeline), paginationOptions)
+  } else {
+    result = await Model.paginate(query, paginationOptions)
+  }
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {

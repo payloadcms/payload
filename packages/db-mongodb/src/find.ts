@@ -1,4 +1,4 @@
-import type { PaginateOptions } from 'mongoose'
+import type { PaginateOptions, PipelineStage } from 'mongoose'
 import type { Find, PayloadRequest } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
@@ -6,8 +6,9 @@ import { flattenWhereToOperators } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
-import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
+import { buildAggregation } from './utilities/buildAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { mergeProjections } from './utilities/mergeProjections.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -20,7 +21,6 @@ export const find: Find = async function find(
     locale,
     page,
     pagination,
-    projection,
     req = {} as PayloadRequest,
     select,
     sort: sortArg,
@@ -49,10 +49,25 @@ export const find: Find = async function find(
     })
   }
 
+  const pipeline: PipelineStage[] = []
+
+  const queryProjection = {}
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    pipeline,
+    projection: queryProjection,
+    session: options.session,
     where,
+  })
+
+  const projection = mergeProjections({
+    queryProjection,
+    selectProjection: buildProjectionFromSelect({
+      adapter: this,
+      fields: collectionConfig.flattenedFields,
+      select,
+    }),
   })
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
@@ -66,14 +81,6 @@ export const find: Find = async function find(
     projection,
     sort,
     useEstimatedCount,
-  }
-
-  if (select) {
-    paginationOptions.projection = buildProjectionFromSelect({
-      adapter: this,
-      fields: collectionConfig.flattenedFields,
-      select,
-    })
   }
 
   if (this.collation) {
@@ -112,12 +119,14 @@ export const find: Find = async function find(
 
   let result
 
-  const aggregate = await buildJoinAggregation({
+  const aggregate = await buildAggregation({
     adapter: this,
     collection,
     collectionConfig,
     joins,
     locale,
+    pipeline,
+    projection,
     query,
   })
   // build join aggregation

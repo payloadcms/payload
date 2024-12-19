@@ -1,4 +1,10 @@
-import type { PaginateOptions } from 'mongoose'
+import type { CountOptions } from 'mongodb'
+import type {
+  AggregatePaginateResult,
+  PaginateOptions,
+  PipelineStage,
+  QueryOptions,
+} from 'mongoose'
 import type { FindVersions, PayloadRequest } from 'payload'
 
 import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
@@ -7,6 +13,7 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { mergeProjections } from './utilities/mergeProjections.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'
 
@@ -27,7 +34,7 @@ export const findVersions: FindVersions = async function findVersions(
 ) {
   const Model = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = {
+  const options: QueryOptions = {
     ...(await withSession(this, req)),
     limit,
     skip,
@@ -51,10 +58,25 @@ export const findVersions: FindVersions = async function findVersions(
     })
   }
 
+  const pipeline: PipelineStage[] = []
+  const queryProjection = {}
+
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    pipeline,
+    projection: queryProjection,
+    session: options.session,
     where,
+  })
+
+  const projection = mergeProjections({
+    queryProjection,
+    selectProjection: buildProjectionFromSelect({
+      adapter: this,
+      fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
+      select,
+    }),
   })
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
@@ -66,11 +88,7 @@ export const findVersions: FindVersions = async function findVersions(
     options,
     page,
     pagination,
-    projection: buildProjectionFromSelect({
-      adapter: this,
-      fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
-      select,
-    }),
+    projection,
     sort,
     useEstimatedCount,
   }
@@ -91,7 +109,7 @@ export const findVersions: FindVersions = async function findVersions(
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
-          ...options,
+          ...(options as CountOptions),
           hint: { _id: 1 },
         }),
       )
@@ -109,7 +127,24 @@ export const findVersions: FindVersions = async function findVersions(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  let result: AggregatePaginateResult<unknown>
+
+  if (pipeline.length) {
+    pipeline.push({ $sort: { createdAt: -1 } })
+
+    if (limit) {
+      pipeline.push({ $limit: limit })
+    }
+
+    if (Object.keys(projection).length > 0) {
+      pipeline.push({ $project: projection })
+    }
+
+    result = await Model.aggregatePaginate(Model.aggregate(pipeline), paginationOptions)
+  } else {
+    result = await Model.paginate(query, paginationOptions)
+  }
+
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {

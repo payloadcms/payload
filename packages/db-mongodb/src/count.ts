@@ -1,4 +1,4 @@
-import type { CountOptions } from 'mongodb'
+import type { AggregateOptions, PipelineStage, QueryOptions } from 'mongoose'
 import type { Count, PayloadRequest } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
@@ -12,7 +12,7 @@ export const count: Count = async function count(
   { collection, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
-  const options: CountOptions = await withSession(this, req)
+  const options: AggregateOptions & QueryOptions = await withSession(this, req)
 
   let hasNearConstraint = false
 
@@ -21,9 +21,13 @@ export const count: Count = async function count(
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
+  const pipeline: PipelineStage[] = []
+
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
+    pipeline,
+    session: options.session,
     where,
   })
 
@@ -37,6 +41,19 @@ export const count: Count = async function count(
     // the correct indexed field
     options.hint = {
       _id: 1,
+    }
+  }
+
+  if (pipeline.length) {
+    pipeline.push({ $match: query })
+    pipeline.push({
+      $count: 'count',
+    })
+
+    const result = await Model.aggregate(pipeline, options)
+
+    return {
+      totalDocs: result.length > 0 ? result[0].count : 0,
     }
   }
 

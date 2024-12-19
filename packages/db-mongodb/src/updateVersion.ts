@@ -47,6 +47,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
   const query = await VersionModel.buildQuery({
     locale,
     payload: this.payload,
+    session: options.session,
     where: whereToUse,
   })
 
