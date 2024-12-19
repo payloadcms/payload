@@ -5,6 +5,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   addImport,
   column,
   locales,
+  tableKey,
 }) => {
   let columnBuilderFn: string = column.type
 
@@ -97,15 +98,26 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
 
     if (column.type === 'jsonb' || column.type === 'geometry') {
       sanitizedDefault = `'${JSON.stringify(column.default)}'`
-    } else if (typeof column.default === 'string' || column.type === 'numeric') {
+    } else if (typeof column.default === 'string') {
       sanitizedDefault = JSON.stringify(column.default)
+    } else if (column.type === 'numeric') {
+      sanitizedDefault = `'${column.default}'`
     }
 
     code = `${code}.default(${sanitizedDefault})`
   }
 
   if (column.reference) {
-    code = `${code}.references(() => ${column.reference.table}.${column.reference.name}, {
+    let callback = `()`
+
+    if (column.reference.table === tableKey) {
+      addImport(`${adapter.packageName}/drizzle/sqlite-core`, 'type AnySQLiteColumn')
+      callback = `${callback}: AnySQLiteColumn`
+    }
+
+    callback = `${callback} => ${column.reference.table}.${column.reference.name}`
+
+    code = `${code}.references(${callback}, {
       ${column.reference.onDelete ? `onDelete: '${column.reference.onDelete}'` : ''}
   })`
   }

@@ -164,6 +164,7 @@ ${Object.entries(table.columns)
         locales: this.payload.config.localization
           ? this.payload.config.localization.localeCodes
           : undefined,
+        tableKey: tableName,
       })},`,
   )
   .join('\n')}

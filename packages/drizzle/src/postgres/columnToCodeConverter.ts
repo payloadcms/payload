@@ -1,16 +1,16 @@
 import type { ColumnToCodeConverter } from '../types.js'
-
 export const columnToCodeConverter: ColumnToCodeConverter = ({
   adapter,
   addEnum,
   addImport,
   column,
+  tableKey,
 }) => {
   let columnBuilderFn: string = column.type
 
   if (column.type === 'geometry') {
     columnBuilderFn = 'geometryColumn'
-    addImport(`@payloadcms/drizzle/postgres`, columnBuilderFn)
+    addImport(adapter.packageName, columnBuilderFn)
   } else if (column.type === 'enum') {
     if ('locale' in column) {
       columnBuilderFn = `enum__locales`
@@ -76,7 +76,16 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   }
 
   if (column.reference) {
-    code = `${code}.references(() => ${column.reference.table}.${column.reference.name}, {
+    let callback = `()`
+
+    if (column.reference.table === tableKey) {
+      addImport(`${adapter.packageName}/drizzle/pg-core`, 'type AnyPgColumn')
+      callback = `${callback}: AnyPgColumn`
+    }
+
+    callback = `${callback} => ${column.reference.table}.${column.reference.name}`
+
+    code = `${code}.references(${callback}, {
       ${column.reference.onDelete ? `onDelete: '${column.reference.onDelete}'` : ''}
   })`
   }

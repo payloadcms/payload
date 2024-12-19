@@ -292,6 +292,7 @@ export type ColumnToCodeConverter = (args: {
   addImport: (from: string, name: string) => void
   column: RawColumn
   locales?: string[]
+  tableKey: string
 }) => string
 
 export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args: {

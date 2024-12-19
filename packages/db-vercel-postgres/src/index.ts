@@ -199,4 +199,5 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
 }
 
 export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
+export { geometryColumn } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'
