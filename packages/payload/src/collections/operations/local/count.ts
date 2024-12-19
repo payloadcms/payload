@@ -13,6 +13,7 @@ export type Options<TSlug extends CollectionSlug> = {
   context?: RequestContext
   depth?: number
   disableErrors?: boolean
+  draft?: boolean
   locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequest
@@ -25,7 +26,7 @@ export default async function countLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<{ totalDocs: number }> {
-  const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
+  const { collection: collectionSlug, disableErrors, draft, overrideAccess = true, where } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -38,6 +39,7 @@ export default async function countLocal<TSlug extends CollectionSlug>(
   return countOperation<TSlug>({
     collection,
     disableErrors,
+    draft,
     overrideAccess,
     req: await createLocalReq(options, payload),
     where,

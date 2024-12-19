@@ -75,6 +75,18 @@ describe('collections-rest', () => {
       expect(result).toEqual({ totalDocs: 2 })
     })
 
+    it('should count drafts', async () => {
+      await payload.create({ collection: 'drafts', data: { name: 'a' }, draft: true })
+      await payload.create({ collection: 'drafts', data: { name: 'b' }, draft: true })
+      const response = await restClient.GET(`/drafts/count`, {
+        query: { where: { name: { equals: 'b' } }, draft: true },
+      })
+      const result = await response.json()
+
+      expect(response.status).toEqual(200)
+      expect(result).toEqual({ totalDocs: 1 })
+    })
+
     it('should find where id', async () => {
       const post1 = await createPost()
       await createPost()

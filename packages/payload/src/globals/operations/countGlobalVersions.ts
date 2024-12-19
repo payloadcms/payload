@@ -4,16 +4,14 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
-import {
-  buildVersionGlobalFields,
-  type GlobalSlug,
-  type SanitizedGlobalConfig,
-} from '../../index.js'
+import { buildVersionGlobalFields } from '../../index.js'
+import { type GlobalSlug, type SanitizedGlobalConfig, type TypedLocale } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
   disableErrors?: boolean
   global: SanitizedGlobalConfig
+  locale?: TypedLocale
   overrideAccess?: boolean
   req?: PayloadRequest
   where?: Where
@@ -26,6 +24,7 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
     const {
       disableErrors,
       global,
+      locale,
       overrideAccess,
       req: { payload },
       req,
@@ -63,6 +62,7 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
 
     const result = await payload.db.countGlobalVersions({
       global: global.slug,
+      locale,
       req,
       where: fullWhere,
     })
