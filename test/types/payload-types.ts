@@ -12,14 +12,26 @@ export interface Config {
   };
   collections: {
     posts: Post;
+    relationships: Relationship;
+    'relationships-to-joins': RelationshipsToJoin;
+    joins: Join;
+    'relationships-deep': RelationshipsDeep;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    joins: {
+      relatedRelations: 'relationships-to-joins';
+    };
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
+    relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
+    'relationships-to-joins': RelationshipsToJoinsSelect<false> | RelationshipsToJoinsSelect<true>;
+    joins: JoinsSelect<false> | JoinsSelect<true>;
+    'relationships-deep': RelationshipsDeepSelect<false> | RelationshipsDeepSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -41,6 +53,15 @@ export interface Config {
   jobs: {
     tasks: unknown;
     workflows: unknown;
+  };
+  depth: {
+    allowed: 0 | 1 | 2 | 3 | 4 | 5;
+    /**
+     * @minItems 6
+     * @maxItems 6
+     */
+    decremented: [null, 0, 1, 2, 3, 4];
+    default: 0;
   };
 }
 export interface UserAuthOperations {
@@ -70,6 +91,61 @@ export interface Post {
   text?: string | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'posts';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships".
+ */
+export interface Relationship {
+  id: string;
+  one: string | Post;
+  oneOptional?: (string | null) | Post;
+  many: (string | Post)[];
+  manyOptional?: (string | Post)[] | null;
+  onePoly:
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }
+    | {
+        relationTo: 'users';
+        value: string | User;
+      };
+  onePolyOptional?:
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  manyPoly: (
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+  )[];
+  manyPolyOptional?:
+    | (
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+        | {
+            relationTo: 'users';
+            value: string | User;
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  __collection?: 'relationships';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -87,6 +163,68 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+  __collection?: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-to-joins".
+ */
+export interface RelationshipsToJoin {
+  id: string;
+  join: string | Join;
+  updatedAt: string;
+  createdAt: string;
+  __collection?: 'relationships-to-joins';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "joins".
+ */
+export interface Join {
+  id: string;
+  relatedRelations?: {
+    docs?: (string | RelationshipsToJoin)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  __collection?: 'joins';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-deep".
+ */
+export interface RelationshipsDeep {
+  id: string;
+  depthTwoOne: string | Relationship;
+  group?: {
+    blocks?:
+      | (
+          | {
+              oneFirst: string | Post;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'first';
+            }
+          | {
+              oneSecond: string | Post;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'second';
+            }
+        )[]
+      | null;
+    array?:
+      | {
+          one: string | Post;
+          many: (string | Post)[];
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  __collection?: 'relationships-deep';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -100,6 +238,22 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'relationships';
+        value: string | Relationship;
+      } | null)
+    | ({
+        relationTo: 'relationships-to-joins';
+        value: string | RelationshipsToJoin;
+      } | null)
+    | ({
+        relationTo: 'joins';
+        value: string | Join;
+      } | null)
+    | ({
+        relationTo: 'relationships-deep';
+        value: string | RelationshipsDeep;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -110,6 +264,7 @@ export interface PayloadLockedDocument {
   };
   updatedAt: string;
   createdAt: string;
+  __collection?: 'payload-locked-documents';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -133,6 +288,7 @@ export interface PayloadPreference {
     | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'payload-preferences';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -144,6 +300,7 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+  __collection?: 'payload-migrations';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -151,6 +308,78 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships_select".
+ */
+export interface RelationshipsSelect<T extends boolean = true> {
+  one?: T;
+  oneOptional?: T;
+  many?: T;
+  manyOptional?: T;
+  onePoly?: T;
+  onePolyOptional?: T;
+  manyPoly?: T;
+  manyPolyOptional?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-to-joins_select".
+ */
+export interface RelationshipsToJoinsSelect<T extends boolean = true> {
+  join?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "joins_select".
+ */
+export interface JoinsSelect<T extends boolean = true> {
+  relatedRelations?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-deep_select".
+ */
+export interface RelationshipsDeepSelect<T extends boolean = true> {
+  depthTwoOne?: T;
+  group?:
+    | T
+    | {
+        blocks?:
+          | T
+          | {
+              first?:
+                | T
+                | {
+                    oneFirst?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              second?:
+                | T
+                | {
+                    oneSecond?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+        array?:
+          | T
+          | {
+              one?: T;
+              many?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -210,6 +439,7 @@ export interface Menu {
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+  __collection?: 'menu';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
