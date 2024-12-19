@@ -290,6 +290,25 @@ export default buildConfigWithDefaults({
           name: 'polymorphic',
           relationTo: ['movies'],
         },
+        {
+          type: 'relationship',
+          name: 'polymorphicLocalized',
+          relationTo: ['movies'],
+          localized: true,
+        },
+        {
+          type: 'relationship',
+          name: 'polymorphicMany',
+          hasMany: true,
+          relationTo: ['movies'],
+        },
+        {
+          type: 'relationship',
+          hasMany: true,
+          name: 'polymorphicManyLocalized',
+          localized: true,
+          relationTo: ['movies'],
+        },
       ],
     },
     {
