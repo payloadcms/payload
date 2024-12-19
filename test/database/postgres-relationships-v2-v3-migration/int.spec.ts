@@ -1,3 +1,4 @@
+/* eslint-disable jest/require-top-level-describe */
 import path from 'path'
 import { buildConfig, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
@@ -5,45 +6,47 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-if (process.env.PAYLOAD_DATABASE.includes('postgres')) {
-  describe('Postgres relationships v2-v3 migration', () => {
-    it('should execute relationships v2-v3 migration', async () => {
-      const { databaseAdapter } = await import(path.resolve(dirname, '../../databaseAdapter.js'))
+const describe = process.env.PAYLOAD_DATABASE.includes('postgres')
+  ? global.describe
+  : global.describe.skip
 
-      const init = databaseAdapter.init
+describe('Postgres relationships v2-v3 migration', () => {
+  it('should execute relationships v2-v3 migration', async () => {
+    const { databaseAdapter } = await import(path.resolve(dirname, '../../databaseAdapter.js'))
 
-      // set options
-      databaseAdapter.init = ({ payload }) => {
-        const adapter = init({ payload })
-        adapter.migrationDir = path.resolve(dirname, 'migrations')
-        adapter.push = false
-        return adapter
-      }
+    const init = databaseAdapter.init
 
-      const config = await buildConfig({
-        db: databaseAdapter,
-        secret: 'secret',
-        collections: [
-          {
-            slug: 'users',
-            auth: true,
-            fields: [],
-          },
-        ],
-      })
+    // set options
+    databaseAdapter.init = ({ payload }) => {
+      const adapter = init({ payload })
+      adapter.migrationDir = path.resolve(dirname, 'migrations')
+      adapter.push = false
+      return adapter
+    }
 
-      const payload = await getPayload({ config })
-
-      let hasErr = false
-
-      await payload.db.migrate().catch(() => {
-        hasErr = true
-      })
-
-      expect(hasErr).toBeFalsy()
-
-      await payload.db.dropDatabase({ adapter: payload.db as any })
-      await payload.db.destroy()
+    const config = await buildConfig({
+      db: databaseAdapter,
+      secret: 'secret',
+      collections: [
+        {
+          slug: 'users',
+          auth: true,
+          fields: [],
+        },
+      ],
     })
+
+    const payload = await getPayload({ config })
+
+    let hasErr = false
+
+    await payload.db.migrate().catch(() => {
+      hasErr = true
+    })
+
+    expect(hasErr).toBeFalsy()
+
+    await payload.db.dropDatabase({ adapter: payload.db as any })
+    await payload.db.destroy()
   })
-}
+})
