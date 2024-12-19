@@ -185,6 +185,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const handleUrlSubmit = async () => {
     if (fileUrl) {
       setUploadInProgress(true)
+      if (typeof onUploadStatusChange === 'function') {
+        onUploadStatusChange(true)
+      }
       try {
         const response = await fetch(fileUrl)
         const data = await response.blob()
@@ -199,15 +202,12 @@ export const Upload: React.FC<UploadProps> = (props) => {
         toast.error(e.message)
       } finally {
         setUploadInProgress(false)
+        if (typeof onUploadStatusChange === 'function') {
+          onUploadStatusChange(false)
+        }
       }
     }
   }
-
-  useEffect(() => {
-    if (typeof onUploadStatusChange === 'function') {
-      onUploadStatusChange(uploadInProgress)
-    }
-  }, [uploadInProgress, onUploadStatusChange])
 
   useEffect(() => {
     if (initialState?.file?.value instanceof File) {
