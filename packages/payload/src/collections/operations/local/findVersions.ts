@@ -37,7 +37,7 @@ export type Options<TSlug extends CollectionSlug, TDepth extends AllowedDepth = 
   overrideAccess?: boolean
   page?: number
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort

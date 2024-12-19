@@ -39,7 +39,7 @@ export type BaseOptions<
   overrideAccess?: boolean
   overrideLock?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: TSelect
   showHiddenFields?: boolean
   user?: Document

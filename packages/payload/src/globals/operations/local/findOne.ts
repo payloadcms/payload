@@ -33,7 +33,7 @@ export type Options<
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: TSelect
   showHiddenFields?: boolean
   slug: TSlug

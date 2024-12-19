@@ -1,7 +1,6 @@
-import type { PayloadRequest } from 'payload'
-
 import {
   commitTransaction,
+  createLocalReq,
   getMigrations,
   initTransaction,
   killTransaction,
@@ -10,6 +9,7 @@ import {
 
 import type { DrizzleAdapter } from './types.js'
 
+import { getTransaction } from './utilities/getTransaction.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'
 
@@ -33,7 +33,7 @@ export async function migrateRefresh(this: DrizzleAdapter) {
     msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  const req = { payload } as PayloadRequest
+  const req = await createLocalReq({}, payload)
 
   // Reverse order of migrations to rollback
   existingMigrations.reverse()
@@ -48,7 +48,7 @@ export async function migrateRefresh(this: DrizzleAdapter) {
       payload.logger.info({ msg: `Migrating down: ${migration.name}` })
       const start = Date.now()
       await initTransaction(req)
-      const db = this.sessions[await req.transactionID]?.db || this.drizzle
+      const db = await getTransaction(this, req)
       await migrationFile.down({ db, payload, req })
       payload.logger.info({
         msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)`,

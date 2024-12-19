@@ -13,7 +13,7 @@ export const esTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Para empezar, crea tu primer usuario.',
     changePassword: 'Cambiar contraseña',
     checkYourEmailForPasswordReset:
-      'Revisa tu correo con el enlace para restablecer tu contraseña de forma segura.',
+      'Si la dirección de correo electrónico está asociada con una cuenta, recibirá instrucciones para restablecer su contraseña en breve. Por favor, revise su carpeta de spam o correo no deseado si no ve el correo electrónico en su bandeja de entrada.',
     confirmGeneration: 'Confirmar Generación',
     confirmPassword: 'Confirmar Contraseña',
     createFirstUser: 'Crear al primer usuario',

@@ -27,7 +27,7 @@ export type Options<TSlug extends GlobalSlug, TDepth extends AllowedDepth = Defa
   locale?: TypedLocale
   overrideAccess?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   showHiddenFields?: boolean
   slug: TSlug
   user?: Document

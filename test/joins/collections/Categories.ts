@@ -91,6 +91,9 @@ export const Categories: CollectionConfig = {
           type: 'join',
           collection: postsSlug,
           on: 'group.category',
+          admin: {
+            defaultColumns: ['id', 'createdAt', 'title'],
+          },
         },
         {
           name: 'camelCasePosts',
@@ -99,6 +102,18 @@ export const Categories: CollectionConfig = {
           on: 'group.camelCaseCategory',
         },
       ],
+    },
+    {
+      name: 'arrayPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'array.category',
+    },
+    {
+      name: 'blocksPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'blocks.category',
     },
     {
       name: 'singulars',

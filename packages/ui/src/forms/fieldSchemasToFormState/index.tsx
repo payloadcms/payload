@@ -84,6 +84,7 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormState> =>
       data: dataWithDefaultValues,
       fields,
       locale: req.locale,
+      req,
       siblingData: dataWithDefaultValues,
       user: req.user,
     })

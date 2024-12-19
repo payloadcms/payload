@@ -69,5 +69,32 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: categoriesSlug,
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'category',
+              type: 'relationship',
+              relationTo: categoriesSlug,
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

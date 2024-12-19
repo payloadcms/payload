@@ -38,7 +38,9 @@ export type Args = {
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
   client: Config
-  idType?: 'serial' | 'uuid'
+  /** Generated schema from payload generate:db-schema file path */
+  generateSchemaOutputFile?: string
+  idType?: 'number' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
@@ -104,10 +106,21 @@ type SQLiteDrizzleAdapter = Omit<
   | 'drizzle'
   | 'dropDatabase'
   | 'execute'
+  | 'idType'
   | 'insert'
   | 'operators'
   | 'relations'
 >
+
+export interface GeneratedDatabaseSchema {
+  schemaUntyped: Record<string, unknown>
+}
+
+type ResolveSchemaType<T> = 'schema' extends keyof T
+  ? T['schema']
+  : GeneratedDatabaseSchema['schemaUntyped']
+
+type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 
 export type SQLiteAdapter = {
   afterSchemaInit: SQLiteSchemaHook[]
@@ -117,9 +130,7 @@ export type SQLiteAdapter = {
   countDistinct: CountDistinct
   defaultDrizzleSnapshot: any
   deleteWhere: DeleteWhere
-  drizzle: { $client: Client } & LibSQLDatabase<
-    Record<string, GenericRelation | GenericTable> & Record<string, unknown>
-  >
+  drizzle: Drizzle
   dropDatabase: DropDatabase
   execute: Execute<unknown>
   /**
@@ -165,7 +176,7 @@ export type MigrateUpArgs = {
    * }
    * ```
    */
-  db: LibSQLDatabase
+  db: Drizzle
   /**
    * The Payload instance that you can use to execute Local API methods
    * To use the current transaction you must pass `req` to arguments
@@ -196,7 +207,7 @@ export type MigrateDownArgs = {
    * }
    * ```
    */
-  db: LibSQLDatabase
+  db: Drizzle
   /**
    * The Payload instance that you can use to execute Local API methods
    * To use the current transaction you must pass `req` to arguments
@@ -221,7 +232,7 @@ declare module 'payload' {
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
     beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
-    drizzle: LibSQLDatabase
+    drizzle: Drizzle
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
      * Used for returning properly formed errors from unique fields

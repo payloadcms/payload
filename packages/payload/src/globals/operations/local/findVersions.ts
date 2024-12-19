@@ -33,7 +33,7 @@ export type Options<TSlug extends GlobalSlug, TDepth extends AllowedDepth = Defa
   overrideAccess?: boolean
   page?: number
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   showHiddenFields?: boolean
   slug: TSlug

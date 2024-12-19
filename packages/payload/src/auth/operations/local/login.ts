@@ -22,7 +22,7 @@ export type Options<TSlug extends CollectionSlug, TDepth extends AllowedDepth = 
   fallbackLocale?: string
   locale?: string
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   showHiddenFields?: boolean
 }
 

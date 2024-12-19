@@ -1,4 +1,3 @@
-/* eslint-disable react/button-has-type */
 import type { ButtonProps } from '@/components/ui/button'
 
 import { buttonVariants } from '@/components/ui/button'
