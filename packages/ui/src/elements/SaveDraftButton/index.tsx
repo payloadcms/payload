@@ -33,7 +33,7 @@ export const SaveDraftButton: React.FC<{ uploadInProgress?: boolean }> = ({ uplo
   const forceDisable = operation === 'update' && !modified
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) {
+    if (forceDisable || uploadInProgress) {
       return
     }
 
@@ -72,6 +72,7 @@ export const SaveDraftButton: React.FC<{ uploadInProgress?: boolean }> = ({ uplo
     id,
     forceDisable,
     setUnpublishedVersionCount,
+    uploadInProgress,
   ])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {

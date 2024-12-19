@@ -92,6 +92,10 @@ export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolea
   })
 
   const publish = useCallback(() => {
+    if (uploadInProgress) {
+      return
+    }
+
     void submit({
       overrides: {
         _status: 'published',
@@ -100,10 +104,14 @@ export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolea
 
     setUnpublishedVersionCount(0)
     setHasPublishedDoc(true)
-  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount])
+  }, [setHasPublishedDoc, submit, uploadInProgress, setUnpublishedVersionCount])
 
   const publishSpecificLocale = useCallback(
     (locale) => {
+      if (uploadInProgress) {
+        return
+      }
+
       const params = qs.stringify({
         publishSpecificLocale: locale,
       })
@@ -121,7 +129,7 @@ export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolea
 
       setHasPublishedDoc(true)
     },
-    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit],
+    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadInProgress],
   )
 
   if (!hasPublishPermission) {
