@@ -79,6 +79,7 @@ export const allDatabaseAdapters = {
 export function generateDatabaseAdapter(dbAdapter) {
   const databaseAdapter = allDatabaseAdapters[dbAdapter]
   if (!databaseAdapter) {
+    console.log({ dbAdapter })
     throw new Error(`Unknown database adapter: ${dbAdapter}`)
   }
   fs.writeFileSync(
@@ -92,4 +93,12 @@ export function generateDatabaseAdapter(dbAdapter) {
 
   console.log('Wrote', dbAdapter, 'db adapter')
   return databaseAdapter
+}
+
+// Run if called directly. Used in test suite build: pnpm build:tests
+if (import.meta.url === `file://${filename}`) {
+  const writeDefaultAdapter = process.argv.find((arg) => arg === '--writeDefaultAdapter')
+  if (writeDefaultAdapter) {
+    generateDatabaseAdapter('mongodb')
+  }
 }
