@@ -25,6 +25,7 @@ type Props = {
   context: {
     clientFieldSchemaMap: ClientFieldSchemaMap
     collectionSlug: string
+    documentData?: any
     field: RichTextField
     fieldSchemaMap: FieldSchemaMap
     id?: number | string
@@ -75,6 +76,7 @@ export async function buildInitialState({
         data: blockNode.fields,
         fields: (context.fieldSchemaMap.get(schemaFieldsPath) as any)?.fields,
         fieldSchemaMap: context.fieldSchemaMap,
+        fullDataOverride: context.documentData,
         operation: context.operation as any, // TODO: Type
         permissions: true,
         preferences: context.preferences,

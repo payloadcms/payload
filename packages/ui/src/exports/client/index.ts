@@ -175,6 +175,7 @@ export { fieldBaseClass } from '../../fields/shared/index.js'
 
 export {
   useAllFormFields,
+  useDocumentForm,
   useForm,
   useFormFields,
   useFormInitializing,
