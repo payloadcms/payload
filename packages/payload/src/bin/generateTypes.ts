@@ -1,3 +1,4 @@
+import { initI18n } from '@payloadcms/translations'
 import fs from 'fs'
 import { compile } from 'json-schema-to-typescript'
 
@@ -19,8 +20,9 @@ export async function generateTypes(
   if (shouldLog) {
     logger.info('Compiling TS types for Collections and Globals...')
   }
+  const i18n = await initI18n({ config: config.i18n, context: 'api', language: 'en' })
 
-  const jsonSchema = configToJSONSchema(config, config.db.defaultIDType)
+  const jsonSchema = configToJSONSchema(config, config.db.defaultIDType, i18n)
 
   const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n}`
   const declareWithTSIgnoreError = `declare module 'payload' {\n  // @ts-ignore \n  export interface GeneratedTypes extends Config {}\n}`

@@ -107,6 +107,9 @@ export interface User {
 export interface Product {
   id: string;
   name?: string | null;
+  /**
+   * All pricing information is managed in Stripe and will be reflected here.
+   */
   price?: {
     stripePriceID?: string | null;
     stripeJSON?: string | null;
@@ -123,6 +126,9 @@ export interface Product {
 export interface Customer {
   id: string;
   name?: string | null;
+  /**
+   * All subscriptions are managed in Stripe and will be reflected here. Use the link in the sidebar to go directly to this customer in Stripe to begin managing their subscriptions.
+   */
   subscriptions?:
     | {
         stripeSubscriptionID?: string | null;
