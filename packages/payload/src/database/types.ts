@@ -70,6 +70,8 @@ export interface BaseDatabaseAdapter {
 
   findVersions: FindVersions
 
+  generateSchema?: GenerateSchema
+
   /**
    * Perform startup tasks required to interact with the database such as building Schema and models
    */
@@ -89,16 +91,15 @@ export interface BaseDatabaseAdapter {
    * Drop the current database and run all migrate up functions
    */
   migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
-
   /**
    * Run all migration down functions before running up
    */
   migrateRefresh: () => Promise<void>
+
   /**
    * Run all migrate down functions
    */
   migrateReset: () => Promise<void>
-
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
@@ -111,6 +112,7 @@ export interface BaseDatabaseAdapter {
    * The name of the database adapter
    */
   name: string
+
   /**
    * Full package name of the database adapter
    *
@@ -122,12 +124,12 @@ export interface BaseDatabaseAdapter {
    * reference to the instance of payload
    */
   payload: Payload
-
   queryDrafts: QueryDrafts
   /**
    * Abort any changes since the start of the transaction.
    */
   rollbackTransaction: RollbackTransaction
+
   /**
    * A key-value store of all sessions open (used for transactions)
    */
@@ -521,3 +523,11 @@ export type MigrationTemplateArgs = {
   packageName?: string
   upSQL?: string
 }
+
+export type GenerateSchemaArgs = {
+  log?: boolean
+  outputFile?: string
+  prettify?: boolean
+}
+
+export type GenerateSchema = (args?: GenerateSchemaArgs) => Promise<void>

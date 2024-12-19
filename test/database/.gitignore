@@ -1,1 +1,2 @@
 migrations
+*.generated-schema.ts

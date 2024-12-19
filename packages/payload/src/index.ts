@@ -1050,6 +1050,7 @@ export type {
   FindOneArgs,
   FindVersions,
   FindVersionsArgs,
+  GenerateSchema,
   Init,
   Migration,
   MigrationData,

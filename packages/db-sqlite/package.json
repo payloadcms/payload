@@ -33,6 +33,26 @@
       "import": "./src/exports/migration-utils.ts",
       "require": "./src/exports/migration-utils.ts",
       "types": "./src/exports/migration-utils.ts"
+    },
+    "./drizzle": {
+      "import": "./src/drizzle-proxy/index.ts",
+      "types": "./src/drizzle-proxy/index.ts",
+      "default": "./src/drizzle-proxy/index.ts"
+    },
+    "./drizzle/sqlite-core": {
+      "import": "./src/drizzle-proxy/sqlite-core.ts",
+      "types": "./src/drizzle-proxy/sqlite-core.ts",
+      "default": "./src/drizzle-proxy/sqlite-core.ts"
+    },
+    "./drizzle/libsql": {
+      "import": "./src/drizzle-proxy/libsql.ts",
+      "types": "./src/drizzle-proxy/libsql.ts",
+      "default": "./src/drizzle-proxy/libsql.ts"
+    },
+    "./drizzle/relations": {
+      "import": "./src/drizzle-proxy/relations.ts",
+      "types": "./src/drizzle-proxy/relations.ts",
+      "default": "./src/drizzle-proxy/relations.ts"
     }
   },
   "main": "./src/index.ts",
@@ -86,6 +106,26 @@
         "import": "./dist/exports/migration-utils.js",
         "require": "./dist/exports/migration-utils.js",
         "types": "./dist/exports/migration-utils.d.ts"
+      },
+      "./drizzle": {
+        "import": "./dist/drizzle-proxy/index.js",
+        "types": "./dist/drizzle-proxy/index.d.ts",
+        "default": "./dist/drizzle-proxy/index.js"
+      },
+      "./drizzle/sqlite-core": {
+        "import": "./dist/drizzle-proxy/sqlite-core.js",
+        "types": "./dist/drizzle-proxy/sqlite-core.d.ts",
+        "default": "./dist/drizzle-proxy/sqlite-core.js"
+      },
+      "./drizzle/libsql": {
+        "import": "./dist/drizzle-proxy/libsql.js",
+        "types": "./dist/drizzle-proxy/libsql.d.ts",
+        "default": "./dist/drizzle-proxy/libsql.js"
+      },
+      "./drizzle/relations": {
+        "import": "./dist/drizzle-proxy/relations.js",
+        "types": "./dist/drizzle-proxy/relations.d.ts",
+        "default": "./dist/drizzle-proxy/relations.js"
       }
     },
     "main": "./dist/index.js",
