@@ -1,0 +1,58 @@
+@import '@payloadcms/ui/scss';
+
+.container {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.label {
+  @extend %body;
+  display: flex;
+  padding-bottom: base(0.25);
+  color: var(--theme-elevation-800);
+  font-family: var(--font-body);
+
+  .required {
+    color: var(--theme-error-500);
+    [dir='ltr'] & {
+      margin-left: base(0.25);
+      margin-right: auto;
+    }
+    [dir='rtl'] & {
+      margin-right: base(0.25);
+      margin-left: auto;
+    }
+  }
+}
+
+.fieldItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  input {
+    margin-top: 0;
+  }
+}
+
+.groupLabel {
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.groupItems {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.groupsContainer {
+  display: flex;
+  column-gap: 4rem;
+  row-gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.requiredIndicator {
+  color: var(--theme-error-500);
+}
