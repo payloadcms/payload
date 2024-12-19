@@ -83,7 +83,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {};
   globalsSelect: {};
@@ -119,69 +119,69 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title?: string | null;
   isFiltered?: boolean | null;
   restrictedField?: string | null;
-  upload?: (number | null) | Upload;
-  category?: (number | null) | Category;
-  categories?: (number | Category)[] | null;
-  categoriesLocalized?: (number | Category)[] | null;
+  upload?: (string | null) | Upload;
+  category?: (string | null) | Category;
+  categories?: (string | Category)[] | null;
+  categoriesLocalized?: (string | Category)[] | null;
   polymorphic?:
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   polymorphics?:
     | (
         | {
             relationTo: 'categories';
-            value: number | Category;
+            value: string | Category;
           }
         | {
             relationTo: 'users';
-            value: number | User;
+            value: string | User;
           }
       )[]
     | null;
   localizedPolymorphic?:
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   localizedPolymorphics?:
     | (
         | {
             relationTo: 'categories';
-            value: number | Category;
+            value: string | Category;
           }
         | {
             relationTo: 'users';
-            value: number | User;
+            value: string | User;
           }
       )[]
     | null;
   group?: {
-    category?: (number | null) | Category;
-    camelCaseCategory?: (number | null) | Category;
+    category?: (string | null) | Category;
+    camelCaseCategory?: (string | null) | Category;
   };
   array?:
     | {
-        category?: (number | null) | Category;
+        category?: (string | null) | Category;
         id?: string | null;
       }[]
     | null;
   blocks?:
     | {
-        category?: (number | null) | Category;
+        category?: (string | null) | Category;
         id?: string | null;
         blockName?: string | null;
         blockType: 'block';
@@ -195,9 +195,9 @@ export interface Post {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: number;
+  id: string;
   relatedPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -217,64 +217,64 @@ export interface Upload {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
+  id: string;
   name?: string | null;
   relatedPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   hasManyPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   hasManyPostsLocalized?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   hiddenPosts?: {
-    docs?: (number | HiddenPost)[] | null;
+    docs?: (string | HiddenPost)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   group?: {
     relatedPosts?: {
-      docs?: (number | Post)[] | null;
+      docs?: (string | Post)[] | null;
       hasNextPage?: boolean | null;
     } | null;
     camelCasePosts?: {
-      docs?: (number | Post)[] | null;
+      docs?: (string | Post)[] | null;
       hasNextPage?: boolean | null;
     } | null;
   };
   arrayPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   blocksPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   polymorphic?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   polymorphics?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   localizedPolymorphic?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   localizedPolymorphics?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   singulars?: {
-    docs?: (number | Singular)[] | null;
+    docs?: (string | Singular)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   filtered?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -285,9 +285,9 @@ export interface Category {
  * via the `definition` "hidden-posts".
  */
 export interface HiddenPost {
-  id: number;
+  id: string;
   title?: string | null;
-  category?: (number | null) | Category;
+  category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -296,8 +296,8 @@ export interface HiddenPost {
  * via the `definition` "singular".
  */
 export interface Singular {
-  id: number;
-  category?: (number | null) | Category;
+  id: string;
+  category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -306,7 +306,7 @@ export interface Singular {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -323,10 +323,10 @@ export interface User {
  * via the `definition` "versions".
  */
 export interface Version {
-  id: number;
-  category?: (number | null) | Category;
-  categoryVersion?: (number | null) | CategoriesVersion;
-  categoryVersions?: (number | CategoriesVersion)[] | null;
+  id: string;
+  category?: (string | null) | Category;
+  categoryVersion?: (string | null) | CategoriesVersion;
+  categoryVersions?: (string | CategoriesVersion)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -336,13 +336,13 @@ export interface Version {
  * via the `definition` "categories-versions".
  */
 export interface CategoriesVersion {
-  id: number;
+  id: string;
   relatedVersions?: {
-    docs?: (number | Version)[] | null;
+    docs?: (string | Version)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   relatedVersionsMany?: {
-    docs?: (number | Version)[] | null;
+    docs?: (string | Version)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -354,9 +354,9 @@ export interface CategoriesVersion {
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
-  id: number;
+  id: string;
   title?: string | null;
-  category?: (number | null) | LocalizedCategory;
+  category?: (string | null) | LocalizedCategory;
   updatedAt: string;
   createdAt: string;
 }
@@ -365,10 +365,10 @@ export interface LocalizedPost {
  * via the `definition` "localized-categories".
  */
 export interface LocalizedCategory {
-  id: number;
+  id: string;
   name?: string | null;
   relatedPosts?: {
-    docs?: (number | LocalizedPost)[] | null;
+    docs?: (string | LocalizedPost)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -379,10 +379,10 @@ export interface LocalizedCategory {
  * via the `definition` "restricted-categories".
  */
 export interface RestrictedCategory {
-  id: number;
+  id: string;
   name?: string | null;
   restrictedPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -393,10 +393,10 @@ export interface RestrictedCategory {
  * via the `definition` "categories-join-restricted".
  */
 export interface CategoriesJoinRestricted {
-  id: number;
+  id: string;
   name?: string | null;
   collectionRestrictedJoin?: {
-    docs?: (number | CollectionRestricted)[] | null;
+    docs?: (string | CollectionRestricted)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -407,10 +407,10 @@ export interface CategoriesJoinRestricted {
  * via the `definition` "collection-restricted".
  */
 export interface CollectionRestricted {
-  id: number;
+  id: string;
   title?: string | null;
   canRead?: boolean | null;
-  category?: (number | null) | CategoriesJoinRestricted;
+  category?: (string | null) | CategoriesJoinRestricted;
   updatedAt: string;
   createdAt: string;
 }
@@ -419,10 +419,10 @@ export interface CollectionRestricted {
  * via the `definition` "restricted-posts".
  */
 export interface RestrictedPost {
-  id: number;
+  id: string;
   title?: string | null;
   restrictedField?: string | null;
-  category?: (number | null) | RestrictedCategory;
+  category?: (string | null) | RestrictedCategory;
   updatedAt: string;
   createdAt: string;
 }
@@ -431,68 +431,68 @@ export interface RestrictedPost {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'hidden-posts';
-        value: number | HiddenPost;
+        value: string | HiddenPost;
       } | null)
     | ({
         relationTo: 'uploads';
-        value: number | Upload;
+        value: string | Upload;
       } | null)
     | ({
         relationTo: 'versions';
-        value: number | Version;
+        value: string | Version;
       } | null)
     | ({
         relationTo: 'categories-versions';
-        value: number | CategoriesVersion;
+        value: string | CategoriesVersion;
       } | null)
     | ({
         relationTo: 'singular';
-        value: number | Singular;
+        value: string | Singular;
       } | null)
     | ({
         relationTo: 'localized-posts';
-        value: number | LocalizedPost;
+        value: string | LocalizedPost;
       } | null)
     | ({
         relationTo: 'localized-categories';
-        value: number | LocalizedCategory;
+        value: string | LocalizedCategory;
       } | null)
     | ({
         relationTo: 'restricted-categories';
-        value: number | RestrictedCategory;
+        value: string | RestrictedCategory;
       } | null)
     | ({
         relationTo: 'categories-join-restricted';
-        value: number | CategoriesJoinRestricted;
+        value: string | CategoriesJoinRestricted;
       } | null)
     | ({
         relationTo: 'restricted-posts';
-        value: number | RestrictedPost;
+        value: string | RestrictedPost;
       } | null)
     | ({
         relationTo: 'collection-restricted';
-        value: number | CollectionRestricted;
+        value: string | CollectionRestricted;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -502,10 +502,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -525,7 +525,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
