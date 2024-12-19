@@ -61,6 +61,8 @@ export { StrikethroughLeaf } from '../../field/leaves/strikethrough/Strikethroug
 export { UnderlineLeafButton } from '../../field/leaves/underline/LeafButton.js'
 export { UnderlineLeaf } from '../../field/leaves/underline/Underline/index.js'
 
+export { useElementButton } from '../../field/providers/ElementButtonProvider.js'
 export { useElement } from '../../field/providers/ElementProvider.js'
+export { useLeafButton } from '../../field/providers/LeafButtonProvider.js'
 export { useLeaf } from '../../field/providers/LeafProvider.js'
 export { useSlatePlugin } from '../../utilities/useSlatePlugin.js'
