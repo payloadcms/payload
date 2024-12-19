@@ -10,7 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -33,6 +33,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
 import {
+  DocumentFormContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -62,6 +63,7 @@ export const Form: React.FC<FormProps> = (props) => {
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
+    isDocumentForm,
     isInitializing: initializingFromProps,
     onChange,
     onSubmit,
@@ -699,6 +701,16 @@ export const Form: React.FC<FormProps> = (props) => {
     },
   )
 
+  const DocumentFormContextComponent: React.FC<any> = isDocumentForm
+    ? DocumentFormContext.Provider
+    : React.Fragment
+
+  const documentFormContextProps = isDocumentForm
+    ? {
+        value: contextRef.current,
+      }
+    : {}
+
   return (
     <form
       action={typeof action === 'function' ? void action : action}
@@ -708,31 +720,34 @@ export const Form: React.FC<FormProps> = (props) => {
       onSubmit={(e) => void contextRef.current.submit({}, e)}
       ref={formRef}
     >
-      <FormContext.Provider value={contextRef.current}>
-        <FormWatchContext.Provider
-          value={{
-            fields,
-            ...contextRef.current,
-          }}
-        >
-          <SubmittedContext.Provider value={submitted}>
-            <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
-              <ProcessingContext.Provider value={processing}>
-                <ModifiedContext.Provider value={modified}>
-                  <FormFieldsContext.Provider value={fieldsReducer}>
-                    {children}
-                  </FormFieldsContext.Provider>
-                </ModifiedContext.Provider>
-              </ProcessingContext.Provider>
-            </InitializingContext.Provider>
-          </SubmittedContext.Provider>
-        </FormWatchContext.Provider>
-      </FormContext.Provider>
+      <DocumentFormContextComponent {...documentFormContextProps}>
+        <FormContext.Provider value={contextRef.current}>
+          <FormWatchContext.Provider
+            value={{
+              fields,
+              ...contextRef.current,
+            }}
+          >
+            <SubmittedContext.Provider value={submitted}>
+              <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
+                <ProcessingContext.Provider value={processing}>
+                  <ModifiedContext.Provider value={modified}>
+                    <FormFieldsContext.Provider value={fieldsReducer}>
+                      {children}
+                    </FormFieldsContext.Provider>
+                  </ModifiedContext.Provider>
+                </ProcessingContext.Provider>
+              </InitializingContext.Provider>
+            </SubmittedContext.Provider>
+          </FormWatchContext.Provider>
+        </FormContext.Provider>
+      </DocumentFormContextComponent>
     </form>
   )
 }
 
 export {
+  DocumentFormContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -740,6 +755,7 @@ export {
   ProcessingContext,
   SubmittedContext,
   useAllFormFields,
+  useDocumentForm,
   useForm,
   useFormFields,
   useFormModified,
