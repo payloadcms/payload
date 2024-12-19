@@ -1,15 +1,15 @@
-import type { FindOne, PayloadRequest } from 'payload'
+import type { FindOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection, joins, locale, req = {} as PayloadRequest, select, where },
+  { collection, joins, locale, req, select, where },
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config

@@ -161,6 +161,7 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
 // Helper functions
 
 async function createContributorSection(commits: GitCommit[]): Promise<string> {
+  console.log('Fetching contributors...')
   const contributors = await getContributors(commits)
   if (!contributors.length) {
     return ''
@@ -179,18 +180,21 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
   const contributors: Contributor[] = []
   const emails = new Set<string>()
 
+  const headers = {
+    Accept: 'application/vnd.github.v3+json',
+    Authorization: `token ${process.env.GITHUB_TOKEN}`,
+  }
+
   for (const commit of commits) {
-    if (emails.has(commit.author.email) || commit.author.name === 'dependabot[bot]') {
+    console.log(`Fetching details for ${commit.message} - ${commit.shortHash}`)
+    if (emails.has(commit.author.email) || commit.author.name.includes('[bot]')) {
       continue
     }
 
     const res = await fetch(
       `https://api.github.com/repos/payloadcms/payload/commits/${commit.shortHash}`,
       {
-        headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${process.env.GITHUB_TOKEN}`,
-        },
+        headers,
       },
     )
 
@@ -202,12 +206,73 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
 
     const { author } = (await res.json()) as { author: { login: string; email: string } }
 
-    // TODO: Handle co-authors
-
     if (!contributors.some((c) => c.username === author.login)) {
       contributors.push({ name: commit.author.name, username: author.login })
     }
     emails.add(author.email)
+
+    // Check git commit for 'Co-authored-by:' lines
+    const coAuthorPattern = /Co-authored-by: (?<name>[^<]+) <(?<email>[^>]+)>/g
+    const coAuthors = Array.from(
+      commit.body.matchAll(coAuthorPattern),
+      (match) => match.groups,
+    ).filter((e) => !e.email.includes('[bot]'))
+
+    if (!coAuthors.length) {
+      continue
+    }
+
+    console.log(
+      `Fetching co-author details for hash: ${commit.shortHash}. Co-authors:`,
+      coAuthors.map((c) => c.email).join(', '),
+    )
+
+    // Attempt to co-authors by email
+    await Promise.all(
+      (coAuthors || [])
+        .map(async ({ name, email }) => {
+          // Check if this co-author has already been added
+          if (emails.has(email)) {
+            return null
+          }
+
+          // Get co-author's GitHub username by email
+          try {
+            const response = await fetch(
+              `https://api.github.com/search/users?q=${encodeURIComponent(email)}+in:email`,
+              {
+                headers,
+              },
+            )
+
+            if (!response.ok) {
+              console.log('Bad response from GitHub API fetching co-author by email')
+              console.error(response.status)
+              return null
+            }
+
+            const data = (await response.json()) as { items?: { login: string }[] }
+            const user = data.items?.[0]
+
+            if (!user) {
+              return null
+            }
+
+            console.log(`Found co-author by email: ${user.login}`)
+
+            if (!contributors.some((c) => c.username === user.login)) {
+              contributors.push({ name, username: user.login })
+            }
+            emails.add(email)
+            return user.login
+          } catch (error) {
+            console.log(`ERROR: Failed to fetch co-author by email`)
+            console.error(error)
+            return null
+          }
+        })
+        .filter(Boolean),
+    )
   }
   return contributors
 }

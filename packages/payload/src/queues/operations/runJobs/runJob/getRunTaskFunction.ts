@@ -170,39 +170,47 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         inlineRunner = task
       }
 
-      let retriesConfig: number | RetryConfig = retries
       let taskConfig: TaskConfig<string>
       if (!isInline) {
         taskConfig = req.payload.config.jobs.tasks.find((t) => t.slug === taskSlug)
-        if (!retriesConfig) {
-          retriesConfig = taskConfig.retries
-        }
 
         if (!taskConfig) {
           throw new Error(`Task ${taskSlug} not found in workflow ${job.workflowSlug}`)
         }
       }
-      let maxRetries: number =
-        typeof retriesConfig === 'object' ? retriesConfig?.attempts : retriesConfig
 
-      if (maxRetries === undefined || maxRetries === null) {
-        // Inherit retries from workflow config, if they are undefined and the workflow config has retries configured
-        if (workflowConfig.retries !== undefined && workflowConfig.retries !== null) {
-          maxRetries =
-            typeof workflowConfig.retries === 'object'
-              ? workflowConfig.retries.attempts
-              : workflowConfig.retries
-        } else {
-          maxRetries = 0
-        }
+      const retriesConfigFromPropsNormalized =
+        retries == undefined || retries == null
+          ? {}
+          : typeof retries === 'number'
+            ? { attempts: retries }
+            : retries
+      const retriesConfigFromTaskConfigNormalized = taskConfig
+        ? typeof taskConfig.retries === 'number'
+          ? { attempts: taskConfig.retries }
+          : taskConfig.retries
+        : {}
+
+      const finalRetriesConfig: RetryConfig = {
+        ...retriesConfigFromTaskConfigNormalized,
+        ...retriesConfigFromPropsNormalized, // Retry config from props takes precedence
       }
 
       const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[taskSlug]
         ? job.taskStatus[taskSlug][taskID]
         : null
 
+      // Handle restoration of task if it succeeded in a previous run
       if (taskStatus && taskStatus.complete === true) {
-        return taskStatus.output
+        let shouldRestore = true
+        if (finalRetriesConfig?.shouldRestore === false) {
+          shouldRestore = false
+        } else if (typeof finalRetriesConfig?.shouldRestore === 'function') {
+          shouldRestore = await finalRetriesConfig.shouldRestore({ input, job, req, taskStatus })
+        }
+        if (shouldRestore) {
+          return taskStatus.output
+        }
       }
 
       let runner: TaskHandler<TaskType>
@@ -245,6 +253,20 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
 
       let output: object = {}
 
+      let maxRetries: number | undefined = finalRetriesConfig?.attempts
+
+      if (maxRetries === undefined || maxRetries === null) {
+        // Inherit retries from workflow config, if they are undefined and the workflow config has retries configured
+        if (workflowConfig.retries !== undefined && workflowConfig.retries !== null) {
+          maxRetries =
+            typeof workflowConfig.retries === 'object'
+              ? workflowConfig.retries.attempts
+              : workflowConfig.retries
+        } else {
+          maxRetries = 0
+        }
+      }
+
       try {
         const runnerOutput = await runner({
           input,
@@ -260,7 +282,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
             maxRetries,
             output,
             req,
-            retriesConfig,
+            retriesConfig: finalRetriesConfig,
             runnerOutput,
             state,
             taskConfig,
@@ -282,7 +304,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           maxRetries,
           output,
           req,
-          retriesConfig,
+          retriesConfig: finalRetriesConfig,
           state,
           taskConfig,
           taskID,

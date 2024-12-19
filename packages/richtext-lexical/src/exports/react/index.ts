@@ -12,6 +12,7 @@ export { UploadJSXConverter } from './components/RichText/converter/converters/u
 export { defaultJSXConverters } from './components/RichText/converter/defaultConverters.js'
 export { convertLexicalNodesToJSX } from './components/RichText/converter/index.js'
 export type {
+  JSXConverter,
   JSXConverters,
   SerializedLexicalNodeWithParent,
 } from './components/RichText/converter/types.js'

@@ -1,9 +1,9 @@
 import { Types } from 'mongoose'
-import { buildVersionCollectionFields, type CreateVersion, type PayloadRequest } from 'payload'
+import { buildVersionCollectionFields, type CreateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
+import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const createVersion: CreateVersion = async function createVersion(
@@ -14,7 +14,7 @@ export const createVersion: CreateVersion = async function createVersion(
     createdAt,
     parent,
     publishedLocale,
-    req = {} as PayloadRequest,
+    req,
     snapshot,
     updatedAt,
     versionData,

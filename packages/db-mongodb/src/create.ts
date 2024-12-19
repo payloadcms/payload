@@ -1,14 +1,14 @@
-import type { Create, PayloadRequest } from 'payload'
+import type { Create } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
+import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
 import { transform } from './utilities/transform.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
-  { collection, data, req = {} as PayloadRequest },
+  { collection, data, req },
 ) {
   const Model = this.collections[collection]
   const session = await getSession(this, req)

@@ -3,7 +3,7 @@ import type { Payload, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
-import { getSession } from '../getSession.js'
+import { getSession } from '../utilities/getSession.js'
 
 export async function migrateVersionsV1_V2({ req }: { req: PayloadRequest }) {
   const { payload } = req

@@ -1,31 +1,20 @@
 import type { CollationOptions } from 'mongodb'
-import type { FindGlobalVersions, PayloadRequest } from 'payload'
+import type { FindGlobalVersions } from 'payload'
 
 import { buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { findMany } from './utilities/findMany.js'
 import { getHasNearConstraint } from './utilities/getHasNearConstraint.js'
+import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,
-  {
-    global,
-    limit,
-    locale,
-    page,
-    pagination,
-    req = {} as PayloadRequest,
-    select,
-    skip,
-    sort: sortArg,
-    where,
-  },
+  { global, limit, locale, page, pagination, req, select, skip, sort: sortArg, where },
 ) {
   const Model = this.versions[global]
   const versionFields = buildVersionGlobalFields(

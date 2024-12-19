@@ -1,32 +1,21 @@
 import type { CollationOptions } from 'mongodb'
-import type { PayloadRequest, QueryDrafts } from 'payload'
+import type { QueryDrafts } from 'payload'
 
 import { buildVersionCollectionFields, combineQueries } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { findMany } from './utilities/findMany.js'
 import { getHasNearConstraint } from './utilities/getHasNearConstraint.js'
+import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
-  {
-    collection,
-    joins,
-    limit,
-    locale,
-    page,
-    pagination,
-    req = {} as PayloadRequest,
-    select,
-    sort: sortArg,
-    where,
-  },
+  { collection, joins, limit, locale, page, pagination, req, select, sort: sortArg, where },
 ) {
   const VersionModel = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config

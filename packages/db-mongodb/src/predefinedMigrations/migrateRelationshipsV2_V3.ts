@@ -5,7 +5,7 @@ import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
-import { getSession } from '../getSession.js'
+import { getSession } from '../utilities/getSession.js'
 import { transform } from '../utilities/transform.js'
 
 const migrateModelWithBatching = async ({

@@ -29,6 +29,18 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
 
       const response = blob._response
 
+      const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
+      const objectEtag = response.headers.get('etag')
+
+      if (etagFromHeaders && etagFromHeaders === objectEtag) {
+        return new Response(null, {
+          headers: new Headers({
+            ...response.headers.rawHeaders(),
+          }),
+          status: 304,
+        })
+      }
+
       // Manually create a ReadableStream for the web from a Node.js stream.
       const readableStream = new ReadableStream({
         start(controller) {

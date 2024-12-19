@@ -1,14 +1,9 @@
-import {
-  buildVersionGlobalFields,
-  type PayloadRequest,
-  type TypeWithID,
-  type UpdateGlobalVersionArgs,
-} from 'payload'
+import { buildVersionGlobalFields, type TypeWithID, type UpdateGlobalVersionArgs } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
@@ -18,7 +13,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     global: globalSlug,
     locale,
     options: optionsArgs = {},
-    req = {} as PayloadRequest,
+    req,
     select,
     versionData,
     where,

@@ -1,16 +1,16 @@
-import type { FindGlobal, PayloadRequest } from 'payload'
+import type { FindGlobal } from 'payload'
 
 import { combineQueries } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
-  { slug, locale, req = {} as PayloadRequest, select, where },
+  { slug, locale, req, select, where },
 ) {
   const Model = this.globals
 

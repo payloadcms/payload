@@ -124,17 +124,19 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
     },
     [
-      modifySearchParams,
       currentQuery?.page,
       currentQuery?.limit,
+      currentQuery?.search,
       currentQuery?.sort,
       currentQuery?.where,
-      currentQuery?.search,
       preferenceKey,
-      router,
-      setPreference,
+      defaultLimit,
+      defaultSort,
+      modifySearchParams,
       onQueryChange,
       onQueryChangeFromProps,
+      setPreference,
+      router,
     ],
   )
 

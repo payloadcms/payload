@@ -11,6 +11,7 @@ import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
+  categoriesJoinRestrictedSlug,
   categoriesSlug,
   postsSlug,
   restrictedCategoriesSlug,
@@ -93,6 +94,8 @@ describe('Joins Field', () => {
           category: category.id,
           camelCaseCategory: category.id,
         },
+        array: [{ category: category.id }],
+        blocks: [{ blockType: 'block', category: category.id }],
       })
     }
   })
@@ -183,6 +186,24 @@ describe('Joins Field', () => {
     expect(docs[0].group.camelCaseCategory.id).toBeDefined()
     expect(docs[0].group.camelCaseCategory.name).toBeDefined()
     expect(docs[0].group.camelCaseCategory.group.camelCasePosts.docs).toHaveLength(10)
+  })
+
+  it('should populate joins with array relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
+  })
+
+  it('should populate joins with blocks relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.blocksPosts.docs).toBeDefined()
   })
 
   it('should populate uploads in joins', async () => {
@@ -557,6 +578,22 @@ describe('Joins Field', () => {
       expect(unlimited.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
+    it('should respect access control for join collections', async () => {
+      const { docs } = await payload.find({
+        collection: categoriesJoinRestrictedSlug,
+        where: {
+          name: { equals: 'categoryJoinRestricted' },
+        },
+        overrideAccess: false,
+        user,
+      })
+      const [categoryWithRestrictedPosts] = docs
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs).toHaveLength(1)
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs[0].title).toStrictEqual(
+        'should allow read',
+      )
+    })
+
     it('should respect access control for join request `where` queries', async () => {
       await expect(async () => {
         await payload.findByID({
@@ -582,7 +619,7 @@ describe('Joins Field', () => {
           name: 'restricted category',
         },
       })
-      const post = await createPost({
+      await createPost({
         collection: restrictedPostsSlug,
         data: {
           title: 'restricted post',
@@ -778,6 +815,31 @@ describe('Joins Field', () => {
         .GRAPHQL_POST({ body: JSON.stringify({ query }) })
         .then((res) => res.json())
       expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 3')
+    })
+
+    it('should respect access control for join collections', async () => {
+      const query = `query {
+        CategoriesJoinRestricteds {
+          docs {
+            name
+            collectionRestrictedJoin {
+              docs {
+                title
+                canRead
+              }
+            }
+          }
+        }
+      }`
+
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const [categoryWithRestrictedPosts] = response.data.CategoriesJoinRestricteds.docs
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs).toHaveLength(1)
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs[0].title).toStrictEqual(
+        'should allow read',
+      )
     })
   })
 

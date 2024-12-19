@@ -1,24 +1,15 @@
-import type { PayloadRequest, UpdateOne } from 'payload'
+import type { UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
 import { transform } from './utilities/transform.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
-  {
-    id,
-    collection,
-    data,
-    locale,
-    options: optionsArgs = {},
-    req = {} as PayloadRequest,
-    select,
-    where: whereArg,
-  },
+  { id, collection, data, locale, options: optionsArgs = {}, req, select, where: whereArg },
 ) {
   const where = id ? { id: { equals: id } } : whereArg
   const Model = this.collections[collection]

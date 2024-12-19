@@ -62,8 +62,12 @@ jobs:
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
   lint:
+    # Follows same github's ci skip: [skip lint], [lint skip], [no lint]
     if: >
-      github.event_name == 'pull_request' && !contains(github.event.pull_request.title, 'no-lint') && !contains(github.event.pull_request.title, 'skip-lint')
+      github.event_name == 'pull_request' &&
+      !contains(github.event.pull_request.title, '[skip lint]') &&
+      !contains(github.event.pull_request.title, '[lint skip]') &&
+      !contains(github.event.pull_request.title, '[no lint]')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -134,6 +138,33 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
+  tests-types:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Types Tests
+        run: pnpm test:types --target '>=5.7'
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+
   tests-int:
     runs-on: ubuntu-24.04
     needs: [changes, build]
@@ -149,6 +180,7 @@ jobs:
           - postgres-uuid
           - supabase
           - sqlite
+          - sqlite-uuid
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -252,20 +284,31 @@ jobs:
           - admin-root
           - auth
           - auth-basic
+          - joins
           - field-error-states
           - fields-relationship
-          - fields
-          - fields__collections__Blocks
           - fields__collections__Array
-          - fields__collections__Relationship
-          - fields__collections__RichText
+          - fields__collections__Blocks
+          - fields__collections__Collapsible
+          - fields__collections__ConditionalLogic
+          - fields__collections__CustomID
+          - fields__collections__Date
+          - fields__collections__Email
+          - fields__collections__Indexed
+          - fields__collections__JSON
           - fields__collections__Lexical__e2e__main
           - fields__collections__Lexical__e2e__blocks
-          - fields__collections__Date
           - fields__collections__Number
           - fields__collections__Point
+          - fields__collections__Radio
+          - fields__collections__Relationship
+          - fields__collections__RichText
+          - fields__collections__Row
+          - fields__collections__Select
           - fields__collections__Tabs
+          - fields__collections__Tabs2
           - fields__collections__Text
+          - fields__collections__UI
           - fields__collections__Upload
           - live-preview
           - localization
@@ -465,9 +508,12 @@ jobs:
     needs:
       - lint
       - build
+      - build-templates
       - tests-unit
       - tests-int
       - tests-e2e
+      - tests-types
+      - tests-type-generation
 
     steps:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}

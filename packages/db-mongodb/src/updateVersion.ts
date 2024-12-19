@@ -1,23 +1,14 @@
-import { buildVersionCollectionFields, type PayloadRequest, type UpdateVersion } from 'payload'
+import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  {
-    id,
-    collection,
-    locale,
-    options: optionsArgs = {},
-    req = {} as PayloadRequest,
-    select,
-    versionData,
-    where,
-  },
+  { id, collection, locale, options: optionsArgs = {}, req, select, versionData, where },
 ) {
   const VersionModel = this.versions[collection]
   const whereToUse = where || { id: { equals: id } }

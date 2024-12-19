@@ -1,16 +1,18 @@
 import type { JoinQuery } from 'payload'
 
 import httpStatus from 'http-status'
-import { findByIDOperation } from 'payload'
+import {
+  findByIDOperation,
+  sanitizeJoinParams,
+  sanitizePopulateParam,
+  sanitizeSelectParam,
+} from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
-import { sanitizeJoinParams } from '../utilities/sanitizeJoinParams.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
-import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const findByID: CollectionRouteHandlerWithID = async ({
   id: incomingID,
@@ -32,9 +34,9 @@ export const findByID: CollectionRouteHandlerWithID = async ({
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
     joins: sanitizeJoinParams(req.query.joins as JoinQuery),
-    populate: sanitizePopulate(req.query.populate),
+    populate: sanitizePopulateParam(req.query.populate),
     req,
-    select: sanitizeSelect(req.query.select),
+    select: sanitizeSelectParam(req.query.select),
   })
 
   return Response.json(result, {

@@ -287,7 +287,7 @@ export const promise = async <T>({
           overrideAccess,
           path: fieldPath,
           previousSiblingDoc: siblingDoc,
-          previousValue: siblingData[field.name],
+          previousValue: siblingDoc[field.name],
           req,
           schemaPath: fieldSchemaPath,
           siblingData,
@@ -321,6 +321,7 @@ export const promise = async <T>({
         siblingData[field.name] = await getDefaultValue({
           defaultValue: field.defaultValue,
           locale: req.locale,
+          req,
           user: req.user,
           value: siblingData[field.name],
         })

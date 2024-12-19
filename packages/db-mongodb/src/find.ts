@@ -1,14 +1,14 @@
 import type { CollationOptions } from 'mongodb'
-import type { Find, PayloadRequest } from 'payload'
+import type { Find } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { findMany } from './utilities/findMany.js'
 import { getHasNearConstraint } from './utilities/getHasNearConstraint.js'
+import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const find: Find = async function find(
@@ -20,7 +20,7 @@ export const find: Find = async function find(
     locale,
     page,
     pagination,
-    req = {} as PayloadRequest,
+    req,
     select,
     sort: sortArg,
     where,

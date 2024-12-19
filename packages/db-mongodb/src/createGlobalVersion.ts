@@ -1,8 +1,8 @@
-import { buildVersionGlobalFields, type CreateGlobalVersion, type PayloadRequest } from 'payload'
+import { buildVersionGlobalFields, type CreateGlobalVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
+import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
@@ -13,7 +13,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     globalSlug,
     parent,
     publishedLocale,
-    req = {} as PayloadRequest,
+    req,
     snapshot,
     updatedAt,
     versionData,

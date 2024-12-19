@@ -84,12 +84,32 @@ describe('Array', () => {
     await page.goto(url.create)
     await page.locator('#field-rowLabelAsComponent >> .array-field__add-row').click()
 
+    // ensure the default label does not blink in before form state returns
+    const defaultRowLabelWasAttached = await page
+      .waitForSelector('#field-rowLabelAsComponent .array-field__row-header .row-label', {
+        state: 'attached',
+        timeout: 100, // A small timeout to catch any transient rendering
+      })
+      .catch(() => false) // If it doesn't appear, this resolves to `false`
+
+    expect(defaultRowLabelWasAttached).toBeFalsy()
+
+    await expect(page.locator('#field-rowLabelAsComponent #custom-array-row-label')).toBeVisible()
+
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
     await wait(100)
+
     const customRowLabel = page.locator(
       '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("custom row label")',
     )
+
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
+  })
+
+  test('should render default array field within custom component', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-customArrayField >> .array-field__add-row').click()
+    await expect(page.locator('#field-customArrayField__0__text')).toBeVisible()
   })
 
   // eslint-disable-next-line playwright/expect-expect
@@ -299,6 +319,30 @@ describe('Array', () => {
   test('should externally update array rows and render custom fields', async () => {
     await page.goto(url.create)
     await page.locator('#updateArrayExternally').click()
-    await expect(page.locator('#custom-field')).toBeVisible()
+    await expect(page.locator('#custom-text-field')).toBeVisible()
+  })
+
+  test('should not re-close initCollapsed true array rows on input in create new view', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-collapsedArray >> .array-field__add-row').click()
+    await page.locator('#field-collapsedArray__0__text').fill('test')
+    const collapsedArrayRow = page.locator('#collapsedArray-row-0 .collapsible--collapsed')
+    await expect(collapsedArrayRow).toBeHidden()
+  })
+
+  describe('sortable arrays', () => {
+    test('should have disabled admin sorting', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-disableSort > div > div > .array-actions__action-chevron')
+      expect(await field.count()).toEqual(0)
+    })
+
+    test('the drag handle should be hidden', async () => {
+      await page.goto(url.create)
+      const field = page.locator(
+        '#field-disableSort > .blocks-field__rows > div > div > .collapsible__drag',
+      )
+      expect(await field.count()).toEqual(0)
+    })
   })
 })

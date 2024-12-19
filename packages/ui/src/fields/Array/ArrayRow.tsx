@@ -9,11 +9,13 @@ import type { UseDraggableSortableReturn } from '../../elements/DraggableSortabl
 import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
+import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import './index.scss'
+import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'array-field'
 
@@ -25,6 +27,7 @@ type ArrayRowProps = {
   readonly fields: ClientField[]
   readonly forceRender?: boolean
   readonly hasMaxRows?: boolean
+  readonly isLoading?: boolean
   readonly isSortable?: boolean
   readonly labels: Partial<ArrayField['labels']>
   readonly moveRow: (fromIndex: number, toIndex: number) => void
@@ -50,6 +53,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   forceRender = false,
   hasMaxRows,
   isDragging,
+  isLoading: isLoadingFromProps,
   isSortable,
   labels,
   listeners,
@@ -68,6 +72,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   transform,
   transition,
 }) => {
+  const isLoading = useThrottledValue(isLoadingFromProps, 500)
+
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
@@ -124,29 +130,35 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }
         header={
           <div className={`${baseClass}__row-header`}>
-            <RowLabel
-              CustomComponent={CustomRowLabel}
-              label={fallbackLabel}
-              path={path}
-              rowNumber={rowIndex}
-            />
+            {isLoading ? null : (
+              <RowLabel
+                CustomComponent={CustomRowLabel}
+                label={fallbackLabel}
+                path={path}
+                rowNumber={rowIndex}
+              />
+            )}
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
         isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fields={fields}
-          forceRender={forceRender}
-          margins="small"
-          parentIndexPath=""
-          parentPath={path}
-          parentSchemaPath={schemaPath}
-          permissions={permissions === true ? permissions : permissions?.fields}
-          readOnly={readOnly}
-        />
+        {isLoading ? (
+          <ShimmerEffect />
+        ) : (
+          <RenderFields
+            className={`${baseClass}__fields`}
+            fields={fields}
+            forceRender={forceRender}
+            margins="small"
+            parentIndexPath=""
+            parentPath={path}
+            parentSchemaPath={schemaPath}
+            permissions={permissions === true ? permissions : permissions?.fields}
+            readOnly={readOnly}
+          />
+        )}
       </Collapsible>
     </div>
   )

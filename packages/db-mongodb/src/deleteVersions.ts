@@ -1,12 +1,12 @@
-import type { DeleteVersions, PayloadRequest } from 'payload'
+import type { DeleteVersions } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { getSession } from './getSession.js'
+import { getSession } from './utilities/getSession.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersions(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  { collection, locale, req, where },
 ) {
   const VersionsModel = this.versions[collection]
 

@@ -5,6 +5,7 @@ import { contact as contactPageData } from './contact-page'
 import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
+import { imageHero1 } from './image-hero-1'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
@@ -59,6 +60,12 @@ export const seed = async ({
     collections.map((collection) => payload.db.deleteMany({ collection, req, where: {} })),
   )
 
+  await Promise.all(
+    collections
+      .filter((collection) => Boolean(payload.collections[collection].config.versions))
+      .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
+  )
+
   payload.logger.info(`— Seeding demo author and user...`)
 
   await payload.delete({
@@ -66,7 +73,7 @@ export const seed = async ({
     depth: 0,
     where: {
       email: {
-        equals: 'demo-author@payloadcms.com',
+        equals: 'demo-author@example.com',
       },
     },
   })
@@ -105,7 +112,7 @@ export const seed = async ({
       collection: 'users',
       data: {
         name: 'Demo Author',
-        email: 'demo-author@payloadcms.com',
+        email: 'demo-author@example.com',
         password: 'password',
       },
     }),
@@ -126,7 +133,7 @@ export const seed = async ({
     }),
     payload.create({
       collection: 'media',
-      data: image2,
+      data: imageHero1,
       file: hero1Buffer,
     }),
 
@@ -234,29 +241,27 @@ export const seed = async ({
   })
 
   // update each post with related posts
-  await Promise.all([
-    payload.update({
-      id: post1Doc.id,
-      collection: 'posts',
-      data: {
-        relatedPosts: [post2Doc.id, post3Doc.id],
-      },
-    }),
-    payload.update({
-      id: post2Doc.id,
-      collection: 'posts',
-      data: {
-        relatedPosts: [post1Doc.id, post3Doc.id],
-      },
-    }),
-    payload.update({
-      id: post3Doc.id,
-      collection: 'posts',
-      data: {
-        relatedPosts: [post1Doc.id, post2Doc.id],
-      },
-    }),
-  ])
+  await payload.update({
+    id: post1Doc.id,
+    collection: 'posts',
+    data: {
+      relatedPosts: [post2Doc.id, post3Doc.id],
+    },
+  })
+  await payload.update({
+    id: post2Doc.id,
+    collection: 'posts',
+    data: {
+      relatedPosts: [post1Doc.id, post3Doc.id],
+    },
+  })
+  await payload.update({
+    id: post3Doc.id,
+    collection: 'posts',
+    data: {
+      relatedPosts: [post1Doc.id, post2Doc.id],
+    },
+  })
 
   payload.logger.info(`— Seeding contact form...`)
 

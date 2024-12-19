@@ -6,7 +6,7 @@ desc: Manage SEO metadata from your Payload admin
 keywords: plugins, seo, meta, search, engine, ranking, google
 ---
 
-[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-seo)](https://www.npmjs.com/package/@payloadcms/plugin-seo)
+[![npm](https://img.shields.io/npm/v/@payloadcms/plugin-seo)](https://www.npmjs.com/package/@payloadcms/plugin-seo)
 
 This plugin allows you to easily manage SEO metadata for your application from within your [Admin Panel](../admin/overview). When enabled on your [Collections](../configuration/collections) and [Globals](../configuration/globals), it adds a new `meta` field group containing `title`, `description`, and `image` by default. Your front-end application can then use this data to render meta tags however your application requires. For example, you would inject a `title` tag into the `<head>` of your page using `meta.title` as its content.
 
@@ -34,7 +34,7 @@ To help you visualize what your page might look like in a search engine, a previ
 
 ## Installation
 
-Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
 
 ```bash
   pnpm add @payloadcms/plugin-seo
@@ -277,7 +277,7 @@ Tip: You can override the length rules by changing the minLength and maxLength p
 All types can be directly imported:
 
 ```ts
-import {
+import type {
   PluginConfig,
   GenerateTitle,
   GenerateDescription
@@ -288,9 +288,9 @@ import {
 You can then pass the collections from your generated Payload types into the generation types, for example:
 
 ```ts
-import { Page } from './payload-types.ts';
+import type { Page } from './payload-types.ts';
 
-import { GenerateTitle } from '@payloadcms/plugin-seo/types';
+import type { GenerateTitle } from '@payloadcms/plugin-seo/types';
 
 const generateTitle: GenerateTitle<Page> = async ({ doc, locale }) => {
   return `Website.com — ${doc?.title}`

@@ -48,6 +48,20 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     } = {},
   } = payload.config || {}
 
+  const serverProps = React.useMemo<ServerProps>(
+    () => ({
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+      visibleEntities,
+    }),
+    [i18n, locale, params, payload, permissions, searchParams, user, visibleEntities],
+  )
+
   const { Actions } = React.useMemo<{
     Actions: Record<string, React.ReactNode>
   }>(() => {
@@ -59,11 +73,13 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                 acc[action.path] = RenderServerComponent({
                   Component: action,
                   importMap: payload.importMap,
+                  serverProps,
                 })
               } else {
                 acc[action] = RenderServerComponent({
                   Component: action,
                   importMap: payload.importMap,
+                  serverProps,
                 })
               }
             }
@@ -72,23 +88,14 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           }, {})
         : undefined,
     }
-  }, [viewActions, payload])
+  }, [payload, serverProps, viewActions])
 
   const NavComponent = RenderServerComponent({
     clientProps: { clientProps: { visibleEntities } },
     Component: CustomNav,
     Fallback: DefaultNav,
     importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-      visibleEntities,
-    },
+    serverProps,
   })
 
   return (
@@ -99,16 +106,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             clientProps: { clientProps: { visibleEntities } },
             Component: CustomHeader,
             importMap: payload.importMap,
-            serverProps: {
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
-              visibleEntities,
-            },
+            serverProps,
           })}
           <div style={{ position: 'relative' }}>
             <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
@@ -127,6 +125,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                       ? RenderServerComponent({
                           Component: avatar.Component,
                           importMap: payload.importMap,
+                          serverProps,
                         })
                       : undefined
                   }
@@ -135,6 +134,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                       ? RenderServerComponent({
                           Component: components.graphics.Icon,
                           importMap: payload.importMap,
+                          serverProps,
                         })
                       : undefined
                   }

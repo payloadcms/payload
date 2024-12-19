@@ -15,6 +15,7 @@ export interface Config {
     posts: Post;
     users: User;
     'hidden-collection': HiddenCollection;
+    'not-in-view-collection': NotInViewCollection;
     'collection-no-api-view': CollectionNoApiView;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
@@ -24,8 +25,6 @@ export interface Config {
     'group-two-collection-ones': GroupTwoCollectionOne;
     'group-two-collection-twos': GroupTwoCollectionTwo;
     geo: Geo;
-    customIdTab: CustomIdTab;
-    customIdRow: CustomIdRow;
     'disable-duplicate': DisableDuplicate;
     'base-list-filters': BaseListFilter;
     'payload-locked-documents': PayloadLockedDocument;
@@ -38,6 +37,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'hidden-collection': HiddenCollectionSelect<false> | HiddenCollectionSelect<true>;
+    'not-in-view-collection': NotInViewCollectionSelect<false> | NotInViewCollectionSelect<true>;
     'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
@@ -47,8 +47,6 @@ export interface Config {
     'group-two-collection-ones': GroupTwoCollectionOnesSelect<false> | GroupTwoCollectionOnesSelect<true>;
     'group-two-collection-twos': GroupTwoCollectionTwosSelect<false> | GroupTwoCollectionTwosSelect<true>;
     geo: GeoSelect<false> | GeoSelect<true>;
-    customIdTab: CustomIdTabSelect<false> | CustomIdTabSelect<true>;
-    customIdRow: CustomIdRowSelect<false> | CustomIdRowSelect<true>;
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -60,6 +58,7 @@ export interface Config {
   };
   globals: {
     'hidden-global': HiddenGlobal;
+    'not-in-view-global': NotInViewGlobal;
     'global-no-api-view': GlobalNoApiView;
     global: Global;
     'custom-global-views-one': CustomGlobalViewsOne;
@@ -70,6 +69,7 @@ export interface Config {
   };
   globalsSelect: {
     'hidden-global': HiddenGlobalSelect<false> | HiddenGlobalSelect<true>;
+    'not-in-view-global': NotInViewGlobalSelect<false> | NotInViewGlobalSelect<true>;
     'global-no-api-view': GlobalNoApiViewSelect<false> | GlobalNoApiViewSelect<true>;
     global: GlobalSelect<false> | GlobalSelect<true>;
     'custom-global-views-one': CustomGlobalViewsOneSelect<false> | CustomGlobalViewsOneSelect<true>;
@@ -138,9 +138,31 @@ export interface Post {
         [k: string]: unknown;
       }[]
     | null;
+  arrayOfFields?:
+    | {
+        optional?: string | null;
+        innerArrayOfFields?:
+          | {
+              innerOptional?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   group?: {
+    defaultValueField?: string | null;
     title?: string | null;
   };
+  someBlock?:
+    | {
+        textFieldForBlock?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlock';
+      }[]
+    | null;
+  defaultValueField?: string | null;
   relationship?: (string | null) | Post;
   customCell?: string | null;
   sidebarField?: string | null;
@@ -172,6 +194,16 @@ export interface User {
  * via the `definition` "hidden-collection".
  */
 export interface HiddenCollection {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-collection".
+ */
+export interface NotInViewCollection {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -298,30 +330,6 @@ export interface Geo {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdTab".
- */
-export interface CustomIdTab {
-  title?: string | null;
-  id: string;
-  description?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdRow".
- */
-export interface CustomIdRow {
-  title?: string | null;
-  id: string;
-  description?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "disable-duplicate".
  */
 export interface DisableDuplicate {
@@ -364,6 +372,10 @@ export interface PayloadLockedDocument {
         value: string | HiddenCollection;
       } | null)
     | ({
+        relationTo: 'not-in-view-collection';
+        value: string | NotInViewCollection;
+      } | null)
+    | ({
         relationTo: 'collection-no-api-view';
         value: string | CollectionNoApiView;
       } | null)
@@ -398,14 +410,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'geo';
         value: string | Geo;
-      } | null)
-    | ({
-        relationTo: 'customIdTab';
-        value: string | CustomIdTab;
-      } | null)
-    | ({
-        relationTo: 'customIdRow';
-        value: string | CustomIdRow;
       } | null)
     | ({
         relationTo: 'disable-duplicate';
@@ -484,11 +488,36 @@ export interface PostsSelect<T extends boolean = true> {
   description?: T;
   number?: T;
   richText?: T;
+  arrayOfFields?:
+    | T
+    | {
+        optional?: T;
+        innerArrayOfFields?:
+          | T
+          | {
+              innerOptional?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   group?:
     | T
     | {
+        defaultValueField?: T;
         title?: T;
       };
+  someBlock?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              textFieldForBlock?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  defaultValueField?: T;
   relationship?: T;
   customCell?: T;
   sidebarField?: T;
@@ -518,6 +547,15 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "hidden-collection_select".
  */
 export interface HiddenCollectionSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-collection_select".
+ */
+export interface NotInViewCollectionSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -635,30 +673,6 @@ export interface GeoSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdTab_select".
- */
-export interface CustomIdTabSelect<T extends boolean = true> {
-  title?: T;
-  id?: T;
-  description?: T;
-  number?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdRow_select".
- */
-export interface CustomIdRowSelect<T extends boolean = true> {
-  title?: T;
-  id?: T;
-  description?: T;
-  number?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "disable-duplicate_select".
  */
 export interface DisableDuplicateSelect<T extends boolean = true> {
@@ -712,6 +726,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "hidden-global".
  */
 export interface HiddenGlobal {
+  id: string;
+  title?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-global".
+ */
+export interface NotInViewGlobal {
   id: string;
   title?: string | null;
   updatedAt?: string | null;
@@ -793,6 +817,16 @@ export interface Setting {
  * via the `definition` "hidden-global_select".
  */
 export interface HiddenGlobalSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-in-view-global_select".
+ */
+export interface NotInViewGlobalSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
