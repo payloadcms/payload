@@ -26,7 +26,9 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
-import { goToFirstCell, navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
+import { openListColumns } from 'helpers/e2e/openListColumns.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -206,21 +208,16 @@ describe('admin2', () => {
       test('should toggle columns', async () => {
         const columnCountLocator = 'table > thead > tr > th'
         await createPost()
-        await page.locator('.list-controls__toggle-columns').click()
+        await openListColumns(page, {})
         const numberOfColumns = await page.locator(columnCountLocator).count()
         await expect(page.locator('.column-selector')).toBeVisible()
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
-
-        const idButton = page.locator(`.column-selector .column-selector__column`, {
-          hasText: exactText('ID'),
-        })
-
-        await idButton.click()
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
         await page.locator('#heading-id').waitFor({ state: 'detached' })
         await page.locator('.cell-id').first().waitFor({ state: 'detached' })
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
-        await idButton.click()
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'on' })
         await expect(page.locator('.cell-id').first()).toBeVisible()
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
@@ -278,9 +275,7 @@ describe('admin2', () => {
 
         await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
-        await page.locator('.list-controls__toggle-where').click()
-        // wait until the filter UI is visible and fully expanded
-        await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+        await openListFilters(page, {})
 
         await page.locator('.where-builder__add-first-filter').click()
 
@@ -318,8 +313,7 @@ describe('admin2', () => {
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
-        await page.locator('.list-controls__toggle-where').click()
-        await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+        await openListFilters(page, {})
         await page.locator('.where-builder__add-first-filter').click()
 
         const operatorField = page.locator('.condition__operator')
@@ -466,7 +460,7 @@ describe('admin2', () => {
         await page.goto(`${postsUrl.list}?limit=10&page=2`)
 
         // add filter
-        await page.locator('.list-controls__toggle-where').click()
+        await openListFilters(page, {})
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
@@ -744,8 +738,7 @@ describe('admin2', () => {
 
       test('should sort with existing filters', async () => {
         await page.goto(postsUrl.list)
-        const column = await toggleColumn(page, { columnLabel: 'ID' })
-        await expect(column).not.toHaveClass('column-selector__column--active')
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
         await page.locator('#heading-id').waitFor({ state: 'detached' })
         await page.locator('#heading-title button.sort-column__asc').click()
         await page.waitForURL(/sort=title/)
@@ -782,7 +775,7 @@ describe('admin2', () => {
         ).toHaveText('Title')
 
         // filters
-        await page.locator('.list-controls__toggle-where').click()
+        await openListFilters(page, {})
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')

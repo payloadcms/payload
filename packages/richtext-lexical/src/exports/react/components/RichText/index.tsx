@@ -20,15 +20,30 @@ export type JSXConvertersFunction<
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
 > = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
 
-type Props = {
+type RichTextProps = {
+  /**
+   * Additional class names for the container.
+   */
   className?: string
+  /**
+   * Custom converters to transform your nodes to JSX. Can be an object or a function that receives the default converters.
+   */
   converters?: JSXConverters | JSXConvertersFunction
+  /**
+   * Serialized editor state to render.
+   */
   data: SerializedEditorState
+  /**
+   * If true, disables indentation globally. If an array, disables for specific node `type` values.
+   */
   disableIndent?: boolean | string[]
+  /**
+   * If true, disables text alignment globally. If an array, disables for specific node `type` values.
+   */
   disableTextAlign?: boolean | string[]
 }
 
-export const RichText: React.FC<Props> = ({
+export const RichText: React.FC<RichTextProps> = ({
   className,
   converters,
   data: editorState,

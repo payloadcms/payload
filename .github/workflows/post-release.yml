@@ -19,7 +19,7 @@ env:
 
 jobs:
   post_release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v4
@@ -38,7 +38,7 @@ jobs:
             🚀 This is included in version {release_link}
 
   github-releases-to-discord:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - name: Checkout

@@ -11,7 +11,7 @@ export const preview: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
 
-  const result = await findOneOperation({
+  const doc = await findOneOperation({
     slug: globalConfig.slug,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
@@ -29,7 +29,7 @@ export const preview: GlobalRouteHandler = async ({ globalConfig, req }) => {
 
   if (typeof generatePreviewURL === 'function') {
     try {
-      previewURL = await generatePreviewURL(result, {
+      previewURL = await generatePreviewURL(doc, {
         locale: req.locale,
         req,
         token,

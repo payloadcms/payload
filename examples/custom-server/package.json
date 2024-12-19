@@ -17,25 +17,19 @@
     "cross-env": "^7.0.3",
     "express": "^4.21.1",
     "graphql": "^16.8.1",
-    "next": "15.0.3",
+    "next": "15.0.4",
     "payload": "latest",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020"
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^18.11.5",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
-  },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "npm:types-react@19.0.0-rc.1",
-      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
-    }
   }
 }

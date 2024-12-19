@@ -32,12 +32,16 @@ export type ServerOnlyFieldProperties =
   | 'editor' // This is a `richText` only property
   | 'enumName' // can be a function
   | 'filterOptions' // This is a `relationship` and `upload` only property
+  | 'graphQL'
   | 'label'
   | 'typescriptSchema'
   | 'validate'
   | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
 
-export type ServerOnlyFieldAdminProperties = keyof Pick<FieldBase['admin'], 'condition'>
+export type ServerOnlyFieldAdminProperties = keyof Pick<
+  FieldBase['admin'],
+  'components' | 'condition'
+>
 
 const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'hooks',
@@ -50,6 +54,7 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'typescriptSchema',
   'dbName', // can be a function
   'enumName', // can be a function
+  'graphQL', // client does not need graphQL
   // the following props are handled separately (see below):
   // `label`
   // `fields`
@@ -57,7 +62,10 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   // `tabs`
   // `admin`
 ]
-const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = ['condition']
+const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = [
+  'condition',
+  'components',
+]
 type FieldWithDescription = {
   admin: AdminClient
 } & ClientField

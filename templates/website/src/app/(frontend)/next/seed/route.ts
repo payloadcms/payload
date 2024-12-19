@@ -33,6 +33,6 @@ export async function POST(
 
     return Response.json({ success: true })
   } catch {
-    return new Response('Error seeding data.')
+    return new Response('Error seeding data.', { status: 500 })
   }
 }

@@ -19,6 +19,7 @@ import {
   fieldHasSubFields,
   fieldIsHiddenOrDisabled,
   fieldIsID,
+  fieldIsLocalized,
   fieldIsSidebar,
   getFieldPaths,
   tabHasName,
@@ -142,6 +143,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   let fieldPermissions: SanitizedFieldPermissions = true
 
+  const fieldState: FormFieldWithoutComponents = {
+    errorPaths: [],
+    fieldSchema: includeSchema ? field : undefined,
+    initialValue: undefined,
+    isSidebar: fieldIsSidebar(field),
+    passesCondition,
+    valid: true,
+    value: undefined,
+  }
+
   if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field)) {
     fieldPermissions =
       parentPermissions === true
@@ -162,16 +173,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
 
     const validate = field.validate
-
-    const fieldState: FormFieldWithoutComponents = {
-      errorPaths: [],
-      fieldSchema: includeSchema ? field : undefined,
-      initialValue: undefined,
-      isSidebar: fieldIsSidebar(field),
-      passesCondition,
-      valid: true,
-      value: undefined,
-    }
 
     let validationResult: string | true = true
 
@@ -274,14 +275,26 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               }),
             )
 
-            const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
+            const previousRows = previousFormState?.[path]?.rows || []
+            const collapsedRowIDsFromPrefs = preferences?.fields?.[path]?.collapsed
 
             acc.rows.push({
               id: row.id,
-              collapsed:
-                collapsedRowIDs === undefined
-                  ? field.admin.initCollapsed
-                  : collapsedRowIDs.includes(row.id),
+              collapsed: (() => {
+                // First, check if `previousFormState` has a matching row
+                const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
+                if (previousRow?.collapsed !== undefined) {
+                  return previousRow.collapsed
+                }
+
+                // If previousFormState is undefined, check preferences
+                if (collapsedRowIDsFromPrefs !== undefined) {
+                  return collapsedRowIDsFromPrefs.includes(row.id) // Check if collapsed in preferences
+                }
+
+                // If neither exists, fallback to `field.admin.initCollapsed`
+                return field.admin.initCollapsed
+              })(),
             })
 
             return acc
@@ -614,7 +627,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       id,
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
-      anyParentLocalized: field.localized || anyParentLocalized,
+      anyParentLocalized: fieldIsLocalized(field) || anyParentLocalized,
       clientFieldSchemaMap,
       collectionSlug,
       data,
@@ -660,7 +673,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       })
 
       let childPermissions: SanitizedFieldsPermissions = undefined
-      if (tabHasName(tab)) {
+
+      if (isNamedTab) {
         if (parentPermissions === true) {
           childPermissions = true
         } else {
@@ -709,16 +723,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     await Promise.all(promises)
   } else if (field.type === 'ui') {
     if (!filter || filter(args)) {
-      state[path] = {
-        disableFormData: true,
-        errorPaths: [],
-        fieldSchema: includeSchema ? field : undefined,
-        initialValue: undefined,
-        isSidebar: fieldIsSidebar(field),
-        passesCondition,
-        valid: true,
-        value: undefined,
-      }
+      state[path] = fieldState
+      state[path].disableFormData = true
     }
   }
 

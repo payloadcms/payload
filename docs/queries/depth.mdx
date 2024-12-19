@@ -43,7 +43,9 @@ But with a `depth` of `1`, the response might look like this:
 To specify depth in the [Local API](../local-api/overview), you can use the `depth` option in your query:
 
 ```ts
-const getPosts = async () => {
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     depth: 2, // highlight-line

@@ -68,10 +68,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Listă neordonată',
   },
   rs: {
-    label: 'Neporedani spisak',
+    label: 'Неуређена листа',
   },
   'rs-latin': {
-    label: 'Neuređena Lista',
+    label: 'Neuređena lista',
   },
   ru: {
     label: 'Несортированный список',

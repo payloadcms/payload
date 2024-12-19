@@ -29,7 +29,7 @@ export const reduceClientFields = ({
   pathPrefix,
 }: ReduceClientFieldsArgs): FieldCondition[] => {
   return fields.reduce((reduced, field) => {
-    if (field.admin?.disableListFilter || (fieldIsHiddenOrDisabled(field) && !fieldIsID(field))) {
+    if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
       return reduced
     }
 

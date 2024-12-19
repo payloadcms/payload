@@ -90,7 +90,7 @@ export const i18n: Partial<GenericLanguages> = {
     loadingWithEllipsis: 'Se încarcă...',
   },
   rs: {
-    label: 'Veza',
+    label: 'Веза',
     loadingWithEllipsis: 'Учитавање...',
   },
   'rs-latin': {
