@@ -20,6 +20,7 @@ const Nested: React.FC<DiffComponentProps> = ({
   i18n,
   locale,
   locales,
+  modifiedOnly,
   version,
 }) => {
   return (
@@ -42,6 +43,7 @@ const Nested: React.FC<DiffComponentProps> = ({
           fields={fields}
           i18n={i18n}
           locales={locales}
+          modifiedOnly
           version={version}
         />
       </div>

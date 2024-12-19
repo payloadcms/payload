@@ -18,6 +18,8 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
   i18n,
   locale,
   locales,
+  modifiedOnly,
+  permissions,
   version,
 }) => {
   return (
@@ -36,6 +38,8 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
                 key={i}
                 locale={locale}
                 locales={locales}
+                modifiedOnly
+                permissions={permissions}
                 version={version?.[tab.name]}
               />
             )
@@ -50,6 +54,7 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
               i18n={i18n}
               key={i}
               locales={locales}
+              modifiedOnly
               version={version}
             />
           )

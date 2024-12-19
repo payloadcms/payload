@@ -441,6 +441,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     draft: 'Чернова',
     draftSavedSuccessfully: 'Чернова запазена успешно.',
     lastSavedAgo: 'последно запазено преди {{distance}}',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Не са открити повече версии',
     noRowsFound: 'Не е открит {{label}}',
     noRowsSelected: 'Не е избран {{label}}',
