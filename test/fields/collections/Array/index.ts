@@ -194,13 +194,28 @@ const ArrayFields: CollectionConfig = {
       type: 'array',
       fields: [
         {
-          name: 'customField',
+          name: 'customTextField',
           type: 'ui',
           admin: {
             components: {
-              Field: '/collections/Array/CustomField.js#CustomField',
+              Field: '/collections/Array/CustomTextField.js#CustomTextField',
             },
           },
+        },
+      ],
+    },
+    {
+      name: 'customArrayField',
+      type: 'array',
+      admin: {
+        components: {
+          Field: '/collections/Array/CustomArrayField.js#CustomArrayField',
+        },
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
         },
       ],
     },

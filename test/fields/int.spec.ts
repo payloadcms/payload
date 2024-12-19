@@ -97,6 +97,20 @@ describe('Fields', () => {
       expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue)
     })
 
+    it('should populate function default values from req', async () => {
+      const text = await payload.create({
+        req: {
+          context: {
+            defaultValue: 'from-context',
+          },
+        },
+        collection: 'text-fields',
+        data: { text: 'required' },
+      })
+
+      expect(text.defaultValueFromReq).toBe('from-context')
+    })
+
     it('should localize an array of strings using hasMany', async () => {
       const localizedHasMany = ['hello', 'world']
       const { id } = await payload.create({
@@ -438,6 +452,37 @@ describe('Fields', () => {
 
       expect(result.docs).toHaveLength(1)
       expect(result.docs[0]).toMatchObject(relationshipInArray)
+    })
+
+    it('should query text in row after relationship', async () => {
+      const row = await payload.create({
+        collection: 'row-fields',
+        data: { title: 'some-title', id: 'custom-row-id' },
+      })
+      const textDoc = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'asd' },
+      })
+
+      const rel = await payload.create({
+        collection: 'relationship-fields',
+        data: {
+          relationship: { relationTo: 'text-fields', value: textDoc },
+          relationToRow: row.id,
+          relationToRowMany: [row.id],
+        },
+      })
+
+      const result = await payload.find({
+        collection: 'relationship-fields',
+        where: {
+          'relationToRow.title': { equals: 'some-title' },
+          'relationToRowMany.title': { equals: 'some-title' },
+        },
+      })
+
+      expect(result.docs[0].id).toBe(rel.id)
+      expect(result.totalDocs).toBe(1)
     })
   })
 

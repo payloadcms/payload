@@ -12,6 +12,7 @@ export type Resolver = (
     limit?: number
     locale?: string
     page?: number
+    pagination?: boolean
     sort?: string
     where: Where
   },
@@ -50,6 +51,7 @@ export function findVersionsResolver(collection: Collection): Resolver {
       depth: 0,
       limit: args.limit,
       page: args.page,
+      pagination: args.pagination,
       req: isolateObjectProperty(req, 'transactionID'),
       sort: args.sort,
       where: args.where,

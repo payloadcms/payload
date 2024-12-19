@@ -13,6 +13,7 @@ export type Resolver = (
     limit?: number
     locale?: string
     page?: number
+    pagination?: boolean
     sort?: string
     where?: Where
   },
@@ -53,6 +54,7 @@ export function findResolver(collection: Collection): Resolver {
       draft: args.draft,
       limit: args.limit,
       page: args.page,
+      pagination: args.pagination,
       req,
       sort: args.sort,
       where: args.where,

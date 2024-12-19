@@ -5,8 +5,6 @@ const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
-import { CustomIdRow } from './collections/CustomIdRow.js'
-import { CustomIdTab } from './collections/CustomIdTab.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
@@ -155,8 +153,6 @@ export default buildConfigWithDefaults({
     CollectionGroup2A,
     CollectionGroup2B,
     Geo,
-    CustomIdTab,
-    CustomIdRow,
     DisableDuplicate,
     BaseListFilter,
   ],

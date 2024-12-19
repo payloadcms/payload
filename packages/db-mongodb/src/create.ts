@@ -1,17 +1,21 @@
-import type { Create, Document, PayloadRequest } from 'payload'
+import type { CreateOptions } from 'mongoose'
+import type { Create, Document } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
-  { collection, data, req = {} as PayloadRequest },
+  { collection, data, req },
 ) {
   const Model = this.collections[collection]
-  const options = await withSession(this, req)
+  const options: CreateOptions = {
+    session: await getSession(this, req),
+  }
+
   let doc
 
   const sanitizedData = sanitizeRelationshipIDs({

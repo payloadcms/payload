@@ -9,7 +9,6 @@ import {
   RenderCustomComponent,
   useEditDepth,
   useField,
-  withCondition,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import React, { useCallback, useMemo } from 'react'
@@ -107,7 +106,7 @@ const RichTextComponent: React.FC<
         CustomComponent={Error}
         Fallback={<FieldError path={path} showError={showError} />}
       />
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
@@ -143,4 +142,4 @@ function fallbackRender({ error }: { error: Error }) {
   )
 }
 
-export const RichText: typeof RichTextComponent = withCondition(RichTextComponent)
+export const RichText: typeof RichTextComponent = RichTextComponent

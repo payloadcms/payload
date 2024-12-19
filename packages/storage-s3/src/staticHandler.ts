@@ -35,6 +35,21 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
+      const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
+      const objectEtag = object.ETag
+
+      if (etagFromHeaders && etagFromHeaders === objectEtag) {
+        return new Response(null, {
+          headers: new Headers({
+            'Accept-Ranges': String(object.AcceptRanges),
+            'Content-Length': String(object.ContentLength),
+            'Content-Type': String(object.ContentType),
+            ETag: String(object.ETag),
+          }),
+          status: 304,
+        })
+      }
+
       const bodyBuffer = await streamToBuffer(object.Body)
 
       return new Response(bodyBuffer, {

@@ -32,7 +32,7 @@ export type Options<TSlug extends CollectionSlug, TDepth extends AllowedDepth = 
   locale?: TypedLocale
   overrideAccess?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   showHiddenFields?: boolean
   user?: Document

@@ -14,6 +14,7 @@ export type Row = {
   blockType?: string
   collapsed?: boolean
   id: string
+  isLoading?: boolean
 }
 
 export type FilterOptionsResult = {

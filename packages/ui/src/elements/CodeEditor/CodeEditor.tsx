@@ -13,11 +13,11 @@ const Editor = (EditorImport.default || EditorImport) as unknown as typeof Edito
 const baseClass = 'code-editor'
 
 const CodeEditor: React.FC<Props> = (props) => {
-  const { className, maxHeight, options, readOnly, ...rest } = props
-  const [dynamicHeight, setDynamicHeight] = useState(20)
-  const { theme } = useTheme()
+  const { className, maxHeight, minHeight, options, readOnly, ...rest } = props
+  const MIN_HEIGHT = minHeight ?? 56 // equivalent to 3 lines
 
-  const MIN_HEIGHT = 56 // equivalent to 3 lines
+  const [dynamicHeight, setDynamicHeight] = useState(MIN_HEIGHT)
+  const { theme } = useTheme()
 
   const classes = [
     baseClass,

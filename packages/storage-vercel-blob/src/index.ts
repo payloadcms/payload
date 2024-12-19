@@ -52,8 +52,10 @@ export type VercelBlobStorageOptions = {
    * Vercel Blob storage read/write token
    *
    * Usually process.env.BLOB_READ_WRITE_TOKEN set by Vercel
+   *
+   * If unset, the plugin will be disabled and will fallback to local storage
    */
-  token: string
+  token: string | undefined
 }
 
 const defaultUploadOptions: Partial<VercelBlobStorageOptions> = {
@@ -68,12 +70,9 @@ type VercelBlobStoragePlugin = (vercelBlobStorageOpts: VercelBlobStorageOptions)
 export const vercelBlobStorage: VercelBlobStoragePlugin =
   (options: VercelBlobStorageOptions) =>
   (incomingConfig: Config): Config => {
-    if (options.enabled === false) {
+    // If the plugin is disabled or no token is provided, do not enable the plugin
+    if (options.enabled === false || !options.token) {
       return incomingConfig
-    }
-
-    if (!options.token) {
-      throw new Error('The token argument is required for the Vercel Blob adapter.')
     }
 
     // Parse storeId from token
@@ -136,10 +135,15 @@ function vercelBlobStorageInternal(
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, token } = options
+
+    if (!token) {
+      throw new Error('Vercel Blob storage token is required')
+    }
+
     return {
       name: 'vercel-blob',
       generateURL: getGenerateUrl({ baseUrl, prefix }),
-      handleDelete: getHandleDelete({ baseUrl, prefix, token: options.token }),
+      handleDelete: getHandleDelete({ baseUrl, prefix, token }),
       handleUpload: getHandleUpload({
         access,
         addRandomSuffix,

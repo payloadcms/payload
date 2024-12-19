@@ -259,7 +259,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rows.map((row, i) => {
-            const { blockType } = row
+            const { blockType, isLoading } = row
             const blockConfig = blocks.find((block) => block.slug === blockType)
 
             if (blockConfig) {
@@ -281,6 +281,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
+                      isLoading={isLoading}
                       isSortable={isSortable}
                       Label={Label}
                       labels={labels}

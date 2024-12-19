@@ -1,5 +1,3 @@
-import type { QueryPromise } from 'drizzle-orm'
-
 export type ChainedMethods = {
   args: unknown[]
   method: string
@@ -10,7 +8,7 @@ export type ChainedMethods = {
  * @param methods
  * @param query
  */
-const chainMethods = <T>({ methods, query }): QueryPromise<T> => {
+const chainMethods = <T>({ methods, query }: { methods: ChainedMethods; query: T }): T => {
   return methods.reduce((query, { args, method }) => {
     return query[method](...args)
   }, query)

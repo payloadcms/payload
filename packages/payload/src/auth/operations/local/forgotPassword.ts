@@ -14,7 +14,7 @@ export type Options<T extends CollectionSlug> = {
   }
   disableEmail?: boolean
   expiration?: number
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
 }
 
 async function localForgotPassword<T extends CollectionSlug>(

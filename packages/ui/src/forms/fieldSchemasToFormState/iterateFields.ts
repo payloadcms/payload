@@ -102,6 +102,7 @@ export const iterateFields = async ({
 
   fields.forEach((field, fieldIndex) => {
     let passesCondition = true
+
     if (!skipConditionChecks) {
       passesCondition = Boolean(
         (field?.admin?.condition

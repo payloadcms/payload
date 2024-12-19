@@ -49,6 +49,7 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
       }
 
       const key = getKeyFromFilename(retrievedDoc, filename)
+
       if (!key) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
@@ -67,10 +68,25 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
 
       const blob = await response.blob()
 
+      const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
+      const objectEtag = response.headers.get('etag') as string
+
+      if (etagFromHeaders && etagFromHeaders === objectEtag) {
+        return new Response(null, {
+          headers: new Headers({
+            'Content-Length': String(blob.size),
+            'Content-Type': blob.type,
+            ETag: objectEtag,
+          }),
+          status: 304,
+        })
+      }
+
       return new Response(blob, {
         headers: new Headers({
           'Content-Length': String(blob.size),
           'Content-Type': blob.type,
+          ETag: objectEtag,
         }),
         status: 200,
       })

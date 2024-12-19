@@ -11,6 +11,7 @@ import { blocksDoc } from './collections/Blocks/shared.js'
 import { codeDoc } from './collections/Code/shared.js'
 import { collapsibleDoc } from './collections/Collapsible/shared.js'
 import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
+import { customRowID, customTabID, nonStandardID } from './collections/CustomID/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { anotherEmailDoc, emailDoc } from './collections/Email/shared.js'
 import { groupDoc } from './collections/Group/shared.js'
@@ -34,6 +35,9 @@ import {
   collapsibleFieldsSlug,
   collectionSlugs,
   conditionalLogicSlug,
+  customIDSlug,
+  customRowIDSlug,
+  customTabIDSlug,
   dateFieldsSlug,
   emailFieldsSlug,
   groupFieldsSlug,
@@ -491,6 +495,27 @@ export const seed = async (_payload: Payload) => {
       ],
     },
   })
+
+  await Promise.all([
+    _payload.create({
+      collection: customIDSlug,
+      data: {
+        id: nonStandardID,
+      },
+    }),
+    _payload.create({
+      collection: customTabIDSlug,
+      data: {
+        id: customTabID,
+      },
+    }),
+    _payload.create({
+      collection: customRowIDSlug,
+      data: {
+        id: customRowID,
+      },
+    }),
+  ])
 }
 
 export async function clearAndSeedEverything(_payload: Payload) {

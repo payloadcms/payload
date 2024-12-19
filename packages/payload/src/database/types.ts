@@ -191,7 +191,7 @@ export type QueryDraftsArgs = {
   locale?: string
   page?: number
   pagination?: boolean
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   sort?: Sort
   where?: Where
@@ -203,7 +203,7 @@ export type FindOneArgs = {
   collection: CollectionSlug
   joins?: JoinQuery
   locale?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   where?: Where
 }
@@ -219,7 +219,7 @@ export type FindArgs = {
   page?: number
   pagination?: boolean
   projection?: Record<string, unknown>
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   skip?: number
   sort?: Sort
@@ -232,7 +232,7 @@ export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 export type CountArgs = {
   collection: CollectionSlug
   locale?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   where?: Where
 }
 
@@ -243,7 +243,7 @@ export type CountVersions = (args: CountArgs) => Promise<{ totalDocs: number }>
 export type CountGlobalVersionArgs = {
   global: string
   locale?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   where?: Where
 }
 
@@ -254,7 +254,7 @@ type BaseVersionArgs = {
   locale?: string
   page?: number
   pagination?: boolean
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   skip?: number
   sort?: Sort
@@ -276,7 +276,7 @@ export type FindGlobalVersionsArgs = {
 
 export type FindGlobalArgs = {
   locale?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   slug: string
   where?: Where
@@ -289,7 +289,7 @@ export type UpdateGlobalVersionArgs<T = TypeWithID> = {
    * Additional database adapter specific options to pass to the query
    */
   options?: Record<string, unknown>
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   versionData: T
 } & (
@@ -313,7 +313,7 @@ export type FindGlobal = <T extends Record<string, unknown> = any>(
 
 export type CreateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   slug: string
 }
 export type CreateGlobal = <T extends Record<string, unknown> = any>(
@@ -326,7 +326,7 @@ export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
    * Additional database adapter specific options to pass to the query
    */
   options?: Record<string, unknown>
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   slug: string
 }
@@ -342,7 +342,7 @@ export type FindGlobalVersions = <T = TypeWithID>(
 export type DeleteVersionsArgs = {
   collection: CollectionSlug
   locale?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   sort?: {
     [key: string]: string
   }
@@ -356,7 +356,7 @@ export type CreateVersionArgs<T = TypeWithID> = {
   /** ID of the parent document for which the version should be created for */
   parent: number | string
   publishedLocale?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   snapshot?: true
   updatedAt: string
@@ -374,7 +374,7 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   /** ID of the parent document for which the version should be created for */
   parent: number | string
   publishedLocale?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   snapshot?: true
   updatedAt: string
@@ -394,7 +394,7 @@ export type UpdateVersionArgs<T = TypeWithID> = {
    * Additional database adapter specific options to pass to the query
    */
   options?: Record<string, unknown>
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   versionData: T
 } & (
@@ -417,7 +417,7 @@ export type CreateArgs = {
   data: Record<string, unknown>
   draft?: boolean
   locale?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
 }
 
@@ -433,7 +433,7 @@ export type UpdateOneArgs = {
    * Additional database adapter specific options to pass to the query
    */
   options?: Record<string, unknown>
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
 } & (
   | {
@@ -453,7 +453,7 @@ export type UpsertArgs = {
   data: Record<string, unknown>
   joins?: JoinQuery
   locale?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   where: Where
 }
@@ -463,7 +463,7 @@ export type Upsert = (args: UpsertArgs) => Promise<Document>
 export type DeleteOneArgs = {
   collection: CollectionSlug
   joins?: JoinQuery
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   where: Where
 }
@@ -473,7 +473,7 @@ export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 export type DeleteManyArgs = {
   collection: CollectionSlug
   joins?: JoinQuery
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   where: Where
 }
 

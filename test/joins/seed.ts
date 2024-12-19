@@ -7,7 +7,9 @@ import { fileURLToPath } from 'url'
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
 import {
+  categoriesJoinRestrictedSlug,
   categoriesSlug,
+  collectionRestrictedSlug,
   collectionSlugs,
   hiddenPostsSlug,
   postsSlug,
@@ -89,6 +91,29 @@ export const seed = async (_payload) => {
     collection: postsSlug,
     data: {
       upload: uploadedImage.id,
+    },
+  })
+
+  const restrictedCategory = await _payload.create({
+    collection: categoriesJoinRestrictedSlug,
+    data: {
+      name: 'categoryJoinRestricted',
+    },
+  })
+  await _payload.create({
+    collection: collectionRestrictedSlug,
+    data: {
+      title: 'should not allow read',
+      canRead: false,
+      category: restrictedCategory.id,
+    },
+  })
+  await _payload.create({
+    collection: collectionRestrictedSlug,
+    data: {
+      title: 'should allow read',
+      canRead: true,
+      category: restrictedCategory.id,
     },
   })
 }

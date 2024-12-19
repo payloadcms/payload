@@ -115,12 +115,21 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
       }
 
+      // map columns from string[] to ColumnPreferences
+      const defaultColumns = field.admin.defaultColumns
+        ? field.admin.defaultColumns.map((accessor) => ({
+            accessor,
+            active: true,
+          }))
+        : undefined
+
       const {
         data: newData,
         state: newColumnState,
         Table: NewTable,
       } = await getTableState({
         collectionSlug: relationTo,
+        columns: defaultColumns,
         docs,
         enableRowSelections: false,
         query: newQuery,
@@ -134,11 +143,12 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       setIsLoadingTable(false)
     },
     [
-      query,
       field.defaultLimit,
       field.defaultSort,
+      field.admin.defaultColumns,
       collectionConfig.admin.pagination.defaultLimit,
       collectionConfig.defaultSort,
+      query,
       filterOptions,
       getTableState,
       relationTo,

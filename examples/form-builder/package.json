@@ -30,7 +30,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-hook-form": "^7.41.0",
-    "react-select": "^5.8.0"
+    "react-select": "^5.9.0"
   },
   "devDependencies": {
     "@payloadcms/graphql": "latest",

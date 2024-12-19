@@ -47,7 +47,7 @@ export type Options<
   page?: number
   pagination?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: TSelect
   showHiddenFields?: boolean
   sort?: Sort

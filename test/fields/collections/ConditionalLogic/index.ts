@@ -18,9 +18,56 @@ const ConditionalLogic: CollectionConfig = {
       type: 'checkbox',
     },
     {
-      name: 'fieldToToggle',
+      name: 'fieldWithCondition',
       type: 'text',
-      required: true,
+      admin: {
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customFieldWithField',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomFieldWithField',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customFieldWithHOC',
+      label: 'Custom Field With HOC (legacy)',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomFieldWithHOC',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customClientFieldWithCondition',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomClientField',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'customServerFieldWithCondition',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomServerField',
+        },
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+    },
+    {
+      name: 'conditionalRichText',
+      type: 'richText',
       admin: {
         condition: ({ toggleField }) => Boolean(toggleField),
       },
@@ -91,6 +138,49 @@ const ConditionalLogic: CollectionConfig = {
       admin: {
         condition: ({ groupSelection }) => groupSelection === 'group2',
       },
+    },
+    {
+      name: 'enableConditionalFields',
+      type: 'checkbox',
+    },
+    {
+      name: 'arrayWithConditionalField',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'textWithCondition',
+          type: 'text',
+          admin: {
+            condition: (data) => data.enableConditionalFields,
+          },
+        },
+      ],
+    },
+    {
+      name: 'blocksWithConditionalField',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'blockWithConditionalField',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+            {
+              name: 'textWithCondition',
+              type: 'text',
+              admin: {
+                condition: (data) => data.enableConditionalFields,
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
 }

@@ -48,6 +48,3 @@ export const globalSlugs = [
   hiddenGlobalSlug,
   noApiViewGlobalSlug,
 ]
-
-export const customIdCollectionSlug = 'customId'
-export const customIdCollectionId = '111111111111111111111111'

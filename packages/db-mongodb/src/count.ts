@@ -1,18 +1,20 @@
 import type { CountOptions } from 'mongodb'
-import type { Count, PayloadRequest } from 'payload'
+import type { Count } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { getSession } from './utilities/getSession.js'
 
 export const count: Count = async function count(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  { collection, locale, req, where },
 ) {
   const Model = this.collections[collection]
-  const options: CountOptions = await withSession(this, req)
+  const options: CountOptions = {
+    session: await getSession(this, req),
+  }
 
   let hasNearConstraint = false
 

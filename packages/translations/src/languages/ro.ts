@@ -13,7 +13,7 @@ export const roTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Pentru a începe, creați primul utilizator.',
     changePassword: 'Schimbați parola',
     checkYourEmailForPasswordReset:
-      'Verificați emailul pentru un link care vă va permite să vă resetați parola în siguranță.',
+      'Dacă adresa de e-mail este asociată cu un cont, veți primi în curând instrucțiuni pentru resetarea parolei voastre. Vă rugăm să verificați dosarul de spam sau de mesaje nedorite dacă nu vedeți e-mailul în inbox-ul dvs.',
     confirmGeneration: 'Confirmați generarea',
     confirmPassword: 'Confirmați parola',
     createFirstUser: 'Creați primul utilizator',

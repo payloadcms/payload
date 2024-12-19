@@ -20,7 +20,6 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { customAdminRoutes } from '../../shared.js'
 import {
-  customIdCollectionId,
   disableDuplicateSlug,
   geoCollectionSlug,
   globalSlug,
@@ -544,7 +543,7 @@ describe('admin3', () => {
         defaultValueField: 'not the default value',
       }
       const updatedPostTitle = `${post1Title} (Updated)`
-      await Promise.all([createPost(postData)])
+      await createPost(postData)
       await page.goto(postsUrl.list)
       await page.locator('input#select-all').check()
       await page.locator('.edit-many__toggle').click()
@@ -650,24 +649,6 @@ describe('admin3', () => {
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
-    })
-  })
-
-  describe('custom IDs', () => {
-    test('unnamed tab — should allow custom ID field', async () => {
-      await page.goto(postsUrl.collection('customIdTab') + '/' + customIdCollectionId)
-
-      const idField = page.locator('#field-id')
-
-      await expect(idField).toHaveValue(customIdCollectionId)
-    })
-
-    test('row — should allow custom ID field', async () => {
-      await page.goto(postsUrl.collection('customIdRow') + '/' + customIdCollectionId)
-
-      const idField = page.locator('#field-id')
-
-      await expect(idField).toHaveValue(customIdCollectionId)
     })
   })
 })

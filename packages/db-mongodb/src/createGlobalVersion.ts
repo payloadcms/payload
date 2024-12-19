@@ -1,14 +1,11 @@
-import {
-  buildVersionGlobalFields,
-  type CreateGlobalVersion,
-  type Document,
-  type PayloadRequest,
-} from 'payload'
+import type { CreateOptions } from 'mongoose'
+
+import { buildVersionGlobalFields, type CreateGlobalVersion, type Document } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getSession } from './utilities/getSession.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: MongooseAdapter,
@@ -18,14 +15,16 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     globalSlug,
     parent,
     publishedLocale,
-    req = {} as PayloadRequest,
+    req,
     snapshot,
     updatedAt,
     versionData,
   },
 ) {
   const VersionModel = this.versions[globalSlug]
-  const options = await withSession(this, req)
+  const options: CreateOptions = {
+    session: await getSession(this, req),
+  }
 
   const data = sanitizeRelationshipIDs({
     config: this.payload.config,

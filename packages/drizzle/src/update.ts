@@ -8,12 +8,13 @@ import { buildFindManyArgs } from './find/buildFindManyArgs.js'
 import buildQuery from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: DrizzleAdapter,
   { id, collection: collectionSlug, data, joins: joinQuery, locale, req, select, where: whereArg },
 ) {
-  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
+  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   const whereToUse = whereArg || { id: { equals: id } }

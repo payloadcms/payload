@@ -118,10 +118,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
       value,
     }),
     [
-      field?.errorMessage,
-      field?.rows,
-      field?.valid,
-      field?.errorPaths,
+      field,
       processing,
       setValue,
       showError,
@@ -131,7 +128,6 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
       path,
       filterOptions,
       initializing,
-      field?.customComponents,
     ],
   )
 

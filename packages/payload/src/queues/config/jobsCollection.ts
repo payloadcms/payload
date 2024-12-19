@@ -13,18 +13,22 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
 
-  config.jobs?.workflows.forEach((workflow) => {
-    workflowSlugs.add(workflow.slug)
-  })
+  if (config.jobs?.workflows.length) {
+    config.jobs?.workflows.forEach((workflow) => {
+      workflowSlugs.add(workflow.slug)
+    })
+  }
 
-  config.jobs.tasks.forEach((task) => {
-    if (workflowSlugs.has(task.slug)) {
-      throw new Error(
-        `Task slug "${task.slug}" is already used by a workflow. No tasks are allowed to have the same slug as a workflow.`,
-      )
-    }
-    taskSlugs.add(task.slug)
-  })
+  if (config.jobs?.tasks.length) {
+    config.jobs.tasks.forEach((task) => {
+      if (workflowSlugs.has(task.slug)) {
+        throw new Error(
+          `Task slug "${task.slug}" is already used by a workflow. No tasks are allowed to have the same slug as a workflow.`,
+        )
+      }
+      taskSlugs.add(task.slug)
+    })
+  }
 
   const jobsCollection: CollectionConfig = {
     slug: 'payload-jobs',

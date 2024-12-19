@@ -13,7 +13,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Za početak, izradite prvog korisnika.',
     changePassword: 'Promijeni lozinku',
     checkYourEmailForPasswordReset:
-      'Provjerite e-mail s poveznicom koja će Vam omogućiti sigurnu promjenu lozinke.',
+      'Ako je e-mail adresa povezana s računom, uskoro ćete primiti upute za resetiranje lozinke. Molimo provjerite svoju mapu za neželjenu poštu ili spam ako ne vidite e-mail u svojoj pristigloj pošti.',
     confirmGeneration: 'Potvrdi generiranje',
     confirmPassword: 'Potvrdi lozinku',
     createFirstUser: 'Izradi prvog korisnika',

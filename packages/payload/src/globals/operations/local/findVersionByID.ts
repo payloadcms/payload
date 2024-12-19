@@ -29,7 +29,7 @@ export type Options<TSlug extends GlobalSlug, TDepth extends AllowedDepth = Defa
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   showHiddenFields?: boolean
   slug: TSlug

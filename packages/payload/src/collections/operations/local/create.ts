@@ -49,7 +49,7 @@ export type Options<
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: TSelect
   showHiddenFields?: boolean
   user?: Document

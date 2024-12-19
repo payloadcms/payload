@@ -1,7 +1,6 @@
-import type { PayloadRequest } from 'payload'
-
 import {
   commitTransaction,
+  createLocalReq,
   getMigrations,
   initTransaction,
   killTransaction,
@@ -10,6 +9,7 @@ import {
 
 import type { DrizzleAdapter } from './types.js'
 
+import { getTransaction } from './utilities/getTransaction.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'
 
@@ -39,12 +39,12 @@ export async function migrateDown(this: DrizzleAdapter): Promise<void> {
     }
 
     const start = Date.now()
-    const req = { payload } as PayloadRequest
+    const req = await createLocalReq({}, payload)
 
     try {
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })
       await initTransaction(req)
-      const db = this.sessions[await req.transactionID]?.db || this.drizzle
+      const db = await getTransaction(this, req)
       await migrationFile.down({ db, payload, req })
       payload.logger.info({
         msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,

@@ -19,6 +19,7 @@ type Args = {
   joins: BuildQueryJoinAliases
   locale: string
   selectFields: Record<string, GenericColumn>
+  selectLocale?: boolean
   tableName: string
   where: Where
 }
@@ -29,6 +30,7 @@ export function parseParams({
   joins,
   locale,
   selectFields,
+  selectLocale,
   tableName,
   where,
 }: Args): SQL {
@@ -53,6 +55,7 @@ export function parseParams({
             joins,
             locale,
             selectFields,
+            selectLocale,
             tableName,
             where: condition,
           })
@@ -86,6 +89,7 @@ export function parseParams({
                   locale,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
+                  selectLocale,
                   tableName,
                   value: val,
                 })

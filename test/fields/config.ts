@@ -12,7 +12,9 @@ import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import ConditionalLogic from './collections/ConditionalLogic/index.js'
-import { CustomIdCollection } from './collections/CustomID/index.js'
+import { CustomRowID } from './collections/CustomID/CustomRowID.js'
+import { CustomTabID } from './collections/CustomID/CustomTabID.js'
+import { CustomID } from './collections/CustomID/index.js'
 import DateFields from './collections/Date/index.js'
 import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
@@ -72,7 +74,9 @@ export const collectionSlugs: CollectionConfig[] = [
   CodeFields,
   CollapsibleFields,
   ConditionalLogic,
-  CustomIdCollection,
+  CustomID,
+  CustomTabID,
+  CustomRowID,
   DateFields,
   EmailFields,
   RadioFields,

@@ -82,12 +82,14 @@ export const Auth: React.FC<Props> = (props) => {
       if (showPasswordFields) {
         setValidateBeforeSubmit(true)
         setSchemaPathSegments([`_${collectionSlug}`, 'auth'])
+
         dispatchFields({
           type: 'UPDATE',
           errorMessage: t('validation:required'),
           path: 'password',
           valid: false,
         })
+
         dispatchFields({
           type: 'UPDATE',
           errorMessage: t('validation:required'),
@@ -157,9 +159,6 @@ export const Auth: React.FC<Props> = (props) => {
                 autoComplete="new-password"
                 field={{
                   name: 'password',
-                  admin: {
-                    disabled,
-                  },
                   label: t('authentication:newPassword'),
                   required: true,
                 }}

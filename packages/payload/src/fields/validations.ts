@@ -232,8 +232,8 @@ export const username: UsernameFieldValidation = (
     return t('validation:shorterThanMax', { maxLength })
   }
 
-  if ((value && !/^[\w.-]+$/.test(value)) || (!value && required)) {
-    return t('validation:username')
+  if (!value && required) {
+    return t('validation:required')
   }
 
   return true

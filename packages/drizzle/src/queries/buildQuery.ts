@@ -18,6 +18,7 @@ type BuildQueryArgs = {
   fields: FlattenedField[]
   joins?: BuildQueryJoinAliases
   locale?: string
+  selectLocale?: boolean
   sort?: Sort
   tableName: string
   where: Where
@@ -37,6 +38,7 @@ const buildQuery = function buildQuery({
   fields,
   joins = [],
   locale,
+  selectLocale,
   sort,
   tableName,
   where: incomingWhere,
@@ -64,6 +66,7 @@ const buildQuery = function buildQuery({
       joins,
       locale,
       selectFields,
+      selectLocale,
       tableName,
       where: incomingWhere,
     })

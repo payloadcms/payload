@@ -70,6 +70,7 @@
     "jwt-decode": "4.0.0",
     "mongoose": "8.8.3",
     "next": "15.0.3",
+    "nodemailer": "6.9.10",
     "payload": "workspace:*",
     "qs-esm": "7.0.2",
     "react": "19.0.0",

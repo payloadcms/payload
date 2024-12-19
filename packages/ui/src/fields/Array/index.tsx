@@ -276,7 +276,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rowsData.map((rowData, i) => {
-            const { id: rowID } = rowData
+            const { id: rowID, isLoading } = rowData
 
             const rowPath = `${path}.${i}`
 
@@ -296,6 +296,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
+                    isLoading={isLoading}
                     isSortable={isSortable}
                     labels={labels}
                     moveRow={moveRow}

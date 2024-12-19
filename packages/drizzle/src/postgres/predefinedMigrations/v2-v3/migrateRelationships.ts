@@ -2,8 +2,7 @@ import type { FlattenedField, Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
 
-import type { TransactionPg } from '../../../types.js'
-import type { BasePostgresAdapter } from '../../types.js'
+import type { BasePostgresAdapter, PostgresDB } from '../../types.js'
 import type { DocsToResave, PathsToQuery } from './types.js'
 
 import { fetchAndResave } from './fetchAndResave/index.js'
@@ -11,7 +10,7 @@ import { fetchAndResave } from './fetchAndResave/index.js'
 type Args = {
   adapter: BasePostgresAdapter
   collectionSlug?: string
-  db: TransactionPg
+  db: PostgresDB
   debug: boolean
   fields: FlattenedField[]
   globalSlug?: string
@@ -95,7 +94,7 @@ export const migrateRelationships = async ({
       globalSlug,
       isVersions,
       payload,
-      req: req as unknown as PayloadRequest,
+      req,
       tableName,
     })
   }

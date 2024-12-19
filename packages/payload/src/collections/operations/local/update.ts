@@ -54,7 +54,7 @@ export type BaseOptions<
   overwriteExistingFiles?: boolean
   populate?: PopulateType
   publishSpecificLocale?: string
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: TSelect
   showHiddenFields?: boolean
   user?: Document

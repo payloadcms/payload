@@ -15,7 +15,7 @@ export type Options<TSlug extends CollectionSlug> = {
   disableErrors?: boolean
   locale?: TypedLocale
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   user?: Document
   where?: Where
 }

@@ -17,7 +17,7 @@ import { baseIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import { validations } from '../validations.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
-import { fieldAffectsData, tabHasName } from './types.js'
+import { fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
 type Args = {
   collectionConfig?: CollectionConfig
@@ -249,7 +249,7 @@ export const sanitizeFields = async ({
           ? `${joinPath ? joinPath + '.' : ''}${field.name}`
           : joinPath,
         joins,
-        parentIsLocalized: parentIsLocalized || field.localized,
+        parentIsLocalized: parentIsLocalized || fieldIsLocalized(field),
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
         validRelationships,

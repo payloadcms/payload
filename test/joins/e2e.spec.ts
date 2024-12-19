@@ -18,7 +18,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
+import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -26,20 +26,31 @@ const dirname = path.dirname(filename)
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 
-test.describe('Admin Panel', () => {
+test.describe('Join Field', () => {
   let page: Page
   let categoriesURL: AdminUrlUtil
   let uploadsURL: AdminUrlUtil
-  let postsURL: AdminUrlUtil
+  let categoriesJoinRestrictedURL: AdminUrlUtil
+  let categoryID
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
-    postsURL = new AdminUrlUtil(serverURL, postsSlug)
     categoriesURL = new AdminUrlUtil(serverURL, categoriesSlug)
     uploadsURL = new AdminUrlUtil(serverURL, uploadsSlug)
+    categoriesJoinRestrictedURL = new AdminUrlUtil(serverURL, categoriesJoinRestrictedSlug)
+    const { docs } = await payload.find({
+      collection: categoriesSlug,
+      where: {
+        name: {
+          equals: 'example',
+        },
+      },
+    })
+
+    ;({ id: categoryID } = docs[0])
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -111,8 +122,8 @@ test.describe('Admin Panel', () => {
     const joinField = page.locator('#field-hiddenPosts.field-type.join')
     await expect(joinField).toBeVisible()
     await expect(joinField.locator('.relationship-table table')).toBeVisible()
-    const columns = await joinField.locator('.relationship-table tbody tr').count()
-    expect(columns).toBe(1)
+    const columns = joinField.locator('.relationship-table tbody tr')
+    await expect(columns).toHaveCount(1)
     const button = joinField.locator('button.doc-drawer__toggler.relationship-table__add-new')
     await expect(button).toBeVisible()
     await button.click()
@@ -122,9 +133,7 @@ test.describe('Admin Panel', () => {
     await expect(titleField).toBeVisible()
     await titleField.fill('Test Hidden Post')
     await drawer.locator('button[id="action-save"]').click()
-    await expect(joinField.locator('.relationship-table tbody tr')).toBeVisible()
-    const newColumns = await joinField.locator('.relationship-table tbody tr').count()
-    expect(newColumns).toBe(2)
+    await expect(joinField.locator('.relationship-table tbody tr.row-2')).toBeVisible()
   })
 
   test('should render the create page and create doc with the join field', async () => {
@@ -152,11 +161,10 @@ test.describe('Admin Panel', () => {
   })
 
   test('should render collection type in first column of relationship table', async () => {
-    await navigateToDoc(page, categoriesURL)
+    await page.goto(categoriesURL.edit(categoryID))
     const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
-    const collectionTypeColumn = joinField.locator('thead tr th#heading-collection:first-child')
-    const text = collectionTypeColumn
+    const text = joinField.locator('thead tr th#heading-collection:first-child')
     await expect(text).toHaveText('Type')
     const cells = joinField.locator('.relationship-table tbody tr td:first-child .pill__label')
 
@@ -171,7 +179,7 @@ test.describe('Admin Panel', () => {
   })
 
   test('should render drawer toggler without document link in second column of relationship table', async () => {
-    await navigateToDoc(page, categoriesURL)
+    await page.goto(categoriesURL.edit(categoryID))
     const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
     const actionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
@@ -203,27 +211,39 @@ test.describe('Admin Panel', () => {
   })
 
   test('should sort relationship table by clicking on column headers', async () => {
-    await navigateToDoc(page, categoriesURL)
-    const joinField = page.locator('#field-relatedPosts.field-type.join')
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-group__relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
     const titleColumn = joinField.locator('thead tr th#heading-title')
     const titleAscButton = titleColumn.locator('button.sort-column__asc')
     await expect(titleAscButton).toBeVisible()
     await titleAscButton.click()
-    await expect(joinField.locator('tbody tr:first-child td:nth-child(2)')).toHaveText(
-      'Test Post 1',
-    )
+    await expect(joinField.locator('tbody .row-1')).toContainText('Test Post 1')
 
     const titleDescButton = titleColumn.locator('button.sort-column__desc')
     await expect(titleDescButton).toBeVisible()
     await titleDescButton.click()
-    await expect(joinField.locator('tbody tr:first-child td:nth-child(2)')).toHaveText(
-      'Test Post 3',
-    )
+    await expect(joinField.locator('tbody .row-1')).toContainText('Test Post 3')
+  })
+
+  test('should display relationship table with columns from admin.defaultColumns', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-group__relatedPosts.field-type.join')
+    const thead = joinField.locator('.relationship-table thead')
+    await expect(thead).toContainText('ID')
+    await expect(thead).toContainText('Created At')
+    await expect(thead).toContainText('Title')
+    const innerText = await thead.innerText()
+
+    // expect the order of columns to be 'ID', 'Created At', 'Title'
+    // eslint-disable-next-line payload/no-flaky-assertions
+    expect(innerText.indexOf('ID')).toBeLessThan(innerText.indexOf('Created At'))
+    // eslint-disable-next-line payload/no-flaky-assertions
+    expect(innerText.indexOf('Created At')).toBeLessThan(innerText.indexOf('Title'))
   })
 
   test('should update relationship table when new document is created', async () => {
-    await navigateToDoc(page, categoriesURL)
+    await page.goto(categoriesURL.edit(categoryID))
     const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
 
@@ -253,8 +273,8 @@ test.describe('Admin Panel', () => {
   })
 
   test('should update relationship table when document is updated', async () => {
-    await navigateToDoc(page, categoriesURL)
-    const joinField = page.locator('#field-relatedPosts.field-type.join')
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-group__relatedPosts.field-type.join')
     await expect(joinField).toBeVisible()
     const editButton = joinField.locator(
       'tbody tr:first-child td:nth-child(2) button.doc-drawer__toggler',
@@ -268,9 +288,7 @@ test.describe('Admin Panel', () => {
     await titleField.fill('Test Post 1 Updated')
     await drawer.locator('button[id="action-save"]').click()
     await expect(drawer).toBeHidden()
-    await expect(joinField.locator('tbody tr:first-child td:nth-child(2)')).toHaveText(
-      'Test Post 1 Updated',
-    )
+    await expect(joinField.locator('tbody .row-1')).toContainText('Test Post 1 Updated')
   })
 
   test('should render empty relationship table when creating new document', async () => {
@@ -309,5 +327,15 @@ test.describe('Admin Panel', () => {
         hasText: exactText('Edited title for upload'),
       }),
     ).toBeVisible()
+  })
+
+  test('should render initial rows within relationship table respecting access control', async () => {
+    await navigateToDoc(page, categoriesJoinRestrictedURL)
+    const joinField = page.locator('#field-collectionRestrictedJoin.field-type.join')
+    await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
+    const rows = joinField.locator('.relationship-table tbody tr')
+    await expect(rows).toHaveCount(1)
+    await expect(joinField.locator('.cell-canRead')).not.toContainText('false')
   })
 })

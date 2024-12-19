@@ -11,6 +11,7 @@ export type Resolver = (
     limit?: number
     locale?: string
     page?: number
+    pagination?: boolean
     sort?: string
     where: Where
   },
@@ -26,6 +27,7 @@ export function findVersions(globalConfig: SanitizedGlobalConfig): Resolver {
       globalConfig,
       limit: args.limit,
       page: args.page,
+      pagination: args.pagination,
       req: isolateObjectProperty(context.req, 'transactionID'),
       sort: args.sort,
       where: args.where,

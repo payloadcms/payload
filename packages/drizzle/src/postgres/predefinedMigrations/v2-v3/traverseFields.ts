@@ -2,15 +2,14 @@ import type { FlattenedField, Payload } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { TransactionPg } from '../../../types.js'
-import type { BasePostgresAdapter } from '../../types.js'
+import type { BasePostgresAdapter, PostgresDB } from '../../types.js'
 import type { PathsToQuery } from './types.js'
 
 type Args = {
   adapter: BasePostgresAdapter
   collectionSlug?: string
   columnPrefix: string
-  db: TransactionPg
+  db: PostgresDB
   disableNotNull: boolean
   fields: FlattenedField[]
   globalSlug?: string

@@ -1392,6 +1392,7 @@ export type {
 } from './queues/config/types/taskTypes.js'
 export type {
   BaseJob,
+  JobLog,
   JobTaskStatus,
   RunningJob,
   SingleTaskStatus,
@@ -1399,6 +1400,7 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
