@@ -14,7 +14,10 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { PopupList } from '../Popup/index.js'
 
-export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolean }> = ({
+  label: labelProp,
+  uploadInProgress,
+}) => {
   const {
     id,
     collectionSlug,
@@ -157,6 +160,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
           : undefined
       }
       type="button"
+      uploadInProgress={uploadInProgress}
     >
       {label}
     </FormSubmit>

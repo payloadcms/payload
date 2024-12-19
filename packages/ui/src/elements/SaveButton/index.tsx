@@ -9,7 +9,10 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
-export const SaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+export const SaveButton: React.FC<{ label?: string; uploadInProgress?: boolean }> = ({
+  label: labelProp,
+  uploadInProgress,
+}) => {
   const { t } = useTranslation()
   const { submit } = useForm()
   const modified = useFormModified()
@@ -42,6 +45,7 @@ export const SaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) =
       ref={ref}
       size="medium"
       type="button"
+      uploadInProgress={uploadInProgress}
     >
       {label}
     </FormSubmit>

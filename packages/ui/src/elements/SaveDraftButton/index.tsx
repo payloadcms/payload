@@ -14,7 +14,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'save-draft'
 
-export const SaveDraftButton: React.FC = () => {
+export const SaveDraftButton: React.FC<{ uploadInProgress?: boolean }> = ({ uploadInProgress }) => {
   const {
     config: {
       routes: { api },
@@ -98,6 +98,7 @@ export const SaveDraftButton: React.FC = () => {
       ref={ref}
       size="medium"
       type="button"
+      uploadInProgress={uploadInProgress}
     >
       {t('version:saveDraft')}
     </FormSubmit>
