@@ -192,6 +192,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
 
+  if (configWithDefaults.kv.kvCollection) {
+    configWithDefaults.collections.push(configWithDefaults.kv.kvCollection)
+  }
+
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
   for (let i = 0; i < config.collections.length; i++) {
     config.collections[i] = await sanitizeCollection(
