@@ -25,6 +25,9 @@ jest.spyOn(nodemailer, 'createTestAccount').mockImplementation(() => {
   })
 })
 
-const dbAdapter = process.env.PAYLOAD_DATABASE || 'mongodb'
+if (!process.env.PAYLOAD_DATABASE) {
+  // Mutate env so we can use conditions by DB adapter in tests properly without ignoring // eslint no-jest-conditions.
+  process.env.PAYLOAD_DATABASE = 'sqlite-uuid'
+}
 
-generateDatabaseAdapter(dbAdapter)
+generateDatabaseAdapter(process.env.PAYLOAD_DATABASE)
