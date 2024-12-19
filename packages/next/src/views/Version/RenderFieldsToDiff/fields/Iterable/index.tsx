@@ -7,7 +7,7 @@ import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
-import FieldDiffCollapser from '../../FieldDiffCollapser/index.js'
+import { FieldDiffCollapser } from '../../FieldDiffCollapser/index.js'
 import RenderFieldsToDiff from '../../index.js'
 import './index.scss'
 
@@ -31,6 +31,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
     <div className={baseClass}>
       <FieldDiffCollapser
         comparison={comparison}
+        isIterable
         label={
           'label' in field &&
           field.label &&
@@ -100,6 +101,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
               return (
                 <FieldDiffCollapser
                   comparison={comparisonRow}
+                  fields={fields}
                   key={i}
                   label={iterableItemLabel}
                   version={versionRow}
