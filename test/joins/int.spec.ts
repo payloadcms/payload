@@ -94,6 +94,8 @@ describe('Joins Field', () => {
           category: category.id,
           camelCaseCategory: category.id,
         },
+        array: [{ category: category.id }],
+        blocks: [{ blockType: 'block', category: category.id }],
       })
     }
   })
@@ -181,6 +183,24 @@ describe('Joins Field', () => {
     expect(docs[0].group.camelCaseCategory.id).toBeDefined()
     expect(docs[0].group.camelCaseCategory.name).toBeDefined()
     expect(docs[0].group.camelCaseCategory.group.camelCasePosts.docs).toHaveLength(10)
+  })
+
+  it('should populate joins with array relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
+  })
+
+  it('should populate joins with blocks relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.blocksPosts.docs).toBeDefined()
   })
 
   it('should populate uploads in joins', async () => {

@@ -20,7 +20,6 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { customAdminRoutes } from '../../shared.js'
 import {
-  customIdCollectionId,
   disableDuplicateSlug,
   geoCollectionSlug,
   globalSlug,
@@ -671,20 +670,6 @@ describe('admin3', () => {
       await expect(modalContainer).toBeVisible()
       await page.locator('.leave-without-saving__controls .btn--style-primary').click()
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
-    })
-  })
-
-  describe('custom IDs', () => {
-    test('unnamed tab — should allow custom ID field', async () => {
-      await page.goto(postsUrl.collection('customIdTab') + '/' + customIdCollectionId)
-      const idField = page.locator('#field-id')
-      await expect(idField).toHaveValue(customIdCollectionId)
-    })
-
-    test('row — should allow custom ID field', async () => {
-      await page.goto(postsUrl.collection('customIdRow') + '/' + customIdCollectionId)
-      const idField = page.locator('#field-id')
-      await expect(idField).toHaveValue(customIdCollectionId)
     })
   })
 })

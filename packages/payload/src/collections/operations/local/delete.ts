@@ -27,7 +27,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   overrideAccess?: boolean
   overrideLock?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: TSelect
   showHiddenFields?: boolean
   user?: Document

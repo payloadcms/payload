@@ -104,6 +104,18 @@ export const Categories: CollectionConfig = {
       ],
     },
     {
+      name: 'arrayPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'array.category',
+    },
+    {
+      name: 'blocksPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'blocks.category',
+    },
+    {
       name: 'singulars',
       type: 'join',
       collection: singularSlug,

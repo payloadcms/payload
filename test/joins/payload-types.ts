@@ -36,6 +36,8 @@ export interface Config {
       hasManyPostsLocalized: 'posts';
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
+      arrayPosts: 'posts';
+      blocksPosts: 'posts';
       filtered: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
@@ -125,6 +127,20 @@ export interface Post {
     category?: (string | null) | Category;
     camelCaseCategory?: (string | null) | Category;
   };
+  array?:
+    | {
+        category?: (string | null) | Category;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        category?: (string | null) | Category;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -183,6 +199,14 @@ export interface Category {
       hasNextPage?: boolean | null;
     } | null;
   };
+  arrayPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  blocksPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   singulars?: {
     docs?: (string | Singular)[] | null;
     hasNextPage?: boolean | null;
@@ -463,6 +487,23 @@ export interface PostsSelect<T extends boolean = true> {
         category?: T;
         camelCaseCategory?: T;
       };
+  array?:
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              category?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -482,6 +523,8 @@ export interface CategoriesSelect<T extends boolean = true> {
         relatedPosts?: T;
         camelCasePosts?: T;
       };
+  arrayPosts?: T;
+  blocksPosts?: T;
   singulars?: T;
   filtered?: T;
   updatedAt?: T;

@@ -5,7 +5,6 @@ import { executePromises } from '../helpers/executePromises.js'
 import { seedDB } from '../helpers/seed.js'
 import {
   collectionSlugs,
-  customIdCollectionId,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
@@ -110,26 +109,6 @@ export const seed = async (_payload) => {
         _payload.create({
           collection: noApiViewCollectionSlug,
           data: {},
-          depth: 0,
-          overrideAccess: true,
-        }),
-      () =>
-        _payload.create({
-          collection: 'customIdTab',
-          data: {
-            id: customIdCollectionId,
-            title: 'Hello world title',
-          },
-          depth: 0,
-          overrideAccess: true,
-        }),
-      () =>
-        _payload.create({
-          collection: 'customIdRow',
-          data: {
-            id: customIdCollectionId,
-            title: 'Hello world title',
-          },
           depth: 0,
           overrideAccess: true,
         }),

@@ -115,6 +115,17 @@ const RelationshipFields: CollectionConfig = {
       minRows: 2,
       type: 'relationship',
     },
+    {
+      name: 'relationToRow',
+      relationTo: 'row-fields',
+      type: 'relationship',
+    },
+    {
+      name: 'relationToRowMany',
+      relationTo: 'row-fields',
+      type: 'relationship',
+      hasMany: true,
+    },
   ],
   slug: relationshipFieldsSlug,
 }
