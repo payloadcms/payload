@@ -18,14 +18,13 @@ export const FormSubmit: React.FC<Props> = (props) => {
     onClick,
     programmaticSubmit,
     ref,
-    uploadInProgress,
   } = props
 
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
   const { disabled, submit } = useForm()
 
-  const canSave = !(disabledFromProps || initializing || processing || disabled || uploadInProgress)
+  const canSave = !(disabledFromProps || initializing || processing || disabled)
 
   const handleClick =
     onClick ??

@@ -38,14 +38,13 @@ export const SaveButton: React.FC<{ label?: string; uploadInProgress?: boolean }
   return (
     <FormSubmit
       buttonId="action-save"
-      disabled={forceDisable}
+      disabled={forceDisable || uploadInProgress}
       onClick={() => {
         return void submit()
       }}
       ref={ref}
       size="medium"
       type="button"
-      uploadInProgress={uploadInProgress}
     >
       {label}
     </FormSubmit>

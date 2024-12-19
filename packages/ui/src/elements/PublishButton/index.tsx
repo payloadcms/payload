@@ -46,7 +46,8 @@ export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolea
   const label = labelProp || t('version:publishChanges')
 
   const hasNewerVersions = unpublishedVersionCount > 0
-  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !hasPublishedDoc)
+  const canPublish =
+    hasPublishPermission && (modified || hasNewerVersions || !hasPublishedDoc) && !uploadInProgress
   const operation = useOperation()
 
   const forceDisable = operation === 'update' && !modified
@@ -160,7 +161,6 @@ export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolea
           : undefined
       }
       type="button"
-      uploadInProgress={uploadInProgress}
     >
       {label}
     </FormSubmit>

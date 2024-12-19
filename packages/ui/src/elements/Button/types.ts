@@ -38,6 +38,5 @@ export type Props = {
   to?: string
   tooltip?: string
   type?: 'button' | 'submit'
-  uploadInProgress?: boolean
   url?: string
 }

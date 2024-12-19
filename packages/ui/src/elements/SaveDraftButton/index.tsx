@@ -91,14 +91,13 @@ export const SaveDraftButton: React.FC<{ uploadInProgress?: boolean }> = ({ uplo
       buttonId="action-save-draft"
       buttonStyle="secondary"
       className={baseClass}
-      disabled={forceDisable}
+      disabled={forceDisable || uploadInProgress}
       onClick={() => {
         return void saveDraft()
       }}
       ref={ref}
       size="medium"
       type="button"
-      uploadInProgress={uploadInProgress}
     >
       {t('version:saveDraft')}
     </FormSubmit>
