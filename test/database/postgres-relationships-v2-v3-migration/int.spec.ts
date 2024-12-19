@@ -6,9 +6,8 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const describe = process.env.PAYLOAD_DATABASE.includes('postgres')
-  ? global.describe
-  : global.describe.skip
+const describe =
+  process.env.PAYLOAD_DATABASE === 'postgres' ? global.describe : global.describe.skip
 
 describe('Postgres relationships v2-v3 migration', () => {
   it('should execute relationships v2-v3 migration', async () => {
