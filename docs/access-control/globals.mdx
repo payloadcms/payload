@@ -6,7 +6,7 @@ desc: Global-level Access Control is specified within each Global's `access` pro
 keywords: globals, access control, permissions, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Global Access Control is [Access Control](../overview) used to restrict access to [Global](../globals/overview) Documents, as well as what they can and cannot see within the [Admin Panel](../admin/overview) as it relates to that Global.
+Global Access Control is [Access Control](../overview) used to restrict access to [Global](../getting-started/concepts#globals) Documents, as well as what they can and cannot see within the [Admin Panel](../admin/overview) as it relates to that Global.
 
 To add Access Control to a Global, use the `access` property in your [Global Config](../configuration/globals):
 
@@ -25,7 +25,7 @@ export const GlobalWithAccessControl: GlobalConfig = {
 
 Access Control is specific to the operation of the request.
 
-To add Access Control to a [Global](../configuration/globals), use the `access` property in the [Global Config](../globals/overview):
+To add Access Control to a [Global](../configuration/globals), use the `access` property in the [Global Config](../configuration/globals):
 
 ```ts
 import { GlobalConfig } from 'payload'
@@ -63,7 +63,7 @@ If a Global supports [Versions](../versions/overview), the following additional 
 
 Returns a boolean result or optionally a [query constraint](../queries/overview) which limits who can read this global based on its current properties.
 
-To add read Access Control to a [Global](../configuration/globals), use the `read` property in the [Global Config](../globals/overview):
+To add read Access Control to a [Global](../configuration/globals), use the `read` property in the [Global Config](../configuration/globals):
 
 ```ts
 import { GlobalConfig } from 'payload'
@@ -90,7 +90,7 @@ The following arguments are provided to the `read` function:
 
 Returns a boolean result or optionally a [query constraint](../queries/overview) which limits who can update this global based on its current properties.
 
-To add update Access Control to a [Global](../configuration/globals), use the `access` property in the [Global Config](../globals/overview):
+To add update Access Control to a [Global](../configuration/globals), use the `access` property in the [Global Config](../configuration/globals):
 
 ```ts
 import { GlobalConfig } from 'payload'
@@ -118,7 +118,7 @@ The following arguments are provided to the `update` function:
 
 If the Global has [Versions](../versions/overview) enabled, the `readVersions` Access Control function determines whether or not the currently logged in user can access the version history of a Document.
 
-To add Read Versions Access Control to a Collection, use the `readVersions` property in the [Global Config](../globals/overview):
+To add Read Versions Access Control to a Collection, use the `readVersions` property in the [Global Config](../configuration/globals):
 
 ```ts
 import type { GlobalConfig } from 'payload'
