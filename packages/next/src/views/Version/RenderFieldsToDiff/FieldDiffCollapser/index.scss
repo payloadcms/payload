@@ -1,0 +1,28 @@
+.field-diff-collapser {
+  &__toggle-button {
+    all: unset;
+    cursor: pointer;
+    // Align the chevron visually with the label text
+    vertical-align: 1px;
+  }
+
+  &__label {
+    // Add space between label, chevron, and change count
+    margin: 0 calc(var(--base) * 0.25);
+  }
+
+  &__field-change-count {
+    // Reset the font weight of the change count to normal
+    font-weight: normal;
+  }
+
+  &__content {
+    // Indent the content, aligning it with the parent label
+    [dir='ltr'] & {
+      margin-left: 15px;
+    }
+    [dir='rtl'] & {
+      margin-right: 15px;
+    }
+  }
+}
