@@ -93,6 +93,7 @@ const getInitialDrawerData = ({
   if (field.type === 'blocks') {
     for (const block of field.blocks) {
       const blockInitialData = getInitialDrawerData({
+        collectionSlug,
         docID,
         fields: block.fields,
         segments: nextSegments,
