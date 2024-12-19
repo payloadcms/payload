@@ -18,7 +18,7 @@ export const getStaticHandler = (
   return async (req, { params: { filename } }) => {
     try {
       const prefix = await getFilePrefix({ collection, filename, req })
-      const fileKey = path.posix.join(prefix, filename)
+      const fileKey = path.posix.join(prefix, encodeURIComponent(filename))
 
       const fileUrl = `${baseUrl}/${fileKey}`
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
