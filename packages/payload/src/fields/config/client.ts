@@ -8,6 +8,7 @@ import type {
   ClientField,
   Field,
   FieldBase,
+  JoinFieldClient,
   LabelsClient,
   RadioFieldClient,
   RowFieldClient,
@@ -224,6 +225,16 @@ export const createClientField = ({
 
           field.blocks[i] = clientBlock
         }
+      }
+
+      break
+    }
+
+    case 'join': {
+      const field = clientField as JoinFieldClient
+
+      field.targetField = {
+        relationTo: field.targetField.relationTo,
       }
 
       break

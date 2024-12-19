@@ -38,6 +38,10 @@ export interface Config {
       'group.camelCasePosts': 'posts';
       arrayPosts: 'posts';
       blocksPosts: 'posts';
+      polymorphic: 'posts';
+      polymorphics: 'posts';
+      localizedPolymorphic: 'posts';
+      localizedPolymorphics: 'posts';
       filtered: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
@@ -123,6 +127,48 @@ export interface Post {
   category?: (string | null) | Category;
   categories?: (string | Category)[] | null;
   categoriesLocalized?: (string | Category)[] | null;
+  polymorphic?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  polymorphics?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'users';
+            value: string | User;
+          }
+      )[]
+    | null;
+  localizedPolymorphic?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  localizedPolymorphics?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'users';
+            value: string | User;
+          }
+      )[]
+    | null;
   group?: {
     category?: (string | null) | Category;
     camelCaseCategory?: (string | null) | Category;
@@ -207,6 +253,22 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  polymorphic?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  polymorphics?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  localizedPolymorphic?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  localizedPolymorphics?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   singulars?: {
     docs?: (string | Singular)[] | null;
     hasNextPage?: boolean | null;
@@ -238,6 +300,23 @@ export interface Singular {
   category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -346,23 +425,6 @@ export interface RestrictedPost {
   category?: (string | null) | RestrictedCategory;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -481,6 +543,10 @@ export interface PostsSelect<T extends boolean = true> {
   category?: T;
   categories?: T;
   categoriesLocalized?: T;
+  polymorphic?: T;
+  polymorphics?: T;
+  localizedPolymorphic?: T;
+  localizedPolymorphics?: T;
   group?:
     | T
     | {
@@ -525,6 +591,10 @@ export interface CategoriesSelect<T extends boolean = true> {
       };
   arrayPosts?: T;
   blocksPosts?: T;
+  polymorphic?: T;
+  polymorphics?: T;
+  localizedPolymorphic?: T;
+  localizedPolymorphics?: T;
   singulars?: T;
   filtered?: T;
   updatedAt?: T;

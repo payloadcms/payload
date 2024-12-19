@@ -1425,7 +1425,7 @@ export type JoinField = {
 export type JoinFieldClient = {
   admin?: AdminClient &
     Pick<JoinField['admin'], 'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'>
-} & FieldBaseClient &
+} & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
     JoinField,
     'collection' | 'defaultLimit' | 'defaultSort' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'
@@ -1451,6 +1451,10 @@ export type FlattenedTabAsField = {
   flattenedFields: FlattenedField[]
 } & MarkRequired<TabAsField, 'name'>
 
+export type FlattenedJoinField = {
+  targetField: RelationshipField | UploadField
+} & JoinField
+
 export type FlattenedField =
   | CheckboxField
   | CodeField
@@ -1459,8 +1463,8 @@ export type FlattenedField =
   | FlattenedArrayField
   | FlattenedBlocksField
   | FlattenedGroupField
+  | FlattenedJoinField
   | FlattenedTabAsField
-  | JoinField
   | JSONField
   | NumberField
   | PointField
