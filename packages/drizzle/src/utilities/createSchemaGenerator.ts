@@ -1,14 +1,10 @@
 import type { GenerateSchema } from 'payload'
 
-import { exec } from 'child_process'
 import { existsSync } from 'fs'
 import { writeFile } from 'fs/promises'
 import path from 'path'
-import { promisify } from 'util'
 
 import type { ColumnToCodeConverter, DrizzleAdapter } from '../types.js'
-
-const execAsync = promisify(exec)
 
 /**
  * @example
@@ -271,7 +267,7 @@ declare module '${this.packageName}/types' {
  */
 `
 
-    const code = [
+    let code = [
       warning,
       ...importDeclarationsSanitized,
       schemaDeclaration,
@@ -295,14 +291,17 @@ declare module '${this.packageName}/types' {
       }
     }
 
-    await writeFile(outputFile, code, 'utf-8')
-
     if (prettify) {
       try {
-        await execAsync(`npx prettier ${outputFile} --write`)
+        const prettier = await import('prettier')
+        const configPath = await prettier.resolveConfigFile()
+        const config = configPath ? await prettier.resolveConfig(configPath) : {}
+        code = await prettier.format(code, { ...config, parser: 'typescript' })
         // eslint-disable-next-line no-empty
       } catch {}
     }
+
+    await writeFile(outputFile, code, 'utf-8')
 
     if (log) {
       this.payload.logger.info(`Written ${outputFile}`)

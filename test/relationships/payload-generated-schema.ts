@@ -422,6 +422,26 @@ export const polymorphic_relationships = pgTable(
   }),
 )
 
+export const polymorphic_relationships_locales = pgTable(
+  'polymorphic_relationships_locales',
+  {
+    id: serial('id').primaryKey(),
+    _locale: enum__locales('_locale').notNull(),
+    _parentID: integer('_parent_id').notNull(),
+  },
+  (columns) => ({
+    _localeParent: uniqueIndex('polymorphic_relationships_locales_locale_parent_id_unique').on(
+      columns._locale,
+      columns._parentID,
+    ),
+    _parentIdFk: foreignKey({
+      columns: [columns['_parentID']],
+      foreignColumns: [polymorphic_relationships.id],
+      name: 'polymorphic_relationships_locales_parent_id_fk',
+    }).onDelete('cascade'),
+  }),
+)
+
 export const polymorphic_relationships_rels = pgTable(
   'polymorphic_relationships_rels',
   {
@@ -429,15 +449,17 @@ export const polymorphic_relationships_rels = pgTable(
     order: integer('order'),
     parent: integer('parent_id').notNull(),
     path: varchar('path').notNull(),
+    locale: enum__locales('locale'),
     moviesID: integer('movies_id'),
   },
   (columns) => ({
     order: index('polymorphic_relationships_rels_order_idx').on(columns.order),
     parentIdx: index('polymorphic_relationships_rels_parent_idx').on(columns.parent),
     pathIdx: index('polymorphic_relationships_rels_path_idx').on(columns.path),
+    localeIdx: index('polymorphic_relationships_rels_locale_idx').on(columns.locale),
     polymorphic_relationships_rels_movies_id_idx: index(
       'polymorphic_relationships_rels_movies_id_idx',
-    ).on(columns.moviesID),
+    ).on(columns.moviesID, columns.locale),
     parentFk: foreignKey({
       columns: [columns['parent']],
       foreignColumns: [polymorphic_relationships.id],
@@ -1093,6 +1115,16 @@ export const relations_movie_reviews = relations(movie_reviews, ({ one, many }) 
     relationName: '_rels',
   }),
 }))
+export const relations_polymorphic_relationships_locales = relations(
+  polymorphic_relationships_locales,
+  ({ one }) => ({
+    _parentID: one(polymorphic_relationships, {
+      fields: [polymorphic_relationships_locales._parentID],
+      references: [polymorphic_relationships.id],
+      relationName: '_locales',
+    }),
+  }),
+)
 export const relations_polymorphic_relationships_rels = relations(
   polymorphic_relationships_rels,
   ({ one }) => ({
@@ -1111,6 +1143,9 @@ export const relations_polymorphic_relationships_rels = relations(
 export const relations_polymorphic_relationships = relations(
   polymorphic_relationships,
   ({ many }) => ({
+    _locales: many(polymorphic_relationships_locales, {
+      relationName: '_locales',
+    }),
     _rels: many(polymorphic_relationships_rels, {
       relationName: '_rels',
     }),
@@ -1347,6 +1382,7 @@ type DatabaseSchema = {
   movie_reviews: typeof movie_reviews
   movie_reviews_rels: typeof movie_reviews_rels
   polymorphic_relationships: typeof polymorphic_relationships
+  polymorphic_relationships_locales: typeof polymorphic_relationships_locales
   polymorphic_relationships_rels: typeof polymorphic_relationships_rels
   tree: typeof tree
   pages_menu: typeof pages_menu
@@ -1377,6 +1413,7 @@ type DatabaseSchema = {
   relations_directors: typeof relations_directors
   relations_movie_reviews_rels: typeof relations_movie_reviews_rels
   relations_movie_reviews: typeof relations_movie_reviews
+  relations_polymorphic_relationships_locales: typeof relations_polymorphic_relationships_locales
   relations_polymorphic_relationships_rels: typeof relations_polymorphic_relationships_rels
   relations_polymorphic_relationships: typeof relations_polymorphic_relationships
   relations_tree: typeof relations_tree
