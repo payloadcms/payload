@@ -55,6 +55,7 @@ import type { Options as FindGlobalVersionsOptions } from './globals/operations/
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
 import type {
+  ApplyDepthInternal,
   ApplyDisableErrors,
   JsonObject,
   SelectType,
@@ -116,10 +117,15 @@ export interface GeneratedTypes {
   dbUntyped: {
     defaultIDType: number | string
   }
+  depthUntyped: {
+    allowed: number
+    decremented: number[]
+    default: number
+  }
+
   globalsSelectUntyped: {
     [slug: string]: SelectType
   }
-
   globalsUntyped: {
     [slug: string]: JsonObject
   }
@@ -137,6 +143,7 @@ export interface GeneratedTypes {
     }
   }
   localeUntyped: null | string
+
   userUntyped: User
 }
 
@@ -209,6 +216,21 @@ export type GlobalSlug = StringKeyOf<TypedGlobal>
 type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUntyped']
 // @ts-expect-error
 type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
+
+type ResolveDepthType<T> = 'depth' extends keyof T
+  ? T['depth']
+  : // @ts-expect-error
+    T['depthUntyped']
+
+export type TypedDepthConfig = ResolveDepthType<GeneratedTypes>
+
+export type AllowedDepth = TypedDepthConfig['allowed']
+
+export type DefaultDepth = TypedDepthConfig['default']
+
+export type DecrementedDepth = TypedDepthConfig['decremented']
+
+export type DecrementDepth<Depth extends AllowedDepth> = DecrementedDepth[Depth]
 
 export type TypedLocale = ResolveLocaleType<GeneratedTypes>
 export type TypedUser = ResolveUserType<GeneratedTypes>
@@ -286,9 +308,13 @@ export class BasePayload {
    * @param options
    * @returns created document
    */
-  create = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: CreateOptions<TSlug, TSelect>,
-  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  create = async <
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: CreateOptions<TSlug, TSelect, TDepth>,
+  ): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>> => {
     const { create } = localOperations
     return create<TSlug, TSelect>(this, options)
   }
@@ -296,9 +322,13 @@ export class BasePayload {
   db: DatabaseAdapter
   decrypt = decrypt
 
-  duplicate = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: DuplicateOptions<TSlug, TSelect>,
-  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
+  duplicate = async <
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: DuplicateOptions<TSlug, TSelect, TDepth>,
+  ): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>> => {
     const { duplicate } = localOperations
     return duplicate<TSlug, TSelect>(this, options)
   }
@@ -321,11 +351,17 @@ export class BasePayload {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: FindOptions<TSlug, TSelect>,
-  ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
+  find = async <
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: FindOptions<TSlug, TSelect, TDepth>,
+  ): Promise<
+    PaginatedDocs<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>>
+  > => {
     const { find } = localOperations
-    return find<TSlug, TSelect>(this, options)
+    return find<TSlug, TSelect, TDepth>(this, options)
   }
 
   /**
@@ -337,16 +373,26 @@ export class BasePayload {
     TSlug extends CollectionSlug,
     TDisableErrors extends boolean,
     TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
   >(
-    options: FindByIDOptions<TSlug, TDisableErrors, TSelect>,
-  ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
+    options: FindByIDOptions<TSlug, TDisableErrors, TSelect, TDepth>,
+  ): Promise<
+    ApplyDisableErrors<
+      ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>,
+      TDisableErrors
+    >
+  > => {
     const { findByID } = localOperations
     return findByID<TSlug, TDisableErrors, TSelect>(this, options)
   }
 
-  findGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
-    options: FindGlobalOptions<TSlug, TSelect>,
-  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+  findGlobal = async <
+    TSlug extends GlobalSlug,
+    TSelect extends SelectFromGlobalSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: FindGlobalOptions<TSlug, TSelect, TDepth>,
+  ): Promise<ApplyDepthInternal<TransformGlobalWithSelect<TSlug, TSelect>, TDepth>> => {
     const { findOne } = localGlobalOperations
     return findOne<TSlug, TSelect>(this, options)
   }
@@ -356,9 +402,12 @@ export class BasePayload {
    * @param options
    * @returns global version with specified ID
    */
-  findGlobalVersionByID = async <TSlug extends GlobalSlug>(
-    options: FindGlobalVersionByIDOptions<TSlug>,
-  ): Promise<TypeWithVersion<DataFromGlobalSlug<TSlug>>> => {
+  findGlobalVersionByID = async <
+    TSlug extends GlobalSlug,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: FindGlobalVersionByIDOptions<TSlug, TDepth>,
+  ): Promise<TypeWithVersion<ApplyDepthInternal<DataFromGlobalSlug<TSlug>, TDepth>>> => {
     const { findVersionByID } = localGlobalOperations
     return findVersionByID<TSlug>(this, options)
   }
@@ -368,9 +417,11 @@ export class BasePayload {
    * @param options
    * @returns versions satisfying query
    */
-  findGlobalVersions = async <TSlug extends GlobalSlug>(
-    options: FindGlobalVersionsOptions<TSlug>,
-  ): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<TSlug>>>> => {
+  findGlobalVersions = async <TSlug extends GlobalSlug, TDepth extends AllowedDepth = DefaultDepth>(
+    options: FindGlobalVersionsOptions<TSlug, TDepth>,
+  ): Promise<
+    PaginatedDocs<TypeWithVersion<ApplyDepthInternal<DataFromGlobalSlug<TSlug>, TDepth>>>
+  > => {
     const { findVersions } = localGlobalOperations
     return findVersions<TSlug>(this, options)
   }
@@ -380,9 +431,12 @@ export class BasePayload {
    * @param options
    * @returns version with specified ID
    */
-  findVersionByID = async <TSlug extends CollectionSlug>(
-    options: FindVersionByIDOptions<TSlug>,
-  ): Promise<TypeWithVersion<DataFromCollectionSlug<TSlug>>> => {
+  findVersionByID = async <
+    TSlug extends CollectionSlug,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: FindVersionByIDOptions<TSlug, TDepth>,
+  ): Promise<TypeWithVersion<ApplyDepthInternal<DataFromCollectionSlug<TSlug>, TDepth>>> => {
     const { findVersionByID } = localOperations
     return findVersionByID<TSlug>(this, options)
   }
@@ -392,9 +446,11 @@ export class BasePayload {
    * @param options
    * @returns versions satisfying query
    */
-  findVersions = async <TSlug extends CollectionSlug>(
-    options: FindVersionsOptions<TSlug>,
-  ): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<TSlug>>>> => {
+  findVersions = async <TSlug extends CollectionSlug, TDepth extends AllowedDepth = DefaultDepth>(
+    options: FindVersionsOptions<TSlug, TDepth>,
+  ): Promise<
+    PaginatedDocs<TypeWithVersion<ApplyDepthInternal<DataFromCollectionSlug<TSlug>, TDepth>>>
+  > => {
     const { findVersions } = localOperations
     return findVersions<TSlug>(this, options)
   }
@@ -418,9 +474,9 @@ export class BasePayload {
 
   logger: Logger
 
-  login = async <TSlug extends CollectionSlug>(
-    options: LoginOptions<TSlug>,
-  ): Promise<{ user: DataFromCollectionSlug<TSlug> } & LoginResult> => {
+  login = async <TSlug extends CollectionSlug, TDepth extends AllowedDepth = DefaultDepth>(
+    options: LoginOptions<TSlug, TDepth>,
+  ): Promise<{ user: ApplyDepthInternal<DataFromCollectionSlug<TSlug>, TDepth> } & LoginResult> => {
     const { login } = localOperations.auth
     return login<TSlug>(this, options)
   }
@@ -437,9 +493,12 @@ export class BasePayload {
    * @param options
    * @returns version with specified ID
    */
-  restoreGlobalVersion = async <TSlug extends GlobalSlug>(
-    options: RestoreGlobalVersionOptions<TSlug>,
-  ): Promise<DataFromGlobalSlug<TSlug>> => {
+  restoreGlobalVersion = async <
+    TSlug extends GlobalSlug,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: RestoreGlobalVersionOptions<TSlug, TDepth>,
+  ): Promise<ApplyDepthInternal<DataFromGlobalSlug<TSlug>, TDepth>> => {
     const { restoreVersion } = localGlobalOperations
     return restoreVersion<TSlug>(this, options)
   }
@@ -449,9 +508,9 @@ export class BasePayload {
    * @param options
    * @returns version with specified ID
    */
-  restoreVersion = async <TSlug extends CollectionSlug>(
-    options: RestoreVersionOptions<TSlug>,
-  ): Promise<DataFromCollectionSlug<TSlug>> => {
+  restoreVersion = async <TSlug extends CollectionSlug, TDepth extends AllowedDepth = DefaultDepth>(
+    options: RestoreVersionOptions<TSlug, TDepth>,
+  ): Promise<ApplyDepthInternal<DataFromCollectionSlug<TSlug>, TDepth>> => {
     const { restoreVersion } = localOperations
     return restoreVersion<TSlug>(this, options)
   }
@@ -479,9 +538,13 @@ export class BasePayload {
     return unlock<TSlug>(this, options)
   }
 
-  updateGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
-    options: UpdateGlobalOptions<TSlug, TSelect>,
-  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+  updateGlobal = async <
+    TSlug extends GlobalSlug,
+    TSelect extends SelectFromGlobalSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: UpdateGlobalOptions<TSlug, TSelect, TDepth>,
+  ): Promise<ApplyDepthInternal<TransformGlobalWithSelect<TSlug, TSelect>, TDepth>> => {
     const { update } = localGlobalOperations
     return update<TSlug, TSelect>(this, options)
   }
@@ -529,19 +592,34 @@ export class BasePayload {
    * @param options
    * @returns Updated document(s)
    */
-  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: DeleteByIDOptions<TSlug, TSelect>,
-  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+  delete<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: DeleteByIDOptions<TSlug, TSelect, TDepth>,
+  ): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>>
 
-  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: DeleteManyOptions<TSlug, TSelect>,
-  ): Promise<BulkOperationResult<TSlug, TSelect>>
+  delete<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: DeleteManyOptions<TSlug, TSelect, TDepth>,
+  ): Promise<BulkOperationResult<TSlug, TSelect, TDepth>>
 
-  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: DeleteOptions<TSlug, TSelect>,
-  ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
+  delete<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: DeleteOptions<TSlug, TSelect, TDepth>,
+  ): Promise<
+    | ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>
+    | BulkOperationResult<TSlug, TSelect, TDepth>
+  > {
     const { deleteLocal } = localOperations
-    return deleteLocal<TSlug, TSelect>(this, options)
+    return deleteLocal<TSlug, TSelect, TDepth>(this, options)
   }
 
   /**
@@ -701,24 +779,39 @@ export class BasePayload {
     return this
   }
 
-  update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: UpdateManyOptions<TSlug, TSelect>,
-  ): Promise<BulkOperationResult<TSlug, TSelect>>
+  update<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: UpdateManyOptions<TSlug, TSelect, TDepth>,
+  ): Promise<BulkOperationResult<TSlug, TSelect, TDepth>>
 
   /**
    * @description Update one or more documents
    * @param options
    * @returns Updated document(s)
    */
-  update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: UpdateByIDOptions<TSlug, TSelect>,
-  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+  update<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: UpdateByIDOptions<TSlug, TSelect, TDepth>,
+  ): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>>
 
-  update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: UpdateOptions<TSlug, TSelect>,
-  ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
+  update<
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDepth extends AllowedDepth = DefaultDepth,
+  >(
+    options: UpdateOptions<TSlug, TSelect, TDepth>,
+  ): Promise<
+    | ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>
+    | BulkOperationResult<TSlug, TSelect, TDepth>
+  > {
     const { update } = localOperations
-    return update<TSlug, TSelect>(this, options)
+    return update<TSlug, TSelect, TDepth>(this, options)
   }
 }
 

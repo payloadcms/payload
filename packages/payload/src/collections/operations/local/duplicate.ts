@@ -1,8 +1,15 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { CollectionSlug, TypedLocale } from '../../..//index.js'
-import type { Payload, RequestContext } from '../../../index.js'
 import type {
+  AllowedDepth,
+  CollectionSlug,
+  DefaultDepth,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -18,14 +25,18 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { duplicateOperation } from '../duplicate.js'
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
   data?: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
-  depth?: number
+  depth?: TDepth
   disableTransaction?: boolean
   draft?: boolean
   fallbackLocale?: false | TypedLocale
@@ -42,10 +53,11 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
 export async function duplicate<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
+  options: Options<TSlug, TSelect, TDepth>,
+): Promise<ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>> {
   const {
     id,
     collection: collectionSlug,

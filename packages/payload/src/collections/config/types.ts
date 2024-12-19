@@ -39,7 +39,9 @@ import type {
   UploadField,
 } from '../../fields/config/types.js'
 import type {
+  AllowedDepth,
   CollectionSlug,
+  DefaultDepth,
   JsonObject,
   RequestContext,
   TypedAuthOperations,
@@ -48,6 +50,7 @@ import type {
   TypedLocale,
 } from '../../index.js'
 import type {
+  ApplyDepthInternal,
   PayloadRequest,
   SelectType,
   Sort,
@@ -565,8 +568,12 @@ export type Collection = {
   }
 }
 
-export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends SelectType> = {
-  docs: TransformCollectionWithSelect<TSlug, TSelect>[]
+export type BulkOperationResult<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType = SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
+  docs: ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>[], TDepth>
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
     message: string
