@@ -7,10 +7,11 @@ This example demonstrates how to achieve a multi-tenancy in [Payload](https://gi
 To spin up this example locally, follow these steps:
 
 1. Clone this repo
-1. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+1. `cd` into this directory and run `pnpm i --ignore-workspace`, `yarn`, or `npm install`
 
    > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
 
+1. `cp .env.example .env` to add the [environment variables file](https://payloadcms.com/docs/configuration/environment-vars)
 1. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
    - Press `y` when prompted to seed the database
 1. `open http://localhost:3000` to access the home page
