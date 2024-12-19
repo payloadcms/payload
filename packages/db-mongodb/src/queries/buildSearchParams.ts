@@ -1,4 +1,5 @@
-import type { Field, Operator, PathToQuery, Payload } from 'payload'
+import type { ClientSession, FindOptions } from 'mongodb'
+import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
 import { getLocalizedPaths } from 'payload'
@@ -15,9 +16,11 @@ type SearchParam = {
   value?: unknown
 }
 
-const subQueryOptions = {
-  lean: true,
+const subQueryOptions: FindOptions = {
   limit: 50,
+  projection: {
+    _id: true,
+  },
 }
 
 /**
@@ -31,15 +34,17 @@ export async function buildSearchParam({
   locale,
   operator,
   payload,
+  session,
   val,
 }: {
   collectionSlug?: string
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   incomingPath: string
   locale?: string
   operator: string
   payload: Payload
+  session?: ClientSession
   val: unknown
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
@@ -68,11 +73,11 @@ export async function buildSearchParam({
       field: {
         name: 'id',
         type: idFieldType,
-      } as Field,
+      } as FlattenedField,
       path: '_id',
     })
   } else {
-    paths = await getLocalizedPaths({
+    paths = getLocalizedPaths({
       collectionSlug,
       fields,
       globalSlug,
@@ -87,6 +92,7 @@ export async function buildSearchParam({
     const sanitizedQueryValue = sanitizeQueryValue({
       field,
       hasCustomID,
+      locale,
       operator,
       path,
       payload,
@@ -133,17 +139,14 @@ export async function buildSearchParam({
               },
             })
 
-            const result = await SubModel.find(subQuery, subQueryOptions)
+            const result = await SubModel.collection
+              .find(subQuery, { session, ...subQueryOptions })
+              .toArray()
 
             const $in: unknown[] = []
 
             result.forEach((doc) => {
-              const stringID = doc._id.toString()
-              $in.push(stringID)
-
-              if (Types.ObjectId.isValid(stringID)) {
-                $in.push(doc._id)
-              }
+              $in.push(doc._id)
             })
 
             if (pathsToQuery.length === 1) {
@@ -161,7 +164,9 @@ export async function buildSearchParam({
           }
 
           const subQuery = priorQueryResult.value
-          const result = await SubModel.find(subQuery, subQueryOptions)
+          const result = await SubModel.collection
+            .find(subQuery, { session, ...subQueryOptions })
+            .toArray()
 
           const $in = result.map((doc) => doc._id)
 

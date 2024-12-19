@@ -80,10 +80,11 @@ export type LexicalRichTextAdapterProvider =
     parentIsLocalized: boolean
   }) => Promise<LexicalRichTextAdapter>
 
+export type SingleFeatureClientSchemaMap = {
+  [key: string]: ClientField[]
+}
 export type FeatureClientSchemaMap = {
-  [featureKey: string]: {
-    [key: string]: ClientField[]
-  }
+  [featureKey: string]: SingleFeatureClientSchemaMap
 }
 
 export type LexicalRichTextFieldProps = {

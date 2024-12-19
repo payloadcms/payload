@@ -126,6 +126,11 @@ export const promise = async <T>({
 
       case 'point': {
         if (Array.isArray(siblingData[field.name])) {
+          if ((siblingData[field.name] as string[]).some((val) => val === null || val === '')) {
+            siblingData[field.name] = null
+            break
+          }
+
           siblingData[field.name] = (siblingData[field.name] as string[]).map((coordinate, i) => {
             if (typeof coordinate === 'string') {
               const value = siblingData[field.name][i] as string
@@ -282,7 +287,7 @@ export const promise = async <T>({
           overrideAccess,
           path: fieldPath,
           previousSiblingDoc: siblingDoc,
-          previousValue: siblingData[field.name],
+          previousValue: siblingDoc[field.name],
           req,
           schemaPath: fieldSchemaPath,
           siblingData,
@@ -316,6 +321,7 @@ export const promise = async <T>({
         siblingData[field.name] = await getDefaultValue({
           defaultValue: field.defaultValue,
           locale: req.locale,
+          req,
           user: req.user,
           value: siblingData[field.name],
         })

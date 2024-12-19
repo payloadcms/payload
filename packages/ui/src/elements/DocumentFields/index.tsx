@@ -2,7 +2,7 @@
 import type { ClientField, SanitizedDocumentPermissions } from 'payload'
 
 import { fieldIsSidebar } from 'payload/shared'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
@@ -32,11 +32,7 @@ export const DocumentFields: React.FC<Args> = ({
   readOnly: readOnlyProp,
   schemaPathSegments,
 }) => {
-  const [{ hasSidebarFields, mainFields, sidebarFields }] = React.useState<{
-    hasSidebarFields: boolean
-    mainFields: ClientField[]
-    sidebarFields: ClientField[]
-  }>(() => {
+  const { hasSidebarFields, mainFields, sidebarFields } = useMemo(() => {
     return fields.reduce(
       (acc, field) => {
         if (fieldIsSidebar(field)) {
@@ -50,12 +46,12 @@ export const DocumentFields: React.FC<Args> = ({
         return acc
       },
       {
-        hasSidebarFields: false as boolean,
+        hasSidebarFields: false,
         mainFields: [] as ClientField[],
         sidebarFields: [] as ClientField[],
       },
     )
-  })
+  }, [fields])
 
   const formInitializing = useFormInitializing()
   const formProcessing = useFormProcessing()

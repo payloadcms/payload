@@ -14,6 +14,20 @@ describe('plugin', () => {
 
   const skipVerify = true
 
+  beforeAll(() => {
+    // Mock createTestAccount to prevent calling external services
+    jest.spyOn(nodemailer, 'createTestAccount').mockImplementation(() => {
+      return Promise.resolve({
+        imap: { host: 'imap.test.com', port: 993, secure: true },
+        pass: 'testpass',
+        pop3: { host: 'pop3.test.com', port: 995, secure: true },
+        smtp: { host: 'smtp.test.com', port: 587, secure: false },
+        user: 'testuser',
+        web: 'https://webmail.test.com',
+      })
+    })
+  })
+
   beforeEach(() => {
     createTransportSpy = jest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
       return {
@@ -94,6 +108,8 @@ describe('plugin', () => {
 
         const existingTransport = nodemailer.createTransport({
           name: 'existing-transport',
+          // eslint-disable-next-line @typescript-eslint/require-await
+          verify: async (): Promise<true> => true,
           // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-misused-promises
           send: async (mail) => {
             // eslint-disable-next-line no-console

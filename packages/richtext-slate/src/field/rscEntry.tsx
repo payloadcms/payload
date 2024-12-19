@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { createClientFields, deepCopyObjectSimple } from 'payload'
+import { createClientFields } from 'payload'
 import React from 'react'
 
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from '../types.js'
@@ -134,11 +134,7 @@ export const RscEntrySlateField: React.FC<
 
       switch (element.name) {
         case 'link': {
-          let clientFields = deepCopyObjectSimple(
-            args.admin?.link?.fields,
-          ) as unknown as ClientField[]
-          clientFields = createClientFields({
-            clientFields,
+          const clientFields = createClientFields({
             defaultIDType: payload.config.db.defaultIDType,
             fields: args.admin?.link?.fields as Field[],
             i18n,
@@ -166,11 +162,7 @@ export const RscEntrySlateField: React.FC<
 
           uploadEnabledCollections.forEach((collection) => {
             if (args?.admin?.upload?.collections[collection.slug]?.fields) {
-              let clientFields = deepCopyObjectSimple(
-                args?.admin?.upload?.collections[collection.slug]?.fields,
-              ) as unknown as ClientField[]
-              clientFields = createClientFields({
-                clientFields,
+              const clientFields = createClientFields({
                 defaultIDType: payload.config.db.defaultIDType,
                 fields: args?.admin?.upload?.collections[collection.slug]?.fields,
                 i18n,

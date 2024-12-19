@@ -35,7 +35,9 @@ async function main() {
 
   const args = minimist(process.argv.slice(2))
   const { dest } = args
-  if (!dest) {throw new Error('--dest is required')}
+  if (!dest) {
+    throw new Error('--dest is required')
+  }
 
   const resolvedDest = path.resolve(dest)
 
@@ -43,18 +45,24 @@ async function main() {
     ? null
     : [
         'payload',
-        'ui',
-        'next',
         'db-mongodb',
-        'drizzle',
-        'db-sqlite',
         'db-postgres',
-        'plugin-seo',
+        'db-sqlite',
         'db-vercel-postgres',
+        'drizzle',
+        'graphql',
+        'live-preview-react',
+        'next',
+        'payload-cloud',
+        'plugin-cloud',
+        'plugin-form-builder',
+        'plugin-nested-docs',
+        'plugin-redirects',
+        'plugin-search',
+        'plugin-seo',
         'richtext-lexical',
         'translations',
-        'plugin-cloud',
-        'graphql',
+        'ui',
       ]
 
   const packageDetails = await getPackageDetails(packageWhitelist)

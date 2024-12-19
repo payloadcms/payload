@@ -91,6 +91,11 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       return null
     }
 
+    if (!result.version) {
+      // Fallback if not selected
+      ;(result as any).version = {}
+    }
+
     // /////////////////////////////////////
     // beforeRead - Collection
     // /////////////////////////////////////

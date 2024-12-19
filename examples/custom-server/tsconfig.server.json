@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "outDir": "dist",
+    "lib": ["es2019"],
+    "target": "ESNext",
+    "isolatedModules": false,
+    "noEmit": false
+  },
+  "include": ["src/server.ts"]
+}

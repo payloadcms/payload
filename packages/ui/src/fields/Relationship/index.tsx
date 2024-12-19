@@ -27,11 +27,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
-import './index.scss'
 import { findOptionsByValue } from './findOptionsByValue.js'
 import { optionsReducer } from './optionsReducer.js'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
+import './index.scss'
 
 const maxResultsPerRequest = 10
 
@@ -100,7 +100,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   )
 
   const {
-    customComponents: { Description, Error, Label } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     filterOptions,
     initialValue,
     setValue,
@@ -310,7 +310,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
-
   useIgnoredEffect(
     () => {
       const relationMap = createRelationMap({
@@ -603,6 +602,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
         />
+        {BeforeInput}
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
@@ -625,7 +625,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 }
                 return hasMany && Array.isArray(relationTo)
                   ? `${option.relationTo}_${option.value}`
-                  : option.value
+                  : (option.value as string)
               }}
               isLoading={isLoading}
               isMulti={hasMany}
@@ -707,6 +707,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
+        {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}

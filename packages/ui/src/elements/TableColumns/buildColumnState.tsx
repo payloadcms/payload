@@ -1,6 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
+  ClientField,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
@@ -11,7 +12,13 @@ import type {
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { deepCopyObjectSimple, fieldIsPresentationalOnly } from 'payload/shared'
+import {
+  deepCopyObjectSimple,
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
+  fieldIsPresentationalOnly,
+  flattenTopLevelFields,
+} from 'payload/shared'
 import React from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
@@ -26,19 +33,19 @@ import {
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
-import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
+import { filterFields } from './filterFields.js'
 
 type Args = {
   beforeRows?: Column[]
-  collectionConfig: ClientCollectionConfig
+  clientCollectionConfig: ClientCollectionConfig
+  collectionConfig: SanitizedCollectionConfig
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   customCellProps: DefaultCellComponentProps['customCellProps']
   docs: PaginatedDocs['docs']
   enableRowSelections: boolean
   enableRowTypes?: boolean
-  fields: Field[]
   i18n: I18nClient
   payload: Payload
   sortColumnProps?: Partial<SortColumnProps>
@@ -48,29 +55,34 @@ type Args = {
 export const buildColumnState = (args: Args): Column[] => {
   const {
     beforeRows,
+    clientCollectionConfig,
     collectionConfig,
     columnPreferences,
     columns,
     customCellProps,
     docs,
     enableRowSelections,
-    fields,
     i18n,
     payload,
     sortColumnProps,
     useAsTitle,
   } = args
 
-  const clientFields = collectionConfig.fields
-
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenFieldMap(clientFields)
-  let _sortedFieldMap = flattenFieldMap(fields) // TODO: think of a way to avoid this additional flatten
+  let sortedFieldMap = flattenTopLevelFields(
+    filterFields(clientCollectionConfig.fields),
+    true,
+  ) as ClientField[]
+
+  let _sortedFieldMap = flattenTopLevelFields(
+    filterFields(collectionConfig.fields),
+    true,
+  ) as Field[] // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
   // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
-  const idFieldIndex = sortedFieldMap?.findIndex((field) => 'name' in field && field.name === 'id')
+  const idFieldIndex = sortedFieldMap?.findIndex((field) => fieldIsID(field))
 
   if (idFieldIndex > -1) {
     const idField = sortedFieldMap.splice(idFieldIndex, 1)[0]
@@ -117,6 +129,10 @@ export const buildColumnState = (args: Args): Column[] => {
   const activeColumnsIndices = []
 
   const sorted: Column[] = sortedFieldMap?.reduce((acc, field, index) => {
+    if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
+      return acc
+    }
+
     const _field = _sortedFieldMap.find(
       (f) => 'name' in field && 'name' in f && f.name === field.name,
     )
@@ -171,7 +187,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const baseCellClientProps: DefaultCellComponentProps = {
       cellData: undefined,
-      collectionConfig: deepCopyObjectSimple(collectionConfig),
+      collectionConfig: deepCopyObjectSimple(clientCollectionConfig),
       customCellProps,
       field,
       rowData: undefined,

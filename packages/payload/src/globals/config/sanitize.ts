@@ -5,6 +5,7 @@ import defaultAccess from '../../auth/defaultAccess.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
+import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
@@ -142,6 +143,8 @@ export const sanitizeGlobals = async (
         label: ({ t }) => t('general:createdAt'),
       })
     }
+
+    ;(global as SanitizedGlobalConfig).flattenedFields = flattenAllFields({ fields: global.fields })
 
     globals[i] = global
   }

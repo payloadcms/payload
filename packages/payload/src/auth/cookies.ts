@@ -22,7 +22,7 @@ type CookieObject = {
   path?: string
   sameSite?: 'Lax' | 'None' | 'Strict'
   secure?: boolean
-  value: string
+  value: string | undefined
 }
 
 export const generateCookie = <ReturnCookieAsObject = boolean>(
@@ -191,13 +191,13 @@ export const parseCookies = (headers: Request['headers']): Map<string, string> =
   if (cookie) {
     cookie.split(';').forEach((cookie) => {
       const parts = cookie.split('=')
-      const key = parts.shift().trim()
+      const key = parts.shift()?.trim()
       const encodedValue = parts.join('=')
 
       try {
         const decodedValue = decodeURI(encodedValue)
         cookieMap.set(key, decodedValue)
-      } catch (e) {
+      } catch (ignore) {
         return null
       }
     })

@@ -52,7 +52,7 @@ _\* An asterisk denotes that a property is required._
 
 ### URL
 
-The `url` property is a string that points to your front-end application. This value is used as the `src` attribute of the iframe rendering your front-end. Once loaded, the Admin Panel will communicate directly with your app through `window.postMessage` events.
+The `url` property resolves to a string that points to your front-end application. This value is used as the `src` attribute of the iframe rendering your front-end. Once loaded, the Admin Panel will communicate directly with your app through `window.postMessage` events.
 
 To set the URL, use the `admin.livePreview.url` property in your [Payload Config](../configuration/overview):
 
@@ -105,8 +105,16 @@ The following arguments are provided to the `url` function:
 | Path               | Description                                                                                                       |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
 | **`data`**         | The data of the Document being edited. This includes changes that have not yet been saved.                        |
-| **`documentInfo`** | Information about the Document being edited like collection slug. [More details](../admin/hooks#usedocumentinfo). |
 | **`locale`**       | The locale currently being edited (if applicable). [More details](../configuration/localization).                 |
+| **`collectionConfig`** | The Collection Admin Config of the Document being edited. [More details](../admin/collections).                 |
+| **`globalConfig`** | The Global Admin Config of the Document being edited. [More details](../admin/globals).                          |
+| **`req`**          | The Payload Request object.  |
+
+If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
+
+```ts
+url: (doc, { req }) => `${req.protocol}//${req.host}/${doc.slug}` // highlight-line
+```
 
 ### Breakpoints
 

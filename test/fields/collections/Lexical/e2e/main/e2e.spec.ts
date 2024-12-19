@@ -784,6 +784,54 @@ describe('lexicalMain', () => {
     })
   })
 
+  /**
+   * When the escape key is pressed, Firefox resets the active element to the beginning of the page instead of staying with the editor.
+   * By applying a keydown listener when the escape key is pressed, we can programatically focus the previous element if shift+tab is pressed.
+   */
+  test('ensure escape key can be used to move focus away from editor', async () => {
+    await navigateToLexicalFields()
+
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
+
+    const textField = page.locator('#field-title')
+    const addBlockButton = page.locator('.add-block-menu').first()
+
+    // Pressing 'Escape' allows focus to be moved to the previous element
+    await paragraph.click()
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Escape')
+    await page.keyboard.press('Shift+Tab')
+    await expect(textField).toBeFocused()
+
+    // Pressing 'Escape' allows focus to be moved to the next element
+    await paragraph.click()
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Escape')
+    await page.keyboard.press('Tab')
+    await expect(addBlockButton).toBeFocused()
+
+    // Focus is not moved to the previous element if 'Escape' is not pressed
+    await paragraph.click()
+    await page.keyboard.press('Shift+Tab')
+    await expect(textField).not.toBeFocused()
+
+    // Focus is not moved to the next element if 'Escape' is not pressed
+    await paragraph.click()
+    await page.keyboard.press('Tab')
+    await expect(addBlockButton).not.toBeFocused()
+  })
+
   test('creating a link, then clicking in the link drawer, then saving the link, should preserve cursor position and not move cursor to beginning of richtext field', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').first()
@@ -798,7 +846,6 @@ describe('lexicalMain', () => {
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
     await paragraph.scrollIntoViewIfNeeded()
     await expect(paragraph).toBeVisible()
-
     /**
      * Type some text
      */
@@ -1129,7 +1176,7 @@ describe('lexicalMain', () => {
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
 
       // @ts-expect-error no need to type this
-      await expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
+      expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })

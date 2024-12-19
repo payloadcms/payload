@@ -38,9 +38,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -301,7 +301,6 @@ export interface FormSubmission {
         id?: string | null;
       }[]
     | null;
-  custom?: string | null;
   payment?: {
     field?: string | null;
     status?: string | null;
@@ -312,7 +311,9 @@ export interface FormSubmission {
       brand?: string | null;
       number?: string | null;
     };
+    stripeCheckoutSession?: string | null;
   };
+  custom?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -584,7 +585,6 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
-  custom?: T;
   payment?:
     | T
     | {
@@ -599,7 +599,9 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
               brand?: T;
               number?: T;
             };
+        stripeCheckoutSession?: T;
       };
+  custom?: T;
   updatedAt?: T;
   createdAt?: T;
 }

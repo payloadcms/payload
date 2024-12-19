@@ -34,10 +34,13 @@ export const AddNewRelation: React.FC<Props> = ({
   const { permissions } = useAuth()
   const [show, setShow] = useState(false)
   const [selectedCollection, setSelectedCollection] = useState<string>()
+
   const relatedToMany = relatedCollections.length > 1
+
   const [collectionConfig, setCollectionConfig] = useState<ClientCollectionConfig>(() =>
     !relatedToMany ? relatedCollections[0] : undefined,
   )
+
   const [popupOpen, setPopupOpen] = useState(false)
   const { i18n, t } = useTranslation()
   const [showTooltip, setShowTooltip] = useState(false)

@@ -21,8 +21,7 @@ type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 
 type RowFieldBaseClientProps = {
   readonly forceRender?: boolean
-} & Omit<FieldPaths, 'path'> &
-  Pick<ServerFieldBase, 'permissions'>
+} & Omit<FieldPaths, 'path'>
 
 export type RowFieldClientProps = Omit<ClientFieldBase<RowFieldClientWithoutType>, 'path'> &
   RowFieldBaseClientProps

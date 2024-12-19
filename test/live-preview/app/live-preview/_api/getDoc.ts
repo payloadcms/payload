@@ -32,8 +32,8 @@ export const getDoc = async <T>(args: {
       return docs[0] as T
     }
   } catch (err) {
-    console.log('Error getting doc', err)
+    throw new Error(`Error getting doc: ${err.message}`)
   }
 
-  throw new Error('Error getting doc')
+  throw new Error('No doc found')
 }

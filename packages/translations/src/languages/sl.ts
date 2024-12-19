@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const slTranslations = {
+export const slTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Račun',
     accountOfCurrentUser: 'Račun trenutnega uporabnika',
@@ -13,7 +13,7 @@ export const slTranslations = {
     beginCreateFirstUser: 'Za začetek ustvarite prvega uporabnika.',
     changePassword: 'Spremeni geslo',
     checkYourEmailForPasswordReset:
-      'Preverite svoj e-poštni predal za povezavo, ki vam bo omogočila varno ponastaviti geslo.',
+      'Če je e-poštni naslov povezan z računom, boste kmalu prejeli navodila za ponastavitev gesla. Prosimo, preverite mapo za neželeno pošto ali spam, če e-pošte ne vidite v vašem prejemu.',
     confirmGeneration: 'Potrdi generiranje',
     confirmPassword: 'Potrdi geslo',
     createFirstUser: 'Ustvari prvega uporabnika',
@@ -92,6 +92,7 @@ export const slTranslations = {
     incorrectCollection: 'Napačna zbirka',
     invalidFileType: 'Neveljaven tip datoteke',
     invalidFileTypeValue: 'Neveljaven tip datoteke: {{value}}',
+    invalidRequestArgs: 'V zahtevi so bili poslani neveljavni argumenti: {{args}}',
     loadingDocument: 'Pri nalaganju dokumenta z ID-jem {{id}} je prišlo do težave.',
     localesNotSaved_one: 'Naslednjega jezika ni bilo mogoče shraniti:',
     localesNotSaved_other: 'Naslednjih jezikov ni bilo mogoče shraniti:',
@@ -111,6 +112,8 @@ export const slTranslations = {
     tokenInvalidOrExpired: 'Žeton je neveljaven ali je potekel.',
     tokenNotProvided: 'Žeton ni bil posredovan.',
     unableToDeleteCount: 'Ni bilo mogoče izbrisati {{count}} od {{total}} {{label}}.',
+    unableToReindexCollection:
+      'Napaka pri reindeksiranju zbirke {{collection}}. Operacija je bila prekinjena.',
     unableToUpdateCount: 'Ni bilo mogoče posodobiti {{count}} od {{total}} {{label}}.',
     unauthorized: 'Neavtorizirano, za to zahtevo morate biti prijavljeni.',
     unknown: 'Prišlo je do neznane napake.',
@@ -177,6 +180,7 @@ export const slTranslations = {
     addBelow: 'Dodaj spodaj',
     addFilter: 'Dodaj filter',
     adminTheme: 'Tema skrbnika',
+    allCollections: 'Vse Zbirke',
     and: 'In',
     anotherUser: 'Drug uporabnik',
     anotherUserTakenOver: 'Drug uporabnik je prevzel urejanje tega dokumenta.',
@@ -194,10 +198,19 @@ export const slTranslations = {
     columns: 'Stolpci',
     columnToSort: 'Stolpec za razvrščanje',
     confirm: 'Potrdi',
+    confirmCopy: 'Potrdi kopiranje',
     confirmDeletion: 'Potrdi brisanje',
     confirmDuplication: 'Potrdi podvajanje',
+    confirmReindex: 'Ponovno indeksirati vse {{collections}}?',
+    confirmReindexAll: 'Ponovno indeksirati vse zbirke?',
+    confirmReindexDescription:
+      'To bo odstranilo obstoječe indekse in ponovno indeksiralo dokumente v zbirkah {{collections}}.',
+    confirmReindexDescriptionAll:
+      'To bo odstranilo obstoječe indekse in ponovno indeksiralo dokumente v vseh zbirkah.',
     copied: 'Kopirano',
     copy: 'Kopiraj',
+    copying: 'Kopiranje',
+    copyWarning: 'Prepisali boste {{to}} z {{from}} za {{label}} {{title}}. Ste prepričani?',
     create: 'Ustvari',
     created: 'Ustvarjeno',
     createdAt: 'Ustvarjeno',
@@ -271,11 +284,14 @@ export const slTranslations = {
     open: 'Odpri',
     or: 'Ali',
     order: 'Vrstni red',
+    overwriteExistingData: 'Prepišite obstoječe podatke polja',
     pageNotFound: 'Stran ni najdena',
     password: 'Geslo',
     payloadSettings: 'Nastavitve Payloada',
     perPage: 'Na stran: {{limit}}',
     previous: 'Prejšnji',
+    reindex: 'Reindeksiraj',
+    reindexingAll: 'Ponovno indeksiranje vseh {{collections}}.',
     remove: 'Odstrani',
     reset: 'Ponastavi',
     row: 'Vrstica',
@@ -298,11 +314,14 @@ export const slTranslations = {
     success: 'Uspeh',
     successfullyCreated: '{{label}} uspešno ustvarjen.',
     successfullyDuplicated: '{{label}} uspešno podvojen.',
+    successfullyReindexed:
+      'Uspešno reindeksiranih {{count}} od {{total}} dokumentov iz zbirk {{collections}}.',
     takeOver: 'Prevzemi',
     thisLanguage: 'Slovenščina',
     titleDeleted: '{{label}} "{{title}}" uspešno izbrisan.',
     true: 'Da',
     unauthorized: 'Nepooblaščeno',
+    unsavedChanges: 'Neshranjene spremembe',
     unsavedChangesDuplicate: 'Imate neshranjene spremembe. Želite nadaljevati s podvajanjem?',
     untitled: 'Brez naslova',
     updatedAt: 'Posodobljeno',
@@ -317,6 +336,14 @@ export const slTranslations = {
     value: 'Vrednost',
     viewReadOnly: 'Ogled samo za branje',
     welcome: 'Dobrodošli',
+  },
+  localization: {
+    cannotCopySameLocale: 'Ni mogoče kopirati v isti jezik',
+    copyFrom: 'Kopiraj iz',
+    copyFromTo: 'Kopiranje iz {{from}} v {{to}}',
+    copyTo: 'Kopiraj v',
+    copyToLocale: 'Kopiraj v jezik',
+    selectLocaleToCopy: 'Izberite jezik za kopiranje',
   },
   operators: {
     contains: 'vsebuje',

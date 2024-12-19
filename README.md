@@ -9,6 +9,8 @@
   &nbsp;
   <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/dw/payload?style=flat-square" /></a>
   &nbsp;
+  <a href="https://github.com/payloadcms/payload/graphs/contributors"><img alt="npm" src="https://img.shields.io/github/contributors-anon/payloadcms/payload?color=yellow&style=flat-square" /></a>
+  &nbsp;
   <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/v/payload?style=flat-square" /></a>
   &nbsp;
   <a href="https://twitter.com/payloadcms"><img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" /></a>
@@ -69,7 +71,7 @@ We're constantly adding more templates to our [Templates Directory](https://gith
 - [Auth out of the box](https://payloadcms.com/docs/authentication/overview)
 - [Versions and drafts](https://payloadcms.com/docs/versions/overview)
 - [Localization](https://payloadcms.com/docs/configuration/localization)
-- [Block-based kayout builder](https://payloadcms.com/docs/fields/blocks)
+- [Block-based layout builder](https://payloadcms.com/docs/fields/blocks)
 - [Customizable React admin](https://payloadcms.com/docs/admin/overview)
 - [Lexical rich text editor](https://payloadcms.com/docs/fields/rich-text)
 - [Conditional field logic](https://payloadcms.com/docs/fields/overview#conditional-logic)

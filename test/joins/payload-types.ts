@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     posts: Post;
     categories: Category;
+    'hidden-posts': HiddenPost;
     uploads: Upload;
     versions: Version;
     'categories-versions': CategoriesVersion;
@@ -20,7 +21,9 @@ export interface Config {
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     'restricted-categories': RestrictedCategory;
+    'categories-join-restricted': CategoriesJoinRestricted;
     'restricted-posts': RestrictedPost;
+    'collection-restricted': CollectionRestricted;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -33,7 +36,10 @@ export interface Config {
       hasManyPostsLocalized: 'posts';
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
+      arrayPosts: 'posts';
+      blocksPosts: 'posts';
       filtered: 'posts';
+      hiddenPosts: 'hidden-posts';
       singulars: 'singular';
     };
     uploads: {
@@ -49,10 +55,14 @@ export interface Config {
     'restricted-categories': {
       restrictedPosts: 'posts';
     };
+    'categories-join-restricted': {
+      collectionRestrictedJoin: 'collection-restricted';
+    };
   };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    'hidden-posts': HiddenPostsSelect<false> | HiddenPostsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
     'categories-versions': CategoriesVersionsSelect<false> | CategoriesVersionsSelect<true>;
@@ -60,7 +70,9 @@ export interface Config {
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'localized-categories': LocalizedCategoriesSelect<false> | LocalizedCategoriesSelect<true>;
     'restricted-categories': RestrictedCategoriesSelect<false> | RestrictedCategoriesSelect<true>;
+    'categories-join-restricted': CategoriesJoinRestrictedSelect<false> | CategoriesJoinRestrictedSelect<true>;
     'restricted-posts': RestrictedPostsSelect<false> | RestrictedPostsSelect<true>;
+    'collection-restricted': CollectionRestrictedSelect<false> | CollectionRestrictedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -115,6 +127,20 @@ export interface Post {
     category?: (string | null) | Category;
     camelCaseCategory?: (string | null) | Category;
   };
+  array?:
+    | {
+        category?: (string | null) | Category;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        category?: (string | null) | Category;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -159,6 +185,10 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  hiddenPosts?: {
+    docs?: (string | HiddenPost)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   group?: {
     relatedPosts?: {
       docs?: (string | Post)[] | null;
@@ -169,6 +199,14 @@ export interface Category {
       hasNextPage?: boolean | null;
     } | null;
   };
+  arrayPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  blocksPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   singulars?: {
     docs?: (string | Singular)[] | null;
     hasNextPage?: boolean | null;
@@ -177,6 +215,17 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-posts".
+ */
+export interface HiddenPost {
+  id: string;
+  title?: string | null;
+  category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -262,6 +311,32 @@ export interface RestrictedCategory {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-join-restricted".
+ */
+export interface CategoriesJoinRestricted {
+  id: string;
+  name?: string | null;
+  collectionRestrictedJoin?: {
+    docs?: (string | CollectionRestricted)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-restricted".
+ */
+export interface CollectionRestricted {
+  id: string;
+  title?: string | null;
+  canRead?: boolean | null;
+  category?: (string | null) | CategoriesJoinRestricted;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "restricted-posts".
  */
 export interface RestrictedPost {
@@ -305,6 +380,10 @@ export interface PayloadLockedDocument {
         value: string | Category;
       } | null)
     | ({
+        relationTo: 'hidden-posts';
+        value: string | HiddenPost;
+      } | null)
+    | ({
         relationTo: 'uploads';
         value: string | Upload;
       } | null)
@@ -333,8 +412,16 @@ export interface PayloadLockedDocument {
         value: string | RestrictedCategory;
       } | null)
     | ({
+        relationTo: 'categories-join-restricted';
+        value: string | CategoriesJoinRestricted;
+      } | null)
+    | ({
         relationTo: 'restricted-posts';
         value: string | RestrictedPost;
+      } | null)
+    | ({
+        relationTo: 'collection-restricted';
+        value: string | CollectionRestricted;
       } | null)
     | ({
         relationTo: 'users';
@@ -400,6 +487,23 @@ export interface PostsSelect<T extends boolean = true> {
         category?: T;
         camelCaseCategory?: T;
       };
+  array?:
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              category?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -412,14 +516,27 @@ export interface CategoriesSelect<T extends boolean = true> {
   relatedPosts?: T;
   hasManyPosts?: T;
   hasManyPostsLocalized?: T;
+  hiddenPosts?: T;
   group?:
     | T
     | {
         relatedPosts?: T;
         camelCasePosts?: T;
       };
+  arrayPosts?: T;
+  blocksPosts?: T;
   singulars?: T;
   filtered?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-posts_select".
+ */
+export interface HiddenPostsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -505,11 +622,32 @@ export interface RestrictedCategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-join-restricted_select".
+ */
+export interface CategoriesJoinRestrictedSelect<T extends boolean = true> {
+  name?: T;
+  collectionRestrictedJoin?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "restricted-posts_select".
  */
 export interface RestrictedPostsSelect<T extends boolean = true> {
   title?: T;
   restrictedField?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-restricted_select".
+ */
+export interface CollectionRestrictedSelect<T extends boolean = true> {
+  title?: T;
+  canRead?: T;
   category?: T;
   updatedAt?: T;
   createdAt?: T;

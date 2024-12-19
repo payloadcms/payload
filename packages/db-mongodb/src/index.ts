@@ -1,8 +1,15 @@
 import type { CollationOptions, TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
-import type { ClientSession, Connection, ConnectOptions, QueryOptions } from 'mongoose'
+import type {
+  ClientSession,
+  Connection,
+  ConnectOptions,
+  QueryOptions,
+  SchemaOptions,
+} from 'mongoose'
 import type {
   BaseDatabaseAdapter,
+  CollectionSlug,
   DatabaseAdapterObj,
   Payload,
   TypeWithID,
@@ -52,6 +59,8 @@ import { upsert } from './upsert.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
+export { transform } from './utilities/transform.js'
+
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
@@ -79,12 +88,13 @@ export interface Args {
    * Defaults to disabled.
    */
   collation?: Omit<CollationOptions, 'locale'>
+  collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
+
   /** Extra configuration options */
   connectOptions?: {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   } & ConnectOptions
-
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
   /**
@@ -103,6 +113,7 @@ export interface Args {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   transactionOptions?: false | TransactionOptions
+
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
 }
@@ -163,6 +174,7 @@ declare module 'payload' {
 
 export function mongooseAdapter({
   autoPluralization = true,
+  collectionsSchemaOptions = {},
   connectOptions,
   disableIndexHints = false,
   ensureIndexes,
@@ -194,6 +206,7 @@ export function mongooseAdapter({
       versions: {},
       // DatabaseAdapter
       beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
+      collectionsSchemaOptions,
       commitTransaction,
       connect,
       count,

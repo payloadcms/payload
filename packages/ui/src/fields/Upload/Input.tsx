@@ -278,7 +278,6 @@ export function UploadInput(props: UploadInputProps) {
         setInitialFiles(fileListToUse)
       }
       setCollectionSlug(relationTo)
-      setOnSuccess(onUploadSuccess)
       if (typeof maxRows === 'number') {
         setMaxFiles(maxRows)
       }
@@ -287,12 +286,10 @@ export function UploadInput(props: UploadInputProps) {
     [
       drawerSlug,
       hasMany,
-      onUploadSuccess,
       openModal,
       relationTo,
       setCollectionSlug,
       setInitialFiles,
-      setOnSuccess,
       maxRows,
       setMaxFiles,
     ],
@@ -446,6 +443,10 @@ export function UploadInput(props: UploadInputProps) {
       void loadInitialDocs()
     }
   }, [populateDocs, activeRelationTo, value])
+
+  useEffect(() => {
+    setOnSuccess(onUploadSuccess)
+  }, [value, onUploadSuccess, setOnSuccess])
 
   const showDropzone =
     !value ||

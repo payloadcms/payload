@@ -1,7 +1,6 @@
-import jwt from 'jsonwebtoken'
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getPayload } from 'payload'
+import { getPayload, type PayloadRequest } from 'payload'
 import configPromise from '@payload-config'
 import { CollectionSlug } from 'payload'
 
@@ -40,20 +39,21 @@ export async function GET(
       return new Response('No path provided', { status: 404 })
     }
 
-    if (!token) {
-      new Response('You are not allowed to preview this page', { status: 403 })
-    }
-
     if (!path.startsWith('/')) {
-      new Response('This endpoint can only be used for internal previews', { status: 500 })
+      return new Response('This endpoint can only be used for internal previews', { status: 500 })
     }
 
     let user
 
     try {
-      user = jwt.verify(token, payload.secret)
+      user = await payload.auth({
+        req: req as unknown as PayloadRequest,
+        headers: req.headers,
+      })
     } catch (error) {
-      payload.logger.error('Error verifying token for live preview:', error)
+      console.log({ token, payloadSecret: payload.secret })
+      payload.logger.error({ err: error }, 'Error verifying token for live preview')
+      return new Response('You are not allowed to preview this page', { status: 403 })
     }
 
     const draft = await draftMode()
@@ -67,8 +67,13 @@ export async function GET(
     // Verify the given slug exists
     try {
       const docs = await payload.find({
-        collection: collection,
+        collection,
         draft: true,
+        limit: 1,
+        // pagination: false reduces overhead if you don't need totalDocs
+        pagination: false,
+        depth: 0,
+        select: {},
         where: {
           slug: {
             equals: slug,
@@ -80,7 +85,7 @@ export async function GET(
         return new Response('Document not found', { status: 404 })
       }
     } catch (error) {
-      payload.logger.error('Error verifying token for live preview:', error)
+      payload.logger.error({ err: error }, 'Error verifying token for live preview')
     }
 
     draft.enable()

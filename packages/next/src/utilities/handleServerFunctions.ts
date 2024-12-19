@@ -1,5 +1,6 @@
 import type { ServerFunction, ServerFunctionHandler } from 'payload'
 
+import { copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
 
@@ -20,6 +21,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
   }
 
   const serverFunctions = {
+    'copy-data-from-locale': copyDataFromLocaleHandler as any as ServerFunction,
     'form-state': buildFormStateHandler as any as ServerFunction,
     'render-document': renderDocumentHandler as any as ServerFunction,
     'render-document-slots': renderDocumentSlotsHandler as any as ServerFunction,

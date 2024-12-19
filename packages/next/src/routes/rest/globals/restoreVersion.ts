@@ -1,11 +1,10 @@
 import httpStatus from 'http-status'
-import { restoreVersionOperationGlobal } from 'payload'
+import { restoreVersionOperationGlobal, sanitizePopulateParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { GlobalRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
 
 export const restoreVersion: GlobalRouteHandlerWithID = async ({ id, globalConfig, req }) => {
   const { searchParams } = req
@@ -17,7 +16,7 @@ export const restoreVersion: GlobalRouteHandlerWithID = async ({ id, globalConfi
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true' ? true : undefined,
     globalConfig,
-    populate: sanitizePopulate(req.query.populate),
+    populate: sanitizePopulateParam(req.query.populate),
     req,
   })
 

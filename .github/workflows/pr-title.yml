@@ -1,7 +1,7 @@
 name: pr-title
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - edited
@@ -12,7 +12,7 @@ permissions:
 jobs:
   main:
     name: lint-pr-title
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: amannn/action-semantic-pull-request@v5
         id: lint_pr_title
@@ -24,14 +24,15 @@ jobs:
             chore
             ci
             docs
+            examples
             feat
             fix
             perf
             refactor
             revert
             style
+            templates
             test
-            types
           scopes: |
             cpa
             db-\*
@@ -40,7 +41,9 @@ jobs:
             db-vercel-postgres
             db-sqlite
             drizzle
+            email-\*
             email-nodemailer
+            email-resend
             eslint
             graphql
             live-preview
@@ -106,7 +109,7 @@ jobs:
 
   label-pr-on-open:
     name: label-pr-on-open
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event.action == 'opened'
     steps:
       - name: Tag with 2.x branch with v2

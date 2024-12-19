@@ -41,9 +41,9 @@ export interface Config {
     | (Customer & {
         collection: 'customers';
       });
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -251,7 +251,6 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   stripeID?: T;
   skipSync?: T;
-  docUrl?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -264,7 +263,6 @@ export interface CustomersSelect<T extends boolean = true> {
   subscriptions?:
     | T
     | {
-        link?: T;
         stripeSubscriptionID?: T;
         stripeProductID?: T;
         product?: T;
@@ -273,7 +271,6 @@ export interface CustomersSelect<T extends boolean = true> {
       };
   stripeID?: T;
   skipSync?: T;
-  docUrl?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;

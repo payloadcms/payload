@@ -28,6 +28,7 @@ export interface Config {
     'hidden-fields': HiddenField;
     'hidden-access': HiddenAccess;
     'hidden-access-count': HiddenAccessCount;
+    'fields-and-top-access': FieldsAndTopAccess;
     disabled: Disabled;
     'rich-text': RichText;
     regression1: Regression1;
@@ -54,6 +55,7 @@ export interface Config {
     'hidden-fields': HiddenFieldsSelect<false> | HiddenFieldsSelect<true>;
     'hidden-access': HiddenAccessSelect<false> | HiddenAccessSelect<true>;
     'hidden-access-count': HiddenAccessCountSelect<false> | HiddenAccessCountSelect<true>;
+    'fields-and-top-access': FieldsAndTopAccessSelect<false> | FieldsAndTopAccessSelect<true>;
     disabled: DisabledSelect<false> | DisabledSelect<true>;
     'rich-text': RichTextSelect<false> | RichTextSelect<true>;
     regression1: Regression1Select<false> | Regression1Select<true>;
@@ -333,6 +335,17 @@ export interface HiddenAccessCount {
   hidden?: boolean | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-and-top-access".
+ */
+export interface FieldsAndTopAccess {
+  id: string;
+  secret?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -671,6 +684,10 @@ export interface PayloadLockedDocument {
         value: string | HiddenAccessCount;
       } | null)
     | ({
+        relationTo: 'fields-and-top-access';
+        value: string | FieldsAndTopAccess;
+      } | null)
+    | ({
         relationTo: 'disabled';
         value: string | Disabled;
       } | null)
@@ -929,6 +946,16 @@ export interface HiddenAccessCountSelect<T extends boolean = true> {
   hidden?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-and-top-access_select".
+ */
+export interface FieldsAndTopAccessSelect<T extends boolean = true> {
+  secret?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -201,18 +201,18 @@ export const i18n: Partial<GenericLanguages> = {
   },
   rs: {
     inlineBlocks: {
-      create: 'Kreiraj {{label}}',
-      edit: 'Izmeni {{label}}',
-      label: 'Umetnuti blokovi',
-      remove: 'Ukloni {{label}}',
+      create: 'Креирај {{label}}',
+      edit: 'Измени {{label}}',
+      label: 'Уметнути блокови',
+      remove: 'Уклони {{label}}',
     },
-    label: 'Blokovi',
+    label: 'Блокови',
   },
   'rs-latin': {
     inlineBlocks: {
       create: 'Kreiraj {{label}}',
       edit: 'Izmeni {{label}}',
-      label: 'Unutar blokovi',
+      label: 'Umetnuti blokovi',
       remove: 'Ukloni {{oznaka}}',
     },
     label: 'Blokovi',

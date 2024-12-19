@@ -22,6 +22,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   filterOptions,
   onBulkSelect,
   onSelect,
+  overrideEntityVisibility = true,
   selectedCollection: selectedCollectionFromProps,
 }) => {
   const { closeModal, isModalOpen } = useModal()
@@ -86,6 +87,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             disableBulkEdit: true,
             drawerSlug,
             enableRowSelections,
+            overrideEntityVisibility,
             query: newQuery,
           },
         })) as { List: React.ReactNode }
@@ -100,7 +102,15 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         }
       }
     },
-    [serverFunction, closeModal, drawerSlug, isOpen, enableRowSelections, filterOptions],
+    [
+      serverFunction,
+      closeModal,
+      drawerSlug,
+      isOpen,
+      enableRowSelections,
+      filterOptions,
+      overrideEntityVisibility,
+    ],
   )
 
   useEffect(() => {

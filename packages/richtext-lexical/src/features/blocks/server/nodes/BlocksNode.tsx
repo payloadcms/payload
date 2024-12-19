@@ -14,7 +14,6 @@ import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
-import { deepCopyObjectSimple } from 'payload/shared'
 
 type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */
@@ -121,10 +120,8 @@ export class ServerBlockNode extends DecoratorBlockNode {
   }
 
   setFields(fields: BlockFields): void {
-    const fieldsCopy = deepCopyObjectSimple(fields)
-
     const writable = this.getWritable()
-    writable.__fields = fieldsCopy
+    writable.__fields = fields
   }
 }
 

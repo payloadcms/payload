@@ -17,7 +17,9 @@ import { getDBName } from './utilities/getDBName.js'
 
 export const init: Init = function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const schema = buildCollectionSchema(collection, this.payload)
+    const schemaOptions = this.collectionsSchemaOptions[collection.slug]
+
+    const schema = buildCollectionSchema(collection, this.payload, schemaOptions)
 
     if (collection.versions) {
       const versionModelName = getDBName({ config: collection, versions: true })
@@ -32,12 +34,13 @@ export const init: Init = function init(this: MongooseAdapter) {
           minimize: false,
           timestamps: false,
         },
+        ...schemaOptions,
       })
 
       versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
         getBuildQueryPlugin({
           collectionSlug: collection.slug,
-          versionsFields: versionCollectionFields,
+          versionsFields: buildVersionCollectionFields(this.payload.config, collection, true),
         }),
       )
 
@@ -84,9 +87,11 @@ export const init: Init = function init(this: MongooseAdapter) {
         },
       })
 
-      versionSchema
-        .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
-        .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }))
+      versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
+        getBuildQueryPlugin({
+          versionsFields: buildVersionGlobalFields(this.payload.config, global, true),
+        }),
+      )
 
       this.versions[global.slug] = mongoose.model(
         versionModelName,

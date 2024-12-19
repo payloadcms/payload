@@ -39,6 +39,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     },
     hasGenerateDescriptionFn,
     path,
+    readOnly,
   } = props
 
   const {
@@ -139,6 +140,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
+                disabled={readOnly}
                 onClick={() => {
                   void regenerateDescription()
                 }}
@@ -185,6 +187,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
           Error={errorMessage}
           onChange={setValue}
           path={path}
+          readOnly={readOnly}
           required={required}
           showError={showError}
           style={{

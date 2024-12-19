@@ -37,7 +37,6 @@ export const mergeServerFormState = (
       /**
        * Handle error paths
        */
-
       const errorPathsResult = mergeErrorPaths(
         newFieldState.errorPaths,
         incomingState[path].errorPaths as unknown as string[],

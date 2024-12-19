@@ -10,6 +10,14 @@ export const Pages: CollectionConfig<'pages'> = {
   // I need only slug, NOT the WHOLE CONTENT!
   defaultPopulate: {
     slug: true,
+    array: {
+      title: true,
+    },
+    blocks: {
+      some: {
+        title: true,
+      },
+    },
   },
   access: { read: () => true },
   fields: [
@@ -84,6 +92,39 @@ export const Pages: CollectionConfig<'pages'> = {
     {
       name: 'additional',
       type: 'text',
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'other',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'some',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+            },
+            {
+              name: 'other',
+              type: 'text',
+            },
+          ],
+        },
+      ],
     },
   ],
 }

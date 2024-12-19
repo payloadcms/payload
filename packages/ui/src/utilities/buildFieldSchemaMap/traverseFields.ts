@@ -63,7 +63,6 @@ export const traverseFields = ({
 
         break
       case 'collapsible':
-
       case 'row':
         traverseFields({
           config,

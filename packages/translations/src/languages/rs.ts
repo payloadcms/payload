@@ -12,7 +12,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     backToLogin: 'Назад на пријаву',
     beginCreateFirstUser: 'На самом почетку креирај свог првог корисника',
     changePassword: 'Промени лозинку',
-    checkYourEmailForPasswordReset: 'Проверите е-пошту и поруку са линком за промену лозинке.',
+    checkYourEmailForPasswordReset:
+      'Ako je e-mail adresa povezana sa nalogom, uskoro ćete dobiti uputstva za resetovanje vaše lozinke. Ako ne vidite e-mail u vašem inboxu, molimo vas da proverite vašu folder za spam ili neželjene poruke.',
     confirmGeneration: 'Потврди креирање',
     confirmPassword: 'Потврди лозинку',
     createFirstUser: 'Креирај првог корисника',
@@ -92,6 +93,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     incorrectCollection: 'Невалидна колекција',
     invalidFileType: 'Невалидан тип датотеке',
     invalidFileTypeValue: 'Невалидан тип датотеке: {{value}}',
+    invalidRequestArgs: 'Неважећи аргументи прослеђени у захтеву: {{args}}',
     loadingDocument: 'Постоји проблем при учитавању документа чији је ИД {{id}}.',
     localesNotSaved_one: 'Следеће локалне поставке није могло бити сачувано:',
     localesNotSaved_other: 'Следеће локалне поставке нису могле бити сачуване:',
@@ -111,6 +113,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     tokenInvalidOrExpired: 'Токен је невалидан или је истекао.',
     tokenNotProvided: 'Token nije dostavljen.',
     unableToDeleteCount: 'Није могуће избрисати {{count}} од {{total}} {{label}}.',
+    unableToReindexCollection:
+      'Грешка при реиндексирању колекције {{collection}}. Операција је прекинута.',
     unableToUpdateCount: 'Није могуће ажурирати {{count}} од {{total}} {{label}}.',
     unauthorized: 'Нисте ауторизовани да бисте упутили овај захтев.',
     unknown: 'Дошло је до непознате грешке.',
@@ -177,6 +181,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     addBelow: 'Додај испод',
     addFilter: 'Додај филтер',
     adminTheme: 'Администраторска тема',
+    allCollections: 'Све Колекције',
     and: 'И',
     anotherUser: 'Други корисник',
     anotherUserTakenOver: 'Други корисник је преузео уређивање овог документа.',
@@ -193,10 +198,20 @@ export const rsTranslations: DefaultTranslationsObject = {
     columns: 'Колоне',
     columnToSort: 'Колона за сортирање',
     confirm: 'Потврди',
+    confirmCopy: 'Potvrda kopiranja',
     confirmDeletion: 'Потврди брисање',
     confirmDuplication: 'Потврди дупликацију',
+    confirmReindex: 'Ponovo indeksirati sve {{collections}}?',
+    confirmReindexAll: 'Ponovo indeksirati sve kolekcije?',
+    confirmReindexDescription:
+      'Ovo će ukloniti postojeće indekse i ponovo indeksirati dokumente u kolekcijama {{collections}}.',
+    confirmReindexDescriptionAll:
+      'Ovo će ukloniti postojeće indekse i ponovo indeksirati dokumente u svim kolekcijama.',
     copied: 'Копирано',
     copy: 'Копирај',
+    copying: 'Kopiranje',
+    copyWarning:
+      'На путу сте да препишете {{to}} са {{from}} за {{label}} {{title}}. Да ли сте сигурни?',
     create: 'Креирај',
     created: 'Креирано',
     createdAt: 'Креирано у',
@@ -270,11 +285,14 @@ export const rsTranslations: DefaultTranslationsObject = {
     open: 'Отвори',
     or: 'Или',
     order: 'Редослед',
+    overwriteExistingData: 'Prepišite postojeće podatke u polju',
     pageNotFound: 'Страница није пронађена',
     password: 'Лозинка',
     payloadSettings: 'Payload поставке',
     perPage: 'По страници: {{limit}}',
     previous: 'Prethodni',
+    reindex: 'Реиндексирај',
+    reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
     remove: 'Уклони',
     reset: 'Поново постави',
     row: 'Ред',
@@ -297,11 +315,14 @@ export const rsTranslations: DefaultTranslationsObject = {
     success: 'Uspeh',
     successfullyCreated: '{{label}} успешно креирано.',
     successfullyDuplicated: '{{label}} успешно дуплицирано.',
+    successfullyReindexed:
+      'Успешно је реиндексирано {{count}} од {{total}} докумената из {{collections}} колекција.',
     takeOver: 'Превузети',
     thisLanguage: 'Српски (ћирилица)',
     titleDeleted: '{{label}} "{{title}}" успешно обрисано.',
     true: 'Istinito',
     unauthorized: 'Нисте ауторизовани',
+    unsavedChanges: 'Imate nesačuvane izmene. Sačuvajte ili odbacite pre nego što nastavite.',
     unsavedChangesDuplicate: 'Имате несачуване промене. Да ли желите наставити са дуплицирањем?',
     untitled: 'Без наслова',
     updatedAt: 'Ажурирано у',
@@ -316,6 +337,14 @@ export const rsTranslations: DefaultTranslationsObject = {
     value: 'Вредност',
     viewReadOnly: 'Прегледај само за читање',
     welcome: 'Добродошли',
+  },
+  localization: {
+    cannotCopySameLocale: 'Не може се копирати на исту локацију.',
+    copyFrom: 'Kopiraj iz',
+    copyFromTo: 'Kopiranje iz {{from}} u {{to}}',
+    copyTo: 'Kopiraj na',
+    copyToLocale: 'Kopiraj na lokaciju',
+    selectLocaleToCopy: 'Izaberite lokalitet za kopiranje',
   },
   operators: {
     contains: 'садржи',
@@ -450,6 +479,6 @@ export const rsTranslations: DefaultTranslationsObject = {
 }
 
 export const rs: Language = {
-  dateFNSKey: 'en-US',
+  dateFNSKey: 'rs',
   translations: rsTranslations,
 }

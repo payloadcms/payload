@@ -22,6 +22,7 @@ export const SSR: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
+    preview: (doc) => `/live-preview/ssr/${doc?.slug}`,
   },
   fields: [
     {

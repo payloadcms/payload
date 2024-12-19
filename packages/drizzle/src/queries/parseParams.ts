@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, Operator, Where } from 'payload'
+import type { FlattenedField, Operator, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
@@ -15,10 +15,11 @@ import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  fields: Field[]
+  fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale: string
   selectFields: Record<string, GenericColumn>
+  selectLocale?: boolean
   tableName: string
   where: Where
 }
@@ -29,6 +30,7 @@ export function parseParams({
   joins,
   locale,
   selectFields,
+  selectLocale,
   tableName,
   where,
 }: Args): SQL {
@@ -53,6 +55,7 @@ export function parseParams({
             joins,
             locale,
             selectFields,
+            selectLocale,
             tableName,
             where: condition,
           })
@@ -86,6 +89,7 @@ export function parseParams({
                   locale,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
+                  selectLocale,
                   tableName,
                   value: val,
                 })

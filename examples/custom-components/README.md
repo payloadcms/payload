@@ -34,7 +34,7 @@ To spin up this example locally, follow the steps below:
 
   The `users` collection is **auth-enabled**, providing access to the admin panel and enabling user authentication. This collection shows how to implement a basic user collection with authentication.
 
-  - For more details on setting up authentication, checkout the [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/cms#readme) and the [Authentication Overview](https://payloadcms.com/docs/authentication/overview#authentication-overview).
+  - For more details on setting up authentication, checkout the [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) and the [Authentication Overview](https://payloadcms.com/docs/authentication/overview#authentication-overview).
 
 - #### Fields
 

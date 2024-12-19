@@ -734,4 +734,75 @@ describe('versions', () => {
       await expect(publishSpecificLocale).toContainText('English')
     })
   })
+
+  describe('Versions diff view', () => {
+    let postID: string
+    let versionID: string
+
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+    })
+
+    beforeEach(async () => {
+      const newPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'new post',
+          description: 'new description',
+        },
+      })
+
+      postID = newPost.id
+
+      await payload.update({
+        collection: draftCollectionSlug,
+        id: postID,
+        draft: true,
+        data: {
+          title: 'draft post',
+          description: 'draft description',
+          blocksField: [
+            {
+              blockName: 'block1',
+              blockType: 'block',
+              text: 'block text',
+            },
+          ],
+        },
+      })
+
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: { equals: postID },
+        },
+      })
+
+      versionID = versions.docs[0].id
+    })
+
+    test('should render diff', async () => {
+      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
+      await page.goto(versionURL)
+      await page.waitForURL(versionURL)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+    })
+
+    test('should render diff for nested fields', async () => {
+      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
+      await page.goto(versionURL)
+      await page.waitForURL(versionURL)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+
+      const blocksDiffLabel = page.locator('.field-diff-label', {
+        hasText: exactText('Blocks Field'),
+      })
+
+      await expect(blocksDiffLabel).toBeVisible()
+      const blocksDiff = blocksDiffLabel.locator('+ .iterable-diff__wrap > .render-field-diffs')
+      await expect(blocksDiff).toBeVisible()
+      const blockTypeDiffLabel = blocksDiff.locator('.render-field-diffs__field').first()
+      await expect(blockTypeDiffLabel).toBeVisible()
+    })
+  })
 })

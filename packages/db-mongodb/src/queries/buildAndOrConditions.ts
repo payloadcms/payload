@@ -1,4 +1,5 @@
-import type { Field, Payload, Where } from 'payload'
+import type { ClientSession } from 'mongodb'
+import type { FlattenedField, Payload, Where } from 'payload'
 
 import { parseParams } from './parseParams.js'
 
@@ -8,13 +9,15 @@ export async function buildAndOrConditions({
   globalSlug,
   locale,
   payload,
+  session,
   where,
 }: {
   collectionSlug?: string
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   locale?: string
   payload: Payload
+  session?: ClientSession
   where: Where[]
 }): Promise<Record<string, unknown>[]> {
   const completedConditions = []
@@ -30,6 +33,7 @@ export async function buildAndOrConditions({
         globalSlug,
         locale,
         payload,
+        session,
         where: condition,
       })
       if (Object.keys(result).length > 0) {

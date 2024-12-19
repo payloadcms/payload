@@ -30,7 +30,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const [reducedFields, setReducedColumns] = useState(() => reduceClientFields({ fields, i18n }))
 
   useEffect(() => {
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     setReducedColumns(reduceClientFields({ fields, i18n }))
   }, [fields, i18n])
 

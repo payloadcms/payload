@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, Where } from 'payload'
+import type { FlattenedField, Where } from 'payload'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -12,16 +12,18 @@ export function buildAndOrConditions({
   joins,
   locale,
   selectFields,
+  selectLocale,
   tableName,
   where,
 }: {
   adapter: DrizzleAdapter
   collectionSlug?: string
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   joins: BuildQueryJoinAliases
   locale?: string
   selectFields: Record<string, GenericColumn>
+  selectLocale?: boolean
   tableName: string
   where: Where[]
 }): SQL[] {
@@ -38,6 +40,7 @@ export function buildAndOrConditions({
         joins,
         locale,
         selectFields,
+        selectLocale,
         tableName,
         where: condition,
       })

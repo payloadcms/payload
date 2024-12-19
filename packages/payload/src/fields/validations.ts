@@ -232,8 +232,8 @@ export const username: UsernameFieldValidation = (
     return t('validation:shorterThanMax', { maxLength })
   }
 
-  if ((value && !/^[\w.-]+$/.test(value)) || (!value && required)) {
-    return t('validation:username')
+  if (!value && required) {
+    return t('validation:required')
   }
 
   return true
@@ -875,7 +875,12 @@ export type PointFieldValidation = Validate<
   PointField
 >
 
-export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
+export const point: PointFieldValidation = (value, { req: { t }, required }) => {
+  // Allow to pass null to clear the field
+  if (!value) {
+    value = ['', '']
+  }
+
   const lng = parseFloat(String(value[0]))
   const lat = parseFloat(String(value[1]))
   if (
@@ -895,7 +900,12 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
   return true
 }
 
-export default {
+/**
+ * Built-in field validations used by Payload
+ *
+ * These can be re-used in custom validations
+ */
+export const validations = {
   array,
   blocks,
   checkbox,

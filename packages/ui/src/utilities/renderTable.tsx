@@ -1,13 +1,14 @@
-import type {
-  ClientCollectionConfig,
-  CollectionConfig,
-  Field,
-  ImportMap,
-  PaginatedDocs,
-  Payload,
-} from 'payload'
-
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
+import {
+  type ClientCollectionConfig,
+  type CollectionConfig,
+  type Field,
+  type ImportMap,
+  type PaginatedDocs,
+  type Payload,
+  type SanitizedCollectionConfig,
+} from 'payload'
+import { fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
@@ -26,6 +27,10 @@ export const renderFilters = (
 ): Map<string, React.ReactNode> =>
   fields.reduce(
     (acc, field) => {
+      if (fieldIsHiddenOrDisabled(field)) {
+        return acc
+      }
+
       if ('name' in field && field.admin?.components?.Filter) {
         acc.set(
           field.name,
@@ -42,27 +47,27 @@ export const renderFilters = (
   )
 
 export const renderTable = ({
+  clientCollectionConfig,
   collectionConfig,
   columnPreferences,
   columns: columnsFromArgs,
   customCellProps,
   docs,
   enableRowSelections,
-  fields,
   i18n,
   payload,
   renderRowTypes,
   tableAppearance,
   useAsTitle,
 }: {
-  collectionConfig: ClientCollectionConfig
+  clientCollectionConfig: ClientCollectionConfig
+  collectionConfig: SanitizedCollectionConfig
   columnPreferences: ColumnPreferences
   columns?: ColumnPreferences
   customCellProps?: Record<string, any>
   docs: PaginatedDocs['docs']
   drawerSlug?: string
   enableRowSelections: boolean
-  fields: Field[]
   i18n: I18nClient
   payload: Payload
   renderRowTypes?: boolean
@@ -72,9 +77,18 @@ export const renderTable = ({
   columnState: Column[]
   Table: React.ReactNode
 } => {
-  const columns =
-    columnsFromArgs ||
-    getInitialColumns(filterFields(fields), useAsTitle, collectionConfig?.admin?.defaultColumns)
+  // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
+  const columns = columnsFromArgs
+    ? columnsFromArgs?.filter((column) =>
+        flattenTopLevelFields(clientCollectionConfig.fields, true)?.some(
+          (field) => 'name' in field && field.name === column.accessor,
+        ),
+      )
+    : getInitialColumns(
+        filterFields(clientCollectionConfig.fields),
+        useAsTitle,
+        clientCollectionConfig?.admin?.defaultColumns,
+      )
 
   const columnState = buildColumnState({
     beforeRows: renderRowTypes
@@ -85,16 +99,16 @@ export const renderTable = ({
             field: null,
             Heading: i18n.t('version:type'),
             renderedCells: docs.map((_, i) => (
-              <Pill key={i}>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
+              <Pill key={i}>{getTranslation(clientCollectionConfig.labels.singular, i18n)}</Pill>
             )),
           },
         ]
       : undefined,
+    clientCollectionConfig,
     collectionConfig,
     columnPreferences,
     columns,
     enableRowSelections,
-    fields,
     i18n,
     // sortColumnProps,
     customCellProps,

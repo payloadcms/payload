@@ -3,8 +3,8 @@ import type { Block } from 'payload'
 import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 
 import type { NodeValidation } from '../../typesServer.js'
-import type { SerializedInlineBlockNode } from '../client/nodes/InlineBlocksNode.js'
 import type { BlockFields, SerializedBlockNode } from './nodes/BlocksNode.js'
+import type { SerializedInlineBlockNode } from './nodes/InlineBlocksNode.js'
 
 export const blockValidationHOC = (
   blocks: Block[],
