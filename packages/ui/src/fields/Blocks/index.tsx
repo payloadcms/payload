@@ -47,12 +47,14 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
+    filterFields,
     path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
     validate,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
@@ -280,6 +282,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
+                      filterFields={filterFields}
                       hasMaxRows={hasMaxRows}
                       isLoading={isLoading}
                       isSortable={isSortable}
