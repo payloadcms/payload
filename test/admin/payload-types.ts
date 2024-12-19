@@ -25,8 +25,6 @@ export interface Config {
     'group-two-collection-ones': GroupTwoCollectionOne;
     'group-two-collection-twos': GroupTwoCollectionTwo;
     geo: Geo;
-    customIdTab: CustomIdTab;
-    customIdRow: CustomIdRow;
     'disable-duplicate': DisableDuplicate;
     'base-list-filters': BaseListFilter;
     'payload-locked-documents': PayloadLockedDocument;
@@ -49,8 +47,6 @@ export interface Config {
     'group-two-collection-ones': GroupTwoCollectionOnesSelect<false> | GroupTwoCollectionOnesSelect<true>;
     'group-two-collection-twos': GroupTwoCollectionTwosSelect<false> | GroupTwoCollectionTwosSelect<true>;
     geo: GeoSelect<false> | GeoSelect<true>;
-    customIdTab: CustomIdTabSelect<false> | CustomIdTabSelect<true>;
-    customIdRow: CustomIdRowSelect<false> | CustomIdRowSelect<true>;
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -455,14 +451,6 @@ export interface PayloadLockedDocument {
         value: string | Geo;
       } | null)
     | ({
-        relationTo: 'customIdTab';
-        value: string | CustomIdTab;
-      } | null)
-    | ({
-        relationTo: 'customIdRow';
-        value: string | CustomIdRow;
-      } | null)
-    | ({
         relationTo: 'disable-duplicate';
         value: string | DisableDuplicate;
       } | null)
@@ -719,30 +707,6 @@ export interface GroupTwoCollectionTwosSelect<T extends boolean = true> {
  */
 export interface GeoSelect<T extends boolean = true> {
   point?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdTab_select".
- */
-export interface CustomIdTabSelect<T extends boolean = true> {
-  title?: T;
-  id?: T;
-  description?: T;
-  number?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdRow_select".
- */
-export interface CustomIdRowSelect<T extends boolean = true> {
-  title?: T;
-  id?: T;
-  description?: T;
-  number?: T;
   updatedAt?: T;
   createdAt?: T;
 }

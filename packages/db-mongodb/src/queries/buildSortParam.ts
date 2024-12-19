@@ -11,20 +11,13 @@ type Args = {
   timestamps: boolean
 }
 
-export type SortArgs = {
-  direction: SortDirection
-  property: string
-}[]
-
-export type SortDirection = 'asc' | 'desc'
-
 export const buildSortParam = ({
   config,
   fields,
   locale,
   sort,
   timestamps,
-}: Args): PaginateOptions['sort'] => {
+}: Args): Record<string, -1 | 1> => {
   if (!sort) {
     if (timestamps) {
       sort = '-createdAt'
@@ -37,15 +30,15 @@ export const buildSortParam = ({
     sort = [sort]
   }
 
-  const sorting = sort.reduce<PaginateOptions['sort']>((acc, item) => {
+  const sorting = sort.reduce<Record<string, -1 | 1>>((acc, item) => {
     let sortProperty: string
-    let sortDirection: SortDirection
+    let sortDirection: -1 | 1
     if (item.indexOf('-') === 0) {
       sortProperty = item.substring(1)
-      sortDirection = 'desc'
+      sortDirection = -1
     } else {
       sortProperty = item
-      sortDirection = 'asc'
+      sortDirection = 1
     }
     if (sortProperty === 'id') {
       acc['_id'] = sortDirection

@@ -1,6 +1,5 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
-import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
@@ -8,6 +7,7 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { desc, type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -530,7 +530,7 @@ describe('database', () => {
   describe('transactions', () => {
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
-      if (!['sqlite'].includes(process.env.PAYLOAD_DATABASE)) {
+      if (!['sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)) {
         it('should commit multiple operations in isolation', async () => {
           const req = {
             payload,
@@ -754,6 +754,17 @@ describe('database', () => {
       expect(helloDocs).toHaveLength(5)
       expect(worldDocs).toHaveLength(5)
     })
+
+    it('should CRUD point field', async () => {
+      const result = await payload.create({
+        collection: 'default-values',
+        data: {
+          point: [5, 10],
+        },
+      })
+
+      expect(result.point).toEqual([5, 10])
+    })
   })
 
   describe('defaultValue', () => {
@@ -773,12 +784,65 @@ describe('database', () => {
       expect(result.array[0].defaultValue).toStrictEqual('default value from database')
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
-      // eslint-disable-next-line jest/no-conditional-in-test
-      if (payload.db.name !== 'sqlite') {
-        expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
-      }
+      expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
     })
   })
+
+  describe('Schema generation', () => {
+    if (process.env.PAYLOAD_DATABASE.includes('postgres')) {
+      it('should generate Drizzle Postgres schema', async () => {
+        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+
+        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+        await payload.db.generateSchema({
+          outputFile,
+        })
+
+        const module = await import(outputFile)
+
+        // Confirm that the generated module exports every relation
+        for (const relation in payload.db.relations) {
+          expect(module).toHaveProperty(relation)
+        }
+
+        // Confirm that module exports every table
+        for (const table in payload.db.tables) {
+          expect(module).toHaveProperty(table)
+        }
+
+        // Confirm that module exports every enum
+        for (const enumName in payload.db.enums) {
+          expect(module).toHaveProperty(enumName)
+        }
+      })
+    }
+
+    if (process.env.PAYLOAD_DATABASE.includes('sqlite')) {
+      it('should generate Drizzle SQLite schema', async () => {
+        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+
+        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+        await payload.db.generateSchema({
+          outputFile,
+        })
+
+        const module = await import(outputFile)
+
+        // Confirm that the generated module exports every relation
+        for (const relation in payload.db.relations) {
+          expect(module).toHaveProperty(relation)
+        }
+
+        // Confirm that module exports every table
+        for (const table in payload.db.tables) {
+          expect(module).toHaveProperty(table)
+        }
+      })
+    }
+  })
+
   describe('drizzle: schema hooks', () => {
     it('should add tables with hooks', async () => {
       // eslint-disable-next-line jest/no-conditional-in-test
@@ -1065,7 +1129,8 @@ describe('database', () => {
         data: { title: 'invalid', relationship: 'not-real-id' },
       })
     } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+      // instanceof checks don't work with libsql
+      expect(error).toBeTruthy()
     }
 
     expect(invalidDoc).toBeUndefined()

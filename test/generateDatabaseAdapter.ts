@@ -53,6 +53,15 @@ export const allDatabaseAdapters = {
       url: process.env.SQLITE_URL || 'file:./payloadtests.db',
     },
   })`,
+  'sqlite-uuid': `
+  import { sqliteAdapter } from '@payloadcms/db-sqlite'
+
+  export const databaseAdapter = sqliteAdapter({
+    idType: 'uuid',
+    client: {
+      url: process.env.SQLITE_URL || 'file:./payloadtests.db',
+    },
+  })`,
   supabase: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
 

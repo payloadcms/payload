@@ -13,7 +13,7 @@ export const myTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'စတင်နိုင်ရန် ပထမဦးစွာ အသုံးပြုသူအား ဖန်တီးပါ။',
     changePassword: 'စကားဝှက် ပြောင်းလဲမည်။',
     checkYourEmailForPasswordReset:
-      'သင့်စကားဝှက်ကို ပြန်လည်သတ်မှတ်နိုင်ရန်အတွက် မေးလ်ပို့ထားပါသည်။',
+      'Jika alamat e-mel dikaitkan dengan akaun, anda akan menerima arahan untuk menetapkan semula kata laluan anda sebentar lagi. Sila semak folder spam atau junk mail anda jika anda tidak melihat e-mel di kotak masuk anda.',
     confirmGeneration: 'Generation အတည်ပြု',
     confirmPassword: 'စကားဝှက်အား ထပ်မံ ရိုက်ထည့်ပါ။',
     createFirstUser: 'ပထမဆုံး အသုံးပြုသူကို ဖန်တီးပါ။',

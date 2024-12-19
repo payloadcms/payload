@@ -13,7 +13,7 @@ export const koTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: '시작하려면 첫 번째 사용자를 생성하세요.',
     changePassword: '비밀번호 변경',
     checkYourEmailForPasswordReset:
-      '비밀번호 재설정을 안전하게 수행할 수 있는 링크가 포함된 이메일을 확인하세요.',
+      '이메일 주소가 계정과 연결되어 있다면, 곧 비밀번호를 재설정하는 방법에 대한 지시를 받게 될 것입니다. 인박스에서 이메일을 찾을 수 없다면 스팸 또는 정크 메일 폴더를 확인해 주시기 바랍니다.',
     confirmGeneration: '생성 확인',
     confirmPassword: '비밀번호 확인',
     createFirstUser: '첫 번째 사용자 생성',
