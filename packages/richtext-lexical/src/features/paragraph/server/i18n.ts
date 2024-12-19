@@ -25,6 +25,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Paragraph',
     label2: 'Normaler Text',
   },
+  el: {
+    label: 'Παράγραφος',
+    label2: 'Κανονικό κείμενο',
+  },
   en: {
     label: 'Paragraph',
     label2: 'Normal Text',
