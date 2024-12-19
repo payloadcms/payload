@@ -1,5 +1,10 @@
 import fs from 'fs'
 
+export interface StreamFileOptions {
+  end?: number
+  start?: number
+}
+
 export function iteratorToStream(iterator) {
   return new ReadableStream({
     async pull(controller) {
@@ -19,8 +24,11 @@ export async function* nodeStreamToIterator(stream: fs.ReadStream) {
   }
 }
 
-export function streamFile(path: string): ReadableStream {
-  const nodeStream = fs.createReadStream(path)
+export function streamFile(
+  path: string,
+  options?: BufferEncoding | StreamFileOptions,
+): ReadableStream {
+  const nodeStream = fs.createReadStream(path, options)
   const data: ReadableStream = iteratorToStream(nodeStreamToIterator(nodeStream))
   return data
 }
