@@ -95,6 +95,7 @@ describe('Joins Field', () => {
           camelCaseCategory: category.id,
         },
         array: [{ category: category.id }],
+        blocks: [{ blockType: 'block', category: category.id }],
       })
     }
   })
@@ -191,6 +192,15 @@ describe('Joins Field', () => {
     })
 
     expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
+  })
+
+  it('should populate joins with blocks relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.blocksPosts.docs).toBeDefined()
   })
 
   it('should populate uploads in joins', async () => {

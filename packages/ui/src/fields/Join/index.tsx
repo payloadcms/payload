@@ -43,6 +43,10 @@ const getInitialDrawerData = ({
 
   const field = flattenedFields.find((field) => field.name === path)
 
+  if (!field) {
+    return null
+  }
+
   if (field.type === 'relationship' || field.type === 'upload') {
     return {
       // TODO: Handle polymorphic https://github.com/payloadcms/payload/pull/9990
@@ -69,6 +73,25 @@ const getInitialDrawerData = ({
 
     return {
       [field.name]: [initialData],
+    }
+  }
+
+  if (field.type === 'blocks') {
+    for (const block of field.blocks) {
+      const blockInitialData = getInitialDrawerData({
+        docID,
+        fields: block.fields,
+        segments: nextSegments,
+      })
+
+      if (blockInitialData) {
+        blockInitialData.id = ObjectId().toHexString()
+        blockInitialData.blockType = block.slug
+
+        return {
+          [field.name]: [blockInitialData],
+        }
+      }
     }
   }
 }
