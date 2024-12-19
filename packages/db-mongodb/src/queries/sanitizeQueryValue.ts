@@ -6,6 +6,7 @@ import { createArrayFromCommaDelineated } from 'payload'
 type SanitizeQueryValueArgs = {
   field: FlattenedField
   hasCustomID: boolean
+  locale?: string
   operator: string
   path: string
   payload: Payload
@@ -74,6 +75,7 @@ const getFieldFromSegments = ({
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
+  locale,
   operator,
   path,
   payload,
@@ -205,11 +207,34 @@ export const sanitizeQueryValue = ({
         formattedValue.value = new Types.ObjectId(value)
       }
 
+      let localizedPath = path
+
+      if (field.localized && payload.config.localization && locale) {
+        localizedPath = `${path}.${locale}`
+      }
+
       return {
         rawQuery: {
-          $and: [
-            { [`${path}.value`]: { $eq: formattedValue.value } },
-            { [`${path}.relationTo`]: { $eq: formattedValue.relationTo } },
+          $or: [
+            {
+              [localizedPath]: {
+                $eq: {
+                  // disable auto sort
+                  /* eslint-disable */
+                  value: formattedValue.value,
+                  relationTo: formattedValue.relationTo,
+                  /* eslint-enable */
+                },
+              },
+            },
+            {
+              [localizedPath]: {
+                $eq: {
+                  relationTo: formattedValue.relationTo,
+                  value: formattedValue.value,
+                },
+              },
+            },
           ],
         },
       }

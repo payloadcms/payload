@@ -1364,6 +1364,112 @@ describe('Relationships', () => {
       })
       expect(res_2.docs).toHaveLength(0)
     })
+
+    it('should allow querying on hasMany polymorphic relationships with an object syntax', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+
+      const { id } = await payload.create({
+        collection: polymorphicRelationshipsSlug,
+        data: {
+          polymorphicMany: [
+            {
+              relationTo: 'movies',
+              value: movie.id,
+            },
+          ],
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'polymorphic-relationships',
+        where: {
+          polymorphicMany: {
+            equals: {
+              relationTo: 'movies',
+              value: movie.id,
+            },
+          },
+        },
+      })
+
+      expect(res.docs).toHaveLength(1)
+      expect(res.docs[0].id).toBe(id)
+    })
+
+    it('should allow querying on localized polymorphic relationships with an object syntax', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+
+      const { id } = await payload.create({
+        collection: polymorphicRelationshipsSlug,
+        data: {
+          polymorphicLocalized: {
+            relationTo: 'movies',
+            value: movie.id,
+          },
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'polymorphic-relationships',
+        where: {
+          polymorphicLocalized: {
+            equals: {
+              relationTo: 'movies',
+              value: movie.id,
+            },
+          },
+        },
+      })
+
+      expect(res.docs).toHaveLength(1)
+      expect(res.docs[0].id).toBe(id)
+    })
+
+    it('should allow querying on hasMany localized polymorphic relationships with an object syntax', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+
+      const { id } = await payload.create({
+        collection: polymorphicRelationshipsSlug,
+        data: {
+          polymorphicManyLocalized: [
+            {
+              relationTo: 'movies',
+              value: movie.id,
+            },
+          ],
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'polymorphic-relationships',
+        where: {
+          polymorphicManyLocalized: {
+            equals: {
+              relationTo: 'movies',
+              value: movie.id,
+            },
+          },
+        },
+      })
+
+      expect(res.docs).toHaveLength(1)
+      expect(res.docs[0].id).toBe(id)
+    })
   })
 })
 

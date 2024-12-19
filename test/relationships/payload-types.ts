@@ -252,6 +252,22 @@ export interface PolymorphicRelationship {
     relationTo: 'movies';
     value: string | Movie;
   } | null;
+  polymorphicLocalized?: {
+    relationTo: 'movies';
+    value: string | Movie;
+  } | null;
+  polymorphicMany?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
+  polymorphicManyLocalized?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -591,6 +607,9 @@ export interface MovieReviewsSelect<T extends boolean = true> {
  */
 export interface PolymorphicRelationshipsSelect<T extends boolean = true> {
   polymorphic?: T;
+  polymorphicLocalized?: T;
+  polymorphicMany?: T;
+  polymorphicManyLocalized?: T;
   updatedAt?: T;
   createdAt?: T;
 }
