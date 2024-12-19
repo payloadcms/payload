@@ -6,7 +6,7 @@ import { $parseSerializedNode } from 'lexical'
 
 import type { NodeWithHooks } from '../../typesServer.js'
 
-import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
+import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/utils.js'
 import {
   $convertToMarkdownString,
   type MultilineElementTransformer,
