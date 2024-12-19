@@ -38,6 +38,10 @@ export interface Config {
       'group.camelCasePosts': 'posts';
       arrayPosts: 'posts';
       blocksPosts: 'posts';
+      polymorphic: 'posts';
+      polymorphics: 'posts';
+      localizedPolymorphic: 'posts';
+      localizedPolymorphics: 'posts';
       filtered: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
@@ -171,13 +175,13 @@ export interface Post {
   };
   array?:
     | {
-        category?: (string | null) | Category;
+        category?: (number | null) | Category;
         id?: string | null;
       }[]
     | null;
   blocks?:
     | {
-        category?: (string | null) | Category;
+        category?: (number | null) | Category;
         id?: string | null;
         blockName?: string | null;
         blockType: 'block';
@@ -242,11 +246,27 @@ export interface Category {
     } | null;
   };
   arrayPosts?: {
-    docs?: (string | Post)[] | null;
+    docs?: (number | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   blocksPosts?: {
-    docs?: (string | Post)[] | null;
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  polymorphic?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  polymorphics?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  localizedPolymorphic?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  localizedPolymorphics?: {
+    docs?: (number | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   singulars?: {
@@ -571,6 +591,10 @@ export interface CategoriesSelect<T extends boolean = true> {
       };
   arrayPosts?: T;
   blocksPosts?: T;
+  polymorphic?: T;
+  polymorphics?: T;
+  localizedPolymorphic?: T;
+  localizedPolymorphics?: T;
   singulars?: T;
   filtered?: T;
   updatedAt?: T;
@@ -755,6 +779,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
