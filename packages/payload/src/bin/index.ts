@@ -102,10 +102,14 @@ export const bin = async () => {
 
       return
     } else {
-      return await payload.jobs.run({
+      await payload.jobs.run({
         limit,
         queue,
       })
+
+      await payload.db.destroy() // close database connections after running jobs so process can exit cleanly
+
+      return
     }
   }
 
