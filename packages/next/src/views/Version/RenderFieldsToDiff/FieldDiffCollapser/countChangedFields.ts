@@ -43,13 +43,14 @@ export function countChangedFields({ comparison, fields, version }: Args) {
       case 'select':
       case 'text':
       case 'textarea':
-      case 'upload':
+      case 'upload': {
         // Fields that have a name and contain data. We can just check if the data has changed.
         if (hasChanges(version?.[field.name], comparison?.[field.name])) {
           count++
         }
         return
-      case 'collapsible':
+      }
+      case 'collapsible': {
         // Collapsible fields don't have a name or nest their fields' data, but we show them in a
         // FieldDiffCollapser, so we increment the count if any of it's fields have changed.
         if (
@@ -62,7 +63,8 @@ export function countChangedFields({ comparison, fields, version }: Args) {
           count++
         }
         return
-      case 'row':
+      }
+      case 'row': {
         // Rows don't have nest their fields' data and we don't show them in a
         // FieldDiffCollapser so we add every changed field to the count.
         count += countChangedFields({
@@ -71,7 +73,8 @@ export function countChangedFields({ comparison, fields, version }: Args) {
           version,
         })
         return
-      case 'tabs':
+      }
+      case 'tabs': {
         // The tabs field is not displayed in the UI, but each of its tabs are.
         // Each tab is displayed in a FieldDiffCollapser, so increment the count
         // for each tab if any of the tab fields has changed.
@@ -87,13 +90,16 @@ export function countChangedFields({ comparison, fields, version }: Args) {
           }
         })
         return
-
-      case 'ui':
+      }
+      case 'ui': {
         // UI fields don't have data and are not displayed in the version view
         // so we can ignore them.
         return
-      // default:
-      // throw new UnreachableCaseError(fieldType)
+      }
+      default: {
+        const _exhaustiveCheck: never = fieldType
+        throw new Error(`Unhandled field.type in countChangedFields : ${String(fieldType)}`)
+      }
     }
   })
 
