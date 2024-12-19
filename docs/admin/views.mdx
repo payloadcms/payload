@@ -198,7 +198,7 @@ The following options are available:
 
 Global Views are views that are scoped under the `/globals` route, such as the Document Edit View.
 
-To swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property in your [Global Config](../globals/overview):
+To swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property in your [Global Config](../configuration/globals):
 
 ```ts
 import type { SanitizedGlobalConfig } from 'payload'
@@ -248,7 +248,7 @@ The following options are available:
 
 Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View or the API View. All Document Views keep their overall structure across navigation changes, such as their title and tabs, and replace only the content below.
 
-To swap out Document Views with your own, or to [create entirely new ones](#adding-new-document-views), use the `admin.components.views.Edit[key]` property in your [Collection Config](../collections/overview) or [Global Config](../globals/overview):
+To swap out Document Views with your own, or to [create entirely new ones](#adding-new-document-views), use the `admin.components.views.Edit[key]` property in your [Collection Config](../collections/overview) or [Global Config](../configuration/globals):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
