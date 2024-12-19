@@ -231,6 +231,9 @@ const sanitizeDate = ({
   }
 }
 
+/**
+ * @experimental This API can be changed without a major version bumb.
+ */
 export const transform = ({
   adapter,
   data,

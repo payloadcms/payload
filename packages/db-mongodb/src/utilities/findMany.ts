@@ -41,7 +41,7 @@ export const findMany = async ({
   let countPromise: Promise<null | number> = Promise.resolve(null)
 
   if (joinAgreggation) {
-    const cursor = collection.aggregate(
+    const aggregation = collection.aggregate(
       [
         {
           $match: query,
@@ -51,26 +51,26 @@ export const findMany = async ({
     )
 
     if (sort) {
-      cursor.sort(sort)
+      aggregation.sort(sort)
     }
 
     if (skip) {
-      cursor.skip(skip)
+      aggregation.skip(skip)
     }
 
     if (limit) {
-      cursor.limit(limit)
+      aggregation.limit(limit)
     }
 
     for (const stage of joinAgreggation) {
-      cursor.addStage(stage)
+      aggregation.addStage(stage)
     }
 
     if (projection) {
-      cursor.project(projection)
+      aggregation.project(projection)
     }
 
-    docsPromise = cursor.toArray()
+    docsPromise = aggregation.toArray()
   } else {
     docsPromise = collection
       .find(query, {

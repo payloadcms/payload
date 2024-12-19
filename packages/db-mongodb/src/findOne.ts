@@ -43,7 +43,7 @@ export const findOne: FindOne = async function findOne(
 
   let doc
   if (joinAggregation) {
-    const cursor = Model.collection.aggregate(
+    const aggregation = Model.collection.aggregate(
       [
         {
           $match: query,
@@ -51,12 +51,12 @@ export const findOne: FindOne = async function findOne(
       ],
       { session },
     )
-    cursor.limit(1)
+    aggregation.limit(1)
     for (const stage of joinAggregation) {
-      cursor.addStage(stage)
+      aggregation.addStage(stage)
     }
 
-    ;[doc] = await cursor.toArray()
+    ;[doc] = await aggregation.toArray()
   } else {
     doc = await Model.collection.findOne(query, { projection, session })
   }
