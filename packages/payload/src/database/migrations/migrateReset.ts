@@ -1,7 +1,7 @@
-import type { PayloadRequest } from '../../types/index.js'
 import type { BaseDatabaseAdapter } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
@@ -18,7 +18,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
     return
   }
 
-  const req = { payload } as PayloadRequest
+  const req = await createLocalReq({}, payload)
 
   // Rollback all migrations in order
   for (const migration of migrationFiles) {

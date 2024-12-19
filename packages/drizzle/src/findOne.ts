@@ -1,4 +1,4 @@
-import type { FindOneArgs, PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload'
+import type { FindOneArgs, SanitizedCollectionConfig, TypeWithID } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -8,7 +8,7 @@ import { findMany } from './find/findMany.js'
 
 export async function findOne<T extends TypeWithID>(
   this: DrizzleAdapter,
-  { collection, joins, locale, req = {} as PayloadRequest, select, where }: FindOneArgs,
+  { collection, joins, locale, req, select, where }: FindOneArgs,
 ): Promise<T> {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 

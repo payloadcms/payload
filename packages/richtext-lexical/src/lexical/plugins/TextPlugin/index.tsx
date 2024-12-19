@@ -3,8 +3,9 @@ import type { TextFormatType } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { TEXT_TYPE_TO_FORMAT, TextNode } from 'lexical'
-import { type SanitizedClientFeatures } from 'packages/richtext-lexical/src/features/typesClient.js'
 import { useEffect } from 'react'
+
+import type { SanitizedClientFeatures } from '../../../features/typesClient.js'
 
 export function TextPlugin({ features }: { features: SanitizedClientFeatures }) {
   const [editor] = useLexicalComposerContext()

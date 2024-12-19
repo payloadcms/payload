@@ -6,6 +6,7 @@ import { createArrayFromCommaDelineated } from 'payload'
 type SanitizeQueryValueArgs = {
   field: FlattenedField
   hasCustomID: boolean
+  locale?: string
   operator: string
   path: string
   payload: Payload
@@ -34,6 +35,22 @@ const buildExistsQuery = (formattedValue, path, treatEmptyString = true) => {
       },
     }
   }
+}
+
+const sanitizeCoordinates = (coordinates: unknown[]): unknown[] => {
+  const result: unknown[] = []
+
+  for (const value of coordinates) {
+    if (typeof value === 'string') {
+      result.push(Number(value))
+    } else if (Array.isArray(value)) {
+      result.push(sanitizeCoordinates(value))
+    } else {
+      result.push(value)
+    }
+  }
+
+  return result
 }
 
 // returns nestedField Field object from blocks.nestedField path because getLocalizedPaths splits them only for relationships
@@ -74,6 +91,7 @@ const getFieldFromSegments = ({
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
+  locale,
   operator,
   path,
   payload,
@@ -205,11 +223,34 @@ export const sanitizeQueryValue = ({
         formattedValue.value = new Types.ObjectId(value)
       }
 
+      let localizedPath = path
+
+      if (field.localized && payload.config.localization && locale) {
+        localizedPath = `${path}.${locale}`
+      }
+
       return {
         rawQuery: {
-          $and: [
-            { [`${path}.value`]: { $eq: formattedValue.value } },
-            { [`${path}.relationTo`]: { $eq: formattedValue.relationTo } },
+          $or: [
+            {
+              [localizedPath]: {
+                $eq: {
+                  // disable auto sort
+                  /* eslint-disable */
+                  value: formattedValue.value,
+                  relationTo: formattedValue.relationTo,
+                  /* eslint-enable */
+                },
+              },
+            },
+            {
+              [localizedPath]: {
+                $eq: {
+                  relationTo: formattedValue.relationTo,
+                  value: formattedValue.value,
+                },
+              },
+            },
           ],
         },
       }
@@ -334,6 +375,14 @@ export const sanitizeQueryValue = ({
   }
 
   if (operator === 'within' || operator === 'intersects') {
+    if (
+      formattedValue &&
+      typeof formattedValue === 'object' &&
+      Array.isArray(formattedValue.coordinates)
+    ) {
+      formattedValue.coordinates = sanitizeCoordinates(formattedValue.coordinates)
+    }
+
     formattedValue = {
       $geometry: formattedValue,
     }

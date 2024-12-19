@@ -180,6 +180,7 @@ jobs:
           - postgres-uuid
           - supabase
           - sqlite
+          - sqlite-uuid
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

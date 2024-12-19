@@ -40,7 +40,7 @@ export type Args = {
   client: Config
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
-  idType?: 'serial' | 'uuid'
+  idType?: 'number' | 'uuid'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
@@ -106,6 +106,7 @@ type SQLiteDrizzleAdapter = Omit<
   | 'drizzle'
   | 'dropDatabase'
   | 'execute'
+  | 'idType'
   | 'insert'
   | 'operators'
   | 'relations'

@@ -104,5 +104,21 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'category',
+              type: 'relationship',
+              relationTo: categoriesSlug,
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

@@ -115,6 +115,7 @@ describe('Joins Field', () => {
           camelCaseCategory: category.id,
         },
         array: [{ category: category.id }],
+        blocks: [{ blockType: 'block', category: category.id }],
       })
     }
   })
@@ -173,7 +174,10 @@ describe('Joins Field', () => {
       collection: categoriesSlug,
     })
 
-    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id', 'group'])
+    expect(categoryWithPosts).toStrictEqual({
+      id: categoryWithPosts.id,
+      group: categoryWithPosts.group,
+    })
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
@@ -211,6 +215,15 @@ describe('Joins Field', () => {
     })
 
     expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
+  })
+
+  it('should populate joins with blocks relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.blocksPosts.docs).toBeDefined()
   })
 
   it('should populate uploads in joins', async () => {

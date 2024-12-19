@@ -37,10 +37,7 @@ export interface Config {
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
       arrayPosts: 'posts';
-      polymorphic: 'posts';
-      polymorphics: 'posts';
-      localizedPolymorphic: 'posts';
-      localizedPolymorphics: 'posts';
+      blocksPosts: 'posts';
       filtered: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
@@ -174,8 +171,16 @@ export interface Post {
   };
   array?:
     | {
-        category?: (number | null) | Category;
+        category?: (string | null) | Category;
         id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        category?: (string | null) | Category;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
       }[]
     | null;
   updatedAt: string;
@@ -237,23 +242,11 @@ export interface Category {
     } | null;
   };
   arrayPosts?: {
-    docs?: (number | Post)[] | null;
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
-  polymorphic?: {
-    docs?: (number | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  polymorphics?: {
-    docs?: (number | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  localizedPolymorphic?: {
-    docs?: (number | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  localizedPolymorphics?: {
-    docs?: (number | Post)[] | null;
+  blocksPosts?: {
+    docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   singulars?: {
@@ -546,6 +539,17 @@ export interface PostsSelect<T extends boolean = true> {
         category?: T;
         id?: T;
       };
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              category?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -566,10 +570,7 @@ export interface CategoriesSelect<T extends boolean = true> {
         camelCasePosts?: T;
       };
   arrayPosts?: T;
-  polymorphic?: T;
-  polymorphics?: T;
-  localizedPolymorphic?: T;
-  localizedPolymorphics?: T;
+  blocksPosts?: T;
   singulars?: T;
   filtered?: T;
   updatedAt?: T;
@@ -754,6 +755,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
