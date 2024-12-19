@@ -2,6 +2,7 @@ import type { GenericTranslationsObject, NestedKeysStripped } from '@payloadcms/
 
 import { cs } from './cs.js'
 import { de } from './de.js'
+import { el } from './el.js'
 import { en } from './en.js'
 import { es } from './es.js'
 import { fa } from './fa.js'
@@ -17,6 +18,7 @@ import { uk } from './uk.js'
 export const translations = {
   cs,
   de,
+  el,
   en,
   es,
   fa,

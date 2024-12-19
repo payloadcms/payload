@@ -37,6 +37,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Listen',
     toolbarItemsActive: '{{count}} aktiv',
   },
+  el: {
+    placeholder: "Ξεκινήστε να πληκτρολογείτε ή πατήστε '/' για εντολές...",
+    slashMenuBasicGroupLabel: 'Βασικό',
+    slashMenuListGroupLabel: 'Λίστες',
+    toolbarItemsActive: '{{count}} ενεργό',
+  },
   en: {
     placeholder: "Start typing, or press '/' for commands...",
     slashMenuBasicGroupLabel: 'Basic',
