@@ -36,6 +36,11 @@ export interface Config {
       hasManyPostsLocalized: 'posts';
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
+      arrayPosts: 'posts';
+      polymorphic: 'posts';
+      polymorphics: 'posts';
+      localizedPolymorphic: 'posts';
+      localizedPolymorphics: 'posts';
       filtered: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
@@ -77,7 +82,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {};
   globalsSelect: {};
@@ -113,18 +118,66 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
   isFiltered?: boolean | null;
   restrictedField?: string | null;
-  upload?: (string | null) | Upload;
-  category?: (string | null) | Category;
-  categories?: (string | Category)[] | null;
-  categoriesLocalized?: (string | Category)[] | null;
+  upload?: (number | null) | Upload;
+  category?: (number | null) | Category;
+  categories?: (number | Category)[] | null;
+  categoriesLocalized?: (number | Category)[] | null;
+  polymorphic?:
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  polymorphics?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: number | Category;
+          }
+        | {
+            relationTo: 'users';
+            value: number | User;
+          }
+      )[]
+    | null;
+  localizedPolymorphic?:
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  localizedPolymorphics?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: number | Category;
+          }
+        | {
+            relationTo: 'users';
+            value: number | User;
+          }
+      )[]
+    | null;
   group?: {
-    category?: (string | null) | Category;
-    camelCaseCategory?: (string | null) | Category;
+    category?: (number | null) | Category;
+    camelCaseCategory?: (number | null) | Category;
   };
+  array?:
+    | {
+        category?: (number | null) | Category;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -133,9 +186,9 @@ export interface Post {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: string;
+  id: number;
   relatedPosts?: {
-    docs?: (string | Post)[] | null;
+    docs?: (number | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -155,40 +208,60 @@ export interface Upload {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: string;
+  id: number;
   name?: string | null;
   relatedPosts?: {
-    docs?: (string | Post)[] | null;
+    docs?: (number | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   hasManyPosts?: {
-    docs?: (string | Post)[] | null;
+    docs?: (number | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   hasManyPostsLocalized?: {
-    docs?: (string | Post)[] | null;
+    docs?: (number | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   hiddenPosts?: {
-    docs?: (string | HiddenPost)[] | null;
+    docs?: (number | HiddenPost)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   group?: {
     relatedPosts?: {
-      docs?: (string | Post)[] | null;
+      docs?: (number | Post)[] | null;
       hasNextPage?: boolean | null;
     } | null;
     camelCasePosts?: {
-      docs?: (string | Post)[] | null;
+      docs?: (number | Post)[] | null;
       hasNextPage?: boolean | null;
     } | null;
   };
+  arrayPosts?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  polymorphic?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  polymorphics?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  localizedPolymorphic?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  localizedPolymorphics?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   singulars?: {
-    docs?: (string | Singular)[] | null;
+    docs?: (number | Singular)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   filtered?: {
-    docs?: (string | Post)[] | null;
+    docs?: (number | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
   updatedAt: string;
@@ -199,9 +272,9 @@ export interface Category {
  * via the `definition` "hidden-posts".
  */
 export interface HiddenPost {
-  id: string;
+  id: number;
   title?: string | null;
-  category?: (string | null) | Category;
+  category?: (number | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -210,116 +283,8 @@ export interface HiddenPost {
  * via the `definition` "singular".
  */
 export interface Singular {
-  id: string;
-  category?: (string | null) | Category;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "versions".
- */
-export interface Version {
-  id: string;
-  category?: (string | null) | Category;
-  categoryVersion?: (string | null) | CategoriesVersion;
-  categoryVersions?: (string | CategoriesVersion)[] | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories-versions".
- */
-export interface CategoriesVersion {
-  id: string;
-  relatedVersions?: {
-    docs?: (string | Version)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  relatedVersionsMany?: {
-    docs?: (string | Version)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized-posts".
- */
-export interface LocalizedPost {
-  id: string;
-  title?: string | null;
-  category?: (string | null) | LocalizedCategory;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized-categories".
- */
-export interface LocalizedCategory {
-  id: string;
-  name?: string | null;
-  relatedPosts?: {
-    docs?: (string | LocalizedPost)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted-categories".
- */
-export interface RestrictedCategory {
-  id: string;
-  name?: string | null;
-  restrictedPosts?: {
-    docs?: (string | Post)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories-join-restricted".
- */
-export interface CategoriesJoinRestricted {
-  id: string;
-  name?: string | null;
-  collectionRestrictedJoin?: {
-    docs?: (string | CollectionRestricted)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collection-restricted".
- */
-export interface CollectionRestricted {
-  id: string;
-  title?: string | null;
-  canRead?: boolean | null;
-  category?: (string | null) | CategoriesJoinRestricted;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "restricted-posts".
- */
-export interface RestrictedPost {
-  id: string;
-  title?: string | null;
-  restrictedField?: string | null;
-  category?: (string | null) | RestrictedCategory;
+  id: number;
+  category?: (number | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -328,7 +293,7 @@ export interface RestrictedPost {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -342,71 +307,179 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions".
+ */
+export interface Version {
+  id: number;
+  category?: (number | null) | Category;
+  categoryVersion?: (number | null) | CategoriesVersion;
+  categoryVersions?: (number | CategoriesVersion)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-versions".
+ */
+export interface CategoriesVersion {
+  id: number;
+  relatedVersions?: {
+    docs?: (number | Version)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  relatedVersionsMany?: {
+    docs?: (number | Version)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts".
+ */
+export interface LocalizedPost {
+  id: number;
+  title?: string | null;
+  category?: (number | null) | LocalizedCategory;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-categories".
+ */
+export interface LocalizedCategory {
+  id: number;
+  name?: string | null;
+  relatedPosts?: {
+    docs?: (number | LocalizedPost)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-categories".
+ */
+export interface RestrictedCategory {
+  id: number;
+  name?: string | null;
+  restrictedPosts?: {
+    docs?: (number | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-join-restricted".
+ */
+export interface CategoriesJoinRestricted {
+  id: number;
+  name?: string | null;
+  collectionRestrictedJoin?: {
+    docs?: (number | CollectionRestricted)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-restricted".
+ */
+export interface CollectionRestricted {
+  id: number;
+  title?: string | null;
+  canRead?: boolean | null;
+  category?: (number | null) | CategoriesJoinRestricted;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-posts".
+ */
+export interface RestrictedPost {
+  id: number;
+  title?: string | null;
+  restrictedField?: string | null;
+  category?: (number | null) | RestrictedCategory;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'hidden-posts';
-        value: string | HiddenPost;
+        value: number | HiddenPost;
       } | null)
     | ({
         relationTo: 'uploads';
-        value: string | Upload;
+        value: number | Upload;
       } | null)
     | ({
         relationTo: 'versions';
-        value: string | Version;
+        value: number | Version;
       } | null)
     | ({
         relationTo: 'categories-versions';
-        value: string | CategoriesVersion;
+        value: number | CategoriesVersion;
       } | null)
     | ({
         relationTo: 'singular';
-        value: string | Singular;
+        value: number | Singular;
       } | null)
     | ({
         relationTo: 'localized-posts';
-        value: string | LocalizedPost;
+        value: number | LocalizedPost;
       } | null)
     | ({
         relationTo: 'localized-categories';
-        value: string | LocalizedCategory;
+        value: number | LocalizedCategory;
       } | null)
     | ({
         relationTo: 'restricted-categories';
-        value: string | RestrictedCategory;
+        value: number | RestrictedCategory;
       } | null)
     | ({
         relationTo: 'categories-join-restricted';
-        value: string | CategoriesJoinRestricted;
+        value: number | CategoriesJoinRestricted;
       } | null)
     | ({
         relationTo: 'restricted-posts';
-        value: string | RestrictedPost;
+        value: number | RestrictedPost;
       } | null)
     | ({
         relationTo: 'collection-restricted';
-        value: string | CollectionRestricted;
+        value: number | CollectionRestricted;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -416,10 +489,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -439,7 +512,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -457,11 +530,21 @@ export interface PostsSelect<T extends boolean = true> {
   category?: T;
   categories?: T;
   categoriesLocalized?: T;
+  polymorphic?: T;
+  polymorphics?: T;
+  localizedPolymorphic?: T;
+  localizedPolymorphics?: T;
   group?:
     | T
     | {
         category?: T;
         camelCaseCategory?: T;
+      };
+  array?:
+    | T
+    | {
+        category?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -482,6 +565,11 @@ export interface CategoriesSelect<T extends boolean = true> {
         relatedPosts?: T;
         camelCasePosts?: T;
       };
+  arrayPosts?: T;
+  polymorphic?: T;
+  polymorphics?: T;
+  localizedPolymorphic?: T;
+  localizedPolymorphics?: T;
   singulars?: T;
   filtered?: T;
   updatedAt?: T;

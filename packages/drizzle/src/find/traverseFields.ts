@@ -16,6 +16,7 @@ import { chainMethods } from './chainMethods.js'
 type TraverseFieldArgs = {
   _locales: Result
   adapter: DrizzleAdapter
+  collectionSlug?: string
   currentArgs: Result
   currentTableName: string
   depth?: number
@@ -42,6 +43,7 @@ type TraverseFieldArgs = {
 export const traverseFields = ({
   _locales,
   adapter,
+  collectionSlug,
   currentArgs,
   currentTableName,
   depth,
@@ -292,6 +294,7 @@ export const traverseFields = ({
         traverseFields({
           _locales,
           adapter,
+          collectionSlug,
           currentArgs,
           currentTableName,
           depth,
@@ -357,13 +360,26 @@ export const traverseFields = ({
           ? adapter.tables[currentTableName].parent
           : adapter.tables[currentTableName].id
 
-        let joinQueryWhere: Where = {
-          [field.on]: {
-            equals: rawConstraint(currentIDColumn),
-          },
+        let joinQueryWhere: Where
+
+        if (Array.isArray(field.targetField.relationTo)) {
+          joinQueryWhere = {
+            [field.on]: {
+              equals: {
+                relationTo: collectionSlug,
+                value: rawConstraint(currentIDColumn),
+              },
+            },
+          }
+        } else {
+          joinQueryWhere = {
+            [field.on]: {
+              equals: rawConstraint(currentIDColumn),
+            },
+          }
         }
 
-        if (where) {
+        if (where && Object.keys(where).length) {
           joinQueryWhere = {
             and: [joinQueryWhere, where],
           }

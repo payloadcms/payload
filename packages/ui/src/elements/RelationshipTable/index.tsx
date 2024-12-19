@@ -61,7 +61,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     relationTo,
   } = props
   const [Table, setTable] = useState<React.ReactNode>(null)
-
   const { getEntityConfig } = useConfig()
 
   const { permissions } = useAuth()
@@ -114,6 +113,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       if (filterOptions) {
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
       }
+
+      console.log(newQuery.where)
 
       // map columns from string[] to ColumnPreferences
       const defaultColumns = field.admin.defaultColumns

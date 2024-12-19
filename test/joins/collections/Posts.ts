@@ -54,6 +54,30 @@ export const Posts: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'polymorphic',
+      type: 'relationship',
+      relationTo: ['categories', 'users'],
+    },
+    {
+      name: 'polymorphics',
+      type: 'relationship',
+      relationTo: ['categories', 'users'],
+      hasMany: true,
+    },
+    {
+      name: 'localizedPolymorphic',
+      type: 'relationship',
+      relationTo: ['categories', 'users'],
+      localized: true,
+    },
+    {
+      name: 'localizedPolymorphics',
+      type: 'relationship',
+      relationTo: ['categories', 'users'],
+      hasMany: true,
+      localized: true,
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [

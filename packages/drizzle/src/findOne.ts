@@ -16,6 +16,7 @@ export async function findOne<T extends TypeWithID>(
 
   const { docs } = await findMany({
     adapter: this,
+    collectionSlug: collection,
     fields: collectionConfig.flattenedFields,
     joins,
     limit: 1,
