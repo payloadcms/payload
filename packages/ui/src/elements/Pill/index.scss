@@ -133,5 +133,10 @@
         }
       }
     }
+
+    &--size-small {
+      padding: 0 base(0.2);
+      line-height: 18px;
+    }
   }
 }
