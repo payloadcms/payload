@@ -123,7 +123,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const handleFileChange = useCallback(
     (newFile: File) => {
       if (newFile instanceof File) {
-        setUploadInProgress(true)
         setFileSrc(URL.createObjectURL(newFile))
       }
 
@@ -133,10 +132,8 @@ export const Upload: React.FC<UploadProps> = (props) => {
       if (typeof onChange === 'function') {
         onChange(newFile)
       }
-
-      setUploadInProgress(false)
     },
-    [onChange, setUploadInProgress, setValue],
+    [onChange, setValue],
   )
 
   const renameFile = (fileToChange: File, newName: string): File => {
