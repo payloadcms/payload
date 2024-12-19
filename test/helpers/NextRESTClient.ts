@@ -141,7 +141,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'DELETE',
     })
-    return this._DELETE(request, { params: Promise.resolve({ slug }) })
+    return this._DELETE(request, { params: new Promise(() => ({ slug })) })
   }
 
   async GET(
@@ -157,7 +157,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'GET',
     })
-    return this._GET(request, { params: Promise.resolve({ slug }) })
+    return this._GET(request, { params: new Promise(() => ({ slug })) })
   }
 
   async GRAPHQL_POST(options: RequestInit & RequestOptions): Promise<Response> {
@@ -213,7 +213,7 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'PATCH',
     })
-    return this._PATCH(request, { params: Promise.resolve({ slug }) })
+    return this._PATCH(request, { params: new Promise(() => ({ slug })) })
   }
 
   async POST(
@@ -227,19 +227,6 @@ export class NextRESTClient {
       headers: this.buildHeaders(options),
       method: 'POST',
     })
-    return this._POST(request, { params: Promise.resolve({ slug }) })
-  }
-
-  async PUT(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
-    const { slug, params, url } = this.generateRequestParts(path)
-    const { query, ...rest } = options
-    const queryParams = generateQueryString(query, params)
-
-    const request = new Request(`${url}${queryParams}`, {
-      ...rest,
-      headers: this.buildHeaders(options),
-      method: 'PUT',
-    })
-    return this._PUT(request, { params: Promise.resolve({ slug }) })
+    return this._POST(request, { params: new Promise(() => ({ slug })) })
   }
 }

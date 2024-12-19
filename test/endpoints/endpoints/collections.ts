@@ -30,11 +30,13 @@ export const collectionEndpoints: CollectionConfig['endpoints'] = [
 
       try {
         data = await req.json()
-      } catch (error) {
+      } catch (ignore) {
         data = {}
       }
 
-      if (data) req.data = data
+      if (data) {
+        req.data = data
+      }
 
       return Response.json({
         name: req.data.name,
