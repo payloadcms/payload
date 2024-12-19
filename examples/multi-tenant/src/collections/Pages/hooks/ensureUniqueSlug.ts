@@ -3,17 +3,25 @@ import type { FieldHook } from 'payload'
 import { ValidationError } from 'payload'
 
 import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
+import { extractID } from '../../../utilities/extractID'
 
 export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, value }) => {
+  if (!value) {
+    return value;
+  }
+
   // if value is unchanged, skip validation
   if (originalDoc.slug === value) {
     return value
   }
 
-  const incomingTenantID = typeof data?.tenant === 'object' ? data.tenant.id : data?.tenant
-  const currentTenantID =
-    typeof originalDoc?.tenant === 'object' ? originalDoc.tenant.id : originalDoc?.tenant
+  const incomingTenantID = extractID(data?.website)
+  const currentTenantID = extractID(originalDoc?.website)
   const tenantIDToMatch = incomingTenantID || currentTenantID
+
+  if (!tenantIDToMatch) {
+    return value
+  }
 
   const findDuplicatePages = await req.payload.find({
     collection: 'pages',
