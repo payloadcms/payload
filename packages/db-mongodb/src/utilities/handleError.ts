@@ -18,7 +18,7 @@ export const handleError = ({
     throw error
   }
 
-  const message = req?.t ? 'error:valueMustBeUnique' : 'Value must be unique'
+  const message = req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique'
 
   // Handle uniqueness error from MongoDB
   if ('code' in error && error.code === 11000 && 'keyValue' in error && error.keyValue) {

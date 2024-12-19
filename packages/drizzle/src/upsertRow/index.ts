@@ -394,7 +394,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           id,
           errors: [
             {
-              message: req?.t ? 'error:valueMustBeUnique' : 'Value must be unique',
+              message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
               path: fieldName,
             },
           ],
