@@ -232,7 +232,7 @@ const sanitizeDate = ({
 }
 
 /**
- * @experimental This API can be changed without a major version bumb.
+ * @experimental This API can be changed without a major version bump.
  */
 export const transform = ({
   adapter,
