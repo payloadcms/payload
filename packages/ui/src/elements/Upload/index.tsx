@@ -85,11 +85,19 @@ export type UploadProps = {
   readonly customActions?: React.ReactNode[]
   readonly initialState?: FormState
   readonly onChange?: (file?: File) => void
+  readonly onUploadStatusChange?: (uploadInProgress: boolean) => void
   readonly uploadConfig: SanitizedCollectionConfig['upload']
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
-  const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
+  const {
+    collectionSlug,
+    customActions,
+    initialState,
+    onChange,
+    onUploadStatusChange,
+    uploadConfig,
+  } = props
 
   const { t } = useTranslation()
   const { setModified } = useForm()
@@ -109,6 +117,8 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const urlInputRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const [uploadInProgress, setUploadInProgress] = useState(false)
 
   const handleFileChange = useCallback(
     (newFile: File) => {
@@ -174,6 +184,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const handleUrlSubmit = async () => {
     if (fileUrl) {
+      setUploadInProgress(true)
+      if (typeof onUploadStatusChange === 'function') {
+        onUploadStatusChange(true)
+      }
       try {
         const response = await fetch(fileUrl)
         const data = await response.blob()
@@ -186,6 +200,11 @@ export const Upload: React.FC<UploadProps> = (props) => {
         handleFileChange(file)
       } catch (e) {
         toast.error(e.message)
+      } finally {
+        setUploadInProgress(false)
+        if (typeof onUploadStatusChange === 'function') {
+          onUploadStatusChange(false)
+        }
       }
     }
   }

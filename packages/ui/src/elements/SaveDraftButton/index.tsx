@@ -14,7 +14,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'save-draft'
 
-export const SaveDraftButton: React.FC = () => {
+export const SaveDraftButton: React.FC<{ uploadInProgress?: boolean }> = ({ uploadInProgress }) => {
   const {
     config: {
       routes: { api },
@@ -33,7 +33,7 @@ export const SaveDraftButton: React.FC = () => {
   const forceDisable = operation === 'update' && !modified
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) {
+    if (forceDisable || uploadInProgress) {
       return
     }
 
@@ -72,6 +72,7 @@ export const SaveDraftButton: React.FC = () => {
     id,
     forceDisable,
     setUnpublishedVersionCount,
+    uploadInProgress,
   ])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
@@ -91,7 +92,7 @@ export const SaveDraftButton: React.FC = () => {
       buttonId="action-save-draft"
       buttonStyle="secondary"
       className={baseClass}
-      disabled={forceDisable}
+      disabled={forceDisable || uploadInProgress}
       onClick={() => {
         return void saveDraft()
       }}

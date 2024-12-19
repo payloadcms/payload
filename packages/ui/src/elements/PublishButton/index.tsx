@@ -14,7 +14,10 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { PopupList } from '../Popup/index.js'
 
-export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolean }> = ({
+  label: labelProp,
+  uploadInProgress,
+}) => {
   const {
     id,
     collectionSlug,
@@ -43,7 +46,8 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   const label = labelProp || t('version:publishChanges')
 
   const hasNewerVersions = unpublishedVersionCount > 0
-  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !hasPublishedDoc)
+  const canPublish =
+    hasPublishPermission && (modified || hasNewerVersions || !hasPublishedDoc) && !uploadInProgress
   const operation = useOperation()
 
   const forceDisable = operation === 'update' && !modified
@@ -88,6 +92,10 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   })
 
   const publish = useCallback(() => {
+    if (uploadInProgress) {
+      return
+    }
+
     void submit({
       overrides: {
         _status: 'published',
@@ -96,10 +104,14 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
 
     setUnpublishedVersionCount(0)
     setHasPublishedDoc(true)
-  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount])
+  }, [setHasPublishedDoc, submit, uploadInProgress, setUnpublishedVersionCount])
 
   const publishSpecificLocale = useCallback(
     (locale) => {
+      if (uploadInProgress) {
+        return
+      }
+
       const params = qs.stringify({
         publishSpecificLocale: locale,
       })
@@ -117,7 +129,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
 
       setHasPublishedDoc(true)
     },
-    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit],
+    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadInProgress],
   )
 
   if (!hasPublishPermission) {
