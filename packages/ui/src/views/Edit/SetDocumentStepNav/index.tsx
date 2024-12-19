@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { CollectionConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useEffect } from 'react'
@@ -19,7 +19,7 @@ export const SetDocumentStepNav: React.FC<{
   globalLabel?: SanitizedGlobalConfig['label']
   globalSlug?: SanitizedGlobalConfig['slug']
   id?: number | string
-  pluralLabel?: SanitizedCollectionConfig['labels']['plural']
+  pluralLabel?: CollectionConfig['labels']['plural']
   useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']
   view?: string
 }> = (props) => {
