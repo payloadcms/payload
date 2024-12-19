@@ -29,6 +29,7 @@ export const updateOne: UpdateOne = async function updateOne(
     data,
     fields,
     operation: 'update',
+    timestamps: optionsArgs.timestamps !== false,
   })
 
   try {

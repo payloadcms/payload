@@ -41,6 +41,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     data: versionData,
     fields,
     operation: 'update',
+    timestamps: optionsArgs.timestamps !== false,
   })
 
   const doc: any = await VersionModel.collection.findOneAndUpdate(

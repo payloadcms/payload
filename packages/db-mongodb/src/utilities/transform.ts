@@ -22,6 +22,11 @@ type Args = {
   globalSlug?: string
   operation: 'create' | 'read' | 'update'
   /**
+   * Set updatedAt and createdAt
+   * @default true
+   */
+  timestamps?: boolean
+  /**
    * Throw errors on invalid relationships
    * @default true
    */
@@ -232,6 +237,7 @@ export const transform = ({
   fields,
   globalSlug,
   operation,
+  timestamps = true,
   validateRelationships = true,
 }: Args) => {
   if (Array.isArray(data)) {
@@ -256,11 +262,13 @@ export const transform = ({
   }
 
   if (operation !== 'read') {
-    if (operation === 'create' && !data.createdAt) {
-      data.createdAt = new Date()
-    }
+    if (timestamps) {
+      if (operation === 'create' && !data.createdAt) {
+        data.createdAt = new Date()
+      }
 
-    data.updatedAt = new Date()
+      data.updatedAt = new Date()
+    }
 
     if (globalSlug) {
       data.globalType = globalSlug

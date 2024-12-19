@@ -32,6 +32,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     data: versionData,
     fields,
     operation: 'update',
+    timestamps: optionsArgs.timestamps !== false,
   })
 
   const doc = await VersionModel.collection.findOneAndUpdate(
