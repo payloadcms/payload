@@ -454,6 +454,7 @@ export const frTranslations: DefaultTranslationsObject = {
     draft: 'Brouillon',
     draftSavedSuccessfully: 'Brouillon enregistré avec succès.',
     lastSavedAgo: 'Dernière sauvegarde il y a {{distance}}',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Aucune autre version trouvée',
     noRowsFound: 'Aucun(e) {{label}} trouvé(e)',
     noRowsSelected: 'Aucune {{étiquette}} sélectionnée',
