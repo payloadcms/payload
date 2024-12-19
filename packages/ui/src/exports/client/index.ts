@@ -90,10 +90,7 @@ export { NavGroup } from '../../elements/NavGroup/index.js'
 export { Pagination } from '../../elements/Pagination/index.js'
 export { PerPage } from '../../elements/PerPage/index.js'
 export { Pill } from '../../elements/Pill/index.js'
-import { toast } from 'sonner'
-
 import * as PopupList from '../../elements/Popup/PopupButtonList/index.js'
-
 export { PopupList }
 export { Popup } from '../../elements/Popup/index.js'
 export { PublishMany } from '../../elements/PublishMany/index.js'
@@ -118,6 +115,7 @@ export { type Column, Table } from '../../elements/Table/index.js'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
+import { toast } from 'sonner'
 export { toast }
 export { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 export { Upload } from '../../elements/Upload/index.js'
