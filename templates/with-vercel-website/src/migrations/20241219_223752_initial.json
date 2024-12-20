@@ -1,5 +1,5 @@
 {
-  "id": "d711bb29-c2e9-4121-b0fa-650889f5a7bd",
+  "id": "1d6262e0-b273-4fe7-bd7b-054dbcfc83fe",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1192,14 +1192,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "categories_id": {
-          "name": "categories_id",
+        "posts_id": {
+          "name": "posts_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "posts_id": {
-          "name": "posts_id",
+        "categories_id": {
+          "name": "categories_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -1266,11 +1266,11 @@
           "method": "btree",
           "with": {}
         },
-        "pages_rels_categories_id_idx": {
-          "name": "pages_rels_categories_id_idx",
+        "pages_rels_posts_id_idx": {
+          "name": "pages_rels_posts_id_idx",
           "columns": [
             {
-              "expression": "categories_id",
+              "expression": "posts_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1281,11 +1281,11 @@
           "method": "btree",
           "with": {}
         },
-        "pages_rels_posts_id_idx": {
-          "name": "pages_rels_posts_id_idx",
+        "pages_rels_categories_id_idx": {
+          "name": "pages_rels_categories_id_idx",
           "columns": [
             {
-              "expression": "posts_id",
+              "expression": "categories_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1316,20 +1316,20 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "pages_rels_categories_fk": {
-          "name": "pages_rels_categories_fk",
-          "tableFrom": "pages_rels",
-          "tableTo": "categories",
-          "columnsFrom": ["categories_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "pages_rels_posts_fk": {
           "name": "pages_rels_posts_fk",
           "tableFrom": "pages_rels",
           "tableTo": "posts",
           "columnsFrom": ["posts_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pages_rels_categories_fk": {
+          "name": "pages_rels_categories_fk",
+          "tableFrom": "pages_rels",
+          "tableTo": "categories",
+          "columnsFrom": ["categories_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -2691,14 +2691,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "categories_id": {
-          "name": "categories_id",
+        "posts_id": {
+          "name": "posts_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "posts_id": {
-          "name": "posts_id",
+        "categories_id": {
+          "name": "categories_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -2765,11 +2765,11 @@
           "method": "btree",
           "with": {}
         },
-        "_pages_v_rels_categories_id_idx": {
-          "name": "_pages_v_rels_categories_id_idx",
+        "_pages_v_rels_posts_id_idx": {
+          "name": "_pages_v_rels_posts_id_idx",
           "columns": [
             {
-              "expression": "categories_id",
+              "expression": "posts_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2780,11 +2780,11 @@
           "method": "btree",
           "with": {}
         },
-        "_pages_v_rels_posts_id_idx": {
-          "name": "_pages_v_rels_posts_id_idx",
+        "_pages_v_rels_categories_id_idx": {
+          "name": "_pages_v_rels_categories_id_idx",
           "columns": [
             {
-              "expression": "posts_id",
+              "expression": "categories_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2815,20 +2815,20 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "_pages_v_rels_categories_fk": {
-          "name": "_pages_v_rels_categories_fk",
-          "tableFrom": "_pages_v_rels",
-          "tableTo": "categories",
-          "columnsFrom": ["categories_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "_pages_v_rels_posts_fk": {
           "name": "_pages_v_rels_posts_fk",
           "tableFrom": "_pages_v_rels",
           "tableTo": "posts",
           "columnsFrom": ["posts_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "_pages_v_rels_categories_fk": {
+          "name": "_pages_v_rels_categories_fk",
+          "tableFrom": "_pages_v_rels",
+          "tableTo": "categories",
+          "columnsFrom": ["categories_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -7831,6 +7831,12 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "posts_id": {
+          "name": "posts_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -7893,6 +7899,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "header_rels_posts_id_idx": {
+          "name": "header_rels_posts_id_idx",
+          "columns": [
+            {
+              "expression": "posts_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -7910,6 +7931,15 @@
           "tableFrom": "header_rels",
           "tableTo": "pages",
           "columnsFrom": ["pages_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "header_rels_posts_fk": {
+          "name": "header_rels_posts_fk",
+          "tableFrom": "header_rels",
+          "tableTo": "posts",
+          "columnsFrom": ["posts_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -8083,6 +8113,12 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "posts_id": {
+          "name": "posts_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -8145,6 +8181,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "footer_rels_posts_id_idx": {
+          "name": "footer_rels_posts_id_idx",
+          "columns": [
+            {
+              "expression": "posts_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -8162,6 +8213,15 @@
           "tableFrom": "footer_rels",
           "tableTo": "pages",
           "columnsFrom": ["pages_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "footer_rels_posts_fk": {
+          "name": "footer_rels_posts_fk",
+          "tableFrom": "footer_rels",
+          "tableTo": "posts",
+          "columnsFrom": ["posts_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
