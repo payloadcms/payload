@@ -86,6 +86,7 @@ export const getBuildQueryPlugin = ({
         globalSlug,
         locale,
         payload,
+        projection,
         where,
       })
 
