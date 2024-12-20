@@ -6,6 +6,7 @@ import { en } from './en.js'
 import { es } from './es.js'
 import { fa } from './fa.js'
 import { fr } from './fr.js'
+import { is } from './is.js'
 import { it } from './it.js'
 import { nb } from './nb.js'
 import { pl } from './pl.js'
@@ -21,6 +22,7 @@ export const translations = {
   es,
   fa,
   fr,
+  is,
   it,
   nb,
   pl,
