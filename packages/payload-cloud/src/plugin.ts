@@ -95,56 +95,66 @@ export const payloadCloudPlugin =
       })
     }
 
-    // If the user has tasks configured, we set up cron jobs on init.
+    // We set up cron jobs on init.
     // We also make sure to only run on one instance using a instance identifier stored in a global.
-    if (config.jobs?.tasks) {
-      config.globals = [
-        ...(config.globals || []),
-        {
-          slug: 'payload-cloud-instance',
-          admin: {
-            hidden: true,
-          },
-          fields: [
-            {
-              name: 'instance',
-              type: 'text',
-              required: true,
-            },
-          ],
+
+    // If you modify this defaults, make sure to update the TsDoc in the types file.
+    const DEFAULT_CRON = '* * * * *'
+    const DEFAULT_LIMIT = 10
+    const DEFAULT_CRON_JOB = {
+      cron: DEFAULT_CRON,
+      limit: DEFAULT_LIMIT,
+      queue: 'default (every minute)',
+    }
+    config.globals = [
+      ...(config.globals || []),
+      {
+        slug: 'payload-cloud-instance',
+        admin: {
+          hidden: true,
         },
-      ]
-      config.onInit = async (payload) => {
-        if (config.onInit) {
-          await config.onInit(payload)
-        }
-        const instance = generateRandomString()
-
-        await payload.updateGlobal({
-          slug: 'payload-cloud-instance',
-          data: {
-            instance,
+        fields: [
+          {
+            name: 'instance',
+            type: 'text',
+            required: true,
           },
-        })
+        ],
+      },
+    ]
+    const newOnInit = async (payload) => {
+      if (config.onInit) {
+        await config.onInit(payload)
+      }
+      const instance = generateRandomString()
 
-        const cloudInstance = await payload.findGlobal({
-          slug: 'payload-cloud-instance',
-        })
+      await payload.updateGlobal({
+        slug: 'payload-cloud-instance',
+        data: {
+          instance,
+        },
+      })
 
-        if (cloudInstance.instance === instance) {
-          pluginOptions?.jobs?.forEach((cronConfig) => {
-            new Cron(cronConfig.cron ?? '* * * * *', async () => {
-              await payload.jobs.run({
-                limit: cronConfig.limit ?? 100,
-                queue: cronConfig.queue,
-              })
+      const cloudInstance = await payload.findGlobal({
+        slug: 'payload-cloud-instance',
+      })
+
+      const cronJobs = pluginOptions?.cronJobs?.run ?? [DEFAULT_CRON_JOB]
+      if (cloudInstance.instance === instance) {
+        cronJobs.forEach((cronConfig) => {
+          new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            await payload.jobs.run({
+              limit: cronConfig.limit ?? DEFAULT_LIMIT,
+              queue: cronConfig.queue,
             })
           })
-        }
+        })
       }
-
-      return config
     }
+
+    config.onInit = newOnInit
+
+    return config
   }
 
 function generateRandomString(): string {

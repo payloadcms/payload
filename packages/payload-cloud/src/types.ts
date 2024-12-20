@@ -74,7 +74,7 @@ export type CronConfig = {
    */
   cron?: string
   /**
-   * The limit for the job. This can be overridden by the user. Defaults to 100.
+   * The limit for the job. This can be overridden by the user. Defaults to 10.
    */
   limit?: number
   /**
@@ -84,6 +84,26 @@ export type CronConfig = {
 }
 
 export interface PluginOptions {
+  /**
+   * Jobs configuration. By default, there is a single
+   * cron job that runs every minute.
+   */
+  cronJobs?: {
+    /**
+     * Enable the cron jobs defined in the `run` array,
+     * or the default cron job if `run` is not defined.
+     * Defaults to `true`.
+     * @note If you change this in a development environment,
+     * you will need to restart the server for the changes to take effect.
+     */
+    enabled?: boolean
+    /**
+     * Cron jobs configuration. If not defined, a single
+     * cron job is created that runs every minute.
+     */
+    run?: CronConfig[]
+  }
+
   /** Payload Cloud Email
    * @default true
    */
@@ -101,11 +121,6 @@ export interface PluginOptions {
    * @internal Endpoint override for developement
    */
   endpoint?: string
-
-  /**
-   * Jobs configuration
-   */
-  jobs?: CronConfig[]
 
   /** Payload Cloud Storage
    * @default true
