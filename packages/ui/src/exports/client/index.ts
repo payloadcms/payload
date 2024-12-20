@@ -246,6 +246,9 @@ export { DocumentEventsProvider, useDocumentEvents } from '../../providers/Docum
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
 
+export { UploadStatusProvider, useUploadStatus } from '../../providers/UploadStatus/index.js'
+export type { UploadStatus, UploadStatusContextType } from '../../providers/UploadStatus/index.js'
+
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
 export {
   EntityVisibilityProvider,

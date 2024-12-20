@@ -204,8 +204,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     return false
   })
 
-  const [uploadInProgress, setUploadInProgress] = useState(false)
-
   const handleDocumentLocking = useCallback(
     (lockedState: LockedState) => {
       setDocumentIsLocked(true)
@@ -393,11 +391,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     ],
   )
 
-  // Track whether any uploads are in progress
-  const handleUploadStatusChange = (status: boolean) => {
-    setUploadInProgress(status)
-  }
-
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
@@ -554,7 +547,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
             redirectAfterDelete={redirectAfterDelete}
             redirectAfterDuplicate={redirectAfterDuplicate}
             slug={collectionConfig?.slug || globalConfig?.slug}
-            uploadInProgress={uploadInProgress}
             user={currentEditor}
           />
           <DocumentFields
@@ -585,7 +577,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                         <Upload
                           collectionSlug={collectionConfig.slug}
                           initialState={initialState}
-                          onUploadStatusChange={handleUploadStatusChange}
                           uploadConfig={upload}
                         />
                       )}

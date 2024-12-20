@@ -63,7 +63,6 @@ export const DocumentControls: React.FC<{
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
-  readonly uploadInProgress?: boolean
   readonly user?: ClientUser
 }> = (props) => {
   const {
@@ -89,7 +88,6 @@ export const DocumentControls: React.FC<{
     readOnlyForIncomingUser,
     redirectAfterDelete,
     redirectAfterDuplicate,
-    uploadInProgress,
     user,
   } = props
 
@@ -219,18 +217,18 @@ export const DocumentControls: React.FC<{
                     {(unsavedDraftWithValidations || !autosaveEnabled) && (
                       <RenderCustomComponent
                         CustomComponent={CustomSaveDraftButton}
-                        Fallback={<SaveDraftButton uploadInProgress={uploadInProgress} />}
+                        Fallback={<SaveDraftButton />}
                       />
                     )}
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
-                      Fallback={<PublishButton uploadInProgress={uploadInProgress} />}
+                      Fallback={<PublishButton />}
                     />
                   </Fragment>
                 ) : (
                   <RenderCustomComponent
                     CustomComponent={CustomSaveButton}
-                    Fallback={<SaveButton uploadInProgress={uploadInProgress} />}
+                    Fallback={<SaveButton />}
                   />
                 )}
               </Fragment>

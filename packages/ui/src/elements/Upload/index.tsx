@@ -1,6 +1,7 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
+import { set } from 'date-fns'
 import { isImage } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -13,14 +14,15 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { useUploadStatus } from '../../providers/UploadStatus/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
-import { Thumbnail } from '../Thumbnail/index.js'
 import './index.scss'
+import { Thumbnail } from '../Thumbnail/index.js'
 
 const baseClass = 'file-field'
 export const editDrawerSlug = 'edit-upload'
@@ -85,24 +87,17 @@ export type UploadProps = {
   readonly customActions?: React.ReactNode[]
   readonly initialState?: FormState
   readonly onChange?: (file?: File) => void
-  readonly onUploadStatusChange?: (uploadInProgress: boolean) => void
   readonly uploadConfig: SanitizedCollectionConfig['upload']
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
-  const {
-    collectionSlug,
-    customActions,
-    initialState,
-    onChange,
-    onUploadStatusChange,
-    uploadConfig,
-  } = props
+  const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
 
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
   const { docPermissions, savedDocumentData } = useDocumentInfo()
+  const { setUploadStatus } = useUploadStatus()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
@@ -117,8 +112,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const urlInputRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  const [uploadInProgress, setUploadInProgress] = useState(false)
 
   const handleFileChange = useCallback(
     (newFile: File) => {
@@ -184,10 +177,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const handleUrlSubmit = async () => {
     if (fileUrl) {
-      setUploadInProgress(true)
-      if (typeof onUploadStatusChange === 'function') {
-        onUploadStatusChange(true)
-      }
+      setUploadStatus('uploading')
       try {
         const response = await fetch(fileUrl)
         const data = await response.blob()
@@ -198,13 +188,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
         // Create a new File object from the Blob data
         const file = new File([data], fileName, { type: data.type })
         handleFileChange(file)
+        setUploadStatus('idle')
       } catch (e) {
         toast.error(e.message)
-      } finally {
-        setUploadInProgress(false)
-        if (typeof onUploadStatusChange === 'function') {
-          onUploadStatusChange(false)
-        }
+        setUploadStatus('failed')
       }
     }
   }

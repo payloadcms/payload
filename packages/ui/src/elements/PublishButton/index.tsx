@@ -12,12 +12,10 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadStatus } from '../../providers/UploadStatus/index.js'
 import { PopupList } from '../Popup/index.js'
 
-export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolean }> = ({
-  label: labelProp,
-  uploadInProgress,
-}) => {
+export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const {
     id,
     collectionSlug,
@@ -35,6 +33,7 @@ export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolea
   const modified = useFormModified()
   const editDepth = useEditDepth()
   const { code: localeCode } = useLocale()
+  const { uploadStatus } = useUploadStatus()
 
   const {
     localization,
@@ -47,7 +46,9 @@ export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolea
 
   const hasNewerVersions = unpublishedVersionCount > 0
   const canPublish =
-    hasPublishPermission && (modified || hasNewerVersions || !hasPublishedDoc) && !uploadInProgress
+    hasPublishPermission &&
+    (modified || hasNewerVersions || !hasPublishedDoc) &&
+    uploadStatus !== 'uploading'
   const operation = useOperation()
 
   const forceDisable = operation === 'update' && !modified
@@ -92,7 +93,7 @@ export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolea
   })
 
   const publish = useCallback(() => {
-    if (uploadInProgress) {
+    if (uploadStatus === 'uploading') {
       return
     }
 
@@ -104,11 +105,11 @@ export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolea
 
     setUnpublishedVersionCount(0)
     setHasPublishedDoc(true)
-  }, [setHasPublishedDoc, submit, uploadInProgress, setUnpublishedVersionCount])
+  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount, uploadStatus])
 
   const publishSpecificLocale = useCallback(
     (locale) => {
-      if (uploadInProgress) {
+      if (uploadStatus === 'uploading') {
         return
       }
 
@@ -129,7 +130,7 @@ export const PublishButton: React.FC<{ label?: string; uploadInProgress?: boolea
 
       setHasPublishedDoc(true)
     },
-    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadInProgress],
+    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadStatus],
   )
 
   if (!hasPublishPermission) {

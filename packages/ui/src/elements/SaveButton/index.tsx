@@ -8,11 +8,9 @@ import { useHotkey } from '../../hooks/useHotkey.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadStatus } from '../../providers/UploadStatus/index.js'
 
-export const SaveButton: React.FC<{ label?: string; uploadInProgress?: boolean }> = ({
-  label: labelProp,
-  uploadInProgress,
-}) => {
+export const SaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const { t } = useTranslation()
   const { submit } = useForm()
   const modified = useFormModified()
@@ -20,6 +18,7 @@ export const SaveButton: React.FC<{ label?: string; uploadInProgress?: boolean }
   const ref = useRef<HTMLButtonElement>(null)
   const editDepth = useEditDepth()
   const operation = useOperation()
+  const { uploadStatus } = useUploadStatus()
 
   const forceDisable = operation === 'update' && !modified
 
@@ -36,7 +35,7 @@ export const SaveButton: React.FC<{ label?: string; uploadInProgress?: boolean }
   })
 
   const handleSubmit = () => {
-    if (uploadInProgress) {
+    if (uploadStatus === 'uploading') {
       return
     }
 
@@ -46,7 +45,7 @@ export const SaveButton: React.FC<{ label?: string; uploadInProgress?: boolean }
   return (
     <FormSubmit
       buttonId="action-save"
-      disabled={forceDisable || uploadInProgress}
+      disabled={forceDisable || uploadStatus === 'uploading'}
       onClick={handleSubmit}
       ref={ref}
       size="medium"
