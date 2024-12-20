@@ -46,15 +46,15 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     operation: 'create',
   })
 
-  const { insertedId } = await VersionModel.collection.insertOne(data, { session })
-  ;(data as any)._id = insertedId
+  const { insertedId: insertedID } = await VersionModel.collection.insertOne(data, { session })
+  ;(data as any)._id = insertedID
 
   await VersionModel.collection.updateMany(
     {
       $and: [
         {
           _id: {
-            $ne: insertedId,
+            $ne: insertedID,
           },
         },
         {

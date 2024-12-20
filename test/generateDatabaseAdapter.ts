@@ -52,6 +52,7 @@ export const allDatabaseAdapters = {
     client: {
       url: process.env.SQLITE_URL || 'file:./payloadtests.db',
     },
+    autoIncrement: true
   })`,
   'sqlite-uuid': `
   import { sqliteAdapter } from '@payloadcms/db-sqlite'

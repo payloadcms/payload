@@ -47,8 +47,8 @@ export const createVersion: CreateVersion = async function createVersion(
     operation: 'create',
   })
 
-  const { insertedId } = await VersionModel.collection.insertOne(data, { session })
-  data._id = insertedId
+  const { insertedId: insertedID } = await VersionModel.collection.insertOne(data, { session })
+  data._id = insertedID
 
   const parentQuery = {
     $or: [
@@ -72,7 +72,7 @@ export const createVersion: CreateVersion = async function createVersion(
       $and: [
         {
           _id: {
-            $ne: insertedId,
+            $ne: insertedID,
           },
         },
         parentQuery,

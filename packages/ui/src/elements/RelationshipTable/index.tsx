@@ -61,7 +61,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     relationTo,
   } = props
   const [Table, setTable] = useState<React.ReactNode>(null)
-
   const { getEntityConfig } = useConfig()
 
   const { permissions } = useAuth()

@@ -13,7 +13,7 @@ import { AccountForm } from './AccountForm'
 import classes from './index.module.scss'
 
 export default async function Account() {
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const payload = await getPayload({ config })
   const { permissions, user } = await payload.auth({ headers })
 
