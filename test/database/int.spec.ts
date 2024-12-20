@@ -1,6 +1,5 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
-import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
@@ -8,6 +7,7 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { desc, type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -786,6 +786,61 @@ describe('database', () => {
       expect(result.select).toStrictEqual('default')
       expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
     })
+  })
+
+  describe('Schema generation', () => {
+    if (process.env.PAYLOAD_DATABASE.includes('postgres')) {
+      it('should generate Drizzle Postgres schema', async () => {
+        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+
+        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+        await payload.db.generateSchema({
+          outputFile,
+        })
+
+        const module = await import(outputFile)
+
+        // Confirm that the generated module exports every relation
+        for (const relation in payload.db.relations) {
+          expect(module).toHaveProperty(relation)
+        }
+
+        // Confirm that module exports every table
+        for (const table in payload.db.tables) {
+          expect(module).toHaveProperty(table)
+        }
+
+        // Confirm that module exports every enum
+        for (const enumName in payload.db.enums) {
+          expect(module).toHaveProperty(enumName)
+        }
+      })
+    }
+
+    if (process.env.PAYLOAD_DATABASE.includes('sqlite')) {
+      it('should generate Drizzle SQLite schema', async () => {
+        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+
+        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+        await payload.db.generateSchema({
+          outputFile,
+        })
+
+        const module = await import(outputFile)
+
+        // Confirm that the generated module exports every relation
+        for (const relation in payload.db.relations) {
+          expect(module).toHaveProperty(relation)
+        }
+
+        // Confirm that module exports every table
+        for (const table in payload.db.tables) {
+          expect(module).toHaveProperty(table)
+        }
+      })
+    }
   })
 
   describe('drizzle: schema hooks', () => {

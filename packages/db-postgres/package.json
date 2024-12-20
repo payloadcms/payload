@@ -33,6 +33,26 @@
       "import": "./src/exports/migration-utils.ts",
       "types": "./src/exports/migration-utils.ts",
       "default": "./src/exports/migration-utils.ts"
+    },
+    "./drizzle": {
+      "import": "./src/drizzle-proxy/index.ts",
+      "types": "./src/drizzle-proxy/index.ts",
+      "default": "./src/drizzle-proxy/index.ts"
+    },
+    "./drizzle/pg-core": {
+      "import": "./src/drizzle-proxy/pg-core.ts",
+      "types": "./src/drizzle-proxy/pg-core.ts",
+      "default": "./src/drizzle-proxy/pg-core.ts"
+    },
+    "./drizzle/node-postgres": {
+      "import": "./src/drizzle-proxy/node-postgres.ts",
+      "types": "./src/drizzle-proxy/node-postgres.ts",
+      "default": "./src/drizzle-proxy/node-postgres.ts"
+    },
+    "./drizzle/relations": {
+      "import": "./src/drizzle-proxy/relations.ts",
+      "types": "./src/drizzle-proxy/relations.ts",
+      "default": "./src/drizzle-proxy/relations.ts"
     }
   },
   "main": "./src/index.ts",
@@ -90,6 +110,26 @@
         "import": "./dist/exports/migration-utils.js",
         "types": "./dist/exports/migration-utils.d.ts",
         "default": "./dist/exports/migration-utils.js"
+      },
+      "./drizzle": {
+        "import": "./dist/drizzle-proxy/index.js",
+        "types": "./dist/drizzle-proxy/index.d.ts",
+        "default": "./dist/drizzle-proxy/index.js"
+      },
+      "./drizzle/pg-core": {
+        "import": "./dist/drizzle-proxy/pg-core.js",
+        "types": "./dist/drizzle-proxy/pg-core.d.ts",
+        "default": "./dist/drizzle-proxy/pg-core.js"
+      },
+      "./drizzle/node-postgres": {
+        "import": "./dist/drizzle-proxy/node-postgres.js",
+        "types": "./dist/drizzle-proxy/node-postgres.d.ts",
+        "default": "./dist/drizzle-proxy/node-postgres.js"
+      },
+      "./drizzle/relations": {
+        "import": "./dist/drizzle-proxy/relations.js",
+        "types": "./dist/drizzle-proxy/relations.d.ts",
+        "default": "./dist/drizzle-proxy/relations.js"
       }
     },
     "main": "./dist/index.js",

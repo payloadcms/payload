@@ -63,7 +63,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
       pictureJSX.push(
         <source
           key={size}
-          media="(max-width: ${imageSize.width}px)"
+          media={`(max-width: ${imageSize.width}px)`}
           srcSet={imageSizeURL}
           type={imageSize.mimeType}
         ></source>,
