@@ -183,6 +183,9 @@ export interface Product {
       | {
           options: string[];
           stripeProductID?: string | null;
+          /**
+           * Define stock for this variant. A stock of 0 disables checkout for this variant.
+           */
           stock: number;
           info?:
             | {
@@ -208,6 +211,9 @@ export interface Product {
     | number
     | boolean
     | null;
+  /**
+   * Define stock for this product. A stock of 0 disables checkout for this product.
+   */
   stock?: number | null;
   price?: number | null;
   currency?: string | null;
@@ -218,6 +224,9 @@ export interface Product {
   meta?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
     image?: (string | null) | Media;
   };
   updatedAt: string;
@@ -289,6 +298,9 @@ export interface CallToActionBlock {
           } | null;
           url?: string | null;
           label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
           appearance?: ('default' | 'outline') | null;
         };
         id?: string | null;
@@ -334,6 +346,9 @@ export interface Page {
             } | null;
             url?: string | null;
             label: string;
+            /**
+             * Choose how the link should be rendered.
+             */
             appearance?: ('default' | 'outline') | null;
           };
           id?: string | null;
@@ -354,6 +369,9 @@ export interface Page {
   meta?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
     image?: (string | null) | Media;
   };
   updatedAt: string;
@@ -393,6 +411,9 @@ export interface ContentBlock {
           } | null;
           url?: string | null;
           label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
           appearance?: ('default' | 'outline') | null;
         };
         id?: string | null;
@@ -407,7 +428,6 @@ export interface ContentBlock {
  * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
-  position?: ('default' | 'fullscreen') | null;
   media: string | Media;
   id?: string | null;
   blockName?: string | null;
@@ -443,12 +463,18 @@ export interface ArchiveBlock {
         value: string | Product;
       }[]
     | null;
+  /**
+   * This field is auto-populated after-read
+   */
   populatedDocs?:
     | {
         relationTo: 'products';
         value: string | Product;
       }[]
     | null;
+  /**
+   * This field is auto-populated after-read
+   */
   populatedDocsTotal?: number | null;
   id?: string | null;
   blockName?: string | null;
@@ -480,12 +506,18 @@ export interface CarouselBlock {
         value: string | Product;
       }[]
     | null;
+  /**
+   * This field is auto-populated after-read
+   */
   populatedDocs?:
     | {
         relationTo: 'products';
         value: string | Product;
       }[]
     | null;
+  /**
+   * This field is auto-populated after-read
+   */
   populatedDocsTotal?: number | null;
   id?: string | null;
   blockName?: string | null;
@@ -665,6 +697,9 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
+  /**
+   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
+   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -684,6 +719,9 @@ export interface Form {
   redirect?: {
     url: string;
   };
+  /**
+   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
+   */
   emails?:
     | {
         emailTo?: string | null;
@@ -692,6 +730,9 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
+        /**
+         * Enter the message that should be sent in this email.
+         */
         message?: {
           root: {
             type: string;
@@ -827,16 +868,7 @@ export interface UsersSelect<T extends boolean = true> {
   cart?:
     | T
     | {
-        items?:
-          | T
-          | {
-              product?: T;
-              variant?: T;
-              stripeProductID?: T;
-              quantity?: T;
-              url?: T;
-              id?: T;
-            };
+        items?: T | CartItemsSelect<T>;
       };
   skipSync?: T;
   updatedAt?: T;
@@ -851,6 +883,18 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CartItems_select".
+ */
+export interface CartItemsSelect<T extends boolean = true> {
+  product?: T;
+  variant?: T;
+  stripeProductID?: T;
+  quantity?: T;
+  url?: T;
+  id?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
@@ -861,60 +905,9 @@ export interface ProductsSelect<T extends boolean = true> {
   layout?:
     | T
     | {
-        cta?:
-          | T
-          | {
-              richText?: T;
-              links?:
-                | T
-                | {
-                    link?:
-                      | T
-                      | {
-                          type?: T;
-                          newTab?: T;
-                          reference?: T;
-                          url?: T;
-                          label?: T;
-                          appearance?: T;
-                        };
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        content?:
-          | T
-          | {
-              columns?:
-                | T
-                | {
-                    size?: T;
-                    richText?: T;
-                    enableLink?: T;
-                    link?:
-                      | T
-                      | {
-                          type?: T;
-                          newTab?: T;
-                          reference?: T;
-                          url?: T;
-                          label?: T;
-                          appearance?: T;
-                        };
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        mediaBlock?:
-          | T
-          | {
-              position?: T;
-              media?: T;
-              id?: T;
-              blockName?: T;
-            };
+        cta?: T | CallToActionBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        mediaBlock?: T | MediaBlockSelect<T>;
       };
   enableVariants?: T;
   variants?:
@@ -967,6 +960,65 @@ export interface ProductsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CallToActionBlock_select".
+ */
+export interface CallToActionBlockSelect<T extends boolean = true> {
+  richText?: T;
+  links?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+              appearance?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock_select".
+ */
+export interface ContentBlockSelect<T extends boolean = true> {
+  columns?:
+    | T
+    | {
+        size?: T;
+        richText?: T;
+        enableLink?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+              appearance?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock_select".
+ */
+export interface MediaBlockSelect<T extends boolean = true> {
+  media?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
@@ -997,102 +1049,13 @@ export interface PagesSelect<T extends boolean = true> {
   layout?:
     | T
     | {
-        cta?:
-          | T
-          | {
-              richText?: T;
-              links?:
-                | T
-                | {
-                    link?:
-                      | T
-                      | {
-                          type?: T;
-                          newTab?: T;
-                          reference?: T;
-                          url?: T;
-                          label?: T;
-                          appearance?: T;
-                        };
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        content?:
-          | T
-          | {
-              columns?:
-                | T
-                | {
-                    size?: T;
-                    richText?: T;
-                    enableLink?: T;
-                    link?:
-                      | T
-                      | {
-                          type?: T;
-                          newTab?: T;
-                          reference?: T;
-                          url?: T;
-                          label?: T;
-                          appearance?: T;
-                        };
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        mediaBlock?:
-          | T
-          | {
-              position?: T;
-              media?: T;
-              id?: T;
-              blockName?: T;
-            };
-        archive?:
-          | T
-          | {
-              introContent?: T;
-              populateBy?: T;
-              relationTo?: T;
-              categories?: T;
-              limit?: T;
-              selectedDocs?: T;
-              populatedDocs?: T;
-              populatedDocsTotal?: T;
-              id?: T;
-              blockName?: T;
-            };
-        carousel?:
-          | T
-          | {
-              populateBy?: T;
-              relationTo?: T;
-              categories?: T;
-              limit?: T;
-              selectedDocs?: T;
-              populatedDocs?: T;
-              populatedDocsTotal?: T;
-              id?: T;
-              blockName?: T;
-            };
-        threeItemGrid?:
-          | T
-          | {
-              products?: T;
-              id?: T;
-              blockName?: T;
-            };
-        banner?:
-          | T
-          | {
-              style?: T;
-              content?: T;
-              id?: T;
-              blockName?: T;
-            };
+        cta?: T | CallToActionBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        mediaBlock?: T | MediaBlockSelect<T>;
+        archive?: T | ArchiveBlockSelect<T>;
+        carousel?: T | CarouselBlockSelect<T>;
+        threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
+        banner?: T | BannerBlockSelect<T>;
       };
   slug?: T;
   meta?:
@@ -1105,6 +1068,56 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ArchiveBlock_select".
+ */
+export interface ArchiveBlockSelect<T extends boolean = true> {
+  introContent?: T;
+  populateBy?: T;
+  relationTo?: T;
+  categories?: T;
+  limit?: T;
+  selectedDocs?: T;
+  populatedDocs?: T;
+  populatedDocsTotal?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarouselBlock_select".
+ */
+export interface CarouselBlockSelect<T extends boolean = true> {
+  populateBy?: T;
+  relationTo?: T;
+  categories?: T;
+  limit?: T;
+  selectedDocs?: T;
+  populatedDocs?: T;
+  populatedDocsTotal?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ThreeItemGridBlock_select".
+ */
+export interface ThreeItemGridBlockSelect<T extends boolean = true> {
+  products?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BannerBlock_select".
+ */
+export interface BannerBlockSelect<T extends boolean = true> {
+  style?: T;
+  content?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

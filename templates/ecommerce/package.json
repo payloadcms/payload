@@ -18,10 +18,6 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@lexical/list": "0.20",
-    "@lexical/react": "0.20",
-    "@lexical/rich-text": "0.20",
-    "@lexical/utils": "0.20",
     "@payloadcms/db-mongodb": "latest",
     "@payloadcms/email-nodemailer": "latest",
     "@payloadcms/live-preview-react": "latest",
@@ -51,14 +47,13 @@
     "embla-carousel-react": "^8.1.5",
     "geist": "^1.3.0",
     "jsonwebtoken": "9.0.1",
-    "lexical": "0.20.0",
     "lucide-react": "^0.378.0",
-    "next": "^15",
+    "next": "^15.1.0",
     "payload": "latest",
     "payload-admin-bar": "^1.0.6",
     "qs-esm": "^7",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-hook-form": "7.45.4",
     "sharp": "0.32.6",
     "stripe": "^10.2.0",
@@ -66,37 +61,25 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^13.1.6",
+    "@eslint/eslintrc": "^3.2.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.12",
     "@types/jsonwebtoken": "^9.0.7",
-    "@types/node": "20.12.7",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/node": "22.5.4",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
     "@vercel/git-hooks": "^1.0.0",
     "autoprefixer": "^10.4.19",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.2",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-unicorn": "^52.0.0",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "15.1.0",
     "lint-staged": "^15.2.2",
     "postcss": "^8.4.38",
-    "prettier": "3.2.5",
+    "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "tailwindcss": "^3.4.3",
     "typescript": "5.7.2"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "npm:types-react@19.0.0-rc.1",
-      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
-    }
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }
