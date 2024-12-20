@@ -53,7 +53,6 @@ export async function GET(
         headers: req.headers,
       })
     } catch (error) {
-      console.log({ token, payloadSecret: payload.secret })
       payload.logger.error({ err: error }, 'Error verifying token for live preview')
       return new Response('You are not allowed to preview this page', { status: 403 })
     }
