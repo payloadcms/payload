@@ -13,7 +13,7 @@ import {
 } from '../../errors/index.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
-import { baseIDField } from '../baseFields/baseIDField.js'
+import { nestedIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import { validations } from '../validations.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
@@ -140,7 +140,7 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'array' && field.fields) {
-      field.fields.push(baseIDField)
+      field.fields.push(nestedIDField)
     }
 
     if ((field.type === 'blocks' || field.type === 'array') && field.label) {

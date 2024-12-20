@@ -1,9 +1,9 @@
 import type { Field } from '../config/types.js'
 
-import { baseIDField } from './baseIDField.js'
+import { nestedIDField } from './baseIDField.js'
 
 export const baseBlockFields: Field[] = [
-  baseIDField,
+  nestedIDField,
   {
     name: 'blockName',
     type: 'text',
