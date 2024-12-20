@@ -270,7 +270,7 @@ export type EnumRawColumn = (
 ) &
   BaseRawColumn
 
-export type RawIntegerColumn = {
+export type IntegerRawColumn = {
   /**
    * SQLite only.
    * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for primary key to ensure that the same ID cannot be reused from previously deleted rows.
@@ -284,7 +284,7 @@ export type RawColumn =
       type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
     } & BaseRawColumn)
   | EnumRawColumn
-  | RawIntegerColumn
+  | IntegerRawColumn
   | TimestampRawColumn
   | UUIDRawColumn
 
