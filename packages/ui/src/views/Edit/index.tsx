@@ -207,7 +207,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const handleDocumentLocking = useCallback(
     (lockedState: LockedState) => {
       setDocumentIsLocked(true)
-      const previousOwnerId =
+      const previousOwnerID =
         typeof documentLockStateRef.current?.user === 'object'
           ? documentLockStateRef.current?.user?.id
           : documentLockStateRef.current?.user
@@ -218,8 +218,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
             ? lockedState.user
             : lockedState.user.id
 
-        if (!documentLockStateRef.current || lockedUserID !== previousOwnerId) {
-          if (previousOwnerId === user.id && lockedUserID !== user.id) {
+        if (!documentLockStateRef.current || lockedUserID !== previousOwnerID) {
+          if (previousOwnerID === user.id && lockedUserID !== user.id) {
             setShowTakeOverModal(true)
             documentLockStateRef.current.hasShownLockedModal = true
           }

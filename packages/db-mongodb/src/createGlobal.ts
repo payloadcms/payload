@@ -25,8 +25,8 @@ export const createGlobal: CreateGlobal = async function createGlobal(
 
   const session = await getSession(this, req)
 
-  const { insertedId } = await Model.collection.insertOne(data, { session })
-  ;(data as any)._id = insertedId
+  const { insertedId: insertedID } = await Model.collection.insertOne(data, { session })
+  ;(data as any)._id = insertedID
 
   transform({
     adapter: this,
