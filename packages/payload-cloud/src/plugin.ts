@@ -1,5 +1,7 @@
 import type { Config } from 'payload'
 
+import { Cron } from 'croner'
+
 import type { PluginOptions } from './types.js'
 
 import { payloadCloudEmail } from './email.js'
@@ -93,5 +95,59 @@ export const payloadCloudPlugin =
       })
     }
 
-    return config
+    // If the user has tasks configured, we set up cron jobs on init.
+    // We also make sure to only run on one instance using a instance identifier stored in a global.
+    if (config.jobs?.tasks) {
+      config.globals = [
+        ...(config.globals || []),
+        {
+          slug: 'payload-cloud-instance',
+          admin: {
+            hidden: true,
+          },
+          fields: [
+            {
+              name: 'instance',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+      ]
+      config.onInit = async (payload) => {
+        if (config.onInit) {
+          await config.onInit(payload)
+        }
+        const instance = generateRandomString()
+
+        await payload.updateGlobal({
+          slug: 'payload-cloud-instance',
+          data: {
+            instance,
+          },
+        })
+
+        const cloudInstance = await payload.findGlobal({
+          slug: 'payload-cloud-instance',
+        })
+
+        if (cloudInstance.instance === instance) {
+          pluginOptions?.jobs?.forEach((cronConfig) => {
+            new Cron(cronConfig.cron ?? '* * * * *', async () => {
+              await payload.jobs.run({
+                limit: cronConfig.limit ?? 100,
+                queue: cronConfig.queue,
+              })
+            })
+          })
+        }
+      }
+
+      return config
+    }
   }
+
+function generateRandomString(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  return Array.from({ length: 24 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+}

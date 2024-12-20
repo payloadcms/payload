@@ -53,6 +53,36 @@ export interface PayloadCloudEmailOptions {
   skipVerify?: boolean
 }
 
+export type CronConfig = {
+  /**
+   * The cron schedule for the job. Defaults to '* * * * *' (every minute).
+   *
+   * @example
+   *      ┌───────────── minute (0 - 59)
+   *      │ ┌───────────── hour (0 - 23)
+   *      │ │ ┌───────────── day of the month (1 - 31)
+   *      │ │ │ ┌───────────── month (1 - 12)
+   *      │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
+   *      │ │ │ │ │                                   OR sun, mon, tue, wed, thu, fri, sat
+   *      │ │ │ │ │
+   *      │ │ │ │ │
+   *   - '0 * * * *' every hour at minute 0
+   *   - '0 0 * * *' daily at midnight
+   *   - '0 0 * * 0' weekly at midnight on Sundays
+   *   - '0 0 1 * *' monthly at midnight on the 1st day of the month
+   *   - '0/5 * * * *' every 5 minutes
+   */
+  cron?: string
+  /**
+   * The limit for the job. This can be overridden by the user. Defaults to 100.
+   */
+  limit?: number
+  /**
+   * The queue name for the job.
+   */
+  queue?: string
+}
+
 export interface PluginOptions {
   /** Payload Cloud Email
    * @default true
@@ -71,6 +101,11 @@ export interface PluginOptions {
    * @internal Endpoint override for developement
    */
   endpoint?: string
+
+  /**
+   * Jobs configuration
+   */
+  jobs?: CronConfig[]
 
   /** Payload Cloud Storage
    * @default true
