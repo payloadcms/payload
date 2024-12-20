@@ -44,7 +44,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
     import config from '../../payload.config'
 
     export default async function AccountPage({ searchParams }) {
-      const headers = getHeaders()
+      const headers = await getHeaders()
       const payload = await getPayload({ config: configPromise })
       const { permissions, user } = await payload.auth({ headers })
 
