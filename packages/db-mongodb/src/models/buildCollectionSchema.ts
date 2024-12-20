@@ -43,9 +43,7 @@ export const buildCollectionSchema = (
     .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
     .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }))
 
-  if (Object.keys(collection.joins).length > 0) {
-    schema.plugin(mongooseAggregatePaginate)
-  }
+  schema.plugin(mongooseAggregatePaginate)
 
   return schema
 }

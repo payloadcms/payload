@@ -1,4 +1,4 @@
-import type { CollationOptions } from 'mongodb'
+import type { PipelineStage } from 'mongoose'
 import type { QueryDrafts } from 'payload'
 
 import { buildVersionCollectionFields, combineQueries } from 'payload'
@@ -9,8 +9,10 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { findMany } from './utilities/findMany.js'
+import { getCollation } from './utilities/getCollation.js'
 import { getHasNearConstraint } from './utilities/getHasNearConstraint.js'
 import { getSession } from './utilities/getSession.js'
+import { mergeProjections } from './utilities/mergeProjections.js'
 import { transform } from './utilities/transform.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
@@ -36,31 +38,35 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)
 
+  const queryAggregation: PipelineStage[] = []
+
+  const queryProjection = {}
+
   const versionQuery = await VersionModel.buildQuery({
+    aggregation: queryAggregation,
     locale,
     payload: this.payload,
+    projection: queryProjection,
     session,
     where: combinedWhere,
   })
 
   const versionFields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
-  const projection = buildProjectionFromSelect({
-    adapter: this,
-    fields: versionFields,
-    select,
+
+  const projection = mergeProjections({
+    queryProjection,
+    selectProjection: buildProjectionFromSelect({
+      adapter: this,
+      fields: versionFields,
+      select,
+    }),
   })
+
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
 
-  const collation: CollationOptions | undefined = this.collation
-    ? {
-        locale: locale && locale !== 'all' && locale !== '*' ? locale : 'en',
-        ...this.collation,
-      }
-    : undefined
-
-  const joinAgreggation = await buildJoinAggregation({
+  const joinAggregation = await buildJoinAggregation({
     adapter: this,
     collection,
     collectionConfig,
@@ -73,14 +79,15 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const result = await findMany({
     adapter: this,
-    collation,
+    collation: getCollation({ adapter: this, locale }),
     collection: VersionModel.collection,
-    joinAgreggation,
+    joinAggregation,
     limit,
     page,
     pagination,
     projection,
     query: versionQuery,
+    queryAggregation,
     session,
     sort,
     useEstimatedCount,

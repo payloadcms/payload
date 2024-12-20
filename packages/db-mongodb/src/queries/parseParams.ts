@@ -1,5 +1,4 @@
-import type { ClientSession } from 'mongodb'
-import type { FilterQuery } from 'mongoose'
+import type { FilterQuery, PipelineStage } from 'mongoose'
 import type { FlattenedField, Operator, Payload, Where } from 'payload'
 
 import { deepMergeWithCombinedArrays } from 'payload'
@@ -8,23 +7,25 @@ import { validOperators } from 'payload/shared'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildSearchParam } from './buildSearchParams.js'
 
-export async function parseParams({
+export function parseParams({
+  aggregation,
   collectionSlug,
   fields,
   globalSlug,
   locale,
   payload,
-  session,
+  projection,
   where,
 }: {
+  aggregation: PipelineStage[]
   collectionSlug?: string
   fields: FlattenedField[]
   globalSlug?: string
   locale: string
   payload: Payload
-  session?: ClientSession
+  projection?: Record<string, boolean>
   where: Where
-}): Promise<Record<string, unknown>> {
+}): Record<string, unknown> {
   let result = {} as FilterQuery<any>
 
   if (typeof where === 'object') {
@@ -38,12 +39,14 @@ export async function parseParams({
         conditionOperator = '$or'
       }
       if (Array.isArray(condition)) {
-        const builtConditions = await buildAndOrConditions({
+        const builtConditions = buildAndOrConditions({
+          aggregation,
           collectionSlug,
           fields,
           globalSlug,
           locale,
           payload,
+          projection,
           where: condition,
         })
         if (builtConditions.length > 0) {
@@ -57,7 +60,8 @@ export async function parseParams({
         if (typeof pathOperators === 'object') {
           for (const operator of Object.keys(pathOperators)) {
             if (validOperators.includes(operator as Operator)) {
-              const searchParam = await buildSearchParam({
+              const searchParam = buildSearchParam({
+                aggregation,
                 collectionSlug,
                 fields,
                 globalSlug,
@@ -65,7 +69,7 @@ export async function parseParams({
                 locale,
                 operator,
                 payload,
-                session,
+                projection,
                 val: pathOperators[operator],
               })
 

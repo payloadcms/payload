@@ -1,6 +1,6 @@
 import type { ClientSession } from 'mongodb'
 import type { PipelineStage } from 'mongoose'
-import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig, Where } from 'payload'
+import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -12,7 +12,7 @@ type BuildJoinAggregationArgs = {
   collectionConfig: SanitizedCollectionConfig
   joins: JoinQuery
   locale: string
-  projection?: Record<string, true>
+  projection?: Record<string, boolean>
   session?: ClientSession
   /** whether the query is from drafts */
   versions?: boolean
