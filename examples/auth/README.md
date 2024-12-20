@@ -2,28 +2,27 @@
 
 This [Payload Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) demonstrates how to implement [Payload Authentication](https://payloadcms.com/docs/authentication/overview) into all types of applications. Follow the [Quick Start](#quick-start) to get up and running quickly.
 
-**IMPORTANT—This example includes a fully integrated Next.js App Router front-end that runs on the same server as Payload.** If you are working on an application running on an entirely separate server, the principals are generally the same. To learn more about this, [check out how Payload can be used in its various headless capacities](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
-
 ## Quick Start
 
-To spin up this example locally, follow these steps:
+To spin up this example locally, follow the steps below:
 
 1. Clone this repo
-1. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+1. Navigate into the project directory and install dependencies using your preferred package manager:
 
-   > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
+- `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
 
-1. `cp .env.example .env` to copy the example environment variables
+> \*NOTE: The --ignore-workspace flag is needed if you are running this example within the Payload monorepo to avoid workspace conflicts.
 
-   > Adjust `PAYLOAD_PUBLIC_SITE_URL` in the `.env` if your front-end is running on a separate domain or port.
+1. Start the server:
+   - Depending on your package manager, run `pnpm dev`, `yarn dev` or `npm run dev`
+   - When prompted, type `y` then `enter` to seed the database with sample data
+1. Access the application:
+   - Open your browser and navigate to `http://localhost:3000` to access the homepage.
+   - Open `http://localhost:3000/admin` to access the admin panel.
+1. Login:
 
-1. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
-   - Press `y` when prompted to seed the database
-1. `open http://localhost:3000` to access the home page
-1. `open http://localhost:3000/admin` to access the admin panel
-   - Login with email `demo@payloadcms.com` and password `demo`
-
-That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.
+- Use the following credentials to log into the admin panel:
+  > `Email: demo@payloadcms.com` > `Password: demo`
 
 ## How it works
 
