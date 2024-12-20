@@ -280,6 +280,10 @@ type Admin = {
   condition?: Condition
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
+  /**
+   * The field description will be displayed next to the field in the admin UI. Additionally,
+   * we use the field description to generate JSDoc comments for the generated TypeScript types.
+   */
   description?: Description
   disableBulkEdit?: boolean
   disabled?: boolean
