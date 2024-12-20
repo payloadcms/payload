@@ -88,7 +88,13 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   }
 
   if (column.primaryKey) {
-    code = `${code}.primaryKey()`
+    let arg = ''
+
+    if (column.type === 'integer' && column.autoIncrement) {
+      arg = `{ autoIncrement: true }`
+    }
+
+    code = `${code}.primaryKey(${arg})`
   }
 
   if (defaultStatement) {
