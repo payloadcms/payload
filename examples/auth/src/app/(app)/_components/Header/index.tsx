@@ -3,6 +3,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import { Gutter } from '../Gutter'
+import { HeaderNav } from './Nav'
 import classes from './index.module.scss'
 
 export const Header = () => {
@@ -23,6 +24,7 @@ export const Header = () => {
             />
           </picture>
         </Link>
+        <HeaderNav />
       </Gutter>
     </header>
   )
