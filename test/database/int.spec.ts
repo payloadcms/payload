@@ -7,7 +7,7 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
-import { desc, type Table } from 'drizzle-orm'
+import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -135,6 +135,63 @@ describe('database', () => {
 
     it('should not accidentally treat nested id fields as custom id', () => {
       expect(payload.collections['fake-custom-ids'].customIDType).toBeUndefined()
+    })
+
+    it('should not overwrite supplied block and array row IDs on create', async () => {
+      const arrayRowID = '67648ed5c72f13be6eacf24e'
+      const blockID = '6764de9af79a863575c5f58c'
+
+      const doc = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'test',
+          arrayWithIDs: [
+            {
+              id: arrayRowID,
+            },
+          ],
+          blocksWithIDs: [
+            {
+              blockType: 'block',
+              id: blockID,
+            },
+          ],
+        },
+      })
+
+      expect(doc.arrayWithIDs[0].id).toStrictEqual(arrayRowID)
+      expect(doc.blocksWithIDs[0].id).toStrictEqual(blockID)
+    })
+
+    it('should overwrite supplied block and array row IDs on duplicate', async () => {
+      const arrayRowID = '6764deb5201e9e36aeba3b6c'
+      const blockID = '6764dec58c68f337a758180c'
+
+      const doc = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'test',
+          arrayWithIDs: [
+            {
+              id: arrayRowID,
+            },
+          ],
+          blocksWithIDs: [
+            {
+              blockType: 'block',
+              id: blockID,
+            },
+          ],
+        },
+      })
+
+      const duplicate = await payload.duplicate({
+        collection: 'posts',
+        id: doc.id,
+      })
+
+      expect(duplicate.arrayWithIDs[0].id).not.toStrictEqual(arrayRowID)
+      expect(duplicate.blocksWithIDs[0].id).not.toStrictEqual(blockID)
     })
   })
 

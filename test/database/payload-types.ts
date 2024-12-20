@@ -90,6 +90,20 @@ export interface Post {
   title: string;
   hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
+  arrayWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -428,6 +442,23 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   hasTransaction?: T;
   throwAfterChange?: T;
+  arrayWithIDs?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  blocksWithIDs?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
