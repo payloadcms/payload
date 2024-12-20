@@ -1,6 +1,6 @@
 import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
-import type { JoinField, RelationshipField, UploadField } from './types.js'
+import type { FlattenedJoinField, JoinField, RelationshipField, UploadField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
 import { InvalidFieldJoin } from '../../errors/InvalidFieldJoin.js'
@@ -12,7 +12,7 @@ export const sanitizeJoinField = ({
   joins,
 }: {
   config: Config
-  field: JoinField
+  field: FlattenedJoinField | JoinField
   joinPath?: string
   joins?: SanitizedJoins
 }) => {
@@ -74,9 +74,6 @@ export const sanitizeJoinField = ({
   if (!joinRelationship) {
     throw new InvalidFieldJoin(join.field)
   }
-  if (Array.isArray(joinRelationship.relationTo)) {
-    throw new APIError('Join fields cannot be used with polymorphic relationships.')
-  }
 
   join.targetField = joinRelationship
 
@@ -84,6 +81,9 @@ export const sanitizeJoinField = ({
   field.localized = joinRelationship.localized
   // override the join field hasMany property to use whatever the relationship field has
   field.hasMany = joinRelationship.hasMany
+
+  // @ts-expect-error converting JoinField to FlattenedJoinField to track targetField
+  field.targetField = join.targetField
 
   if (!joins[field.collection]) {
     joins[field.collection] = [join]
