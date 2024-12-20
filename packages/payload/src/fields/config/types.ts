@@ -280,6 +280,10 @@ type Admin = {
   condition?: Condition
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
+  /**
+   * The field description will be displayed next to the field in the admin UI. Additionally,
+   * we use the field description to generate JSDoc comments for the generated TypeScript types.
+   */
   description?: Description
   disableBulkEdit?: boolean
   disabled?: boolean
@@ -1425,7 +1429,7 @@ export type JoinField = {
 export type JoinFieldClient = {
   admin?: AdminClient &
     Pick<JoinField['admin'], 'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'>
-} & FieldBaseClient &
+} & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
     JoinField,
     'collection' | 'defaultLimit' | 'defaultSort' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'
@@ -1451,6 +1455,10 @@ export type FlattenedTabAsField = {
   flattenedFields: FlattenedField[]
 } & MarkRequired<TabAsField, 'name'>
 
+export type FlattenedJoinField = {
+  targetField: RelationshipField | UploadField
+} & JoinField
+
 export type FlattenedField =
   | CheckboxField
   | CodeField
@@ -1459,8 +1467,8 @@ export type FlattenedField =
   | FlattenedArrayField
   | FlattenedBlocksField
   | FlattenedGroupField
+  | FlattenedJoinField
   | FlattenedTabAsField
-  | JoinField
   | JSONField
   | NumberField
   | PointField
