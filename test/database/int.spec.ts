@@ -137,7 +137,7 @@ describe('database', () => {
       expect(payload.collections['fake-custom-ids'].customIDType).toBeUndefined()
     })
 
-    it('should not overwrite supplied block and array row IDs', async () => {
+    it('should not overwrite supplied block and array row IDs on create', async () => {
       const arrayRowID = '67648ed5c72f13be6eacf24e'
       const blockID = '6764de9af79a863575c5f58c'
 
@@ -163,7 +163,7 @@ describe('database', () => {
       expect(doc.blocksWithIDs[0].id).toStrictEqual(blockID)
     })
 
-    it('should overwrite supplied block and array row IDs during duplicate', async () => {
+    it('should overwrite supplied block and array row IDs on duplicate', async () => {
       const arrayRowID = '6764deb5201e9e36aeba3b6c'
       const blockID = '6764dec58c68f337a758180c'
 
