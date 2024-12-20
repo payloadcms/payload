@@ -290,8 +290,8 @@ export type RawColumn =
 
 export type IDType = 'integer' | 'numeric' | 'text' | 'uuid' | 'varchar'
 
-export type SetColumnID<T = DrizzleAdapter> = (args: {
-  adapter: T
+export type SetColumnID = (args: {
+  adapter: DrizzleAdapter
   columns: Record<string, RawColumn>
   fields: FlattenedField[]
 }) => IDType
