@@ -241,7 +241,7 @@ export const getViewFromConfig = ({
         // --> /collections/:collectionSlug/:id/api
         // --> /collections/:collectionSlug/:id/preview
         // --> /collections/:collectionSlug/:id/versions
-        // --> /collections/:collectionSlug/:id/versions/:versionId
+        // --> /collections/:collectionSlug/:id/versions/:versionID
 
         ViewToRender = {
           Component: DocumentView,
@@ -311,7 +311,7 @@ export const getViewFromConfig = ({
         // Custom Views
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/preview
-        // --> /globals/:globalSlug/versions/:versionId
+        // --> /globals/:globalSlug/versions/:versionID
         // --> /globals/:globalSlug/api
 
         ViewToRender = {

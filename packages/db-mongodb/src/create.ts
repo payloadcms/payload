@@ -27,8 +27,8 @@ export const create: Create = async function create(
   })
 
   try {
-    const { insertedId } = await Model.collection.insertOne(data, { session })
-    data._id = insertedId
+    const { insertedId: insertedID } = await Model.collection.insertOne(data, { session })
+    data._id = insertedID
 
     transform({
       adapter: this,
