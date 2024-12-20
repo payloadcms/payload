@@ -1,7 +1,6 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
-import { set } from 'date-fns'
 import { isImage } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
