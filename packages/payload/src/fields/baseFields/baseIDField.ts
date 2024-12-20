@@ -13,7 +13,7 @@ export const baseIDField: TextField = {
   },
   defaultValue: () => new ObjectId().toHexString(),
   hooks: {
-    beforeChange: [({ value }) => (!value ? new ObjectId().toHexString() : value)],
+    beforeChange: [({ value }) => value || new ObjectId().toHexString()],
     beforeDuplicate: [() => new ObjectId().toHexString()],
   },
   label: 'ID',
