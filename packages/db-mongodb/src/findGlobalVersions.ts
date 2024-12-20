@@ -1,4 +1,4 @@
-import type { CollationOptions } from 'mongodb'
+import type { PipelineStage } from 'mongoose'
 import type { FindGlobalVersions } from 'payload'
 
 import { buildVersionGlobalFields } from 'payload'
@@ -8,8 +8,10 @@ import type { MongooseAdapter } from './index.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { findMany } from './utilities/findMany.js'
+import { getCollation } from './utilities/getCollation.js'
 import { getHasNearConstraint } from './utilities/getHasNearConstraint.js'
 import { getSession } from './utilities/getSession.js'
+import { mergeProjections } from './utilities/mergeProjections.js'
 import { transform } from './utilities/transform.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
@@ -38,10 +40,15 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 
   const session = await getSession(this, req)
 
+  const queryAggregation: PipelineStage[] = []
+  const queryProjection = {}
+
   const query = await Model.buildQuery({
+    aggregation: queryAggregation,
     globalSlug: global,
     locale,
     payload: this.payload,
+    projection: queryProjection,
     session,
     where,
   })
@@ -49,24 +56,21 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
 
-  const projection = buildProjectionFromSelect({ adapter: this, fields: versionFields, select })
-
-  const collation: CollationOptions | undefined = this.collation
-    ? {
-        locale: locale && locale !== 'all' && locale !== '*' ? locale : 'en',
-        ...this.collation,
-      }
-    : undefined
+  const projection = mergeProjections({
+    queryProjection,
+    selectProjection: buildProjectionFromSelect({ adapter: this, fields: versionFields, select }),
+  })
 
   const result = await findMany({
     adapter: this,
-    collation,
+    collation: getCollation({ adapter: this, locale }),
     collection: Model.collection,
     limit,
     page,
     pagination,
     projection,
     query,
+    queryAggregation,
     session,
     skip,
     sort,

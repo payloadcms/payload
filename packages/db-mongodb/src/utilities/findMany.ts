@@ -4,16 +4,19 @@ import type { PaginatedDocs } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
+import { countDocuments } from './countDocuments.js'
+
 export const findMany = async ({
   adapter,
   collation,
   collection,
-  joinAgreggation,
+  joinAggregation,
   limit,
   page = 1,
   pagination,
   projection,
   query = {},
+  queryAggregation,
   session,
   skip,
   sort,
@@ -22,12 +25,13 @@ export const findMany = async ({
   adapter: MongooseAdapter
   collation?: CollationOptions
   collection: Collection
-  joinAgreggation?: PipelineStage[]
+  joinAggregation?: PipelineStage[]
   limit?: number
   page?: number
   pagination?: boolean
   projection?: Record<string, unknown>
   query?: Record<string, unknown>
+  queryAggregation?: PipelineStage[]
   session?: ClientSession
   skip?: number
   sort?: Record<string, -1 | 1>
@@ -40,15 +44,17 @@ export const findMany = async ({
   let docsPromise: Promise<Document[]>
   let countPromise: Promise<null | number> = Promise.resolve(null)
 
-  if (joinAgreggation) {
-    const aggregation = collection.aggregate(
-      [
-        {
-          $match: query,
-        },
-      ],
-      { collation, session },
-    )
+  if (joinAggregation?.length || queryAggregation?.length) {
+    const aggregation = collection.aggregate([], { collation, session })
+
+    // We need to add query aggregation stages _before_ $match to load relationships first
+    if (queryAggregation) {
+      for (const stage of queryAggregation) {
+        aggregation.addStage(stage)
+      }
+    }
+
+    aggregation.match(query)
 
     if (sort) {
       aggregation.sort(sort)
@@ -62,8 +68,10 @@ export const findMany = async ({
       aggregation.limit(limit)
     }
 
-    for (const stage of joinAgreggation) {
-      aggregation.addStage(stage)
+    if (joinAggregation) {
+      for (const stage of joinAggregation) {
+        aggregation.addStage(stage)
+      }
     }
 
     if (projection) {
@@ -85,18 +93,15 @@ export const findMany = async ({
   }
 
   if (pagination !== false && limit) {
-    if (useEstimatedCount) {
-      countPromise = collection.estimatedDocumentCount()
-    } else {
-      // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
-      // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
-      // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
-      // the correct indexed field
-
-      const hint = adapter.disableIndexHints !== true ? { _id: 1 } : undefined
-
-      countPromise = collection.countDocuments(query, { collation, hint, session })
-    }
+    countPromise = countDocuments({
+      adapter,
+      collation,
+      collection,
+      query,
+      queryAggregation,
+      session,
+      useEstimatedCount,
+    })
   }
 
   const [docs, countResult] = await Promise.all([docsPromise, countPromise])

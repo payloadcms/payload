@@ -1,10 +1,13 @@
+import type { PipelineStage } from 'mongoose'
 import type { FindOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { findMany } from './utilities/findMany.js'
 import { getSession } from './utilities/getSession.js'
+import { mergeProjections } from './utilities/mergeProjections.js'
 import { transform } from './utilities/transform.js'
 
 export const findOne: FindOne = async function findOne(
@@ -16,19 +19,28 @@ export const findOne: FindOne = async function findOne(
 
   const session = await getSession(this, req)
 
+  const queryAggregation: PipelineStage[] = []
+
+  const queryProjection = {}
+
   const query = await Model.buildQuery({
+    aggregation: queryAggregation,
     locale,
     payload: this.payload,
+    projection: queryProjection,
     session,
     where,
   })
 
   const fields = collectionConfig.flattenedFields
 
-  const projection = buildProjectionFromSelect({
-    adapter: this,
-    fields,
-    select,
+  const projection = mergeProjections({
+    queryProjection,
+    selectProjection: buildProjectionFromSelect({
+      adapter: this,
+      fields,
+      select,
+    }),
   })
 
   const joinAggregation = await buildJoinAggregation({
@@ -37,29 +49,22 @@ export const findOne: FindOne = async function findOne(
     collectionConfig,
     joins,
     locale,
-    projection,
     session,
   })
 
-  let doc
-  if (joinAggregation) {
-    const aggregation = Model.collection.aggregate(
-      [
-        {
-          $match: query,
-        },
-      ],
-      { session },
-    )
-    aggregation.limit(1)
-    for (const stage of joinAggregation) {
-      aggregation.addStage(stage)
-    }
-
-    ;[doc] = await aggregation.toArray()
-  } else {
-    doc = await Model.collection.findOne(query, { projection, session })
-  }
+  const {
+    docs: [doc],
+  } = await findMany({
+    adapter: this,
+    collection: Model.collection,
+    joinAggregation,
+    limit: 1,
+    pagination: false,
+    projection,
+    query,
+    queryAggregation,
+    session,
+  })
 
   if (!doc) {
     return null

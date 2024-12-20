@@ -1,4 +1,4 @@
-import type { CollationOptions } from 'mongodb'
+import type { PipelineStage } from 'mongoose'
 import type { Find } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -7,8 +7,10 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { findMany } from './utilities/findMany.js'
+import { getCollation } from './utilities/getCollation.js'
 import { getHasNearConstraint } from './utilities/getHasNearConstraint.js'
 import { getSession } from './utilities/getSession.js'
+import { mergeProjections } from './utilities/mergeProjections.js'
 import { transform } from './utilities/transform.js'
 
 export const find: Find = async function find(
@@ -45,30 +47,31 @@ export const find: Find = async function find(
     })
   }
 
+  const queryAggregation: PipelineStage[] = []
+
+  const queryProjection = {}
   const query = await Model.buildQuery({
+    aggregation: queryAggregation,
     locale,
     payload: this.payload,
+    projection: queryProjection,
     session,
     where,
+  })
+
+  const projection = mergeProjections({
+    queryProjection,
+    selectProjection: buildProjectionFromSelect({
+      adapter: this,
+      fields: collectionConfig.flattenedFields,
+      select,
+    }),
   })
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
 
-  const projection = buildProjectionFromSelect({
-    adapter: this,
-    fields,
-    select,
-  })
-
-  const collation: CollationOptions | undefined = this.collation
-    ? {
-        locale: locale && locale !== 'all' && locale !== '*' ? locale : 'en',
-        ...this.collation,
-      }
-    : undefined
-
-  const joinAgreggation = await buildJoinAggregation({
+  const joinAggregation = await buildJoinAggregation({
     adapter: this,
     collection,
     collectionConfig,
@@ -79,14 +82,15 @@ export const find: Find = async function find(
 
   const result = await findMany({
     adapter: this,
-    collation,
+    collation: getCollation({ adapter: this, locale }),
     collection: Model.collection,
-    joinAgreggation,
+    joinAggregation,
     limit,
     page,
     pagination,
     projection,
     query,
+    queryAggregation,
     session,
     sort,
     useEstimatedCount,
