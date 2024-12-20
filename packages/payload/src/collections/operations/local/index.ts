@@ -1,5 +1,7 @@
-/* eslint-disable no-restricted-exports */
 import * as auth from '../../../auth/operations/local/index.js'
+/* eslint-disable no-restricted-exports */
+import { findOne as findPreferenceByKey } from '../../../preferences/operations/findOne.js'
+import { update as updatePreference } from '../../../preferences/operations/update.js'
 import count from './count.js'
 import countVersions from './countVersions.js'
 import create from './create.js'
@@ -21,8 +23,10 @@ export default {
   duplicate,
   find: findLocal,
   findByID,
+  findPreferenceByKey,
   findVersionByID,
   findVersions,
   restoreVersion,
   update,
+  updatePreference,
 }
