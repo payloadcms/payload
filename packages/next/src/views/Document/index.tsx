@@ -324,30 +324,30 @@ export const renderDocument = async ({
   return {
     data: doc,
     Document: (
-      <DocumentInfoProvider
-        apiURL={apiURL}
-        collectionSlug={collectionConfig?.slug}
-        currentEditor={currentEditor}
-        disableActions={disableActions ?? false}
-        docPermissions={docPermissions}
-        globalSlug={globalConfig?.slug}
-        hasPublishedDoc={hasPublishedDoc}
-        hasPublishPermission={hasPublishPermission}
-        hasSavePermission={hasSavePermission}
-        id={id}
-        initialData={doc}
-        initialState={formState}
-        isEditing={isEditing}
-        isLocked={isLocked}
-        key={locale?.code}
-        lastUpdateTime={lastUpdateTime}
-        mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
-        redirectAfterDelete={redirectAfterDelete}
-        redirectAfterDuplicate={redirectAfterDuplicate}
-        unpublishedVersionCount={unpublishedVersionCount}
-        versionCount={versionCount}
-      >
-        <UploadStatusProvider>
+      <UploadStatusProvider>
+        <DocumentInfoProvider
+          apiURL={apiURL}
+          collectionSlug={collectionConfig?.slug}
+          currentEditor={currentEditor}
+          disableActions={disableActions ?? false}
+          docPermissions={docPermissions}
+          globalSlug={globalConfig?.slug}
+          hasPublishedDoc={hasPublishedDoc}
+          hasPublishPermission={hasPublishPermission}
+          hasSavePermission={hasSavePermission}
+          id={id}
+          initialData={doc}
+          initialState={formState}
+          isEditing={isEditing}
+          isLocked={isLocked}
+          key={locale?.code}
+          lastUpdateTime={lastUpdateTime}
+          mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+          redirectAfterDelete={redirectAfterDelete}
+          redirectAfterDuplicate={redirectAfterDuplicate}
+          unpublishedVersionCount={unpublishedVersionCount}
+          versionCount={versionCount}
+        >
           {!RootViewOverride && !drawerSlug && (
             <DocumentHeader
               collectionConfig={collectionConfig}
@@ -377,8 +377,8 @@ export const renderDocument = async ({
                   serverProps,
                 })}
           </EditDepthProvider>
-        </UploadStatusProvider>
-      </DocumentInfoProvider>
+        </DocumentInfoProvider>
+      </UploadStatusProvider>
     ),
   }
 }
