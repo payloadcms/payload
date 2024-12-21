@@ -300,6 +300,12 @@ export const createClientField = ({
                 i18n,
                 importMap,
               })
+            } else if (key === 'label' || key === 'description') {
+              let content = tab[key] ? tab[key] : undefined
+              if (typeof content === 'function') {
+                content = content({ t: i18n.t })
+              }
+              clientTab[key] = content
             } else {
               clientTab[key] = tab[key]
             }
