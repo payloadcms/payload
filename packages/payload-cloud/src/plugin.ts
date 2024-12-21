@@ -1,5 +1,7 @@
 import type { Config } from 'payload'
 
+import { Cron } from 'croner'
+
 import type { PluginOptions } from './types.js'
 
 import { payloadCloudEmail } from './email.js'
@@ -93,5 +95,69 @@ export const payloadCloudPlugin =
       })
     }
 
+    // We set up cron jobs on init.
+    // We also make sure to only run on one instance using a instance identifier stored in a global.
+
+    // If you modify this defaults, make sure to update the TsDoc in the types file.
+    const DEFAULT_CRON = '* * * * *'
+    const DEFAULT_LIMIT = 10
+    const DEFAULT_CRON_JOB = {
+      cron: DEFAULT_CRON,
+      limit: DEFAULT_LIMIT,
+      queue: 'default (every minute)',
+    }
+    config.globals = [
+      ...(config.globals || []),
+      {
+        slug: 'payload-cloud-instance',
+        admin: {
+          hidden: true,
+        },
+        fields: [
+          {
+            name: 'instance',
+            type: 'text',
+            required: true,
+          },
+        ],
+      },
+    ]
+    const newOnInit = async (payload) => {
+      if (config.onInit) {
+        await config.onInit(payload)
+      }
+      const instance = generateRandomString()
+
+      await payload.updateGlobal({
+        slug: 'payload-cloud-instance',
+        data: {
+          instance,
+        },
+      })
+
+      const cloudInstance = await payload.findGlobal({
+        slug: 'payload-cloud-instance',
+      })
+
+      const cronJobs = pluginOptions?.cronJobs?.run ?? [DEFAULT_CRON_JOB]
+      if (cloudInstance.instance === instance) {
+        cronJobs.forEach((cronConfig) => {
+          new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            await payload.jobs.run({
+              limit: cronConfig.limit ?? DEFAULT_LIMIT,
+              queue: cronConfig.queue,
+            })
+          })
+        })
+      }
+    }
+
+    config.onInit = newOnInit
+
     return config
   }
+
+function generateRandomString(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  return Array.from({ length: 24 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+}
