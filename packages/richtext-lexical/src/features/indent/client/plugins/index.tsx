@@ -19,7 +19,7 @@ export const IndentPlugin: PluginComponent<undefined> = () => {
         FOCUS_COMMAND,
         () => {
           setFirefoxFlag(false)
-          return true
+          return false
         },
         COMMAND_PRIORITY_NORMAL,
       ),
