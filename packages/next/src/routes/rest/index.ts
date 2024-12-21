@@ -42,6 +42,7 @@ import { restoreVersion } from './collections/restoreVersion.js'
 import { update } from './collections/update.js'
 import { updateByID } from './collections/updateByID.js'
 import { getFile } from './files/getFile.js'
+import { getFileFromURL } from './files/getFileFromURL.js'
 import { docAccess as docAccessGlobal } from './globals/docAccess.js'
 import { findOne } from './globals/findOne.js'
 import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID.js'
@@ -108,6 +109,7 @@ const endpoints = {
     GET: {
       access,
       og: generateOGImage,
+      'paste-url': getFileFromURL,
     },
   },
 }
