@@ -115,6 +115,15 @@ export const renderDocumentSlots: (args: {
     }
   }
 
+  const CustomUpload = collectionConfig?.admin?.components?.edit?.Upload
+
+  if (CustomUpload) {
+    components.Upload = RenderServerComponent({
+      Component: CustomUpload,
+      importMap: req.payload.importMap,
+    })
+  }
+
   return components
 }
 
