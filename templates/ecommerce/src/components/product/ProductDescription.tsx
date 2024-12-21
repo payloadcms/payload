@@ -1,10 +1,9 @@
 import type { Product } from '@/payload-types'
 import type { InfoType } from '@/collections/Products/ui/types'
 
-import { RichText } from '@/components/RichText'
+import RichText from '@/components/RichText'
 import { AddToCart } from '@/components/cart/add-to-cart'
 import { Price } from '@/components/Price'
-import { Prose } from '@/components/Prose'
 import React, { Suspense } from 'react'
 
 import { VariantSelector } from './VariantSelector'
@@ -56,7 +55,7 @@ export function ProductDescription({ product }: { product: Product }) {
       </Suspense>
 
       {product.description ? (
-        <RichText className="mb-6" content={product.description} enableGutter={false} />
+        <RichText className="mb-6" data={product.description} enableGutter={false} />
       ) : null}
 
       <Suspense fallback={null}>

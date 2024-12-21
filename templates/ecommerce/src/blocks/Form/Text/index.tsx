@@ -16,25 +16,15 @@ export const Text: React.FC<
       }>
     >
     register: UseFormRegister<FieldValues>
-    type?: 'password' | 'text'
   }
-> = ({
-  name,
-  type = 'text',
-  defaultValue,
-  errors,
-  label,
-  register,
-  required: requiredFromProps,
-  width,
-}) => {
+> = ({ name, defaultValue, errors, label, register, required: requiredFromProps, width }) => {
   return (
     <Width width={width}>
       <Label htmlFor={name}>{label}</Label>
       <Input
         defaultValue={defaultValue}
         id={name}
-        type={type}
+        type="text"
         {...register(name, { required: requiredFromProps })}
       />
       {requiredFromProps && errors[name] && <Error />}

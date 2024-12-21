@@ -1,7 +1,7 @@
 import type { Product, CarouselBlock as CarouselBlockProps } from '@/payload-types'
 
 import configPromise from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import { CarouselClient } from './Component.client'
@@ -16,7 +16,7 @@ export const CarouselBlock: React.FC<
   let products: Product[] = []
 
   if (populateBy === 'collection') {
-    const payload = await getPayloadHMR({ config: configPromise })
+    const payload = await getPayload({ config: configPromise })
 
     const flattenedCategories = categories?.length
       ? categories.map((category) => {

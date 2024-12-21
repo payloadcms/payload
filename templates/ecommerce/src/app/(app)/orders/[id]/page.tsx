@@ -12,16 +12,16 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import React, { Fragment } from 'react'
 
-export default async function Order({
-  params: { id },
-  searchParams,
-}: {
-  params: { id: string }
-  searchParams: { paymentId?: string }
-}) {
+type PageProps = {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ paymentId?: string }>
+}
+
+export default async function Order({ params, searchParams }: PageProps) {
   const { token } = await getMeUser()
 
-  const paymentId = searchParams.paymentId ?? ''
+  const { id } = await params
+  const { paymentId = '' } = await searchParams
 
   let order: Order | null = null
 
@@ -46,7 +46,7 @@ export default async function Order({
       return json
     })
   } catch (error) {
-    console.error(error) // eslint-disable-line no-console
+    console.error(error)
   }
 
   if (!order) {
@@ -96,7 +96,9 @@ export default async function Order({
   )
 }
 
-export async function generateMetadata({ params: { id } }): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params
+
   return {
     description: `Order details for order ${id}.`,
     openGraph: mergeOpenGraph({

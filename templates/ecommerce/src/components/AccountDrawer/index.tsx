@@ -18,10 +18,10 @@ import React, { useEffect, useState } from 'react'
 export default function AccountDrawer() {
   const { user } = useAuth()
   const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    setIsOpen(true)
+    setIsOpen(false)
   }, [pathname])
 
   return (

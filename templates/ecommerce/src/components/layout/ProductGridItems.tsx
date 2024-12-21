@@ -14,7 +14,10 @@ export function ProductGridItems({ products }: { products: Product[] }) {
         if (!image) return null
         return (
           <Grid.Item className="animate-fadeIn" key={product.id}>
-            <Link className="relative inline-block h-full w-full" href={`/product/${product.slug}`}>
+            <Link
+              className="relative inline-block h-full w-full"
+              href={`/products/${product.slug}`}
+            >
               <GridTileImage
                 label={{
                   amount: product.price!,

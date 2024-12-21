@@ -1,14 +1,12 @@
 import type { Media, Product } from '@/payload-types'
-import type { Metadata } from 'next'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { GridTileImage } from '@/components/grid/tile'
 import { Gallery } from '@/components/product/Gallery'
 import { ProductDescription } from '@/components/product/ProductDescription'
-import { HIDDEN_PRODUCT_TAG } from '@/lib/constants'
 import configPromise from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import { draftMode, headers } from 'next/headers'
+import { getPayload } from 'payload'
+import { draftMode } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import React, { Suspense } from 'react'
@@ -51,8 +49,15 @@ import React, { Suspense } from 'react'
   }
 } */
 
-export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const product = await queryProductBySlug({ slug: params.slug })
+type Args = {
+  params: Promise<{
+    slug: string
+  }>
+}
+
+export default async function ProductPage({ params }: Args) {
+  const { slug } = await params
+  const product = await queryProductBySlug({ slug })
 
   if (!product) return notFound()
 
@@ -80,18 +85,14 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const relatedProducts =
     product.relatedProducts?.filter((relatedProduct) => typeof relatedProduct !== 'string') ?? []
 
-  const gallery = product.gallery
-    ?.filter((image) => Boolean(image.image && typeof image.image !== 'string'))
-    .map((image) => {
-      if (image.image && typeof image.image !== 'string') return image.image
-    }) as Media[]
+  const gallery = product.gallery?.filter((image) => typeof image !== 'string')
 
   if (variants?.length) {
     variants.forEach((variant) => {
       if (variant?.images?.length) {
         variant.images.forEach((image) => {
-          if (image.image && typeof image.image !== 'string') {
-            gallery?.push(image.image)
+          if (typeof image !== 'string') {
+            gallery?.push(image)
           }
         })
       }
@@ -165,12 +166,9 @@ function RelatedProducts({ products }: { products: Product[] }) {
 }
 
 const queryProductBySlug = async ({ slug }: { slug: string }) => {
-  const { isEnabled: draft } = draftMode()
+  const { isEnabled: draft } = await draftMode()
 
-  const payload = await getPayloadHMR({ config: configPromise })
-  const authResult = draft ? await payload.auth({ headers: headers() }) : undefined
-
-  const user = authResult?.user
+  const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
     collection: 'products',
@@ -178,7 +176,6 @@ const queryProductBySlug = async ({ slug }: { slug: string }) => {
     draft,
     limit: 1,
     overrideAccess: false,
-    user,
     where: {
       slug: {
         equals: slug,

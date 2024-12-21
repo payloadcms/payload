@@ -1,35 +1,35 @@
-import type { Product, ArchiveBlock as ArchiveBlockProps } from 'src/payload-types'
+import type { Product, ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
 
 import configPromise from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { getPayload } from 'payload'
 import React from 'react'
-import { RichText } from '@/components/RichText'
+import RichText from '@/components/RichText'
 
-import { CollectionArchive } from '../../components/CollectionArchive'
+import { CollectionArchive } from '@/components/CollectionArchive'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
     id?: string
   }
 > = async (props) => {
-  const { id, categories, introContent, limit = 3, populateBy, selectedDocs } = props
+  const { id, categories, introContent, limit: limitFromProps, populateBy, selectedDocs } = props
 
-  let products: Product[] = []
+  const limit = limitFromProps || 3
+
+  let posts: Product[] = []
 
   if (populateBy === 'collection') {
-    const payload = await getPayloadHMR({ config: configPromise })
+    const payload = await getPayload({ config: configPromise })
 
-    const flattenedCategories = categories?.length
-      ? categories.map((category) => {
-          if (typeof category === 'string') return category
-          else return category.id
-        })
-      : null
+    const flattenedCategories = categories?.map((category) => {
+      if (typeof category === 'object') return category.id
+      else return category
+    })
 
     const fetchedProducts = await payload.find({
       collection: 'products',
       depth: 1,
-      limit: limit!,
+      limit,
       ...(flattenedCategories && flattenedCategories.length > 0
         ? {
             where: {
@@ -41,21 +41,25 @@ export const ArchiveBlock: React.FC<
         : {}),
     })
 
-    products = fetchedProducts.docs
+    posts = fetchedProducts.docs
   } else {
-    products = selectedDocs?.map((post) => {
-      if (typeof post.value !== 'string') return post.value
-    }) as Product[]
+    if (selectedDocs?.length) {
+      const filteredSelectedPosts = selectedDocs.map((post) => {
+        if (typeof post.value === 'object') return post.value
+      }) as Product[]
+
+      posts = filteredSelectedPosts
+    }
   }
 
   return (
     <div className="my-16" id={`block-${id}`}>
       {introContent && (
         <div className="container mb-16">
-          <RichText className="ml-0 max-w-[48rem]" content={introContent} enableGutter={false} />
+          <RichText className="ml-0 max-w-[48rem]" data={introContent} enableGutter={false} />
         </div>
       )}
-      <CollectionArchive posts={products} />
+      <CollectionArchive posts={posts} />
     </div>
   )
 }

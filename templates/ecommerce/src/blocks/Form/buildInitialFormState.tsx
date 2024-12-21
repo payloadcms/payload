@@ -5,7 +5,7 @@ export const buildInitialFormState = (fields: FormFieldBlock[]) => {
     if (field.blockType === 'checkbox') {
       return {
         ...initialSchema,
-        [field.name]: false,
+        [field.name]: field.defaultValue,
       }
     }
     if (field.blockType === 'country') {

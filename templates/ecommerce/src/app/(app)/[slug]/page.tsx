@@ -5,25 +5,44 @@ import { RenderHero } from '@/heros/RenderHero'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import { generateMeta } from '@/utilities/generateMeta'
 import configPromise from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import { draftMode, headers } from 'next/headers'
+import { getPayload } from 'payload'
+import { draftMode } from 'next/headers'
 import React from 'react'
 
 import type { Page } from '@/payload-types'
 
 export async function generateStaticParams() {
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayload({ config: configPromise })
   const pages = await payload.find({
     collection: 'pages',
     draft: false,
     limit: 1000,
     overrideAccess: false,
+    pagination: false,
+    select: {
+      slug: true,
+    },
   })
 
-  return pages.docs?.map(({ slug }) => slug)
+  const params = pages.docs
+    ?.filter((doc) => {
+      return doc.slug !== 'home'
+    })
+    .map(({ slug }) => {
+      return { slug }
+    })
+
+  return params
 }
 
-export default async function Page({ params: { slug = 'home' } }) {
+type Args = {
+  params: Promise<{
+    slug?: string
+  }>
+}
+
+export default async function Page({ params }: Args) {
+  const { slug = 'home' } = await params
   const url = '/' + slug
 
   const page = await queryPageBySlug({
@@ -44,7 +63,9 @@ export default async function Page({ params: { slug = 'home' } }) {
   )
 }
 
-export async function generateMetadata({ params: { slug = 'home' } }): Promise<Metadata> {
+export async function generateMetadata({ params }: Args): Promise<Metadata> {
+  const { slug = 'home' } = await params
+
   const page = await queryPageBySlug({
     slug,
   })
@@ -53,19 +74,15 @@ export async function generateMetadata({ params: { slug = 'home' } }): Promise<M
 }
 
 const queryPageBySlug = async ({ slug }: { slug: string }) => {
-  const { isEnabled: draft } = draftMode()
+  const { isEnabled: draft } = await draftMode()
 
-  const payload = await getPayloadHMR({ config: configPromise })
-  const authResult = draft ? await payload.auth({ headers: headers() }) : undefined
-
-  const user = authResult?.user
+  const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
     collection: 'pages',
     draft,
     limit: 1,
     overrideAccess: false,
-    user,
     where: {
       slug: {
         equals: slug,

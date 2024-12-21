@@ -7,10 +7,11 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { linkGroup } from '@/fields/linkGroup'
+import { linkGroup } from '../../fields/linkGroup'
 
 export const CallToAction: Block = {
   slug: 'cta',
+  interfaceName: 'CallToActionBlock',
   fields: [
     {
       name: 'richText',
@@ -34,7 +35,6 @@ export const CallToAction: Block = {
       },
     }),
   ],
-  interfaceName: 'CallToActionBlock',
   labels: {
     plural: 'Calls to Action',
     singular: 'Call to Action',

@@ -99,7 +99,7 @@ export default buildConfig({
       ]
     },
   }),
-  email: nodemailerAdapter(),
+  //email: nodemailerAdapter(),
   endpoints: [
     {
       handler: productsProxy,
@@ -116,13 +116,6 @@ export default buildConfig({
       handler: customersProxy,
       method: 'get',
       path: '/stripe/customers',
-    }, */
-    // The seed endpoint is used to populate the database with some example data
-    // You should delete this endpoint before deploying your site to production
-    /* {
-      handler: seed,
-      method: 'get',
-      path: '/seed',
     }, */
   ],
   globals: [Footer, Header],

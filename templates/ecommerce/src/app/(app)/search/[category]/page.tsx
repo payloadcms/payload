@@ -1,7 +1,7 @@
 import { Grid } from '@/components/grid'
 import { ProductGridItems } from '@/components/layout/ProductGridItems'
 import configPromise from '@payload-config'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { getPayload } from 'payload'
 import React from 'react'
 
 export const metadata = {
@@ -18,7 +18,7 @@ export default async function SearchCategoryPage({
 }) {
   const { q: searchValue, sort } = searchParams as { [key: string]: string }
   const { category } = params
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayload({ config: configPromise })
 
   // Get the category id so we can search for products that belong to this category
   const categoryDoc = (

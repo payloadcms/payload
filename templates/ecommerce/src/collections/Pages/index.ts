@@ -13,7 +13,7 @@ import { hero } from '@/fields/hero'
 import { slugField } from '@/fields/slug'
 import { adminsOrPublished } from '@/access/adminsOrPublished'
 
-import { revalidatePage } from './hooks/revalidatePage'
+import { revalidatePage, revalidateDelete } from './hooks/revalidatePage'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -87,6 +87,7 @@ export const Pages: CollectionConfig = {
   ],
   hooks: {
     afterChange: [revalidatePage],
+    afterDelete: [revalidateDelete],
   },
   versions: {
     drafts: {

@@ -463,19 +463,6 @@ export interface ArchiveBlock {
         value: string | Product;
       }[]
     | null;
-  /**
-   * This field is auto-populated after-read
-   */
-  populatedDocs?:
-    | {
-        relationTo: 'products';
-        value: string | Product;
-      }[]
-    | null;
-  /**
-   * This field is auto-populated after-read
-   */
-  populatedDocsTotal?: number | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
@@ -1080,8 +1067,6 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
   categories?: T;
   limit?: T;
   selectedDocs?: T;
-  populatedDocs?: T;
-  populatedDocsTotal?: T;
   id?: T;
   blockName?: T;
 }

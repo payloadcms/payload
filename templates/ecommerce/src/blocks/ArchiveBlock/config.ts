@@ -9,6 +9,7 @@ import {
 
 export const Archive: Block = {
   slug: 'archive',
+  interfaceName: 'ArchiveBlock',
   fields: [
     {
       name: 'introContent',
@@ -85,31 +86,7 @@ export const Archive: Block = {
       label: 'Selection',
       relationTo: ['products'],
     },
-    {
-      name: 'populatedDocs',
-      type: 'relationship',
-      admin: {
-        condition: (_, siblingData) => siblingData.populateBy === 'collection',
-        description: 'This field is auto-populated after-read',
-        disabled: true,
-      },
-      hasMany: true,
-      label: 'Populated Docs',
-      relationTo: ['products'],
-    },
-    {
-      name: 'populatedDocsTotal',
-      type: 'number',
-      admin: {
-        condition: (_, siblingData) => siblingData.populateBy === 'collection',
-        description: 'This field is auto-populated after-read',
-        disabled: true,
-        step: 1,
-      },
-      label: 'Populated Docs Total',
-    },
   ],
-  interfaceName: 'ArchiveBlock',
   labels: {
     plural: 'Archives',
     singular: 'Archive',

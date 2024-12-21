@@ -9,6 +9,7 @@ import {
 
 export const FormBlock: Block = {
   slug: 'formBlock',
+  interfaceName: 'FormBlock',
   fields: [
     {
       name: 'form',
@@ -43,7 +44,6 @@ export const FormBlock: Block = {
   graphQL: {
     singularName: 'FormBlock',
   },
-  interfaceName: 'FormBlock',
   labels: {
     plural: 'Form Blocks',
     singular: 'Form Block',
