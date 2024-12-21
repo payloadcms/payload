@@ -291,6 +291,39 @@ test.describe('Join Field', () => {
     await expect(joinField.locator('tbody .row-1')).toContainText('Test Post 1 Updated')
   })
 
+  test('should update relationship table when document is deleted', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-group__relatedPosts.field-type.join')
+    await expect(joinField).toBeVisible()
+
+    const expectedRows = 3
+    const rows = joinField.locator('.relationship-table tbody tr')
+    await expect(rows).toHaveCount(expectedRows)
+
+    const editButton = joinField.locator(
+      'tbody tr:first-child td:nth-child(2) button.doc-drawer__toggler',
+    )
+    await expect(editButton).toBeVisible()
+    await editButton.click()
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(drawer).toBeVisible()
+    const popupButton = drawer.locator('button.popup-button')
+    await expect(popupButton).toBeVisible()
+    await popupButton.click()
+    const deleteButton = drawer.locator('#action-delete')
+    await expect(deleteButton).toBeVisible()
+    await deleteButton.click()
+    const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
+    await expect(deleteConfirmModal).toBeVisible()
+    const confirmDeleteButton = deleteConfirmModal.locator('button#confirm-delete')
+    await expect(confirmDeleteButton).toBeVisible()
+    await confirmDeleteButton.click()
+    await expect(drawer).toBeHidden()
+
+    // We should have one less row than we started with
+    await expect(rows).toHaveCount(expectedRows - 1)
+  })
+
   test('should create join collection from polymorphic relationships', async () => {
     await page.goto(categoriesURL.edit(categoryID))
     const joinField = page.locator('#field-polymorphic.field-type.join')
