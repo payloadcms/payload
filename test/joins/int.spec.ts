@@ -174,10 +174,7 @@ describe('Joins Field', () => {
       collection: categoriesSlug,
     })
 
-    expect(categoryWithPosts).toStrictEqual({
-      id: categoryWithPosts.id,
-      group: categoryWithPosts.group,
-    })
+    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id', 'group'])
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')

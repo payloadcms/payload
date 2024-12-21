@@ -1,11 +1,12 @@
-import type { FindOne } from 'payload'
+import type { AggregateOptions, QueryOptions } from 'mongoose'
+import type { Document, FindOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { transform } from './utilities/transform.js'
+import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
@@ -13,64 +14,52 @@ export const findOne: FindOne = async function findOne(
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config
-
   const session = await getSession(this, req)
+  const options: AggregateOptions & QueryOptions = {
+    lean: true,
+    session,
+  }
 
   const query = await Model.buildQuery({
     locale,
     payload: this.payload,
-    session,
     where,
   })
 
-  const fields = collectionConfig.flattenedFields
-
   const projection = buildProjectionFromSelect({
     adapter: this,
-    fields,
+    fields: collectionConfig.flattenedFields,
     select,
   })
 
-  const joinAggregation = await buildJoinAggregation({
+  const aggregate = await buildJoinAggregation({
     adapter: this,
     collection,
     collectionConfig,
     joins,
+    limit: 1,
     locale,
     projection,
-    session,
+    query,
   })
 
   let doc
-  if (joinAggregation) {
-    const aggregation = Model.collection.aggregate(
-      [
-        {
-          $match: query,
-        },
-      ],
-      { session },
-    )
-    aggregation.limit(1)
-    for (const stage of joinAggregation) {
-      aggregation.addStage(stage)
-    }
-
-    ;[doc] = await aggregation.toArray()
+  if (aggregate) {
+    ;[doc] = await Model.aggregate(aggregate, { session })
   } else {
-    doc = await Model.collection.findOne(query, { projection, session })
+    ;(options as Record<string, unknown>).projection = projection
+    doc = await Model.findOne(query, {}, options)
   }
 
   if (!doc) {
     return null
   }
 
-  transform({
-    adapter: this,
-    data: doc,
-    fields,
-    operation: 'read',
-  })
+  let result: Document = JSON.parse(JSON.stringify(doc))
 
-  return doc
+  // custom id type reset
+  result.id = result._id
+  result = sanitizeInternalFields(result)
+
+  return result
 }

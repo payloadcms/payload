@@ -1,9 +1,8 @@
-import { flattenAllFields, type Field, type SanitizedConfig } from 'payload'
+import type { Field, SanitizedConfig } from 'payload'
 
 import { Types } from 'mongoose'
 
-import { transform } from './transform.js'
-import { MongooseAdapter } from '..'
+import { sanitizeRelationshipIDs } from './sanitizeRelationshipIDs.js'
 
 const flattenRelationshipValues = (obj: Record<string, any>, prefix = ''): Record<string, any> => {
   return Object.keys(obj).reduce(
@@ -272,8 +271,8 @@ const relsData = {
   },
 }
 
-describe('transform', () => {
-  it('should sanitize relationships with transform write', () => {
+describe('sanitizeRelationshipIDs', () => {
+  it('should sanitize relationships', () => {
     const data = {
       ...relsData,
       array: [
@@ -349,19 +348,12 @@ describe('transform', () => {
     }
     const flattenValuesBefore = Object.values(flattenRelationshipValues(data))
 
-    const mockAdapter = { payload: { config } } as MongooseAdapter
-
-    const fields = flattenAllFields({ fields: config.collections[0].fields })
-
-    transform({ type: 'write', adapter: mockAdapter, data, fields })
-
+    sanitizeRelationshipIDs({ config, data, fields: config.collections[0].fields })
     const flattenValuesAfter = Object.values(flattenRelationshipValues(data))
 
     flattenValuesAfter.forEach((value, i) => {
       expect(value).toBeInstanceOf(Types.ObjectId)
       expect(flattenValuesBefore[i]).toBe(value.toHexString())
     })
-
-    transform({ type: 'read', adapter: mockAdapter, data, fields })
   })
 })
