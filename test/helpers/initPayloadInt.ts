@@ -3,7 +3,7 @@ import type { Payload, SanitizedConfig } from 'payload'
 import path from 'path'
 import { getPayload } from 'payload'
 
-import { runInit } from '../runInit.js'
+import { initDevAndTest } from '../initDevAndTest.js'
 import { NextRESTClient } from './NextRESTClient.js'
 
 /**
@@ -14,8 +14,8 @@ export async function initPayloadInt(
   testSuiteNameOverride?: string,
   initializePayload = true,
 ): Promise<{ config: SanitizedConfig; payload?: Payload; restClient?: NextRESTClient }> {
-  const testSuiteName = testSuiteNameOverride ?? path.basename(dirname)
-  await runInit(testSuiteName, false, true)
+  const testSuite = testSuiteNameOverride ?? path.basename(dirname)
+  await initDevAndTest({ testSuite, writeDBAdapter: false, skipGenImportMap: true })
   console.log('importing config', path.resolve(dirname, 'config.ts'))
   const { default: config } = await import(path.resolve(dirname, 'config.ts'))
 
