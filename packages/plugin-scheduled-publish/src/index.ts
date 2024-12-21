@@ -1,4 +1,4 @@
-import type { Config, TaskHandlerArgs, VersionedCollectionSlug } from 'payload'
+import type { Config, Field, TaskHandlerArgs, VersionedCollectionSlug } from 'payload'
 
 type Options = {
   collections: Partial<Record<VersionedCollectionSlug, true>>
@@ -11,6 +11,34 @@ type PublishDocumentInput = {
 }
 
 export const pluginScheduledPublish = (options: Options) => {
+  const inputSchema: Field[] = [
+    {
+      name: 'collectionSlug',
+      type: 'select',
+      options: Object.keys(options.collections),
+      required: true,
+    },
+    {
+      name: 'documentID',
+      type: 'json',
+      jsonSchema: {
+        fileMatch: ['a://b/foo.json'],
+        schema: {
+          oneOf: [
+            {
+              type: 'string',
+            },
+            {
+              type: 'number',
+            },
+          ],
+        },
+        uri: 'a://b/foo.json',
+      },
+      required: true,
+    },
+  ]
+
   return (config: Config) => {
     if (options.disabled) {
       return config
@@ -33,8 +61,6 @@ export const pluginScheduledPublish = (options: Options) => {
           },
         })
       }
-
-      return config
     }
 
     if (!config.jobs) {
@@ -65,33 +91,7 @@ export const pluginScheduledPublish = (options: Options) => {
           state: 'succeeded',
         }
       },
-      inputSchema: [
-        {
-          name: 'collectionSlug',
-          type: 'select',
-          options: Object.keys(options.collections),
-          required: true,
-        },
-        {
-          name: 'documentID',
-          type: 'json',
-          jsonSchema: {
-            fileMatch: ['a://b/foo.json'],
-            schema: {
-              oneOf: [
-                {
-                  type: 'string',
-                },
-                {
-                  type: 'number',
-                },
-              ],
-              required: true,
-            },
-            uri: 'a://b/foo.json',
-          },
-        },
-      ],
+      inputSchema,
     })
 
     config.jobs.tasks.push({
@@ -116,33 +116,7 @@ export const pluginScheduledPublish = (options: Options) => {
           state: 'succeeded',
         }
       },
-      inputSchema: [
-        {
-          name: 'collectionSlug',
-          type: 'select',
-          options: Object.keys(options.collections),
-          required: true,
-        },
-        {
-          name: 'documentID',
-          type: 'json',
-          jsonSchema: {
-            fileMatch: ['a://b/foo.json'],
-            schema: {
-              oneOf: [
-                {
-                  type: 'string',
-                },
-                {
-                  type: 'number',
-                },
-              ],
-              required: true,
-            },
-            uri: 'a://b/foo.json',
-          },
-        },
-      ],
+      inputSchema,
     })
 
     return config
