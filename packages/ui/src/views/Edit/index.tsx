@@ -454,6 +454,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission}
           disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
+          isDocumentForm={true}
           isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
