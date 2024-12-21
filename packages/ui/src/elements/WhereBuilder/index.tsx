@@ -33,6 +33,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     setReducedColumns(reduceClientFields({ fields, i18n }))
   }, [fields, i18n])
 
+  const filterableFields = React.useMemo(() => {
+    return reducedFields.filter((condition) => !condition.field?.admin?.disableListFilter)
+  }, [reducedFields])
+
   const { handleWhereChange, query } = useListQuery()
   const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
 
@@ -185,7 +189,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                               addCondition={addCondition}
                               andIndex={andIndex}
                               fieldName={initialFieldName}
-                              fields={reducedFields}
+                              fields={filterableFields}
                               initialValue={initialValue}
                               operator={initialOperator}
                               orIndex={orIndex}
@@ -208,12 +212,14 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             iconPosition="left"
             iconStyle="with-border"
             onClick={() => {
-              addCondition({
-                andIndex: 0,
-                fieldName: reducedFields[0].value,
-                orIndex: conditions.length,
-                relation: 'or',
-              })
+              if (filterableFields.length > 0) {
+                addCondition({
+                  andIndex: 0,
+                  fieldName: filterableFields[0].value,
+                  orIndex: conditions.length,
+                  relation: 'or',
+                })
+              }
             }}
           >
             {t('general:or')}
@@ -230,10 +236,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             iconPosition="left"
             iconStyle="with-border"
             onClick={() => {
-              if (reducedFields.length > 0) {
+              if (filterableFields.length > 0) {
                 addCondition({
                   andIndex: 0,
-                  fieldName: reducedFields[0].value,
+                  fieldName: filterableFields[0].value,
                   orIndex: conditions.length,
                   relation: 'or',
                 })
