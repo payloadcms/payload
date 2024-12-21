@@ -8,7 +8,20 @@ export const MediaCollection: CollectionConfig = {
     create: () => true,
     read: () => true,
   },
-  fields: [],
+  fields: [
+    {
+      type: 'text',
+      name: 'alt',
+    },
+    {
+      type: 'text',
+      name: 'canttouchthis',
+      defaultValue: 'nah nah nah nah',
+      admin: {
+        readOnly: true,
+      },
+    },
+  ],
   upload: {
     crop: true,
     focalPoint: true,
