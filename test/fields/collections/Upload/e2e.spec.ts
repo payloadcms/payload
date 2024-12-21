@@ -109,6 +109,38 @@ describe('Upload', () => {
     )
   })
 
+  test('should disable save button during upload progress from remote URL', async () => {
+    await page.goto(url.create)
+
+    const pasteURLButton = page.locator('.file-field__upload button', {
+      hasText: 'Paste URL',
+    })
+    await pasteURLButton.click()
+
+    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+
+    const inputField = page.locator('.file-field__upload .file-field__remote-file')
+    await inputField.fill(remoteImage)
+
+    // Intercept the upload request
+    await page.route(
+      'https://payloadcms.com/images/og-image.jpg',
+      (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
+    )
+
+    const addFileButton = page.locator('.file-field__add-file')
+    await addFileButton.click()
+
+    const submitButton = page.locator('.form-submit .btn')
+    await expect(submitButton).toBeDisabled()
+
+    // Wait for the upload to complete
+    await page.waitForResponse('https://payloadcms.com/images/og-image.jpg')
+
+    // Assert the submit button is re-enabled after upload
+    await expect(submitButton).toBeEnabled()
+  })
+
   // test that the image renders
   test('should render uploaded image', async () => {
     await uploadImage()

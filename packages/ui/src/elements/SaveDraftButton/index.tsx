@@ -11,6 +11,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadStatus } from '../../providers/UploadStatus/index.js'
 
 const baseClass = 'save-draft'
 
@@ -29,11 +30,12 @@ export const SaveDraftButton: React.FC = () => {
   const { t } = useTranslation()
   const { submit } = useForm()
   const operation = useOperation()
+  const { uploadStatus } = useUploadStatus()
 
   const forceDisable = operation === 'update' && !modified
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) {
+    if (forceDisable || uploadStatus === 'uploading') {
       return
     }
 
@@ -72,6 +74,7 @@ export const SaveDraftButton: React.FC = () => {
     id,
     forceDisable,
     setUnpublishedVersionCount,
+    uploadStatus,
   ])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
@@ -91,7 +94,7 @@ export const SaveDraftButton: React.FC = () => {
       buttonId="action-save-draft"
       buttonStyle="secondary"
       className={baseClass}
-      disabled={forceDisable}
+      disabled={forceDisable || uploadStatus === 'uploading'}
       onClick={() => {
         return void saveDraft()
       }}
