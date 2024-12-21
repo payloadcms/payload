@@ -179,6 +179,12 @@ export type TypedUploadCollection = NonNever<{
     : never
 }>
 
+export type TypedVersionedCollection = NonNever<{
+  [K in keyof TypedCollection]: '_status' extends keyof TypedCollection[K]
+    ? TypedCollection[K]
+    : never
+}>
+
 export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
 
 export type TypedCollectionJoins = ResolveCollectionJoinsType<GeneratedTypes>
@@ -194,6 +200,8 @@ export type StringKeyOf<T> = Extract<keyof T, string>
 export type CollectionSlug = StringKeyOf<TypedCollection>
 
 export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
+
+export type VersionedCollectionSlug = StringKeyOf<TypedVersionedCollection>
 
 type ResolveDbType<T> = 'db' extends keyof T
   ? T['db']

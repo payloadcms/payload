@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/_community/config.ts"
+        "./test/plugin-scheduled-publish/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
@@ -86,6 +86,9 @@
       ],
       "@payloadcms/plugin-search/client": [
         "./packages/plugin-search/src/exports/client.ts"
+      ],
+      "@payloadcms/plugin-scheduled-publish/rsc": [
+        "./packages/plugin-scheduled-publish/src/exports/rsc.ts"
       ],
       "@payloadcms/plugin-form-builder/client": [
         "./packages/plugin-form-builder/src/exports/client.ts"

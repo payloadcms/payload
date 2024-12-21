@@ -1055,6 +1055,22 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/plugin-scheduled-publish:
+    dependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@types/react':
+        specifier: 19.0.1
+        version: 19.0.1
+      '@types/react-dom':
+        specifier: 19.0.1
+        version: 19.0.1
+
   packages/plugin-search:
     dependencies:
       '@payloadcms/next':
@@ -1667,6 +1683,9 @@ importers:
       '@payloadcms/plugin-redirects':
         specifier: workspace:*
         version: link:../packages/plugin-redirects
+      '@payloadcms/plugin-scheduled-publish':
+        specifier: workspace:*
+        version: link:../packages/plugin-scheduled-publish
       '@payloadcms/plugin-search':
         specifier: workspace:*
         version: link:../packages/plugin-search

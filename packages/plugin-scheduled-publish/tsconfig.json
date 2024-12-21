@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "strict": true
+  },
+  "extends": "../../tsconfig.base.json",
+  "references": [{ "path": "../payload" }]
+}

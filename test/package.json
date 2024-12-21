@@ -45,6 +45,7 @@
     "@payloadcms/plugin-sentry": "workspace:*",
     "@payloadcms/plugin-seo": "workspace:*",
     "@payloadcms/plugin-stripe": "workspace:*",
+    "@payloadcms/plugin-scheduled-publish": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/richtext-slate": "workspace:*",
     "@payloadcms/storage-azure": "workspace:*",
