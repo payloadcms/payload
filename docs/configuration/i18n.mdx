@@ -184,7 +184,7 @@ Here we create a shareable translations object. We will import this in both our 
 import type { Config } from 'payload'
 import type { NestedKeysStripped } from '@payloadcms/translations'
 
-export const customTranslations: Config['i18n']['translations'] = {
+export const customTranslations = {
   en: {
     general: {
       myCustomKey: 'My custom english translation',
@@ -193,7 +193,7 @@ export const customTranslations: Config['i18n']['translations'] = {
       addLabel: 'Add!',
     }
   },
-}
+} satisfies NonNullable<Config['i18n']>['translations']
 
 export type CustomTranslationsObject = typeof customTranslations.en
 export type CustomTranslationsKeys = NestedKeysStripped<CustomTranslationsObject>
