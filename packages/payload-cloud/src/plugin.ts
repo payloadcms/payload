@@ -135,6 +135,8 @@ export const payloadCloudPlugin =
         },
       })
 
+      await waitRandomTime()
+
       const cloudInstance = await payload.findGlobal({
         slug: 'payload-cloud-instance',
       })
@@ -156,6 +158,14 @@ export const payloadCloudPlugin =
 
     return config
   }
+
+function waitRandomTime(): Promise<void> {
+  const min = 1000 // 1 second in milliseconds
+  const max = 5000 // 5 seconds in milliseconds
+  const randomTime = Math.floor(Math.random() * (max - min + 1)) + min
+
+  return new Promise((resolve) => setTimeout(resolve, randomTime))
+}
 
 function generateRandomString(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
