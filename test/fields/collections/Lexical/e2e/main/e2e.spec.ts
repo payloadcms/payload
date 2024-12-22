@@ -784,10 +784,7 @@ describe('lexicalMain', () => {
     })
   })
 
-  /**
-   * When the escape key is pressed, Firefox resets the active element to the beginning of the page instead of staying with the editor.
-   * By applying a keydown listener when the escape key is pressed, we can programatically focus the previous element if shift+tab is pressed.
-   */
+  // NOTE: this test doesn't work in Firefox, see https://github.com/payloadcms/payload/issues/10049
   test('ensure escape key can be used to move focus away from editor', async () => {
     await navigateToLexicalFields()
 
