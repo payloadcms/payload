@@ -52,7 +52,7 @@ await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
-await safelyRunScriptFunction(runInit, 14000, testSuiteArg, true)
+await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
 
 if (shouldStartMemoryDB) {
   await startMemoryDB()
