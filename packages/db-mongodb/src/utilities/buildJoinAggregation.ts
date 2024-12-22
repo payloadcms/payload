@@ -1,4 +1,3 @@
-import type { ClientSession } from 'mongodb'
 import type { PipelineStage } from 'mongoose'
 import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig, Where } from 'payload'
 
@@ -11,9 +10,12 @@ type BuildJoinAggregationArgs = {
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
   joins: JoinQuery
+  // the number of docs to get at the top collection level
+  limit?: number
   locale: string
   projection?: Record<string, true>
-  session?: ClientSession
+  // the where clause for the top collection
+  query?: Where
   /** whether the query is from drafts */
   versions?: boolean
 }
@@ -23,9 +25,10 @@ export const buildJoinAggregation = async ({
   collection,
   collectionConfig,
   joins,
+  limit,
   locale,
   projection,
-  session,
+  query,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
   if (Object.keys(collectionConfig.joins).length === 0 || joins === false) {
@@ -33,7 +36,23 @@ export const buildJoinAggregation = async ({
   }
 
   const joinConfig = adapter.payload.collections[collection].config.joins
-  const aggregate: PipelineStage[] = []
+  const aggregate: PipelineStage[] = [
+    {
+      $sort: { createdAt: -1 },
+    },
+  ]
+
+  if (query) {
+    aggregate.push({
+      $match: query,
+    })
+  }
+
+  if (limit) {
+    aggregate.push({
+      $limit: limit,
+    })
+  }
 
   for (const slug of Object.keys(joinConfig)) {
     for (const join of joinConfig[slug]) {
@@ -53,25 +72,26 @@ export const buildJoinAggregation = async ({
         where: whereJoin,
       } = joins?.[join.joinPath] || {}
 
-      const $sort = buildSortParam({
+      const sort = buildSortParam({
         config: adapter.payload.config,
         fields: adapter.payload.collections[slug].config.flattenedFields,
         locale,
         sort: sortJoin,
         timestamps: true,
       })
+      const sortProperty = Object.keys(sort)[0]
+      const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
       const $match = await joinModel.buildQuery({
         locale,
         payload: adapter.payload,
-        session,
         where: whereJoin,
       })
 
       const pipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
         { $match },
         {
-          $sort,
+          $sort: { [sortProperty]: sortDirection },
         },
       ]
 
@@ -169,8 +189,8 @@ export const buildJoinAggregation = async ({
     }
   }
 
-  if (!aggregate.length) {
-    return
+  if (projection) {
+    aggregate.push({ $project: projection })
   }
 
   return aggregate

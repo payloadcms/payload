@@ -875,12 +875,7 @@ export type PointFieldValidation = Validate<
   PointField
 >
 
-export const point: PointFieldValidation = (value, { req: { t }, required }) => {
-  // Allow to pass null to clear the field
-  if (!value) {
-    value = ['', '']
-  }
-
+export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
   const lng = parseFloat(String(value[0]))
   const lat = parseFloat(String(value[1]))
   if (

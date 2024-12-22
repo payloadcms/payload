@@ -1,44 +1,48 @@
-import type { Create } from 'payload'
+import type { CreateOptions } from 'mongoose'
+import type { Create, Document } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
-import { transform } from './utilities/transform.js'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
   { collection, data, req },
 ) {
   const Model = this.collections[collection]
-  const session = await getSession(this, req)
-
-  const fields = this.payload.collections[collection].config.flattenedFields
-
-  if (this.payload.collections[collection].customIDType) {
-    data._id = data.id
+  const options: CreateOptions = {
+    session: await getSession(this, req),
   }
 
-  transform({
-    adapter: this,
+  let doc
+
+  const sanitizedData = sanitizeRelationshipIDs({
+    config: this.payload.config,
     data,
-    fields,
-    operation: 'create',
+    fields: this.payload.collections[collection].config.fields,
   })
 
+  if (this.payload.collections[collection].customIDType) {
+    sanitizedData._id = sanitizedData.id
+  }
+
   try {
-    const { insertedId: insertedID } = await Model.collection.insertOne(data, { session })
-    data._id = insertedID
-
-    transform({
-      adapter: this,
-      data,
-      fields,
-      operation: 'read',
-    })
-
-    return data
+    ;[doc] = await Model.create([sanitizedData], options)
   } catch (error) {
     handleError({ collection, error, req })
   }
+
+  // doc.toJSON does not do stuff like converting ObjectIds to string, or date strings to date objects. That's why we use JSON.parse/stringify here
+  const result: Document = JSON.parse(JSON.stringify(doc))
+  const verificationToken = doc._verificationToken
+
+  // custom id type reset
+  result.id = result._id
+  if (verificationToken) {
+    result._verificationToken = verificationToken
+  }
+
+  return result
 }
