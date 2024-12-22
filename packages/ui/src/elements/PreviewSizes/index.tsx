@@ -90,12 +90,20 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
   )
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
+  const getImageSrc = (url: string, tag?: string) => {
+    if (!url) return ''
+    if (!tag) return url
+  
+    const hasQueryParams = url.includes('?')
+    return hasQueryParams ? `${url}&${tag}` : `${url}?${tag}`
+  }
+
   const generateImageUrl = (doc) => {
     if (!doc.filename) {
       return null
     }
     if (doc.url) {
-      return `${doc.url}${imageCacheTag ? `?${imageCacheTag}` : ''}`
+      return getImageSrc(doc.url, imageCacheTag)
     }
   }
   useEffect(() => {
