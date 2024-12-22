@@ -66,11 +66,12 @@ const reduceFields = ({
   return fields?.reduce((fieldsToUse, field) => {
     // escape for a variety of reasons, include ui fields as they have `name`.
     if (
-      (fieldAffectsData(field) || field.type === 'ui') &&
-      (field.admin.disableBulkEdit ||
+      fieldAffectsData(field) &&
+      (field.admin?.disableBulkEdit ||
+        field.admin?.hidden ||
+        field.admin?.readOnly ||
         field.unique ||
-        fieldIsHiddenOrDisabled(field) ||
-        ('readOnly' in field && field.readOnly))
+        fieldIsHiddenOrDisabled(field))
     ) {
       return fieldsToUse
     }
