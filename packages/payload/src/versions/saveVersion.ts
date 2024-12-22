@@ -39,6 +39,8 @@ export const saveVersion = async ({
   let createNewVersion = true
   const now = new Date().toISOString()
   const versionData = deepCopyObjectSimple(doc)
+  versionData.updatedAt = now
+
   if (draft) {
     versionData._status = 'draft'
   }

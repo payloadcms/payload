@@ -18,12 +18,14 @@ describe('@payloadcms/plugin-redirects', () => {
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(dirname))
 
-    page = await payload.create({
+    const { id } = await payload.create({
       collection: 'pages',
       data: {
         title: 'Test',
       },
     })
+
+    page = await payload.findByID({ collection: 'pages', id })
   })
 
   afterAll(async () => {
