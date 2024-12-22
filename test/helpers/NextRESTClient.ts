@@ -18,6 +18,7 @@ type RequestOptions = {
   auth?: boolean
   query?: {
     depth?: number
+    draft?: boolean
     fallbackLocale?: string
     joins?: JoinQuery
     limit?: number
