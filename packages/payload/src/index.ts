@@ -54,6 +54,7 @@ import type { Options as FindGlobalVersionByIDOptions } from './globals/operatio
 import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js'
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
+import type { PreferenceRequest, PreferenceUpdateRequest } from './preferences/types.js'
 import type {
   ApplyDisableErrors,
   JsonObject,
@@ -375,6 +376,9 @@ export class BasePayload {
     return findVersions<TSlug>(this, options)
   }
 
+  findPreferenceByKey = async (args: PreferenceRequest) =>
+    localOperations.findPreferenceByKey(this, args)
+
   /**
    * @description Find version by ID
    * @param options
@@ -485,6 +489,9 @@ export class BasePayload {
     const { update } = localGlobalOperations
     return update<TSlug, TSelect>(this, options)
   }
+
+  updatePreference = async (args: PreferenceUpdateRequest) =>
+    localOperations.updatePreference(this, args)
 
   validationRules: (args: OperationArgs<any>) => ValidationRule[]
 

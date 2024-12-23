@@ -3,7 +3,7 @@ import type { PayloadRequest } from '../types/index.js'
 export type PreferenceRequest = {
   key: string
   overrideAccess?: boolean
-  req: PayloadRequest
+  req?: PayloadRequest
   user: PayloadRequest['user']
 }
 
