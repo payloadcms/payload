@@ -1,13 +1,13 @@
 {
   "extends": "../tsconfig.json",
   "exclude": [],
-  "include":[
+  "include": [
     "**/*.ts",
     "**/*.tsx",
     "../src/**/*.ts",
     "../src/**/*.tsx",
     "next.config.mjs",
-    ".next/types/**/*.ts",
+    ".next/types/**/*.ts"
   ],
   "compilerOptions": {
     "baseUrl": "./",
@@ -23,7 +23,8 @@
       ],
       "plugin-package-name-placeholder/rsc": [
         "../src/exports/rsc.ts"
-      ],
+      ]
     },
+    "noEmit": true
   }
 }
