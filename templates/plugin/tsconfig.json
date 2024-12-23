@@ -6,7 +6,7 @@
       "DOM.Iterable",
       "ES2022"
     ],
-    "rootDir": "./",
+    "rootDir": "./src",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -18,21 +18,9 @@
     "jsx": "preserve",
     "incremental": true,
     "target": "ES2022",
-    "paths": {
-      "plugin-package-name-placeholder": [
-        "./src/index.ts"
-      ],
-      "plugin-package-name-placeholder/client": [
-        "./src/exports/client.ts"
-      ],
-      "plugin-package-name-placeholder/rsc": [
-        "./src/exports/rsc.ts"
-      ],
-      "@payload-config": [
-        "./dev/payload.config.ts"
-      ]
-    },
     "noEmit": true,
+    "emitDeclarationOnly": true,
+    "composite": true,
     "plugins": [
       {
         "name": "next"
@@ -40,13 +28,8 @@
     ],
   },
   "include": [
-    "./dev/**/*.ts",
-    "./dev/**/*.tsx",
     "./src/**/*.ts",
     "./src/**/*.tsx",
-    ".next/types/**/*.ts"
+    "./dev/next-env.d.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
 }

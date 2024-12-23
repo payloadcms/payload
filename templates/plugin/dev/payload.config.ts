@@ -3,8 +3,11 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { myPlugin } from 'plugin-package-name-placeholder'
+import { seed } from 'seed.js'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
+
+import { devUser } from './helpers/credentials.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -16,6 +19,7 @@ if (!process.env.ROOT_DIR) {
 // eslint-disable-next-line no-restricted-exports
 export default buildConfig({
   admin: {
+    autoLogin: devUser,
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -30,6 +34,9 @@ export default buildConfig({
     url: process.env.DATABASE_URI || '',
   }),
   editor: lexicalEditor(),
+  onInit: async (payload) => {
+    await seed(payload)
+  },
   plugins: [
     myPlugin({
       collections: {

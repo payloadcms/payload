@@ -14,9 +14,7 @@ const handle = app.getRequestHandler()
 await app.prepare()
 
 // Open the admin if the -o flag is passed
-if (process.argv.includes('--o')) {
-  await open(`http://localhost:3000/admin`)
-}
+await open(`http://localhost:3000/admin`)
 
 const server = createServer((req, res) => {
   const parsedUrl = parse(req.url!, true)

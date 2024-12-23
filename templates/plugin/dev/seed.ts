@@ -1,3 +1,21 @@
-import { Payload } from 'payload'
+import type { Payload } from 'payload'
 
-export const seed = (payload: Payload) => {}
+import { devUser } from './helpers/credentials.js'
+
+export const seed = async (payload: Payload) => {
+  const { totalDocs } = await payload.count({
+    collection: 'users',
+    where: {
+      email: {
+        equals: devUser.email,
+      },
+    },
+  })
+
+  if (!totalDocs) {
+    await payload.create({
+      collection: 'users',
+      data: devUser,
+    })
+  }
+}

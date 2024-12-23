@@ -38,7 +38,21 @@ export const myPlugin =
       `plugin-package-name-placeholder/rsc#BeforeDashboardServer`,
     )
 
-    if (pluginOptions.collections && config.collections) {
+    if (!config.collections) {
+      config.collections = []
+    }
+
+    config.collections.push({
+      slug: 'plugin-collection',
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+        },
+      ],
+    })
+
+    if (pluginOptions.collections) {
       for (const collectionSlug in pluginOptions.collections) {
         const collection = config.collections.find(
           (collection) => collection.slug === collectionSlug,
@@ -63,6 +77,32 @@ export const myPlugin =
       method: 'get',
       path: '/my-plugin-endpoint',
     })
+
+    const incomingOnInit = config.onInit
+
+    config.onInit = async (payload) => {
+      if (incomingOnInit) {
+        await incomingOnInit(payload)
+      }
+
+      const { totalDocs } = await payload.count({
+        collection: 'plugin-collection',
+        where: {
+          id: {
+            equals: 'seeded-by-plugin',
+          },
+        },
+      })
+
+      if (totalDocs === 0) {
+        await payload.create({
+          collection: 'plugin-collection',
+          data: {
+            id: 'seeded-by-plugin',
+          },
+        })
+      }
+    }
 
     return config
   }
