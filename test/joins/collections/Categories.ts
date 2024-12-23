@@ -110,6 +110,36 @@ export const Categories: CollectionConfig = {
       on: 'array.category',
     },
     {
+      name: 'blocksPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'blocks.category',
+    },
+    {
+      name: 'polymorphic',
+      type: 'join',
+      collection: postsSlug,
+      on: 'polymorphic',
+    },
+    {
+      name: 'polymorphics',
+      type: 'join',
+      collection: postsSlug,
+      on: 'polymorphics',
+    },
+    {
+      name: 'localizedPolymorphic',
+      type: 'join',
+      collection: postsSlug,
+      on: 'localizedPolymorphic',
+    },
+    {
+      name: 'localizedPolymorphics',
+      type: 'join',
+      collection: postsSlug,
+      on: 'localizedPolymorphics',
+    },
+    {
       name: 'singulars',
       type: 'join',
       collection: singularSlug,

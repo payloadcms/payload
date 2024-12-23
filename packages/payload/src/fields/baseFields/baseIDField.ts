@@ -13,23 +13,8 @@ export const baseIDField: TextField = {
   },
   defaultValue: () => new ObjectId().toHexString(),
   hooks: {
-    beforeChange: [
-      ({ operation, value }) => {
-        // If creating new doc, need to disregard any
-        // ids that have been passed in because they will cause
-        // primary key unique conflicts in relational DBs
-        if (!value || (operation === 'create' && value)) {
-          return new ObjectId().toHexString()
-        }
-
-        return value
-      },
-    ],
-    beforeDuplicate: [
-      () => {
-        return new ObjectId().toHexString()
-      },
-    ],
+    beforeChange: [({ value }) => value || new ObjectId().toHexString()],
+    beforeDuplicate: [() => new ObjectId().toHexString()],
   },
   label: 'ID',
 }

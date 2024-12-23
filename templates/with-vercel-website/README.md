@@ -50,7 +50,7 @@ If you prefer to use Docker for local development instead of a local Postgres in
 
 To do so, follow these steps:
 
-- Modify the `POSTGRES_URL` in your `.env` file to `postgres://postgres@postgres:54320/<dbname>`
+- Modify the `POSTGRES_URL` in your `.env` file to `postgres://postgres@localhost:54320/<dbname>`
 - Modify the `docker-compose.yml` file's `POSTGRES_DB` to match the above `<dbname>`
 - Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
 

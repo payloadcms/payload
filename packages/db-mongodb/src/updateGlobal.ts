@@ -1,23 +1,22 @@
 import type { QueryOptions } from 'mongoose'
-import type { PayloadRequest, UpdateGlobal } from 'payload'
+import type { UpdateGlobal } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: MongooseAdapter,
-  { slug, data, options: optionsArgs = {}, req = {} as PayloadRequest, select },
+  { slug, data, options: optionsArgs = {}, req, select },
 ) {
   const Model = this.globals
   const fields = this.payload.config.globals.find((global) => global.slug === slug).fields
 
   const options: QueryOptions = {
     ...optionsArgs,
-    ...(await withSession(this, req)),
     lean: true,
     new: true,
     projection: buildProjectionFromSelect({
@@ -25,6 +24,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
       fields: this.payload.config.globals.find((global) => global.slug === slug).flattenedFields,
       select,
     }),
+    session: await getSession(this, req),
   }
 
   let result

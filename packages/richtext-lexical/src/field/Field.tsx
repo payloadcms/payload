@@ -106,7 +106,7 @@ const RichTextComponent: React.FC<
         CustomComponent={Error}
         Fallback={<FieldError path={path} showError={showError} />}
       />
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}

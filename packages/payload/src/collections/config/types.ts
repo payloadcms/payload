@@ -329,7 +329,7 @@ export type CollectionAdminOptions = {
    */
   defaultColumns?: string[]
   /**
-   * Custom description for collection
+   * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
   enableRichTextLink?: boolean

@@ -147,6 +147,9 @@ export interface User {
  */
 export interface PayloadJob {
   id: string;
+  /**
+   * Input data provided to the job
+   */
   input?:
     | {
         [k: string]: unknown;
@@ -167,7 +170,13 @@ export interface PayloadJob {
     | null;
   completedAt?: string | null;
   totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
   hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
   error?:
     | {
         [k: string]: unknown;
@@ -177,6 +186,9 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
+  /**
+   * Task execution log
+   */
   log?:
     | {
         executedAt: string;

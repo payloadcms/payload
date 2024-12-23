@@ -214,7 +214,7 @@ const PreviewView: React.FC<Props> = ({
       setDocumentIsLocked(true)
 
       if (isLockingEnabled) {
-        const previousOwnerId =
+        const previousOwnerID =
           typeof documentLockStateRef.current?.user === 'object'
             ? documentLockStateRef.current?.user?.id
             : documentLockStateRef.current?.user
@@ -225,8 +225,8 @@ const PreviewView: React.FC<Props> = ({
               ? lockedState.user
               : lockedState.user.id
 
-          if (!documentLockStateRef.current || lockedUserID !== previousOwnerId) {
-            if (previousOwnerId === user.id && lockedUserID !== user.id) {
+          if (!documentLockStateRef.current || lockedUserID !== previousOwnerID) {
+            if (previousOwnerID === user.id && lockedUserID !== user.id) {
               setShowTakeOverModal(true)
               documentLockStateRef.current.hasShownLockedModal = true
             }
@@ -270,7 +270,7 @@ const PreviewView: React.FC<Props> = ({
 
       const currentPath = window.location.pathname
 
-      const documentId = id || globalSlug
+      const documentID = id || globalSlug
 
       // Routes where we do NOT want to unlock the document
       const stayWithinDocumentPaths = ['preview', 'api', 'versions']
@@ -280,7 +280,7 @@ const PreviewView: React.FC<Props> = ({
       )
 
       // Unlock the document only if we're actually navigating away from the document
-      if (documentId && documentIsLocked && !isStayingWithinDocument) {
+      if (documentID && documentIsLocked && !isStayingWithinDocument) {
         // Check if this user is still the current editor
         if (
           typeof documentLockStateRef.current?.user === 'object'
