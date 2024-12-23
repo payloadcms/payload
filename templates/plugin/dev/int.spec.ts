@@ -77,6 +77,14 @@ describe('Plugin tests', () => {
       },
     })
 
-    expect(post).toBeTruthy()
+    expect(post.addedByPlugin).toBe('added by plugin')
+  })
+
+  it('plugin creates and seeds plugin-collection', async () => {
+    expect(payload.collections['plugin-collection']).toBeDefined()
+
+    const { docs } = await payload.find({ collection: 'plugin-collection' })
+
+    expect(docs).toHaveLength(1)
   })
 })
