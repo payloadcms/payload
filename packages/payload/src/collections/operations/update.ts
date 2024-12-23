@@ -42,6 +42,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
+  options?: Record<string, unknown>
   limit?: number
   overrideAccess?: boolean
   overrideLock?: boolean
@@ -86,6 +87,7 @@ export const updateOperation = async <
       collection,
       depth,
       draft: draftArg = false,
+      options,
       limit = 0,
       overrideAccess,
       overrideLock,
@@ -329,6 +331,7 @@ export const updateOperation = async <
             collection: collectionConfig.slug,
             data: result,
             locale,
+            options,
             req,
             select,
           })
