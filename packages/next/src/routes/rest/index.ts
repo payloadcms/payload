@@ -68,6 +68,7 @@ const endpoints = {
       getFile,
       init,
       me,
+      'paste-url': getFileFromURL,
       preview: previewCollection,
       versions: findVersions,
     },
@@ -97,6 +98,7 @@ const endpoints = {
       'doc-versions': findVersionsGlobal,
       'doc-versions-by-id': findVersionByIdGlobal,
       findOne,
+      'paste-url': getFileFromURL,
       preview: previewGlobal,
     },
     POST: {
@@ -109,7 +111,6 @@ const endpoints = {
     GET: {
       access,
       og: generateOGImage,
-      'paste-url': getFileFromURL,
     },
   },
 }

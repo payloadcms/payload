@@ -102,7 +102,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
-  const { docPermissions, savedDocumentData } = useDocumentInfo()
+  const { docPermissions, globalSlug, savedDocumentData } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
@@ -183,8 +183,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const handleUrlSubmit = async () => {
     if (fileUrl) {
       try {
+        const slug = collectionSlug || globalSlug
+
         // Make a request to the Payload 'paste-url' endpoint
-        const pasteURL = `/paste-url?src=${encodeURIComponent(fileUrl)}`
+        const pasteURL = `/${slug}/paste-url?src=${encodeURIComponent(fileUrl)}`
         const response = await fetch(`${serverURL}${api}${pasteURL}`)
 
         if (!response.ok) {

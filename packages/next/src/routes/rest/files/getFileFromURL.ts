@@ -1,26 +1,53 @@
-import type { PayloadRequest } from 'payload'
+import type { Collection, GlobalConfig, PayloadRequest, TypeWithID } from 'payload'
 
-import { APIError } from 'payload'
+import { APIError, executeAccess, Forbidden } from 'payload'
 
 // /api/paste-url/:fileUrl
 
-type WrapperRequest = {
+// /:collectionSlug/paste-url/:fileUrl
+
+// /:globalSlug/paste-url/:fileUrl
+
+export const getFileFromURL = async ({
+  collection,
+  docID,
+  global,
+  req,
+}: {
+  collection?: Collection
+  docID: number | string // global slug OR docID
+  filename: string
+  global?: GlobalConfig
   req: PayloadRequest
-}
+}): Promise<Response | TypeWithID> => {
+  if (!req.user) {
+    throw new Forbidden(req.t)
+  }
 
-const getRequestFromPayload = (wrapperReq: WrapperRequest): PayloadRequest => {
-  return wrapperReq.req
-}
+  const config = collection?.config || global
 
-export const getFileFromURL = async (wrapperReq: WrapperRequest) => {
+  if (docID) {
+    // updating doc
+    const accessResult = await executeAccess({ req }, config.access.update)
+    if (!accessResult) {
+      throw new Forbidden(req.t)
+    }
+  } else if (collection) {
+    // creating doc (only applicable to collections)
+    const accessResult = await executeAccess({ req }, collection.config.access?.create)
+    if (!accessResult) {
+      throw new Forbidden(req.t)
+    }
+  } else {
+    throw new APIError('Invalid operation: creating is not allowed.', 400)
+  }
+
   try {
-    const request = getRequestFromPayload(wrapperReq)
-
-    if (!request.url) {
+    if (!req.url) {
       throw new APIError('Request URL is missing.', 400)
     }
 
-    const { searchParams } = new URL(request.url)
+    const { searchParams } = new URL(req.url)
     const src = searchParams.get('src')
 
     if (!src || typeof src !== 'string') {
