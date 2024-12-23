@@ -1,6 +1,6 @@
 import type { CollectionSlug, Config } from 'payload'
 
-export type ExamplePluginOptions = {
+export type MyPluginConfig = {
   /**
    * List of collections to add a custom field
    */
@@ -9,7 +9,7 @@ export type ExamplePluginOptions = {
 }
 
 export const myPlugin =
-  (pluginOptions: ExamplePluginOptions) =>
+  (pluginOptions: MyPluginConfig) =>
   (config: Config): Config => {
     if (pluginOptions.disabled) {
       return config

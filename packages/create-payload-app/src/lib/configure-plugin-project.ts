@@ -1,6 +1,8 @@
 import fse from 'fs-extra'
 import path from 'path'
 
+import { toCamelCase, toPascalCase } from '../utils/casing.js'
+
 /**
  * Configures a plugin project by updating all package name placeholders to projectName
  */
@@ -20,7 +22,16 @@ export const configurePluginProject = ({
   const indexTs = fse.readFileSync(indexTsPath, 'utf-8')
 
   const updatedTsConfig = devTsConfig.replaceAll('plugin-package-name-placeholder', projectName)
-  const updatedIndexTs = indexTs.replaceAll('plugin-package-name-placeholder', projectName)
+  let updatedIndexTs = indexTs.replaceAll('plugin-package-name-placeholder', projectName)
+  updatedIndexTs = updatedIndexTs.replace(
+    'export const myPlugin',
+    `export const ${toCamelCase(projectName)}`,
+  )
+  updatedIndexTs = updatedIndexTs.replace(
+    'export type MyPluginConfig',
+    `export type ${toPascalCase(projectName)}Config`,
+  )
+
   const updatedPayloadConfig = devPayloadConfig.replaceAll(
     'plugin-package-name-placeholder',
     projectName,
