@@ -31,6 +31,7 @@ export const tgzToPkgNameMap = {
   '@payloadcms/plugin-stripe': 'payloadcms-plugin-stripe-*',
   '@payloadcms/richtext-lexical': 'payloadcms-richtext-lexical-*',
   '@payloadcms/richtext-slate': 'payloadcms-richtext-slate-*',
+  '@payloadcms/sdk': 'payloadcms-sdk-*',
   '@payloadcms/storage-azure': 'payloadcms-storage-azure-*',
   '@payloadcms/storage-gcs': 'payloadcms-storage-gcs-*',
   '@payloadcms/storage-s3': 'payloadcms-storage-s3-*',
