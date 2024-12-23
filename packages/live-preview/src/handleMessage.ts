@@ -3,7 +3,7 @@ import type { LivePreviewMessageEvent } from './types.js'
 import { isLivePreviewEvent } from './isLivePreviewEvent.js'
 import { mergeData } from './mergeData.js'
 
-global._payloadLivePreview = global._payloadLivePreview || {
+const _payloadLivePreview = {
   /**
    * For performance reasons, `fieldSchemaJSON` will only be sent once on the initial message
    * We need to cache this value so that it can be used across subsequent messages
@@ -30,11 +30,11 @@ export const handleMessage = async <T>(args: {
   if (isLivePreviewEvent(event, serverURL)) {
     const { data, externallyUpdatedRelationship, fieldSchemaJSON, locale } = event.data
 
-    if (!global?._payloadLivePreview?.fieldSchema && fieldSchemaJSON) {
-      global._payloadLivePreview.fieldSchema = fieldSchemaJSON
+    if (!_payloadLivePreview?.fieldSchema && fieldSchemaJSON) {
+      _payloadLivePreview.fieldSchema = fieldSchemaJSON
     }
 
-    if (!global?._payloadLivePreview?.fieldSchema) {
+    if (!_payloadLivePreview?.fieldSchema) {
       // eslint-disable-next-line no-console
       console.warn(
         'Payload Live Preview: No `fieldSchemaJSON` was received from the parent window. Unable to merge data.',
@@ -47,14 +47,14 @@ export const handleMessage = async <T>(args: {
       apiRoute,
       depth,
       externallyUpdatedRelationship,
-      fieldSchema: global._payloadLivePreview.fieldSchema,
+      fieldSchema: _payloadLivePreview.fieldSchema,
       incomingData: data,
-      initialData: global?._payloadLivePreview?.previousData || initialData,
+      initialData: _payloadLivePreview?.previousData || initialData,
       locale,
       serverURL,
     })
 
-    global._payloadLivePreview.previousData = mergedData
+    _payloadLivePreview.previousData = mergedData
 
     return mergedData
   }

@@ -1,4 +1,4 @@
-import type { DocumentEvent } from 'payload'
+import type { DocumentEvent, FieldSchemaJSON } from 'payload'
 
 export type LivePreviewArgs = {}
 
@@ -15,7 +15,7 @@ export type PopulationsByCollection = {
 export type LivePreviewMessageEvent<T> = MessageEvent<{
   data: T
   externallyUpdatedRelationship?: DocumentEvent
-  fieldSchemaJSON: Record<string, unknown>
+  fieldSchemaJSON: FieldSchemaJSON
   locale?: string
   type: 'payload-live-preview'
 }>
