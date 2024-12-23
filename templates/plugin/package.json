@@ -66,6 +66,7 @@
     "qs-esm": "7.0.2",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "rimraf": "3.0.2",
     "sharp": "0.32.6",
     "sort-package-json": "^2.10.0",
     "typescript": "5.7.2"
