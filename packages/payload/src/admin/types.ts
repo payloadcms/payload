@@ -507,3 +507,9 @@ export type ClientFieldSchemaMap = Map<
   | ClientField
   | ClientTab
 >
+
+export type DocumentEvent = {
+  entitySlug: string
+  id?: number | string
+  updatedAt: string
+}

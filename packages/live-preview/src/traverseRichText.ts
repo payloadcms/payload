@@ -1,4 +1,6 @@
-import type { PopulationsByCollection, UpdatedDocument } from './types.js'
+import type { DocumentEvent } from 'payload'
+
+import type { PopulationsByCollection } from './types.js'
 
 export const traverseRichText = ({
   externallyUpdatedRelationship,
@@ -6,7 +8,7 @@ export const traverseRichText = ({
   populationsByCollection,
   result,
 }: {
-  externallyUpdatedRelationship?: UpdatedDocument
+  externallyUpdatedRelationship?: DocumentEvent
   incomingData: any
   populationsByCollection: PopulationsByCollection
   result: any
