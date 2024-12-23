@@ -24,17 +24,21 @@ export const configurePluginProject = ({
   const updatedTsConfig = devTsConfig.replaceAll('plugin-package-name-placeholder', projectName)
   let updatedIndexTs = indexTs.replaceAll('plugin-package-name-placeholder', projectName)
 
+  const pluginExportVariableName = toCamelCase(projectName)
+
   updatedIndexTs = updatedIndexTs.replace(
     'export const myPlugin',
-    `export const ${toCamelCase(projectName)}`,
+    `export const ${pluginExportVariableName}`,
   )
 
   updatedIndexTs = updatedIndexTs.replaceAll('MyPluginConfig', `${toPascalCase(projectName)}Config`)
 
-  const updatedPayloadConfig = devPayloadConfig.replaceAll(
+  let updatedPayloadConfig = devPayloadConfig.replace(
     'plugin-package-name-placeholder',
     projectName,
   )
+
+  updatedPayloadConfig = updatedPayloadConfig.replaceAll('myPlugin', pluginExportVariableName)
 
   fse.writeFileSync(devPayloadConfigPath, updatedPayloadConfig)
   fse.writeFileSync(devTsConfigPath, updatedTsConfig)
