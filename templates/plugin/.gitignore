@@ -40,4 +40,4 @@ yarn-error.log*
 
 .env
 
-/media
+/dev/media

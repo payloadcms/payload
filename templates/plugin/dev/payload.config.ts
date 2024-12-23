@@ -29,6 +29,13 @@ export default buildConfig({
       slug: 'posts',
       fields: [],
     },
+    {
+      slug: 'media',
+      fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, 'media'),
+      },
+    },
   ],
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
