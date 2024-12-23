@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "rootDir": "./",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "target": "ES2022",
+    "paths": {
+      "plugin-package-name-placeholder": [
+        "./src/index.ts"
+      ],
+      "plugin-package-name-placeholder/client": [
+        "./src/exports/client.ts"
+      ],
+      "plugin-package-name-placeholder/rsc": [
+        "./src/exports/rsc.ts"
+      ],
+      "@payload-config": [
+        "./dev/payload.config.ts"
+      ]
+    },
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+  },
+  "include": [
+    "./dev/**/*.ts",
+    "./dev/**/*.tsx",
+    "./src/**/*.ts",
+    "./src/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
