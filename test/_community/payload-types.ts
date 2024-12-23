@@ -69,7 +69,9 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  title?: string | null;
+  group?: {
+    text?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -201,7 +203,11 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  title?: T;
+  group?:
+    | T
+    | {
+        text?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

@@ -33,6 +33,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
     readOnly,
     schemaPath: schemaPathFromProps,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const { i18n } = useTranslation()

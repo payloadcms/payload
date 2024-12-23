@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, FieldWithPathClient, FormState } from 'payload'
+import type { ClientCollectionConfig, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -26,9 +26,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
-import './index.scss'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
+import { type SelectedField } from '../FieldSelect/reduceFieldOptions.js'
+import { reduceSelectedFields } from './reduceSelectedFields.js'
+import './index.scss'
 
 const baseClass = 'edit-many'
 
@@ -36,12 +38,12 @@ export type EditManyProps = {
   readonly collection: ClientCollectionConfig
 }
 
-const sanitizeUnselectedFields = (formState: FormState, selected: FieldWithPathClient[]) => {
-  const filteredData = selected.reduce((acc, field) => {
-    const foundState = formState?.[field.path]
+const sanitizeUnselectedFields = (formState: FormState, selectedFields: SelectedField[]) => {
+  const filteredData = selectedFields.reduce((acc, { path }) => {
+    const foundState = formState?.[path]
 
     if (foundState) {
-      acc[field.path] = formState?.[field.path]?.value
+      acc[path] = formState?.[path]?.value
     }
 
     return acc
@@ -53,8 +55,8 @@ const sanitizeUnselectedFields = (formState: FormState, selected: FieldWithPathC
 const Submit: React.FC<{
   readonly action: string
   readonly disabled: boolean
-  readonly selected?: FieldWithPathClient[]
-}> = ({ action, disabled, selected }) => {
+  readonly selectedFields?: SelectedField[]
+}> = ({ action, disabled, selectedFields }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -62,10 +64,10 @@ const Submit: React.FC<{
     void submit({
       action,
       method: 'PATCH',
-      overrides: (formState) => sanitizeUnselectedFields(formState, selected),
+      overrides: (formState) => sanitizeUnselectedFields(formState, selectedFields),
       skipValidation: true,
     })
-  }, [action, submit, selected])
+  }, [action, submit, selectedFields])
 
   return (
     <FormSubmit className={`${baseClass}__save`} disabled={disabled} onClick={save}>
@@ -77,8 +79,8 @@ const Submit: React.FC<{
 const PublishButton: React.FC<{
   action: string
   disabled: boolean
-  selected?: FieldWithPathClient[]
-}> = ({ action, disabled, selected }) => {
+  selectedFields?: SelectedField[]
+}> = ({ action, disabled, selectedFields }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -87,12 +89,12 @@ const PublishButton: React.FC<{
       action,
       method: 'PATCH',
       overrides: (formState) => ({
-        ...sanitizeUnselectedFields(formState, selected),
+        ...sanitizeUnselectedFields(formState, selectedFields),
         _status: 'published',
       }),
       skipValidation: true,
     })
-  }, [action, submit, selected])
+  }, [action, submit, selectedFields])
 
   return (
     <FormSubmit className={`${baseClass}__publish`} disabled={disabled} onClick={save}>
@@ -104,8 +106,8 @@ const PublishButton: React.FC<{
 const SaveDraftButton: React.FC<{
   action: string
   disabled: boolean
-  selected?: FieldWithPathClient[]
-}> = ({ action, disabled, selected }) => {
+  selectedFields?: SelectedField[]
+}> = ({ action, disabled, selectedFields }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -114,12 +116,12 @@ const SaveDraftButton: React.FC<{
       action,
       method: 'PATCH',
       overrides: (formState) => ({
-        ...sanitizeUnselectedFields(formState, selected),
+        ...sanitizeUnselectedFields(formState, selectedFields),
         _status: 'draft',
       }),
       skipValidation: true,
     })
-  }, [action, submit, selected])
+  }, [action, submit, selectedFields])
 
   return (
     <FormSubmit
@@ -134,7 +136,8 @@ const SaveDraftButton: React.FC<{
 }
 
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
+  const { collection: { slug: collectionSlug, fields, labels: { plural } } = {}, collection } =
+    props
 
   const { permissions, user } = useAuth()
 
@@ -151,18 +154,24 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
-  const [selected, setSelected] = useState<FieldWithPathClient[]>([])
+  const [selectedFields, setSelectedFields] = useState<SelectedField[]>([])
   const searchParams = useSearchParams()
   const router = useRouter()
   const [initialState, setInitialState] = useState<FormState>()
   const hasInitializedState = React.useRef(false)
   const formStateAbortControllerRef = React.useRef<AbortController>(null)
   const { clearRouteCache } = useRouteCache()
-
-  const collectionPermissions = permissions?.collections?.[slug]
+  const collectionPermissions = permissions?.collections?.[collectionSlug]
   const hasUpdatePermission = collectionPermissions?.update
 
-  const drawerSlug = `edit-${slug}`
+  const drawerSlug = `edit-${collectionSlug}`
+
+  const fieldsToRender = React.useMemo(
+    () => reduceSelectedFields(fields, selectedFields),
+    [fields, selectedFields],
+  )
+
+  console.log(fieldsToRender)
 
   React.useEffect(() => {
     const controller = new AbortController()
@@ -170,12 +179,12 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     if (!hasInitializedState.current) {
       const getInitialState = async () => {
         const { state: result } = await getFormState({
-          collectionSlug: slug,
+          collectionSlug,
           data: {},
           docPermissions: collectionPermissions,
           docPreferences: null,
           operation: 'update',
-          schemaPath: slug,
+          schemaPath: collectionSlug,
           signal: controller.signal,
         })
 
@@ -189,7 +198,15 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
     return () => {
       abortAndIgnore(controller)
     }
-  }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
+  }, [
+    apiRoute,
+    hasInitializedState,
+    serverURL,
+    collectionSlug,
+    getFormState,
+    user,
+    collectionPermissions,
+  ])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
@@ -199,18 +216,18 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
       formStateAbortControllerRef.current = controller
 
       const { state } = await getFormState({
-        collectionSlug: slug,
+        collectionSlug,
         docPermissions: collectionPermissions,
         docPreferences: null,
         formState: prevFormState,
         operation: 'update',
-        schemaPath: slug,
+        schemaPath: collectionSlug,
         signal: controller.signal,
       })
 
       return state
     },
-    [getFormState, slug, collectionPermissions],
+    [getFormState, collectionSlug, collectionPermissions],
   )
 
   useEffect(() => {
@@ -252,7 +269,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         aria-label={t('general:edit')}
         className={`${baseClass}__toggle`}
         onClick={() => {
-          setSelected([])
+          setSelectedFields([])
         }}
         slug={drawerSlug}
       >
@@ -261,7 +278,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
       <EditDepthProvider>
         <Drawer Header={null} slug={drawerSlug}>
           <DocumentInfoProvider
-            collectionSlug={slug}
+            collectionSlug={collectionSlug}
             currentEditor={user}
             hasPublishedDoc={false}
             id={null}
@@ -295,13 +312,13 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                   onChange={[onChange]}
                   onSuccess={onSuccess}
                 >
-                  <FieldSelect fields={fields} setSelected={setSelected} />
-                  {selected.length === 0 ? null : (
+                  <FieldSelect fields={fields} setSelected={setSelectedFields} />
+                  {selectedFields.length === 0 ? null : (
                     <RenderFields
-                      fields={selected}
+                      fields={fieldsToRender}
                       parentIndexPath=""
                       parentPath=""
-                      parentSchemaPath={slug}
+                      parentSchemaPath={collectionSlug}
                       permissions={collectionPermissions?.fields}
                       readOnly={false}
                     />
@@ -313,21 +330,21 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                           {collection?.versions?.drafts ? (
                             <React.Fragment>
                               <SaveDraftButton
-                                action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
-                                disabled={selected.length === 0}
-                                selected={selected}
+                                action={`${serverURL}${apiRoute}/${collectionSlug}${queryString}&draft=true`}
+                                disabled={selectedFields.length === 0}
+                                selectedFields={selectedFields}
                               />
                               <PublishButton
-                                action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
-                                disabled={selected.length === 0}
-                                selected={selected}
+                                action={`${serverURL}${apiRoute}/${collectionSlug}${queryString}&draft=true`}
+                                disabled={selectedFields.length === 0}
+                                selectedFields={selectedFields}
                               />
                             </React.Fragment>
                           ) : (
                             <Submit
-                              action={`${serverURL}${apiRoute}/${slug}${queryString}`}
-                              disabled={selected.length === 0}
-                              selected={selected}
+                              action={`${serverURL}${apiRoute}/${collectionSlug}${queryString}`}
+                              disabled={selectedFields.length === 0}
+                              selectedFields={selectedFields}
                             />
                           )}
                         </div>
