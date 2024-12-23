@@ -12,7 +12,14 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig =
       type: 'relationship',
       index: true,
       maxDepth: 0,
-      relationTo: [...config.collections.map((collectionConfig) => collectionConfig.slug)],
+      relationTo: [
+        ...config.collections.map((collectionConfig, index) => {
+          if (!collectionConfig?.slug) {
+            throw new Error(`Invalid collection config. Each collection must have a valid slug. Please check your Payload Config collections array.`);
+          }
+          return collectionConfig.slug;
+        })
+      ]
     },
     {
       name: 'globalSlug',
@@ -23,9 +30,12 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig =
       name: 'user',
       type: 'relationship',
       maxDepth: 1,
-      relationTo: config.collections
-        .filter((collectionConfig) => collectionConfig.auth)
-        .map((collectionConfig) => collectionConfig.slug),
+      relationTo: config.collections.map((collectionConfig, index) => {
+        if (!collectionConfig?.slug) {
+            throw new Error(`Invalid collection config. Each collection must have a valid slug. Please check your Payload Config collections array.`);
+        }
+        return collectionConfig.auth ? collectionConfig.slug : null;
+      }).filter(Boolean),
       required: true,
     },
   ],
