@@ -75,7 +75,7 @@
     "build:esbuild": "echo skipping esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "clean:cache": "rimraf node_modules/.cache",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
@@ -126,7 +126,7 @@
     "esbuild": "0.24.0",
     "graphql-http": "^1.22.0",
     "react-datepicker": "7.5.0",
-    "rimraf": "3.0.2",
+    "rimraf": "6.0.1",
     "sharp": "0.32.6"
   },
   "peerDependencies": {

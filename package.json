@@ -159,7 +159,7 @@
     "prompts": "2.4.2",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "rimraf": "3.0.2",
+    "rimraf": "6.0.1",
     "semver": "^7.5.4",
     "sharp": "0.32.6",
     "shelljs": "0.8.5",
