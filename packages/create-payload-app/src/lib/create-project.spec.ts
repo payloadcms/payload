@@ -44,10 +44,11 @@ describe('createProject', () => {
         name: 'plugin',
         type: 'plugin',
         description: 'Template for creating a Payload plugin',
-        url: 'https://github.com/payloadcms/payload-plugin-template',
+        url: 'https://github.com/payloadcms/payload/templates/plugin',
       }
+
       await createProject({
-        cliArgs: args,
+        cliArgs: { ...args, '--local-template': 'plugin' } as CliArgs,
         packageManager,
         projectDir,
         projectName,
