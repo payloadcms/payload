@@ -1,5 +1,6 @@
 'use client'
 
+import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
 import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
@@ -7,7 +8,6 @@ import type { ToolbarGroup } from '../../toolbars/types.js'
 import { IndentDecreaseIcon } from '../../../lexical/ui/icons/IndentDecrease/index.js'
 import { IndentIncreaseIcon } from '../../../lexical/ui/icons/IndentIncrease/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
-import { IndentPlugin } from './plugins/index.js'
 import { toolbarIndentGroupWithItems } from './toolbarIndentGroup.js'
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -58,7 +58,7 @@ const toolbarGroups: ToolbarGroup[] = [
 export const IndentFeatureClient = createClientFeature({
   plugins: [
     {
-      Component: IndentPlugin,
+      Component: TabIndentationPlugin,
       position: 'normal',
     },
   ],
