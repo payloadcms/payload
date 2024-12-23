@@ -13,7 +13,7 @@ const opts: NextServerOptions = {
   dir: dirname,
 }
 
-// @ts-expect-error
+// @ts-expect-error next types do not import
 const app = next(opts)
 const handle = app.getRequestHandler()
 
@@ -26,7 +26,4 @@ const server = createServer((req, res) => {
   void handle(req, res, parsedUrl)
 })
 
-server.listen(3000, () => {
-  void fetch(`http://localhost:3000/admin`)
-  void fetch(`http://localhost:3000/api/access`)
-})
+server.listen(3000)
