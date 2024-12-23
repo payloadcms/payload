@@ -98,7 +98,6 @@ const endpoints = {
       'doc-versions': findVersionsGlobal,
       'doc-versions-by-id': findVersionByIdGlobal,
       findOne,
-      'paste-url': getFileFromURL,
       preview: previewGlobal,
     },
     POST: {

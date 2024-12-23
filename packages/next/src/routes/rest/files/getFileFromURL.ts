@@ -1,47 +1,41 @@
-import type { Collection, GlobalConfig, PayloadRequest, TypeWithID } from 'payload'
+import type { Collection, PayloadRequest, TypeWithID } from 'payload'
 
 import { APIError, executeAccess, Forbidden } from 'payload'
 
-// /api/paste-url/:fileUrl
+// If doc id is provided, it means we are updating the doc
+// /:collectionSlug/:doc-id/paste-url/:fileUrl
 
+// If doc id is not provided, it means we are creating a new doc
 // /:collectionSlug/paste-url/:fileUrl
 
-// /:globalSlug/paste-url/:fileUrl
-
 export const getFileFromURL = async ({
+  id,
   collection,
-  docID,
-  global,
   req,
 }: {
   collection?: Collection
-  docID: number | string // global slug OR docID
-  filename: string
-  global?: GlobalConfig
+  id?: number | string
   req: PayloadRequest
 }): Promise<Response | TypeWithID> => {
   if (!req.user) {
     throw new Forbidden(req.t)
   }
 
-  const config = collection?.config || global
+  const config = collection?.config
 
-  if (docID) {
+  if (id) {
     // updating doc
     const accessResult = await executeAccess({ req }, config.access.update)
     if (!accessResult) {
       throw new Forbidden(req.t)
     }
-  } else if (collection) {
-    // creating doc (only applicable to collections)
-    const accessResult = await executeAccess({ req }, collection.config.access?.create)
+  } else {
+    // creating doc
+    const accessResult = await executeAccess({ req }, config.access?.create)
     if (!accessResult) {
       throw new Forbidden(req.t)
     }
-  } else {
-    throw new APIError('Invalid operation: creating is not allowed.', 400)
   }
-
   try {
     if (!req.url) {
       throw new APIError('Request URL is missing.', 400)
