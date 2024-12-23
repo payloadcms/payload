@@ -1,3 +1,5 @@
+import type { DocumentEvent } from 'payload'
+
 export type LivePreviewArgs = {}
 
 export type LivePreview = void
@@ -10,9 +12,10 @@ export type PopulationsByCollection = {
   }>
 }
 
-// TODO: import this from `payload/admin/components/utilities/DocumentEvents/types.ts`
-export type UpdatedDocument = {
-  entitySlug: string
-  id?: number | string
-  updatedAt: string
-}
+export type LivePreviewMessageEvent<T> = MessageEvent<{
+  data: T
+  externallyUpdatedRelationship?: DocumentEvent
+  fieldSchemaJSON: Record<string, unknown>
+  locale?: string
+  type: 'payload-live-preview'
+}>
