@@ -12,6 +12,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadStatus } from '../../providers/UploadStatus/index.js'
 import { PopupList } from '../Popup/index.js'
 
 export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
@@ -32,6 +33,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   const modified = useFormModified()
   const editDepth = useEditDepth()
   const { code: localeCode } = useLocale()
+  const { uploadStatus } = useUploadStatus()
 
   const {
     localization,
@@ -43,7 +45,10 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   const label = labelProp || t('version:publishChanges')
 
   const hasNewerVersions = unpublishedVersionCount > 0
-  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !hasPublishedDoc)
+  const canPublish =
+    hasPublishPermission &&
+    (modified || hasNewerVersions || !hasPublishedDoc) &&
+    uploadStatus !== 'uploading'
   const operation = useOperation()
 
   const forceDisable = operation === 'update' && !modified
@@ -88,6 +93,10 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   })
 
   const publish = useCallback(() => {
+    if (uploadStatus === 'uploading') {
+      return
+    }
+
     void submit({
       overrides: {
         _status: 'published',
@@ -96,10 +105,14 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
 
     setUnpublishedVersionCount(0)
     setHasPublishedDoc(true)
-  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount])
+  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount, uploadStatus])
 
   const publishSpecificLocale = useCallback(
     (locale) => {
+      if (uploadStatus === 'uploading') {
+        return
+      }
+
       const params = qs.stringify({
         publishSpecificLocale: locale,
       })
@@ -117,7 +130,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
 
       setHasPublishedDoc(true)
     },
-    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit],
+    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadStatus],
   )
 
   if (!hasPublishPermission) {

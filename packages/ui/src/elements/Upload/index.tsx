@@ -13,14 +13,15 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { useUploadStatus } from '../../providers/UploadStatus/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
-import { Thumbnail } from '../Thumbnail/index.js'
 import './index.scss'
+import { Thumbnail } from '../Thumbnail/index.js'
 
 const baseClass = 'file-field'
 export const editDrawerSlug = 'edit-upload'
@@ -95,6 +96,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
   const { docPermissions, savedDocumentData } = useDocumentInfo()
+  const { setUploadStatus } = useUploadStatus()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
@@ -174,6 +176,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const handleUrlSubmit = async () => {
     if (fileUrl) {
+      setUploadStatus('uploading')
       try {
         const response = await fetch(fileUrl)
         const data = await response.blob()
@@ -184,8 +187,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
         // Create a new File object from the Blob data
         const file = new File([data], fileName, { type: data.type })
         handleFileChange(file)
+        setUploadStatus('idle')
       } catch (e) {
         toast.error(e.message)
+        setUploadStatus('failed')
       }
     }
   }
