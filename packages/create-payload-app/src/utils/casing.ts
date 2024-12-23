@@ -1,9 +1,9 @@
-export function toCamelCase(str: string) {
-  return str
-    .replace(/^\w|[A-Z]|\b\w/g, function (word, index) {
-      return index === 0 ? word.toLowerCase() : word.toUpperCase()
-    })
-    .replace(/\s+/g, '')
+export const toCamelCase = (str: string) => {
+  const s = str
+    .match(/[A-Z]{2,}(?=[A-Z][a-z]+\d*|\b)|[A-Z]?[a-z]+\d*|[A-Z]|\d+/g)
+    ?.map((x) => x.slice(0, 1).toUpperCase() + x.slice(1).toLowerCase())
+    .join('')
+  return s && s.slice(0, 1).toLowerCase() + s.slice(1)
 }
 
 export function toPascalCase(input: string): string {

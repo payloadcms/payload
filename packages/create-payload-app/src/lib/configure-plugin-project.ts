@@ -23,14 +23,13 @@ export const configurePluginProject = ({
 
   const updatedTsConfig = devTsConfig.replaceAll('plugin-package-name-placeholder', projectName)
   let updatedIndexTs = indexTs.replaceAll('plugin-package-name-placeholder', projectName)
+
   updatedIndexTs = updatedIndexTs.replace(
     'export const myPlugin',
     `export const ${toCamelCase(projectName)}`,
   )
-  updatedIndexTs = updatedIndexTs.replace(
-    'export type MyPluginConfig',
-    `export type ${toPascalCase(projectName)}Config`,
-  )
+
+  updatedIndexTs = updatedIndexTs.replaceAll('MyPluginConfig', `${toPascalCase(projectName)}Config`)
 
   const updatedPayloadConfig = devPayloadConfig.replaceAll(
     'plugin-package-name-placeholder',
