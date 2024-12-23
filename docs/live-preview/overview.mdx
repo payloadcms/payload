@@ -88,10 +88,10 @@ const config = buildConfig({
       // highlight-start
       url: ({
         data,
-        documentInfo,
+        collectionConfig,
         locale
       }) => `${data.tenant.url}${ // Multi-tenant top-level domain
-        documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
+        collectionConfig.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
       }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
       collections: ['pages'],
     },
