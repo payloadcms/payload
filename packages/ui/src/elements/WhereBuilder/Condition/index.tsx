@@ -65,10 +65,6 @@ export const Condition: React.FC<Props> = (props) => {
     updateCondition,
   } = props
 
-  const options = useMemo(() => {
-    return fields.filter(({ field }) => !field.admin.disableListFilter)
-  }, [fields])
-
   const [internalField, setInternalField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldName === field.value),
   )
@@ -135,7 +131,7 @@ export const Condition: React.FC<Props> = (props) => {
                 setInternalOperatorOption(undefined)
                 setInternalQueryValue(undefined)
               }}
-              options={options}
+              options={fields}
               value={
                 fields.find((field) => internalField?.value === field.value) || {
                   value: internalField?.value,
