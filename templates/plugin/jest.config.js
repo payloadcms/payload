@@ -26,7 +26,6 @@ const esModules = [
 const customJestConfig = {
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   transformIgnorePatterns: [
-    `/node_modules/.pnpm/(?!(@payloadcms\/.*)@)/`,
     `/node_modules/(?!.pnpm)(?!(${esModules})/)`,
     `/node_modules/.pnpm/(?!(${esModules.replace(/\//g, '\\+')})@)`,
   ],

@@ -10,6 +10,7 @@ import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../typ
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
+import { configurePluginProject } from './configure-plugin-project.js'
 import { downloadTemplate } from './download-template.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -93,11 +94,17 @@ export async function createProject(args: {
   spinner.start('Checking latest Payload version...')
 
   await updatePackageJSON({ projectDir, projectName })
-  spinner.message('Configuring Payload...')
-  await configurePayloadConfig({
-    dbType: dbDetails?.type,
-    projectDirOrConfigPath: { projectDir },
-  })
+
+  if (template.type === 'plugin') {
+    spinner.message('Configuring Plugin...')
+    configurePluginProject({ projectDirPath: projectDir, projectName })
+  } else {
+    spinner.message('Configuring Payload...')
+    await configurePayloadConfig({
+      dbType: dbDetails?.type,
+      projectDirOrConfigPath: { projectDir },
+    })
+  }
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
   const lockPath = path.resolve(projectDir, 'pnpm-lock.yaml')

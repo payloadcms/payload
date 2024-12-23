@@ -1,3 +1,5 @@
+import type { NextServerOptions } from 'next/dist/server/next.js'
+
 import { createServer } from 'http'
 import next from 'next'
 import open from 'open'
@@ -6,14 +8,17 @@ import { fileURLToPath, parse } from 'url'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+const opts: NextServerOptions = {
+  dev: true,
+  dir: dirname,
+}
+
 // @ts-expect-error
-const app = next({ dev: true, dir: dirname })
+const app = next(opts)
 const handle = app.getRequestHandler()
 
 await app.prepare()
 
-// Open the admin if the -o flag is passed
 await open(`http://localhost:3000/admin`)
 
 const server = createServer((req, res) => {

@@ -29,7 +29,7 @@
     "build:types": "tsc --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "dev": "payload run ./dev/server.ts --o",
+    "dev": "payload run ./dev/server.ts",
     "dev:generate-importmap": "pnpm dev:payload generate:importmap",
     "dev:generate-types": "pnpm dev:payload generate:types",
     "dev:payload": "PAYLOAD_CONFIG_PATH=./dev/payload.config.ts payload",

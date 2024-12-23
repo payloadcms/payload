@@ -4,6 +4,8 @@
   "include":[
     "**/*.ts",
     "**/*.tsx",
+    "../src/**/*.ts",
+    "../src/**/*.tsx",
     "next.config.mjs",
     ".next/types/**/*.ts",
   ],
