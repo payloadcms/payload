@@ -19,23 +19,25 @@ const previousSchema: {
  * @returns {Promise<void>} - A promise that resolves once the schema push is complete.
  */
 export const pushDevSchema = async (adapter: DrizzleAdapter) => {
-  const localeCodes =
-    adapter.payload.config.localization && adapter.payload.config.localization.localeCodes
+  if (process.env.PAYLOAD_FORCE_DRIZZLE_PUSH !== 'true') {
+    const localeCodes =
+      adapter.payload.config.localization && adapter.payload.config.localization.localeCodes
 
-  try {
-    deepStrictEqual(previousSchema, {
-      localeCodes,
-      rawTables: adapter.rawTables,
-    })
+    try {
+      deepStrictEqual(previousSchema, {
+        localeCodes,
+        rawTables: adapter.rawTables,
+      })
 
-    if (adapter.logger) {
-      adapter.payload.logger.info('No changes detected in schema, skipping schema push.')
+      if (adapter.logger) {
+        adapter.payload.logger.info('No changes detected in schema, skipping schema push.')
+      }
+
+      return
+    } catch {
+      previousSchema.localeCodes = localeCodes
+      previousSchema.rawTables = adapter.rawTables
     }
-
-    return
-  } catch {
-    previousSchema.localeCodes = localeCodes
-    previousSchema.rawTables = adapter.rawTables
   }
 
   const { pushSchema } = adapter.requireDrizzleKit()
