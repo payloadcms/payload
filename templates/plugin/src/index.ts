@@ -11,33 +11,6 @@ export type MyPluginConfig = {
 export const myPlugin =
   (pluginOptions: MyPluginConfig) =>
   (config: Config): Config => {
-    if (pluginOptions.disabled) {
-      return config
-    }
-
-    if (!config.endpoints) {
-      config.endpoints = []
-    }
-
-    if (!config.admin) {
-      config.admin = {}
-    }
-
-    if (!config.admin.components) {
-      config.admin.components = {}
-    }
-
-    if (!config.admin.components.beforeDashboard) {
-      config.admin.components.beforeDashboard = []
-    }
-
-    config.admin.components.beforeDashboard.push(
-      `plugin-package-name-placeholder/client#BeforeDashboardClient`,
-    )
-    config.admin.components.beforeDashboard.push(
-      `plugin-package-name-placeholder/rsc#BeforeDashboardServer`,
-    )
-
     if (!config.collections) {
       config.collections = []
     }
@@ -70,6 +43,37 @@ export const myPlugin =
       }
     }
 
+    /**
+     * If the plugin is disabled, we still want to keep added collections/fields so the database schema is consistent which is important for migrations.
+     * If your plugin heavily modifies the database schema, you may want to remove this property.
+     */
+    if (pluginOptions.disabled) {
+      return config
+    }
+
+    if (!config.endpoints) {
+      config.endpoints = []
+    }
+
+    if (!config.admin) {
+      config.admin = {}
+    }
+
+    if (!config.admin.components) {
+      config.admin.components = {}
+    }
+
+    if (!config.admin.components.beforeDashboard) {
+      config.admin.components.beforeDashboard = []
+    }
+
+    config.admin.components.beforeDashboard.push(
+      `plugin-package-name-placeholder/client#BeforeDashboardClient`,
+    )
+    config.admin.components.beforeDashboard.push(
+      `plugin-package-name-placeholder/rsc#BeforeDashboardServer`,
+    )
+
     config.endpoints.push({
       handler: () => {
         return Response.json({ message: 'Hello from custom endpoint' })
@@ -81,6 +85,7 @@ export const myPlugin =
     const incomingOnInit = config.onInit
 
     config.onInit = async (payload) => {
+      // Ensure we are executing any existing onInit functions before running our own.
       if (incomingOnInit) {
         await incomingOnInit(payload)
       }
