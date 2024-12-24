@@ -9,7 +9,14 @@ const CustomDrawer = () => {
   return (
     <Drawer slug={customDrawerSlug}>
       <h1>Custom Drawer</h1>
-      <TextField name="alt" path="alt" />
+      <TextField
+        field={{
+          name: 'alt',
+          label: 'Alt',
+          required: true,
+        }}
+        path="alt"
+      />
     </Drawer>
   )
 }
