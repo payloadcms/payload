@@ -1,4 +1,4 @@
-import type { Access } from 'payload'
+import type { Access, PayloadRequest } from 'payload'
 
 import type { User } from '../../../payload-types'
 
@@ -6,7 +6,7 @@ import { isSuperAdmin } from '../../../access/isSuperAdmin'
 import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
 
 export const createAccess: Access<User> = (args) => {
-  const { req, data }: { req: any; data: User } = args
+  const { req, data }: { req: PayloadRequest; data?: User } = args
   if (!req.user) {
     return false
   }
@@ -35,7 +35,7 @@ export const createAccess: Access<User> = (args) => {
   }
 
   // allow only if the tenants are where this user is an admin.
-  return data.tenants?.every((tenant) =>
+  return !!data.tenants?.every((tenant) =>
     adminTenantAccessIDs.includes(
       typeof tenant.tenant === 'string' ? tenant.tenant : tenant.tenant.id,
     ),
