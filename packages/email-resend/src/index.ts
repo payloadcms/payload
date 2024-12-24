@@ -6,6 +6,11 @@ export type ResendAdapterArgs = {
   apiKey: string
   defaultFromAddress: string
   defaultFromName: string
+  /**
+   * Override all emails to be sent to this address.
+   * Useful for testing.
+   */
+  overrideRecipientAddress?: string
 }
 
 type ResendAdapter = EmailAdapter<ResendResponse>
@@ -29,9 +34,14 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
     defaultFromAddress,
     defaultFromName,
     sendEmail: async (message) => {
+      const modifiedMessage = {
+        ...message,
+        ...(args.overrideRecipientAddress ? { to: args.overrideRecipientAddress } : {}),
+      }
+
       // Map the Payload email options to Resend email options
       const sendEmailOptions = mapPayloadEmailToResendEmail(
-        message,
+        modifiedMessage,
         defaultFromAddress,
         defaultFromName,
       )
