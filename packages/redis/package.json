@@ -1,5 +1,5 @@
 {
-  "name": "@payloadcms/kv-redis",
+  "name": "@payloadcms/redis",
   "version": "3.6.0",
   "description": "Payload storage adapter for uploadthing",
   "homepage": "https://payloadcms.com",

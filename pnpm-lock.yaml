@@ -637,16 +637,6 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
-  packages/kv-redis:
-    dependencies:
-      ioredis:
-        specifier: ^5.4.1
-        version: 5.4.1
-    devDependencies:
-      payload:
-        specifier: workspace:*
-        version: link:../payload
-
   packages/live-preview:
     devDependencies:
       '@payloadcms/eslint-config':
@@ -1192,6 +1182,16 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/redis:
+    dependencies:
+      ioredis:
+        specifier: ^5.4.1
+        version: 5.4.1
+    devDependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/richtext-lexical:
     dependencies:
       '@faceless-ui/modal':
@@ -1653,9 +1653,6 @@ importers:
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
-      '@payloadcms/kv-redis':
-        specifier: workspace:*
-        version: link:../packages/kv-redis
       '@payloadcms/live-preview':
         specifier: workspace:*
         version: link:../packages/live-preview
@@ -1692,6 +1689,9 @@ importers:
       '@payloadcms/plugin-stripe':
         specifier: workspace:*
         version: link:../packages/plugin-stripe
+      '@payloadcms/redis':
+        specifier: workspace:*
+        version: link:../packages/redis
       '@payloadcms/richtext-lexical':
         specifier: workspace:*
         version: link:../packages/richtext-lexical

@@ -32,7 +32,7 @@
       "path": "./packages/live-preview-vue"
     },
     {
-      "path": "./packages/kv-redis"
+      "path": "./packages/redis"
     },
     {
       "path": "./packages/next"

@@ -39,6 +39,7 @@ import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
 import type { KVAdapterResult } from '../kv/index.js'
+import type { PubSubAdapterResult } from '../pubSub/index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -977,7 +978,7 @@ export type Config = {
   jobs?: JobsConfig
   /**
    * Pass in a KV adapter for use on this project.
-   * @default `DatabaseKVAdapter` from:
+   * @default `InMemoryDatabaseAdapter` from:
    * ```ts
    * import { createDatabaseKVAdapter } from 'payload'
    * createDatabaseKVAdapter()
@@ -990,7 +991,6 @@ export type Config = {
    * @default false // disable localization
    */
   localization?: false | LocalizationConfig
-
   /**
    * Logger options, logger options with a destination stream, or an instantiated logger instance.
    *
@@ -1047,6 +1047,7 @@ export type Config = {
    * @default 10
    */
   maxDepth?: number
+
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
   /**
@@ -1055,6 +1056,7 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
+  pubSub?: PubSubAdapterResult
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
     /** The route for the admin panel.

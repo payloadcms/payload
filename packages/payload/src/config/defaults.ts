@@ -2,7 +2,8 @@ import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
 
 import defaultAccess from '../auth/defaultAccess.js'
-import { databaseKVAdapter } from '../kv/adapters/DatabaseKVAdapter.js'
+import { inMemoryKVAdapter } from '../kv/InMemoryKVAdapter.js'
+import { inMemoryPubSubAdapter } from '../pubSub/InMemoryPubSubAdapter.js'
 
 export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
@@ -55,9 +56,10 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     deleteJobOnComplete: true,
     depth: 0,
   } as JobsConfig,
-  kv: databaseKVAdapter(),
+  kv: inMemoryKVAdapter(),
   localization: false,
   maxDepth: 10,
+  pubSub: inMemoryPubSubAdapter(),
   routes: {
     admin: '/admin',
     api: '/api',

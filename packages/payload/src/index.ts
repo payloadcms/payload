@@ -9,6 +9,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import WebSocket from 'ws'
 
+export type { FieldState } from './admin/forms/Form.js'
+
 import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
 import type { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword.js'
@@ -55,6 +57,7 @@ import type { Options as FindGlobalVersionsOptions } from './globals/operations/
 import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js'
 import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js'
 import type { KVAdapter } from './kv/index.js'
+import type { PubSubAdapter } from './pubSub/index.js'
 import type {
   ApplyDisableErrors,
   JsonObject,
@@ -79,8 +82,8 @@ import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
-export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
+export { default as executeAccess } from './auth/executeAccess.js'
 
 export interface GeneratedTypes {
   authUntyped: {
@@ -295,8 +298,8 @@ export class BasePayload {
   }
 
   db: DatabaseAdapter
-  decrypt = decrypt
 
+  decrypt = decrypt
   duplicate = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: DuplicateOptions<TSlug, TSelect>,
   ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
@@ -308,14 +311,14 @@ export class BasePayload {
 
   encrypt = encrypt
 
-  // TODO: re-implement or remove?
-  // errorHandler: ErrorHandler
-
   extensions: (args: {
     args: OperationArgs<any>
     req: graphQLRequest<unknown, unknown>
     result: ExecutionResult
   }) => Promise<any>
+
+  // TODO: re-implement or remove?
+  // errorHandler: ErrorHandler
 
   /**
    * @description Find documents with criteria
@@ -430,6 +433,8 @@ export class BasePayload {
     const { login } = localOperations.auth
     return login<TSlug>(this, options)
   }
+
+  pubSub: PubSubAdapter
 
   resetPassword = async <TSlug extends CollectionSlug>(
     options: ResetPasswordOptions<TSlug>,
@@ -625,6 +630,8 @@ export class BasePayload {
     this.db.payload = this
 
     this.kv = this.config.kv.init({ payload: this })
+
+    this.pubSub = this.config.pubSub.init({ payload: this })
 
     if (this.db?.init) {
       await this.db.init()
@@ -889,7 +896,6 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export { default as executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
@@ -906,7 +912,6 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
-
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -927,8 +932,8 @@ export type {
 } from './auth/types.js'
 
 export { generateImportMap } from './bin/generateImportMap/index.js'
-export type { ImportMap } from './bin/generateImportMap/index.js'
 
+export type { ImportMap } from './bin/generateImportMap/index.js'
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 
 export {
@@ -975,6 +980,7 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
+
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
@@ -996,8 +1002,8 @@ export {
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
 } from './config/client.js'
-
 export { defaults } from './config/defaults.js'
+
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1106,8 +1112,8 @@ export {
   ValidationErrorName,
 } from './errors/index.js'
 export type { ValidationFieldError } from './errors/index.js'
-
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
+
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export {
   createClientField,
@@ -1217,16 +1223,16 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-
 export { getDefaultValue } from './fields/getDefaultValue.js'
+
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
-
 export { validations } from './fields/validations.js'
+
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1258,7 +1264,6 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1278,17 +1283,17 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
+
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
-
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
+
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
-export * from './kv/adapters/DatabaseKVAdapter.js'
-export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
+export * from './kv/InMemoryKVAdapter.js'
 export type {
   CollapsedPreferences,
   DocumentPreferences,
@@ -1298,6 +1303,8 @@ export type {
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
+export type { PubSubAdapter, PubSubAdapterResult } from './pubSub/index.js'
+export { InMemoryPubSubAdapter, inMemoryPubSubAdapter } from './pubSub/InMemoryPubSubAdapter.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
   RunTaskFunction,

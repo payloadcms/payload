@@ -1,8 +1,8 @@
-import type { KVAdapterResult, Payload } from 'payload'
+import type { KVAdapterResult, Payload, PubSubAdapterResult } from 'payload'
 
-import { RedisKVAdapter, redisKVAdapter } from '@payloadcms/kv-redis'
+import { RedisKVAdapter, redisKVAdapter, redisPubSubAdapter } from '@payloadcms/redis'
 import path from 'path'
-import { inMemoryKVAdapter } from 'payload'
+import { inMemoryKVAdapter, inMemoryPubSubAdapter } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -12,7 +12,7 @@ let payload: Payload
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('KV Adapters', () => {
+describe('KV / PubSub Adapters', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
@@ -27,7 +27,7 @@ describe('KV Adapters', () => {
     }
   })
 
-  const testKVAdapter = async (adapter?: KVAdapterResult) => {
+  const testKVAdapter = async (adapter: KVAdapterResult) => {
     if (adapter) {
       payload.kv = adapter.init({ payload })
     }
@@ -71,10 +71,35 @@ describe('KV Adapters', () => {
     return true
   }
 
-  it('databaseKVAdapter', async () => {
-    // default
-    expect(await testKVAdapter()).toBeTruthy()
-  })
+  const testPubSubAdapter = async (adapter?: PubSubAdapterResult) => {
+    payload.pubSub = adapter.init({ payload })
+
+    const channel = 'my-channel'
+
+    let receivedMessage: null | string = null
+
+    // Subscribe to the channel
+    await payload.pubSub.subscribe(channel, (message) => {
+      receivedMessage = message
+    })
+
+    // Publish a message to the channel
+    await payload.pubSub.publish(channel, 'Hello, world!')
+
+    let retries = 0
+    while (!receivedMessage) {
+      if (retries++ > 10) {
+        break
+      }
+      await new Promise((resolve) => setTimeout(resolve, 30))
+    }
+
+    expect(receivedMessage).toBe('Hello, world!')
+
+    await payload.pubSub.unsubscribe(channel)
+
+    return true
+  }
 
   it('inMemoryKVAdapter', async () => {
     expect(await testKVAdapter(inMemoryKVAdapter())).toBeTruthy()
@@ -82,5 +107,13 @@ describe('KV Adapters', () => {
 
   it('redisKVAdapter', async () => {
     expect(await testKVAdapter(redisKVAdapter())).toBeTruthy()
+  })
+
+  it('inMemoryPubSubAdapter', async () => {
+    expect(await testPubSubAdapter(inMemoryPubSubAdapter())).toBeTruthy()
+  })
+
+  it('redisPubSubAdapter', async () => {
+    expect(await testPubSubAdapter(redisPubSubAdapter())).toBeTruthy()
   })
 })
