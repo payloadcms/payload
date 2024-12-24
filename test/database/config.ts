@@ -464,6 +464,16 @@ export default buildConfigWithDefaults({
       ],
       versions: true,
     },
+    {
+      slug: 'custom-column-names',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          dbColumnName: 'custom_title',
+        },
+      ],
+    },
   ],
   globals: [
     {
