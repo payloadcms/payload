@@ -34,8 +34,8 @@ export const i18n: Partial<GenericLanguages> = {
     increaseLabel: 'Aumentar Sangría',
   },
   et: {
-    decreaseLabel: 'Vähenda taandatust',
-    increaseLabel: 'Suurenda taandatust',
+    decreaseLabel: 'Taande vähendamine',
+    increaseLabel: 'Taande suurendamine',
   },
   fa: {
     decreaseLabel: 'کاهش تورفتگی',
