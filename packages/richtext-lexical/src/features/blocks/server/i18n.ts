@@ -73,6 +73,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Bloques',
   },
+  et: {
+    inlineBlocks: {
+      create: 'Loo {{silt}}',
+      edit: 'Muuda {{silt}}',
+      label: 'Sisseehitatud plokid',
+      remove: 'Eemalda {{silt}}',
+    },
+    label: undefined,
+  },
   fa: {
     inlineBlocks: {
       create: 'ایجاد {{برچسب}}',
@@ -234,6 +243,15 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Odstráňte {{label}}',
     },
     label: 'Bloky',
+  },
+  sl: {
+    inlineBlocks: {
+      create: undefined,
+      edit: undefined,
+      label: undefined,
+      remove: undefined,
+    },
+    label: undefined,
   },
   sv: {
     inlineBlocks: {

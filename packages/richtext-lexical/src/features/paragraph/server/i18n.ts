@@ -33,6 +33,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Párrafo',
     label2: 'Texto normal',
   },
+  et: {
+    label: 'Paragrahv',
+    label2: 'Tavaline tekst',
+  },
   fa: {
     label: 'پاراگراف',
     label2: 'متن عادی',
@@ -104,6 +108,10 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Odsek',
     label2: 'Normálny text',
+  },
+  sl: {
+    label: undefined,
+    label2: undefined,
   },
   sv: {
     label: 'Stycke',

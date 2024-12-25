@@ -49,6 +49,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Listas',
     toolbarItemsActive: '{{count}} activo',
   },
+  et: {
+    placeholder: "Alusta kirjutamist või vajuta '/' käskude jaoks...",
+    slashMenuBasicGroupLabel: 'Põhiline',
+    slashMenuListGroupLabel: 'Loendid',
+    toolbarItemsActive: '{{count}} aktiivne',
+  },
   fa: {
     placeholder: "شروع به تایپ کنید، یا برای دستورات '/' را فشار دهید ...",
     slashMenuBasicGroupLabel: 'پایه',
@@ -156,6 +162,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuBasicGroupLabel: 'Základný',
     slashMenuListGroupLabel: 'Zoznamy',
     toolbarItemsActive: '{{count}} aktívne',
+  },
+  sl: {
+    placeholder: undefined,
+    slashMenuBasicGroupLabel: undefined,
+    slashMenuListGroupLabel: undefined,
+    toolbarItemsActive: undefined,
   },
   sv: {
     placeholder: "Börja skriva, eller tryck på '/' för kommandon...",

@@ -33,6 +33,10 @@ export const i18n: Partial<GenericLanguages> = {
     decreaseLabel: 'Disminuir Sangría',
     increaseLabel: 'Aumentar Sangría',
   },
+  et: {
+    decreaseLabel: 'Vähenda taandatust',
+    increaseLabel: 'Suurenda taandatust',
+  },
   fa: {
     decreaseLabel: 'کاهش تورفتگی',
     increaseLabel: 'افزایش تورفتگی',
@@ -104,6 +108,10 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     decreaseLabel: 'Znížiť odsadenie',
     increaseLabel: 'Zväčšiť odsadenie',
+  },
+  sl: {
+    decreaseLabel: undefined,
+    increaseLabel: undefined,
   },
   sv: {
     decreaseLabel: 'Minska indrag',
