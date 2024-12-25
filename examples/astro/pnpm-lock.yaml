@@ -80,10 +80,6 @@ importers:
       payload-app:
         specifier: workspace:*
         version: link:../payload
-    devDependencies:
-      vite:
-        specifier: ^6.0.5
-        version: 6.0.5(@types/node@22.10.2)(jiti@2.4.2)(sass@1.77.4)(tsx@4.19.2)(yaml@2.6.1)
 
 packages:
 
