@@ -75,12 +75,12 @@ export const i18n: Partial<GenericLanguages> = {
   },
   et: {
     inlineBlocks: {
-      create: 'Loo {{silt}}',
-      edit: 'Muuda {{silt}}',
+      create: 'Loo {{label}}',
+      edit: 'Muuda {{label}}',
       label: 'Sisseehitatud plokid',
-      remove: 'Eemalda {{silt}}',
+      remove: 'Eemalda {{label}}',
     },
-    label: undefined,
+    label: 'Plokk',
   },
   fa: {
     inlineBlocks: {

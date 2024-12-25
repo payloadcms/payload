@@ -51,9 +51,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   et: {
     alignCenterLabel: 'Keskjoondus',
-    alignJustifyLabel: 'Joondus õigustama',
-    alignLeftLabel: 'Joondus vasakule',
-    alignRightLabel: 'Joondus paremale',
+    alignJustifyLabel: 'Rööpjoondus',
+    alignLeftLabel: 'Vasakjoondus',
+    alignRightLabel: 'Paremjoondus',
   },
   fa: {
     alignCenterLabel: 'تراز در مرکز',
