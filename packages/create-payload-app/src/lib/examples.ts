@@ -3,7 +3,7 @@ import type { ProjectExample } from '../types.js'
 import { error, info } from '../utils/log.js'
 
 export async function getExamples({ branch }: { branch: string }): Promise<ProjectExample[]> {
-  const url = `https://api.github.com/repos/payloadcms/payload/contents/examples?ref=${branch || 'latest'}`
+  const url = `https://api.github.com/repos/payloadcms/payload/contents/examples?ref=${branch}`
 
   const response = await fetch(url)
 
