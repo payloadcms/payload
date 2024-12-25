@@ -7,8 +7,11 @@ export interface Args extends arg.Spec {
   '--db-connection-string': StringConstructor
   '--debug': BooleanConstructor
   '--dry-run': BooleanConstructor
+  '--example': StringConstructor
+  '--example-branch': StringConstructor
   '--help': BooleanConstructor
   '--init-next': BooleanConstructor
+  '--local-example': StringConstructor
   '--local-template': StringConstructor
   '--name': StringConstructor
   '--no-deps': BooleanConstructor
@@ -23,6 +26,7 @@ export interface Args extends arg.Spec {
 
   // Aliases
 
+  '-e': string
   '-h': string
   '-n': string
   '-t': string
@@ -31,6 +35,11 @@ export interface Args extends arg.Spec {
 export type CliArgs = arg.Result<Args>
 
 export type ProjectTemplate = GitTemplate | PluginTemplate
+
+export type ProjectExample = {
+  name: string
+  url: string
+}
 
 /**
  * Template that is cloned verbatim from a git repo
