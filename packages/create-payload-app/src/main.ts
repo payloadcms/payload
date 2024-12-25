@@ -67,8 +67,8 @@ export class Main {
         '--dry-run': Boolean,
 
         // Aliases
-        '--e': '--example',
         '-d': '--db',
+        '-e': '--example',
         '-h': '--help',
         '-n': '--name',
         '-t': '--template',
