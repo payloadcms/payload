@@ -130,7 +130,9 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }
         header={
           <div className={`${baseClass}__row-header`}>
-            {isLoading ? null : (
+            {isLoading ? (
+              <ShimmerEffect height="1rem" width="8rem" />
+            ) : (
               <RowLabel
                 CustomComponent={CustomRowLabel}
                 label={fallbackLabel}
@@ -141,7 +143,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
-        isCollapsed={row.collapsed}
+        isCollapsed={row.collapsed ?? true}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         {isLoading ? (
