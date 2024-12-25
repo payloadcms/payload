@@ -9,6 +9,7 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@astrojs/node": "^9.0.0",
     "astro": "^5.1.1",
     "payload": "3.11.0",
     "payload-app": "workspace:*"

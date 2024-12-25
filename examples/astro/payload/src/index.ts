@@ -1,2 +1,2 @@
-export { resolveConfig } from './getConfig'
+export { default as config } from './payload.config'
 export * from './payload-types'

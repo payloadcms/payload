@@ -1,6 +1,7 @@
 import { defineAction } from 'astro:actions'
 import { z } from 'astro:schema'
-import { getPayload } from '../utils/getPayload'
+import { getPayload } from 'payload'
+import { config } from 'payload-app'
 
 export const server = {
   addPost: defineAction({
@@ -9,7 +10,7 @@ export const server = {
     }),
     accept: 'json',
     handler: async (input) => {
-      const payload = await getPayload()
+      const payload = await getPayload({ config })
       return payload.create({ collection: 'posts', data: input })
     },
   }),
@@ -19,7 +20,7 @@ export const server = {
     }),
     accept: 'json',
     handler: async (input) => {
-      const payload = await getPayload()
+      const payload = await getPayload({ config })
       return payload.delete({ collection: 'posts', id: input.id })
     },
   }),
