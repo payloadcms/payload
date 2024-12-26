@@ -133,21 +133,21 @@ const DocumentInfo: React.FC<
   }
 
   const unlockDocument = useCallback(
-    async (docId: number | string, slug: string) => {
+    async (docID: number | string, slug: string) => {
       try {
         const isGlobal = slug === globalSlug
 
         const query = isGlobal
           ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docId}&where[document.relationTo][equals]=${slug}`
+          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
 
         const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
 
         const { docs } = await request.json()
 
         if (docs.length > 0) {
-          const lockId = docs[0].id
-          await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
+          const lockID = docs[0].id
+          await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
             headers: {
               'Content-Type': 'application/json',
             },
@@ -163,13 +163,13 @@ const DocumentInfo: React.FC<
   )
 
   const updateDocumentEditor = useCallback(
-    async (docId: number | string, slug: string, user: ClientUser | number | string) => {
+    async (docID: number | string, slug: string, user: ClientUser | number | string) => {
       try {
         const isGlobal = slug === globalSlug
 
         const query = isGlobal
           ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docId}&where[document.relationTo][equals]=${slug}`
+          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
 
         // Check if the document is already locked
         const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
@@ -177,7 +177,7 @@ const DocumentInfo: React.FC<
         const { docs } = await request.json()
 
         if (docs.length > 0) {
-          const lockId = docs[0].id
+          const lockID = docs[0].id
 
           const userData =
             typeof user === 'object'
@@ -185,7 +185,7 @@ const DocumentInfo: React.FC<
               : { relationTo: 'users', value: user }
 
           // Send a patch request to update the _lastEdited info
-          await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
+          await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
             body: JSON.stringify({
               user: userData,
             }),

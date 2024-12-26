@@ -21,6 +21,7 @@ import {
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
+import { beforeValidateSlug } from './collectionSlugs.js'
 import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
 
@@ -524,6 +525,30 @@ describe('Hooks', () => {
       const body = await response.json()
       expect(response.status).toEqual(418)
       expect(body).toEqual({ errors: [{ message: "I'm a teapot" }] })
+    })
+  })
+
+  describe('beforeValidate', () => {
+    it('should have correct arguments', async () => {
+      const doc = await payload.create({
+        collection: beforeValidateSlug,
+        data: {
+          selection: 'b',
+        },
+      })
+
+      const updateResult = await payload.update({
+        id: doc.id,
+        collection: beforeValidateSlug,
+        data: {
+          selection: 'a',
+        },
+        context: {
+          beforeValidateTest: true,
+        },
+      })
+
+      expect(updateResult).toBeDefined()
     })
   })
 })

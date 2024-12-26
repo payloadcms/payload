@@ -14,7 +14,6 @@ import {
   useEditDepth,
   useField,
   useTranslation,
-  withCondition,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { isHotkey } from 'is-hotkey'
@@ -314,7 +313,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
 
   return (
     <div className={classes} style={styles}>
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} path={path} required={required} />}
       <div className={`${baseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
@@ -459,4 +458,4 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
   )
 }
 
-export const RichText = withCondition(RichTextField)
+export const RichText = RichTextField
