@@ -248,6 +248,12 @@ describe('auth', () => {
       await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
         'Unauthorized, this user does not have access to the admin panel.',
       )
+
+      await page.goto(url.logout)
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
     })
   })
 
