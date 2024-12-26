@@ -12,9 +12,10 @@ type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
   const { body, headers, method, payload } = req
 
-  if (method && ['PATCH', 'POST', 'PUT'].includes(method.toUpperCase()) && body) {
+  const bodyByteSize = parseInt(req.headers.get('Content-Length') || '0', 10)
+
+  if (method && ['PATCH', 'POST', 'PUT'].includes(method.toUpperCase()) && body && bodyByteSize) {
     const [contentType] = (headers.get('Content-Type') || '').split(';')
-    const bodyByteSize = parseInt(req.headers.get('Content-Length') || '0', 10)
 
     if (contentType === 'application/json') {
       let data = {}

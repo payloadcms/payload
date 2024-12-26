@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import { APIError, type CollectionConfig, type Endpoint } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -264,11 +265,21 @@ export default buildConfigWithDefaults({
     {
       slug: endpointsSlug,
       fields: [],
-      endpoints: methods.map((method) => ({
-        method,
-        handler: () => new Response(`${method} response`),
-        path: `/${method}-test`,
-      })),
+      endpoints: [
+        ...methods.map((method) => ({
+          method,
+          handler: () => new Response(`${method} response`),
+          path: `/${method}-test`,
+        })),
+        {
+          path: '/custom',
+          method: 'post',
+          handler: async (req) => {
+            await addDataAndFileToRequest(req)
+            return new Response('success')
+          },
+        },
+      ],
     },
   ],
   endpoints: [
