@@ -13,7 +13,6 @@ const CustomDrawer = () => {
         field={{
           name: 'alt',
           label: 'Alt',
-          required: true,
         }}
         path="alt"
       />
