@@ -21,7 +21,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { apiKeysSlug, slug } from './shared.js'
+import { apiKeysSlug, publicUsersSlug, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -107,7 +107,7 @@ describe('auth', () => {
     })
 
     await payload.create({
-      collection: 'api-keys',
+      collection: apiKeysSlug,
       data: {
         apiKey: uuid(),
         enableAPIKey: true,
@@ -115,10 +115,19 @@ describe('auth', () => {
     })
 
     await payload.create({
-      collection: 'api-keys',
+      collection: apiKeysSlug,
       data: {
         apiKey: uuid(),
         enableAPIKey: true,
+      },
+    })
+
+    await payload.create({
+      collection: publicUsersSlug,
+      data: {
+        email: 'public-user@payloadcms.com',
+        password: devUser.password,
+        _verified: true,
       },
     })
 
@@ -195,6 +204,31 @@ describe('auth', () => {
       await saveDocAndAssert(page)
       await expect(page.locator('#users-api-result')).toHaveText('Goodbye, world!')
       await expect(page.locator('#use-auth-result')).toHaveText('Goodbye, world!')
+    })
+  })
+
+  describe('public users', () => {
+    beforeAll(async () => {
+      await page.goto(url.logout)
+
+      const user = await payload.login({
+        collection: publicUsersSlug,
+        data: {
+          email: 'public-user@payloadcms.com',
+          password: devUser.password,
+        },
+      })
+      console.log('publicUsersSlug', user)
+    })
+
+    test('should not be able to access admin', async () => {
+      await page.goto(url.admin)
+      await expect(page.locator('h1')).toHaveText('Unauthorized')
+    })
+
+    test('should be able to access login view', async () => {
+      await page.goto(url.login)
+      await expect(page.locator('h1')).toHaveText('Unauthorized')
     })
   })
 

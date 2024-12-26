@@ -28,8 +28,12 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
     routes: { admin },
   } = config
 
+  // && permissions.canAccessAdmin
+
   if (user) {
     redirect((searchParams.redirect as string) || admin)
+  } else if (user && !permissions.canAccessAdmin) {
+    // Do something else, like present a message with a logout button
   }
 
   const collectionConfig = collections.find(({ slug }) => slug === userSlug)
