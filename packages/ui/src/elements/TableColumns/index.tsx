@@ -280,8 +280,10 @@ export const TableColumnsProvider: React.FC<Props> = ({
   }, [columnState])
 
   useEffect(() => {
+    const abortTableState = abortTableStateRef.current
+
     return () => {
-      abortAndIgnore(abortTableStateRef.current)
+      abortAndIgnore(abortTableState)
     }
   }, [])
 

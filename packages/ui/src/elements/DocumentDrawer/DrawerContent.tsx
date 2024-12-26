@@ -153,8 +153,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   // Cleanup any pending requests when the component unmounts
   useEffect(() => {
+    const abortGetDocumentView = abortGetDocumentViewRef.current
+
     return () => {
-      abortAndIgnore(abortGetDocumentViewRef.current)
+      abortAndIgnore(abortGetDocumentView)
     }
   }, [])
 

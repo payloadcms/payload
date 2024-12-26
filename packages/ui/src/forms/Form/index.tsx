@@ -575,8 +575,10 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   useEffect(() => {
+    const abortOnChange = abortResetFormRef.current
+
     return () => {
-      abortAndIgnore(abortResetFormRef.current)
+      abortAndIgnore(abortOnChange)
     }
   }, [])
 

@@ -418,9 +418,12 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   ])
 
   useEffect(() => {
+    const abortOnChange = abortOnChangeRef.current
+    const abortOnSave = abortOnSaveRef.current
+
     return () => {
-      abortAndIgnore(abortOnChangeRef.current)
-      abortAndIgnore(abortOnSaveRef.current)
+      abortAndIgnore(abortOnChange)
+      abortAndIgnore(abortOnSave)
     }
   }, [])
 

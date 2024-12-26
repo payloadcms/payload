@@ -133,8 +133,10 @@ export function EditForm({ submitted }: EditFormProps) {
   )
 
   useEffect(() => {
+    const abortOnChange = abortOnChangeRef.current
+
     return () => {
-      abortAndIgnore(abortOnChangeRef.current)
+      abortAndIgnore(abortOnChange)
     }
   }, [])
 

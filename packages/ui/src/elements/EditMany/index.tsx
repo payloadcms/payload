@@ -213,8 +213,10 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   )
 
   useEffect(() => {
+    const abortFormState = abortFormStateRef.current
+
     return () => {
-      abortAndIgnore(abortFormStateRef.current)
+      abortAndIgnore(abortFormState)
     }
   }, [])
 
