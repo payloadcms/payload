@@ -48,10 +48,17 @@ export function getLocalizedPaths({
       let matchedField: FlattenedField
 
       if (lastIncompletePath?.field?.type === 'blocks') {
-        for (const block of lastIncompletePath.field.blocks) {
-          matchedField = block.flattenedFields.find((field) => field.name === segment)
-          if (matchedField) {
-            break
+        if (segment === 'blockType') {
+          matchedField = {
+            name: 'blockType',
+            type: 'text',
+          }
+        } else {
+          for (const block of lastIncompletePath.field.blocks) {
+            matchedField = block.flattenedFields.find((field) => field.name === segment)
+            if (matchedField) {
+              break
+            }
           }
         }
       } else {
