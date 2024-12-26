@@ -120,11 +120,6 @@ const PreviewView: React.FC<Props> = ({
 
   const docConfig = collectionConfig || globalConfig
 
-  const autosaveEnabled = Boolean(
-    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
-  )
-
   const entitySlug = collectionConfig?.slug || globalConfig?.slug
 
   const depth = useEditDepth()
@@ -136,6 +131,11 @@ const PreviewView: React.FC<Props> = ({
   const lockDuration =
     typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
   const lockDurationInMilliseconds = lockDuration * 1000
+
+  const autosaveEnabled = Boolean(
+    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
+      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
+  )
 
   const preventLeaveWithoutSaving =
     typeof disableLeaveWithoutSaving !== 'undefined' ? !disableLeaveWithoutSaving : !autosaveEnabled

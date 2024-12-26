@@ -112,11 +112,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
   const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
 
-  const autosaveEnabled = Boolean(
-    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
-  )
-
   const depth = useEditDepth()
 
   const router = useRouter()
@@ -146,6 +141,11 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const lockDuration =
     typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
   const lockDurationInMilliseconds = lockDuration * 1000
+
+  const autosaveEnabled = Boolean(
+    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
+      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
+  )
 
   const preventLeaveWithoutSaving =
     typeof disableLeaveWithoutSaving !== 'undefined' ? !disableLeaveWithoutSaving : !autosaveEnabled

@@ -28,7 +28,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const newRow: Row = {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
         blockType: blockType || undefined,
-        collapsed: true,
+        collapsed: false,
         isLoading: true,
       }
 

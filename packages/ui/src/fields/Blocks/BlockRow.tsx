@@ -160,7 +160,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             )
           )
         }
-        isCollapsed={row.collapsed ?? true}
+        isCollapsed={row.collapsed}
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
