@@ -117,6 +117,7 @@ export const skTranslations: DefaultTranslationsObject = {
       'Chyba pri reindexácii kolekcie {{collection}}. Operácia bola prerušená.',
     unableToUpdateCount: 'Nie je možné aktualizovať {{count}} z {{total}} {{label}}.',
     unauthorized: 'Neautorizováno, pro zadání tohoto požadavku musíte být přihlášeni.',
+    unauthorizedAdmin: undefined,
     unknown: 'Došlo k neznámej chybe.',
     unPublishingDocument: 'Pri zrušení publikovania tohto dokumentu došlo k chybe.',
     unspecific: 'Došlo k chybe.',

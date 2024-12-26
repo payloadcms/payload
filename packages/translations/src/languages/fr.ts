@@ -119,6 +119,7 @@ export const frTranslations: DefaultTranslationsObject = {
       'Erreur lors de la réindexation de la collection {{collection}}. Opération annulée.',
     unableToUpdateCount: 'Impossible de mettre à jour {{count}} sur {{total}} {{label}}.',
     unauthorized: 'Non autorisé, vous devez être connecté pour effectuer cette demande.',
+    unauthorizedAdmin: undefined,
     unknown: 'Une erreur inconnue s’est produite.',
     unPublishingDocument:
       'Un problème est survenu lors de l’annulation de la publication de ce document.',

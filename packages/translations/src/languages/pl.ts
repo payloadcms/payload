@@ -116,6 +116,7 @@ export const plTranslations: DefaultTranslationsObject = {
       'Błąd podczas ponownego indeksowania kolekcji {{collection}}. Operacja została przerwana.',
     unableToUpdateCount: 'Nie można zaktualizować {{count}} z {{total}} {{label}}.',
     unauthorized: 'Brak dostępu, musisz być zalogowany.',
+    unauthorizedAdmin: undefined,
     unknown: 'Wystąpił nieznany błąd.',
     unPublishingDocument: 'Wystąpił problem podczas cofania publikacji tego dokumentu.',
     unspecific: 'Wystąpił błąd',

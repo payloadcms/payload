@@ -1,9 +1,10 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 import type { SanitizedConfig } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -83,6 +84,7 @@ const createFirstUser = async ({
 
 describe('auth', () => {
   let page: Page
+  let context: BrowserContext
   let url: AdminUrlUtil
   let serverURL: string
   let apiURL: string
@@ -93,7 +95,7 @@ describe('auth', () => {
     apiURL = `${serverURL}/api`
     url = new AdminUrlUtil(serverURL, slug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -207,8 +209,17 @@ describe('auth', () => {
     })
   })
 
-  describe('public users', () => {
-    beforeAll(async () => {
+  describe('unauthorized users', () => {
+    test('unauthenticated users should not have access to the admin panel', async () => {
+      await page.goto(url.logout)
+      await page.goto(url.admin)
+
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, you must be logged in to make this request.',
+      )
+    })
+
+    test('public users should not have access to access admin', async () => {
       await page.goto(url.logout)
 
       const user = await payload.login({
@@ -218,17 +229,25 @@ describe('auth', () => {
           password: devUser.password,
         },
       })
-      console.log('publicUsersSlug', user)
-    })
 
-    test('should not be able to access admin', async () => {
+      await context.addCookies([
+        {
+          name: 'payload-token',
+          value: user.token,
+          domain: 'localhost',
+          path: '/',
+          httpOnly: true,
+          secure: true,
+        },
+      ])
+
+      await page.reload()
+
       await page.goto(url.admin)
-      await expect(page.locator('h1')).toHaveText('Unauthorized')
-    })
 
-    test('should be able to access login view', async () => {
-      await page.goto(url.login)
-      await expect(page.locator('h1')).toHaveText('Unauthorized')
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, this user does not have access to the admin panel.',
+      )
     })
   })
 

@@ -117,6 +117,7 @@ export const trTranslations: DefaultTranslationsObject = {
       '{{collection}} koleksiyonunun yeniden indekslenmesinde hata oluştu. İşlem durduruldu.',
     unableToUpdateCount: '{{total}} {{label}} içinden {{count}} güncellenemiyor.',
     unauthorized: 'Bu işlemi gerçekleştirmek için lütfen giriş yapın.',
+    unauthorizedAdmin: undefined,
     unknown: 'Bilinmeyen bir hata oluştu.',
     unPublishingDocument: 'Geçerli döküman yayından kaldırılırken bir sorun oluştu.',
     unspecific: 'Bir hata oluştu.',

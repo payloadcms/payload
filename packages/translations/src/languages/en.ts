@@ -116,6 +116,7 @@ export const enTranslations = {
     unableToReindexCollection: 'Error reindexing collection {{collection}}. Operation aborted.',
     unableToUpdateCount: 'Unable to update {{count}} out of {{total}} {{label}}.',
     unauthorized: 'Unauthorized, you must be logged in to make this request.',
+    unauthorizedAdmin: 'Unauthorized, this user does not have access to the admin panel.',
     unknown: 'An unknown error has occurred.',
     unPublishingDocument: 'There was a problem while un-publishing this document.',
     unspecific: 'An error has occurred.',
