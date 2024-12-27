@@ -714,7 +714,7 @@ describe('admin2', () => {
           .click()
 
         await expect(tableItems).toHaveCount(25)
-        await expect(page.locator('.per-page')).toContainText('Per Page: 25')
+        await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 25')
         await page.locator('.paginator button').nth(1).click()
         await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
         await expect(tableItems).toHaveCount(1)

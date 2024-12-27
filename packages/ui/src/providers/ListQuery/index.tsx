@@ -4,7 +4,14 @@ import type { ListQuery, PaginatedDocs, Sort, Where } from 'payload'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+} from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
 
@@ -45,6 +52,20 @@ const Context = createContext({} as ListQueryContext)
 
 export const useListQuery = (): ListQueryContext => useContext(Context)
 
+type ListQueryAction = { query: ListQuery; type: 'RESET' } | { query: ListQuery; type: 'UPDATE' }
+
+const queryReducer = (state: ListQuery, action: ListQueryAction): ListQuery => {
+  switch (action.type) {
+    case 'RESET':
+      return action.query
+    case 'UPDATE':
+      return {
+        ...state,
+        ...action.query,
+      }
+  }
+}
+
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
   collectionSlug,
@@ -63,7 +84,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const { onQueryChange } = useListDrawerContext()
 
-  const [currentQuery, setCurrentQuery] = useState(() => {
+  const [currentQuery, dispatchQuery] = useReducer(queryReducer, {}, () => {
     if (modifySearchParams) {
       return searchParams
     } else {
@@ -73,16 +94,16 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   useEffect(() => {
     if (modifySearchParams) {
-      setCurrentQuery(searchParams)
+      dispatchQuery({ type: 'RESET', query: searchParams })
     }
   }, [searchParams, modifySearchParams])
 
   const refineListData = useCallback(
     async (query: ListQuery) => {
-      let pageQuery = 'page' in query ? query.page : currentQuery?.page
+      let page = 'page' in query ? query.page : currentQuery?.page
 
       if ('where' in query || 'search' in query) {
-        pageQuery = '1'
+        page = '1'
       }
 
       const updatedPreferences: Record<string, unknown> = {}
@@ -103,14 +124,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
 
       const newQuery: ListQuery = {
-        limit:
-          'limit' in query
-            ? query.limit
-            : ((currentQuery?.limit as string) ?? String(defaultLimit)),
-        page: pageQuery as string,
-        search: 'search' in query ? query.search : (currentQuery?.search as string),
+        limit: 'limit' in query ? query.limit : (currentQuery?.limit ?? String(defaultLimit)),
+        page,
+        search: 'search' in query ? query.search : currentQuery?.search,
         sort: 'sort' in query ? query.sort : ((currentQuery?.sort as string) ?? defaultSort),
-        where: 'where' in query ? query.where : (currentQuery?.where as Where),
+        where: 'where' in query ? query.where : currentQuery?.where,
       }
 
       if (modifySearchParams) {
@@ -122,6 +140,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         const onChangeFn = onQueryChange || onQueryChangeFromProps
         onChangeFn(newQuery)
       }
+
+      dispatchQuery({ type: 'RESET', query: newQuery })
     },
     [
       currentQuery?.page,
@@ -190,9 +210,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         shouldUpdateQueryString = true
       }
 
-      setCurrentQuery(currentQuery)
-
       if (shouldUpdateQueryString) {
+        dispatchQuery({ type: 'RESET', query: currentQuery })
         router.replace(`?${qs.stringify(currentQuery)}`)
       }
     }
