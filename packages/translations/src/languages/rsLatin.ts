@@ -447,6 +447,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Prethodno objavljeno',
     problemRestoringVersion: 'Nastao je problem pri vraćanju ove verzije',
     publish: 'Objaviti',
+    publishAllLocales: 'Objavi sve lokalne postavke',
     publishChanges: 'Objavljivanje',
     published: 'Objavljeno',
     publishIn: 'Objavite na {{locale}}',
