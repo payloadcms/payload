@@ -22,7 +22,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { apiKeysSlug, publicUsersSlug, slug } from './shared.js'
+import { apiKeysSlug, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -124,15 +124,6 @@ describe('auth', () => {
       },
     })
 
-    await payload.create({
-      collection: publicUsersSlug,
-      data: {
-        email: 'public-user@payloadcms.com',
-        password: devUser.password,
-        _verified: true,
-      },
-    })
-
     await createFirstUser({ page, serverURL })
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -206,54 +197,6 @@ describe('auth', () => {
       await saveDocAndAssert(page)
       await expect(page.locator('#users-api-result')).toHaveText('Goodbye, world!')
       await expect(page.locator('#use-auth-result')).toHaveText('Goodbye, world!')
-    })
-  })
-
-  describe('unauthorized users', () => {
-    test('unauthenticated users should not have access to the admin panel', async () => {
-      await page.goto(url.logout)
-      await page.goto(url.admin)
-
-      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
-        'Unauthorized, you must be logged in to make this request.',
-      )
-    })
-
-    test('public users should not have access to access admin', async () => {
-      await page.goto(url.logout)
-
-      const user = await payload.login({
-        collection: publicUsersSlug,
-        data: {
-          email: 'public-user@payloadcms.com',
-          password: devUser.password,
-        },
-      })
-
-      await context.addCookies([
-        {
-          name: 'payload-token',
-          value: user.token,
-          domain: 'localhost',
-          path: '/',
-          httpOnly: true,
-          secure: true,
-        },
-      ])
-
-      await page.reload()
-
-      await page.goto(url.admin)
-
-      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
-        'Unauthorized, this user does not have access to the admin panel.',
-      )
-
-      await page.goto(url.logout)
-
-      await expect(page.locator('.payload-toast-container')).toContainText(
-        'You have been logged out successfully.',
-      )
     })
   })
 

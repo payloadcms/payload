@@ -21,9 +21,11 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
-  noAdminAccessEmail,
+  nonAdminEmail,
   nonAdminUserEmail,
   nonAdminUserSlug,
+  publicUserEmail,
+  publicUsersSlug,
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
@@ -80,7 +82,7 @@ export default buildConfigWithDefaults({
       access: {
         // admin:  () => true,
         admin: async ({ req }) => {
-          if (req.user?.email === noAdminAccessEmail) {
+          if (req.user?.email === nonAdminEmail) {
             return false
           }
 
@@ -109,7 +111,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: nonAdminUserSlug,
+      slug: publicUsersSlug,
       auth: true,
       fields: [],
     },
@@ -617,15 +619,15 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: 'users',
       data: {
-        email: noAdminAccessEmail,
+        email: nonAdminEmail,
         password: 'test',
       },
     })
 
     await payload.create({
-      collection: nonAdminUserSlug,
+      collection: publicUsersSlug,
       data: {
-        email: nonAdminUserEmail,
+        email: publicUserEmail,
         password: 'test',
       },
     })
