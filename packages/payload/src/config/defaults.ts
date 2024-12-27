@@ -55,6 +55,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     depth: 0,
   } as JobsConfig,
   localization: false,
+  maxCallDepth: 30,
   maxDepth: 10,
   routes: {
     admin: '/admin',

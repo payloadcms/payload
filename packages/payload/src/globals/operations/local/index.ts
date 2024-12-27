@@ -1,3 +1,4 @@
+import { enforceCallDepth } from '../../../utilities/enforceCallDepth.js'
 import countGlobalVersions from './countGlobalVersions.js'
 import findOne from './findOne.js'
 import findVersionByID from './findVersionByID.js'
@@ -5,7 +6,7 @@ import findVersions from './findVersions.js'
 import restoreVersion from './restoreVersion.js'
 import update from './update.js'
 
-export default {
+const local = {
   countGlobalVersions,
   findOne,
   findVersionByID,
@@ -13,3 +14,9 @@ export default {
   restoreVersion,
   update,
 }
+
+for (const operation in local) {
+  local[operation] = enforceCallDepth(local[operation])
+}
+
+export default local

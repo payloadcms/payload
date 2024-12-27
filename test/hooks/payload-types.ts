@@ -21,6 +21,7 @@ export interface Config {
     relations: Relation;
     'hooks-users': HooksUser;
     'data-hooks': DataHook;
+    'infinity-loop': InfinityLoop;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -37,6 +38,7 @@ export interface Config {
     relations: RelationsSelect<false> | RelationsSelect<true>;
     'hooks-users': HooksUsersSelect<false> | HooksUsersSelect<true>;
     'data-hooks': DataHooksSelect<false> | DataHooksSelect<true>;
+    'infinity-loop': InfinityLoopSelect<false> | InfinityLoopSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -226,6 +228,15 @@ export interface DataHook {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "infinity-loop".
+ */
+export interface InfinityLoop {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -270,6 +281,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'data-hooks';
         value: string | DataHook;
+      } | null)
+    | ({
+        relationTo: 'infinity-loop';
+        value: string | InfinityLoop;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -442,6 +457,14 @@ export interface DataHooksSelect<T extends boolean = true> {
   collection_beforeRead_collection?: T;
   collection_afterRead_collection?: T;
   collection_afterOperation_collection?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "infinity-loop_select".
+ */
+export interface InfinityLoopSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
 }
