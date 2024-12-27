@@ -1,3 +1,7 @@
+import JSON5Import from 'json5'
+
+const JSON5 = ('default' in JSON5Import ? JSON5Import.default : JSON5Import) as typeof JSON5Import
+
 /**
  * Turns a JSX props string into an object.
  *
@@ -78,7 +82,7 @@ function handleArray(propsString: string, startIndex: number): { newIndex: numbe
     i++
   }
 
-  return { newIndex: i, value: JSON.parse(`[${value}]`) }
+  return { newIndex: i, value: JSON5.parse(`[${value}]`) }
 }
 
 function handleQuotedString(
@@ -116,10 +120,10 @@ function handleObject(propsString: string, startIndex: number): { newIndex: numb
 
 function parseObject(objString: string): Record<string, any> {
   if (objString[0] !== '{') {
-    return JSON.parse(objString)
+    return JSON5.parse(objString)
   }
 
-  const result = JSON.parse(objString.replace(/(\w+):/g, '"$1":'))
+  const result = JSON5.parse(objString.replace(/(\w+):/g, '"$1":'))
 
   return result
 }
