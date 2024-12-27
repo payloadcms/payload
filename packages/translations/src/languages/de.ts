@@ -472,7 +472,7 @@ export const deTranslations: DefaultTranslationsObject = {
     revertToPublished: 'Auf veröffentlichte Version zurücksetzen',
     saveDraft: 'Entwurf speichern',
     scheduledSuccessfully: 'Erfolgreich geplant.',
-    schedulePublish: undefined,
+    schedulePublish: 'Veröffentlichungsplan',
     selectLocales: 'Wähle anzuzeigende Sprachen',
     selectVersionToCompare: 'Wähle Version zum Vergleich',
     showingVersionsFor: 'Versionen anzeigen für:',
