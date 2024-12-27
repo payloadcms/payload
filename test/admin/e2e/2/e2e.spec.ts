@@ -719,7 +719,7 @@ describe('admin2', () => {
         await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
         await expect(tableItems).toHaveCount(1)
         await expect(page.locator('.per-page')).toContainText('Per Page: 25')
-        await expect(page.locator('.collection-list__page-info')).toHaveText('25-26 of 26')
+        await expect(page.locator('.collection-list__page-info')).toHaveText('26-26 of 26')
       })
     })
 
