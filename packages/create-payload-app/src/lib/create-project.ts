@@ -101,8 +101,8 @@ export async function createProject(
     await fse.copy(localTemplate, projectDir)
   } else if ('template' in args && 'url' in args.template) {
     const { template } = args
-    if (cliArgs['--template-branch']) {
-      template.url = `${template.url.split('#')?.[0]}#${cliArgs['--template-branch']}`
+    if (cliArgs['--branch']) {
+      template.url = `${template.url.split('#')?.[0]}#${cliArgs['--branch']}`
     }
 
     await downloadTemplate({
@@ -112,8 +112,8 @@ export async function createProject(
     })
   } else if ('example' in args && 'url' in args.example) {
     const { example } = args
-    if (cliArgs['--example-branch']) {
-      example.url = `${example.url.split('#')?.[0]}#${cliArgs['--example-branch']}`
+    if (cliArgs['--branch']) {
+      example.url = `${example.url.split('#')?.[0]}#${cliArgs['--branch']}`
     }
 
     await downloadExample({

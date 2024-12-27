@@ -36,17 +36,16 @@ export class Main {
     // @ts-expect-error bad typings
     this.args = arg(
       {
+        '--branch': String,
         '--db': String,
         '--db-accept-recommended': Boolean,
         '--db-connection-string': String,
         '--example': String,
-        '--example-branch': String,
         '--help': Boolean,
         '--local-template': String,
         '--name': String,
         '--secret': String,
         '--template': String,
-        '--template-branch': String,
 
         // Next.js
         '--init-next': Boolean, // TODO: Is this needed if we detect if inside Next.js project?
@@ -213,7 +212,7 @@ export class Main {
       if (exampleArg) {
         const example = await parseExample({
           name: exampleArg,
-          branch: this.args['--example-branch'] ?? 'main',
+          branch: this.args['--branch'] ?? 'main',
         })
 
         if (!example) {

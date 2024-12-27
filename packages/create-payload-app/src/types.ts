@@ -2,13 +2,14 @@ import type arg from 'arg'
 
 export interface Args extends arg.Spec {
   '--beta': BooleanConstructor
+  '--branch': StringConstructor
   '--db': StringConstructor
   '--db-accept-recommended': BooleanConstructor
   '--db-connection-string': StringConstructor
   '--debug': BooleanConstructor
   '--dry-run': BooleanConstructor
+
   '--example': StringConstructor
-  '--example-branch': StringConstructor
   '--help': BooleanConstructor
   '--init-next': BooleanConstructor
   '--local-example': StringConstructor
@@ -18,7 +19,6 @@ export interface Args extends arg.Spec {
   '--no-git': BooleanConstructor
   '--secret': StringConstructor
   '--template': StringConstructor
-  '--template-branch': StringConstructor
   '--use-bun': BooleanConstructor
   '--use-npm': BooleanConstructor
   '--use-pnpm': BooleanConstructor
