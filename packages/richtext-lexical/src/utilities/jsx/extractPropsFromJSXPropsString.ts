@@ -1,6 +1,4 @@
-import JSOXImport from 'jsox'
-
-const JSOX = 'default' in JSOXImport ? JSOXImport.default : JSOXImport
+import * as JSOX from 'jsox'
 
 /**
  * Turns a JSX props string into an object.
@@ -82,6 +80,7 @@ function handleArray(propsString: string, startIndex: number): { newIndex: numbe
     i++
   }
 
+  // @ts-expect-error
   return { newIndex: i, value: JSOX.parse(`[${value}]`) }
 }
 
@@ -120,9 +119,11 @@ function handleObject(propsString: string, startIndex: number): { newIndex: numb
 
 function parseObject(objString: string): Record<string, any> {
   if (objString[0] !== '{') {
+    // @ts-expect-error
     return JSOX.parse(objString)
   }
 
+  // @ts-expect-error
   const result = JSOX.parse(objString.replace(/(\w+):/g, '"$1":'))
 
   return result
