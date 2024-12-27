@@ -1042,6 +1042,9 @@ importers:
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
+      csv-stringify:
+        specifier: ^6.5.2
+        version: 6.5.2
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -6078,6 +6081,9 @@ packages:
 
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
+
+  csv-stringify@6.5.2:
+    resolution: {integrity: sha512-RFPahj0sXcmUyjrObAK+DOWtMvMIFV328n4qZJhgX3x2RqkQgOTU2mCUmiFR0CzM6AzChlRSUErjiJeEt8BaQA==}
 
   damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
@@ -15710,6 +15716,8 @@ snapshots:
       cssom: 0.3.8
 
   csstype@3.1.3: {}
+
+  csv-stringify@6.5.2: {}
 
   damerau-levenshtein@1.0.8: {}
 

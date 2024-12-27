@@ -1,4 +1,6 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, UploadConfig } from 'payload'
+
+export type CollectionOverride = { upload: UploadConfig } & CollectionConfig
 
 export type ImportExportPluginConfig = {
   /**
@@ -16,5 +18,5 @@ export type ImportExportPluginConfig = {
    * @param collection
    * @returns collection
    */
-  overrideExportCollection?: (collection: CollectionConfig) => CollectionConfig
+  overrideExportCollection?: (collection: CollectionOverride) => CollectionOverride
 }

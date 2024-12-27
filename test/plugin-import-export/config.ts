@@ -33,7 +33,15 @@ export default buildConfigWithDefaults({
 
     await seed(payload)
   },
-  plugins: [importExportPlugin({})],
+  plugins: [
+    importExportPlugin({
+      overrideExportCollection: (collection) => {
+        collection.admin.group = 'System'
+        collection.upload.staticDir = path.resolve(dirname, 'uploads')
+        return collection
+      },
+    }),
+  ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

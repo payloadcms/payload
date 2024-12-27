@@ -54,7 +54,8 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@payloadcms/translations": "workspace:*"
+    "@payloadcms/translations": "workspace:*",
+    "csv-stringify": "^6.5.2"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

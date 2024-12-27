@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import type { ImportExportPluginConfig } from './types.js'
+import type { CollectionOverride, ImportExportPluginConfig } from './types.js'
+
+import { createExport } from './export/createExport.js'
 
 export const getExportCollection = ({
   pluginConfig,
@@ -9,12 +11,12 @@ export const getExportCollection = ({
 }): CollectionConfig => {
   const { overrideExportCollection } = pluginConfig
 
-  const collection: CollectionConfig = {
+  const collection: CollectionOverride = {
     slug: 'exports',
     admin: {
-      // TODO: this will likely need to be false
-      group: 'System',
+      group: false,
     },
+    disableDuplicate: true,
     fields: [
       {
         name: 'collections',
@@ -23,11 +25,20 @@ export const getExportCollection = ({
           {
             name: 'slug',
             type: 'text',
+            required: true,
           },
-          // other options like filters, limit, etc.
+          {
+            name: 'fields',
+            type: 'text',
+            hasMany: true,
+          },
+          // other options like where filters, limit, drafts, etc.
         ],
-        minRows: 1,
-        required: true,
+      },
+      {
+        name: 'locales',
+        type: 'text',
+        hasMany: true,
       },
       {
         name: 'globals',
@@ -36,7 +47,7 @@ export const getExportCollection = ({
       },
       {
         name: 'format',
-        type: 'select',
+        type: 'radio',
         options: [
           {
             label: 'JSON',
@@ -50,7 +61,27 @@ export const getExportCollection = ({
         required: true,
       },
     ],
-    upload: true,
+    hooks: {
+      beforeOperation: [
+        async ({ args, operation, req }) => {
+          if (operation !== 'create') {
+            return
+          }
+          // TODO:
+          //  if configured for to use jobs, queue the export job
+          //  await req.payload.jobs.queue({ input: { doc, req }, task: 'createExport' })
+          //  otherwise, start the export immediately and don't await it
+
+          // TODO: need a way to not await createExport so that this operation can happen in the background
+          await createExport({ data: args.data, req })
+        },
+      ],
+    },
+    upload: {
+      filesRequiredOnCreate: false,
+      // must be csv, json or zip
+      mimeTypes: ['application/json', 'text/csv', 'application/zip'],
+    },
   }
 
   if (typeof overrideExportCollection === 'function') {
