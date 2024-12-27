@@ -117,6 +117,8 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Fout bij het herindexeren van de collectie {{collection}}. De operatie is afgebroken.',
     unableToUpdateCount: 'Kan {{count}} van {{total}} {{label}} niet updaten.',
     unauthorized: 'Ongeautoriseerd, u moet ingelogd zijn om dit verzoek te doen.',
+    unauthorizedAdmin:
+      'Ongeautoriseerd, deze gebruiker heeft geen toegang tot het beheerderspaneel.',
     unknown: 'Er is een onbekende fout opgetreden.',
     unPublishingDocument: 'Er was een probleem met het depubliceren van dit document.',
     unspecific: 'Er is een fout opgetreden.',

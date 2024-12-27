@@ -117,6 +117,7 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Помилка при повторному індексуванні колекції {{collection}}. Операцію скасовано.',
     unableToUpdateCount: 'Не вдалося оновити {{count}} із {{total}} {{label}}.',
     unauthorized: 'Немає доступу, ви повинні увійти, щоб виконати цей запит.',
+    unauthorizedAdmin: 'Немає доступу, цей користувач не має доступу до панелі адміністратора.',
     unknown: 'Виникла невідома помилка.',
     unPublishingDocument: 'Під час скасування публікації даного документа виникла помилка.',
     unspecific: 'Виникла помилка.',

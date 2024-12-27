@@ -117,6 +117,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Greška pri reindeksiranju kolekcije {{collection}}. Operacija je prekinuta.',
     unableToUpdateCount: 'Nije moguće ažurirati {{count}} od {{total}} {{label}}.',
     unauthorized: 'Niste autorizovani da biste uputili ovaj zahtev.',
+    unauthorizedAdmin: 'Nemate pristup administratorskom panelu.',
     unknown: 'Došlo je do nepoznate greške.',
     unPublishingDocument: 'Postoji problem pri poništavanju objave ovog dokumenta.',
     unspecific: 'Došlo je do greške.',

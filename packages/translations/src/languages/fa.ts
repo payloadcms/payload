@@ -114,6 +114,7 @@ export const faTranslations: DefaultTranslationsObject = {
     unableToReindexCollection: 'خطا در بازنمایه‌سازی مجموعه {{collection}}. عملیات متوقف شد.',
     unableToUpdateCount: 'امکان به روز رسانی {{count}} خارج از {{total}} {{label}} وجود ندارد.',
     unauthorized: 'درخواست نامعتبر، جهت فرستادن این درخواست باید وارد شوید.',
+    unauthorizedAdmin: 'دسترسی به پیشخوان برای این کاربر مجاز نیست.',
     unknown: 'یک خطای ناشناخته رخ داد.',
     unPublishingDocument: 'هنگام لغو انتشار این سند خطایی رخ داد.',
     unspecific: 'خطایی رخ داد.',

@@ -115,6 +115,7 @@ export const daTranslations: DefaultTranslationsObject = {
       'Fejl ved genindeksering af samling {{collection}}. Operationen blev afbrudt.',
     unableToUpdateCount: 'Kunne ikke slette {{count}} mangler {{total}} {{label}}.',
     unauthorized: 'Uautoriseret, log in for at gennemføre handlingen.',
+    unauthorizedAdmin: 'Uautoriseret, denne bruger har ikke adgang til adminpanelet.',
     unknown: 'En ukendt fejl er opstået.',
     unPublishingDocument: 'Der opstod et problem med at ophæve udgivelsen af dette dokument.',
     unspecific: 'En fejl er opstået.',

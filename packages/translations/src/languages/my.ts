@@ -116,6 +116,7 @@ export const myTranslations: DefaultTranslationsObject = {
       '{{collection}} စုစည်းမှုကို ပြန်လည်အညွှန်းပြုလုပ်ခြင်း အမှားရှိနေသည်။ လုပ်ဆောင်မှုကို ဖျက်သိမ်းခဲ့သည်။',
     unableToUpdateCount: '{{total}} {{label}} မှ {{count}} ကို အပ်ဒိတ်လုပ်၍မရပါ။',
     unauthorized: 'အခွင့်မရှိပါ။ ဤတောင်းဆိုချက်ကို လုပ်ဆောင်နိုင်ရန် သင်သည် လော့ဂ်အင်ဝင်ရပါမည်။',
+    unauthorizedAdmin: 'အခွင့်မရှိပါ။ ဤအကောင့်အသုံးပြုသူသည် အဆင့်မပြုပါနိုင်ပါ။',
     unknown: 'ဘာမှန်းမသိသော error တက်သွားပါသည်။',
     unPublishingDocument: 'ဖိုင်ကို ပြန်လည့် သိမ်းဆည်းခြင်းမှာ ပြဿနာရှိနေသည်။',
     unspecific: 'Error တက်နေပါသည်။',

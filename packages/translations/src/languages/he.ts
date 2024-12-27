@@ -113,6 +113,7 @@ export const heTranslations: DefaultTranslationsObject = {
     unableToReindexCollection: 'שגיאה בהחזרת אינדקס של אוסף {{collection}}. הפעולה בוטלה.',
     unableToUpdateCount: 'לא ניתן לעדכן {{count}} מתוך {{total}} {{label}}.',
     unauthorized: 'אין הרשאה, עליך להתחבר כדי לבצע בקשה זו.',
+    unauthorizedAdmin: 'אין הרשאה, משתמש זה אינו יכול לגשת לפאנל הניהול.',
     unknown: 'אירעה שגיאה לא ידועה.',
     unPublishingDocument: 'אירעה בעיה בביטול הפרסום של מסמך זה.',
     unspecific: 'אירעה שגיאה.',

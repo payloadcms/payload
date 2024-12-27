@@ -117,6 +117,7 @@ export const jaTranslations: DefaultTranslationsObject = {
       'コレクション {{collection}} の再インデックス中にエラーが発生しました。操作は中止されました。',
     unableToUpdateCount: '{{total}} {{label}} のうち {{count}} 個を更新できません。',
     unauthorized: '認証されていません。このリクエストを行うにはログインが必要です。',
+    unauthorizedAdmin: '管理画面へのアクセス権がないため、認証されていません。',
     unknown: '不明なエラーが発生しました。',
     unPublishingDocument: 'このデータを非公開する際に問題が発生しました。',
     unspecific: 'エラーが発生しました。',

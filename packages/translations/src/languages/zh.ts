@@ -111,6 +111,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     unableToReindexCollection: '重新索引集合 {{collection}} 时出错。操作已中止。',
     unableToUpdateCount: '无法更新 {{count}} 个，共 {{total}} 个 {{label}}。',
     unauthorized: '未经授权，您必须登录才能提出这个请求。',
+    unauthorizedAdmin: '未经授权，此用户无权访问管理面板。',
     unknown: '发生了一个未知的错误。',
     unPublishingDocument: '取消发布此文件时出现了问题。',
     unspecific: '发生了一个错误。',

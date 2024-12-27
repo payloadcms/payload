@@ -117,6 +117,7 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Ошибка при переиндексации коллекции {{collection}}. Операция прервана.',
     unableToUpdateCount: 'Не удалось обновить {{count}} из {{total}} {{label}}.',
     unauthorized: 'Нет доступа, вы должны войти, чтобы сделать этот запрос.',
+    unauthorizedAdmin: 'Нет доступа, этот пользователь не имеет доступа к панели администратора.',
     unknown: 'Произошла неизвестная ошибка.',
     unPublishingDocument: 'При отмене публикации этого документа возникла проблема.',
     unspecific: 'Произошла ошибка.',

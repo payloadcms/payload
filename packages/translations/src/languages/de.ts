@@ -118,6 +118,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Fehler beim Neuindizieren der Sammlung {{collection}}. Vorgang abgebrochen.',
     unableToUpdateCount: '{{count}} von {{total}} {{label}} konnte nicht aktualisiert werden.',
     unauthorized: 'Nicht autorisiert - du musst angemeldet sein, um diese Anfrage zu stellen.',
+    unauthorizedAdmin: 'Nicht autorisiert, dieser Benutzer hat keinen Zugriff auf das Admin-Panel.',
     unknown: 'Ein unbekannter Fehler ist aufgetreten.',
     unPublishingDocument: 'Es gab ein Problem, dieses Dokument auf Entwurf zu setzen.',
     unspecific: 'Ein Fehler ist aufgetreten.',

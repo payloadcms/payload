@@ -116,6 +116,7 @@ export const viTranslations: DefaultTranslationsObject = {
       'Lỗi khi tái lập chỉ mục bộ sưu tập {{collection}}. Quá trình bị hủy.',
     unableToUpdateCount: 'Không thể cập nhật {{count}} trên {{total}} {{label}}.',
     unauthorized: 'Lỗi - Bạn cần phải đăng nhập trước khi gửi request sau.',
+    unauthorizedAdmin: 'Lỗi - Người dùng không có quyền truy cập vào bảng điều khiển.',
     unknown: 'Lỗi - Không xác định (unknown error).',
     unPublishingDocument: 'Lỗi - Đã xảy ra vấn để khi ẩn bản tài liệu.',
     unspecific: 'Lỗi - Đã xảy ra (unspecific error).',

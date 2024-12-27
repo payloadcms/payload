@@ -78,6 +78,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:unableToReindexCollection',
   'error:unableToUpdateCount',
   'error:unauthorized',
+  'error:unauthorizedAdmin',
   'error:unknown',
   'error:unspecific',
   'error:userEmailAlreadyRegistered',

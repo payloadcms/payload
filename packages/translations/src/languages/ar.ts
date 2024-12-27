@@ -115,6 +115,7 @@ export const arTranslations: DefaultTranslationsObject = {
     unableToReindexCollection: 'خطأ في إعادة فهرسة المجموعة {{collection}}. تم إيقاف العملية.',
     unableToUpdateCount: 'يتعذّر تحديث {{count}} من {{total}} {{label}}.',
     unauthorized: 'غير مصرّح لك ، عليك أن تقوم بتسجيل الدّخول لتتمكّن من تقديم هذا الطّلب.',
+    unauthorizedAdmin: 'غير مصرّح لك بالوصول إلى لوحة التحكّم.',
     unknown: 'حدث خطأ غير معروف.',
     unPublishingDocument: 'حدث خطأ أثناء إلغاء نشر هذا المستند.',
     unspecific: 'حدث خطأ.',
