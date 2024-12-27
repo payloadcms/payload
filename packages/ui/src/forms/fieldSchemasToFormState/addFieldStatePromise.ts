@@ -532,6 +532,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               id,
               data: fullData,
               relationTo: field.relationTo,
+              req,
               siblingData: data,
               user: req.user,
             })
