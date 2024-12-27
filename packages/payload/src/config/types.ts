@@ -378,6 +378,7 @@ export type EditViewConfig = {
 } & (
   | {
       actions?: CustomComponent[]
+      saveActions?: CustomComponent[]
     }
   | {
       Component: EditViewComponent

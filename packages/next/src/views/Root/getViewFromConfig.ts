@@ -54,14 +54,16 @@ const oneSegmentViews: OneSegmentViews = {
 }
 
 function getViewActions({
+  actionsKey = 'actions',
   editConfig,
   viewKey,
 }: {
+  actionsKey?: 'actions' | 'saveActions'
   editConfig: EditConfig
   viewKey: keyof EditConfig
 }): CustomComponent[] | undefined {
-  if (editConfig && viewKey in editConfig && 'actions' in editConfig[viewKey]) {
-    return editConfig[viewKey].actions
+  if (editConfig && viewKey in editConfig && actionsKey in editConfig[viewKey]) {
+    return editConfig[viewKey][actionsKey]
   }
 
   return undefined
@@ -70,6 +72,7 @@ function getViewActions({
 type ServerPropsFromView = {
   collectionConfig?: SanitizedConfig['collections'][number]
   globalConfig?: SanitizedConfig['globals'][number]
+  saveActions: CustomComponent[]
   viewActions: CustomComponent[]
 }
 
@@ -119,6 +122,7 @@ export const getViewFromConfig = ({
   let matchedGlobal: SanitizedConfig['globals'][number] = undefined
 
   const serverProps: ServerPropsFromView = {
+    saveActions: [],
     viewActions: config?.admin?.components?.actions || [],
   }
 
@@ -259,6 +263,14 @@ export const getViewFromConfig = ({
                 viewKey: 'root',
               }),
             )
+
+            serverProps.saveActions = serverProps.saveActions.concat(
+              getViewActions({
+                actionsKey: 'saveActions',
+                editConfig: matchedCollection.admin?.components?.views?.edit,
+                viewKey: 'root',
+              }),
+            )
           } else {
             if (segmentFive) {
               if (segmentFour === 'versions') {
@@ -287,6 +299,14 @@ export const getViewFromConfig = ({
                     viewKey: 'livePreview',
                   }),
                 )
+
+                serverProps.saveActions = serverProps.saveActions.concat(
+                  getViewActions({
+                    actionsKey: 'saveActions',
+                    editConfig: matchedCollection.admin?.components?.views?.edit,
+                    viewKey: 'livePreview',
+                  }),
+                )
               } else if (segmentFour === 'api') {
                 // add api view actions
                 serverProps.viewActions = serverProps.viewActions.concat(
@@ -301,6 +321,14 @@ export const getViewFromConfig = ({
               serverProps.viewActions = serverProps.viewActions.concat(
                 getViewActions({
                   editConfig: matchedCollection.admin?.components?.views.edit,
+                  viewKey: 'default',
+                }),
+              )
+
+              serverProps.saveActions = serverProps.saveActions.concat(
+                getViewActions({
+                  actionsKey: 'saveActions',
+                  editConfig: matchedCollection.admin?.components?.views?.edit,
                   viewKey: 'default',
                 }),
               )
@@ -330,6 +358,14 @@ export const getViewFromConfig = ({
                 viewKey: 'root',
               }),
             )
+
+            serverProps.saveActions = serverProps.saveActions.concat(
+              getViewActions({
+                actionsKey: 'saveActions',
+                editConfig: matchedGlobal.admin.components?.views?.edit,
+                viewKey: 'root',
+              }),
+            )
           } else {
             if (segmentFour) {
               if (segmentThree === 'versions') {
@@ -355,6 +391,14 @@ export const getViewFromConfig = ({
                 serverProps.viewActions = serverProps.viewActions.concat(
                   getViewActions({
                     editConfig: matchedGlobal.admin?.components?.views?.edit,
+                    viewKey: 'livePreview',
+                  }),
+                )
+
+                serverProps.saveActions = serverProps.saveActions.concat(
+                  getViewActions({
+                    actionsKey: 'saveActions',
+                    editConfig: matchedGlobal.admin.components?.views?.edit,
                     viewKey: 'livePreview',
                   }),
                 )

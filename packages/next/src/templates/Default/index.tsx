@@ -20,6 +20,7 @@ const baseClass = 'template-default'
 export type DefaultTemplateProps = {
   children?: React.ReactNode
   className?: string
+  saveActions?: CustomComponent[]
   viewActions?: CustomComponent[]
   visibleEntities: VisibleEntities
 } & ServerProps
@@ -32,6 +33,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   params,
   payload,
   permissions,
+  saveActions,
   searchParams,
   user,
   viewActions,
@@ -90,6 +92,34 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     }
   }, [payload, serverProps, viewActions])
 
+  const { SaveActions } = React.useMemo<{
+    SaveActions: Record<string, React.ReactNode>
+  }>(() => {
+    return {
+      SaveActions: saveActions
+        ? saveActions.reduce((acc, action) => {
+            if (action) {
+              if (typeof action === 'object') {
+                acc[action.path] = RenderServerComponent({
+                  Component: action,
+                  importMap: payload.importMap,
+                  serverProps,
+                })
+              } else {
+                acc[action] = RenderServerComponent({
+                  Component: action,
+                  importMap: payload.importMap,
+                  serverProps,
+                })
+              }
+            }
+
+            return acc
+          }, {})
+        : undefined,
+    }
+  }, [payload, serverProps, saveActions])
+
   const NavComponent = RenderServerComponent({
     clientProps: { clientProps: { visibleEntities } },
     Component: CustomNav,
@@ -101,7 +131,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <BulkUploadProvider>
-        <ActionsProvider Actions={Actions}>
+        <ActionsProvider Actions={Actions} SaveActions={SaveActions}>
           {RenderServerComponent({
             clientProps: { clientProps: { visibleEntities } },
             Component: CustomHeader,

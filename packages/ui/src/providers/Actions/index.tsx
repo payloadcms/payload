@@ -6,11 +6,17 @@ type ActionsContextType = {
   Actions: {
     [key: string]: React.ReactNode
   }
+  SaveActions: {
+    [key: string]: React.ReactNode
+  }
+  setSaveActions: (actions: ActionsContextType['SaveActions']) => void
   setViewActions: (actions: ActionsContextType['Actions']) => void
 }
 
 const ActionsContext = createContext<ActionsContextType>({
   Actions: {},
+  SaveActions: {},
+  setSaveActions: () => {},
   setViewActions: () => {},
 })
 
@@ -21,8 +27,12 @@ export const ActionsProvider: React.FC<{
     [key: string]: React.ReactNode
   }
   readonly children: React.ReactNode
-}> = ({ Actions, children }) => {
+  readonly SaveActions?: {
+    [key: string]: React.ReactNode
+  }
+}> = ({ Actions, children, SaveActions }) => {
   const [viewActions, setViewActions] = useState(Actions)
+  const [saveActions, setSaveActions] = useState(SaveActions)
 
   return (
     <ActionsContext.Provider
@@ -31,6 +41,10 @@ export const ActionsProvider: React.FC<{
           ...viewActions,
           ...Actions,
         },
+        SaveActions: {
+          ...saveActions,
+        },
+        setSaveActions,
         setViewActions,
       }}
     >
