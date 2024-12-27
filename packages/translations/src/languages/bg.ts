@@ -116,6 +116,7 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Грешка при преиндексиране на колекцията {{collection}}. Операцията е прекратена.',
     unableToUpdateCount: 'Не беше възможно да се обновят {{count}} от {{total}} {{label}}.',
     unauthorized: 'Неоторизиран, трябва да влезеш, за да извършиш тази заявка.',
+    unauthorizedAdmin: 'Неоторизиран, трябва да си администратор, за да извършиш тази заявка.',
     unknown: 'Неизвестна грешка.',
     unPublishingDocument: 'Имаше проблем при скриването на този документ.',
     unspecific: 'Грешка.',

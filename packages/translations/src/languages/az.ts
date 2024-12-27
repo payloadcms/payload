@@ -116,6 +116,7 @@ export const azTranslations: DefaultTranslationsObject = {
       '{{collection}} kolleksiyasının yenidən indekslənməsi zamanı səhv baş verdi. Əməliyyat dayandırıldı.',
     unableToUpdateCount: '{{count}} dən {{total}} {{label}} yenilənə bilmir.',
     unauthorized: 'İcazəniz yoxdur, bu tələbi yerinə yetirmək üçün daxil olmalısınız.',
+    unauthorizedAdmin: 'Bu əməliyyatı yerinə yetirmək üçün admin olmalısınız.',
     unknown: 'Naməlum bir xəta baş verdi.',
     unPublishingDocument: 'Bu sənədin nəşrini ləğv etmək zamanı problem baş verdi.',
     unspecific: 'Xəta baş verdi.',

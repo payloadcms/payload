@@ -16,6 +16,7 @@ import type {
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
+import { configurePluginProject } from './configure-plugin-project.js'
 import { downloadExample } from './download-example.js'
 import { downloadTemplate } from './download-template.js'
 
@@ -129,6 +130,11 @@ export async function createProject(
   await updatePackageJSON({ projectDir, projectName })
 
   if ('template' in args) {
+    if (args.template.type === 'plugin') {
+      spinner.message('Configuring Plugin...')
+      configurePluginProject({ projectDirPath: projectDir, projectName })
+    }
+  } else {
     spinner.message('Configuring Payload...')
     await configurePayloadConfig({
       dbType: dbDetails?.type,

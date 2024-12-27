@@ -116,6 +116,7 @@ export const esTranslations: DefaultTranslationsObject = {
       'Error al reindexar la colección {{collection}}. Operación abortada.',
     unableToUpdateCount: 'No se puede actualizar {{count}} de {{total}} {{label}}.',
     unauthorized: 'No autorizado, debes iniciar sesión para realizar esta solicitud.',
+    unauthorizedAdmin: 'No autorizado, este usuario no tiene acceso al panel de administración.',
     unknown: 'Ocurrió un error desconocido.',
     unPublishingDocument: 'Ocurrió un error al despublicar este documento.',
     unspecific: 'Ocurrió un error.',

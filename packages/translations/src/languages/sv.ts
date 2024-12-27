@@ -116,6 +116,7 @@ export const svTranslations: DefaultTranslationsObject = {
       'Fel vid omindexering av samlingen {{collection}}. Operationen avbröts.',
     unableToUpdateCount: 'Det gick inte att uppdatera {{count}} av {{total}} {{label}}.',
     unauthorized: 'Obehörig, du måste vara inloggad för att göra denna begäran.',
+    unauthorizedAdmin: 'Obehörig, denna användare har inte åtkomst till adminpanelen.',
     unknown: 'Ett okänt fel har uppstått.',
     unPublishingDocument: 'Det uppstod ett problem när det här dokumentet skulle avpubliceras.',
     unspecific: 'Ett fel har uppstått.',

@@ -116,6 +116,7 @@ export const csTranslations: DefaultTranslationsObject = {
       'Chyba při přeindexování kolekce {{collection}}. Operace byla přerušena.',
     unableToUpdateCount: 'Nelze aktualizovat {{count}} z {{total}} {{label}}.',
     unauthorized: 'Neautorizováno, pro zadání tohoto požadavku musíte být přihlášeni.',
+    unauthorizedAdmin: 'Neautorizováno, tento uživatel nemá přístup k administraci.',
     unknown: 'Došlo k neznámé chybě.',
     unPublishingDocument: 'Při zrušení publikování tohoto dokumentu došlo k chybě.',
     unspecific: 'Došlo k chybě.',

@@ -114,6 +114,7 @@ export const thTranslations: DefaultTranslationsObject = {
       'เกิดข้อผิดพลาดในการจัดทำดัชนีใหม่ของคอลเลกชัน {{collection}}. การดำเนินการถูกยกเลิก',
     unableToUpdateCount: 'ไม่สามารถอัปเดต {{count}} จาก {{total}} {{label}}',
     unauthorized: 'คุณไม่ได้รับอนุญาต กรุณาเข้าสู่ระบบเพื่อทำคำขอนี้',
+    unauthorizedAdmin: 'คุณไม่ได้รับอนุญาตให้เข้าถึงแผงผู้ดูแล',
     unknown: 'เกิดปัญหาบางอย่างที่ไม่ทราบสาเหตุ',
     unPublishingDocument: 'เกิดปัญหาระหว่างการยกเลิกการเผยแพร่เอกสารนี้',
     unspecific: 'เกิดปัญหาบางอย่าง',

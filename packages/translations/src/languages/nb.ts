@@ -116,6 +116,7 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Feil ved reindeksering av samlingen {{collection}}. Operasjonen ble avbrutt.',
     unableToUpdateCount: 'Kan ikke oppdatere {{count}} av {{total}} {{label}}.',
     unauthorized: 'Uautorisert, du må være innlogget for å gjøre denne forespørselen.',
+    unauthorizedAdmin: 'Uautorisert, denne brukeren har ikke tilgang til kontrollpanelet.',
     unknown: 'En ukjent feil har oppstått.',
     unPublishingDocument: 'Det oppstod et problem under avpublisering av dokumentet.',
     unspecific: 'En feil har oppstått.',

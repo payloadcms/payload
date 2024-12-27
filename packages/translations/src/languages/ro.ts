@@ -117,7 +117,8 @@ export const roTranslations: DefaultTranslationsObject = {
     unableToReindexCollection:
       'Eroare la reindexarea colecției {{collection}}. Operațiune anulată.',
     unableToUpdateCount: 'Nu se poate șterge {{count}} din {{total}} {{label}}.',
-    unauthorized: 'neautorizat, trebuie să vă conectați pentru a face această cerere.',
+    unauthorized: 'Neautorizat, trebuie să vă conectați pentru a face această cerere.',
+    unauthorizedAdmin: 'Neautorizat, acest utilizator nu are acces la panoul de administrare.',
     unknown: 'S-a produs o eroare necunoscută.',
     unPublishingDocument: 'A existat o problemă în timpul nepublicării acestui document.',
     unspecific: 'S-a produs o eroare.',

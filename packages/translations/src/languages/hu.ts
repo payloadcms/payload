@@ -118,6 +118,7 @@ export const huTranslations: DefaultTranslationsObject = {
       'Hiba a(z) {{collection}} gyűjtemény újraindexelésekor. A művelet megszakítva.',
     unableToUpdateCount: 'Nem sikerült frissíteni {{count}}/{{total}} {{label}}.',
     unauthorized: 'Jogosulatlan, a kéréshez be kell jelentkeznie.',
+    unauthorizedAdmin: 'Jogosulatlan, ez a felhasználó nem fér hozzá az admin panelhez.',
     unknown: 'Ismeretlen hiba történt.',
     unPublishingDocument: 'Hiba történt a dokumentum közzétételének visszavonása közben.',
     unspecific: 'Hiba történt.',

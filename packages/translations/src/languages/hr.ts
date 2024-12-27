@@ -117,6 +117,7 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Pogreška pri ponovnom indeksiranju kolekcije {{collection}}. Operacija je prekinuta.',
     unableToUpdateCount: 'Nije moguće ažurirati {{count}} od {{total}} {{label}}.',
     unauthorized: 'Neovlašteno, morate biti prijavljeni da biste uputili ovaj zahtjev.',
+    unauthorizedAdmin: 'Neovlašteno, ovaj korisnik nema pristup administratorskom panelu.',
     unknown: 'Došlo je do nepoznate pogreške.',
     unPublishingDocument: 'Došlo je do problema pri poništavanju objave ovog dokumenta.',
     unspecific: 'Došlo je do pogreške.',

@@ -116,6 +116,7 @@ export const koTranslations: DefaultTranslationsObject = {
       '{{collection}} 컬렉션의 재인덱싱 중 오류가 발생했습니다. 작업이 중단되었습니다.',
     unableToUpdateCount: '총 {{total}}개 중 {{count}}개의 {{label}}을(를) 업데이트할 수 없습니다.',
     unauthorized: '권한 없음, 이 요청을 수행하려면 로그인해야 합니다.',
+    unauthorizedAdmin: '관리자 패널에 액세스할 수 없습니다.',
     unknown: '알 수 없는 오류가 발생했습니다.',
     unPublishingDocument: '이 문서의 게시 취소 중에 문제가 발생했습니다.',
     unspecific: '오류가 발생했습니다.',

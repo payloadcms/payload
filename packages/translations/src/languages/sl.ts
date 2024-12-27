@@ -116,6 +116,7 @@ export const slTranslations: DefaultTranslationsObject = {
       'Napaka pri reindeksiranju zbirke {{collection}}. Operacija je bila prekinjena.',
     unableToUpdateCount: 'Ni bilo mogoče posodobiti {{count}} od {{total}} {{label}}.',
     unauthorized: 'Neavtorizirano, za to zahtevo morate biti prijavljeni.',
+    unauthorizedAdmin: 'Neavtorizirano, ta uporabnik nima dostopa do skrbniškega vmesnika.',
     unknown: 'Prišlo je do neznane napake.',
     unPublishingDocument: 'Pri umiku objave tega dokumenta je prišlo do težave.',
     unspecific: 'Prišlo je do napake.',

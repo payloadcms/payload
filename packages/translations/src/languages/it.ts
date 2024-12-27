@@ -118,6 +118,8 @@ export const itTranslations: DefaultTranslationsObject = {
       'Errore durante la reindicizzazione della collezione {{collection}}. Operazione annullata.',
     unableToUpdateCount: 'Impossibile aggiornare {{count}} su {{total}} {{label}}.',
     unauthorized: 'Non autorizzato, devi essere loggato per effettuare questa richiesta.',
+    unauthorizedAdmin:
+      'Non autorizzato, questo utente non ha accesso al pannello di amministrazione.',
     unknown: 'Si è verificato un errore sconosciuto.',
     unPublishingDocument:
       "Si è verificato un problema durante l'annullamento della pubblicazione di questo documento.",

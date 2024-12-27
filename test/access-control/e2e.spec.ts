@@ -9,12 +9,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type {
-  Config,
-  NonAdminUser,
-  ReadOnlyCollection,
-  RestrictedVersion,
-} from './payload-types.js'
+import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
 import {
   closeNav,
@@ -34,9 +29,9 @@ import {
   disabledSlug,
   docLevelAccessSlug,
   fullyRestrictedSlug,
-  noAdminAccessEmail,
-  nonAdminUserEmail,
-  nonAdminUserSlug,
+  nonAdminEmail,
+  publicUserEmail,
+  publicUsersSlug,
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
@@ -610,56 +605,56 @@ describe('access control', () => {
   })
 
   describe('admin access', () => {
-    test('should block admin access to admin user', async () => {
-      const adminURL = `${serverURL}/admin`
-      await page.goto(adminURL)
-      await page.waitForURL(adminURL)
+    test('unauthenticated users should not have access to the admin panel', async () => {
+      await page.goto(url.logout)
+      await page.waitForURL(url.logout)
 
-      await expect(page.locator('.dashboard')).toBeVisible()
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
 
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
+      await expect(page.locator('form.login__form')).toBeVisible()
+
+      await page.goto(url.admin)
+      await page.waitForURL(url.login)
+      expect(page.url()).toEqual(url.login)
+    })
+
+    test('non-admin users should not have access to the admin panel', async () => {
+      await page.goto(url.logout)
+      await page.waitForURL(url.logout)
 
       await login({
         data: {
-          email: noAdminAccessEmail,
+          email: nonAdminEmail,
           password: 'test',
         },
         page,
         serverURL,
       })
 
-      await expect(page.locator('.unauthorized')).toBeVisible()
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, this user does not have access to the admin panel.',
+      )
 
-      // Log back in for the next test
-      await page.goto(logoutURL)
-      await login({
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-        page,
-        serverURL,
-      })
+      await page.goto(url.logout)
+      await page.waitForURL(url.logout)
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
+
+      await expect(page.locator('form.login__form')).toBeVisible()
     })
 
-    test('should block admin access to non-admin user', async () => {
-      const adminURL = `${serverURL}/admin`
-      const unauthorizedURL = `${serverURL}/admin/unauthorized`
-      await page.goto(adminURL)
-      await page.waitForURL(adminURL)
+    test('public users should not have access to access admin', async () => {
+      await page.goto(url.logout)
+      await page.waitForURL(url.logout)
 
-      await expect(page.locator('.dashboard')).toBeVisible()
-
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
-
-      const nonAdminUser: {
-        token?: string
-      } & NonAdminUser = await payload.login({
-        collection: nonAdminUserSlug,
+      const user = await payload.login({
+        collection: publicUsersSlug,
         data: {
-          email: nonAdminUserEmail,
+          email: publicUserEmail,
           password: devUser.password,
         },
       })
@@ -667,20 +662,36 @@ describe('access control', () => {
       await context.addCookies([
         {
           name: 'payload-token',
-          url: serverURL,
-          value: nonAdminUser.token,
+          value: user.token,
+          domain: 'localhost',
+          path: '/',
+          httpOnly: true,
+          secure: true,
         },
       ])
 
-      await page.goto(adminURL)
-      await page.waitForURL(unauthorizedURL)
+      await page.reload()
 
-      await expect(page.locator('.unauthorized')).toBeVisible()
+      await page.goto(url.admin)
+      await page.waitForURL(/unauthorized$/)
 
-      // Log back in for the next test
-      await context.clearCookies()
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, this user does not have access to the admin panel.',
+      )
+
+      await page.goto(url.logout)
+      await page.waitForURL(url.logout)
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
+
+      await expect(page.locator('form.login__form')).toBeVisible()
+    })
+  })
+
+  describe('read-only from access control', () => {
+    beforeAll(async () => {
       await login({
         data: {
           email: devUser.email,
@@ -690,9 +701,7 @@ describe('access control', () => {
         serverURL,
       })
     })
-  })
 
-  describe('read-only from access control', () => {
     test('should be read-only when update returns false', async () => {
       await page.goto(disabledFields.create)
 

@@ -18,6 +18,7 @@ export interface Config {
     versions: Version;
     'categories-versions': CategoriesVersion;
     singular: Singular;
+    'self-joins': SelfJoin;
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     'restricted-categories': RestrictedCategory;
@@ -53,6 +54,9 @@ export interface Config {
       relatedVersions: 'versions';
       relatedVersionsMany: 'versions';
     };
+    'self-joins': {
+      joins: 'self-joins';
+    };
     'localized-categories': {
       relatedPosts: 'localized-posts';
     };
@@ -71,6 +75,7 @@ export interface Config {
     versions: VersionsSelect<false> | VersionsSelect<true>;
     'categories-versions': CategoriesVersionsSelect<false> | CategoriesVersionsSelect<true>;
     singular: SingularSelect<false> | SingularSelect<true>;
+    'self-joins': SelfJoinsSelect<false> | SelfJoinsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'localized-categories': LocalizedCategoriesSelect<false> | LocalizedCategoriesSelect<true>;
     'restricted-categories': RestrictedCategoriesSelect<false> | RestrictedCategoriesSelect<true>;
@@ -357,6 +362,20 @@ export interface CategoriesVersion {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "self-joins".
+ */
+export interface SelfJoin {
+  id: string;
+  rel?: (string | null) | SelfJoin;
+  joins?: {
+    docs?: (string | SelfJoin)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
@@ -466,6 +485,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'singular';
         value: string | Singular;
+      } | null)
+    | ({
+        relationTo: 'self-joins';
+        value: string | SelfJoin;
       } | null)
     | ({
         relationTo: 'localized-posts';
@@ -663,6 +686,16 @@ export interface CategoriesVersionsSelect<T extends boolean = true> {
  */
 export interface SingularSelect<T extends boolean = true> {
   category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "self-joins_select".
+ */
+export interface SelfJoinsSelect<T extends boolean = true> {
+  rel?: T;
+  joins?: T;
   updatedAt?: T;
   createdAt?: T;
 }

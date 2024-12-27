@@ -116,6 +116,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     unableToReindexCollection: 'Erro ao reindexar a coleção {{collection}}. Operação abortada.',
     unableToUpdateCount: 'Não foi possível atualizar {{count}} de {{total}} {{label}}.',
     unauthorized: 'Não autorizado. Você deve estar logado para fazer essa requisição',
+    unauthorizedAdmin: 'Não autorizado, esse usuário não tem acesso ao painel de administração.',
     unknown: 'Ocorreu um erro desconhecido.',
     unPublishingDocument: 'Ocorreu um problema ao despublicar esse documento',
     unspecific: 'Ocorreu um erro.',
