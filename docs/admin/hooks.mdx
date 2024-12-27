@@ -9,7 +9,7 @@ keywords: admin, components, custom, documentation, Content Management System, c
 Payload provides a variety of powerful [React Hooks](https://react.dev/reference/react-dom/hooks) that can be used within your own [Custom Components](./components), such as [Custom Fields](./fields). With them, you can interface with Payload itself to build just about any type of complex customization you can think of.
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
+  **Reminder:**
   All Custom Components are [React Server Components](https://react.dev/reference/rsc/server-components) by default. Hooks, on the other hand, are only available in client-side environments. To use hooks, [ensure your component is a client component](./components#client-components).
 </Banner>
 
@@ -78,7 +78,7 @@ type FieldType<T> = {
 There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields' form states from anywhere within a form.
 
 <Banner type="success">
-  <strong>This hook is great for retrieving only certain fields from form state</strong> because it
+  **This hook is great for retrieving only certain fields from form state** because it
   ensures that it will only cause a rerender when the items that you ask for change.
 </Banner>
 
@@ -157,8 +157,8 @@ To see types for each action supported within the `dispatchFields` hook, check o
 The `useForm` hook can be used to interact with the form itself, and sends back many methods that can be used to reactively fetch form state without causing rerenders within your components each time a field is changed. This is useful if you have action-based callbacks that your components fire, and need to interact with form state _based on a user action_.
 
 <Banner type="warning">
-  <strong>Warning:</strong>
-  <br />
+  **Warning:**
+
   This hook is optimized to avoid causing rerenders when fields change, and as such, its `fields`
   property will be out of date. You should only leverage this hook if you need to perform actions
   against the form in response to your users' actions. Do not rely on its returned "fields" as being

@@ -23,7 +23,7 @@ export default buildConfig({
 The Payload Config is strongly typed and ties directly into Payload's TypeScript codebase. This means your IDE (such as VSCode) will provide helpful information like type-ahead suggestions while you write your config.
 
 <Banner type="success">
-  <strong>Tip:</strong>
+  **Tip:**
   The location of your Payload Config can be customized. [More details](#customizing--automating-config-location-detection).
 </Banner>
 
@@ -57,7 +57,7 @@ export default buildConfig({
 ```
 
 <Banner type="success">
-  <strong>Note:</strong>
+  **Note:**
   For more complex examples, see the [Templates](https://github.com/payloadcms/payload/tree/main/templates) and [Examples](https://github.com/payloadcms/payload/tree/main/examples) directories in the Payload repository.
 </Banner>
 
@@ -102,7 +102,7 @@ The following options are available:
 _\* An asterisk denotes that a property is required._
 
 <Banner type="warning">
-  <strong>Note:</strong>
+  **Note:**
   Some properties are removed from the client-side bundle. [More details](../admin/components#accessing-the-payload-config).
 </Banner>
 
@@ -143,7 +143,7 @@ For Payload command-line scripts, we need to be able to locate your Payload Conf
 _\* Config location detection is different between development and production environments. See below for more details._
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   Ensure your `tsconfig.json` is properly configured for Payload to auto-detect your config location. If if does not exist, or does not specify the proper `compilerOptions`, Payload will default to the current working directory.
 </Banner>
 
@@ -195,7 +195,7 @@ To use a custom config location, set the `PAYLOAD_CONFIG_PATH` environment varia
 ```
 
 <Banner type="info">
-  <strong>Tip:</strong>
+  **Tip:**
   `PAYLOAD_CONFIG_PATH` can be either an absolute path, or path relative to your current working directory.
 </Banner>
 

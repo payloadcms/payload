@@ -37,7 +37,7 @@ export const MyUploadField: Field = {
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   To use the Upload Field, you must have a [Collection](../configuration/collections) configured to allow [Uploads](../upload/overview).
 </Banner>
 
@@ -46,7 +46,7 @@ export const MyUploadField: Field = {
 | Option                 | Description                                                                                                                                                                 |
 |------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
-| **`relationTo`** \*    | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>        |
+| **`relationTo`** \*    | Provide a single collection `slug` to allow this field to accept a relation to. **Note: the related collection must be configured to support Uploads.**        |
 | **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More](#filtering-upload-options).                                                                   |
 | **`hasMany`**          | Boolean which, if set to true, allows this field to have many relations instead of only one.                                                                                |
 | **`minRows`**          | A number for the fewest allowed items during validation when a value is present. Used with hasMany.                                                                         |
@@ -125,12 +125,12 @@ const uploadField = {
 You can learn more about writing queries [here](/docs/queries/overview).
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
-  When an upload field has both <strong>filterOptions</strong> and a custom{' '}
-  <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong>{' '}
+  **Note:**
+
+  When an upload field has both **filterOptions** and a custom{' '}
+  **validate** function, the api will not validate **filterOptions**{' '}
   unless you call the default upload field validation function imported from{' '}
-  <strong>payload/shared</strong> in your validate function.
+  **payload/shared** in your validate function.
 </Banner>
 
 ## Bi-directional relationships

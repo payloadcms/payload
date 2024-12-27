@@ -71,7 +71,7 @@ export default buildConfig({
 ```
 
 <Banner type="success">
-  <strong>Tip:</strong>
+  **Tip:**
   Localization works very well alongside [I18n](/docs/configuration/i18n).
 </Banner>
 
@@ -121,7 +121,7 @@ With the above configuration, the `title` field will now be saved in the databas
 All field types with a `name` property support the `localized` property—even the more complex field types like `array`s and `block`s.
 
 <Banner type="info">
-  <strong>Note:</strong>
+  **Note:**
   Enabling Localization for field types that support nested fields will automatically create
   localized "sets" of all fields contained within the field. For example, if you have a page layout
   using a blocks field type, you have the choice of either localizing the full layout, by enabling
@@ -129,7 +129,7 @@ All field types with a `name` property support the `localized` property—even t
 </Banner>
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   When converting an existing field to or from `localized: true` the data structure in the document
   will change for this field and so existing data for this field will be lost. Before changing the
   Localization setting on fields with existing data, you may need to consider a field migration
@@ -205,8 +205,8 @@ const posts = await payload.find({
 ```
 
 <Banner type="success">
-  <strong>Tip:</strong>
+  **Tip:**
   The REST and Local APIs can return all Localization data in one request by passing 'all' or '*' as
-  the <strong>locale</strong> parameter. The response will be structured so that field values come
+  the **locale** parameter. The response will be structured so that field values come
   back as the full objects keyed for each locale instead of the single, translated value.
 </Banner>

@@ -26,16 +26,16 @@ Collections and Globals both support the same options for configuring drafts. Yo
 
 ## Database changes
 
-By enabling drafts on a collection or a global, Payload will <strong>automatically inject a new field into your schema</strong> called `_status`. The `_status` field is used internally by Payload to store if a document is set to `draft` or `published`.
+By enabling drafts on a collection or a global, Payload will **automatically inject a new field into your schema** called `_status`. The `_status` field is used internally by Payload to store if a document is set to `draft` or `published`.
 
 **Admin UI status indication**
 
 Within the Admin UI, if drafts are enabled, a document can be shown with one of three "statuses":
 
-1. <strong>Draft</strong> - if a document has never been published, and only draft versions of the document
+1. **Draft** - if a document has never been published, and only draft versions of the document
    are present
-1. <strong>Published</strong> - if a document is published and there are no newer drafts available
-1. <strong>Changed</strong> - if a document has been published, but there are newer drafts available
+1. **Published** - if a document is published and there are no newer drafts available
+1. **Changed** - if a document has been published, but there are newer drafts available
    and not yet published
 
 ## Draft API
@@ -48,7 +48,7 @@ Within the Admin UI, if drafts are enabled, a document can be shown with one of 
 
 #### Updating or creating drafts
 
-If you enable drafts on a collection or global, the `create` and `update` operations for REST, GraphQL, and Local APIs expose a new option called `draft` which allows you to specify if you are creating or updating a <strong>draft</strong>, or if you're just sending your changes straight to the published document. For example, if you pass the query parameter `?draft=true` to a REST `create` or `update` operation, your action will be treated as if you are creating a `draft` and not a published document. By default, the `draft` argument is set to `false`.
+If you enable drafts on a collection or global, the `create` and `update` operations for REST, GraphQL, and Local APIs expose a new option called `draft` which allows you to specify if you are creating or updating a **draft**, or if you're just sending your changes straight to the published document. For example, if you pass the query parameter `?draft=true` to a REST `create` or `update` operation, your action will be treated as if you are creating a `draft` and not a published document. By default, the `draft` argument is set to `false`.
 
 **Required fields**
 
@@ -58,9 +58,9 @@ If `draft` is enabled while creating or updating a document, all fields are cons
 
 In addition to the `draft` argument within `create` and `update` operations, a `draft` argument is also exposed for `find` and `findByID` operations.
 
-If `draft` is set to `true` while reading a document, <strong>Payload will automatically replace returned document(s) with their newest drafts</strong> if any newer drafts are available.
+If `draft` is set to `true` while reading a document, **Payload will automatically replace returned document(s) with their newest drafts** if any newer drafts are available.
 
-<strong>For example, let's take the following scenario:</strong>
+**For example, let's take the following scenario:**
 
 1. You create a new collection document and publish it right away
 1. You then make some updates, and save the updates as a draft
@@ -75,7 +75,7 @@ But, if you specify `draft` as `true`, Payload will automatically replace your p
 ## Controlling who can see Collection drafts
 
 <Banner type="warning">
-  If you're using the <strong>drafts</strong> feature, it's important for you to consider who can
+  If you're using the **drafts** feature, it's important for you to consider who can
   view your drafts, and who can view only published documents. Luckily, Payload makes this extremely
   simple and puts the power completely in your hands.
 </Banner>
@@ -115,15 +115,15 @@ export const Pages: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  <strong>Note regarding adding versions to an existing collection</strong>
-  <br />
-  If you already have a collection with documents, and you <em>opt in</em> to draft functionality
+  **Note regarding adding versions to an existing collection**
+
+  If you already have a collection with documents, and you *opt in* to draft functionality
   after you have already created existing documents, all of your old documents{' '}
-  <em>will not have a _status field</em> until you resave them. For this reason, if you are{' '}
-  <em>adding</em> versions into an existing collection, you might want to write your Access Control
+  *will not have a _status field* until you resave them. For this reason, if you are{' '}
+  *adding* versions into an existing collection, you might want to write your Access Control
   function to allow for users to read both documents where{' '}
-  <strong>_status is equal to "published"</strong> as well as where{' '}
-  <strong>_status does not exist</strong>.
+  **status is equal to "published"** as well as where{' '}
+  **status does not exis**.
 </Banner>
 
 Here is an example for how to write an [Access Control](../access-control/overview) function that grants access to both documents where `_status` is equal to "published" and where `_status` does not exist:
