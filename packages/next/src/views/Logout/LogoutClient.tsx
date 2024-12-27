@@ -52,8 +52,10 @@ export const LogoutClient: React.FC<{
   useEffect(() => {
     if (!isLoggedOut) {
       void handleLogOut()
+    } else {
+      router.push(loginRoute)
     }
-  }, [handleLogOut, isLoggedOut])
+  }, [handleLogOut, isLoggedOut, loginRoute, router])
 
   if (isLoggedOut && inactivity) {
     return (
