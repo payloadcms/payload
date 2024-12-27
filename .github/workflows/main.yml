@@ -414,6 +414,8 @@ jobs:
           - template: with-vercel-postgres
             database: postgres
 
+          - template: plugin
+
           # Re-enable once PG conncection is figured out
           # - template: with-vercel-website
           #   database: postgres
