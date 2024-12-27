@@ -6,15 +6,14 @@ This example demonstrates how to achieve a multi-tenancy in [Payload](https://gi
 
 To spin up this example locally, follow these steps:
 
-1. Clone this repo
-1. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+1. Run the following command to create a project from the example:
 
-   > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
+- `npx create-payload-app --example multi-tenant`
 
-1. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+2. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
    - Press `y` when prompted to seed the database
-1. `open http://localhost:3000` to access the home page
-1. `open http://localhost:3000/admin` to access the admin panel
+3. `open http://localhost:3000` to access the home page
+4. `open http://localhost:3000/admin` to access the admin panel
    - Login with email `demo@payloadcms.com` and password `demo`
 
 ## How it works
