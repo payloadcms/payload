@@ -16,6 +16,7 @@ import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
   draftCollectionSlug,
+  draftGlobalSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
 } from './slugs.js'
@@ -1754,7 +1755,7 @@ describe('Versions', () => {
   })
 
   describe('Scheduled Publish', () => {
-    it('should allow scheduled publish', async () => {
+    it('should allow collection scheduled publish', async () => {
       const draft = await payload.create({
         collection: draftCollectionSlug,
         data: {
@@ -1791,7 +1792,7 @@ describe('Versions', () => {
       expect(retrieved._status).toStrictEqual('published')
     })
 
-    it('should allow scheduled unpublish', async () => {
+    it('should allow collection scheduled unpublish', async () => {
       const published = await payload.create({
         collection: draftCollectionSlug,
         data: {
@@ -1828,6 +1829,74 @@ describe('Versions', () => {
       })
 
       expect(retrieved._status).toStrictEqual('draft')
+    })
+
+    it('should allow global scheduled publish', async () => {
+      const draft = await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          _status: 'draft',
+          title: 'i will publish',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          global: draftGlobalSlug,
+        },
+      })
+
+      await wait(4000)
+
+      await payload.jobs.run()
+
+      const retrieved = await payload.findGlobal({
+        slug: draftGlobalSlug,
+      })
+
+      expect(retrieved._status).toStrictEqual('published')
+      expect(retrieved.title).toStrictEqual('i will publish')
+    })
+
+    it('should allow global scheduled unpublish', async () => {
+      const draft = await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          _status: 'published',
+          title: 'i will be a draft',
+        },
+      })
+
+      expect(draft._status).toStrictEqual('published')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          type: 'unpublish',
+          global: draftGlobalSlug,
+        },
+      })
+
+      await wait(4000)
+
+      await payload.jobs.run()
+
+      const retrieved = await payload.findGlobal({
+        slug: draftGlobalSlug,
+      })
+
+      expect(retrieved._status).toStrictEqual('draft')
+      expect(retrieved.title).toStrictEqual('i will be a draft')
     })
   })
 
