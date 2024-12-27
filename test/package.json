@@ -33,6 +33,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/graphql": "workspace:*",
+    "@payloadcms/kv-redis": "workspace:*",
     "@payloadcms/live-preview": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@payloadcms/next": "workspace:*",

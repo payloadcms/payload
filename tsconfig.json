@@ -32,6 +32,9 @@
       "path": "./packages/live-preview-vue"
     },
     {
+      "path": "./packages/kv-redis"
+    },
+    {
       "path": "./packages/next"
     },
     {

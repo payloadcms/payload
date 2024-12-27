@@ -24,6 +24,7 @@
     "build:essentials:force": "pnpm clean:build && turbo build --filter=\"payload...\" --filter=\"@payloadcms/ui\" --filter=\"@payloadcms/next\" --filter=\"@payloadcms/db-mongodb\" --filter=\"@payloadcms/db-postgres\" --filter=\"@payloadcms/richtext-lexical\" --filter=\"@payloadcms/translations\" --filter=\"@payloadcms/plugin-cloud\" --filter=\"@payloadcms/graphql\" --no-cache --force",
     "build:force": "pnpm run build:core:force",
     "build:graphql": "turbo build --filter \"@payloadcms/graphql\"",
+    "build:kv-redis": "turbo build --filter \"@payloadcms/kv-redis\"",
     "build:live-preview": "turbo build --filter \"@payloadcms/live-preview\"",
     "build:live-preview-react": "turbo build --filter \"@payloadcms/live-preview-react\"",
     "build:live-preview-vue": "turbo build --filter \"@payloadcms/live-preview-vue\"",
