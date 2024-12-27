@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from 'async_hooks'
 import chalk from 'chalk'
 import { createServer } from 'http'
 import minimist from 'minimist'
@@ -14,6 +15,8 @@ import startMemoryDB from './helpers/startMemoryDB.js'
 import { runInit } from './runInit.js'
 import { child, safelyRunScriptFunction } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
+
+globalThis.AsyncLocalStorage = AsyncLocalStorage
 
 const prod = process.argv.includes('--prod')
 if (prod) {
