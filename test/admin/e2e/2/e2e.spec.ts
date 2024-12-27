@@ -440,9 +440,15 @@ describe('admin2', () => {
       test('should reset page when filters are applied', async () => {
         await deleteAllPosts()
 
-        await mapAsync([...Array(12)], async () => {
-          await createPost()
-        })
+        await Promise.all(
+          Array.from({ length: 12 }, async (_, i) => {
+            if (i < 6) {
+              await createPost()
+            } else {
+              await createPost({ title: 'test' })
+            }
+          }),
+        )
 
         await page.reload()
 
