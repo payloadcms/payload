@@ -1,4 +1,5 @@
 /* eslint-disable jest/prefer-strict-equal */
+import { describe, it, expect } from 'vitest'
 import { formatName } from './formatName'
 
 describe('formatName', () => {

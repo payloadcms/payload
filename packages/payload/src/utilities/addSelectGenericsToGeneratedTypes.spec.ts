@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { addSelectGenericsToGeneratedTypes } from './addSelectGenericsToGeneretedTypes.js'
 
 const INPUT_AND_OUTPUT = [

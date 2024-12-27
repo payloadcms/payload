@@ -1,6 +1,6 @@
+import { describe, beforeAll, beforeEach, it, expect, vitest } from 'vitest'
 import type { Config, Payload } from 'payload'
 
-import { jest } from '@jest/globals'
 import nodemailer from 'nodemailer'
 import { defaults } from 'payload'
 
@@ -12,11 +12,11 @@ describe('email', () => {
   const defaultDomain = 'test.com'
   const apiKey = 'test'
 
-  const mockedPayload: Payload = jest.fn() as unknown as Payload
+  const mockedPayload: Payload = vitest.fn() as unknown as Payload
 
   beforeAll(() => {
     // Mock createTestAccount to prevent calling external services
-    jest.spyOn(nodemailer, 'createTestAccount').mockImplementation(() => {
+    vitest.spyOn(nodemailer, 'createTestAccount').mockImplementation(() => {
       return Promise.resolve({
         imap: { host: 'imap.test.com', port: 993, secure: true },
         pass: 'testpass',
@@ -73,7 +73,7 @@ describe('email', () => {
         defaultFromAddress,
         defaultFromName,
         skipVerify,
-      })
+      })!
 
       const initializedEmail = email({ payload: mockedPayload })
 

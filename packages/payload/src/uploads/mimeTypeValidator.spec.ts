@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import type { ValidateOptions } from '../fields/config/types'
 
 import { mimeTypeValidator } from './mimeTypeValidator'
@@ -5,6 +6,7 @@ import { mimeTypeValidator } from './mimeTypeValidator'
 const options = { siblingData: { filename: 'file.xyz' } } as ValidateOptions<
   undefined,
   undefined,
+  any,
   undefined
 >
 

@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import type { Field, SanitizedConfig } from 'payload'
 
 import { Types } from 'mongoose'

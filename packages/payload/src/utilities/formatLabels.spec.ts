@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { formatLabels, toWords } from './formatLabels'
 
 describe('formatLabels', () => {
