@@ -82,7 +82,6 @@ function handleArray(propsString: string, startIndex: number): { newIndex: numbe
     i++
   }
 
-  // @ts-expect-error
   return { newIndex: i, value: JSOX.parse(`[${value}]`) }
 }
 
@@ -121,11 +120,9 @@ function handleObject(propsString: string, startIndex: number): { newIndex: numb
 
 function parseObject(objString: string): Record<string, any> {
   if (objString[0] !== '{') {
-    // @ts-expect-error
     return JSOX.parse(objString)
   }
 
-  // @ts-expect-error
   const result = JSOX.parse(objString.replace(/(\w+):/g, '"$1":'))
 
   return result
