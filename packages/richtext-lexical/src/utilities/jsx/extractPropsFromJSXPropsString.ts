@@ -1,3 +1,5 @@
+import { parse } from 'json5'
+
 /**
  * Turns a JSX props string into an object.
  *
@@ -78,7 +80,7 @@ function handleArray(propsString: string, startIndex: number): { newIndex: numbe
     i++
   }
 
-  return { newIndex: i, value: JSON.parse(`[${value}]`) }
+  return { newIndex: i, value: parse(`[${value}]`) }
 }
 
 function handleQuotedString(
@@ -116,10 +118,10 @@ function handleObject(propsString: string, startIndex: number): { newIndex: numb
 
 function parseObject(objString: string): Record<string, any> {
   if (objString[0] !== '{') {
-    return JSON.parse(objString)
+    return parse(objString)
   }
 
-  const result = JSON.parse(objString.replace(/(\w+):/g, '"$1":'))
+  const result = parse(objString.replace(/(\w+):/g, '"$1":'))
 
   return result
 }
