@@ -414,6 +414,8 @@ jobs:
           - template: with-vercel-postgres
             database: postgres
 
+          - template: plugin
+
           # Re-enable once PG conncection is figured out
           # - template: with-vercel-website
           #   database: postgres
@@ -467,6 +469,7 @@ jobs:
         uses: supercharge/mongodb-github-action@1.11.0
         with:
           mongodb-version: 6.0
+        if: matrix.database == 'mongodb'
 
       - name: Build Template
         run: |
