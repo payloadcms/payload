@@ -1357,6 +1357,7 @@ export { default as isolateObjectProperty } from './utilities/isolateObjectPrope
 export { isPlainObject } from './utilities/isPlainObject.js'
 export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
+export { defaultLoggerOptions } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
