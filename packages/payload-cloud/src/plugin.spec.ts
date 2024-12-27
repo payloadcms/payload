@@ -165,6 +165,38 @@ describe('plugin', () => {
       })
     })
   })
+
+  describe('cron jobs', () => {
+    test('should always set global instance identifier, even with no cron jobs or enabled: false', async () => {
+      const plugin = payloadCloudPlugin({
+        cronJobs: {
+          enabled: false,
+        },
+      })
+      const config = await plugin(createConfig())
+
+      const globalInstance = config.globals?.find(
+        (global) => global.slug === 'payload-cloud-instance',
+      )
+
+      expect(globalInstance).toBeDefined()
+      expect(globalInstance?.fields).toStrictEqual([
+        {
+          name: 'instance',
+          type: 'text',
+          required: true,
+        },
+      ]),
+        expect(globalInstance?.admin?.hidden).toStrictEqual(true)
+
+      const plugin2 = payloadCloudPlugin()
+      const config2 = await plugin(createConfig())
+      const globalInstance2 = config2.globals?.find(
+        (global) => global.slug === 'payload-cloud-instance',
+      )
+      expect(globalInstance2).toBeDefined()
+    })
+  })
 })
 
 function assertCloudStorage(config: Config) {
