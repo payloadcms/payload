@@ -118,11 +118,28 @@ describe('jsx', () => {
       },
       {
         // Test if unquoted property keys in objects within arrays are supprted. This is
-        // supported through the more lenient json5 parser, instead of using JSON.parse()
+        // supported through the more lenient JSOX parser, instead of using JSON.parse()
         input: 'key={[1, 2, { hello: "there" }]}',
         inputFromOutput: 'key={[1, 2, { "hello": "there" }]}',
         output: {
           key: [1, 2, { hello: 'there' }],
+        },
+      },
+      {
+        // Test if ` strings work
+        input: `key={[1, 2, { hello: \`there\` }]}`,
+        inputFromOutput: 'key={[1, 2, { "hello": "there" }]}',
+        output: {
+          key: [1, 2, { hello: 'there' }],
+        },
+      },
+      {
+        // Test if multiline ` strings work
+        input: `key={[1, 2, { hello: \`Hello
+there\` }]}`,
+        inputFromOutput: 'key={[1, 2, { "hello": "Hello\\nthere" }]}',
+        output: {
+          key: [1, 2, { hello: 'Hello\nthere' }],
         },
       },
     ]
