@@ -4,14 +4,7 @@ import type { ListQuery, PaginatedDocs, Sort, Where } from 'payload'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-} from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
 
@@ -52,20 +45,6 @@ const Context = createContext({} as ListQueryContext)
 
 export const useListQuery = (): ListQueryContext => useContext(Context)
 
-type ListQueryAction = { query: ListQuery; type: 'RESET' } | { query: ListQuery; type: 'UPDATE' }
-
-const queryReducer = (state: ListQuery, action: ListQueryAction): ListQuery => {
-  switch (action.type) {
-    case 'RESET':
-      return action.query
-    case 'UPDATE':
-      return {
-        ...state,
-        ...action.query,
-      }
-  }
-}
-
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
   collectionSlug,
@@ -84,7 +63,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const { onQueryChange } = useListDrawerContext()
 
-  const [currentQuery, dispatchQuery] = useReducer(queryReducer, {}, () => {
+  const [currentQuery, setCurrentQuery] = useState<ListQuery>(() => {
     if (modifySearchParams) {
       return searchParams
     } else {
@@ -92,9 +71,12 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   })
 
+  const currentQueryRef = React.useRef(currentQuery)
+
+  // If the search params change externally, update the current query
   useEffect(() => {
     if (modifySearchParams) {
-      dispatchQuery({ type: 'RESET', query: searchParams })
+      setCurrentQuery(searchParams)
     }
   }, [searchParams, modifySearchParams])
 
@@ -141,7 +123,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         onChangeFn(newQuery)
       }
 
-      dispatchQuery({ type: 'RESET', query: newQuery })
+      setCurrentQuery(newQuery)
     },
     [
       currentQuery?.page,
@@ -196,26 +178,30 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     [refineListData],
   )
 
+  // If `defaultLimit` or `defaultSort` are updated externally, update the query
   useEffect(() => {
     if (modifySearchParams) {
       let shouldUpdateQueryString = false
+      const newQuery = { ...(currentQueryRef.current || {}) }
 
-      if (isNumber(defaultLimit) && !('limit' in currentQuery)) {
-        currentQuery.limit = String(defaultLimit)
+      // Allow the URL to override the default limit
+      if (isNumber(defaultLimit) && !('limit' in currentQueryRef.current)) {
+        newQuery.limit = String(defaultLimit)
         shouldUpdateQueryString = true
       }
 
-      if (defaultSort && !('sort' in currentQuery)) {
-        currentQuery.sort = defaultSort
+      // Allow the URL to override the default sort
+      if (defaultSort && !('sort' in currentQueryRef.current)) {
+        newQuery.sort = defaultSort
         shouldUpdateQueryString = true
       }
 
       if (shouldUpdateQueryString) {
-        dispatchQuery({ type: 'RESET', query: currentQuery })
-        router.replace(`?${qs.stringify(currentQuery)}`)
+        setCurrentQuery(newQuery)
+        router.replace(`?${qs.stringify(newQuery)}`)
       }
     }
-  }, [defaultSort, defaultLimit, router, modifySearchParams, currentQuery])
+  }, [defaultSort, defaultLimit, router, modifySearchParams])
 
   return (
     <Context.Provider
