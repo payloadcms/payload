@@ -1,3 +1,4 @@
+import { expect, describe, it } from 'vitest'
 import type { CollectionPermission, Permissions } from '../auth/types.js'
 
 import { sanitizePermissions } from './sanitizePermissions.js'

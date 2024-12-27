@@ -1,12 +1,12 @@
-import { jest } from '@jest/globals'
+import { expect, describe, it, vitest } from 'vitest'
 
 import type { ValidateOptions } from './config/types.js'
 
 import { number, password, point, relationship, select, text, textarea } from './validations.js'
 
-const t = jest.fn((string) => string)
+const t = vitest.fn((string) => string)
 
-let options: ValidateOptions<any, any, any> = {
+let options: ValidateOptions<any, any, any, any> = {
   data: undefined,
   operation: 'create',
   req: {

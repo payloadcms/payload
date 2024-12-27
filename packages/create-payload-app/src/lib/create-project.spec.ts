@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 import fs from 'fs'
 import fse from 'fs-extra'
 import globby from 'globby'
@@ -15,7 +15,7 @@ describe('createProject', () => {
   let projectDir: string
   beforeAll(() => {
     // eslint-disable-next-line no-console
-    console.log = jest.fn()
+    console.log = vitest.fn()
   })
 
   beforeEach(() => {

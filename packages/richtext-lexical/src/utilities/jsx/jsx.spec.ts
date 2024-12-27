@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { extractPropsFromJSXPropsString } from './extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from './jsx.js'
 

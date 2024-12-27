@@ -1,3 +1,4 @@
+import { describe, beforeAll, it, expect } from 'vitest'
 import type { Config, SanitizedConfig } from 'payload'
 
 import { flattenAllFields, sanitizeConfig } from 'payload'

@@ -37,8 +37,7 @@
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "test": "jest"
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity": "^3.614.0",
@@ -51,10 +50,8 @@
     "resend": "^0.17.2"
   },
   "devDependencies": {
-    "@types/jest": "29.5.12",
     "@types/nodemailer": "6.4.14",
-    "payload": "workspace:*",
-    "ts-jest": "^29.1.0"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"

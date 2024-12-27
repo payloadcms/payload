@@ -1,6 +1,7 @@
+import { describe, it, expect, vitest } from 'vitest'
 import type { AfterErrorHook, AfterErrorHookArgs, Config, PayloadRequest } from 'payload'
 
-import { APIError, defaults } from 'payload'
+import { defaults } from 'payload'
 
 import { sentryPlugin } from './index'
 import { randomUUID } from 'crypto'
@@ -70,7 +71,7 @@ describe('@payloadcms/plugin-sentry - unit', () => {
       collection: { slug: 'mock-slug' } as any,
     }
 
-    const captureExceptionSpy = jest.spyOn(mockSentry, 'captureException')
+    const captureExceptionSpy = vitest.spyOn(mockSentry, 'captureException')
 
     await hook(afterApiErrorHookArgs)
 

@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import type { Config } from '../../config/types.js'
 import type { CollectionConfig, Field } from '../../index.js'
 

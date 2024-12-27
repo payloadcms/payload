@@ -43,6 +43,8 @@ export const rootEslintConfig = [
       'packages/**/*.spec.ts',
       'templates/**',
       'examples/**',
+      '**/*.spec.ts',
+      'vitest.config.ts',
     ],
   },
   {
