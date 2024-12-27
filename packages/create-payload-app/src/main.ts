@@ -10,6 +10,7 @@ import type { CliArgs } from './types.js'
 import { configurePayloadConfig } from './lib/configure-payload-config.js'
 import { PACKAGE_VERSION } from './lib/constants.js'
 import { createProject } from './lib/create-project.js'
+import { parseExample } from './lib/examples.js'
 import { generateSecret } from './lib/generate-secret.js'
 import { getPackageManager } from './lib/get-package-manager.js'
 import { getNextAppDetails, initNext } from './lib/init-next.js'
@@ -35,15 +36,16 @@ export class Main {
     // @ts-expect-error bad typings
     this.args = arg(
       {
+        '--branch': String,
         '--db': String,
         '--db-accept-recommended': Boolean,
         '--db-connection-string': String,
+        '--example': String,
         '--help': Boolean,
         '--local-template': String,
         '--name': String,
         '--secret': String,
         '--template': String,
-        '--template-branch': String,
 
         // Next.js
         '--init-next': Boolean, // TODO: Is this needed if we detect if inside Next.js project?
@@ -65,6 +67,7 @@ export class Main {
 
         // Aliases
         '-d': '--db',
+        '-e': '--example',
         '-h': '--help',
         '-n': '--name',
         '-t': '--template',
@@ -204,52 +207,76 @@ export class Main {
         }
       }
 
-      if (debugFlag) {
-        debug(`Using templates from git tag: v${PACKAGE_VERSION}`)
-      }
+      const exampleArg = this.args['--example']
 
-      const validTemplates = getValidTemplates()
-      const template = await parseTemplate(this.args, validTemplates)
-      if (!template) {
-        p.log.error('Invalid template given')
-        p.outro(feedbackOutro())
-        process.exit(1)
-      }
+      if (exampleArg) {
+        const example = await parseExample({
+          name: exampleArg,
+          branch: this.args['--branch'] ?? 'main',
+        })
 
-      switch (template.type) {
-        case 'plugin': {
-          await createProject({
-            cliArgs: this.args,
-            packageManager,
-            projectDir,
-            projectName,
-            template,
-          })
-          break
+        if (!example) {
+          helpMessage()
+          process.exit(1)
         }
-        case 'starter': {
-          const dbDetails = await selectDb(this.args, projectName)
-          const payloadSecret = generateSecret()
 
-          await createProject({
-            cliArgs: this.args,
-            dbDetails,
-            packageManager,
-            projectDir,
-            projectName,
-            template,
-          })
+        await createProject({
+          cliArgs: this.args,
+          example,
+          packageManager,
+          projectDir,
+          projectName,
+        })
+      }
 
-          await manageEnvFiles({
-            cliArgs: this.args,
-            databaseType: dbDetails.type,
-            databaseUri: dbDetails.dbUri,
-            payloadSecret,
-            projectDir,
-            template,
-          })
+      if (debugFlag) {
+        debug(`Using ${exampleArg ? 'examples' : 'templates'} from git tag: v${PACKAGE_VERSION}`)
+      }
 
-          break
+      if (!exampleArg) {
+        const validTemplates = getValidTemplates()
+        const template = await parseTemplate(this.args, validTemplates)
+        if (!template) {
+          p.log.error('Invalid template given')
+          p.outro(feedbackOutro())
+          process.exit(1)
+        }
+
+        switch (template.type) {
+          case 'plugin': {
+            await createProject({
+              cliArgs: this.args,
+              packageManager,
+              projectDir,
+              projectName,
+              template,
+            })
+            break
+          }
+          case 'starter': {
+            const dbDetails = await selectDb(this.args, projectName)
+            const payloadSecret = generateSecret()
+
+            await createProject({
+              cliArgs: this.args,
+              dbDetails,
+              packageManager,
+              projectDir,
+              projectName,
+              template,
+            })
+
+            await manageEnvFiles({
+              cliArgs: this.args,
+              databaseType: dbDetails.type,
+              databaseUri: dbDetails.dbUri,
+              payloadSecret,
+              projectDir,
+              template,
+            })
+
+            break
+          }
         }
       }
 
