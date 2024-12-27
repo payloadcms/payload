@@ -87,6 +87,11 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
               equals: 'schedulePublish',
             },
           },
+          {
+            waitUntil: {
+              greater_than: new Date(),
+            },
+          },
         ],
       },
     }
