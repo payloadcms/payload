@@ -38,7 +38,7 @@
     "dev:payload": "PAYLOAD_CONFIG_PATH=./dev/payload.config.ts payload",
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
+    "prepublishOnly": "pnpm clean && pnpm build",
     "test": "jest"
   },
   "devDependencies": {
