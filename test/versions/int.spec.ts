@@ -1753,6 +1753,84 @@ describe('Versions', () => {
     })
   })
 
+  describe('Scheduled Publish', () => {
+    it('should allow scheduled publish', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'my doc to publish in the future',
+          description: 'hello',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+        },
+      })
+
+      await wait(4000)
+
+      await payload.jobs.run()
+
+      const retrieved = await payload.findByID({
+        collection: draftCollectionSlug,
+        id: draft.id,
+      })
+
+      expect(retrieved._status).toStrictEqual('published')
+    })
+
+    it('should allow scheduled unpublish', async () => {
+      const published = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'my doc to publish in the future',
+          description: 'hello',
+          _status: 'published',
+        },
+        draft: true,
+      })
+
+      expect(published._status).toStrictEqual('published')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          type: 'unpublish',
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: published.id,
+          },
+        },
+      })
+
+      await wait(4000)
+
+      await payload.jobs.run()
+
+      const retrieved = await payload.findByID({
+        collection: draftCollectionSlug,
+        id: published.id,
+      })
+
+      expect(retrieved._status).toStrictEqual('draft')
+    })
+  })
+
   describe('Publish Individual Locale', () => {
     const collection = localizedCollectionSlug
     const global = localizedGlobalSlug

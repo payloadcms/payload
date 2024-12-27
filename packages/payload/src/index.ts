@@ -1374,5 +1374,6 @@ export { getLatestCollectionVersion } from './versions/getLatestCollectionVersio
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 
 export { saveVersion } from './versions/saveVersion.js'
+export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

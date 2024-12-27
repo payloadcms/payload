@@ -11,12 +11,22 @@ import React, { createContext, useCallback } from 'react'
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
+import type {
+  schedulePublishHandler,
+  SchedulePublishHandlerArgs,
+} from '../../utilities/schedulePublishHandler.js'
 
 type GetFormStateClient = (
   args: {
     signal?: AbortSignal
   } & Omit<BuildFormStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildFormStateHandler>
+
+type SchedulePublishClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<SchedulePublishHandlerArgs, 'clientConfig' | 'req'>,
+) => ReturnType<typeof schedulePublishHandler>
 
 type GetTableStateClient = (
   args: {
@@ -53,6 +63,7 @@ type ServerFunctionsContextType = {
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
   renderDocument: RenderDocument
+  schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
 }
 
@@ -82,6 +93,36 @@ export const ServerFunctionsProvider: React.FC<{
         name: 'render-document-slots',
         args,
       }),
+    [serverFunction],
+  )
+
+  const schedulePublish = useCallback<SchedulePublishClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args
+
+      try {
+        if (!remoteSignal?.aborted) {
+          const result = (await serverFunction({
+            name: 'schedule-publish',
+            args: { ...rest },
+          })) as ReturnType<typeof schedulePublishHandler> // TODO: infer this type when `strictNullChecks` is enabled
+
+          if (!remoteSignal?.aborted) {
+            return result
+          }
+        }
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+
+      let error = `Error scheduling ${rest.type}`
+
+      if (rest.doc) {
+        error += ` for document with ID ${rest.doc.value} in collection ${rest.doc.relationTo}`
+      }
+
+      return { error: '' }
+    },
     [serverFunction],
   )
 
@@ -179,6 +220,7 @@ export const ServerFunctionsProvider: React.FC<{
         getFormState,
         getTableState,
         renderDocument,
+        schedulePublish,
         serverFunction,
       }}
     >

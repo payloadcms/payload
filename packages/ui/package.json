@@ -53,6 +53,11 @@
       "types": "./src/utilities/buildTableState.ts",
       "default": "./src/utilities/buildTableState.ts"
     },
+    "./utilities/schedulePublishHandler": {
+      "import": "./src/utilities/schedulePublishHandler.ts",
+      "types": "./src/utilities/schedulePublishHandler.ts",
+      "default": "./src/utilities/schedulePublishHandler.ts"
+    },
     "./utilities/getClientConfig": {
       "import": "./src/utilities/getClientConfig.ts",
       "types": "./src/utilities/getClientConfig.ts",
