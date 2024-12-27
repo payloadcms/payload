@@ -1,6 +1,6 @@
 import React from 'react'
 
-const BeforeLogin: React.FC = () => {
+export const BeforeLogin: React.FC = () => {
   if (process.env.PAYLOAD_PUBLIC_SEED === 'true') {
     return (
       <p>
@@ -13,5 +13,3 @@ const BeforeLogin: React.FC = () => {
   }
   return null
 }
-
-export default BeforeLogin

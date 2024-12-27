@@ -13,7 +13,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Za početak, izradite prvog korisnika.',
     changePassword: 'Promijeni lozinku',
     checkYourEmailForPasswordReset:
-      'Provjerite e-mail s poveznicom koja će Vam omogućiti sigurnu promjenu lozinke.',
+      'Ako je e-mail adresa povezana s računom, uskoro ćete primiti upute za resetiranje lozinke. Molimo provjerite svoju mapu za neželjenu poštu ili spam ako ne vidite e-mail u svojoj pristigloj pošti.',
     confirmGeneration: 'Potvrdi generiranje',
     confirmPassword: 'Potvrdi lozinku',
     createFirstUser: 'Izradi prvog korisnika',
@@ -117,6 +117,7 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Pogreška pri ponovnom indeksiranju kolekcije {{collection}}. Operacija je prekinuta.',
     unableToUpdateCount: 'Nije moguće ažurirati {{count}} od {{total}} {{label}}.',
     unauthorized: 'Neovlašteno, morate biti prijavljeni da biste uputili ovaj zahtjev.',
+    unauthorizedAdmin: 'Neovlašteno, ovaj korisnik nema pristup administratorskom panelu.',
     unknown: 'Došlo je do nepoznate pogreške.',
     unPublishingDocument: 'Došlo je do problema pri poništavanju objave ovog dokumenta.',
     unspecific: 'Došlo je do pogreške.',

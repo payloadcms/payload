@@ -12,7 +12,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     backToLogin: '返回登入頁面',
     beginCreateFirstUser: '首先，請建立您的第一個使用者。',
     changePassword: '更改密碼',
-    checkYourEmailForPasswordReset: '請檢查您的電子郵件以獲取安全重設密碼的連結。',
+    checkYourEmailForPasswordReset:
+      '如果此電子郵件地址已與一個帳戶相關聯，您將很快收到重設密碼的指示。如果您在收件箱中看不到該電子郵件，請檢查您的垃圾郵件或垃圾郵件夾。',
     confirmGeneration: '確認生成',
     confirmPassword: '確認密碼',
     createFirstUser: '建立第一個使用者',
@@ -110,6 +111,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     unableToReindexCollection: '重新索引集合 {{collection}} 時出現錯誤。操作已中止。',
     unableToUpdateCount: '無法從 {{total}} 個中更新 {{count}} 個 {{label}}。',
     unauthorized: '未經授權，您必須登錄才能提出這個請求。',
+    unauthorizedAdmin: '未經授權，此使用者無法訪問管理面板。',
     unknown: '發生了一個未知的錯誤。',
     unPublishingDocument: '取消發布此文件時出現了問題。',
     unspecific: '發生了一個錯誤。',

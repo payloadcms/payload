@@ -13,7 +13,7 @@ export const arTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'للبدء, قم بإنشاء المستخدم الأوّل.',
     changePassword: 'تغيير كلمة المرور',
     checkYourEmailForPasswordReset:
-      'تحقّق من بريدك الإلكتروني بحثًا عن رابط يسمح لك بإعادة تعيين كلمة المرور الخاصّة بك بشكل آمن.',
+      'إذا كان عنوان البريد الإلكتروني مرتبطًا بحساب، فستتلقى تعليمات لإعادة تعيين كلمة المرور قريبًا. يرجى التحقق من مجلد البريد العشوائي أو السبام إذا لم تر البريد الإلكتروني في صندوق الوارد.',
     confirmGeneration: 'تأكيد التّوليد',
     confirmPassword: 'تأكيد كلمة المرور',
     createFirstUser: 'إنشاء المستخدم الأوّل',
@@ -115,6 +115,7 @@ export const arTranslations: DefaultTranslationsObject = {
     unableToReindexCollection: 'خطأ في إعادة فهرسة المجموعة {{collection}}. تم إيقاف العملية.',
     unableToUpdateCount: 'يتعذّر تحديث {{count}} من {{total}} {{label}}.',
     unauthorized: 'غير مصرّح لك ، عليك أن تقوم بتسجيل الدّخول لتتمكّن من تقديم هذا الطّلب.',
+    unauthorizedAdmin: 'غير مصرّح لك بالوصول إلى لوحة التحكّم.',
     unknown: 'حدث خطأ غير معروف.',
     unPublishingDocument: 'حدث خطأ أثناء إلغاء نشر هذا المستند.',
     unspecific: 'حدث خطأ.',

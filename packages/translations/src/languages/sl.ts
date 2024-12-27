@@ -13,7 +13,7 @@ export const slTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Za začetek ustvarite prvega uporabnika.',
     changePassword: 'Spremeni geslo',
     checkYourEmailForPasswordReset:
-      'Preverite svoj e-poštni predal za povezavo, ki vam bo omogočila varno ponastaviti geslo.',
+      'Če je e-poštni naslov povezan z računom, boste kmalu prejeli navodila za ponastavitev gesla. Prosimo, preverite mapo za neželeno pošto ali spam, če e-pošte ne vidite v vašem prejemu.',
     confirmGeneration: 'Potrdi generiranje',
     confirmPassword: 'Potrdi geslo',
     createFirstUser: 'Ustvari prvega uporabnika',
@@ -116,6 +116,7 @@ export const slTranslations: DefaultTranslationsObject = {
       'Napaka pri reindeksiranju zbirke {{collection}}. Operacija je bila prekinjena.',
     unableToUpdateCount: 'Ni bilo mogoče posodobiti {{count}} od {{total}} {{label}}.',
     unauthorized: 'Neavtorizirano, za to zahtevo morate biti prijavljeni.',
+    unauthorizedAdmin: 'Neavtorizirano, ta uporabnik nima dostopa do skrbniškega vmesnika.',
     unknown: 'Prišlo je do neznane napake.',
     unPublishingDocument: 'Pri umiku objave tega dokumenta je prišlo do težave.',
     unspecific: 'Prišlo je do napake.',

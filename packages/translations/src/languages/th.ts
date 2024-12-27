@@ -13,7 +13,7 @@ export const thTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'สร้างผู้ใช้แรกเพื่อเริ่มใช้งาน',
     changePassword: 'เปลี่ยนรหัสผ่าน',
     checkYourEmailForPasswordReset:
-      'ระบบได้ส่งอีเมลสำหรับรีเซ็ตรหัสผ่านไปที่อีเมลของคุณแล้ว โปรดเช็กอีเมลของคุณ',
+      'ถ้าที่อยู่อีเมลถูกเชื่อมโยงกับบัญชีผู้ใช้งาน คุณจะได้รับคำแนะนำในการเปลี่ยนรหัสผ่านในไม่ช้า กรุณาตรวจสอบโฟลเดอร์สแปมหรือจัด mail ถ้าคุณไม่เห็นอีเมลในกล่องจดหมายขาเข้า',
     confirmGeneration: 'ยืนยันการสร้าง',
     confirmPassword: 'ยืนยันรหัสผ่าน',
     createFirstUser: 'สร้างผู้ใช้แรก',
@@ -114,6 +114,7 @@ export const thTranslations: DefaultTranslationsObject = {
       'เกิดข้อผิดพลาดในการจัดทำดัชนีใหม่ของคอลเลกชัน {{collection}}. การดำเนินการถูกยกเลิก',
     unableToUpdateCount: 'ไม่สามารถอัปเดต {{count}} จาก {{total}} {{label}}',
     unauthorized: 'คุณไม่ได้รับอนุญาต กรุณาเข้าสู่ระบบเพื่อทำคำขอนี้',
+    unauthorizedAdmin: 'คุณไม่ได้รับอนุญาตให้เข้าถึงแผงผู้ดูแล',
     unknown: 'เกิดปัญหาบางอย่างที่ไม่ทราบสาเหตุ',
     unPublishingDocument: 'เกิดปัญหาระหว่างการยกเลิกการเผยแพร่เอกสารนี้',
     unspecific: 'เกิดปัญหาบางอย่าง',

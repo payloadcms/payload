@@ -13,7 +13,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Чтобы начать - создайте первого пользователя.',
     changePassword: 'Сменить пароль',
     checkYourEmailForPasswordReset:
-      'На ваш email отправлена ссылка, с помощью которой можно будет сбросить пароль.',
+      'Если указанный адрес электронной почты связан с аккаунтом, вы скоро получите инструкции по сбросу пароля. Пожалуйста, проверьте папку со спамом или нежелательной почтой, если вы не видите письма во входящих.',
     confirmGeneration: 'Подтвердить генерацию',
     confirmPassword: 'Подтверждение пароля',
     createFirstUser: 'Создание первого пользователя',
@@ -117,6 +117,7 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Ошибка при переиндексации коллекции {{collection}}. Операция прервана.',
     unableToUpdateCount: 'Не удалось обновить {{count}} из {{total}} {{label}}.',
     unauthorized: 'Нет доступа, вы должны войти, чтобы сделать этот запрос.',
+    unauthorizedAdmin: 'Нет доступа, этот пользователь не имеет доступа к панели администратора.',
     unknown: 'Произошла неизвестная ошибка.',
     unPublishingDocument: 'При отмене публикации этого документа возникла проблема.',
     unspecific: 'Произошла ошибка.',

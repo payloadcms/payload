@@ -13,7 +13,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Om te beginnen maakt u uw eerste gebruiker aan.',
     changePassword: 'Wachtwoord wijzigen',
     checkYourEmailForPasswordReset:
-      'Controleer uw e-mail voor een link waarmee u uw wachtwoord veilig opnieuw kunt instellen.',
+      'Als het e-mailadres is gekoppeld aan een account, ontvangt u binnenkort instructies om uw wachtwoord opnieuw in te stellen. Controleer uw spam- of ongewenste e-mailmap als u de e-mail niet in uw inbox ziet.',
     confirmGeneration: 'Bevestigen',
     confirmPassword: 'Wachtwoord bevestigen',
     createFirstUser: 'Eerste gebruiker aanmaken',
@@ -117,6 +117,8 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Fout bij het herindexeren van de collectie {{collection}}. De operatie is afgebroken.',
     unableToUpdateCount: 'Kan {{count}} van {{total}} {{label}} niet updaten.',
     unauthorized: 'Ongeautoriseerd, u moet ingelogd zijn om dit verzoek te doen.',
+    unauthorizedAdmin:
+      'Ongeautoriseerd, deze gebruiker heeft geen toegang tot het beheerderspaneel.',
     unknown: 'Er is een onbekende fout opgetreden.',
     unPublishingDocument: 'Er was een probleem met het depubliceren van dit document.',
     unspecific: 'Er is een fout opgetreden.',

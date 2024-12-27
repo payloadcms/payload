@@ -106,10 +106,15 @@ export interface Page {
           link: {
             type?: ('reference' | 'custom') | null;
             newTab?: boolean | null;
-            reference?: {
-              relationTo: 'pages';
-              value: string | Page;
-            } | null;
+            reference?:
+              | ({
+                  relationTo: 'pages';
+                  value: string | Page;
+                } | null)
+              | ({
+                  relationTo: 'posts';
+                  value: string | Post;
+                } | null);
             url?: string | null;
             label: string;
             appearance?: ('default' | 'outline') | null;
@@ -126,6 +131,50 @@ export interface Page {
     description?: string | null;
   };
   publishedAt?: string | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  heroImage?: (string | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  relatedPosts?: (string | Post)[] | null;
+  categories?: (string | Category)[] | null;
+  meta?: {
+    title?: string | null;
+    image?: (string | null) | Media;
+    description?: string | null;
+  };
+  publishedAt?: string | null;
+  authors?: (string | User)[] | null;
+  populatedAuthors?:
+    | {
+        id?: string | null;
+        name?: string | null;
+      }[]
+    | null;
   slug?: string | null;
   slugLock?: boolean | null;
   updatedAt: string;
@@ -226,6 +275,43 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  title: string;
+  parent?: (string | null) | Category;
+  breadcrumbs?:
+    | {
+        doc?: (string | null) | Category;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
@@ -249,10 +335,15 @@ export interface CallToActionBlock {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null);
           url?: string | null;
           label: string;
           appearance?: ('default' | 'outline') | null;
@@ -291,10 +382,15 @@ export interface ContentBlock {
         link?: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null);
           url?: string | null;
           label: string;
           appearance?: ('default' | 'outline') | null;
@@ -349,86 +445,6 @@ export interface ArchiveBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  title: string;
-  parent?: (string | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (string | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  title: string;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  relatedPosts?: (string | Post)[] | null;
-  categories?: (string | Category)[] | null;
-  meta?: {
-    title?: string | null;
-    image?: (string | null) | Media;
-    description?: string | null;
-  };
-  publishedAt?: string | null;
-  authors?: (string | User)[] | null;
-  populatedAuthors?:
-    | {
-        id?: string | null;
-        name?: string | null;
-      }[]
-    | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -804,80 +820,11 @@ export interface PagesSelect<T extends boolean = true> {
   layout?:
     | T
     | {
-        cta?:
-          | T
-          | {
-              richText?: T;
-              links?:
-                | T
-                | {
-                    link?:
-                      | T
-                      | {
-                          type?: T;
-                          newTab?: T;
-                          reference?: T;
-                          url?: T;
-                          label?: T;
-                          appearance?: T;
-                        };
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        content?:
-          | T
-          | {
-              columns?:
-                | T
-                | {
-                    size?: T;
-                    richText?: T;
-                    enableLink?: T;
-                    link?:
-                      | T
-                      | {
-                          type?: T;
-                          newTab?: T;
-                          reference?: T;
-                          url?: T;
-                          label?: T;
-                          appearance?: T;
-                        };
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        mediaBlock?:
-          | T
-          | {
-              media?: T;
-              id?: T;
-              blockName?: T;
-            };
-        archive?:
-          | T
-          | {
-              introContent?: T;
-              populateBy?: T;
-              relationTo?: T;
-              categories?: T;
-              limit?: T;
-              selectedDocs?: T;
-              id?: T;
-              blockName?: T;
-            };
-        formBlock?:
-          | T
-          | {
-              form?: T;
-              enableIntro?: T;
-              introContent?: T;
-              id?: T;
-              blockName?: T;
-            };
+        cta?: T | CallToActionBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        mediaBlock?: T | MediaBlockSelect<T>;
+        archive?: T | ArchiveBlockSelect<T>;
+        formBlock?: T | FormBlockSelect<T>;
       };
   meta?:
     | T
@@ -895,10 +842,95 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CallToActionBlock_select".
+ */
+export interface CallToActionBlockSelect<T extends boolean = true> {
+  richText?: T;
+  links?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+              appearance?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock_select".
+ */
+export interface ContentBlockSelect<T extends boolean = true> {
+  columns?:
+    | T
+    | {
+        size?: T;
+        richText?: T;
+        enableLink?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+              appearance?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock_select".
+ */
+export interface MediaBlockSelect<T extends boolean = true> {
+  media?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ArchiveBlock_select".
+ */
+export interface ArchiveBlockSelect<T extends boolean = true> {
+  introContent?: T;
+  populateBy?: T;
+  relationTo?: T;
+  categories?: T;
+  limit?: T;
+  selectedDocs?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormBlock_select".
+ */
+export interface FormBlockSelect<T extends boolean = true> {
+  form?: T;
+  enableIntro?: T;
+  introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  heroImage?: T;
   content?: T;
   relatedPosts?: T;
   categories?: T;
@@ -1283,10 +1315,15 @@ export interface Header {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null);
           url?: string | null;
           label: string;
         };
@@ -1307,10 +1344,15 @@ export interface Footer {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null);
           url?: string | null;
           label: string;
         };

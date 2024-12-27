@@ -12,7 +12,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     backToLogin: '回到登录页面',
     beginCreateFirstUser: '首先，请创建您的第一个用户。',
     changePassword: '更改密码',
-    checkYourEmailForPasswordReset: '请查看您的电子邮件，以取得安全重置密码的链接。',
+    checkYourEmailForPasswordReset:
+      '如果此电子邮件地址已关联到一个账户，你将会很快收到重置密码的说明。如果你在收件箱中看不到此电子邮件，请检查你的垃圾邮件或垃圾邮件夹。',
     confirmGeneration: '确认生成',
     confirmPassword: '确认密码',
     createFirstUser: '创建第一个用户',
@@ -110,6 +111,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     unableToReindexCollection: '重新索引集合 {{collection}} 时出错。操作已中止。',
     unableToUpdateCount: '无法更新 {{count}} 个，共 {{total}} 个 {{label}}。',
     unauthorized: '未经授权，您必须登录才能提出这个请求。',
+    unauthorizedAdmin: '未经授权，此用户无权访问管理面板。',
     unknown: '发生了一个未知的错误。',
     unPublishingDocument: '取消发布此文件时出现了问题。',
     unspecific: '发生了一个错误。',

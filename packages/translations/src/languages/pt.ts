@@ -13,7 +13,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Para começar, crie seu primeiro usuário.',
     changePassword: 'Mudar senha',
     checkYourEmailForPasswordReset:
-      'Verifique seu email para um link que permitirá que você redefina sua senha com segurança.',
+      'Se o endereço de email estiver associado a uma conta, você receberá instruções para redefinir sua senha em breve. Por favor, verifique sua pasta de spam ou lixo eletrônico se você não vir o email na sua caixa de entrada.',
     confirmGeneration: 'Confirmar Geração',
     confirmPassword: 'Confirmar Senha',
     createFirstUser: 'Criar primeiro usuário',
@@ -116,6 +116,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     unableToReindexCollection: 'Erro ao reindexar a coleção {{collection}}. Operação abortada.',
     unableToUpdateCount: 'Não foi possível atualizar {{count}} de {{total}} {{label}}.',
     unauthorized: 'Não autorizado. Você deve estar logado para fazer essa requisição',
+    unauthorizedAdmin: 'Não autorizado, esse usuário não tem acesso ao painel de administração.',
     unknown: 'Ocorreu um erro desconhecido.',
     unPublishingDocument: 'Ocorreu um problema ao despublicar esse documento',
     unspecific: 'Ocorreu um erro.',

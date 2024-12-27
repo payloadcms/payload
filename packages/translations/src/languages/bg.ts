@@ -13,7 +13,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'За да започнеш, създай първия си потребител',
     changePassword: 'Промяна на паролата',
     checkYourEmailForPasswordReset:
-      'Провери имейла си за връзка, която ще ти позволи да промениш паролата си',
+      'Ако имейл адресът е свързан с акаунт, скоро ще получите инструкции за възстановяване на паролата си. Моля, проверете папката си за спам или нежелана поща, ако не виждате имейла във входящата си поща.',
     confirmGeneration: 'Потвърди създаването',
     confirmPassword: 'Потвърди парола',
     createFirstUser: 'Създай първи потребител',
@@ -116,6 +116,7 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Грешка при преиндексиране на колекцията {{collection}}. Операцията е прекратена.',
     unableToUpdateCount: 'Не беше възможно да се обновят {{count}} от {{total}} {{label}}.',
     unauthorized: 'Неоторизиран, трябва да влезеш, за да извършиш тази заявка.',
+    unauthorizedAdmin: 'Неоторизиран, трябва да си администратор, за да извършиш тази заявка.',
     unknown: 'Неизвестна грешка.',
     unPublishingDocument: 'Имаше проблем при скриването на този документ.',
     unspecific: 'Грешка.',

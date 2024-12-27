@@ -13,7 +13,7 @@ export const enTranslations = {
     beginCreateFirstUser: 'To begin, create your first user.',
     changePassword: 'Change Password',
     checkYourEmailForPasswordReset:
-      'Check your email for a link that will allow you to securely reset your password.',
+      "If the email address is associated with an account, you will receive instructions to reset your password shortly. Please check your spam or junk mail folder if you don't see the email in your inbox.",
     confirmGeneration: 'Confirm Generation',
     confirmPassword: 'Confirm Password',
     createFirstUser: 'Create first user',
@@ -116,6 +116,7 @@ export const enTranslations = {
     unableToReindexCollection: 'Error reindexing collection {{collection}}. Operation aborted.',
     unableToUpdateCount: 'Unable to update {{count}} out of {{total}} {{label}}.',
     unauthorized: 'Unauthorized, you must be logged in to make this request.',
+    unauthorizedAdmin: 'Unauthorized, this user does not have access to the admin panel.',
     unknown: 'An unknown error has occurred.',
     unPublishingDocument: 'There was a problem while un-publishing this document.',
     unspecific: 'An error has occurred.',

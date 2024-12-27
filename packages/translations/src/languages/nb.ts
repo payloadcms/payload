@@ -13,7 +13,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Opprett din første bruker for å fortsette.',
     changePassword: 'Endre passord',
     checkYourEmailForPasswordReset:
-      'Sjekk e-posten din for en lenke som lar deg tilbakestille passordet ditt.',
+      'Hvis e-postadressen er knyttet til en konto, vil du motta instruksjoner for å tilbakestille passordet ditt snart. Vennligst sjekk spam- eller junk mail-mappen din hvis du ikke ser e-posten i innboksen din.',
     confirmGeneration: 'Bekreft generering',
     confirmPassword: 'Bekreft passord',
     createFirstUser: 'Opprett første bruker',
@@ -116,6 +116,7 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Feil ved reindeksering av samlingen {{collection}}. Operasjonen ble avbrutt.',
     unableToUpdateCount: 'Kan ikke oppdatere {{count}} av {{total}} {{label}}.',
     unauthorized: 'Uautorisert, du må være innlogget for å gjøre denne forespørselen.',
+    unauthorizedAdmin: 'Uautorisert, denne brukeren har ikke tilgang til kontrollpanelet.',
     unknown: 'En ukjent feil har oppstått.',
     unPublishingDocument: 'Det oppstod et problem under avpublisering av dokumentet.',
     unspecific: 'En feil har oppstått.',

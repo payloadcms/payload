@@ -13,7 +13,7 @@ export const deTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Erstelle deinen ersten Benutzer um zu beginnen',
     changePassword: 'Passwort ändern',
     checkYourEmailForPasswordReset:
-      'Du solltest eine E-Mail mit einem Link zum sicheren Zurücksetzen deines Passworts erhalten haben.',
+      'Wenn die E-Mail-Adresse mit einem Konto verknüpft ist, erhalten Sie in Kürze Anweisungen zur Zurücksetzung Ihres Passworts. Bitte überprüfen Sie Ihren Spam- oder Junk-Mail-Ordner, wenn Sie die E-Mail nicht in Ihrem Posteingang sehen.',
     confirmGeneration: 'Generierung bestätigen',
     confirmPassword: 'Passwort bestätigen',
     createFirstUser: 'Ersten Benutzer erstellen',
@@ -118,6 +118,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Fehler beim Neuindizieren der Sammlung {{collection}}. Vorgang abgebrochen.',
     unableToUpdateCount: '{{count}} von {{total}} {{label}} konnte nicht aktualisiert werden.',
     unauthorized: 'Nicht autorisiert - du musst angemeldet sein, um diese Anfrage zu stellen.',
+    unauthorizedAdmin: 'Nicht autorisiert, dieser Benutzer hat keinen Zugriff auf das Admin-Panel.',
     unknown: 'Ein unbekannter Fehler ist aufgetreten.',
     unPublishingDocument: 'Es gab ein Problem, dieses Dokument auf Entwurf zu setzen.',
     unspecific: 'Ein Fehler ist aufgetreten.',

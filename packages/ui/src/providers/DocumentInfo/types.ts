@@ -70,9 +70,9 @@ export type DocumentInfoContext = {
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
   title: string
-  unlockDocument: (docId: number | string, slug: string) => Promise<void>
+  unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
-  updateDocumentEditor: (docId: number | string, slug: string, user: ClientUser) => Promise<void>
+  updateDocumentEditor: (docID: number | string, slug: string, user: ClientUser) => Promise<void>
   updateSavedDocumentData: (data: Data) => void
   versionCount: number
 } & DocumentInfoProps

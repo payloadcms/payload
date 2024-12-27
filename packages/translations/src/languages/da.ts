@@ -13,7 +13,7 @@ export const daTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'For at starte, opret en bruger.',
     changePassword: 'Skift adgangskode',
     checkYourEmailForPasswordReset:
-      'Tjek din email for at finde linket der vil give adgang til at ændre din adgangskode',
+      'Hvis e-mailadressen er forbundet med en konto, vil du kort tid modtage instruktioner til at nulstille din adgangskode. Tjek venligst din spam- eller junkmail-mappe, hvis du ikke ser e-mailen i din indbakke.',
     confirmGeneration: 'Bekræft generering',
     confirmPassword: 'Bekræft adgangskode',
     createFirstUser: 'Opret bruger',
@@ -115,6 +115,7 @@ export const daTranslations: DefaultTranslationsObject = {
       'Fejl ved genindeksering af samling {{collection}}. Operationen blev afbrudt.',
     unableToUpdateCount: 'Kunne ikke slette {{count}} mangler {{total}} {{label}}.',
     unauthorized: 'Uautoriseret, log in for at gennemføre handlingen.',
+    unauthorizedAdmin: 'Uautoriseret, denne bruger har ikke adgang til adminpanelet.',
     unknown: 'En ukendt fejl er opstået.',
     unPublishingDocument: 'Der opstod et problem med at ophæve udgivelsen af dette dokument.',
     unspecific: 'En fejl er opstået.',

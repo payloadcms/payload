@@ -13,7 +13,7 @@ export const esTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Para empezar, crea tu primer usuario.',
     changePassword: 'Cambiar contraseña',
     checkYourEmailForPasswordReset:
-      'Revisa tu correo con el enlace para restablecer tu contraseña de forma segura.',
+      'Si la dirección de correo electrónico está asociada con una cuenta, recibirá instrucciones para restablecer su contraseña en breve. Por favor, revise su carpeta de spam o correo no deseado si no ve el correo electrónico en su bandeja de entrada.',
     confirmGeneration: 'Confirmar Generación',
     confirmPassword: 'Confirmar Contraseña',
     createFirstUser: 'Crear al primer usuario',
@@ -116,6 +116,7 @@ export const esTranslations: DefaultTranslationsObject = {
       'Error al reindexar la colección {{collection}}. Operación abortada.',
     unableToUpdateCount: 'No se puede actualizar {{count}} de {{total}} {{label}}.',
     unauthorized: 'No autorizado, debes iniciar sesión para realizar esta solicitud.',
+    unauthorizedAdmin: 'No autorizado, este usuario no tiene acceso al panel de administración.',
     unknown: 'Ocurrió un error desconocido.',
     unPublishingDocument: 'Ocurrió un error al despublicar este documento.',
     unspecific: 'Ocurrió un error.',

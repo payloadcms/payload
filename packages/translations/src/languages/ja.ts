@@ -13,7 +13,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'まずは、最初のユーザーを作成します。',
     changePassword: 'パスワードを変更',
     checkYourEmailForPasswordReset:
-      'パスワードを安全に再設定するためのリンクがメールで送られてくるので、確認してください。',
+      'そのメールアドレスがアカウントに関連付けられている場合、すぐにパスワードをリセットするための指示が送信されます。メールが受信トレイにない場合は、迷惑メールフォルダまたはジャンクメールフォルダを確認してください。',
     confirmGeneration: '生成の確認',
     confirmPassword: 'パスワードの確認',
     createFirstUser: '最初のユーザーを作成',
@@ -117,6 +117,7 @@ export const jaTranslations: DefaultTranslationsObject = {
       'コレクション {{collection}} の再インデックス中にエラーが発生しました。操作は中止されました。',
     unableToUpdateCount: '{{total}} {{label}} のうち {{count}} 個を更新できません。',
     unauthorized: '認証されていません。このリクエストを行うにはログインが必要です。',
+    unauthorizedAdmin: '管理画面へのアクセス権がないため、認証されていません。',
     unknown: '不明なエラーが発生しました。',
     unPublishingDocument: 'このデータを非公開する際に問題が発生しました。',
     unspecific: 'エラーが発生しました。',

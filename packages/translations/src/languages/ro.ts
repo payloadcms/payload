@@ -13,7 +13,7 @@ export const roTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Pentru a începe, creați primul utilizator.',
     changePassword: 'Schimbați parola',
     checkYourEmailForPasswordReset:
-      'Verificați emailul pentru un link care vă va permite să vă resetați parola în siguranță.',
+      'Dacă adresa de e-mail este asociată cu un cont, veți primi în curând instrucțiuni pentru resetarea parolei voastre. Vă rugăm să verificați dosarul de spam sau de mesaje nedorite dacă nu vedeți e-mailul în inbox-ul dvs.',
     confirmGeneration: 'Confirmați generarea',
     confirmPassword: 'Confirmați parola',
     createFirstUser: 'Creați primul utilizator',
@@ -117,7 +117,8 @@ export const roTranslations: DefaultTranslationsObject = {
     unableToReindexCollection:
       'Eroare la reindexarea colecției {{collection}}. Operațiune anulată.',
     unableToUpdateCount: 'Nu se poate șterge {{count}} din {{total}} {{label}}.',
-    unauthorized: 'neautorizat, trebuie să vă conectați pentru a face această cerere.',
+    unauthorized: 'Neautorizat, trebuie să vă conectați pentru a face această cerere.',
+    unauthorizedAdmin: 'Neautorizat, acest utilizator nu are acces la panoul de administrare.',
     unknown: 'S-a produs o eroare necunoscută.',
     unPublishingDocument: 'A existat o problemă în timpul nepublicării acestui document.',
     unspecific: 'S-a produs o eroare.',

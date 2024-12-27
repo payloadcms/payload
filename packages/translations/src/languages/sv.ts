@@ -13,7 +13,7 @@ export const svTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'För att börja, skapa din första användare.',
     changePassword: 'Byt Lösenord',
     checkYourEmailForPasswordReset:
-      'Kontrollera din e-post efter en länk som gör att du säkert kan återställa ditt lösenord.',
+      'Om e-postadressen är kopplad till ett konto kommer du inom kort att få instruktioner för att återställa ditt lösenord. Vänligen kontrollera din skräppost eller junk mail-mapp om du inte ser e-postmeddelandet i din inkorg.',
     confirmGeneration: 'Bekräfta Generering',
     confirmPassword: 'Bekräfta Lösenord',
     createFirstUser: 'Skapa första användaren',
@@ -116,6 +116,7 @@ export const svTranslations: DefaultTranslationsObject = {
       'Fel vid omindexering av samlingen {{collection}}. Operationen avbröts.',
     unableToUpdateCount: 'Det gick inte att uppdatera {{count}} av {{total}} {{label}}.',
     unauthorized: 'Obehörig, du måste vara inloggad för att göra denna begäran.',
+    unauthorizedAdmin: 'Obehörig, denna användare har inte åtkomst till adminpanelen.',
     unknown: 'Ett okänt fel har uppstått.',
     unPublishingDocument: 'Det uppstod ett problem när det här dokumentet skulle avpubliceras.',
     unspecific: 'Ett fel har uppstått.',

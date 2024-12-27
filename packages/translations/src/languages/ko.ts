@@ -13,7 +13,7 @@ export const koTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: '시작하려면 첫 번째 사용자를 생성하세요.',
     changePassword: '비밀번호 변경',
     checkYourEmailForPasswordReset:
-      '비밀번호 재설정을 안전하게 수행할 수 있는 링크가 포함된 이메일을 확인하세요.',
+      '이메일 주소가 계정과 연결되어 있다면, 곧 비밀번호를 재설정하는 방법에 대한 지시를 받게 될 것입니다. 인박스에서 이메일을 찾을 수 없다면 스팸 또는 정크 메일 폴더를 확인해 주시기 바랍니다.',
     confirmGeneration: '생성 확인',
     confirmPassword: '비밀번호 확인',
     createFirstUser: '첫 번째 사용자 생성',
@@ -116,6 +116,7 @@ export const koTranslations: DefaultTranslationsObject = {
       '{{collection}} 컬렉션의 재인덱싱 중 오류가 발생했습니다. 작업이 중단되었습니다.',
     unableToUpdateCount: '총 {{total}}개 중 {{count}}개의 {{label}}을(를) 업데이트할 수 없습니다.',
     unauthorized: '권한 없음, 이 요청을 수행하려면 로그인해야 합니다.',
+    unauthorizedAdmin: '관리자 패널에 액세스할 수 없습니다.',
     unknown: '알 수 없는 오류가 발생했습니다.',
     unPublishingDocument: '이 문서의 게시 취소 중에 문제가 발생했습니다.',
     unspecific: '오류가 발생했습니다.',
