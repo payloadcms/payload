@@ -608,6 +608,13 @@ describe('access control', () => {
     test('unauthenticated users should not have access to the admin panel', async () => {
       await page.goto(url.logout)
       await page.waitForURL(url.logout)
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
+
+      await expect(page.locator('form.login__form')).toBeVisible()
+
       await page.goto(url.admin)
       await page.waitForURL(url.login)
       expect(page.url()).toEqual(url.login)
