@@ -110,14 +110,14 @@ If you need to proxy the API server-side, use the [stripeProxy](#node) function.
 
 <Banner type="info">
   **Note:**
-  <br />
+
   The `/api` part of these routes may be different based on the settings defined in your Payload
   config.
 </Banner>
 
 <Banner type="warning">
   **Warning:**
-  <br />
+
   Opening the REST proxy endpoint in production is a potential security risk. Authenticated users will have open access to the Stripe REST API. In production, open your own endpoint and use the [stripeProxy](#node) function to proxy the Stripe API server-side.
 </Banner>
 
@@ -233,7 +233,7 @@ This option will setup a basic sync between Payload collections and Stripe resou
 
 <Banner type="info">
   **Note:**
-  <br />
+
   If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the
   `stripeWebhooksEndpointSecret` through your config.
 </Banner>
@@ -269,7 +269,7 @@ export default config
 
 <Banner type="warning">
   **Note:**
-  <br />
+
   Due to limitations in the Stripe API, this currently only works with top-level fields. This is
   because every Stripe object is a separate entity, making it difficult to abstract into a simple
   reusable library. In the future, we may find a pattern around this. But for now, cases like that
