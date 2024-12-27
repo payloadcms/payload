@@ -109,6 +109,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     handlePerPageChange,
     query,
   } = useListQuery()
+
   const { openModal } = useModal()
   const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()

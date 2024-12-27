@@ -125,8 +125,6 @@ export interface Upload {
   focalY?: number | null;
 }
 /**
- * This is a custom collection description.
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
@@ -167,9 +165,6 @@ export interface Post {
   defaultValueField?: string | null;
   relationship?: (string | null) | Post;
   customCell?: string | null;
-  /**
-   * This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.
-   */
   sidebarField?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -251,13 +246,7 @@ export interface CustomField {
   id: string;
   customTextServerField?: string | null;
   customTextClientField?: string | null;
-  /**
-   * Static field description.
-   */
   descriptionAsString?: string | null;
-  /**
-   * Function description
-   */
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
@@ -336,34 +325,6 @@ export interface Geo {
    * @maxItems 2
    */
   point?: [number, number] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Description
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdTab".
- */
-export interface CustomIdTab {
-  title?: string | null;
-  id: string;
-  description?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Description
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdRow".
- */
-export interface CustomIdRow {
-  title?: string | null;
-  id: string;
-  description?: string | null;
-  number?: number | null;
   updatedAt: string;
   createdAt: string;
 }
