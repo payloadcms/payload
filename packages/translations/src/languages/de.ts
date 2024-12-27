@@ -185,6 +185,7 @@ export const deTranslations: DefaultTranslationsObject = {
     addBelow: 'Darunter hinzufügen',
     addFilter: 'Filter hinzufügen',
     adminTheme: 'Admin-Farbthema',
+    all: 'Alle',
     allCollections: 'Alle Sammlungen',
     and: 'Und',
     anotherUser: 'Ein anderer Benutzer',
@@ -356,6 +357,7 @@ export const deTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Kopieren von {{from}} zu {{to}}',
     copyTo: 'Kopieren nach',
     copyToLocale: 'Kopieren in das Gebietsschema',
+    localeToPublish: 'Zu veröffentlichende Lokalität',
     selectLocaleToCopy: 'Wählen Sie den Ort zum Kopieren aus',
   },
   operators: {

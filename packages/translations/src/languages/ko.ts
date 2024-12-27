@@ -181,6 +181,7 @@ export const koTranslations: DefaultTranslationsObject = {
     addBelow: '아래에 추가',
     addFilter: '필터 추가',
     adminTheme: '관리자 테마',
+    all: '모두',
     allCollections: '모든 컬렉션',
     and: '및',
     anotherUser: '다른 사용자',
@@ -348,6 +349,7 @@ export const koTranslations: DefaultTranslationsObject = {
     copyFromTo: '{{from}}에서 {{to}}로 복사하기',
     copyTo: '복사하기',
     copyToLocale: '로케일로 복사',
+    localeToPublish: '발행할 장소',
     selectLocaleToCopy: '복사할 지역을 선택하십시오.',
   },
   operators: {

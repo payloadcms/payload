@@ -183,6 +183,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     addBelow: 'Добавить ниже',
     addFilter: 'Добавить фильтр',
     adminTheme: 'Тема Панели',
+    all: 'Все',
     allCollections: 'Все Коллекции',
     and: 'А также',
     anotherUser: 'Другой пользователь',
@@ -354,6 +355,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Копирование из {{from}} в {{to}}',
     copyTo: 'Копировать в',
     copyToLocale: 'Копировать в локаль',
+    localeToPublish: 'Локаль для публикации',
     selectLocaleToCopy: 'Выберите локаль для копирования',
   },
   operators: {

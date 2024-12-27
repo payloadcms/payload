@@ -181,6 +181,7 @@ export const viTranslations: DefaultTranslationsObject = {
     addBelow: 'Thêm bên dưới',
     addFilter: 'Thêm bộ lọc',
     adminTheme: 'Giao diện bảng điều khiển',
+    all: 'Tất cả',
     allCollections: 'Tất cả Bộ sưu tập',
     and: 'Và',
     anotherUser: 'Người dùng khác',
@@ -349,6 +350,7 @@ export const viTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Sao chép từ {{from}} đến {{to}}',
     copyTo: 'Sao chép đến',
     copyToLocale: 'Sao chép vào địa phương',
+    localeToPublish: 'Ngôn ngữ để xuất bản',
     selectLocaleToCopy: 'Chọn địa phương để sao chép',
   },
   operators: {

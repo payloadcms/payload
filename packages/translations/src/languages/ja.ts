@@ -182,6 +182,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     addBelow: '下に追加',
     addFilter: '絞り込みを追加',
     adminTheme: '管理画面のテーマ',
+    all: 'すべて',
     allCollections: 'すべてのコレクション',
     and: 'かつ',
     anotherUser: '別のユーザー',
@@ -350,6 +351,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     copyFromTo: '{{from}}から{{to}}へのコピー',
     copyTo: 'コピー先',
     copyToLocale: 'ロケールにコピー',
+    localeToPublish: '公開する場所',
     selectLocaleToCopy: 'コピーするロケールを選択してください',
   },
   operators: {

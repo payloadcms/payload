@@ -177,6 +177,7 @@ export const heTranslations: DefaultTranslationsObject = {
     addBelow: 'הוסף מתחת',
     addFilter: 'הוסף מסנן',
     adminTheme: 'ערכת נושא ממשק הניהול',
+    all: 'כל',
     allCollections: 'כל האוספים',
     and: 'וגם',
     anotherUser: 'משתמש אחר',
@@ -343,6 +344,7 @@ export const heTranslations: DefaultTranslationsObject = {
     copyFromTo: 'העתקה מ-{{from}} ל-{{to}}',
     copyTo: 'העתק אל',
     copyToLocale: 'העתק למקום',
+    localeToPublish: 'מיקום לפרסום',
     selectLocaleToCopy: 'בחר מיקום להעתקה',
   },
   operators: {

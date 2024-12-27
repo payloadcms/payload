@@ -175,6 +175,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     addBelow: '新增到下方',
     addFilter: '新增過濾器',
     adminTheme: '管理頁面主題',
+    all: '所有',
     allCollections: '所有集合',
     and: '和',
     anotherUser: '另一位使用者',
@@ -339,6 +340,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     copyFromTo: '從{{from}}複製到{{to}}',
     copyTo: '複製到',
     copyToLocale: '複製到區域設定',
+    localeToPublish: '發布地區',
     selectLocaleToCopy: '選擇要複製的地區設定',
   },
   operators: {

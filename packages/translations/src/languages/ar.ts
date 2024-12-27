@@ -179,6 +179,7 @@ export const arTranslations: DefaultTranslationsObject = {
     addBelow: 'أضف في الاسفل',
     addFilter: 'أضف فلتر',
     adminTheme: 'شكل واجهة المستخدم',
+    all: 'الكل',
     allCollections: 'جميع المجموعات',
     and: 'و',
     anotherUser: 'مستخدم آخر',
@@ -346,6 +347,7 @@ export const arTranslations: DefaultTranslationsObject = {
     copyFromTo: 'النسخ من {{from}} إلى {{to}}',
     copyTo: 'انسخ إلى',
     copyToLocale: 'نسخ إلى الموقع المحلي',
+    localeToPublish: 'الموقع للنشر',
     selectLocaleToCopy: 'حدد الموقع المحلي للنسخ',
   },
   operators: {

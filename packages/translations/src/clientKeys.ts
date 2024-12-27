@@ -124,6 +124,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'fields:toggleBlock',
   'fields:uploadNewLabel',
 
+  'general:all',
   'general:aboutToDeleteCount',
   'general:aboutToDelete',
   'general:addBelow',
@@ -279,6 +280,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:uploadingBulk',
   'general:welcome',
 
+  'localization:localeToPublish',
   'localization:copyToLocale',
   'localization:copyFromTo',
   'localization:selectLocaleToCopy',

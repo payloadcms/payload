@@ -181,6 +181,7 @@ export const svTranslations: DefaultTranslationsObject = {
     addBelow: 'Lägg Till Nedanför',
     addFilter: 'Lägg Till Filter',
     adminTheme: 'Admin Tema',
+    all: 'Alla',
     allCollections: 'Alla Samlingar',
     and: 'Och',
     anotherUser: 'En annan användare',
@@ -350,6 +351,7 @@ export const svTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Kopierar från {{from}} till {{to}}',
     copyTo: 'Kopiera till',
     copyToLocale: 'Kopiera till plats',
+    localeToPublish: 'Publicera lokalt',
     selectLocaleToCopy: 'Välj plats att kopiera',
   },
   operators: {

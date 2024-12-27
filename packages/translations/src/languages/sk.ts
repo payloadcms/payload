@@ -184,6 +184,7 @@ export const skTranslations: DefaultTranslationsObject = {
     addBelow: 'Pridať pod',
     addFilter: 'Pridať filter',
     adminTheme: 'Motív administračného rozhrania',
+    all: 'Všetko',
     allCollections: 'Všetky Kolekcie',
     and: 'a',
     anotherUser: 'Iný používateľ',
@@ -351,6 +352,7 @@ export const skTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Kopírovanie z {{from}} do {{to}}',
     copyTo: 'Kopírovať do',
     copyToLocale: 'Kopírovať do lokalizácie',
+    localeToPublish: 'Miesto na publikovanie',
     selectLocaleToCopy: 'Vyberte miestny systém na kopírovanie',
   },
   operators: {

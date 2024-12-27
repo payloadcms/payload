@@ -183,6 +183,7 @@ export const myTranslations: DefaultTranslationsObject = {
     addBelow: 'အောက်တွင်ထည့်ပါ။',
     addFilter: 'ဇကာထည့်ပါ။',
     adminTheme: 'အက်ပ်ဒိုင်များစပ်စွာ',
+    all: 'Semua',
     allCollections: 'အားလုံးစုစည်းမှုများ',
     and: 'နှင့်',
     anotherUser: 'တစ်ခြားအသုံးပြုသူ',
@@ -354,6 +355,7 @@ export const myTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Menyalin dari {{from}} ke {{to}}',
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke tempat setempat',
+    localeToPublish: 'Untuk menerbitkan di lokasi',
     selectLocaleToCopy: 'Pilih tempatan untuk menyalin',
   },
   operators: {

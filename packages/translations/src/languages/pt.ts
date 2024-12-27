@@ -181,6 +181,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     addBelow: 'Adicionar abaixo',
     addFilter: 'Adicionar Filtro',
     adminTheme: 'Tema do Admin',
+    all: 'Todos',
     allCollections: 'Todas as Coleções',
     and: 'E',
     anotherUser: 'Outro usuário',
@@ -350,6 +351,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Copiando de {{from}} para {{to}}',
     copyTo: 'Copiar para',
     copyToLocale: 'Copiar para localidade',
+    localeToPublish: 'Local para publicar',
     selectLocaleToCopy: 'Selecione o local para copiar',
   },
   operators: {

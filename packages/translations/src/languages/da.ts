@@ -180,6 +180,7 @@ export const daTranslations: DefaultTranslationsObject = {
     addBelow: 'Tilføj under',
     addFilter: 'Tilføj filter',
     adminTheme: 'Admin tema',
+    all: 'Alle',
     allCollections: 'Alle samlinger',
     and: 'Og',
     anotherUser: 'En anden bruger',
@@ -348,6 +349,7 @@ export const daTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Kopierer fra {{from}} til {{to}}',
     copyTo: 'Kopier til',
     copyToLocale: 'Kopier til lokal',
+    localeToPublish: 'Offentliggør på lokalitet',
     selectLocaleToCopy: 'Vælg lokalitet til kopiering',
   },
   operators: {

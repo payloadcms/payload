@@ -185,6 +185,7 @@ export const esTranslations: DefaultTranslationsObject = {
     addBelow: 'Agrega abajo',
     addFilter: 'Añadir filtro',
     adminTheme: 'Tema del admin',
+    all: 'Todo',
     allCollections: 'Todas las colecciones',
     and: 'Y',
     anotherUser: 'Otro usuario',
@@ -354,6 +355,7 @@ export const esTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Copiando de {{from}} a {{to}}',
     copyTo: 'Copia a',
     copyToLocale: 'Copiar a localización',
+    localeToPublish: 'Locación para publicar',
     selectLocaleToCopy: 'Seleccione la ubicación para copiar',
   },
   operators: {

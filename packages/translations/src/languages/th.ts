@@ -178,6 +178,7 @@ export const thTranslations: DefaultTranslationsObject = {
     addBelow: 'เพิ่มด้านล่าง',
     addFilter: 'เพิ่มการกรอง',
     adminTheme: 'ธีมผู้ดูแลระบบ',
+    all: 'ทั้งหมด',
     allCollections: 'คอลเลกชันทั้งหมด',
     and: 'และ',
     anotherUser: 'ผู้ใช้อื่น',
@@ -346,6 +347,7 @@ export const thTranslations: DefaultTranslationsObject = {
     copyFromTo: 'คัดลอกจาก {{from}} ไปยัง {{to}}',
     copyTo: 'คัดลอกไปที่',
     copyToLocale: 'คัดลอกไปยังสถานที่',
+    localeToPublish: 'เผยแพร่ในสถานที่',
     selectLocaleToCopy: 'เลือกสถานที่ท้องถิ่นเพื่อคัดลอก',
   },
   operators: {

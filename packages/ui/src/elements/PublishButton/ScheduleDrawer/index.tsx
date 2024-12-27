@@ -4,6 +4,7 @@
 import type { Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 import { toast } from 'sonner'
 
@@ -23,6 +24,7 @@ import { Button } from '../../Button/index.js'
 import { DatePickerField } from '../../DatePicker/index.js'
 import { Drawer } from '../../Drawer/index.js'
 import { Gutter } from '../../Gutter/index.js'
+import { ReactSelect } from '../../ReactSelect/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Table } from '../../Table/index.js'
 import { buildUpcomingColumns } from './buildUpcomingColumns.js'
@@ -34,11 +36,17 @@ type Props = {
   slug: string
 }
 
+const defaultLocaleOption = {
+  label: 'All',
+  value: 'all',
+}
+
 export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
   const { toggleModal } = useModal()
   const {
     config: {
       admin: { dateFormat },
+      localization,
       routes: { api },
       serverURL,
     },
@@ -48,10 +56,26 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
   const { schedulePublish } = useServerFunctions()
   const [type, setType] = React.useState<PublishType>('publish')
   const [date, setDate] = React.useState<Date>()
+  const [locale, setLocale] = React.useState<{ label: string; value: string }>(defaultLocaleOption)
   const [processing, setProcessing] = React.useState(false)
   const modalTitle = t('general:schedulePublishFor', { title })
   const [upcoming, setUpcoming] = React.useState<UpcomingEvent[]>()
   const [upcomingColumns, setUpcomingColumns] = React.useState<Column[]>()
+
+  const localeOptions = React.useMemo(() => {
+    if (localization) {
+      const options = localization.locales.map(({ code, label }) => ({
+        label: getTranslation(label, i18n),
+        value: code,
+      }))
+
+      options.unshift(defaultLocaleOption)
+
+      return options
+    }
+
+    return []
+  }, [localization, i18n])
 
   const fetchUpcoming = React.useCallback(async () => {
     const params: { sort: string; where: Where } = {
@@ -93,9 +117,9 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
       .get(`${serverURL}${api}/payload-jobs`, { params })
       .then((res) => res.json())
 
-    setUpcomingColumns(buildUpcomingColumns({ dateFormat, docs, i18n, t }))
+    setUpcomingColumns(buildUpcomingColumns({ dateFormat, docs, i18n, localization, t }))
     setUpcoming(docs)
-  }, [api, collectionSlug, dateFormat, globalSlug, i18n, id, serverURL, t])
+  }, [api, collectionSlug, dateFormat, globalSlug, i18n, id, serverURL, t, localization])
 
   const handleSave = React.useCallback(async () => {
     if (!date) {
@@ -103,6 +127,12 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     }
 
     setProcessing(true)
+
+    let publishSpecificLocale: string
+
+    if (typeof locale === 'object' && locale.value !== 'all' && type === 'publish') {
+      publishSpecificLocale = locale.value
+    }
 
     try {
       await schedulePublish({
@@ -115,6 +145,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
             }
           : undefined,
         global: globalSlug || undefined,
+        locale: publishSpecificLocale,
       })
 
       setDate(undefined)
@@ -126,7 +157,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     }
 
     setProcessing(false)
-  }, [date, t, schedulePublish, type, collectionSlug, id, globalSlug, fetchUpcoming])
+  }, [date, t, schedulePublish, type, locale, collectionSlug, id, globalSlug, fetchUpcoming])
 
   React.useEffect(() => {
     if (!upcoming) {
@@ -184,6 +215,18 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
           timeIntervals={5}
           value={date}
         />
+        <br />
+        {localeOptions.length > 0 && type === 'publish' && (
+          <React.Fragment>
+            <FieldLabel label={t('localization:localeToPublish')} />
+            <ReactSelect
+              onChange={(e) => setLocale(e as { label: string; value: string })}
+              options={localeOptions}
+              value={locale}
+            />
+            <br />
+          </React.Fragment>
+        )}
         <div className={`${baseClass}__actions`}>
           <Button buttonStyle="primary" disabled={processing} onClick={handleSave} type="button">
             {t('general:save')}

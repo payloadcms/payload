@@ -183,6 +183,7 @@ export const huTranslations: DefaultTranslationsObject = {
     addBelow: 'Hozzáadás lent',
     addFilter: 'Szűrő hozzáadása',
     adminTheme: 'Admin téma',
+    all: 'Mind',
     allCollections: 'Minden gyűjtemény',
     and: 'És',
     anotherUser: 'Egy másik felhasználó',
@@ -352,6 +353,7 @@ export const huTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Másolás {{from}}-ról {{to}}-ra',
     copyTo: 'Másolja ide',
     copyToLocale: 'Másolás a helyi verzióba',
+    localeToPublish: 'Közzététel helye',
     selectLocaleToCopy: 'Válassza ki a másolni kívánt területet.',
   },
   operators: {

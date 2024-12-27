@@ -181,6 +181,7 @@ export const csTranslations: DefaultTranslationsObject = {
     addBelow: 'Přidat pod',
     addFilter: 'Přidat filtr',
     adminTheme: 'Motiv administračního rozhraní',
+    all: 'Všechny',
     allCollections: 'Všechny kolekce',
     and: 'a',
     anotherUser: 'Jiný uživatel',
@@ -348,6 +349,7 @@ export const csTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Kopírování z {{from}} do {{to}}',
     copyTo: 'Kopírovat do',
     copyToLocale: 'Kopírovat do lokalizace',
+    localeToPublish: 'Místo k publikování',
     selectLocaleToCopy: 'Vyberte lokalitu ke kopírování',
   },
   operators: {

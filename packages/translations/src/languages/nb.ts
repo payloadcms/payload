@@ -181,6 +181,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     addBelow: 'Legg til under',
     addFilter: 'Legg til filter',
     adminTheme: 'Admin-tema',
+    all: 'Alle',
     allCollections: 'Alle samlinger',
     and: 'Og',
     anotherUser: 'En annen bruker',
@@ -350,6 +351,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Kopiering fra {{fra}} til {{til}}',
     copyTo: 'Kopier til',
     copyToLocale: 'Kopiere til lokalt',
+    localeToPublish: 'Publiseringssted',
     selectLocaleToCopy: 'Velg lokalitet for å kopiere',
   },
   operators: {

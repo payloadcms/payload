@@ -179,6 +179,7 @@ export const faTranslations: DefaultTranslationsObject = {
     addBelow: 'افزودن به زیر',
     addFilter: 'افزودن علامت',
     adminTheme: 'پوسته پیشخوان',
+    all: 'همه',
     allCollections: 'همه مجموعه‌ها',
     and: 'و',
     anotherUser: 'کاربر دیگر',
@@ -348,6 +349,7 @@ export const faTranslations: DefaultTranslationsObject = {
     copyFromTo: 'کپی از {{from}} به {{to}}',
     copyTo: 'کپی کنید به',
     copyToLocale: 'کپی به محلی',
+    localeToPublish: 'محل انتشار',
     selectLocaleToCopy: 'انتخاب مکان برای کپی کردن',
   },
   operators: {

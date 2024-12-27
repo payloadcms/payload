@@ -182,6 +182,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     addBelow: 'Додај испод',
     addFilter: 'Додај филтер',
     adminTheme: 'Администраторска тема',
+    all: 'Svi',
     allCollections: 'Све Колекције',
     and: 'И',
     anotherUser: 'Други корисник',
@@ -350,6 +351,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Kopiranje iz {{from}} u {{to}}',
     copyTo: 'Kopiraj na',
     copyToLocale: 'Kopiraj na lokaciju',
+    localeToPublish: 'Lokalitet za objavljivanje',
     selectLocaleToCopy: 'Izaberite lokalitet za kopiranje',
   },
   operators: {

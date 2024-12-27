@@ -10,6 +10,7 @@ export const schedulePublishHandler = async ({
   date,
   doc,
   global,
+  locale,
   req: { i18n, payload },
 }: SchedulePublishHandlerArgs) => {
   try {
@@ -18,6 +19,7 @@ export const schedulePublishHandler = async ({
         type,
         doc,
         global,
+        locale,
       },
       task: 'schedulePublish',
       waitUntil: date,

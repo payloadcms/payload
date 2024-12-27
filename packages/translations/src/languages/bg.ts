@@ -181,6 +181,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addBelow: 'Добави отдолу',
     addFilter: 'Добави филтър',
     adminTheme: 'Цветова тема',
+    all: 'Всички',
     allCollections: 'Всички колекции',
     and: 'И',
     anotherUser: 'Друг потребител',
@@ -349,6 +350,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Копиране от {{from}} към {{to}}',
     copyTo: 'Копирай в',
     copyToLocale: 'Копирайте в местното',
+    localeToPublish: 'Местоположение за публикуване',
     selectLocaleToCopy: 'Изберете място за копиране',
   },
   operators: {

@@ -182,6 +182,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     addBelow: 'Dodaj ispod',
     addFilter: 'Dodaj filter',
     adminTheme: 'Administratorska tema',
+    all: 'Svi',
     allCollections: 'Sve kolekcije',
     and: 'i',
     anotherUser: 'Drugi korisnik',
@@ -350,6 +351,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Kopiranje iz {{from}} u {{to}}',
     copyTo: 'Kopiraj na',
     copyToLocale: 'Kopiraj na lokaciju',
+    localeToPublish: 'Lokacija za objavu',
     selectLocaleToCopy: 'Odaberite mjesto za kopiranje',
   },
   operators: {

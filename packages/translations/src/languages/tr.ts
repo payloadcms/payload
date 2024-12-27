@@ -184,6 +184,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addBelow: 'Altına ekle',
     addFilter: 'Filtre ekle',
     adminTheme: 'Admin arayüzü',
+    all: 'Tüm',
     allCollections: 'Tüm Koleksiyonlar',
     and: 've',
     anotherUser: 'Başka bir kullanıcı',
@@ -354,6 +355,7 @@ export const trTranslations: DefaultTranslationsObject = {
     copyFromTo: "{{from}} 'dan {{to}} 'ya kopyalama",
     copyTo: 'Kopyala',
     copyToLocale: 'Yerel hafızaya kopyala',
+    localeToPublish: 'Yayınlanacak yerel',
     selectLocaleToCopy: 'Kopyalamak için yerel seçimi yapın',
   },
   operators: {

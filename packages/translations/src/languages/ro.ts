@@ -185,6 +185,7 @@ export const roTranslations: DefaultTranslationsObject = {
     addBelow: 'Adaugă mai jos',
     addFilter: 'Adaugă filtru',
     adminTheme: 'Tema Admin',
+    all: 'Toate',
     allCollections: 'Toate Colecțiile',
     and: 'Şi',
     anotherUser: 'Un alt utilizator',
@@ -354,6 +355,7 @@ export const roTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Copierea de la {{from}} la {{to}}',
     copyTo: 'Copiați în',
     copyToLocale: 'Copiați în localizare',
+    localeToPublish: 'Localizare pentru publicare',
     selectLocaleToCopy: 'Selectați localizarea pentru copiere',
   },
   operators: {

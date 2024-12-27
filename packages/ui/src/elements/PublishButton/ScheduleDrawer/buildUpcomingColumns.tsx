@@ -1,4 +1,6 @@
-import type { I18nClient, TFunction } from '@payloadcms/translations'
+import type { ClientConfig } from 'payload'
+
+import { getTranslation, type I18nClient, type TFunction } from '@payloadcms/translations'
 
 import type { Column } from '../../Table/index.js'
 import type { UpcomingEvent } from './types.js'
@@ -10,11 +12,18 @@ type Args = {
   dateFormat: string
   docs: UpcomingEvent[]
   i18n: I18nClient
+  localization: ClientConfig['localization']
   t: TFunction
 }
 
-export const buildUpcomingColumns = ({ dateFormat, docs, i18n, t }: Args): Column[] => {
-  return [
+export const buildUpcomingColumns = ({
+  dateFormat,
+  docs,
+  i18n,
+  localization,
+  t,
+}: Args): Column[] => {
+  const columns: Column[] = [
     {
       accessor: 'input.type',
       active: true,
@@ -47,4 +56,30 @@ export const buildUpcomingColumns = ({ dateFormat, docs, i18n, t }: Args): Colum
       )),
     },
   ]
+
+  if (localization) {
+    columns.push({
+      accessor: 'input.locale',
+      active: true,
+      field: {
+        name: '',
+        type: 'text',
+      },
+      Heading: <span>{t('general:locale')}</span>,
+      renderedCells: docs.map((doc) => {
+        if (doc.input.locale) {
+          const matchedLocale = localization.locales.find(
+            (locale) => locale.code === doc.input.locale,
+          )
+          if (matchedLocale) {
+            return <span key={doc.id}>{getTranslation(matchedLocale.label, i18n)}</span>
+          }
+        }
+
+        return <span key={doc.id}>{t('general:all')}</span>
+      }),
+    })
+  }
+
+  return columns
 }

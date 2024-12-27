@@ -181,6 +181,7 @@ export const slTranslations: DefaultTranslationsObject = {
     addBelow: 'Dodaj spodaj',
     addFilter: 'Dodaj filter',
     adminTheme: 'Tema skrbnika',
+    all: 'Vse',
     allCollections: 'Vse Zbirke',
     and: 'In',
     anotherUser: 'Drug uporabnik',
@@ -349,6 +350,7 @@ export const slTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Kopiranje iz {{from}} v {{to}}',
     copyTo: 'Kopiraj v',
     copyToLocale: 'Kopiraj v jezik',
+    localeToPublish: 'Lokalno za objavo',
     selectLocaleToCopy: 'Izberite jezik za kopiranje',
   },
   operators: {

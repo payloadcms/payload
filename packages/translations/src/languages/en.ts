@@ -181,6 +181,7 @@ export const enTranslations = {
     addBelow: 'Add Below',
     addFilter: 'Add Filter',
     adminTheme: 'Admin Theme',
+    all: 'All',
     allCollections: 'All Collections',
     and: 'And',
     anotherUser: 'Another user',
@@ -350,6 +351,7 @@ export const enTranslations = {
     copyFromTo: 'Copying from {{from}} to {{to}}',
     copyTo: 'Copy to',
     copyToLocale: 'Copy to locale',
+    localeToPublish: 'Locale to publish',
     selectLocaleToCopy: 'Select locale to copy',
   },
   operators: {

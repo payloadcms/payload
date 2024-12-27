@@ -182,6 +182,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     addBelow: 'Додати нижче',
     addFilter: 'Додати фільтр',
     adminTheme: 'Тема адмін панелі',
+    all: 'Все',
     allCollections: 'Усі Колекції',
     and: 'і',
     anotherUser: 'Інший користувач',
@@ -349,6 +350,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Копіювання з {{from}} до {{to}}',
     copyTo: 'Копіювати в',
     copyToLocale: 'Копіювати до локалі',
+    localeToPublish: 'Місце публікації',
     selectLocaleToCopy: 'Виберіть локалізацію для копіювання',
   },
   operators: {

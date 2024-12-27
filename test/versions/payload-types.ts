@@ -717,11 +717,12 @@ export interface LocalizedGlobalSelect<T extends boolean = true> {
 export interface TaskSchedulePublish {
   input: {
     type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
     doc?: {
       relationTo: 'draft-posts';
       value: string | DraftPost;
     } | null;
-    global?: string | null;
+    global?: 'draft-global' | null;
   };
   output?: unknown;
 }

@@ -184,6 +184,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     addBelow: 'Onderaan toevoegen',
     addFilter: 'Filter toevoegen',
     adminTheme: 'Adminthema',
+    all: 'Alle',
     allCollections: 'Alle collecties',
     and: 'En',
     anotherUser: 'Een andere gebruiker',
@@ -353,6 +354,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     copyFromTo: 'Kopiëren van {{from}} naar {{to}}',
     copyTo: 'Kopiëren naar',
     copyToLocale: 'Kopieer naar locatie',
+    localeToPublish: 'Te publiceren locatie',
     selectLocaleToCopy: 'Selecteer locatie om te kopiëren',
   },
   operators: {

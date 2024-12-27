@@ -181,6 +181,7 @@ export const azTranslations: DefaultTranslationsObject = {
     addBelow: 'Aşağıya əlavə et',
     addFilter: 'Filter əlavə et',
     adminTheme: 'Admin Mövzusu',
+    all: 'Hamısı',
     allCollections: 'Bütün kolleksiyalar',
     and: 'Və',
     anotherUser: 'Başqa bir istifadəçi',
@@ -352,6 +353,7 @@ export const azTranslations: DefaultTranslationsObject = {
     copyFromTo: '{{from}}-dan {{to}}-ya kopyalama',
     copyTo: 'Köçür',
     copyToLocale: 'Yerliyə köçürün',
+    localeToPublish: 'Yayımlamaq üçün yerləşdirin',
     selectLocaleToCopy: 'Köçürmək üçün yerli seçin',
   },
   operators: {
