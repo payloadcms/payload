@@ -19,10 +19,11 @@ _If Drafts are enabled, the typical Save button is replaced with new actions whi
 
 Collections and Globals both support the same options for configuring drafts. You can either set `versions.drafts` to `true`, or pass an object to configure draft properties.
 
-| Draft Option | Description                                                                                                                                                      |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `autosave`   | Enable `autosave` to automatically save progress while documents are edited. To enable, set to `true` or pass an object with [options](/docs/versions/autosave). |
-| `validate`   | Set `validate` to `true` to validate draft documents when saved. Default is `false`.                                                                             |
+| Draft Option      | Description                                                                                                                                                      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `autosave`        | Enable `autosave` to automatically save progress while documents are edited. To enable, set to `true` or pass an object with [options](/docs/versions/autosave). |
+| `schedulePublish` | Allow for editors to schedule publish / unpublish events in the future. [More](#scheduled-publish)                                                               |
+| `validate`        | Set `validate` to `true` to validate draft documents when saved. Default is `false`.                                                                             |
 
 ## Database changes
 
@@ -165,6 +166,16 @@ export const Pages: CollectionConfig = {
   //.. the rest of the Pages config here
 }
 ```
+
+## Scheduled publish
+
+Payload provides for an ability to schedule publishing / unpublishing events in the future, which can be helpful if you need to set certain documents to "go live" at a given date in the future, or, vice versa, revert to a draft state after a certain time has passed.
+
+You can enable this functionality on both collections and globals via the `versions.drafts.schedulePublish: true` property.
+
+<Banner type="warning">
+  **Important:** if you are going to enable scheduled publish / unpublish, you need to make sure your Payload app is set up to process [Jobs](/docs/jobs-queue/overview). This feature works by creating a Job in the background, which will be picked up after the job becomes available. If you do not have any mechanism in place to run jobs, your scheduled publish / unpublish jobs will never be executed.
+</Banner>
 
 ## Unpublishing drafts
 
