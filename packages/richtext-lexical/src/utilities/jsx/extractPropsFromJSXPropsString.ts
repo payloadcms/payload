@@ -1,6 +1,4 @@
-import * as _JSOX from 'jsox'
-
-const JSOX = 'default' in _JSOX ? _JSOX.default : _JSOX
+import { JSOX } from 'jsox'
 
 /**
  * Turns a JSX props string into an object.
