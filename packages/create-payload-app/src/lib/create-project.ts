@@ -133,13 +133,13 @@ export async function createProject(
     if (args.template.type === 'plugin') {
       spinner.message('Configuring Plugin...')
       configurePluginProject({ projectDirPath: projectDir, projectName })
+    } else {
+      spinner.message('Configuring Payload...')
+      await configurePayloadConfig({
+        dbType: dbDetails?.type,
+        projectDirOrConfigPath: { projectDir },
+      })
     }
-  } else {
-    spinner.message('Configuring Payload...')
-    await configurePayloadConfig({
-      dbType: dbDetails?.type,
-      projectDirOrConfigPath: { projectDir },
-    })
   }
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
