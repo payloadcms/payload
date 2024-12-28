@@ -1,3 +1,4 @@
+import nextEnvImport from '@next/env'
 import chalk from 'chalk'
 import { createServer } from 'http'
 import minimist from 'minimist'
@@ -57,6 +58,10 @@ await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
 if (shouldStartMemoryDB) {
   await startMemoryDB()
 }
+
+// This is needed to forward the environment variables to the next process that were created after loadEnv()
+// for example process.env.MONGODB_MEMORY_SERVER_URI otherwise app.prepare() will clear them
+nextEnvImport.updateInitialEnv(process.env)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
