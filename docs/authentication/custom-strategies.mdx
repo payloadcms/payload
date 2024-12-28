@@ -38,7 +38,7 @@ At its core a strategy simply takes information from the incoming request and re
 Your `authenticate` method should return an object containing a Payload user document and any optional headers that you'd like Payload to set for you when we return a response.
 
 ```ts
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, User } from 'payload'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -48,7 +48,7 @@ export const Users: CollectionConfig = {
     strategies: [
       {
         name: 'custom-strategy',
-        authenticate: ({ payload, headers }) => {
+        authenticate: async ({ payload, headers }) => {
           const usersQuery = await payload.find({
             collection: 'users',
             where: {
@@ -61,10 +61,19 @@ export const Users: CollectionConfig = {
             },
           })
 
+          // Send null if no user should be authenticated
+          if (!usersQuery.docs[0]) return { user: null }
+
+          const user: User = {
+            ...usersQuery.docs[0],
+            
+            // Returned user also needs the collection property
+            collection: 'users',
+          }
+
           return {
-            // Send the user back to authenticate,
-            // or send null if no user should be authenticated
-            user: usersQuery.docs[0] || null,
+            // Send the user back to authenticate
+            user,
 
             // Optionally, you can return headers
             // that you'd like Payload to set here when
