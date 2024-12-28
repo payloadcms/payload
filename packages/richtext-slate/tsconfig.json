@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true, // Make sure typescript knows that this module depends on their references
     "noEmit": false /* Do not emit outputs. */,
