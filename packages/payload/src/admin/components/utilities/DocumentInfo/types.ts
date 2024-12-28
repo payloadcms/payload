@@ -24,11 +24,11 @@ export type ContextType = {
   global?: SanitizedGlobalConfig
   id?: number | string
   preferencesKey?: string
-  publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
+  publishedDoc?: (TypeWithID & TypeWithTimestamps & { _status?: string }) | null
   setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
   slug?: string
-  unpublishedVersions?: PaginatedDocs<Version>
-  versions?: PaginatedDocs<Version>
+  unpublishedVersions?: PaginatedDocs<Version> | null
+  versions?: PaginatedDocs<Version> | null
 }
 
 export type Props = {
