@@ -359,7 +359,7 @@ The `useForm` hook returns an object with the following properties:
     rows={[
       [
         {
-          value: "**\`path\`**",
+          value: "**\\\`path\\\`**",
         },
         {
           value: "The path to the array or block field",
@@ -367,7 +367,7 @@ The `useForm` hook returns an object with the following properties:
       ],
       [
         {
-          value: "**\`rowIndex\`**",
+          value: "**\\\`rowIndex\\\`**",
         },
         {
           value: "The index of the row to add. If omitted, the row will be added to the end of the array.",
@@ -375,7 +375,7 @@ The `useForm` hook returns an object with the following properties:
       ],
       [
         {
-          value: "**\`data<\`**",
+          value: "**\\\`data<\\\`**",
         },
         {
           value: "The data to add to the row",
@@ -385,8 +385,8 @@ The `useForm` hook returns an object with the following properties:
   />
 
 
-\`\`\`tsx
-  {\`import { useForm } from "payload/components/forms";
+\\\`\\\`\\\`tsx
+  {\\\`import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { addFieldRow } = useForm()
@@ -409,13 +409,13 @@ export const CustomArrayManager = () => {
       Add Row
     </button>
   )
-}\`}
-\`\`\`
+}\\\`}
+\\\`\\\`\\\`
 
 An example config to go along with the Custom Component
 
-\`\`\`tsx
-{\`const ExampleCollection = {
+\\\`\\\`\\\`tsx
+{\\\`const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -438,8 +438,8 @@ An example config to go along with the Custom Component
       },
     },
   ],
-}\`}
-\`\`\`
+}\\\`}
+\\\`\\\`\\\`
 `
       }
     ],
@@ -463,7 +463,7 @@ An example config to go along with the Custom Component
     rows={[
       [
         {
-          value: "**\`path\`**",
+          value: "**\\\`path\\\`**",
         },
         {
           value: "The path to the array or block field",
@@ -471,7 +471,7 @@ An example config to go along with the Custom Component
       ],
       [
         {
-          value: "**\`rowIndex\`**",
+          value: "**\\\`rowIndex\\\`**",
         },
         {
           value: "The index of the row to remove",
@@ -482,8 +482,8 @@ An example config to go along with the Custom Component
 
 
 
-\`\`\`tsx
-  {\`import { useForm } from "payload/components/forms";
+\\\`\\\`\\\`tsx
+  {\\\`import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { removeFieldRow } = useForm()
@@ -501,13 +501,13 @@ export const CustomArrayManager = () => {
       Remove Row
     </button>
   )
-}\`}
-\`\`\`
+}\\\`}
+\\\`\\\`\\\`
 
 An example config to go along with the Custom Component
 
-\`\`\`tsx
-{\`const ExampleCollection = {
+\\\`\\\`\\\`tsx
+{\\\`const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -530,8 +530,8 @@ An example config to go along with the Custom Component
       },
     },
   ],
-}\`}
-\`\`\`
+}\\\`}
+\\\`\\\`\\\`
 `
       }
     ],
@@ -555,7 +555,7 @@ An example config to go along with the Custom Component
     rows={[
       [
         {
-          value: "**\`path\`**",
+          value: "**\\\`path\\\`**",
         },
         {
           value: "The path to the array or block field",
@@ -563,7 +563,7 @@ An example config to go along with the Custom Component
       ],
       [
         {
-          value: "**\`rowIndex\`**",
+          value: "**\\\`rowIndex\\\`**",
         },
         {
           value: "The index of the row to replace",
@@ -571,7 +571,7 @@ An example config to go along with the Custom Component
       ],
       [
         {
-         value: "**\`data\`**",
+         value: "**\\\`data\\\`**",
         },
         {
           value: "The data to replace within the row",
@@ -583,8 +583,8 @@ An example config to go along with the Custom Component
 
 
 
-\`\`\`tsx
-  {\`import { useForm } from "payload/components/forms";
+\\\`\\\`\\\`tsx
+  {\\\`import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { replaceFieldRow } = useForm()
@@ -607,13 +607,13 @@ export const CustomArrayManager = () => {
       Replace Row
     </button>
   )
-}\`}
-\`\`\`
+}\\\`}
+\\\`\\\`\\\`
 
 An example config to go along with the Custom Component
 
-\`\`\`tsx
-{\`const ExampleCollection = {
+\\\`\\\`\\\`tsx
+{\\\`const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -636,8 +636,8 @@ An example config to go along with the Custom Component
       },
     },
   ],
-}\`}
-\`\`\`
+}\\\`}
+\\\`\\\`\\\`
          `
       }
     ],
