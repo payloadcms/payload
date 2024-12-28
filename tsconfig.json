@@ -3,8 +3,7 @@
   "compilerOptions": {
     "composite": false,
     "noEmit": true,
-    "baseUrl": ".",
-
+    "baseUrl": "."
   },
   "references": [
     {
@@ -76,6 +75,8 @@
   ],
   "include": [
     "${configDir}/src",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "scripts/**/*.ts",
+    "scripts/**/*.js",
   ]
 }

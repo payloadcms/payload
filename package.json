@@ -77,7 +77,7 @@
     "reinstall": "pnpm clean:all && pnpm install",
     "release": "pnpm runts ./scripts/release.ts --tag latest",
     "release:beta": "pnpm runts ./scripts/release.ts --bump prerelease --tag beta",
-    "runts": "cross-env NODE_OPTIONS=--no-deprecation node --no-deprecation --import @swc-node/register/esm-register",
+    "runts": "node ./scripts/ensure-generated-tsconfig.js && cross-env NODE_OPTIONS=--no-deprecation node --no-deprecation --import @swc-node/register/esm-register",
     "script:gen-templates": "pnpm runts ./scripts/generate-template-variations.ts",
     "script:list-published": "pnpm runts scripts/lib/getPackageRegistryVersions.ts",
     "script:pack": "pnpm runts scripts/pack-all-to-dest.ts",
