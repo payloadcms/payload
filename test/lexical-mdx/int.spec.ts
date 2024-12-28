@@ -1401,6 +1401,27 @@ Some line [Start of link
         },
       },
     },
+    {
+      input: `
+<PackageInstallOptions
+  update
+  packageId="Line"
+  someObject={{test: \`Line 1
+
+Line 2\`}}
+  ignored>
+</PackageInstallOptions>
+`,
+      inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="Line" update someObject={{"test":"Line 1\\n\\nLine 2"}}/>`,
+      blockNode: {
+        fields: {
+          blockType: 'PackageInstallOptions',
+          packageId: 'Line',
+          someObject: { test: 'Line 1\n\nLine 2' },
+          update: true,
+        },
+      },
+    },
   ]
 
   const INPUT_AND_OUTPUT: Tests = INPUT_AND_OUTPUTBase //.filter((test) => test.debugFlag)
