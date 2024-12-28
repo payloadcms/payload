@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { wait } from 'payload/shared'
 
-import type { Config, Geo, Post } from '../../payload-types.js'
+import type { Config, Post } from '../../payload-types.js'
 
 import {
   checkBreadcrumb,
@@ -21,7 +21,6 @@ import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.
 import { customAdminRoutes } from '../../shared.js'
 import {
   disableDuplicateSlug,
-  geoCollectionSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
@@ -50,9 +49,8 @@ const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
 
-describe('admin3', () => {
+describe('Document View', () => {
   let page: Page
-  let geoUrl: AdminUrlUtil
   let postsUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
@@ -69,7 +67,6 @@ describe('admin3', () => {
       dirname,
       prebuild,
     }))
-    geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
@@ -134,62 +131,6 @@ describe('admin3', () => {
     test('global — should not enable API route when disabled in config', async () => {
       await page.goto(`${postsUrl.global(noApiViewGlobalSlug)}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
-    })
-  })
-
-  describe('header actions', () => {
-    test('should show admin level action in admin panel', async () => {
-      await page.goto(postsUrl.admin)
-      // Check if the element with the class .admin-button exists
-      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
-    })
-
-    test('should show admin level action in collection list view', async () => {
-      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
-      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
-    })
-
-    test('should show admin level action in collection edit view', async () => {
-      const { id } = await createGeo()
-      await page.goto(geoUrl.edit(id))
-      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
-    })
-
-    test('should show collection list view level action in collection list view', async () => {
-      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
-      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
-    })
-
-    test('should show collection edit view level action in collection edit view', async () => {
-      const { id } = await createGeo()
-      await page.goto(geoUrl.edit(id))
-      await expect(page.locator('.app-header .collection-edit-button')).toHaveCount(1)
-    })
-
-    test('should show collection api view level action in collection api view', async () => {
-      const { id } = await createGeo()
-      await page.goto(`${geoUrl.edit(id)}/api`)
-      await expect(page.locator('.app-header .collection-api-button')).toHaveCount(1)
-    })
-
-    test('should show global edit view level action in globals edit view', async () => {
-      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
-      await page.goto(globalWithPreview.global(globalSlug))
-      await expect(page.locator('.app-header .global-edit-button')).toHaveCount(1)
-    })
-
-    test('should show global api view level action in globals api view', async () => {
-      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
-      await page.goto(`${globalWithPreview.global(globalSlug)}/api`)
-      await expect(page.locator('.app-header .global-api-button')).toHaveCount(1)
-    })
-
-    test('should reset actions array when navigating from view with actions to view without actions', async () => {
-      await page.goto(geoUrl.list)
-      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
-      await page.locator('button.nav-toggler[aria-label="Open Menu"][tabindex="0"]').click()
-      await page.locator(`#nav-posts`).click()
-      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(0)
     })
   })
 
@@ -311,73 +252,6 @@ describe('admin3', () => {
       await globalLabel.click()
       await checkPageTitle(page, label)
       await checkBreadcrumb(page, label)
-    })
-  })
-
-  describe('i18n', () => {
-    test('should allow changing language', async () => {
-      await page.goto(postsUrl.account)
-
-      const field = page.locator('.payload-settings__language .react-select')
-
-      await field.click()
-      const options = page.locator('.rs__option')
-      await options.locator('text=Español').click()
-
-      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
-        'title',
-        'Tablero',
-      )
-
-      await field.click()
-      await options.locator('text=English').click()
-      await field.click()
-      await expect(page.locator('.form-submit .btn')).toContainText('Save')
-    })
-
-    test('should allow custom translation', async () => {
-      await page.goto(postsUrl.account)
-      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
-        'title',
-        'Home',
-      )
-    })
-
-    test('should allow custom translation of locale labels', async () => {
-      const selectOptionClass = '.localizer .popup-button-list__button'
-      const localizerButton = page.locator('.localizer .popup-button')
-      const localeListItem1 = page.locator(selectOptionClass).nth(0)
-
-      async function checkLocaleLabels(firstLabel: string, secondLabel: string) {
-        await localizerButton.click()
-        await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
-        await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
-      }
-
-      await checkLocaleLabels('Spanish (es)', 'English (en)')
-
-      // Change locale to Spanish
-      await localizerButton.click()
-      await expect(localeListItem1).toContainText('Spanish (es)')
-      await localeListItem1.click()
-
-      // Go to account page
-      await page.goto(postsUrl.account)
-
-      const languageField = page.locator('.payload-settings__language .react-select')
-      const options = page.locator('.rs__option')
-
-      // Change language to Spanish
-      await languageField.click()
-      await options.locator('text=Español').click()
-
-      await checkLocaleLabels('Español (es)', 'Inglés (en)')
-
-      // Change locale and language back to English
-      await languageField.click()
-      await options.locator('text=English').click()
-      await localizerButton.click()
-      await expect(localeListItem1).toContainText('Spanish (es)')
     })
   })
 
@@ -666,14 +540,4 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
 
 async function deleteAllPosts() {
   await payload.delete({ collection: postsCollectionSlug, where: { id: { exists: true } } })
-}
-
-async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
-  return payload.create({
-    collection: geoCollectionSlug,
-    data: {
-      point: [4, -4],
-      ...overrides,
-    },
-  }) as unknown as Promise<Geo>
 }
