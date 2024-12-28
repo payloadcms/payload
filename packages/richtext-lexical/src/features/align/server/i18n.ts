@@ -164,10 +164,10 @@ export const i18n: Partial<GenericLanguages> = {
     alignRightLabel: 'Zarovnať doprava',
   },
   sl: {
-    alignCenterLabel: undefined,
-    alignJustifyLabel: undefined,
-    alignLeftLabel: undefined,
-    alignRightLabel: undefined,
+    alignCenterLabel: 'Poravnaj na sredino',
+    alignJustifyLabel: 'Poravnaj Obojestransko',
+    alignLeftLabel: 'Poravnaj na levo',
+    alignRightLabel: 'Poravnaj na desno',
   },
   sv: {
     alignCenterLabel: 'Centrera',

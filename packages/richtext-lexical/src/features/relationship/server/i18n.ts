@@ -83,7 +83,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Vzťah',
   },
   sl: {
-    label: undefined,
+    label: 'Odnos',
   },
   sv: {
     label: 'Relation',

@@ -83,7 +83,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Citát',
   },
   sl: {
-    label: undefined,
+    label: 'Citat',
   },
   sv: {
     label: 'Blockcitat',

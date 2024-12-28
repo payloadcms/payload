@@ -110,8 +110,8 @@ export const i18n: Partial<GenericLanguages> = {
     loadingWithEllipsis: 'Načítava sa...',
   },
   sl: {
-    label: undefined,
-    loadingWithEllipsis: undefined,
+    label: 'Povezava',
+    loadingWithEllipsis: 'Nalaganje...',
   },
   sv: {
     label: 'Länk',

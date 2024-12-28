@@ -246,12 +246,12 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sl: {
     inlineBlocks: {
-      create: undefined,
-      edit: undefined,
-      label: undefined,
-      remove: undefined,
+      create: 'Ustvari {{oznaka}}',
+      edit: 'Uredi {{label}}',
+      label: 'Vrstični bloki',
+      remove: 'Odstrani {{label}}',
     },
-    label: undefined,
+    label: 'Bloki',
   },
   sv: {
     inlineBlocks: {

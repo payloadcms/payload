@@ -110,8 +110,8 @@ export const i18n: Partial<GenericLanguages> = {
     increaseLabel: 'Zväčšiť odsadenie',
   },
   sl: {
-    decreaseLabel: undefined,
-    increaseLabel: undefined,
+    decreaseLabel: 'Zmanjšaj zamik',
+    increaseLabel: 'Povečaj zamik',
   },
   sv: {
     decreaseLabel: 'Minska indrag',
