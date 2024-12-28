@@ -317,3 +317,5 @@ test/databaseAdapter.js
 /filename-compound-index
 /media-with-relation-preview
 /media-without-relation-preview
+
+tsconfig.generated.json
