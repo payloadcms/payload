@@ -21,8 +21,8 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
-import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 import { TabsProvider } from './provider.js'
 import { TabComponent } from './Tab/index.js'
 
@@ -225,6 +225,7 @@ type ActiveTabProps = {
   permissions: SanitizedFieldPermissions
   readOnly: boolean
 }
+
 function ActiveTabContent({
   description,
   fields,
