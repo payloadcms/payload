@@ -11,6 +11,7 @@ import {
   initPageConsoleErrorCatch,
   openNav,
   saveDocAndAssert,
+  saveDocHotkeyAndAssert,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -31,8 +32,8 @@ import {
   slugPluralLabel,
 } from '../../shared.js'
 import {
-  customFieldsSlug,
   customViews2CollectionSlug,
+  disableDuplicateSlug,
   geoCollectionSlug,
   globalSlug,
   notInViewCollectionSlug,
@@ -48,6 +49,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -66,7 +68,7 @@ describe('General', () => {
   let notInViewUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
-  let customFieldsURL: AdminUrlUtil
+  let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
 
@@ -85,7 +87,7 @@ describe('General', () => {
     notInViewUrl = new AdminUrlUtil(serverURL, notInViewCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
-    customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
+    disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -475,62 +477,6 @@ describe('General', () => {
     })
   })
 
-  describe('header actions', () => {
-    test('should show admin level action in admin panel', async () => {
-      await page.goto(postsUrl.admin)
-      // Check if the element with the class .admin-button exists
-      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
-    })
-
-    test('should show admin level action in collection list view', async () => {
-      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
-      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
-    })
-
-    test('should show admin level action in collection edit view', async () => {
-      const { id } = await createGeo()
-      await page.goto(geoUrl.edit(id))
-      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
-    })
-
-    test('should show collection list view level action in collection list view', async () => {
-      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
-      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
-    })
-
-    test('should show collection edit view level action in collection edit view', async () => {
-      const { id } = await createGeo()
-      await page.goto(geoUrl.edit(id))
-      await expect(page.locator('.app-header .collection-edit-button')).toHaveCount(1)
-    })
-
-    test('should show collection api view level action in collection api view', async () => {
-      const { id } = await createGeo()
-      await page.goto(`${geoUrl.edit(id)}/api`)
-      await expect(page.locator('.app-header .collection-api-button')).toHaveCount(1)
-    })
-
-    test('should show global edit view level action in globals edit view', async () => {
-      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
-      await page.goto(globalWithPreview.global(globalSlug))
-      await expect(page.locator('.app-header .global-edit-button')).toHaveCount(1)
-    })
-
-    test('should show global api view level action in globals api view', async () => {
-      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
-      await page.goto(`${globalWithPreview.global(globalSlug)}/api`)
-      await expect(page.locator('.app-header .global-api-button')).toHaveCount(1)
-    })
-
-    test('should reset actions array when navigating from view with actions to view without actions', async () => {
-      await page.goto(geoUrl.list)
-      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
-      await page.locator('button.nav-toggler[aria-label="Open Menu"][tabindex="0"]').click()
-      await page.locator(`#nav-posts`).click()
-      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(0)
-    })
-  })
-
   describe('custom CSS', () => {
     test('should see custom css in admin UI', async () => {
       await page.goto(postsUrl.admin)
@@ -597,124 +543,59 @@ describe('General', () => {
     })
   })
 
-  describe('custom fields', () => {
-    test('should render custom field component', async () => {
-      await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#field-customTextClientField')).toBeVisible()
+  describe('header actions', () => {
+    test('should show admin level action in admin panel', async () => {
+      await page.goto(postsUrl.admin)
+      // Check if the element with the class .admin-button exists
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
     })
 
-    test('renders custom label component', async () => {
-      await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#custom-client-field-label')).toBeVisible()
-      await expect(page.locator('#custom-server-field-label')).toBeVisible()
+    test('should show admin level action in collection list view', async () => {
+      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
     })
 
-    test('renders custom field description text', async () => {
-      await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
-      await expect(page.locator('#custom-client-field-description')).toBeVisible()
-      await expect(page.locator('#custom-server-field-description')).toBeVisible()
+    test('should show admin level action in collection edit view', async () => {
+      const { id } = await createGeo()
+      await page.goto(geoUrl.edit(id))
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
     })
 
-    test('custom server components should receive field props', async () => {
-      await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
-      await expect(
-        page.locator('#custom-server-field-label', {
-          hasText: exactText('Label: the max length of this field is: 100'),
-        }),
-      ).toBeVisible()
-
-      await expect(
-        page.locator('#custom-server-field-description', {
-          hasText: exactText('Description: the max length of this field is: 100'),
-        }),
-      ).toBeVisible()
+    test('should show collection list view level action in collection list view', async () => {
+      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
     })
 
-    test('custom client components should receive field props', async () => {
-      await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
-      await expect(
-        page.locator('#custom-client-field-label', {
-          hasText: exactText('Label: the max length of this field is: 100'),
-        }),
-      ).toBeVisible()
-      await expect(
-        page.locator('#custom-client-field-description', {
-          hasText: exactText('Description: the max length of this field is: 100'),
-        }),
-      ).toBeVisible()
+    test('should show collection edit view level action in collection edit view', async () => {
+      const { id } = await createGeo()
+      await page.goto(geoUrl.edit(id))
+      await expect(page.locator('.app-header .collection-edit-button')).toHaveCount(1)
     })
 
-    describe('field descriptions', () => {
-      test('should render static field description', async () => {
-        await page.goto(customFieldsURL.create)
-        await page.waitForURL(customFieldsURL.create)
-        await expect(page.locator('.field-description-descriptionAsString')).toContainText(
-          'Static field description.',
-        )
-      })
-
-      test('should render functional field description', async () => {
-        await page.goto(customFieldsURL.create)
-        await page.waitForURL(customFieldsURL.create)
-        await page.locator('#field-descriptionAsFunction').fill('functional')
-        await expect(page.locator('.field-description-descriptionAsFunction')).toContainText(
-          'Function description',
-        )
-      })
+    test('should show collection api view level action in collection api view', async () => {
+      const { id } = await createGeo()
+      await page.goto(`${geoUrl.edit(id)}/api`)
+      await expect(page.locator('.app-header .collection-api-button')).toHaveCount(1)
     })
 
-    test('should render component field description', async () => {
-      await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
-      await page.locator('#field-descriptionAsComponent').fill('component')
-      await expect(page.locator('.field-description-descriptionAsComponent')).toContainText(
-        'Component description: descriptionAsComponent - component',
-      )
+    test('should show global edit view level action in globals edit view', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(globalWithPreview.global(globalSlug))
+      await expect(page.locator('.app-header .global-edit-button')).toHaveCount(1)
     })
 
-    test('should render custom error component', async () => {
-      await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
-      const input = page.locator('input[id="field-customTextClientField"]')
-      await input.fill('ab')
-      await expect(input).toHaveValue('ab')
-      const error = page.locator('.custom-error:near(input[id="field-customTextClientField"])')
-      const submit = page.locator('button[type="button"][id="action-save"]')
-      await submit.click()
-      await expect(error).toHaveText('#custom-error')
+    test('should show global api view level action in globals api view', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(`${globalWithPreview.global(globalSlug)}/api`)
+      await expect(page.locator('.app-header .global-api-button')).toHaveCount(1)
     })
 
-    test('should render beforeInput and afterInput', async () => {
-      await page.goto(customFieldsURL.create)
-      const input = page.locator('input[id="field-customTextClientField"]')
-
-      const prevSibling = await input.evaluateHandle((el) => {
-        return el.previousElementSibling
-      })
-
-      const prevSiblingText = await page.evaluate((el) => el?.textContent, prevSibling)
-      expect(prevSiblingText).toEqual('#before-input')
-
-      const nextSibling = await input.evaluateHandle((el) => {
-        return el.nextElementSibling
-      })
-
-      const nextSiblingText = await page.evaluate((el) => el?.textContent, nextSibling)
-      expect(nextSiblingText).toEqual('#after-input')
-    })
-
-    describe('select field', () => {
-      test('should render custom select options', async () => {
-        await page.goto(customFieldsURL.create)
-        await page.waitForURL(customFieldsURL.create)
-        await page.locator('#field-customSelectField .rs__control').click()
-        await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
-      })
+    test('should reset actions array when navigating from view with actions to view without actions', async () => {
+      await page.goto(geoUrl.list)
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
+      await page.locator('button.nav-toggler[aria-label="Open Menu"][tabindex="0"]').click()
+      await page.locator(`#nav-posts`).click()
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(0)
     })
   })
 
@@ -792,7 +673,260 @@ describe('General', () => {
       await expect(localeListItem1).toContainText('Spanish (es)')
     })
   })
+
+  describe('CRUD', () => {
+    test('should create', async () => {
+      await page.goto(postsUrl.create)
+      await page.locator('#field-title').fill(title)
+      await page.locator('#field-description').fill(description)
+      await saveDocAndAssert(page)
+      await expect(page.locator('#field-title')).toHaveValue(title)
+      await expect(page.locator('#field-description')).toHaveValue(description)
+    })
+
+    test('should read existing', async () => {
+      const { id } = await createPost()
+      await page.goto(postsUrl.edit(id))
+      await expect(page.locator('#field-title')).toHaveValue(title)
+      await expect(page.locator('#field-description')).toHaveValue(description)
+    })
+
+    test('should update existing', async () => {
+      const { id } = await createPost()
+      await page.goto(postsUrl.edit(id))
+      const newTitle = 'new title'
+      const newDesc = 'new description'
+      await page.locator('#field-title').fill(newTitle)
+      await page.locator('#field-description').fill(newDesc)
+      await saveDocAndAssert(page)
+      await expect(page.locator('#field-title')).toHaveValue(newTitle)
+      await expect(page.locator('#field-description')).toHaveValue(newDesc)
+    })
+
+    test('should save using hotkey', async () => {
+      const { id } = await createPost()
+      await page.goto(postsUrl.edit(id))
+      const newTitle = 'new title'
+      await page.locator('#field-title').fill(newTitle)
+      await saveDocHotkeyAndAssert(page)
+      await expect(page.locator('#field-title')).toHaveValue(newTitle)
+    })
+
+    test('should delete existing', async () => {
+      const { id, title } = await createPost()
+      await page.goto(postsUrl.edit(id))
+      await openDocControls(page)
+      await page.locator('#action-delete').click()
+      await page.locator('#confirm-delete').click()
+      await expect(page.locator(`text=Post "${title}" successfully deleted.`)).toBeVisible()
+      expect(page.url()).toContain(postsUrl.list)
+    })
+
+    test('should bulk delete all on page', async () => {
+      await deleteAllPosts()
+      await Promise.all([createPost(), createPost(), createPost()])
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+        'Deleted 3 Posts successfully.',
+      )
+
+      await expect(page.locator('.collection-list__no-results')).toBeVisible()
+    })
+
+    test('should bulk delete with filters and across pages', async () => {
+      await deleteAllPosts()
+      await Promise.all([createPost({ title: 'Post 1' }), createPost({ title: 'Post 2' })])
+      await page.goto(postsUrl.list)
+      await page.locator('#search-filter-input').fill('Post 1')
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await page.locator('input#select-all').check()
+      await page.locator('button.list-selection__button').click()
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+        'Deleted 1 Post successfully.',
+      )
+
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+    })
+
+    test('should bulk update', async () => {
+      // First, delete all posts created by the seed
+      await deleteAllPosts()
+      const post1Title = 'Post'
+      const updatedPostTitle = `${post1Title} (Updated)`
+      await Promise.all([createPost({ title: post1Title }), createPost(), createPost()])
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const titleOption = page.locator('.field-select .rs__option', {
+        hasText: exactText('Title'),
+      })
+
+      await expect(titleOption).toBeVisible()
+      await titleOption.click()
+      const titleInput = page.locator('#field-title')
+      await expect(titleInput).toBeVisible()
+      await titleInput.fill(updatedPostTitle)
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Updated 3 Posts successfully.',
+      )
+
+      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
+      await expect(page.locator('.row-2 .cell-title')).toContainText(updatedPostTitle)
+      await expect(page.locator('.row-3 .cell-title')).toContainText(updatedPostTitle)
+    })
+
+    test('should not override un-edited values in bulk edit if it has a defaultValue', async () => {
+      await deleteAllPosts()
+      const post1Title = 'Post'
+      const postData = {
+        title: 'Post',
+        arrayOfFields: [
+          {
+            optional: 'some optional array field',
+            innerArrayOfFields: [
+              {
+                innerOptional: 'some inner optional array field',
+              },
+            ],
+          },
+        ],
+        group: {
+          defaultValueField: 'not the group default value',
+          title: 'some title',
+        },
+        someBlock: [
+          {
+            textFieldForBlock: 'some text for block text',
+            blockType: 'textBlock',
+          },
+        ],
+        defaultValueField: 'not the default value',
+      }
+      const updatedPostTitle = `${post1Title} (Updated)`
+      await createPost(postData)
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const titleOption = page.locator('.field-select .rs__option', {
+        hasText: exactText('Title'),
+      })
+
+      await expect(titleOption).toBeVisible()
+      await titleOption.click()
+      const titleInput = page.locator('#field-title')
+      await expect(titleInput).toBeVisible()
+      await titleInput.fill(updatedPostTitle)
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Updated 1 Post successfully.',
+      )
+
+      const updatedPost = await payload.find({
+        collection: 'posts',
+        limit: 1,
+      })
+
+      expect(updatedPost.docs[0].title).toBe(updatedPostTitle)
+      expect(updatedPost.docs[0].arrayOfFields.length).toBe(1)
+      expect(updatedPost.docs[0].arrayOfFields[0].optional).toBe('some optional array field')
+      expect(updatedPost.docs[0].arrayOfFields[0].innerArrayOfFields.length).toBe(1)
+      expect(updatedPost.docs[0].someBlock[0].textFieldForBlock).toBe('some text for block text')
+      expect(updatedPost.docs[0].defaultValueField).toBe('not the default value')
+    })
+
+    test('should bulk update with filters and across pages', async () => {
+      // First, delete all posts created by the seed
+      await deleteAllPosts()
+      const post1Title = 'Post 1'
+      await Promise.all([createPost({ title: post1Title }), createPost({ title: 'Post 2' })])
+      const updatedPostTitle = `${post1Title} (Updated)`
+      await page.goto(postsUrl.list)
+      await page.locator('#search-filter-input').fill('Post 1')
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await page.locator('input#select-all').check()
+      await page.locator('button.list-selection__button').click()
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const titleOption = page.locator('.field-select .rs__option', {
+        hasText: exactText('Title'),
+      })
+
+      await expect(titleOption).toBeVisible()
+      await titleOption.click()
+      const titleInput = page.locator('#field-title')
+      await expect(titleInput).toBeVisible()
+      await titleInput.fill(updatedPostTitle)
+
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Updated 1 Post successfully.',
+      )
+
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
+    })
+
+    test('should save globals', async () => {
+      await page.goto(postsUrl.global(globalSlug))
+
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('#field-title')).toHaveValue(title)
+    })
+
+    test('should hide duplicate when disableDuplicate: true', async () => {
+      await page.goto(disableDuplicateURL.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await expect(page.locator('#action-duplicate')).toBeHidden()
+    })
+
+    test('should properly close leave-without-saving modal after clicking leave-anyway button', async () => {
+      const { id } = await createPost()
+      await page.goto(postsUrl.edit(id))
+      const title = 'title'
+      await page.locator('#field-title').fill(title)
+      await saveDocHotkeyAndAssert(page)
+      await expect(page.locator('#field-title')).toHaveValue(title)
+
+      const newTitle = 'new title'
+      await page.locator('#field-title').fill(newTitle)
+
+      await page.locator('header.app-header a[href="/admin/collections/posts"]').click()
+
+      // Locate the modal container
+      const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+
+      // Click the "Leave anyway" button
+      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+
+      // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
+      await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
+    })
+  })
 })
+
+async function deleteAllPosts() {
+  await payload.delete({ collection: postsCollectionSlug, where: { id: { exists: true } } })
+}
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
