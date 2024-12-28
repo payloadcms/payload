@@ -434,7 +434,7 @@ export const svTranslations: DefaultTranslationsObject = {
     aboutToUnpublish: 'Du kommer avpublicera detta dokumentet. Är du säker?',
     aboutToUnpublishSelection:
       'Du är på väg att avpublicera alla {{label}} i urvalet. Är du säker?',
-    autosave: 'Spara utomatiskt',
+    autosave: 'Spara automatiskt',
     autosavedSuccessfully: 'Autosparades framgångsrikt.',
     autosavedVersion: 'Autosparad version',
     changed: 'Ändrad',
