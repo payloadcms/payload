@@ -25,7 +25,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -41,7 +40,6 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
-  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
@@ -71,12 +69,9 @@ const dirname = path.dirname(filename)
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let global: AdminUrlUtil
-let id: string
-
 let context: BrowserContext
 
-describe('versions', () => {
+describe('Versions', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
@@ -84,7 +79,6 @@ describe('versions', () => {
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
-  let global: AdminUrlUtil
   let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -641,8 +635,8 @@ describe('versions', () => {
   describe('Collections - publish specific locale', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, localizedCollectionSlug)
-      global = new AdminUrlUtil(serverURL, localizedGlobalSlug)
     })
+
     test('should show publish individual locale dropdown', async () => {
       await page.goto(url.create)
       const publishOptions = page.locator('.doc-controls__controls .popup')

@@ -278,9 +278,9 @@ jobs:
         suite:
           - _community
           - access-control
-          - admin__e2e__1
-          - admin__e2e__2
-          - admin__e2e__3
+          - admin__e2e__general
+          - admin__e2e__list-view
+          - admin__e2e__document-view
           - admin-root
           - auth
           - auth-basic
