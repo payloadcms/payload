@@ -205,24 +205,6 @@ describe('admin2', () => {
         await expect(page.locator('#search-filter-input')).toHaveValue('')
       })
 
-      test('should toggle columns', async () => {
-        const columnCountLocator = 'table > thead > tr > th'
-        await createPost()
-        await openListColumns(page, {})
-        const numberOfColumns = await page.locator(columnCountLocator).count()
-        await expect(page.locator('.column-selector')).toBeVisible()
-        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
-        await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
-        await page.locator('#heading-id').waitFor({ state: 'detached' })
-        await page.locator('.cell-id').first().waitFor({ state: 'detached' })
-        await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
-        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
-        await toggleColumn(page, { columnLabel: 'ID', targetState: 'on' })
-        await expect(page.locator('.cell-id').first()).toBeVisible()
-        await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
-        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
-      })
-
       test('should link second cell', async () => {
         const { id } = await createPost()
         await page.reload()
@@ -471,6 +453,24 @@ describe('admin2', () => {
     })
 
     describe('table columns', () => {
+      test('should toggle columns', async () => {
+        const columnCountLocator = 'table > thead > tr > th'
+        await createPost()
+        await openListColumns(page, {})
+        const numberOfColumns = await page.locator(columnCountLocator).count()
+        await expect(page.locator('.column-selector')).toBeVisible()
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
+        await page.locator('#heading-id').waitFor({ state: 'detached' })
+        await page.locator('.cell-id').first().waitFor({ state: 'detached' })
+        await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'on' })
+        await expect(page.locator('.cell-id').first()).toBeVisible()
+        await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
+      })
+
       test('should drag to reorder columns and save to preferences', async () => {
         await createPost()
 
@@ -773,6 +773,20 @@ describe('admin2', () => {
         await expect(columnAfterSort).not.toHaveClass('column-selector__column--active')
         await expect(page.locator('#heading-id')).toBeHidden()
         await expect(page.locator('.cell-id')).toHaveCount(0)
+      })
+
+      test('should remove sorted column when toggled off', async () => {
+        await createPost()
+        await page.goto(postsUrl.list)
+        await page.locator('#heading-id .sort-column__asc').click()
+        await page.waitForURL(/sort=id/)
+        await openListColumns(page, {})
+        await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
+        await page.locator('#heading-id').waitFor({ state: 'detached' })
+        await page.locator('.cell-id').first().waitFor({ state: 'detached' })
+        await expect(page.locator('#heading-id .sort-column__asc')).toHaveCount(0)
+        await expect(page.locator('#heading-id .sort-column__desc')).toHaveCount(0)
+        expect(page.url()).not.toContain('sort=id')
       })
     })
 
