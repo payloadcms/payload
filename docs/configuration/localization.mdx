@@ -149,8 +149,8 @@ All field types with a `name` property support the `localized` property—even t
 and `block`s.
 
 <Banner>
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   Enabling localization for field types that support nested fields will automatically create
   localized "sets" of all fields contained within the field. For example, if you have a page layout
   using a blocks field type, you have the choice of either localizing the full layout, by enabling
@@ -158,8 +158,8 @@ and `block`s.
 </Banner>
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
+  **Important:**
+
   When converting an existing field to or from `localized: true` the data structure in the document
   will change for this field and so existing data for this field will be lost. Before changing the
   localization setting on fields with existing data, you may need to consider a field migration
@@ -235,9 +235,9 @@ const posts = await payload.find({
 ```
 
 <Banner type="alert">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   The REST and Local APIs can return all localization data in one request by passing 'all' or '*' as
-  the <strong>locale</strong> parameter. The response will be structured so that field values come
+  the **locale** parameter. The response will be structured so that field values come
   back as the full objects keyed for each locale instead of the single, translated value.
 </Banner>

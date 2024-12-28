@@ -46,9 +46,9 @@ To enable API keys on a collection, set the `useAPIKey` auth option to `true`. F
 </Banner>
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   If you change your `PAYLOAD_SECRET`, you will need to regenerate your API keys.
-  <br />
+
   The secret key is used to encrypt the API keys, so if you change the secret, existing API keys will no longer be valid.
 </Banner>
 
@@ -95,8 +95,8 @@ You can customize how the Forgot Password workflow operates with the following o
 Function that accepts one argument, containing `{ req, token, user }`, that allows for overriding the HTML within emails that are sent to users attempting to reset their password. The function should return a string that supports HTML, which can be a full HTML email.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   HTML templating can be used to create custom email templates, inline CSS automatically, and more.
   You can make a reusable function that standardizes all email sent from Payload, which makes
   sending custom emails more DRY. Payload doesn't ship with an HTML templating engine, so you are
@@ -138,8 +138,8 @@ export const Customers: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
+  **Important:**
+
   If you specify a different URL to send your users to for resetting their password, such as a page
   on the frontend of your app or similar, you need to handle making the call to the Payload REST or
   GraphQL reset-password operation yourself on your frontend, using the token that was provided for
@@ -198,8 +198,8 @@ export const Customers: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
+  **Important:**
+
   If you specify a different URL to send your users to for email verification, such as a page on the
   frontend of your app or similar, you need to handle making the call to the Payload REST or GraphQL
   verification operation yourself on your frontend, using the token that was provided for you.

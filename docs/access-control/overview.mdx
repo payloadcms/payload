@@ -34,16 +34,14 @@ const defaultPayloadAccess = ({ req: { user } }) => {
 ```
 
 <Banner type="success">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   In the Local API, all Access Control functions are skipped by default, allowing your server to do
   whatever it needs. But, you can opt back in by setting the option
-  {' '}
-  <strong>
-    overrideAccess
-  </strong>
-  {' '}
-  to <strong>false</strong>.
+
+  **overrideAccess**
+
+  to **false**.
 </Banner>
 
 ### Access Control Types
@@ -57,8 +55,8 @@ You can manage access within Payload on three different levels:
 ### When Access Control is Executed
 
 <Banner type="success">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   Access control functions are utilized in two places. It's important to understand how and when
   your access control is executed.
 </Banner>
@@ -76,10 +74,10 @@ To accomplish this, Payload ships with an `Access` operation, which is executed 
 ### Argument Availability
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
-  When your access control functions are executed via the <strong>access</strong> operation, the{' '}
-  <strong>id</strong> and <strong>data</strong> arguments will be <strong>undefined</strong>,
+  **Important:**
+
+  When your access control functions are executed via the **access** operation, the{' '}
+  **id** and **data** arguments will be **undefined**,
   because Payload is executing your functions without referencing a specific document.
 </Banner>
 

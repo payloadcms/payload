@@ -52,8 +52,8 @@ caption="Admin panel screenshot of a Relationship field"
 _\* An asterisk denotes that a property is required._
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   The [Depth](/docs/getting-started/concepts#depth) parameter can be used to automatically populate
   related documents that are returned by the API.
 </Banner>
@@ -173,12 +173,12 @@ export const ExampleCollection: CollectionConfig = {
 You can learn more about writing queries [here](/docs/queries/overview).
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
-  When a relationship field has both <strong>filterOptions</strong> and a custom{' '}
-  <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong>{' '}
+  **Note:**
+
+  When a relationship field has both **filterOptions** and a custom{' '}
+  **validate** function, the api will not validate **filterOptions**{' '}
   unless you call the default relationship field validation function imported from{' '}
-  <strong>payload/fields/validations</strong> in your validate function.
+  **payload/fields/validations** in your validate function.
 </Banner>
 
 ### How the data is saved
@@ -360,7 +360,7 @@ However, you **cannot** query on any field values within the related document.
 Since we are referencing multiple collections, the field you are querying on may not exist and break the query.
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
-  You <strong>cannot</strong> query on a field within a polymorphic relationship as you would with a non-polymorphic relationship.
+  **Note:**
+
+  You **cannot** query on a field within a polymorphic relationship as you would with a non-polymorphic relationship.
 </Banner>
