@@ -151,6 +151,25 @@ const TextFields: CollectionConfig = {
       maxRows: 4,
     },
     {
+      name: 'hidden',
+      type: 'text',
+      hidden: true,
+    },
+    {
+      name: 'adminHidden',
+      type: 'text',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'hiddenInVersionView',
+      type: 'text',
+      admin: {
+        hiddenInVersionView: true,
+      },
+    },
+    {
       name: 'disableListColumnText',
       type: 'text',
       admin: {
@@ -195,6 +214,7 @@ const TextFields: CollectionConfig = {
     },
   ],
   slug: textFieldsSlug,
+  versions: true,
 }
 
 export default TextFields
