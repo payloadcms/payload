@@ -11,8 +11,8 @@ While designing the Payload Admin panel, we determined it should be as minimal a
 To swap in your own React component, first, consult the list of available component overrides below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component accordingly.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   Custom components will automatically be provided with all props that the default component normally
   accepts.
 </Banner>
@@ -133,8 +133,8 @@ To add a _new_ view to the Admin Panel, simply add another key to the `views` ob
 ```
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   Routes are cascading. This means that unless explicitly given the `exact` property, they will match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all routes in your application. Alternatively, you could define your nested route _before_ your parent route.
 </Banner>
 
@@ -451,8 +451,8 @@ Your custom view components will be given all the props that a React Router `<Ro
 | **`canAccessAdmin`** \* | If the currently logged in user is allowed to access the admin panel or not. |
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   It's up to you to secure your custom views. If your view requires a user to be logged in or to
   have certain access rights, you should handle that within your view component yourself.
 </Banner>
@@ -471,8 +471,8 @@ To see how to pass in your custom views to create custom views of your own, take
 All Payload fields support the ability to swap in your own React components. So, for example, instead of rendering a default Text input, you might need to render a color picker that provides the editor with a custom color picker interface to restrict the data entered to colors only.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   Don't see a built-in field type that you need? Build it! Using a combination of custom validation
   and custom components, you can override the entirety of how a component functions within the admin
   panel and effectively create your own field type.
@@ -546,7 +546,7 @@ const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
 
 <Banner type="success">
   For more information regarding the hooks that are available to you while you build custom
-  components, including the <strong>useField</strong> hook, [click here](/docs/admin/hooks).
+  components, including the **useField** hook, [click here](/docs/admin/hooks).
 </Banner>
 
 ## Label Component
@@ -651,7 +651,7 @@ export default titleField;
 As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to add your own context to any Payload app for use in other custom components within the admin panel. Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. Read the [React context](https://reactjs.org/docs/context.html) docs to learn more.
 
 <Banner type="warning">
-  <strong>Reminder:</strong> Don't forget to pass the **children** prop through the provider
+  **Reminder:** Don't forget to pass the **children** prop through the provider
   component for the admin UI to show
 </Banner>
 

@@ -51,12 +51,12 @@ All field-level hooks are formatted to accept the same arguments, although some 
 which field hook you are utilizing.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   It's a good idea to conditionally scope your logic based on which operation is executing. For
-  example, if you are writing a <strong>beforeChange</strong> hook, you may want to perform
-  different logic based on if the current <strong>operation</strong> is <strong>create</strong> or{' '}
-  <strong>update</strong>.
+  example, if you are writing a **beforeChange** hook, you may want to perform
+  different logic based on if the current **operation** is **create** or
+  **update**.
 </Banner>
 
 #### Arguments
@@ -86,8 +86,8 @@ All field hooks can optionally modify the return value of the field before the o
 optionally return the value that should be used within the field.
 
 <Banner type="warning">
-  <strong>Important</strong>
-  <br />
+  **Important**
+
   Due to GraphQL's typed nature, you should never change the type of data that you return from a
   field, otherwise GraphQL will produce errors. If you need to change the shape or type of data,
   reconsider Field Hooks and instead evaluate if Collection / Global hooks might suit you better.
