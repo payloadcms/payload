@@ -1,4 +1,4 @@
-import type { GenericLanguages, I18nClient } from '@payloadcms/translations'
+import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type {
   Klass,
@@ -298,14 +298,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   // @ts-expect-error - TODO: fix this
   componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
   generatedTypes?: {
-    modifyOutputSchema: ({
-      collectionIDFieldTypes,
-      config,
-      currentSchema,
-      field,
-      interfaceNameDefinitions,
-      isRequired,
-    }: {
+    modifyOutputSchema: (args: {
       collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
       config?: SanitizedConfig
       /**
@@ -313,6 +306,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
        */
       currentSchema: JSONSchema4
       field: RichTextField<SerializedEditorState, AdapterProps>
+      i18n?: I18n
       /**
        * Allows you to define new top-level interfaces that can be re-used in the output schema.
        */
@@ -381,14 +375,7 @@ export type SanitizedServerFeatures = {
   enabledFeatures: string[]
   generatedTypes: {
     modifyOutputSchemas: Array<
-      ({
-        collectionIDFieldTypes,
-        config,
-        currentSchema,
-        field,
-        interfaceNameDefinitions,
-        isRequired,
-      }: {
+      (args: {
         collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
         config?: SanitizedConfig
         /**
@@ -396,6 +383,7 @@ export type SanitizedServerFeatures = {
          */
         currentSchema: JSONSchema4
         field: RichTextField<SerializedEditorState, AdapterProps>
+        i18n?: I18n
         /**
          * Allows you to define new top-level interfaces that can be re-used in the output schema.
          */

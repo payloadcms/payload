@@ -196,7 +196,7 @@ export function AuthProvider({
 
   const logOut = useCallback(async () => {
     try {
-      await requests.post(`${serverURL}${apiRoute}/${userSlug}/logout`)
+      await requests.post(`${serverURL}${apiRoute}/${user.collection}/logout`)
       setNewUser(null)
       revokeTokenAndExpire()
       return true
@@ -204,7 +204,7 @@ export function AuthProvider({
       toast.error(`Logging out failed: ${e.message}`)
       return false
     }
-  }, [apiRoute, revokeTokenAndExpire, serverURL, setNewUser, userSlug])
+  }, [apiRoute, revokeTokenAndExpire, serverURL, setNewUser, user])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
@@ -309,7 +309,7 @@ export function AuthProvider({
         clearTimeout(forceLogOut)
       }
     }
-  }, [tokenExpiration, openModal, i18n, setNewUser, user])
+  }, [tokenExpiration, openModal, i18n, setNewUser, user, redirectToInactivityRoute])
 
   return (
     <Context.Provider

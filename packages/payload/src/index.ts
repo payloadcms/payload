@@ -807,7 +807,7 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload)
+      await reload(config, cached.payload, !options.importMap)
 
       resolve()
     }
@@ -815,7 +815,6 @@ export const getPayload = async (
     if (cached.reload instanceof Promise) {
       await cached.reload
     }
-
     if (options?.importMap) {
       cached.payload.importMap = options.importMap
     }
@@ -839,6 +838,7 @@ export const getPayload = async (
     ) {
       try {
         const port = process.env.PORT || '3000'
+
         cached.ws = new WebSocket(
           `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
         )
@@ -1050,6 +1050,7 @@ export type {
   FindOneArgs,
   FindVersions,
   FindVersionsArgs,
+  GenerateSchema,
   Init,
   Migration,
   MigrationData,
@@ -1299,6 +1300,7 @@ export type {
 } from './queues/config/types/taskTypes.js'
 export type {
   BaseJob,
+  JobLog,
   JobTaskStatus,
   RunningJob,
   SingleTaskStatus,
@@ -1306,6 +1308,7 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
@@ -1335,6 +1338,7 @@ export {
   type CustomVersionParser,
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+export type { FieldSchemaJSON } from './utilities/fieldSchemaToJSON.js'
 export {
   findUp,
   findUpSync,
@@ -1353,8 +1357,12 @@ export { default as isolateObjectProperty } from './utilities/isolateObjectPrope
 export { isPlainObject } from './utilities/isPlainObject.js'
 export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
+export { defaultLoggerOptions } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
+export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
+export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
+export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
@@ -1366,5 +1374,6 @@ export { getLatestCollectionVersion } from './versions/getLatestCollectionVersio
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 
 export { saveVersion } from './versions/saveVersion.js'
+export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

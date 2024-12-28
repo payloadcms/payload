@@ -21,9 +21,11 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
-  noAdminAccessEmail,
+  nonAdminEmail,
   nonAdminUserEmail,
   nonAdminUserSlug,
+  publicUserEmail,
+  publicUsersSlug,
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
@@ -66,667 +68,672 @@ function isUser(user: Config['user']): user is {
   return user?.collection === 'users'
 }
 
-export default buildConfigWithDefaults({
-  admin: {
-    autoLogin: false,
-    user: 'users',
-    importMap: {
-      baseDir: path.resolve(dirname),
+export default buildConfigWithDefaults(
+  {
+    admin: {
+      autoLogin: false,
+      user: 'users',
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
-  },
-  collections: [
-    {
-      slug: 'users',
-      access: {
-        // admin:  () => true,
-        admin: async ({ req }) => {
-          if (req.user?.email === noAdminAccessEmail) {
-            return false
-          }
+    collections: [
+      {
+        slug: 'users',
+        access: {
+          // admin:  () => true,
+          admin: async ({ req }) => {
+            if (req.user?.email === nonAdminEmail) {
+              return false
+            }
 
-          return new Promise((resolve) => {
-            // Simulate a request to an external service to determine access, i.e. another instance of Payload
-            setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
-          })
-        },
-      },
-      auth: true,
-      fields: [
-        {
-          name: 'roles',
-          type: 'select',
-          access: {
-            create: ({ req }) => isUser(req.user) && req.user?.roles?.includes('admin'),
-            read: () => false,
-            update: ({ req }) => {
-              return isUser(req.user) && req.user?.roles?.includes('admin')
-            },
-          },
-          defaultValue: ['user'],
-          hasMany: true,
-          options: ['admin', 'user'],
-        },
-      ],
-    },
-    {
-      slug: nonAdminUserSlug,
-      auth: true,
-      fields: [],
-    },
-    {
-      slug,
-      access: {
-        ...openAccess,
-        update: () => false,
-      },
-      fields: [
-        {
-          name: 'restrictedField',
-          type: 'text',
-          access: {
-            read: () => false,
-            update: () => false,
+            return new Promise((resolve) => {
+              // Simulate a request to an external service to determine access, i.e. another instance of Payload
+              setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
+            })
           },
         },
-        {
-          name: 'group',
-          type: 'group',
-          fields: [
-            {
-              name: 'restrictedGroupText',
-              type: 'text',
-              access: {
-                create: () => false,
-                read: () => false,
-                update: () => false,
+        auth: true,
+        fields: [
+          {
+            name: 'roles',
+            type: 'select',
+            access: {
+              create: ({ req }) => isUser(req.user) && req.user?.roles?.includes('admin'),
+              read: () => false,
+              update: ({ req }) => {
+                return isUser(req.user) && req.user?.roles?.includes('admin')
               },
             },
-          ],
-        },
-        {
-          type: 'row',
-          fields: [
-            {
-              name: 'restrictedRowText',
-              type: 'text',
-              access: {
-                create: () => false,
-                read: () => false,
-                update: () => false,
-              },
-            },
-          ],
-        },
-        {
-          type: 'collapsible',
-          fields: [
-            {
-              name: 'restrictedCollapsibleText',
-              type: 'text',
-              access: {
-                create: () => false,
-                read: () => false,
-                update: () => false,
-              },
-            },
-          ],
-          label: 'Access',
-        },
-      ],
-    },
-    {
-      slug: unrestrictedSlug,
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'userRestrictedDocs',
-          type: 'relationship',
-          hasMany: true,
-          relationTo: userRestrictedCollectionSlug,
-        },
-        {
-          name: 'createNotUpdateDocs',
-          type: 'relationship',
-          hasMany: true,
-          relationTo: createNotUpdateCollectionSlug,
-        },
-      ],
-    },
-    {
-      slug: 'relation-restricted',
-      access: {
-        read: () => true,
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'post',
-          type: 'relationship',
-          relationTo: slug,
-        },
-      ],
-    },
-    {
-      slug: fullyRestrictedSlug,
-      access: {
-        create: () => false,
-        delete: () => false,
-        read: () => false,
-        update: () => false,
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: readOnlySlug,
-      access: {
-        create: () => false,
-        delete: () => false,
-        read: () => true,
-        update: () => false,
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: userRestrictedCollectionSlug,
-      access: {
-        create: () => true,
-        delete: () => false,
-        read: () => true,
-        update: ({ req }) => ({
-          name: {
-            equals: req.user?.email,
+            defaultValue: ['user'],
+            hasMany: true,
+            options: ['admin', 'user'],
           },
-        }),
+        ],
       },
-      admin: {
-        useAsTitle: 'name',
+      {
+        slug: publicUsersSlug,
+        auth: true,
+        fields: [],
       },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
+      {
+        slug,
+        access: {
+          ...openAccess,
+          update: () => false,
         },
-      ],
-    },
-    {
-      slug: createNotUpdateCollectionSlug,
-      access: {
-        create: () => true,
-        delete: () => false,
-        read: () => true,
-        update: () => false,
-      },
-      admin: {
-        useAsTitle: 'name',
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: restrictedVersionsSlug,
-      access: {
-        read: ({ req: { user } }) => {
-          if (user) {
-            return true
-          }
-
-          return {
-            hidden: {
-              not_equals: true,
+        fields: [
+          {
+            name: 'restrictedField',
+            type: 'text',
+            access: {
+              read: () => false,
+              update: () => false,
             },
-          }
-        },
-        readVersions: ({ req: { user } }) => {
-          if (user) {
-            return true
-          }
-
-          return {
-            'version.hidden': {
-              not_equals: true,
-            },
-          }
-        },
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'hidden',
-          type: 'checkbox',
-          hidden: true,
-        },
-      ],
-      versions: true,
-    },
-    {
-      slug: siblingDataSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'array',
-          type: 'array',
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                {
-                  name: 'allowPublicReadability',
-                  type: 'checkbox',
-                  label: 'Allow Public Readability',
+          },
+          {
+            name: 'group',
+            type: 'group',
+            fields: [
+              {
+                name: 'restrictedGroupText',
+                type: 'text',
+                access: {
+                  create: () => false,
+                  read: () => false,
+                  update: () => false,
                 },
-                {
-                  name: 'text',
-                  type: 'text',
-                  access: {
-                    read: PublicReadabilityAccess,
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      slug: relyOnRequestHeadersSlug,
-      access: {
-        create: UseRequestHeadersAccess,
-        delete: UseRequestHeadersAccess,
-        read: UseRequestHeadersAccess,
-        update: UseRequestHeadersAccess,
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: docLevelAccessSlug,
-      access: {
-        delete: () => ({
-          and: [
-            {
-              approvedForRemoval: {
-                equals: true,
               },
-            },
-          ],
-        }),
+            ],
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'restrictedRowText',
+                type: 'text',
+                access: {
+                  create: () => false,
+                  read: () => false,
+                  update: () => false,
+                },
+              },
+            ],
+          },
+          {
+            type: 'collapsible',
+            fields: [
+              {
+                name: 'restrictedCollapsibleText',
+                type: 'text',
+                access: {
+                  create: () => false,
+                  read: () => false,
+                  update: () => false,
+                },
+              },
+            ],
+            label: 'Access',
+          },
+        ],
       },
-      fields: [
-        {
-          name: 'approvedForRemoval',
-          type: 'checkbox',
-          defaultValue: false,
+      {
+        slug: unrestrictedSlug,
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'userRestrictedDocs',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: userRestrictedCollectionSlug,
+          },
+          {
+            name: 'createNotUpdateDocs',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: createNotUpdateCollectionSlug,
+          },
+        ],
+      },
+      {
+        slug: 'relation-restricted',
+        access: {
+          read: () => true,
         },
-        {
-          name: 'approvedTitle',
-          type: 'text',
-          access: {
-            update: (args) => {
-              if (args?.doc?.lockTitle) {
-                return false
-              }
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'post',
+            type: 'relationship',
+            relationTo: slug,
+          },
+        ],
+      },
+      {
+        slug: fullyRestrictedSlug,
+        access: {
+          create: () => false,
+          delete: () => false,
+          read: () => false,
+          update: () => false,
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
+      {
+        slug: readOnlySlug,
+        access: {
+          create: () => false,
+          delete: () => false,
+          read: () => true,
+          update: () => false,
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
+      {
+        slug: userRestrictedCollectionSlug,
+        access: {
+          create: () => true,
+          delete: () => false,
+          read: () => true,
+          update: ({ req }) => ({
+            name: {
+              equals: req.user?.email,
+            },
+          }),
+        },
+        admin: {
+          useAsTitle: 'name',
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
+      {
+        slug: createNotUpdateCollectionSlug,
+        access: {
+          create: () => true,
+          delete: () => false,
+          read: () => true,
+          update: () => false,
+        },
+        admin: {
+          useAsTitle: 'name',
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
+      {
+        slug: restrictedVersionsSlug,
+        access: {
+          read: ({ req: { user } }) => {
+            if (user) {
               return true
+            }
+
+            return {
+              hidden: {
+                not_equals: true,
+              },
+            }
+          },
+          readVersions: ({ req: { user } }) => {
+            if (user) {
+              return true
+            }
+
+            return {
+              'version.hidden': {
+                not_equals: true,
+              },
+            }
+          },
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'hidden',
+            type: 'checkbox',
+            hidden: true,
+          },
+        ],
+        versions: true,
+      },
+      {
+        slug: siblingDataSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'array',
+            type: 'array',
+            fields: [
+              {
+                type: 'row',
+                fields: [
+                  {
+                    name: 'allowPublicReadability',
+                    type: 'checkbox',
+                    label: 'Allow Public Readability',
+                  },
+                  {
+                    name: 'text',
+                    type: 'text',
+                    access: {
+                      read: PublicReadabilityAccess,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        slug: relyOnRequestHeadersSlug,
+        access: {
+          create: UseRequestHeadersAccess,
+          delete: UseRequestHeadersAccess,
+          read: UseRequestHeadersAccess,
+          update: UseRequestHeadersAccess,
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
+      {
+        slug: docLevelAccessSlug,
+        access: {
+          delete: () => ({
+            and: [
+              {
+                approvedForRemoval: {
+                  equals: true,
+                },
+              },
+            ],
+          }),
+        },
+        fields: [
+          {
+            name: 'approvedForRemoval',
+            type: 'checkbox',
+            defaultValue: false,
+          },
+          {
+            name: 'approvedTitle',
+            type: 'text',
+            access: {
+              update: (args) => {
+                if (args?.doc?.lockTitle) {
+                  return false
+                }
+                return true
+              },
+            },
+            localized: true,
+          },
+          {
+            name: 'lockTitle',
+            type: 'checkbox',
+            defaultValue: false,
+          },
+        ],
+        labels: {
+          plural: 'Doc Level Access',
+          singular: 'Doc Level Access',
+        },
+      },
+      {
+        slug: hiddenFieldsSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+          {
+            name: 'partiallyHiddenGroup',
+            type: 'group',
+            fields: [
+              {
+                name: 'name',
+                type: 'text',
+              },
+              {
+                name: 'value',
+                type: 'text',
+                hidden: true,
+              },
+            ],
+          },
+          {
+            name: 'partiallyHiddenArray',
+            type: 'array',
+            fields: [
+              {
+                name: 'name',
+                type: 'text',
+              },
+              {
+                name: 'value',
+                type: 'text',
+                hidden: true,
+              },
+            ],
+          },
+          {
+            name: 'hidden',
+            type: 'checkbox',
+            hidden: true,
+          },
+        ],
+      },
+      {
+        slug: hiddenAccessSlug,
+        access: {
+          read: ({ req: { user } }) => {
+            if (user) {
+              return true
+            }
+
+            return {
+              hidden: {
+                not_equals: true,
+              },
+            }
+          },
+        },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'hidden',
+            type: 'checkbox',
+            hidden: true,
+          },
+        ],
+      },
+      {
+        slug: hiddenAccessCountSlug,
+        access: {
+          read: ({ req: { user } }) => {
+            if (user) {
+              return true
+            }
+
+            return {
+              hidden: {
+                not_equals: true,
+              },
+            }
+          },
+        },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'hidden',
+            type: 'checkbox',
+            hidden: true,
+          },
+        ],
+      },
+      {
+        slug: 'fields-and-top-access',
+        access: {
+          readVersions: () => ({
+            'version.secret': {
+              equals: 'will-success-access-read',
+            },
+          }),
+          read: () => ({
+            secret: {
+              equals: 'will-success-access-read',
+            },
+          }),
+        },
+        versions: { drafts: true },
+        fields: [
+          {
+            type: 'text',
+            name: 'secret',
+            access: { read: () => false },
+          },
+        ],
+      },
+      Disabled,
+      RichText,
+      Regression1,
+      Regression2,
+    ],
+    globals: [
+      {
+        slug: 'settings',
+        admin: {
+          components: {
+            elements: {
+              SaveButton: '/TestButton.js#TestButton',
             },
           },
-          localized: true,
         },
-        {
-          name: 'lockTitle',
-          type: 'checkbox',
-          defaultValue: false,
-        },
-      ],
-      labels: {
-        plural: 'Doc Level Access',
-        singular: 'Doc Level Access',
+        fields: [
+          {
+            name: 'test',
+            type: 'checkbox',
+            label: 'Allow access to test global',
+          },
+        ],
       },
-    },
-    {
-      slug: hiddenFieldsSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
+      {
+        slug: 'test',
+        access: {
+          read: async ({ req: { payload } }) => {
+            const access = await payload.findGlobal({ slug: 'settings' })
+            return Boolean(access.test)
+          },
         },
-        {
-          name: 'partiallyHiddenGroup',
-          type: 'group',
-          fields: [
+        fields: [],
+      },
+      {
+        slug: readOnlyGlobalSlug,
+        access: {
+          read: () => true,
+          update: () => false,
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
+      {
+        slug: userRestrictedGlobalSlug,
+        access: {
+          read: () => true,
+          update: ({ data, req }) => data?.name === req.user?.email,
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
+      {
+        slug: readNotUpdateGlobalSlug,
+        access: {
+          read: () => true,
+          update: () => false,
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
+    ],
+    onInit: async (payload) => {
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: nonAdminEmail,
+          password: 'test',
+        },
+      })
+
+      await payload.create({
+        collection: publicUsersSlug,
+        data: {
+          email: publicUserEmail,
+          password: 'test',
+        },
+      })
+
+      await payload.create({
+        collection: slug,
+        data: {
+          restrictedField: 'restricted',
+        },
+      })
+
+      await payload.create({
+        collection: readOnlySlug,
+        data: {
+          name: 'read-only',
+        },
+      })
+
+      await payload.create({
+        collection: restrictedVersionsSlug,
+        data: {
+          name: 'versioned',
+        },
+      })
+
+      await payload.create({
+        collection: siblingDataSlug,
+        data: {
+          array: [
             {
-              name: 'name',
-              type: 'text',
+              allowPublicReadability: true,
+              text: firstArrayText,
             },
             {
-              name: 'value',
-              type: 'text',
-              hidden: true,
+              allowPublicReadability: false,
+              text: secondArrayText,
             },
           ],
         },
-        {
-          name: 'partiallyHiddenArray',
-          type: 'array',
-          fields: [
+      })
+
+      await payload.updateGlobal({
+        slug: userRestrictedGlobalSlug,
+        data: {
+          name: 'dev@payloadcms.com',
+        },
+      })
+
+      await payload.create({
+        collection: 'regression1',
+        data: {
+          richText4: textToLexicalJSON({ text: 'Text1' }),
+          array: [{ art: textToLexicalJSON({ text: 'Text2' }) }],
+          arrayWithAccessFalse: [{ richText6: textToLexicalJSON({ text: 'Text3' }) }],
+          group1: {
+            text: 'Text4',
+            richText1: textToLexicalJSON({ text: 'Text5' }),
+          },
+          blocks: [
             {
-              name: 'name',
-              type: 'text',
-            },
-            {
-              name: 'value',
-              type: 'text',
-              hidden: true,
+              blockType: 'myBlock3',
+              richText7: textToLexicalJSON({ text: 'Text6' }),
+              blockName: 'My Block 1',
             },
           ],
-        },
-        {
-          name: 'hidden',
-          type: 'checkbox',
-          hidden: true,
-        },
-      ],
-    },
-    {
-      slug: hiddenAccessSlug,
-      access: {
-        read: ({ req: { user } }) => {
-          if (user) {
-            return true
-          }
-
-          return {
-            hidden: {
-              not_equals: true,
-            },
-          }
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'hidden',
-          type: 'checkbox',
-          hidden: true,
-        },
-      ],
-    },
-    {
-      slug: hiddenAccessCountSlug,
-      access: {
-        read: ({ req: { user } }) => {
-          if (user) {
-            return true
-          }
-
-          return {
-            hidden: {
-              not_equals: true,
-            },
-          }
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'hidden',
-          type: 'checkbox',
-          hidden: true,
-        },
-      ],
-    },
-    {
-      slug: 'fields-and-top-access',
-      access: {
-        readVersions: () => ({
-          'version.secret': {
-            equals: 'will-success-access-read',
-          },
-        }),
-        read: () => ({
-          secret: {
-            equals: 'will-success-access-read',
-          },
-        }),
-      },
-      versions: { drafts: true },
-      fields: [
-        {
-          type: 'text',
-          name: 'secret',
-          access: { read: () => false },
-        },
-      ],
-    },
-    Disabled,
-    RichText,
-    Regression1,
-    Regression2,
-  ],
-  globals: [
-    {
-      slug: 'settings',
-      admin: {
-        components: {
-          elements: {
-            SaveButton: '/TestButton.js#TestButton',
-          },
-        },
-      },
-      fields: [
-        {
-          name: 'test',
-          type: 'checkbox',
-          label: 'Allow access to test global',
-        },
-      ],
-    },
-    {
-      slug: 'test',
-      access: {
-        read: async ({ req: { payload } }) => {
-          const access = await payload.findGlobal({ slug: 'settings' })
-          return Boolean(access.test)
-        },
-      },
-      fields: [],
-    },
-    {
-      slug: readOnlyGlobalSlug,
-      access: {
-        read: () => true,
-        update: () => false,
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: userRestrictedGlobalSlug,
-      access: {
-        read: () => true,
-        update: ({ data, req }) => data?.name === req.user?.email,
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: readNotUpdateGlobalSlug,
-      access: {
-        read: () => true,
-        update: () => false,
-      },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-    },
-  ],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: noAdminAccessEmail,
-        password: 'test',
-      },
-    })
-
-    await payload.create({
-      collection: nonAdminUserSlug,
-      data: {
-        email: nonAdminUserEmail,
-        password: 'test',
-      },
-    })
-
-    await payload.create({
-      collection: slug,
-      data: {
-        restrictedField: 'restricted',
-      },
-    })
-
-    await payload.create({
-      collection: readOnlySlug,
-      data: {
-        name: 'read-only',
-      },
-    })
-
-    await payload.create({
-      collection: restrictedVersionsSlug,
-      data: {
-        name: 'versioned',
-      },
-    })
-
-    await payload.create({
-      collection: siblingDataSlug,
-      data: {
-        array: [
-          {
-            allowPublicReadability: true,
-            text: firstArrayText,
-          },
-          {
-            allowPublicReadability: false,
-            text: secondArrayText,
-          },
-        ],
-      },
-    })
-
-    await payload.updateGlobal({
-      slug: userRestrictedGlobalSlug,
-      data: {
-        name: 'dev@payloadcms.com',
-      },
-    })
-
-    await payload.create({
-      collection: 'regression1',
-      data: {
-        richText4: textToLexicalJSON({ text: 'Text1' }),
-        array: [{ art: textToLexicalJSON({ text: 'Text2' }) }],
-        arrayWithAccessFalse: [{ richText6: textToLexicalJSON({ text: 'Text3' }) }],
-        group1: {
-          text: 'Text4',
-          richText1: textToLexicalJSON({ text: 'Text5' }),
-        },
-        blocks: [
-          {
-            blockType: 'myBlock3',
-            richText7: textToLexicalJSON({ text: 'Text6' }),
-            blockName: 'My Block 1',
-          },
-        ],
-        blocks3: [
-          {
-            blockType: 'myBlock2',
-            richText5: textToLexicalJSON({ text: 'Text7' }),
-            blockName: 'My Block 2',
-          },
-        ],
-        tab1: {
-          richText2: textToLexicalJSON({ text: 'Text8' }),
-          blocks2: [
+          blocks3: [
             {
-              blockType: 'myBlock',
-              richText3: textToLexicalJSON({ text: 'Text9' }),
-              blockName: 'My Block 3',
+              blockType: 'myBlock2',
+              richText5: textToLexicalJSON({ text: 'Text7' }),
+              blockName: 'My Block 2',
             },
           ],
-        },
-      },
-    })
-
-    await payload.create({
-      collection: 'regression2',
-      data: {
-        array: [
-          {
-            richText2: textToLexicalJSON({ text: 'Text1' }),
+          tab1: {
+            richText2: textToLexicalJSON({ text: 'Text8' }),
+            blocks2: [
+              {
+                blockType: 'myBlock',
+                richText3: textToLexicalJSON({ text: 'Text9' }),
+                blockName: 'My Block 3',
+              },
+            ],
           },
-        ],
-        group: {
-          text: 'Text2',
-          richText1: textToLexicalJSON({ text: 'Text3' }),
         },
-      },
-    })
+      })
+
+      await payload.create({
+        collection: 'regression2',
+        data: {
+          array: [
+            {
+              richText2: textToLexicalJSON({ text: 'Text1' }),
+            },
+          ],
+          group: {
+            text: 'Text2',
+            richText1: textToLexicalJSON({ text: 'Text3' }),
+          },
+        },
+      })
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  {
+    disableAutoLogin: true,
   },
-})
+)

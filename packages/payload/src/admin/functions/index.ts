@@ -1,7 +1,7 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
@@ -43,13 +43,13 @@ export type ListQuery = {
     When provided, is automatically injected into the `where` object
   */
   search?: string
-  sort?: string
+  sort?: Sort
   where?: Where
 }
 
 export type BuildTableStateArgs = {
   collectionSlug: string
-  columns?: any[] // TODO: type this (comes from ui pkg)
+  columns?: { accessor: string; active: boolean }[]
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
   query?: ListQuery

@@ -1,6 +1,5 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
-import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
@@ -8,6 +7,7 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -136,6 +136,63 @@ describe('database', () => {
     it('should not accidentally treat nested id fields as custom id', () => {
       expect(payload.collections['fake-custom-ids'].customIDType).toBeUndefined()
     })
+
+    it('should not overwrite supplied block and array row IDs on create', async () => {
+      const arrayRowID = '67648ed5c72f13be6eacf24e'
+      const blockID = '6764de9af79a863575c5f58c'
+
+      const doc = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'test',
+          arrayWithIDs: [
+            {
+              id: arrayRowID,
+            },
+          ],
+          blocksWithIDs: [
+            {
+              blockType: 'block',
+              id: blockID,
+            },
+          ],
+        },
+      })
+
+      expect(doc.arrayWithIDs[0].id).toStrictEqual(arrayRowID)
+      expect(doc.blocksWithIDs[0].id).toStrictEqual(blockID)
+    })
+
+    it('should overwrite supplied block and array row IDs on duplicate', async () => {
+      const arrayRowID = '6764deb5201e9e36aeba3b6c'
+      const blockID = '6764dec58c68f337a758180c'
+
+      const doc = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'test',
+          arrayWithIDs: [
+            {
+              id: arrayRowID,
+            },
+          ],
+          blocksWithIDs: [
+            {
+              blockType: 'block',
+              id: blockID,
+            },
+          ],
+        },
+      })
+
+      const duplicate = await payload.duplicate({
+        collection: 'posts',
+        id: doc.id,
+      })
+
+      expect(duplicate.arrayWithIDs[0].id).not.toStrictEqual(arrayRowID)
+      expect(duplicate.blocksWithIDs[0].id).not.toStrictEqual(blockID)
+    })
   })
 
   describe('timestamps', () => {
@@ -182,6 +239,57 @@ describe('database', () => {
       })
 
       expect(result.updatedAt).not.toStrictEqual(updatedAt)
+    })
+  })
+
+  describe('Data strictness', () => {
+    it('should not save and leak password, confirm-password from Local API', async () => {
+      const createdUser = await payload.create({
+        collection: 'users',
+        data: {
+          password: 'some-password',
+          // @ts-expect-error
+          'confirm-password': 'some-password',
+          email: 'user1@payloadcms.com',
+        },
+      })
+
+      let keys = Object.keys(createdUser)
+
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+
+      const foundUser = await payload.findByID({ id: createdUser.id, collection: 'users' })
+
+      keys = Object.keys(foundUser)
+
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+    })
+
+    it('should not save and leak password, confirm-password from payload.db', async () => {
+      const createdUser = await payload.db.create({
+        collection: 'users',
+        data: {
+          password: 'some-password',
+          'confirm-password': 'some-password',
+          email: 'user2@payloadcms.com',
+        },
+      })
+
+      let keys = Object.keys(createdUser)
+
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+
+      const foundUser = await payload.db.findOne({
+        collection: 'users',
+        where: { id: createdUser.id },
+      })
+
+      keys = Object.keys(foundUser)
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
     })
   })
 
@@ -530,7 +638,7 @@ describe('database', () => {
   describe('transactions', () => {
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
-      if (!['sqlite'].includes(process.env.PAYLOAD_DATABASE)) {
+      if (!['sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)) {
         it('should commit multiple operations in isolation', async () => {
           const req = {
             payload,
@@ -754,6 +862,17 @@ describe('database', () => {
       expect(helloDocs).toHaveLength(5)
       expect(worldDocs).toHaveLength(5)
     })
+
+    it('should CRUD point field', async () => {
+      const result = await payload.create({
+        collection: 'default-values',
+        data: {
+          point: [5, 10],
+        },
+      })
+
+      expect(result.point).toEqual([5, 10])
+    })
   })
 
   describe('defaultValue', () => {
@@ -773,13 +892,70 @@ describe('database', () => {
       expect(result.array[0].defaultValue).toStrictEqual('default value from database')
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
-      // eslint-disable-next-line jest/no-conditional-in-test
-      if (payload.db.name !== 'sqlite') {
-        expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
-      }
+      expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
     })
   })
+
+  describe('Schema generation', () => {
+    if (process.env.PAYLOAD_DATABASE.includes('postgres')) {
+      it('should generate Drizzle Postgres schema', async () => {
+        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+
+        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+        await payload.db.generateSchema({
+          outputFile,
+        })
+
+        const module = await import(outputFile)
+
+        // Confirm that the generated module exports every relation
+        for (const relation in payload.db.relations) {
+          expect(module).toHaveProperty(relation)
+        }
+
+        // Confirm that module exports every table
+        for (const table in payload.db.tables) {
+          expect(module).toHaveProperty(table)
+        }
+
+        // Confirm that module exports every enum
+        for (const enumName in payload.db.enums) {
+          expect(module).toHaveProperty(enumName)
+        }
+      })
+    }
+
+    if (process.env.PAYLOAD_DATABASE.includes('sqlite')) {
+      it('should generate Drizzle SQLite schema', async () => {
+        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+
+        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+        await payload.db.generateSchema({
+          outputFile,
+        })
+
+        const module = await import(outputFile)
+
+        // Confirm that the generated module exports every relation
+        for (const relation in payload.db.relations) {
+          expect(module).toHaveProperty(relation)
+        }
+
+        // Confirm that module exports every table
+        for (const table in payload.db.tables) {
+          expect(module).toHaveProperty(table)
+        }
+      })
+    }
+  })
+
   describe('drizzle: schema hooks', () => {
+    beforeAll(() => {
+      process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+    })
+
     it('should add tables with hooks', async () => {
       // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'mongoose') {
@@ -1065,7 +1241,8 @@ describe('database', () => {
         data: { title: 'invalid', relationship: 'not-real-id' },
       })
     } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+      // instanceof checks don't work with libsql
+      expect(error).toBeTruthy()
     }
 
     expect(invalidDoc).toBeUndefined()
@@ -1075,5 +1252,45 @@ describe('database', () => {
     })
 
     expect(relationBDocs.docs).toHaveLength(0)
+  })
+
+  it('should upsert', async () => {
+    const postShouldCreated = await payload.db.upsert({
+      req: {},
+      collection: 'posts',
+      data: {
+        title: 'some-title-here',
+      },
+      where: {
+        title: {
+          equals: 'some-title-here',
+        },
+      },
+    })
+
+    expect(postShouldCreated).toBeTruthy()
+
+    const postShouldUpdated = await payload.db.upsert({
+      req: {},
+      collection: 'posts',
+      data: {
+        title: 'some-title-here',
+      },
+      where: {
+        title: {
+          equals: 'some-title-here',
+        },
+      },
+    })
+
+    // Should stay the same ID
+    expect(postShouldCreated.id).toBe(postShouldUpdated.id)
+  })
+
+  it('should enforce unique ids on db level even after delete', async () => {
+    const { id } = await payload.create({ collection: 'posts', data: { title: 'ASD' } })
+    await payload.delete({ id, collection: 'posts' })
+    const { id: id_2 } = await payload.create({ collection: 'posts', data: { title: 'ASD' } })
+    expect(id_2).not.toBe(id)
   })
 })

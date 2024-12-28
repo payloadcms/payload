@@ -6,10 +6,12 @@ import { toast } from 'sonner'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
+import { drawerZBase } from '../Drawer/index.js'
 import './index.scss'
 
 const baseClass = 'status'
@@ -35,6 +37,8 @@ export const Status: React.FC = () => {
   const { reset: resetForm } = useForm()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
+
+  const editDepth = useEditDepth()
 
   const unPublishModalSlug = `confirm-un-publish-${id}`
   const revertModalSlug = `confirm-revert-${id}`
@@ -159,7 +163,11 @@ export const Status: React.FC = () => {
               >
                 {t('version:unpublish')}
               </Button>
-              <Modal className={`${baseClass}__modal`} slug={unPublishModalSlug}>
+              <Modal
+                className={`${baseClass}__modal`}
+                slug={unPublishModalSlug}
+                style={{ zIndex: drawerZBase + editDepth }}
+              >
                 <div className={`${baseClass}__wrapper`}>
                   <div className={`${baseClass}__content`}>
                     <h1>{t('version:confirmUnpublish')}</h1>

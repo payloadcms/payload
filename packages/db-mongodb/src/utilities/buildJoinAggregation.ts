@@ -101,6 +101,11 @@ export const buildJoinAggregation = async ({
         })
       }
 
+      let polymorphicSuffix = ''
+      if (Array.isArray(join.targetField.relationTo)) {
+        polymorphicSuffix = '.value'
+      }
+
       if (adapter.payload.config.localization && locale === 'all') {
         adapter.payload.config.localization.localeCodes.forEach((code) => {
           const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${code}`
@@ -109,7 +114,7 @@ export const buildJoinAggregation = async ({
             {
               $lookup: {
                 as: `${as}.docs`,
-                foreignField: `${join.field.on}${code}`,
+                foreignField: `${join.field.on}${code}${polymorphicSuffix}`,
                 from: adapter.collections[slug].collection.name,
                 localField: versions ? 'parent' : '_id',
                 pipeline,
@@ -150,7 +155,7 @@ export const buildJoinAggregation = async ({
           {
             $lookup: {
               as: `${as}.docs`,
-              foreignField: `${join.field.on}${localeSuffix}`,
+              foreignField: `${join.field.on}${localeSuffix}${polymorphicSuffix}`,
               from: adapter.collections[slug].collection.name,
               localField: versions ? 'parent' : '_id',
               pipeline,

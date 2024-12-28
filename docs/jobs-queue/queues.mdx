@@ -9,7 +9,7 @@ keywords: jobs queue, application framework, typescript, node, react, nextjs
 Queues are the final aspect of Payload's Jobs Queue and deal with how to _run your jobs_. Up to this point, all we've covered is how to queue up jobs to run, but so far, we aren't actually running any jobs.
 
 <Banner type="default">
-  A <strong>Queue</strong> is a grouping of jobs that should be executed in order of when they were added.
+  A **Queue** is a grouping of jobs that should be executed in order of when they were added.
 </Banner>
 
 When you go to run jobs, Payload will query for any jobs that are added to the queue and then run them. By default, all queued jobs are added to the `default` queue.
@@ -98,11 +98,24 @@ After the project is deployed to Vercel, the Vercel Cron job will automatically 
 
 If you want to process jobs programmatically from your server-side code, you can use the Local API:
 
+**Run all jobs:**
+
 ```ts
 const results = await payload.jobs.run()
 
 // You can customize the queue name and limit by passing them as arguments:
 await payload.jobs.run({ queue: 'nightly', limit: 100 })
+
+// You can provide a where clause to filter the jobs that should be run:
+await payload.jobs.run({ where: { 'input.message': { equals: 'secret' } } })
+```
+
+**Run a single job:**
+
+```ts
+const results = await payload.jobs.runByID({
+  id: myJobID
+})
 ```
 
 #### Bin script

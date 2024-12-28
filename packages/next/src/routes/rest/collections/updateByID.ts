@@ -1,13 +1,11 @@
 import httpStatus from 'http-status'
-import { updateByIDOperation } from 'payload'
+import { sanitizePopulateParam, sanitizeSelectParam, updateByIDOperation } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
-import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const updateByID: CollectionRouteHandlerWithID = async ({
   id: incomingID,
@@ -35,10 +33,10 @@ export const updateByID: CollectionRouteHandlerWithID = async ({
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
     overrideLock: Boolean(overrideLock === 'true'),
-    populate: sanitizePopulate(req.query.populate),
+    populate: sanitizePopulateParam(req.query.populate),
     publishSpecificLocale,
     req,
-    select: sanitizeSelect(req.query.select),
+    select: sanitizeSelectParam(req.query.select),
   })
 
   let message = req.t('general:updatedSuccessfully')

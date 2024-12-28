@@ -71,31 +71,33 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
     >
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
-          <div className={`${baseClass}__header`}>
-            {Boolean(Label || Description || label) && (
-              <header>
-                <RenderCustomComponent
-                  CustomComponent={Label}
-                  Fallback={
-                    <h3 className={`${baseClass}__title`}>
-                      <FieldLabel
-                        as="span"
-                        label={getTranslation(label, i18n)}
-                        localized={false}
-                        path={path}
-                        required={false}
-                      />
-                    </h3>
-                  }
-                />
-                <RenderCustomComponent
-                  CustomComponent={Description}
-                  Fallback={<FieldDescription description={description} path={path} />}
-                />
-              </header>
-            )}
-            {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-          </div>
+          {Boolean(Label || Description || label || fieldHasErrors) && (
+            <div className={`${baseClass}__header`}>
+              {Boolean(Label || Description || label) && (
+                <header>
+                  <RenderCustomComponent
+                    CustomComponent={Label}
+                    Fallback={
+                      <h3 className={`${baseClass}__title`}>
+                        <FieldLabel
+                          as="span"
+                          label={getTranslation(label, i18n)}
+                          localized={false}
+                          path={path}
+                          required={false}
+                        />
+                      </h3>
+                    }
+                  />
+                  <RenderCustomComponent
+                    CustomComponent={Description}
+                    Fallback={<FieldDescription description={description} path={path} />}
+                  />
+                </header>
+              )}
+              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+            </div>
+          )}
           {BeforeInput}
           <RenderFields
             fields={fields}

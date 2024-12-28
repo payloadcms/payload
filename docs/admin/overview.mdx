@@ -56,7 +56,7 @@ As shown above, all Payload routes are nested within the `(payload)` route group
 The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's exact requirements.
 
 <Banner type="warning">
-  <strong>Note:</strong>
+  **Note:**
   If you don't use the [REST API](../rest/overview) or [GraphQL API](../graphql/overview), you can delete the [Next.js files corresponding to those routes](../admin/overview#project-structure), however, the overhead of this API is completely constrained to these endpoints, and will not slow down or affect Payload outside of the endpoints.
 </Banner>
 
@@ -86,23 +86,24 @@ const config = buildConfig({
 
 The following options are available:
 
-| Option        | Description                                                                                                                                                           |
-|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`avatar`**      | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                              |
-| **`autoLogin`**   | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                                            |
-| **`buildPath`**   | Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                            |
-| **`components`**  | Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                        |
-| **`custom`**      | Any custom properties you wish to pass to the Admin Panel.                                                                                                            |
-| **`dateFormat`**  | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                       |
-| **`disable`**     | If set to `true`, the entire Admin Panel will be disabled.                                                                                                            |
-| **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                         |
-| **`meta`**        | Base metadata to use for the Admin Panel. [More details](./metadata). |
-| **`routes`**      | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                 |
-| **`theme`**       | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.
-| **`user`**        | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                          |
+| Option                         | Description                                                                                                                                                           |
+|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`avatar`**                   | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                              |
+| **`autoLogin`**                | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                                            |
+| **`buildPath`**                | Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                            |
+| **`components`**               | Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                        |
+| **`custom`**                   | Any custom properties you wish to pass to the Admin Panel.                                                                                                            |
+| **`dateFormat`**               | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                       |
+| **`disable`**                  | If set to `true`, the entire Admin Panel will be disabled.                                                                                                            |
+| **`livePreview`**              | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                         |
+| **`meta`**                     | Base metadata to use for the Admin Panel. [More details](./metadata).                                                                                                 |
+| **`routes`**                   | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                 |
+| **`suppressHydrationWarning`** | If set to `true`, suppresses React hydration mismatch warnings during the hydration of the root `<html>` tag. Defaults to `false`.                                      |
+| **`theme`**                    | Restrict the Admin Panel theme to use only one of your choice. Default is `all`.                                                                                      |
+| **`user`**                     | The `slug` of the Collection that you want to allow to login to the Admin Panel. [More details](#the-admin-user-collection).                                          |
 
 <Banner type="success">
-  <strong>Reminder:</strong>
+  **Reminder:**
   These are the _root-level_ options for the Admin Panel. You can also customize [Collection Admin Options](./collections) and [Global Admin Options](./globals) through their respective `admin` keys.
 </Banner>
 
@@ -122,8 +123,8 @@ const config = buildConfig({
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
+  **Important:**
+
   The Admin Panel can only be used by a single auth-enabled Collection. To enable authentication for a Collection, simply set `auth: true` in the Collection's configuration. See [Authentication](../authentication/overview) for more information.
 </Banner>
 
@@ -176,7 +177,7 @@ The following options are available:
 | `graphQLPlayground` | `/graphql-playground` | The GraphQL Playground.                           |
 
 <Banner type="success">
-  <strong>Tip:</strong>
+  **Tip:**
   You can easily add _new_ routes to the Admin Panel through [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Views](./views).
 </Banner>
 
@@ -194,7 +195,7 @@ app/
 ```
 
 <Banner type="warning">
-  <strong>Note:</strong>
+  **Note:**
   If you set Root-level Routes _before_ auto-generating the Admin Panel via `create-payload-app`, your [Project Structure](#project-structure) will already be set up correctly.
 </Banner>
 
@@ -231,7 +232,7 @@ The following options are available:
 | `unauthorized`    | `/unauthorized`         | The unauthorized page.                          |
 
 <Banner type="success">
-  <strong>Note:</strong>
+  **Note:**
   You can also swap out entire _views_ out for your own, using the `admin.views` property of the Payload Config. See [Custom Views](./views) for more information.
 </Banner>
 

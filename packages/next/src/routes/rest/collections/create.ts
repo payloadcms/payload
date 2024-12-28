@@ -1,13 +1,11 @@
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
-import { createOperation } from 'payload'
+import { createOperation, sanitizePopulateParam, sanitizeSelectParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
-import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const create: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
@@ -21,9 +19,9 @@ export const create: CollectionRouteHandler = async ({ collection, req }) => {
     data: req.data,
     depth: isNumber(depth) ? depth : undefined,
     draft,
-    populate: sanitizePopulate(req.query.populate),
+    populate: sanitizePopulateParam(req.query.populate),
     req,
-    select: sanitizeSelect(req.query.select),
+    select: sanitizeSelectParam(req.query.select),
   })
 
   return Response.json(

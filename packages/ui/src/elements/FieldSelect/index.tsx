@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, FieldWithPath, FormState } from 'payload'
+import type { ClientField, FieldWithPathClient, FormState } from 'payload'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsHiddenOrDisabled } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
@@ -16,7 +16,7 @@ const baseClass = 'field-select'
 
 export type FieldSelectProps = {
   readonly fields: ClientField[]
-  readonly setSelected: (fields: FieldWithPath[]) => void
+  readonly setSelected: (fields: FieldWithPathClient[]) => void
 }
 
 export const combineLabel = ({
@@ -56,7 +56,7 @@ const reduceFields = ({
   formState?: FormState
   labelPrefix?: React.ReactNode
   path?: string
-}): { Label: React.ReactNode; value: FieldWithPath }[] => {
+}): { Label: React.ReactNode; value: FieldWithPathClient }[] => {
   if (!fields) {
     return []
   }

@@ -14,6 +14,10 @@ export const localizedCategoriesSlug = 'localized-categories'
 
 export const restrictedPostsSlug = 'restricted-posts'
 
+export const categoriesJoinRestrictedSlug = 'categories-join-restricted'
+
+export const collectionRestrictedSlug = 'collection-restricted'
+
 export const restrictedCategoriesSlug = 'restricted-categories'
 
 export const collectionSlugs = [

@@ -40,7 +40,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   page?: number
   pagination?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: TSelect
   showHiddenFields?: boolean
   sort?: Sort

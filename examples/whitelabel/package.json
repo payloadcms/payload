@@ -22,15 +22,15 @@
     "graphql": "^16.9.0",
     "next": "^15.0.0",
     "payload": "latest",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "sharp": "0.32.6"
   },
   "devDependencies": {
     "@payloadcms/graphql": "latest",
     "@types/node": "^20.11.25",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.1",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",
@@ -39,15 +39,5 @@
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "npm:types-react@19.0.0-rc.1",
-      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
-    }
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

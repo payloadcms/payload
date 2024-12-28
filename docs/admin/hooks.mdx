@@ -9,7 +9,7 @@ keywords: admin, components, custom, documentation, Content Management System, c
 Payload provides a variety of powerful [React Hooks](https://react.dev/reference/react-dom/hooks) that can be used within your own [Custom Components](./components), such as [Custom Fields](./fields). With them, you can interface with Payload itself to build just about any type of complex customization you can think of.
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
+  **Reminder:**
   All Custom Components are [React Server Components](https://react.dev/reference/rsc/server-components) by default. Hooks, on the other hand, are only available in client-side environments. To use hooks, [ensure your component is a client component](./components#client-components).
 </Banner>
 
@@ -78,7 +78,7 @@ type FieldType<T> = {
 There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields' form states from anywhere within a form.
 
 <Banner type="success">
-  <strong>This hook is great for retrieving only certain fields from form state</strong> because it
+  **This hook is great for retrieving only certain fields from form state** because it
   ensures that it will only cause a rerender when the items that you ask for change.
 </Banner>
 
@@ -157,8 +157,8 @@ To see types for each action supported within the `dispatchFields` hook, check o
 The `useForm` hook can be used to interact with the form itself, and sends back many methods that can be used to reactively fetch form state without causing rerenders within your components each time a field is changed. This is useful if you have action-based callbacks that your components fire, and need to interact with form state _based on a user action_.
 
 <Banner type="warning">
-  <strong>Warning:</strong>
-  <br />
+  **Warning:**
+
   This hook is optimized to avoid causing rerenders when fields change, and as such, its `fields`
   property will be out of date. You should only leverage this hook if you need to perform actions
   against the form in response to your users' actions. Do not rely on its returned "fields" as being
@@ -176,7 +176,7 @@ The `useForm` hook returns an object with the following properties:
   rows={[
     [
       {
-        value: <strong><code>fields</code></strong>,
+        value: `<strong><code>fields</code></strong>`,
       },
       {
         value: "Deprecated. This property cannot be relied on as up-to-date.",
@@ -187,7 +187,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>submit</code></strong>,
+        value: `<strong><code>submit</code></strong>`,
       },
       {
         value: "Method to trigger the form to submit",
@@ -198,7 +198,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>dispatchFields</code></strong>,
+        value: `<strong><code>dispatchFields</code></strong>`,
       },
       {
         value: "Dispatch actions to the form field state",
@@ -209,7 +209,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>validateForm</code></strong>,
+        value: `<strong><code>validateForm</code></strong>`,
       },
       {
         value: "Trigger a validation of the form state",
@@ -220,10 +220,10 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>createFormData</code></strong>,
+        value: `<strong><code>createFormData</code></strong>`,
       },
       {
-        value: <>Create a <code>multipart/form-data</code> object from the current form's state</>,
+        value: `<>Create a <code>multipart/form-data</code> object from the current form's state</>`,
       },
       {
         value: ''
@@ -231,7 +231,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>disabled</code></strong>,
+        value: `<strong><code>disabled</code></strong>`,
       },
       {
         value: "Boolean denoting whether or not the form is disabled",
@@ -242,7 +242,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>getFields</code></strong>,
+        value: `<strong><code>getFields</code></strong>`,
       },
       {
         value: 'Gets all fields from state',
@@ -253,7 +253,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>getField</code></strong>,
+        value: `<strong><code>getField</code></strong>`,
       },
       {
         value: 'Gets a single field from state by path',
@@ -264,7 +264,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>getData</code></strong>,
+        value: `<strong><code>getData</code></strong>`,
       },
       {
         value: 'Returns the data stored in the form',
@@ -275,7 +275,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>getSiblingData</code></strong>,
+        value: `<strong><code>getSiblingData</code></strong>`,
       },
       {
         value: 'Returns form sibling data for the given field path',
@@ -286,21 +286,10 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>setModified</code></strong>,
+        value: `<strong><code>setModified</code></strong>`,
       },
       {
-        value: <>Set the form\'s <code>modified</code> state</>,
-      },
-      {
-        value: '',
-      },
-    ],
-    [
-      {
-        value: <strong><code>setProcessing</code></strong>,
-      },
-      {
-        value: <>Set the form\'s <code>processing</code> state</>,
+        value: `<>Set the form\'s <code>modified</code> state</>`,
       },
       {
         value: '',
@@ -308,10 +297,10 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>setSubmitted</code></strong>,
+        value: `<strong><code>setProcessing</code></strong>`,
       },
       {
-        value: <>Set the form\'s <code>submitted</code> state</>,
+        value: `<>Set the form\'s <code>processing</code> state</>`,
       },
       {
         value: '',
@@ -319,7 +308,18 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>formRef</code></strong>,
+        value: `<strong><code>setSubmitted</code></strong>`,
+      },
+      {
+        value: `<>Set the form\'s <code>submitted</code> state</>`,
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: `<strong><code>formRef</code></strong>`,
       },
       {
         value: 'The ref from the form HTML element',
@@ -330,7 +330,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>reset</code></strong>,
+        value: `<strong><code>reset</code></strong>`,
       },
       {
         value: 'Method to reset the form to its initial state',
@@ -341,7 +341,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>addFieldRow</code></strong>,
+        value: `<strong><code>addFieldRow</code></strong>`,
       },
       {
         value: "Method to add a row on an array or block field",
@@ -350,7 +350,7 @@ The `useForm` hook returns an object with the following properties:
         drawerTitle: 'addFieldRow',
         drawerDescription: 'A useful method to programmatically add a row to an array or block field.',
         drawerSlug: 'addFieldRow',
-        drawerContent: (
+        drawerContent: `
 <>
   <TableWithDrawers
     columns={[
@@ -392,7 +392,7 @@ The `useForm` hook returns an object with the following properties:
 {' '}
 
 <pre>
-  {`import { useForm } from "payload/components/forms";
+  {\`import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { addFieldRow } = useForm()
@@ -415,12 +415,12 @@ export const CustomArrayManager = () => {
       Add Row
     </button>
   )
-}`}
+}\`}
 </pre>
 
   <p>An example config to go along with the Custom Component</p>
   <pre>
-{`const ExampleCollection = {
+{\`const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -443,15 +443,15 @@ export const CustomArrayManager = () => {
       },
     },
   ],
-}`}
+}\`}
   </pre>
 </>
-        )
+        `
       }
     ],
     [
       {
-        value: <strong><code>removeFieldRow</code></strong>,
+        value: `<strong><code>removeFieldRow</code></strong>`,
       },
       {
         value: "Method to remove a row from an array or block field",
@@ -460,7 +460,7 @@ export const CustomArrayManager = () => {
         drawerTitle: 'removeFieldRow',
         drawerDescription: 'A useful method to programmatically remove a row from an array or block field.',
         drawerSlug: 'removeFieldRow',
-        drawerContent: (
+        drawerContent:  `
 <>
   <TableWithDrawers
     columns={[
@@ -494,7 +494,7 @@ export const CustomArrayManager = () => {
 {' '}
 
 <pre>
-  {`import { useForm } from "payload/components/forms";
+  {\`import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { removeFieldRow } = useForm()
@@ -512,12 +512,12 @@ export const CustomArrayManager = () => {
       Remove Row
     </button>
   )
-}`}
+}\`}
 </pre>
 
   <p>An example config to go along with the Custom Component</p>
   <pre>
-{`const ExampleCollection = {
+{\`const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -540,15 +540,15 @@ export const CustomArrayManager = () => {
       },
     },
   ],
-}`}
+}\`}
   </pre>
 </>
-        )
+        `
       }
     ],
     [
       {
-        value: <strong><code>replaceFieldRow</code></strong>,
+        value: `<strong><code>replaceFieldRow</code></strong>`,
       },
       {
         value: "Method to replace a row from an array or block field",
@@ -557,7 +557,7 @@ export const CustomArrayManager = () => {
         drawerTitle: 'replaceFieldRow',
         drawerDescription: 'A useful method to programmatically replace a row from an array or block field.',
         drawerSlug: 'replaceFieldRow',
-        drawerContent: (
+        drawerContent:  `
 <>
   <TableWithDrawers
     columns={[
@@ -599,7 +599,7 @@ export const CustomArrayManager = () => {
 {' '}
 
 <pre>
-  {`import { useForm } from "payload/components/forms";
+  {\`import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { replaceFieldRow } = useForm()
@@ -622,12 +622,12 @@ export const CustomArrayManager = () => {
       Replace Row
     </button>
   )
-}`}
+}\`}
 </pre>
 
   <p>An example config to go along with the Custom Component</p>
   <pre>
-{`const ExampleCollection = {
+{\`const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -650,10 +650,10 @@ export const CustomArrayManager = () => {
       },
     },
   ],
-}`}
+}\`}
   </pre>
 </>
-        )
+         `
       }
     ],
   ]}
