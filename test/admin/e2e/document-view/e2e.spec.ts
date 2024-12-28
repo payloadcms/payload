@@ -17,8 +17,18 @@ import {
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { customAdminRoutes } from '../../shared.js'
 import {
+  customAdminRoutes,
+  customEditLabel,
+  customNestedTabViewPath,
+  customNestedTabViewTitle,
+  customTabLabel,
+  customTabViewPath,
+  customTabViewTitle,
+} from '../../shared.js'
+import {
+  customGlobalViews2GlobalSlug,
+  customViews2CollectionSlug,
   disableDuplicateSlug,
   globalSlug,
   group1Collection1Slug,
@@ -54,6 +64,7 @@ describe('Document View', () => {
   let globalURL: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
+  let customViewsURL: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -68,6 +79,7 @@ describe('Document View', () => {
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
+    customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -249,6 +261,78 @@ describe('Document View', () => {
       await globalLabel.click()
       await checkPageTitle(page, label)
       await checkBreadcrumb(page, label)
+    })
+  })
+
+  describe('custom document views', () => {
+    test('collection — should render custom tab view', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+      const pageURL = page.url()
+      const customViewURL = `${pageURL}${customTabViewPath}`
+      await page.goto(customViewURL)
+      expect(page.url()).toEqual(customViewURL)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customTabViewTitle)
+    })
+
+    test('collection — should render custom nested tab view', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+
+      // wait for the update view to load
+      await page.waitForURL(/\/(?!create$)[\w-]+$/)
+      const pageURL = page.url()
+
+      const customNestedTabViewURL = `${pageURL}${customNestedTabViewPath}`
+      await page.goto(customNestedTabViewURL)
+      await page.waitForURL(customNestedTabViewURL)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customNestedTabViewTitle)
+    })
+
+    test('collection — should render custom tab label', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+
+      // wait for the update view to load
+      await page.waitForURL(/\/(?!create$)[\w-]+$/)
+      const editTab = page.locator('.doc-tab a[tabindex="-1"]')
+
+      await expect(editTab).toContainText(customEditLabel)
+    })
+
+    test('collection — should render custom tab component', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+
+      const customTab = page.locator(`.doc-tab a:has-text("${customTabLabel}")`)
+
+      await expect(customTab).toBeVisible()
+    })
+
+    test('global — should render custom tab label', async () => {
+      await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-view')
+
+      const title = page.locator('#custom-view-title')
+
+      const docTab = page.locator('.doc-tab__link:has-text("Custom")')
+
+      await expect(docTab).toBeVisible()
+      await expect(title).toContainText('Custom Tab Label View')
+    })
+
+    test('global — should render custom tab component', async () => {
+      await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-component')
+      const title = page.locator('#custom-view-title')
+
+      const docTab = page.locator('.custom-doc-tab').first()
+
+      await expect(docTab).toBeVisible()
+      await expect(docTab).toContainText('Custom Tab Component')
+      await expect(title).toContainText('Custom View With Tab Component')
     })
   })
 

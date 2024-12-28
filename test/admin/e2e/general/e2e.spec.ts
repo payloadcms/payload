@@ -18,15 +18,10 @@ import {
   customAdminRoutes,
   customCollectionMetaTitle,
   customDefaultTabMetaTitle,
-  customEditLabel,
-  customNestedTabViewPath,
-  customNestedTabViewTitle,
   customNestedViewPath,
   customNestedViewTitle,
   customRootViewMetaTitle,
-  customTabLabel,
   customTabViewPath,
-  customTabViewTitle,
   customVersionsTabMetaTitle,
   customViewMetaTitle,
   customViewPath,
@@ -37,7 +32,6 @@ import {
 } from '../../shared.js'
 import {
   customFieldsSlug,
-  customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
   globalSlug,
@@ -563,14 +557,14 @@ describe('General', () => {
     })
   })
 
-  describe('custom views', () => {
-    test('root — should render custom view', async () => {
+  describe('custom root views', () => {
+    test('should render custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${customViewPath}`)
       await page.waitForURL(`**${adminRoutes.routes.admin}${customViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('root — should render custom nested view', async () => {
+    test('should render custom nested view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${customNestedViewPath}`)
       const pageURL = page.url()
       const pathname = new URL(pageURL).pathname
@@ -578,13 +572,13 @@ describe('General', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
     })
 
-    test('root — should render public custom view', async () => {
+    test('should render public custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${publicCustomViewPath}`)
       await page.waitForURL(`**${adminRoutes.routes.admin}${publicCustomViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('root — should render protected nested custom view', async () => {
+    test('should render protected nested custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
       await page.waitForURL(`**${adminRoutes.routes.admin}/unauthorized`)
       await expect(page.locator('.unauthorized')).toBeVisible()
@@ -600,76 +594,6 @@ describe('General', () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
       await page.waitForURL(`**${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
-    })
-
-    test('collection - should render custom tab view', async () => {
-      await page.goto(customViewsURL.create)
-      await page.locator('#field-title').fill('Test')
-      await saveDocAndAssert(page)
-      const pageURL = page.url()
-      const customViewURL = `${pageURL}${customTabViewPath}`
-      await page.goto(customViewURL)
-      expect(page.url()).toEqual(customViewURL)
-      await expect(page.locator('h1#custom-view-title')).toContainText(customTabViewTitle)
-    })
-
-    test('collection — should render custom nested tab view', async () => {
-      await page.goto(customViewsURL.create)
-      await page.locator('#field-title').fill('Test')
-      await saveDocAndAssert(page)
-
-      // wait for the update view to load
-      await page.waitForURL(/\/(?!create$)[\w-]+$/)
-      const pageURL = page.url()
-
-      const customNestedTabViewURL = `${pageURL}${customNestedTabViewPath}`
-      await page.goto(customNestedTabViewURL)
-      await page.waitForURL(customNestedTabViewURL)
-      await expect(page.locator('h1#custom-view-title')).toContainText(customNestedTabViewTitle)
-    })
-
-    test('collection — should render custom tab label', async () => {
-      await page.goto(customViewsURL.create)
-      await page.locator('#field-title').fill('Test')
-      await saveDocAndAssert(page)
-
-      // wait for the update view to load
-      await page.waitForURL(/\/(?!create$)[\w-]+$/)
-      const editTab = page.locator('.doc-tab a[tabindex="-1"]')
-
-      await expect(editTab).toContainText(customEditLabel)
-    })
-
-    test('collection — should render custom tab component', async () => {
-      await page.goto(customViewsURL.create)
-      await page.locator('#field-title').fill('Test')
-      await saveDocAndAssert(page)
-
-      const customTab = page.locator(`.doc-tab a:has-text("${customTabLabel}")`)
-
-      await expect(customTab).toBeVisible()
-    })
-
-    test('global — should render custom tab label', async () => {
-      await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-view')
-
-      const title = page.locator('#custom-view-title')
-
-      const docTab = page.locator('.doc-tab__link:has-text("Custom")')
-
-      await expect(docTab).toBeVisible()
-      await expect(title).toContainText('Custom Tab Label View')
-    })
-
-    test('global — should render custom tab component', async () => {
-      await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-component')
-      const title = page.locator('#custom-view-title')
-
-      const docTab = page.locator('.custom-doc-tab').first()
-
-      await expect(docTab).toBeVisible()
-      await expect(docTab).toContainText('Custom Tab Component')
-      await expect(title).toContainText('Custom View With Tab Component')
     })
   })
 
