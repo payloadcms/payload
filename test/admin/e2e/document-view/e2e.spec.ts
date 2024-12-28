@@ -10,7 +10,6 @@ import {
   checkPageTitle,
   ensureCompilationIsDone,
   exactText,
-  getRoutes,
   initPageConsoleErrorCatch,
   openNav,
   saveDocAndAssert,
@@ -55,7 +54,6 @@ describe('Document View', () => {
   let globalURL: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
-  let adminRoutes: ReturnType<typeof getRoutes>
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -76,9 +74,8 @@ describe('Document View', () => {
     initPageConsoleErrorCatch(page)
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
-
-    adminRoutes = getRoutes({ customAdminRoutes })
   })
+
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,

@@ -54,7 +54,7 @@ const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
 let payload: PayloadTestSDK<Config>
-describe('access control', () => {
+describe('Access Control', () => {
   let page: Page
   let url: AdminUrlUtil
   let restrictedUrl: AdminUrlUtil
