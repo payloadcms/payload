@@ -7,9 +7,9 @@ export const defaultTests: Test[] = [
     inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" uniqueId="xxx" update/>`,
     input: `
 <PackageInstallOptions
-packageId="444"
-uniqueId="xxx" update/>
-    `,
+  packageId="444"
+  uniqueId="xxx" update/>
+      `,
     blockNode: {
       fields: {
         blockType: 'PackageInstallOptions',
@@ -22,7 +22,7 @@ uniqueId="xxx" update/>
   {
     input: `
 <PackageInstallOptions packageId="444">
-ignored
+  ignored
 </PackageInstallOptions>
 `,
     inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444"/>`,
@@ -36,7 +36,7 @@ ignored
   {
     input: `
 <PackageInstallOptions update packageId="444">
-ignored
+  ignored
 </PackageInstallOptions>
 `,
     inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" update/>`,
@@ -51,9 +51,9 @@ ignored
   {
     input: `
 <PackageInstallOptions
-update
-packageId="444">
-ignored
+  update
+  packageId="444">
+  ignored
 </PackageInstallOptions>
 `,
     inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" update/>`,
@@ -69,10 +69,10 @@ ignored
     inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" update/>`,
     input: `
 <PackageInstallOptions
-update
-packageId="444"
+  update
+  packageId="444"
 >
-ignored
+  ignored
 </PackageInstallOptions>
 `,
     blockNode: {
@@ -87,11 +87,11 @@ ignored
     inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" someNestedObject={{"test":"hello"}} update/>`, // Not test - test is not part of the block
     input: `
 <PackageInstallOptions
-update
-packageId="444"
-someNestedObject={{test: "hello"}} test={4}
+  update
+  packageId="444"
+  someNestedObject={{test: "hello"}} test={4}
 >
-ignored
+  ignored
 </PackageInstallOptions>
 `,
     blockNode: {
@@ -108,17 +108,17 @@ ignored
 
     input: `
 <PackageInstallOptions
-update
-packageId="444"
->
-ignored
-<PackageInstallOptions
   update
   packageId="444"
-  someNestedObject={{test: "hello"}} test={4}
 >
-  ignoredi
-</PackageInstallOptions>
+  ignored
+  <PackageInstallOptions
+    update
+    packageId="444"
+    someNestedObject={{test: "hello"}} test={4}
+  >
+    ignoredi
+  </PackageInstallOptions>
 </PackageInstallOptions>
 `,
     blockNode: {
@@ -134,19 +134,19 @@ ignored
 
     input: `
 <PackageInstallOptions
-update
-packageId="444"
->
-ignored
-<PackageInstallOptions
   update
   packageId="444"
-  someNestedObject={{test: "hello"}} test={4}
 >
-  ignoredi
-</PackageInstallOptions>
-<TagThatImmediatelyClosesShouldBeCorrectlyHandledByContentSubTagStartAmount />
-<Tag2 test="hello" />
+  ignored
+  <PackageInstallOptions
+    update
+    packageId="444"
+    someNestedObject={{test: "hello"}} test={4}
+  >
+    ignoredi
+  </PackageInstallOptions>
+  <TagThatImmediatelyClosesShouldBeCorrectlyHandledByContentSubTagStartAmount />
+  <Tag2 test="hello" />
 </PackageInstallOptions>
 `,
     blockNode: {
@@ -160,20 +160,20 @@ ignored
   // TODO: Write test for this:
   /*
 <PackageInstallOptions
-update
-packageId="444"
->
-not ignored
-<PackageInstallOptions
   update
   packageId="444"
-  someNestedObject={{test: "hello"}} test={4}
 >
   not ignored
+  <PackageInstallOptions
+    update
+    packageId="444"
+    someNestedObject={{test: "hello"}} test={4}
+  >
+    not ignored
+  </PackageInstallOptions>
+  not ignored
 </PackageInstallOptions>
-not ignored
-</PackageInstallOptions>
-  */
+    */
   {
     input: `
 \`\`\`ts
@@ -195,11 +195,11 @@ hello
   {
     input: `
 \`\`\`ts
-hello\`\`\`
+ hello\`\`\`
 `,
     inputAfterConvertFromEditorJSON: `
 \`\`\`ts
-hello
+ hello
 \`\`\`
 `,
     blockNode: {
@@ -216,8 +216,8 @@ hello
 `,
     inputAfterConvertFromEditorJSON: `
 \`\`\`ts
-x
-hello
+ x
+ hello
 \`\`\`
 `,
     blockNode: {
@@ -274,7 +274,7 @@ there1
 `,
     inputAfterConvertFromEditorJSON: `
 \`\`\`ts
-hello
+ hello
 there1
 \`\`\`
 `,
@@ -294,7 +294,7 @@ there2
 `,
     inputAfterConvertFromEditorJSON: `
 \`\`\`ts
-hello
+ hello
 there2
 !!
 \`\`\`
@@ -372,7 +372,7 @@ there4
   {
     input: `
 <Banner>
-children text
+  children text
 </Banner>
 `,
     blockNode: {
@@ -410,7 +410,7 @@ children text
     // This test ensures that the JSX within the code block is does not disrupt the main JSX parsing
     input: `
 <Banner>
-\`https://<some link>.payloadcms.com/page\`
+  \`https://<some link>.payloadcms.com/page\`
 </Banner>
 `,
     blockNode: {
@@ -494,11 +494,11 @@ children text
   {
     input: `
 <Banner>
-Some text 1 <InlineCode>code 1</InlineCode> some
+  Some text 1 <InlineCode>code 1</InlineCode> some
 
-text 2 <InlineCode>code 2</InlineCode> some text
+  text 2 <InlineCode>code 2</InlineCode> some text
 
-3 <InlineCode>code 3</InlineCode> some text 4<InlineCode>code 4</InlineCode>
+  3 <InlineCode>code 3</InlineCode> some text 4<InlineCode>code 4</InlineCode>
 </Banner>
 `,
     description: 'Banner with inline codes, each line a paragraph',
@@ -647,11 +647,11 @@ text 2 <InlineCode>code 2</InlineCode> some text
   {
     input: `
 <Banner>
-Some text 1 <InlineCode>code 1</InlineCode> some
+  Some text 1 <InlineCode>code 1</InlineCode> some
 
-text 2 <InlineCode>code 2</InlineCode> some text
+  text 2 <InlineCode>code 2</InlineCode> some text
 
-3 <InlineCode>code 3</InlineCode> some text 4<InlineCode>code 4</InlineCode>
+  3 <InlineCode>code 3</InlineCode> some text 4<InlineCode>code 4</InlineCode>
 </Banner>
 `,
     description: 'Banner with inline codes, three paragraphs',
@@ -793,7 +793,7 @@ text 2 <InlineCode>code 2</InlineCode> some text
 Text before banner
 
 <Banner>
-test
+  test
 </Banner>
 `,
     rootChildren: [
@@ -861,9 +861,9 @@ test
 <TextContainerNoTrim>
 no indent
 
-indent 2
+  indent 2
 
-  indent 4
+    indent 4
 
 no indent
 </TextContainerNoTrim>
@@ -873,9 +873,9 @@ no indent
         blockType: 'TextContainerNoTrim',
         text: `no indent
 
-indent 2
+  indent 2
 
-  indent 4
+    indent 4
 
 no indent`,
       },
@@ -888,17 +888,6 @@ no indent`,
 <TextContainer>
 no indent
 
-indent 2
-
-  indent 4
-
-no indent
-</TextContainer>
-`,
-    inputAfterConvertFromEditorJSON: `
-<TextContainer>
-no indent
-
   indent 2
 
     indent 4
@@ -906,14 +895,25 @@ no indent
 no indent
 </TextContainer>
 `,
+    inputAfterConvertFromEditorJSON: `
+<TextContainer>
+  no indent
+
+    indent 2
+
+      indent 4
+
+  no indent
+</TextContainer>
+`,
     blockNode: {
       fields: {
         blockType: 'TextContainer',
         text: `no indent
 
-indent 2
+  indent 2
 
-  indent 4
+    indent 4
 
 no indent`,
       },
@@ -923,13 +923,13 @@ no indent`,
     description: 'TextContainerNoTrim with nested, leftpad content',
     input: `
 <TextContainerNoTrim>
-indent 2
+  indent 2
 
-  indent 4
+    indent 4
 
-    indent 6
+      indent 6
 
-indent 2
+  indent 2
 </TextContainerNoTrim>
 `,
     blockNode: {
@@ -937,11 +937,11 @@ indent 2
         blockType: 'TextContainerNoTrim',
         text: `  indent 2
 
-  indent 4
+    indent 4
 
-    indent 6
+      indent 6
 
-indent 2`,
+  indent 2`,
       },
     },
   },
@@ -949,13 +949,13 @@ indent 2`,
     description: 'TextContainer with nested, leftpad content',
     input: `
 <TextContainer>
-indent 2
+  indent 2
 
-  indent 4
+    indent 4
 
-    indent 6
+      indent 6
 
-indent 2
+  indent 2
 </TextContainer>
 `,
     blockNode: {
@@ -963,9 +963,9 @@ indent 2
         blockType: 'TextContainer',
         text: `indent 2
 
-indent 4
+  indent 4
 
-  indent 6
+    indent 6
 
 indent 2`,
       },
@@ -1015,9 +1015,9 @@ Some text 1
     description: 'Code block with nested within Banner',
     input: `
 <Banner>
-\`\`\`ts
-  indent 1;
-\`\`\`
+  \`\`\`ts
+    indent 1;
+  \`\`\`
 </Banner>
 `,
     blockNode: {
@@ -1051,15 +1051,15 @@ Some text 1
     input: `
 <Banner>
 \`\`\`ts
-indent 1;
+  indent 1;
 \`\`\`
 </Banner>
 `,
     inputAfterConvertFromEditorJSON: `
 <Banner>
-\`\`\`ts
-  indent 1;
-\`\`\`
+  \`\`\`ts
+    indent 1;
+  \`\`\`
 </Banner>
 `,
     blockNode: {
@@ -1095,7 +1095,7 @@ indent 1;
 `,
     inputAfterConvertFromEditorJSON: `
 <Banner>
-Hi
+  Hi
 </Banner>
 `,
     blockNode: {
@@ -1139,18 +1139,18 @@ Hi
 <Banner>
 <Banner>
 \`\`\`ts
-indent 1;
+  indent 1;
 \`\`\`
 </Banner>
 </Banner>
 `,
     inputAfterConvertFromEditorJSON: `
 <Banner>
-<Banner>
-  \`\`\`ts
-    indent 1;
-  \`\`\`
-</Banner>
+  <Banner>
+    \`\`\`ts
+      indent 1;
+    \`\`\`
+  </Banner>
 </Banner>
 `,
     blockNode: {
@@ -1200,13 +1200,13 @@ indent 1;
   {
     inputAfterConvertFromEditorJSON: `
 <Banner>
-Some line [Start of link line2](/some/link)
+  Some line [Start of link line2](/some/link)
 </Banner>
 `,
     input: `
 <Banner>
 Some line [Start of link
-line2](/some/link)
+  line2](/some/link)
 </Banner>
 `,
     blockNode: {
@@ -1271,13 +1271,13 @@ line2](/some/link)
   {
     inputAfterConvertFromEditorJSON: `
 <Banner>
-Text text [ Link ](/some/link) .
+  Text text [ Link ](/some/link) .
 </Banner>
 `,
     input: `
 <Banner>
-Text text [ Link
-](/some/link) .
+  Text text [ Link
+  ](/some/link) .
 </Banner>
 `,
     blockNode: {
@@ -1351,12 +1351,12 @@ Text text [ Link
   {
     input: `
 <PackageInstallOptions
-update
-packageId="Line"
-someObject={{test: \`Line 1
+  update
+  packageId="Line"
+  someObject={{test: \`Line 1
 
 Line 2\`}}
-ignored>
+  ignored>
 </PackageInstallOptions>
 `,
     inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="Line" update someObject={{"test":"Line 1\\n\\nLine 2"}}/>`,
