@@ -30,6 +30,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
       localized,
       required,
     },
+    onMount,
     path,
     readOnly,
     validate,
@@ -84,6 +85,7 @@ const CodeFieldComponent: CodeFieldClientComponent = (props) => {
         <CodeEditor
           defaultLanguage={prismToMonacoLanguageMap[language] || language}
           onChange={readOnly ? () => null : (val) => setValue(val)}
+          onMount={onMount}
           options={editorOptions}
           readOnly={readOnly}
           value={(value as string) || ''}
