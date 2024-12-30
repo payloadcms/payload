@@ -5,12 +5,13 @@ import React, { useRef } from 'react'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useUploadStatus } from '../../providers/UploadStatus/index.js'
 
 export const SaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+  const { uploadStatus } = useDocumentInfo()
   const { t } = useTranslation()
   const { submit } = useForm()
   const modified = useFormModified()
@@ -18,7 +19,6 @@ export const SaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) =
   const ref = useRef<HTMLButtonElement>(null)
   const editDepth = useEditDepth()
   const operation = useOperation()
-  const { uploadStatus } = useUploadStatus()
 
   const forceDisable = operation === 'update' && !modified
 

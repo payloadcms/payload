@@ -1,11 +1,6 @@
 import type { AdminViewProps, Data, PayloadComponent, ServerSideEditViewProps } from 'payload'
 
-import {
-  DocumentInfoProvider,
-  EditDepthProvider,
-  HydrateAuthProvider,
-  UploadStatusProvider,
-} from '@payloadcms/ui'
+import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
@@ -324,61 +319,59 @@ export const renderDocument = async ({
   return {
     data: doc,
     Document: (
-      <UploadStatusProvider>
-        <DocumentInfoProvider
-          apiURL={apiURL}
-          collectionSlug={collectionConfig?.slug}
-          currentEditor={currentEditor}
-          disableActions={disableActions ?? false}
-          docPermissions={docPermissions}
-          globalSlug={globalConfig?.slug}
-          hasPublishedDoc={hasPublishedDoc}
-          hasPublishPermission={hasPublishPermission}
-          hasSavePermission={hasSavePermission}
-          id={id}
-          initialData={doc}
-          initialState={formState}
-          isEditing={isEditing}
-          isLocked={isLocked}
-          key={locale?.code}
-          lastUpdateTime={lastUpdateTime}
-          mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
-          redirectAfterDelete={redirectAfterDelete}
-          redirectAfterDuplicate={redirectAfterDuplicate}
-          unpublishedVersionCount={unpublishedVersionCount}
-          versionCount={versionCount}
-        >
-          {!RootViewOverride && !drawerSlug && (
-            <DocumentHeader
-              collectionConfig={collectionConfig}
-              globalConfig={globalConfig}
-              i18n={i18n}
-              payload={payload}
-              permissions={permissions}
-            />
-          )}
-          <HydrateAuthProvider permissions={permissions} />
-          <EditDepthProvider>
-            {ErrorView
-              ? RenderServerComponent({
-                  clientProps,
-                  Component: ErrorView.ComponentConfig || ErrorView.Component,
-                  importMap,
-                  serverProps,
-                })
-              : RenderServerComponent({
-                  clientProps,
-                  Component: RootViewOverride
-                    ? RootViewOverride
-                    : CustomView?.ComponentConfig || CustomView?.Component
-                      ? CustomView?.ComponentConfig || CustomView?.Component
-                      : DefaultView?.ComponentConfig || DefaultView?.Component,
-                  importMap,
-                  serverProps,
-                })}
-          </EditDepthProvider>
-        </DocumentInfoProvider>
-      </UploadStatusProvider>
+      <DocumentInfoProvider
+        apiURL={apiURL}
+        collectionSlug={collectionConfig?.slug}
+        currentEditor={currentEditor}
+        disableActions={disableActions ?? false}
+        docPermissions={docPermissions}
+        globalSlug={globalConfig?.slug}
+        hasPublishedDoc={hasPublishedDoc}
+        hasPublishPermission={hasPublishPermission}
+        hasSavePermission={hasSavePermission}
+        id={id}
+        initialData={doc}
+        initialState={formState}
+        isEditing={isEditing}
+        isLocked={isLocked}
+        key={locale?.code}
+        lastUpdateTime={lastUpdateTime}
+        mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+        redirectAfterDelete={redirectAfterDelete}
+        redirectAfterDuplicate={redirectAfterDuplicate}
+        unpublishedVersionCount={unpublishedVersionCount}
+        versionCount={versionCount}
+      >
+        {!RootViewOverride && !drawerSlug && (
+          <DocumentHeader
+            collectionConfig={collectionConfig}
+            globalConfig={globalConfig}
+            i18n={i18n}
+            payload={payload}
+            permissions={permissions}
+          />
+        )}
+        <HydrateAuthProvider permissions={permissions} />
+        <EditDepthProvider>
+          {ErrorView
+            ? RenderServerComponent({
+                clientProps,
+                Component: ErrorView.ComponentConfig || ErrorView.Component,
+                importMap,
+                serverProps,
+              })
+            : RenderServerComponent({
+                clientProps,
+                Component: RootViewOverride
+                  ? RootViewOverride
+                  : CustomView?.ComponentConfig || CustomView?.Component
+                    ? CustomView?.ComponentConfig || CustomView?.Component
+                    : DefaultView?.ComponentConfig || DefaultView?.Component,
+                importMap,
+                serverProps,
+              })}
+        </EditDepthProvider>
+      </DocumentInfoProvider>
     ),
   }
 }

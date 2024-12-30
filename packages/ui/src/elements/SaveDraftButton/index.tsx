@@ -11,7 +11,6 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useUploadStatus } from '../../providers/UploadStatus/index.js'
 
 const baseClass = 'save-draft'
 
@@ -22,7 +21,8 @@ export const SaveDraftButton: React.FC = () => {
       serverURL,
     },
   } = useConfig()
-  const { id, collectionSlug, globalSlug, setUnpublishedVersionCount } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, setUnpublishedVersionCount, uploadStatus } =
+    useDocumentInfo()
   const modified = useFormModified()
   const { code: locale } = useLocale()
   const ref = useRef<HTMLButtonElement>(null)
@@ -30,7 +30,6 @@ export const SaveDraftButton: React.FC = () => {
   const { t } = useTranslation()
   const { submit } = useForm()
   const operation = useOperation()
-  const { uploadStatus } = useUploadStatus()
 
   const forceDisable = operation === 'update' && !modified
 

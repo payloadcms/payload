@@ -13,7 +13,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
-import { useUploadStatus } from '../../providers/UploadStatus/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -95,8 +94,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
-  const { docPermissions, savedDocumentData } = useDocumentInfo()
-  const { setUploadStatus } = useUploadStatus()
+  const { docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',

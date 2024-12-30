@@ -1,11 +1,6 @@
 import type { AdminViewProps } from 'payload'
 
-import {
-  DocumentInfoProvider,
-  EditDepthProvider,
-  HydrateAuthProvider,
-  UploadStatusProvider,
-} from '@payloadcms/ui'
+import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound } from 'next/navigation.js'
@@ -115,55 +110,53 @@ export const Account: React.FC<AdminViewProps> = async ({
       })
 
     return (
-      <UploadStatusProvider>
-        <DocumentInfoProvider
-          AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} theme={theme} />}
-          apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
-          collectionSlug={userSlug}
-          currentEditor={currentEditor}
-          docPermissions={docPermissions}
-          hasPublishedDoc={hasPublishedDoc}
-          hasPublishPermission={hasPublishPermission}
-          hasSavePermission={hasSavePermission}
-          id={user?.id}
-          initialData={data}
-          initialState={formState}
-          isEditing
-          isLocked={isLocked}
-          lastUpdateTime={lastUpdateTime}
-          mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
-          unpublishedVersionCount={unpublishedVersionCount}
-          versionCount={versionCount}
-        >
-          <EditDepthProvider>
-            <DocumentHeader
-              collectionConfig={collectionConfig}
-              hideTabs
-              i18n={i18n}
-              payload={payload}
-              permissions={permissions}
-            />
-            <HydrateAuthProvider permissions={permissions} />
-            {RenderServerComponent({
-              Component: config.admin?.components?.views?.account?.Component,
-              Fallback: EditView,
-              importMap: payload.importMap,
-              serverProps: {
-                i18n,
-                initPageResult,
-                locale,
-                params,
-                payload,
-                permissions,
-                routeSegments: [],
-                searchParams,
-                user,
-              },
-            })}
-            <AccountClient />
-          </EditDepthProvider>
-        </DocumentInfoProvider>
-      </UploadStatusProvider>
+      <DocumentInfoProvider
+        AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} theme={theme} />}
+        apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
+        collectionSlug={userSlug}
+        currentEditor={currentEditor}
+        docPermissions={docPermissions}
+        hasPublishedDoc={hasPublishedDoc}
+        hasPublishPermission={hasPublishPermission}
+        hasSavePermission={hasSavePermission}
+        id={user?.id}
+        initialData={data}
+        initialState={formState}
+        isEditing
+        isLocked={isLocked}
+        lastUpdateTime={lastUpdateTime}
+        mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+        unpublishedVersionCount={unpublishedVersionCount}
+        versionCount={versionCount}
+      >
+        <EditDepthProvider>
+          <DocumentHeader
+            collectionConfig={collectionConfig}
+            hideTabs
+            i18n={i18n}
+            payload={payload}
+            permissions={permissions}
+          />
+          <HydrateAuthProvider permissions={permissions} />
+          {RenderServerComponent({
+            Component: config.admin?.components?.views?.account?.Component,
+            Fallback: EditView,
+            importMap: payload.importMap,
+            serverProps: {
+              i18n,
+              initPageResult,
+              locale,
+              params,
+              payload,
+              permissions,
+              routeSegments: [],
+              searchParams,
+              user,
+            },
+          })}
+          <AccountClient />
+        </EditDepthProvider>
+      </DocumentInfoProvider>
     )
   }
 
