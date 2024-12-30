@@ -1,5 +1,6 @@
-import { tableJson } from '../tableJson.js'
 import type { Test } from '../int.spec.js'
+
+import { tableJson } from '../tableJson.js'
 import { textToRichText } from '../textToRichText.js'
 
 export const defaultTests: Test[] = [
