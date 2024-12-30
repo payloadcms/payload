@@ -3,6 +3,7 @@ import type {
   BuildTableStateArgs,
   Data,
   DocumentSlots,
+  Locale,
   ServerFunctionClient,
 } from 'payload'
 
@@ -40,6 +41,7 @@ type RenderDocument = (args: {
   docID?: number | string
   drawerSlug?: string
   initialData?: Data
+  locale?: Locale
   overrideEntityVisibility?: boolean
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
