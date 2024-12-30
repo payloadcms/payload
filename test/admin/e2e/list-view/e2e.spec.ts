@@ -119,7 +119,37 @@ describe('List View', () => {
     })
   })
 
-  describe('filtering', () => {
+  describe('list view table', () => {
+    test('should link second cell', async () => {
+      const { id } = await createPost()
+      await page.reload()
+      const linkCell = page.locator(`${tableRowLocator} td`).nth(1).locator('a')
+
+      await expect(linkCell).toHaveAttribute(
+        'href',
+        `${adminRoutes.routes.admin}/collections/posts/${id}`,
+      )
+
+      await page.locator('.list-controls__toggle-columns').click()
+      await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+
+      await page
+        .locator('.column-selector .column-selector__column', {
+          hasText: exactText('ID'),
+        })
+        .click()
+
+      await page.locator('#heading-id').waitFor({ state: 'detached' })
+      await page.locator('.cell-id').first().waitFor({ state: 'detached' })
+
+      await expect(linkCell).toHaveAttribute(
+        'href',
+        `${adminRoutes.routes.admin}/collections/posts/${id}`,
+      )
+    })
+  })
+
+  describe('search', () => {
     test('should prefill search input from query param', async () => {
       await createPost({ title: 'dennis' })
       await createPost({ title: 'charlie' })
@@ -191,51 +221,13 @@ describe('List View', () => {
 
       await expect(page.locator('#search-filter-input')).toHaveValue('')
     })
+  })
 
-    test('should toggle columns', async () => {
-      const columnCountLocator = 'table > thead > tr > th'
-      await createPost()
-      await openListColumns(page, {})
-      const numberOfColumns = await page.locator(columnCountLocator).count()
-      await expect(page.locator('.column-selector')).toBeVisible()
-      await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
-      await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
-      await page.locator('#heading-id').waitFor({ state: 'detached' })
-      await page.locator('.cell-id').first().waitFor({ state: 'detached' })
-      await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
-      await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
-      await toggleColumn(page, { columnLabel: 'ID', targetState: 'on' })
-      await expect(page.locator('.cell-id').first()).toBeVisible()
-      await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
-      await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
-    })
-
-    test('should link second cell', async () => {
-      const { id } = await createPost()
-      await page.reload()
-      const linkCell = page.locator(`${tableRowLocator} td`).nth(1).locator('a')
-
-      await expect(linkCell).toHaveAttribute(
-        'href',
-        `${adminRoutes.routes.admin}/collections/posts/${id}`,
-      )
-
-      await page.locator('.list-controls__toggle-columns').click()
-      await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
-
-      await page
-        .locator('.column-selector .column-selector__column', {
-          hasText: exactText('ID'),
-        })
-        .click()
-
-      await page.locator('#heading-id').waitFor({ state: 'detached' })
-      await page.locator('.cell-id').first().waitFor({ state: 'detached' })
-
-      await expect(linkCell).toHaveAttribute(
-        'href',
-        `${adminRoutes.routes.admin}/collections/posts/${id}`,
-      )
+  describe('filters', () => {
+    test('should respect base list filters', async () => {
+      await page.goto(baseListFiltersUrl.list)
+      await page.waitForURL((url) => url.toString().startsWith(baseListFiltersUrl.list))
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 
     test('should filter rows', async () => {
@@ -452,9 +444,228 @@ describe('List View', () => {
       await page.waitForURL(new RegExp(`${postsUrl.list}\\?limit=5&page=1`))
       await expect(page.locator('.collection-list__page-info')).toHaveText('1-3 of 3')
     })
+
+    test('should reset filter values for every additional filters', async () => {
+      await page.goto(postsUrl.list)
+      await openListFilters(page, {})
+      await page.locator('.where-builder__add-first-filter').click()
+      const firstConditionField = page.locator('.condition__field')
+      const firstOperatorField = page.locator('.condition__operator')
+      const firstValueField = page.locator('.condition__value >> input')
+
+      await firstConditionField.click()
+      await firstConditionField
+        .locator('.rs__option', {
+          hasText: exactText('Tab 1 > Title'),
+        })
+        .click()
+
+      await expect(firstConditionField.locator('.rs__single-value')).toContainText('Tab 1 > Title')
+      await firstOperatorField.click()
+      await firstOperatorField.locator('.rs__option').locator('text=equals').click()
+      await firstValueField.fill('Test')
+      await expect(firstValueField).toHaveValue('Test')
+      await page.locator('.condition__actions-add').click()
+      const secondLi = page.locator('.where-builder__and-filters li:nth-child(2)')
+      await expect(secondLi).toBeVisible()
+
+      await expect(
+        secondLi.locator('.condition__field').locator('.rs__single-value'),
+      ).toContainText('Tab 1 > Title')
+
+      await expect(secondLi.locator('.condition__operator >> input')).toHaveValue('')
+      await expect(secondLi.locator('.condition__value >> input')).toHaveValue('')
+    })
+
+    test('should not re-render page upon typing in a value in the filter value field', async () => {
+      await page.goto(postsUrl.list)
+      await openListFilters(page, {})
+      await page.locator('.where-builder__add-first-filter').click()
+      const firstConditionField = page.locator('.condition__field')
+      const firstOperatorField = page.locator('.condition__operator')
+      const firstValueField = page.locator('.condition__value >> input')
+
+      await firstConditionField.click()
+      await firstConditionField
+        .locator('.rs__option', { hasText: exactText('Tab 1 > Title') })
+        .click()
+      await expect(firstConditionField.locator('.rs__single-value')).toContainText('Tab 1 > Title')
+
+      await firstOperatorField.click()
+      await firstOperatorField.locator('.rs__option').locator('text=equals').click()
+
+      // Type into the input field instead of filling it
+      await firstValueField.click()
+      await firstValueField.type('Test', { delay: 100 }) // Add a delay to simulate typing speed
+
+      // Wait for a short period to see if the input loses focus
+      await page.waitForTimeout(500)
+
+      // Check if the input still has the correct value
+      await expect(firstValueField).toHaveValue('Test')
+    })
+
+    test('should still show second filter if two filters exist and first filter is removed', async () => {
+      await page.goto(postsUrl.list)
+      await openListFilters(page, {})
+      await page.locator('.where-builder__add-first-filter').click()
+      const firstConditionField = page.locator('.condition__field')
+      const firstOperatorField = page.locator('.condition__operator')
+      const firstValueField = page.locator('.condition__value >> input')
+      await firstConditionField.click()
+      await firstConditionField
+        .locator('.rs__option', { hasText: exactText('Tab 1 > Title') })
+        .click()
+      await expect(firstConditionField.locator('.rs__single-value')).toContainText('Tab 1 > Title')
+      await firstOperatorField.click()
+      await firstOperatorField.locator('.rs__option').locator('text=equals').click()
+      await firstValueField.fill('Test 1')
+      await expect(firstValueField).toHaveValue('Test 1')
+
+      await wait(500)
+
+      await page.locator('.condition__actions-add').click()
+
+      const secondLi = page.locator('.where-builder__and-filters li:nth-child(2)')
+      await expect(secondLi).toBeVisible()
+      const secondConditionField = secondLi.locator('.condition__field')
+      const secondOperatorField = secondLi.locator('.condition__operator')
+      const secondValueField = secondLi.locator('.condition__value >> input')
+      await secondConditionField.click()
+
+      await secondConditionField
+        .locator('.rs__option', { hasText: exactText('Tab 1 > Title') })
+        .click()
+
+      await expect(secondConditionField.locator('.rs__single-value')).toContainText('Tab 1 > Title')
+      await secondOperatorField.click()
+      await secondOperatorField.locator('.rs__option').locator('text=equals').click()
+      await secondValueField.fill('Test 2')
+      await expect(secondValueField).toHaveValue('Test 2')
+
+      const firstLi = page.locator('.where-builder__and-filters li:nth-child(1)')
+      const removeButton = firstLi.locator('.condition__actions-remove')
+
+      await wait(500)
+
+      // remove first filter
+      await removeButton.click()
+      const filterListItems = page.locator('.where-builder__and-filters li')
+      await expect(filterListItems).toHaveCount(1)
+      await expect(firstValueField).toHaveValue('Test 2')
+    })
+
+    test('should hide field filter when admin.disableListFilter is true', async () => {
+      await page.goto(postsUrl.list)
+      await openListFilters(page, {})
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const initialField = page.locator('.condition__field')
+      await initialField.click()
+
+      await expect(
+        initialField.locator(`.rs__option :has-text("Disable List Filter Text")`),
+      ).toBeHidden()
+    })
+
+    test('should simply disable field filter when admin.disableListFilter is true but still exists in the query', async () => {
+      await page.goto(
+        `${postsUrl.list}${qs.stringify(
+          {
+            where: {
+              or: [
+                {
+                  and: [
+                    {
+                      disableListFilterText: {
+                        equals: 'Disable List Filter Text',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          { addQueryPrefix: true },
+        )}`,
+      )
+
+      await openListFilters(page, {})
+
+      const condition = page.locator('.condition__field')
+      await expect(condition.locator('input.rs__input')).toBeDisabled()
+      await expect(page.locator('.condition__operator input.rs__input')).toBeDisabled()
+      await expect(page.locator('.condition__value input.condition-value-text')).toBeDisabled()
+      await expect(condition.locator('.rs__single-value')).toHaveText('Disable List Filter Text')
+      await page.locator('button.condition__actions-add').click()
+      const condition2 = page.locator('.condition__field').nth(1)
+      await condition2.click()
+      await expect(
+        condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
+      ).toBeHidden()
+    })
   })
 
   describe('table columns', () => {
+    test('should hide field in column selector when admin.disableListColumn is true', async () => {
+      await page.goto(postsUrl.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Check if "Disable List Column Text" is not present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disable List Column Text'),
+        }),
+      ).toBeHidden()
+    })
+
+    test('should display field in column selector despite admin.disableListFilter', async () => {
+      await page.goto(postsUrl.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Check if "Disable List Filter Text" is present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Disable List Filter Text'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should still show field in filter when admin.disableListColumn is true', async () => {
+      await page.goto(postsUrl.list)
+      await openListFilters(page, {})
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const initialField = page.locator('.condition__field')
+      await initialField.click()
+
+      await expect(
+        initialField.locator(`.rs__menu-list:has-text("Disable List Column Text")`),
+      ).toBeVisible()
+    })
+
+    test('should toggle columns', async () => {
+      const columnCountLocator = 'table > thead > tr > th'
+      await createPost()
+      await openListColumns(page, {})
+      const numberOfColumns = await page.locator(columnCountLocator).count()
+      await expect(page.locator('.column-selector')).toBeVisible()
+      await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
+      await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
+      await page.locator('#heading-id').waitFor({ state: 'detached' })
+      await page.locator('.cell-id').first().waitFor({ state: 'detached' })
+      await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
+      await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
+      await toggleColumn(page, { columnLabel: 'ID', targetState: 'on' })
+      await expect(page.locator('.cell-id').first()).toBeVisible()
+      await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
+      await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
+    })
+
     test('should drag to reorder columns and save to preferences', async () => {
       await createPost()
 
@@ -811,14 +1022,6 @@ describe('List View', () => {
           hasText: exactText('Title'),
         }),
       ).toHaveText('Title')
-    })
-  })
-
-  describe('base list filters', () => {
-    test('should respect base list filters', async () => {
-      await page.goto(baseListFiltersUrl.list)
-      await page.waitForURL((url) => url.toString().startsWith(baseListFiltersUrl.list))
-      await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
   })
 })
