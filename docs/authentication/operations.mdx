@@ -269,6 +269,8 @@ const result = await payload.verifyEmail({
 })
 ```
 
+**Note:** if you do not have a `config.serverURL` set, Payload will attempt to create one for you if the user was created via REST or GraphQL by looking at the incoming `req`. But this is not supported if you are creating the user via the Local API's `payload.create()` method. If this applies to you, and you do not have a `serverURL` set, you may want to override your `verify.generateEmailHTML` function to provide a full URL to link the user to a proper verification page.
+
 ## Unlock
 
 If a user locks themselves out and you wish to deliberately unlock them, you can utilize the Unlock operation. The [Admin Panel](../admin/overview) features an Unlock control automatically for all collections that feature max login attempts, but you can programmatically unlock users as well by using the Unlock operation.
@@ -343,6 +345,8 @@ const token = await payload.forgotPassword({
   disableEmail: false, // you can disable the auto-generation of email via local API
 })
 ```
+
+**Note:** if you do not have a `config.serverURL` set, Payload will attempt to create one for you if the `forgot-password` operation was triggered via REST or GraphQL by looking at the incoming `req`. But this is not supported if you are calling `payload.forgotPassword()` via the Local API. If you do not have a `serverURL` set, you may want to override your `auth.forgotPassword.generateEmailHTML` function to provide a full URL to link the user to a proper reset-password page.
 
 <Banner type="success">
   **Tip:**
