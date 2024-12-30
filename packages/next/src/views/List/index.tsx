@@ -74,6 +74,8 @@ export const renderListView = async (
 
   const query = queryFromArgs || queryFromReq
 
+  console.log(queryFromArgs, queryFromReq)
+
   let listPreferences: ListPreferences
   const preferenceKey = `${collectionSlug}-list`
 
@@ -222,6 +224,7 @@ export const renderListView = async (
     const clientProps: ListViewClientProps = {
       ...listViewSlots,
       ...sharedClientProps,
+      collectionConfig: clientCollectionConfig,
       columnState,
       disableBulkDelete,
       disableBulkEdit,

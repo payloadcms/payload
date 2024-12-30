@@ -35,8 +35,6 @@ export type ListQueryProps = {
 
 export type ListQueryContext = {
   data: PaginatedDocs
-  defaultLimit?: number
-  defaultSort?: Sort
   query: ListQuery
   refineListData: (args: ListQuery) => Promise<void>
 } & ContextHandlers

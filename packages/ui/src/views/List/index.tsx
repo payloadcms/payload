@@ -54,6 +54,11 @@ export type ListViewSlots = {
 
 export type ListViewClientProps = {
   beforeActions?: React.ReactNode[]
+  collectionConfig?: ClientCollectionConfig // TODO: make this required in the next major version
+  /**
+   * @deprecated
+   * This prop will be removed in the next major version. Read the collection slug from the `collectionConfig.slug` instead.
+   */
   collectionSlug: string
   columnState: Column[]
   disableBulkDelete?: boolean
@@ -73,6 +78,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     beforeActions,
     BeforeList,
     BeforeListTable,
+    collectionConfig: collectionConfigFromProps,
     collectionSlug,
     columnState,
     Description,
@@ -102,19 +108,16 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const { getEntityConfig } = useConfig()
   const router = useRouter()
 
-  const {
-    data,
-    defaultLimit: initialLimit,
-    handlePageChange,
-    handlePerPageChange,
-    query,
-  } = useListQuery()
+  const { data, handlePageChange, handlePerPageChange, query } = useListQuery()
 
   const { openModal } = useModal()
   const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  // TODO: in the next major version, `collectionConfigFromProps` will be required so no need to get the config from context
+  // This is because it requires an entire rendering cycle before it is available through context
+  const collectionConfig =
+    collectionConfigFromProps || (getEntityConfig({ collectionSlug }) as ClientCollectionConfig)
 
   const { labels, upload } = collectionConfig
 
@@ -272,7 +275,11 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                       </div>
                       <PerPage
                         handleChange={(limit) => void handlePerPageChange(limit)}
-                        limit={isNumber(query?.limit) ? Number(query.limit) : initialLimit}
+                        limit={
+                          isNumber(query?.limit)
+                            ? Number(query.limit)
+                            : collectionConfig?.admin?.pagination?.defaultLimit
+                        }
                         limits={collectionConfig?.admin?.pagination?.limits}
                         resetPage={data.totalDocs <= data.pagingCounter}
                       />
