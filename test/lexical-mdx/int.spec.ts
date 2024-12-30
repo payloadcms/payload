@@ -15,6 +15,8 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { editorJSONToMDX, mdxToEditorJSON } from './mdx/hooks.js'
 import { restExamplesTest1 } from './tests/restExamples.test.js'
+import { restExamplesTest2 } from './tests/restExamples2.test.js'
+
 import { defaultTests } from './tests/default.test.js'
 import { writeFileSync } from 'fs'
 
@@ -59,7 +61,7 @@ describe('Lexical MDX', () => {
     editorConfig = (richTextField.editor as LexicalRichTextAdapter).editorConfig
   })
 
-  const INPUT_AND_OUTPUTBase: Tests = [...defaultTests, restExamplesTest1]
+  const INPUT_AND_OUTPUTBase: Tests = [...defaultTests, restExamplesTest1, restExamplesTest2]
 
   const INPUT_AND_OUTPUT: Tests = INPUT_AND_OUTPUTBase.find((test) => test.debugFlag)
     ? [INPUT_AND_OUTPUTBase.find((test) => test.debugFlag)]
