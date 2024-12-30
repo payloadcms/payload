@@ -275,6 +275,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:updatedCountSuccessfully',
   'general:updatedSuccessfully',
   'general:updating',
+  'general:value',
   'general:viewReadOnly',
   'general:uploading',
   'general:uploadingBulk',
@@ -334,6 +335,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'validation:required',
   'validation:requiresAtLeast',
   'validation:shorterThanMax',
+  'validation:greaterThanMax',
   'validation:username',
 
   'version:aboutToPublishSelection',
