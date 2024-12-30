@@ -58,7 +58,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const versionsConfig = docConfig?.versions
 
   const [fields] = useAllFormFields()
-  const formModified = useFormModified()
+  const modified = useFormModified()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
 
@@ -69,7 +69,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const [saving, setSaving] = useState(false)
   const debouncedFields = useDebounce(fields, interval)
-  const modified = useDebounce(formModified, interval)
   const fieldRef = useRef(fields)
   const modifiedRef = useRef(modified)
   const localeRef = useRef(locale)

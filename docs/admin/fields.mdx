@@ -11,7 +11,7 @@ keywords:
 For example, your app might need to render a specific interface that Payload does not inherently support, such as a color picker. To do this, you could replace the default [Text Field](../fields/text) input with your own user-friendly component that formats the data into a valid color value.
 
 <Banner type="success">
-  <strong>Tip:</strong>
+  **Tip:**
   Don't see a built-in field type that you need? Build it! Using a combination of [Field Validations](../fields/overview#validation)
   and [Custom Components](./components), you can override the entirety of how a component functions within the [Admin Panel](./overview) to effectively create your own field type.
 </Banner>
@@ -87,7 +87,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 ```
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
+  **Reminder:**
   To replace the Field Description with a [Custom Component](./components), use the `admin.components.Description` property. [More details](#description).
 </Banner>
 
@@ -122,7 +122,7 @@ All Description Functions receive the following arguments:
 | **`t`**        | The `t` function used to internationalize the Admin Panel. [More details](../configuration/i18n) |
 
 <Banner type="info">
-  <strong>Note:</strong>
+  **Note:**
   If you need to subscribe to live updates within your form, use a Description Component instead. [More details](#description).
 </Banner>
 

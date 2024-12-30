@@ -815,8 +815,6 @@ export interface TextField {
   withMinRows?: string[] | null;
   withMaxRows?: string[] | null;
   defaultValueFromReq?: string | null;
-  disableListColumnText?: string | null;
-  disableListFilterText?: string | null;
   array?:
     | {
         texts?: string[] | null;
@@ -3129,8 +3127,6 @@ export interface TextFieldsSelect<T extends boolean = true> {
   withMinRows?: T;
   withMaxRows?: T;
   defaultValueFromReq?: T;
-  disableListColumnText?: T;
-  disableListFilterText?: T;
   array?:
     | T
     | {

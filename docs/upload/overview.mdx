@@ -36,10 +36,9 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
 Every Payload Collection can opt-in to supporting Uploads by specifying the `upload` property on the Collection's config to either `true` or to an object containing `upload` options.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />A common pattern is to create a <strong>"media"</strong> collection and enable <strong>
-    upload
-  </strong> on that collection.
+  **Tip:**
+
+  A common pattern is to create a **"media"** collection and enable **upload** on that collection.
 </Banner>
 
 ```ts
@@ -182,8 +181,8 @@ When an uploaded image is smaller than the defined image size, we have 3 options
 3. `true`: if the image is smaller than the image size, return the original image
 
 <Banner type="error">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   By default, the image size will return NULL when the uploaded image is smaller than the defined
   image size. Use the `withoutEnlargement` prop to change this.
 </Banner>
@@ -219,12 +218,12 @@ If no resizing options are specified (`imageSizes` or `resizeOptions`), the foca
 If you are using a plugin to send your files off to a third-party file storage host or CDN, like Amazon S3 or similar, you may not want to store your files locally at all. You can prevent Payload from writing files to disk by specifying `disableLocalStorage: true` on your collection's upload config.
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   This is a fairly advanced feature. If you do disable local file storage, by default, your admin
   panel's thumbnails will be broken as you will not have stored a file. It will be totally up to you
   to use either a plugin or your own hooks to store your files in a permanent manner, as well as
-  provide your own admin thumbnail using <strong>upload.adminThumbnail</strong>.
+  provide your own admin thumbnail using **upload.adminThumbnail**.
 </Banner>
 
 ## Admin Thumbnails
@@ -297,8 +296,8 @@ export const Media: CollectionConfig = {
 ## Uploading Files
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
+  **Important:**
+
   Uploading files is currently only possible through the REST and Local APIs due to how GraphQL
   works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
 </Banner>

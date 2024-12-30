@@ -29,8 +29,8 @@ const config = buildConfig({
 })
 ```
 <Banner type="warning">
-  <strong>Reminder:</strong>
-  Alternatively, you can define the <code>admin.livePreview</code> property on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Settings defined here will be merged into the top-level as overrides.
+  **Reminder:**
+  Alternatively, you can define the `admin.livePreview` property on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Settings defined here will be merged into the top-level as overrides.
 </Banner>
 
 {/* IMAGE OF LIVE PREVIEW HERE */}
@@ -88,10 +88,10 @@ const config = buildConfig({
       // highlight-start
       url: ({
         data,
-        documentInfo,
+        collectionConfig,
         locale
       }) => `${data.tenant.url}${ // Multi-tenant top-level domain
-        documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
+        collectionConfig.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
       }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
       collections: ['pages'],
     },

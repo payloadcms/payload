@@ -113,7 +113,9 @@ const DraftPosts: CollectionConfig = {
     },
   ],
   versions: {
-    drafts: true,
+    drafts: {
+      schedulePublish: true,
+    },
     maxPerDoc: 35,
   },
 }

@@ -50,6 +50,10 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
+    pagination: {
+      defaultLimit: 5,
+      limits: [5, 10, 15],
+    },
     meta: {
       description: 'This is a custom meta description for posts',
       openGraph: {
@@ -176,6 +180,20 @@ export const Posts: CollectionConfig = {
         components: {
           Cell: '/components/CustomCell/index.js#CustomCell',
         },
+      },
+    },
+    {
+      name: 'disableListColumnText',
+      type: 'text',
+      admin: {
+        disableListColumn: true,
+      },
+    },
+    {
+      name: 'disableListFilterText',
+      type: 'text',
+      admin: {
+        disableListFilter: true,
       },
     },
     {

@@ -123,12 +123,12 @@ The built-in `relationship` element is a powerful way to reference other Documen
 Similar to the `relationship` element, the `upload` element is a user-friendly way to reference [Upload-enabled collections](/docs/upload/overview) with a UI specifically designed for media / image-based uploads.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   Collections are automatically allowed to be selected within the Rich Text relationship and upload
   elements by default. If you want to disable a collection from being able to be referenced in Rich
-  Text fields, set the collection admin options of <strong>enableRichTextLink</strong> and{' '}
-  <strong>enableRichTextRelationship</strong> to false.
+  Text fields, set the collection admin options of **enableRichTextLink** and{' '}
+  **enableRichTextRelationship** to false.
 </Banner>
 
 Relationship and Upload elements are populated dynamically into your Rich Text field' content. Within the REST and Local APIs, any present RichText `relationship` or `upload` elements will respect the `depth` option that you pass, and will be populated accordingly. In GraphQL, each `richText` field accepts an argument of `depth` for you to utilize.
@@ -306,8 +306,8 @@ const serialize = (children) =>
 ```
 
 <Banner>
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   The above example is for how to render to JSX, although for plain HTML the pattern is similar.
   Just remove the JSX and return HTML strings instead!
 </Banner>

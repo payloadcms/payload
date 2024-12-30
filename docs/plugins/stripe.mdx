@@ -109,15 +109,15 @@ const res = await fetch(`/api/stripe/rest`, {
 If you need to proxy the API server-side, use the [stripeProxy](#node) function.
 
 <Banner type="info">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   The `/api` part of these routes may be different based on the settings defined in your Payload
   config.
 </Banner>
 
 <Banner type="warning">
-  <strong>Warning:</strong>
-  <br />
+  **Warning:**
+
   Opening the REST proxy endpoint in production is a potential security risk. Authenticated users will have open access to the Stripe REST API. In production, open your own endpoint and use the [stripeProxy](#node) function to proxy the Stripe API server-side.
 </Banner>
 
@@ -232,8 +232,8 @@ export const MyFunction = async () => {
 This option will setup a basic sync between Payload collections and Stripe resources for you automatically. It will create all the necessary hooks and webhooks handlers, so the only thing you have to do is map your Payload fields to their corresponding Stripe properties. As documents are created, updated, and deleted from either Stripe or Payload, the changes are reflected on either side.
 
 <Banner type="info">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the
   `stripeWebhooksEndpointSecret` through your config.
 </Banner>
@@ -268,8 +268,8 @@ export default config
 ```
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   Due to limitations in the Stripe API, this currently only works with top-level fields. This is
   because every Stripe object is a separate entity, making it difficult to abstract into a simple
   reusable library. In the future, we may find a pattern around this. But for now, cases like that

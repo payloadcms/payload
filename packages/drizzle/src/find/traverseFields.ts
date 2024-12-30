@@ -9,6 +9,8 @@ import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../t
 import type { Result } from './buildFindManyArgs.js'
 
 import buildQuery from '../queries/buildQuery.js'
+import { getTableAlias } from '../queries/getTableAlias.js'
+import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
 import { chainMethods } from './chainMethods.js'
@@ -385,12 +387,22 @@ export const traverseFields = ({
           }
         }
 
+        const columnName = `${path.replaceAll('.', '_')}${field.name}`
+
+        const subQueryAlias = `${columnName}_alias`
+
+        const { newAliasTable } = getTableAlias({
+          adapter,
+          tableName: joinCollectionTableName,
+        })
+
         const {
           orderBy,
           selectFields,
           where: subQueryWhere,
         } = buildQuery({
           adapter,
+          aliasTable: newAliasTable,
           fields,
           joins,
           locale,
@@ -418,15 +430,21 @@ export const traverseFields = ({
 
         const db = adapter.drizzle as LibSQLDatabase
 
-        const columnName = `${path.replaceAll('.', '_')}${field.name}`
+        for (let key in selectFields) {
+          const val = selectFields[key]
 
-        const subQueryAlias = `${columnName}_alias`
+          if (val.table && getNameFromDrizzleTable(val.table) === joinCollectionTableName) {
+            delete selectFields[key]
+            key = key.split('.').pop()
+            selectFields[key] = newAliasTable[key]
+          }
+        }
 
         const subQuery = chainMethods({
           methods: chainedMethods,
           query: db
             .select(selectFields as any)
-            .from(adapter.tables[joinCollectionTableName])
+            .from(newAliasTable)
             .where(subQueryWhere)
             .orderBy(() => orderBy.map(({ column, order }) => order(column))),
         }).as(subQueryAlias)
@@ -440,7 +458,7 @@ export const traverseFields = ({
               }),
             }),
           })
-          .from(sql`${subQuery}`)}`.as(columnName)
+          .from(sql`${subQuery}`)}`.as(subQueryAlias)
 
         break
       }
