@@ -21,12 +21,11 @@ export type Props = {
 }
 
 const filterColumnFields = (columns: Column[]): Column[] =>
-  columns.filter(
-    (col) =>
-      col.accessor !== '_select' &&
-      col.field &&
-      col.CustomLabel !== null &&
-      !col?.field?.admin?.disableListColumn,
+  columns.filter((col) =>
+    Boolean(
+      col.accessor !== '_select' ||
+        (!col.field && col.CustomLabel === null && col?.field?.admin?.disableListColumn),
+    ),
   )
 
 export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
