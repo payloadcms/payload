@@ -101,12 +101,16 @@ function exportChildren(
   textTransformersIndex: Array<TextFormatTransformer>,
   textMatchTransformers: Array<TextMatchTransformer>,
   unclosedTags?: Array<{ format: TextFormatType; tag: string }>,
+  unclosableTags?: Array<{ format: TextFormatType; tag: string }>,
 ): string {
   const output = []
   const children = node.getChildren()
   // keep track of unclosed tags from the very beginning
   if (!unclosedTags) {
     unclosedTags = []
+  }
+  if (!unclosableTags) {
+    unclosableTags = []
   }
 
   mainLoop: for (const child of children) {
@@ -118,9 +122,26 @@ function exportChildren(
       const result = transformer.export(
         child,
         (parentNode) =>
-          exportChildren(parentNode, textTransformersIndex, textMatchTransformers, unclosedTags),
+          exportChildren(
+            parentNode,
+            textTransformersIndex,
+            textMatchTransformers,
+            unclosedTags,
+            // Add current unclosed tags to the list of unclosable tags - we don't want nested tags from
+            // textmatch transformers to close the outer ones, as that may result in invalid markdown.
+            // E.g. **text [text**](https://lexical.io)
+            // is invalid markdown, as the closing ** is inside the link.
+            //
+            [...unclosableTags, ...unclosedTags],
+          ),
         (textNode, textContent) =>
-          exportTextFormat(textNode, textContent, textTransformersIndex, unclosedTags),
+          exportTextFormat(
+            textNode,
+            textContent,
+            textTransformersIndex,
+            unclosedTags,
+            unclosableTags,
+          ),
       )
 
       if (result != null) {
@@ -133,11 +154,25 @@ function exportChildren(
       output.push('\n')
     } else if ($isTextNode(child)) {
       output.push(
-        exportTextFormat(child, child.getTextContent(), textTransformersIndex, unclosedTags),
+        exportTextFormat(
+          child,
+          child.getTextContent(),
+          textTransformersIndex,
+          unclosedTags,
+          unclosableTags,
+        ),
       )
     } else if ($isElementNode(child)) {
       // empty paragraph returns ""
-      output.push(exportChildren(child, textTransformersIndex, textMatchTransformers, unclosedTags))
+      output.push(
+        exportChildren(
+          child,
+          textTransformersIndex,
+          textMatchTransformers,
+          unclosedTags,
+          unclosableTags,
+        ),
+      )
     } else if ($isDecoratorNode(child)) {
       output.push(child.getTextContent())
     }
@@ -152,6 +187,7 @@ function exportTextFormat(
   textTransformers: Array<TextFormatTransformer>,
   // unclosed tags include the markdown tags that haven't been closed yet, and their associated formats
   unclosedTags: Array<{ format: TextFormatType; tag: string }>,
+  unclosableTags?: Array<{ format: TextFormatType; tag: string }>,
 ): string {
   // This function handles the case of a string looking like this: "   foo   "
   // Where it would be invalid markdown to generate: "**   foo   **"
@@ -162,7 +198,8 @@ function exportTextFormat(
   // the opening tags to be added to the result
   let openingTags = ''
   // the closing tags to be added to the result
-  let closingTags = ''
+  let closingTagsBefore = ''
+  let closingTagsAfter = ''
 
   const prevNode = getTextSibling(node, true)
   const nextNode = getTextSibling(node, false)
@@ -189,23 +226,47 @@ function exportTextFormat(
 
   // close any tags in the same order they were applied, if necessary
   for (let i = 0; i < unclosedTags.length; i++) {
+    const nodeHasFormat = hasFormat(node, unclosedTags[i].format)
+    const nextNodeHasFormat = hasFormat(nextNode, unclosedTags[i].format)
+
     // prevent adding closing tag if next sibling will do it
-    if (hasFormat(nextNode, unclosedTags[i].format)) {
+    if (nodeHasFormat && nextNodeHasFormat) {
       continue
     }
 
-    while (unclosedTags.length > i) {
-      const unclosedTag = unclosedTags.pop()
-      if (unclosedTag && typeof unclosedTag.tag === 'string') {
-        closingTags += unclosedTag.tag
+    const unhandledUnclosedTags = [...unclosedTags] // Shallow copy to avoid modifying the original array
+
+    while (unhandledUnclosedTags.length > i) {
+      const unclosedTag = unhandledUnclosedTags.pop()
+
+      // If tag is unclosable, don't close it and leave it in the original array,
+      // So that it can be closed when it's no longer unclosable
+      if (
+        unclosableTags &&
+        unclosedTag &&
+        unclosableTags.find((element) => element.tag === unclosedTag.tag)
+      ) {
+        continue
       }
+
+      if (unclosedTag && typeof unclosedTag.tag === 'string') {
+        if (!nodeHasFormat) {
+          // Handles cases where the tag has not been closed before, e.g. if the previous node
+          // was a text match transformer that did not account for closing tags of the next node (e.g. a link)
+          closingTagsBefore += unclosedTag.tag
+        } else if (!nextNodeHasFormat) {
+          closingTagsAfter += unclosedTag.tag
+        }
+      }
+      // Mutate the original array to remove the closed tag
+      unclosedTags.pop()
     }
     break
   }
 
-  output = openingTags + output + closingTags
+  output = openingTags + output + closingTagsAfter
   // Replace trimmed version of textContent ensuring surrounding whitespace is not modified
-  return textContent.replace(frozenString, () => output)
+  return closingTagsBefore + textContent.replace(frozenString, () => output)
 }
 
 // Get next or previous text sibling a text node, including cases

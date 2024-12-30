@@ -87,7 +87,7 @@ export function importFoundTextMatchTransformer(
   let nodeAfter, nodeBefore, transformedNode
 
   if (startIndex === 0) {
-    ;[transformedNode, textNode] = textNode.splitText(endIndex)
+    ;[transformedNode, nodeAfter] = textNode.splitText(endIndex)
   } else {
     ;[nodeBefore, transformedNode, nodeAfter] = textNode.splitText(startIndex, endIndex)
   }
