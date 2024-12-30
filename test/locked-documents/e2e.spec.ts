@@ -36,7 +36,7 @@ let testsUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 
-describe('locked documents', () => {
+describe('Locked Documents', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))

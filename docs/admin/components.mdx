@@ -11,7 +11,7 @@ The Payload [Admin Panel](./overview) is designed to be as minimal and straightf
 All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default. This enables the use of the [Local API](../local-api/overview) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
 
 <Banner type="success">
-  <strong>Note:</strong>
+  **Note:**
   Client Components continue to be fully supported. To use Client Components in your app, simply include the `use client` directive. Payload will automatically detect and remove all default, [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) before rendering your component. [More details](#client-components).
 </Banner>
 
@@ -46,7 +46,7 @@ const config = buildConfig({
 ```
 
 <Banner type="success">
-  <strong>Note:</strong>
+  **Note:**
   All Custom Components can be either Server Components or Client Components, depending on the presence of the `use client` directive at the top of the file.
 </Banner>
 
@@ -184,7 +184,7 @@ Each Custom Component receives the following props by default:
 | `i18n`                    | The [i18n](../configuration/i18n) object.                                                                           |
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
+  **Reminder:**
   All Custom Components also receive various other props that are specific component being rendered. See [Root Components](#root-components), [Collection Components](./collections#custom-components), [Global Components](./globals#custom-components), or [Field Components](./fields#custom-components) for a complete list of all default props per component.
 </Banner>
 
@@ -243,7 +243,7 @@ export const MyClientComponent: React.FC = () => {
 ```
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
+  **Reminder:**
   Client Components cannot be passed [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types). If you are rendering your Client Component _from within_ a Server Component, ensure that its props are serializable.
 </Banner>
 
@@ -455,7 +455,7 @@ Payload also exports its [SCSS](https://sass-lang.com) library for reuse which i
 ```
 
 <Banner type="success">
-  <strong>Note:</strong>
+  **Note:**
   You can also drill into Payload's own component styles, or easily apply global, app-wide CSS. More on that [here](./customizing-css).
 </Banner>
 
@@ -503,7 +503,7 @@ The following options are available:
 | **`views`**           | Override or create new views within the Admin Panel. [More details](./views).                                                                                                                                 |
 
 <Banner type="success">
-  <strong>Note:</strong>
+  **Note:**
   You can also use set [Collection Components](./collections#custom-components) and [Global Components](./globals#custom-components) in their respective configs.
 </Banner>
 
@@ -546,5 +546,5 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
 ```
 
 <Banner type="warning">
-  <strong>Reminder:</strong>React Context exists only within Client Components. This means they must include the `use client` directive at the top of their files and cannot contain server-only code. To use a Server Component here, simply _wrap_ your Client Component with it.
+  **Reminder:**React Context exists only within Client Components. This means they must include the `use client` directive at the top of their files and cannot contain server-only code. To use a Server Component here, simply _wrap_ your Client Component with it.
 </Banner>

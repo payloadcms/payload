@@ -95,6 +95,7 @@ const DocumentInfo: React.FC<
   const [mostRecentVersionIsAutosaved, setMostRecentVersionIsAutosaved] = useState(
     mostRecentVersionIsAutosavedFromProps,
   )
+
   const [versionCount, setVersionCount] = useState(versionCountFromProps)
 
   const [hasPublishedDoc, setHasPublishedDoc] = useState(hasPublishedDocFromProps)

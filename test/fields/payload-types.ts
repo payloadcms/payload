@@ -310,9 +310,6 @@ export interface LexicalMigrateField {
 export interface LexicalLocalizedField {
   id: string;
   title: string;
-  /**
-   * Non-localized field with localized block subfields
-   */
   lexicalBlocksSubLocalized?: {
     root: {
       type: string;
@@ -328,9 +325,6 @@ export interface LexicalLocalizedField {
     };
     [k: string]: unknown;
   } | null;
-  /**
-   * Localized field with localized block subfields
-   */
   lexicalBlocksLocalized?: {
     root: {
       type: string;
@@ -481,9 +475,6 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
-  /**
-   * Row labels rendered as react components.
-   */
   rowLabelAsComponent?:
     | {
         title?: string | null;
@@ -598,9 +589,6 @@ export interface BlockField {
           }
       )[]
     | null;
-  /**
-   * The purpose of this field is to test validateExistingBlockIsIdentical works with similar blocks with group fields
-   */
   blocksWithSimilarGroup?:
     | (
         | {
@@ -789,18 +777,9 @@ export interface TextField {
   id: string;
   text: string;
   hiddenTextField?: string | null;
-  /**
-   * This field should be hidden
-   */
   adminHiddenTextField?: string | null;
-  /**
-   * This field should be disabled
-   */
   disabledTextField?: string | null;
   localizedText?: string | null;
-  /**
-   * en description
-   */
   i18nText?: string | null;
   defaultString?: string | null;
   defaultEmptyString?: string | null;
@@ -921,14 +900,8 @@ export interface ConditionalLogic {
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
-    /**
-     * Ensures we can rely on nested fields within `data`.
-     */
     siblingField?: string | null;
   };
-  /**
-   * Ensures we can rely on nested fields within `siblingsData`.
-   */
   reliesOnParentGroup?: string | null;
   groupSelection?: ('group1' | 'group2') | null;
   group1?: {
@@ -1008,9 +981,6 @@ export interface EmailField {
   email: string;
   localizedEmail?: string | null;
   emailWithAutocomplete?: string | null;
-  /**
-   * en description
-   */
   i18nEmail?: string | null;
   defaultEmail?: string | null;
   defaultEmptyString?: string | null;
@@ -1040,9 +1010,6 @@ export interface RadioField {
  */
 export interface GroupField {
   id: string;
-  /**
-   * This is a group.
-   */
   group: {
     text: string;
     defaultParent?: string | null;
@@ -1435,9 +1402,6 @@ export interface RichTextField {
     [k: string]: unknown;
   };
   lexicalCustomFields_html?: string | null;
-  /**
-   * This rich text field uses the lexical editor.
-   */
   lexical?: {
     root: {
       type: string;
@@ -1453,9 +1417,6 @@ export interface RichTextField {
     };
     [k: string]: unknown;
   } | null;
-  /**
-   * This select field is rendered here to ensure its options dropdown renders above the rich text toolbar.
-   */
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
   richText: {
     [k: string]: unknown;
@@ -1544,9 +1505,6 @@ export interface TabsFields2 {
  */
 export interface TabsField {
   id: string;
-  /**
-   * This should not collapse despite there being many tabs pushing the main fields open.
-   */
   sidebarField?: string | null;
   array: {
     text: string;
@@ -2157,42 +2115,257 @@ export interface BlockFieldsSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
-        content?: T | ContentBlockSelect<T>;
-        number?: T | NumberBlockSelect<T>;
-        subBlocks?: T | SubBlocksBlockSelect<T>;
-        tabs?: T | TabsBlockSelect<T>;
+        content?:
+          | T
+          | {
+              text?: T;
+              richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        number?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+              blockName?: T;
+            };
+        subBlocks?:
+          | T
+          | {
+              subBlocks?:
+                | T
+                | {
+                    text?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                    number?:
+                      | T
+                      | {
+                          number?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        tabs?:
+          | T
+          | {
+              textInCollapsible?: T;
+              textInRow?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   duplicate?:
     | T
     | {
-        content?: T | ContentBlockSelect<T>;
-        number?: T | NumberBlockSelect<T>;
-        subBlocks?: T | SubBlocksBlockSelect<T>;
-        tabs?: T | TabsBlockSelect<T>;
+        content?:
+          | T
+          | {
+              text?: T;
+              richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        number?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+              blockName?: T;
+            };
+        subBlocks?:
+          | T
+          | {
+              subBlocks?:
+                | T
+                | {
+                    text?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                    number?:
+                      | T
+                      | {
+                          number?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        tabs?:
+          | T
+          | {
+              textInCollapsible?: T;
+              textInRow?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   collapsedByDefaultBlocks?:
     | T
     | {
-        localizedContent?: T | LocalizedContentBlockSelect<T>;
-        localizedNumber?: T | LocalizedNumberBlockSelect<T>;
-        localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
-        localizedTabs?: T | LocalizedTabsBlockSelect<T>;
+        localizedContent?:
+          | T
+          | {
+              text?: T;
+              richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        localizedNumber?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+              blockName?: T;
+            };
+        localizedSubBlocks?:
+          | T
+          | {
+              subBlocks?:
+                | T
+                | {
+                    text?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                    number?:
+                      | T
+                      | {
+                          number?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        localizedTabs?:
+          | T
+          | {
+              textInCollapsible?: T;
+              textInRow?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   disableSort?:
     | T
     | {
-        localizedContent?: T | LocalizedContentBlockSelect<T>;
-        localizedNumber?: T | LocalizedNumberBlockSelect<T>;
-        localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
-        localizedTabs?: T | LocalizedTabsBlockSelect<T>;
+        localizedContent?:
+          | T
+          | {
+              text?: T;
+              richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        localizedNumber?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+              blockName?: T;
+            };
+        localizedSubBlocks?:
+          | T
+          | {
+              subBlocks?:
+                | T
+                | {
+                    text?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                    number?:
+                      | T
+                      | {
+                          number?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        localizedTabs?:
+          | T
+          | {
+              textInCollapsible?: T;
+              textInRow?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   localizedBlocks?:
     | T
     | {
-        localizedContent?: T | LocalizedContentBlockSelect<T>;
-        localizedNumber?: T | LocalizedNumberBlockSelect<T>;
-        localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
-        localizedTabs?: T | LocalizedTabsBlockSelect<T>;
+        localizedContent?:
+          | T
+          | {
+              text?: T;
+              richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        localizedNumber?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+              blockName?: T;
+            };
+        localizedSubBlocks?:
+          | T
+          | {
+              subBlocks?:
+                | T
+                | {
+                    text?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                    number?:
+                      | T
+                      | {
+                          number?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        localizedTabs?:
+          | T
+          | {
+              textInCollapsible?: T;
+              textInRow?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   i18nBlocks?:
     | T
@@ -2329,116 +2502,6 @@ export interface BlockFieldsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock_select".
- */
-export interface ContentBlockSelect<T extends boolean = true> {
-  text?: T;
-  richText?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "NumberBlock_select".
- */
-export interface NumberBlockSelect<T extends boolean = true> {
-  number?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SubBlocksBlock_select".
- */
-export interface SubBlocksBlockSelect<T extends boolean = true> {
-  subBlocks?:
-    | T
-    | {
-        text?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-        number?:
-          | T
-          | {
-              number?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TabsBlock_select".
- */
-export interface TabsBlockSelect<T extends boolean = true> {
-  textInCollapsible?: T;
-  textInRow?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedContentBlock_select".
- */
-export interface LocalizedContentBlockSelect<T extends boolean = true> {
-  text?: T;
-  richText?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedNumberBlock_select".
- */
-export interface LocalizedNumberBlockSelect<T extends boolean = true> {
-  number?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedSubBlocksBlock_select".
- */
-export interface LocalizedSubBlocksBlockSelect<T extends boolean = true> {
-  subBlocks?:
-    | T
-    | {
-        text?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-        number?:
-          | T
-          | {
-              number?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedTabsBlock_select".
- */
-export interface LocalizedTabsBlockSelect<T extends boolean = true> {
-  textInCollapsible?: T;
-  textInRow?: T;
-  id?: T;
-  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3022,10 +3085,53 @@ export interface TabsFieldsSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
-        content?: T | ContentBlockSelect<T>;
-        number?: T | NumberBlockSelect<T>;
-        subBlocks?: T | SubBlocksBlockSelect<T>;
-        tabs?: T | TabsBlockSelect<T>;
+        content?:
+          | T
+          | {
+              text?: T;
+              richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        number?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+              blockName?: T;
+            };
+        subBlocks?:
+          | T
+          | {
+              subBlocks?:
+                | T
+                | {
+                    text?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                    number?:
+                      | T
+                      | {
+                          number?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        tabs?:
+          | T
+          | {
+              textInCollapsible?: T;
+              textInRow?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   group?:
     | T
@@ -3035,7 +3141,24 @@ export interface TabsFieldsSelect<T extends boolean = true> {
   textInRow?: T;
   numberInRow?: T;
   json?: T;
-  tab?: T | TabWithNameSelect<T>;
+  tab?:
+    | T
+    | {
+        array?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        text?: T;
+        defaultValue?: T;
+        arrayInRow?:
+          | T
+          | {
+              textInArrayInRow?: T;
+              id?: T;
+            };
+      };
   namedTabWithDefaultValue?:
     | T
     | {
@@ -3084,26 +3207,6 @@ export interface TabsFieldsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TabWithName_select".
- */
-export interface TabWithNameSelect<T extends boolean = true> {
-  array?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  text?: T;
-  defaultValue?: T;
-  arrayInRow?:
-    | T
-    | {
-        textInArrayInRow?: T;
-        id?: T;
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

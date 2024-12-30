@@ -68,7 +68,7 @@ export const MyCustomView: React.FC<AdminViewProps> = ({
     >
       <Gutter>
         <h1>Custom Default Root View</h1>
-        <br />
+
         <p>This view uses the Default Template.</p>
       </Gutter>
     </DefaultTemplate>
@@ -125,8 +125,8 @@ const config = buildConfig({
 The above example shows how to add a new [Root View](#root-views), but the pattern is the same for [Collection Views](#collection-views), [Global Views](#global-views), and [Document Views](#document-views). For help on how to build your own Custom Views, see [Building Custom Views](#building-custom-views).
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   Routes are cascading, so unless explicitly given the `exact` property, they will
   match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all
   routes in your application. Alternatively, define your nested route _before_ your parent
@@ -134,8 +134,8 @@ The above example shows how to add a new [Root View](#root-views), but the patte
 </Banner>
 
 <Banner type="warning">
-  <strong>Custom views are public</strong>
-  <br />
+  **Custom views are public**
+
   Custom views are public by default. If your view requires a user to be logged in or to have certain access rights, you should handle that within your view component yourself.
 </Banner>
 
@@ -178,7 +178,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
-  <strong>Note:</strong>
+  **Note:**
   The `root` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
 </Banner>
 
@@ -190,7 +190,7 @@ The following options are available:
 | **`list`** | The List View is used to show a list of documents for any given Collection.                                         |
 
 <Banner type="success">
-  <strong>Note:</strong>
+  **Note:**
   You can also add _new_ Collection Views to the config by adding a new key to the `views` object with at least a `path` and `Component` property. See [Adding New Views](#adding-new-views) for more information.
 </Banner>
 
@@ -229,7 +229,7 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
-  <strong>Note:</strong>
+  **Note:**
   The `root` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
 </Banner>
 
@@ -240,7 +240,7 @@ The following options are available:
 | **`edit`** | The Edit View is used to edit a single document for any given Global. [More details](#document-views). |
 
 <Banner type="success">
-  <strong>Note:</strong>
+  **Note:**
   You can also add _new_ Global Views to the config by adding a new key to the `views` object with at least a `path` and `Component` property. See [Adding New Views](#adding-new-views) for more information.
 </Banner>
 
@@ -272,7 +272,7 @@ export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
 <Banner type="warning">
- <strong>Note:</strong>
+ **Note:**
  If you need to replace the _entire_ Edit View, including _all_ nested Document Views, use the `root` key. See [Custom Collection Views](#collection-views) or [Custom Global Views](#global-views) for more information.
 </Banner>
 
@@ -325,7 +325,7 @@ export const MyCollection: SanitizedCollectionConfig = {
 ```
 
 <Banner type="warning">
- <strong>Note:</strong>
+ **Note:**
  This applies to _both_ Collections _and_ Globals.
 </Banner>
 
@@ -364,12 +364,12 @@ Your Custom Views will be provided with the following props:
 | **`doc`**                 | The document being edited. Only available in Document Views. [More details](#document-views).                                           |
 
 <Banner type="success">
-  <strong>Reminder:</strong>
+  **Reminder:**
   All [Custom Server Components](./components) receive `payload` and `i18n` by default. See [Building Custom Components](./components#building-custom-components) for more details.
 </Banner>
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   It's up to you to secure your custom views. If your view requires a user to be logged in or to
   have certain access rights, you should handle that within your view component yourself.
 </Banner>

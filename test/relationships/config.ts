@@ -387,6 +387,47 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'deep-nested',
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'content',
+              fields: [
+                {
+                  type: 'blocks',
+                  name: 'blocks',
+                  blocks: [
+                    {
+                      slug: 'testBlock',
+                      fields: [
+                        {
+                          type: 'tabs',
+                          tabs: [
+                            {
+                              name: 'meta',
+                              fields: [
+                                {
+                                  type: 'relationship',
+                                  relationTo: 'movies',
+                                  name: 'movie',
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

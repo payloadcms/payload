@@ -20,7 +20,7 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { abortAndIgnore } from '@payloadcms/ui/shared'
+import { abortAndIgnore, handleAbortRef } from '@payloadcms/ui/shared'
 import React, { useEffect } from 'react'
 
 export const CreateFirstUserClient: React.FC<{
@@ -43,16 +43,13 @@ export const CreateFirstUserClient: React.FC<{
   const { t } = useTranslation()
   const { setUser } = useAuth()
 
-  const formStateAbortControllerRef = React.useRef<AbortController>(null)
+  const abortOnChangeRef = React.useRef<AbortController>(null)
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState }) => {
-      abortAndIgnore(formStateAbortControllerRef.current)
-
-      const controller = new AbortController()
-      formStateAbortControllerRef.current = controller
+      const controller = handleAbortRef(abortOnChangeRef)
 
       const response = await getFormState({
         collectionSlug: userSlug,
@@ -63,6 +60,8 @@ export const CreateFirstUserClient: React.FC<{
         schemaPath: `_${userSlug}.auth`,
         signal: controller.signal,
       })
+
+      abortOnChangeRef.current = null
 
       if (response && response.state) {
         return response.state
@@ -76,8 +75,10 @@ export const CreateFirstUserClient: React.FC<{
   }
 
   useEffect(() => {
+    const abortOnChange = abortOnChangeRef.current
+
     return () => {
-      abortAndIgnore(formStateAbortControllerRef.current)
+      abortAndIgnore(abortOnChange)
     }
   }, [])
 
