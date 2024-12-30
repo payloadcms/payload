@@ -233,7 +233,8 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
               if (reducedFields.length > 0) {
                 addCondition({
                   andIndex: 0,
-                  fieldName: reducedFields[0].value,
+                  fieldName: reducedFields.find((field) => !field.field.admin?.disableListFilter)
+                    .value,
                   orIndex: conditions.length,
                   relation: 'or',
                 })
