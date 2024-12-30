@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import type { FieldCondition } from '../types.js'
 
@@ -17,9 +17,9 @@ export type Props = {
   }) => void
   readonly andIndex: number
   readonly fieldName: string
-  readonly fields: FieldCondition[]
   readonly initialValue: string
   readonly operator: Operator
+  readonly options: FieldCondition[]
   readonly orIndex: number
   readonly removeCondition: ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void
   readonly RenderedFilter: React.ReactNode
@@ -56,21 +56,17 @@ export const Condition: React.FC<Props> = (props) => {
     addCondition,
     andIndex,
     fieldName,
-    fields,
     initialValue,
     operator,
+    options,
     orIndex,
     removeCondition,
     RenderedFilter,
     updateCondition,
   } = props
 
-  const options = useMemo(() => {
-    return fields.filter(({ field }) => !field.admin.disableListFilter)
-  }, [fields])
-
-  const [internalField, setInternalField] = useState<FieldCondition>(() =>
-    fields.find((field) => fieldName === field.value),
+  const [fieldOption, setFieldOption] = useState<FieldCondition>(() =>
+    options.find((field) => fieldName === field.value),
   )
 
   const { t } = useTranslation()
@@ -82,13 +78,13 @@ export const Condition: React.FC<Props> = (props) => {
   useEffect(() => {
     // This is to trigger changes when the debounced value changes
     if (
-      (internalField?.value || typeof internalField?.value === 'number') &&
+      (fieldOption?.value || typeof fieldOption?.value === 'number') &&
       internalOperatorOption &&
       ![null, undefined].includes(debouncedValue)
     ) {
       updateCondition({
         andIndex,
-        fieldName: internalField.value,
+        fieldName: fieldOption.value,
         operator: internalOperatorOption,
         orIndex,
         value: debouncedValue,
@@ -97,7 +93,7 @@ export const Condition: React.FC<Props> = (props) => {
   }, [
     debouncedValue,
     andIndex,
-    internalField?.value,
+    fieldOption?.value,
     internalOperatorOption,
     orIndex,
     updateCondition,
@@ -105,7 +101,7 @@ export const Condition: React.FC<Props> = (props) => {
   ])
 
   const booleanSelect =
-    ['exists'].includes(internalOperatorOption) || internalField?.field?.type === 'checkbox'
+    ['exists'].includes(internalOperatorOption) || fieldOption?.field?.type === 'checkbox'
 
   let valueOptions
 
@@ -114,13 +110,13 @@ export const Condition: React.FC<Props> = (props) => {
       { label: t('general:true'), value: 'true' },
       { label: t('general:false'), value: 'false' },
     ]
-  } else if (internalField?.field && 'options' in internalField.field) {
-    valueOptions = internalField.field.options
+  } else if (fieldOption?.field && 'options' in fieldOption.field) {
+    valueOptions = fieldOption.field.options
   }
 
   const disabled =
-    (!internalField?.value && typeof internalField?.value !== 'number') ||
-    internalField?.field?.admin?.disableListFilter
+    (!fieldOption?.value && typeof fieldOption?.value !== 'number') ||
+    fieldOption?.field?.admin?.disableListFilter
 
   return (
     <div className={baseClass}>
@@ -131,14 +127,14 @@ export const Condition: React.FC<Props> = (props) => {
               disabled={disabled}
               isClearable={false}
               onChange={(field: Option) => {
-                setInternalField(fields.find((f) => f.value === field.value))
+                setFieldOption(options.find((f) => f.value === field.value))
                 setInternalOperatorOption(undefined)
                 setInternalQueryValue(undefined)
               }}
-              options={options}
+              options={options.filter((field) => !field.field.admin.disableListFilter)}
               value={
-                fields.find((field) => internalField?.value === field.value) || {
-                  value: internalField?.value,
+                options.find((field) => fieldOption?.value === field.value) || {
+                  value: fieldOption?.value,
                 }
               }
             />
@@ -150,9 +146,9 @@ export const Condition: React.FC<Props> = (props) => {
               onChange={(operator: Option<Operator>) => {
                 setInternalOperatorOption(operator.value)
               }}
-              options={internalField?.operators}
+              options={fieldOption?.operators}
               value={
-                internalField?.operators.find(
+                fieldOption?.operators.find(
                   (operator) => internalOperatorOption === operator.value,
                 ) || null
               }
@@ -162,8 +158,12 @@ export const Condition: React.FC<Props> = (props) => {
             {RenderedFilter || (
               <DefaultFilter
                 booleanSelect={booleanSelect}
-                disabled={!internalOperatorOption || internalField?.field?.admin?.disableListFilter}
-                internalField={internalField}
+                disabled={
+                  !internalOperatorOption ||
+                  !fieldOption ||
+                  fieldOption?.field?.admin?.disableListFilter
+                }
+                internalField={fieldOption}
                 onChange={setInternalQueryValue}
                 operator={internalOperatorOption}
                 options={valueOptions}
@@ -194,7 +194,7 @@ export const Condition: React.FC<Props> = (props) => {
             onClick={() =>
               addCondition({
                 andIndex: andIndex + 1,
-                fieldName: fields.find((field) => !field.field.admin?.disableListFilter).value,
+                fieldName: options.find((field) => !field.field.admin?.disableListFilter).value,
                 orIndex,
                 relation: 'and',
               })

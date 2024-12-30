@@ -183,6 +183,18 @@ export const Posts: CollectionConfig = {
       },
     },
     {
+      name: 'hiddenField',
+      type: 'text',
+      hidden: true,
+    },
+    {
+      name: 'adminHiddenField',
+      type: 'text',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'disableListColumnText',
       type: 'text',
       admin: {

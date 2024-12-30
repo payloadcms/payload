@@ -10,10 +10,10 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
-import './index.scss'
 import { reduceClientFields } from './reduceClientFields.js'
 import { transformWhereQuery } from './transformWhereQuery.js'
 import validateWhereQuery from './validateWhereQuery.js'
+import './index.scss'
 
 const baseClass = 'where-builder'
 
@@ -27,10 +27,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { collectionPluralLabel, fields, renderedFilters } = props
   const { i18n, t } = useTranslation()
 
-  const [reducedFields, setReducedColumns] = useState(() => reduceClientFields({ fields, i18n }))
+  const [options, setOptions] = useState(() => reduceClientFields({ fields, i18n }))
 
   useEffect(() => {
-    setReducedColumns(reduceClientFields({ fields, i18n }))
+    setOptions(reduceClientFields({ fields, i18n }))
   }, [fields, i18n])
 
   const { handleWhereChange, query } = useListQuery()
@@ -185,9 +185,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                               addCondition={addCondition}
                               andIndex={andIndex}
                               fieldName={initialFieldName}
-                              fields={reducedFields}
                               initialValue={initialValue}
                               operator={initialOperator}
+                              options={options}
                               orIndex={orIndex}
                               removeCondition={removeCondition}
                               RenderedFilter={renderedFilters?.get(initialFieldName)}
@@ -210,7 +210,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             onClick={() => {
               addCondition({
                 andIndex: 0,
-                fieldName: reducedFields[0].value,
+                fieldName: options[0].value,
                 orIndex: conditions.length,
                 relation: 'or',
               })
@@ -230,11 +230,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             iconPosition="left"
             iconStyle="with-border"
             onClick={() => {
-              if (reducedFields.length > 0) {
+              if (options.length > 0) {
                 addCondition({
                   andIndex: 0,
-                  fieldName: reducedFields.find((field) => !field.field.admin?.disableListFilter)
-                    .value,
+                  fieldName: options.find((field) => !field.field.admin?.disableListFilter).value,
                   orIndex: conditions.length,
                   relation: 'or',
                 })

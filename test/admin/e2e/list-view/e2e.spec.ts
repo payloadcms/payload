@@ -590,6 +590,8 @@ describe('List View', () => {
         )}`,
       )
 
+      console.log('URL', page.url())
+
       await openListFilters(page, {})
 
       const condition = page.locator('.condition__field')
@@ -607,6 +609,32 @@ describe('List View', () => {
   })
 
   describe('table columns', () => {
+    test('should hide field column when field.hidden is true', async () => {
+      await page.goto(postsUrl.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Hidden Field'),
+        }),
+      ).toBeHidden()
+    })
+
+    test('should show field column despite admin.hidden being true', async () => {
+      await page.goto(postsUrl.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Admin Hidden Field'),
+        }),
+      ).toBeVisible()
+    })
+
     test('should hide field in column selector when admin.disableListColumn is true', async () => {
       await page.goto(postsUrl.list)
       await page.locator('.list-controls__toggle-columns').click()
