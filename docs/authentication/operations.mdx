@@ -269,6 +269,10 @@ const result = await payload.verifyEmail({
 })
 ```
 
+Note that the token you need to pass to the `verifyEmail` function is unique to verification and is not the same as the token that you can retrieve from the `forgotPassword` operation. It can be found on the user document, as a hidden `_verificationToken` field.
+
+If you'd like to retrieve this token, you can use the Local API's `find` or `findByID` methods, setting `showHiddenFields: true`.
+
 ## Unlock
 
 If a user locks themselves out and you wish to deliberately unlock them, you can utilize the Unlock operation. The [Admin Panel](../admin/overview) features an Unlock control automatically for all collections that feature max login attempts, but you can programmatically unlock users as well by using the Unlock operation.
