@@ -1,7 +1,7 @@
 'use client'
 import type { SanitizedCollectionConfig } from 'payload'
 
-import React, { useId, useState } from 'react'
+import React, { useId } from 'react'
 
 import type { Column } from '../Table/index.js'
 
@@ -35,7 +35,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const uuid = useId()
   const editDepth = useEditDepth()
 
-  const [filteredColumns] = useState(() => filterColumnFields(columns))
+  const filteredColumns = filterColumnFields(columns)
 
   if (!columns) {
     return null
