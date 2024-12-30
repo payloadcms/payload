@@ -57,7 +57,7 @@ export type ListViewClientProps = {
   collectionConfig?: ClientCollectionConfig // TODO: make this required in the next major version
   /**
    * @deprecated
-   * This prop will be removed in the next major version. Read the collection slug from the `collectionConfig.slug` instead.
+   * This prop will be removed in the next major version. You can read the collection slug from `collectionConfig.slug` instead.
    */
   collectionSlug: string
   columnState: Column[]

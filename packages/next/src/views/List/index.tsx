@@ -74,8 +74,6 @@ export const renderListView = async (
 
   const query = queryFromArgs || queryFromReq
 
-  console.log(queryFromArgs, queryFromReq)
-
   let listPreferences: ListPreferences
   const preferenceKey = `${collectionSlug}-list`
 
