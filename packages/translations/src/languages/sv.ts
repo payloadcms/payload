@@ -279,7 +279,7 @@ export const svTranslations: DefaultTranslationsObject = {
     none: 'Ingen',
     noOptions: 'Inga alternativ',
     noResults:
-      'Inga {{label}} hittades. Antingen finns inga {{label}} ännu eller matchar ingen filtren du har angett ovan.',
+      'Inga {{label}} hittades. Antingen finns inga {{label}} ännu eller så matchar inga filtren du har angett ovan.',
     notFound: 'Hittades inte',
     nothingFound: 'Inget hittades',
     noUpcomingEventsScheduled: 'Inga kommande händelser är planerade.',
