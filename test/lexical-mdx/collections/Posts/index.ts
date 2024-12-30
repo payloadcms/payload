@@ -13,9 +13,9 @@ import { BannerBlock } from '../../mdx/jsxBlocks/banner.js'
 import { CodeBlock } from '../../mdx/jsxBlocks/code/code.js'
 import { InlineCodeBlock } from '../../mdx/jsxBlocks/inlineCode.js'
 import { PackageInstallOptions } from '../../mdx/jsxBlocks/packageInstallOptions.js'
+import { RestExamplesBlock } from '../../mdx/jsxBlocks/restExamples/index.js'
 import { TextContainerBlock } from '../../mdx/jsxBlocks/TextContainer.js'
 import { TextContainerNoTrimBlock } from '../../mdx/jsxBlocks/TextContainerNoTrim.js'
-import { RestExamplesBlock } from '../../mdx/jsxBlocks/restExamples/index.js'
 
 export const postsSlug = 'posts'
 

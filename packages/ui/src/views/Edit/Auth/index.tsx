@@ -44,7 +44,7 @@ export const Auth: React.FC<Props> = (props) => {
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
-  const { docPermissions, isInitializing } = useDocumentInfo()
+  const { docPermissions, isEditing, isInitializing } = useDocumentInfo()
 
   const {
     config: {
@@ -222,7 +222,7 @@ export const Auth: React.FC<Props> = (props) => {
           {canReadApiKey && <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />}
         </div>
       )}
-      {verify && (
+      {verify && isEditing && (
         <CheckboxField
           field={{
             name: '_verified',
