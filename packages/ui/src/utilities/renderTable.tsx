@@ -113,6 +113,8 @@ export const renderTable = ({
       field: {
         admin: {
           disabled: true,
+          disableListColumn: true,
+          disableListFilter: true,
         },
         hidden: true,
       },
@@ -130,6 +132,8 @@ export const renderTable = ({
       field: {
         admin: {
           disabled: true,
+          disableListColumn: true,
+          disableListFilter: true,
         },
         hidden: true,
       },
