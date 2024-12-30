@@ -424,6 +424,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   graphQL?:
     | {
+        disableMutations?: true
+        disableQueries?: true
         pluralName?: string
         singularName?: string
       }
