@@ -3,8 +3,6 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import React, { useId, useMemo } from 'react'
 
-import type { Column } from '../Table/index.js'
-
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
@@ -20,21 +18,16 @@ export type Props = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
 }
 
-const filterColumnFields = (columns: Column[]): Column[] =>
-  columns.filter((col) =>
-    Boolean(
-      col.accessor !== '_select' ||
-        (!col.field && col.CustomLabel === null && col?.field?.admin?.disableListColumn),
-    ),
-  )
-
 export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const { columns, moveColumn, toggleColumn } = useTableColumns()
 
   const uuid = useId()
   const editDepth = useEditDepth()
 
-  const filteredColumns = useMemo(() => filterColumnFields(columns), [columns])
+  const filteredColumns = useMemo(
+    () => columns.filter((col) => !col?.field?.admin?.disableListColumn),
+    [columns],
+  )
 
   if (!columns) {
     return null

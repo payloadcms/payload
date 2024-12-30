@@ -487,9 +487,11 @@ describe('List View', () => {
 
       // reload to ensure the preferred order was stored in the database
       await page.reload()
+
       await expect(
         page.locator('.list-controls .column-selector .column-selector__column').first(),
       ).toHaveText('Number')
+
       await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number')
     })
 

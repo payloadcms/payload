@@ -4,6 +4,8 @@ import type { ClientField } from 'payload'
 
 import React from 'react'
 
+import { SelectAll } from '../SelectAll/index.js'
+import { SelectRow } from '../SelectRow/index.js'
 import './index.scss'
 
 const baseClass = 'table'
@@ -21,9 +23,10 @@ export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
+  readonly enableRowSelections?: boolean
 }
 
-export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
+export const Table: React.FC<Props> = ({ appearance, columns, data, enableRowSelections }) => {
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -39,6 +42,11 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
       <table cellPadding="0" cellSpacing="0">
         <thead>
           <tr>
+            {enableRowSelections ? (
+              <th id="heading-_select">
+                <SelectAll />
+              </th>
+            ) : null}
             {activeColumns.map((col, i) => (
               <th id={`heading-${col.accessor}`} key={i}>
                 {col.Heading}
@@ -50,6 +58,11 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
           {data &&
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
+                {enableRowSelections ? (
+                  <td className={`cell-_select`}>
+                    <SelectRow rowData={row as any} />
+                  </td>
+                ) : null}
                 {activeColumns.map((col, colIndex) => {
                   const { accessor } = col
 
