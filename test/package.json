@@ -5,11 +5,12 @@
   "description": "Payload test suite",
   "type": "module",
   "scripts": {
+    "prebuild": "node --no-deprecation --import @swc-node/register/esm-register generateDatabaseAdapter.ts --writeDefaultAdapter",
+    "build": "tsc --project tsconfig.typecheck.json",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation node ./dev.js",
     "test": "pnpm -C \"../\" run test",
     "test:e2e": "pnpm -C \"../\" run test:e2e",
-    "test:int": "pnpm -C \"../\" run test:int",
-    "typecheck": "pnpm turbo build --filter payload-test-suite && tsc --project tsconfig.typecheck.json"
+    "test:int": "pnpm -C \"../\" run test:int"
   },
   "lint-staged": {
     "**/package.json": "sort-package-json",

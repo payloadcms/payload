@@ -46,7 +46,7 @@
     "build:storage-s3": "turbo build --filter \"@payloadcms/storage-s3\"",
     "build:storage-uploadthing": "turbo build --filter \"@payloadcms/storage-uploadthing\"",
     "build:storage-vercel-blob": "turbo build --filter \"@payloadcms/storage-vercel-blob\"",
-    "build:tests": "pnpm --filter payload-test-suite run typecheck",
+    "build:tests": "pnpm --filter payload-test-suite run build",
     "build:translations": "turbo build --filter \"@payloadcms/translations\"",
     "build:ui": "turbo build --filter \"@payloadcms/ui\"",
     "clean": "turbo clean",
