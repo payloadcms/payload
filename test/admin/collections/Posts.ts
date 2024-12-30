@@ -183,6 +183,13 @@ export const Posts: CollectionConfig = {
       },
     },
     {
+      name: 'hiddenField',
+      type: 'text',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'disableListColumnText',
       type: 'text',
       admin: {
@@ -206,27 +213,6 @@ export const Posts: CollectionConfig = {
         description:
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
         position: 'sidebar',
-      },
-    },
-    {
-      name: 'hiddenField',
-      type: 'text',
-      admin: {
-        hidden: true,
-      },
-    },
-    {
-      name: 'disableListColumnText',
-      type: 'text',
-      admin: {
-        disableListColumn: true,
-      },
-    },
-    {
-      name: 'disableListFilterText',
-      type: 'text',
-      admin: {
-        disableListFilter: true,
       },
     },
   ],
