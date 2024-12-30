@@ -424,8 +424,8 @@ describe('List View', () => {
       await deleteAllPosts()
 
       await Promise.all(
-        Array.from({ length: 12 }, async (_, i) => {
-          if (i < 6) {
+        Array.from({ length: 6 }, async (_, i) => {
+          if (i < 3) {
             await createPost()
           } else {
             await createPost({ title: 'test' })
@@ -437,10 +437,10 @@ describe('List View', () => {
 
       const tableItems = page.locator(tableRowLocator)
 
-      await expect(tableItems).toHaveCount(10)
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-10 of 12')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 10')
-      await page.goto(`${postsUrl.list}?limit=10&page=2`)
+      await expect(tableItems).toHaveCount(5)
+      await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
+      await page.goto(`${postsUrl.list}?limit=5&page=2`)
       await openListFilters(page, {})
       await page.locator('.where-builder__add-first-filter').click()
       await page.locator('.condition__field .rs__control').click()
@@ -449,7 +449,8 @@ describe('List View', () => {
       await page.locator('.condition__operator .rs__control').click()
       await options.locator('text=equals').click()
       await page.locator('.condition__value input').fill('test')
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-6 of 6')
+      await page.waitForURL(new RegExp(`${postsUrl.list}\\?limit=5&page=1`))
+      await expect(page.locator('.collection-list__page-info')).toHaveText('1-3 of 3')
     })
   })
 
