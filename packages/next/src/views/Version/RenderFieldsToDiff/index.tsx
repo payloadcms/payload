@@ -1,6 +1,7 @@
 'use client'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
+import { dequal } from 'dequal/lite'
 import { fieldAffectsData, fieldIsID } from 'payload/shared'
 import React from 'react'
 
@@ -20,6 +21,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   fields,
   i18n,
   locales,
+  modifiedOnly,
   version,
 }) => {
   // typing it as `as typeof _diffComponents` here ensures the TField generics of DiffComponentProps are respected.
@@ -51,6 +53,10 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               ? JSON.stringify(comparison?.[fieldName])
               : comparison?.[fieldName]
 
+            if (modifiedOnly && (dequal(versionValue, comparisonValue) || field.admin?.hidden)) {
+              return null
+            }
+
             const hasPermission =
               fieldPermissions === true ||
               fieldPermissions?.[fieldName] === true ||
@@ -75,6 +81,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               i18n,
               isRichText,
               locales,
+              modifiedOnly,
               version: versionValue,
             }
 

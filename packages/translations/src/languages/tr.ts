@@ -451,6 +451,7 @@ export const trTranslations: DefaultTranslationsObject = {
     draft: 'Taslak',
     draftSavedSuccessfully: 'Taslak başarıyla kaydedildi.',
     lastSavedAgo: 'Son kaydedildi {{distance}} önce',
+    modifiedOnly: undefined,
     noFurtherVersionsFound: 'Başka sürüm bulunamadı.',
     noRowsFound: '{{label}} bulunamadı',
     noRowsSelected: 'Seçilen {{label}} yok',
