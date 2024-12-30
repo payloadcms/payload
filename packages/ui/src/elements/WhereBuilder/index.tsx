@@ -27,10 +27,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { collectionPluralLabel, fields, renderedFilters } = props
   const { i18n, t } = useTranslation()
 
-  const [fieldOptions, setFieldOptions] = useState(() => reduceClientFields({ fields, i18n }))
+  const [options, setOptions] = useState(() => reduceClientFields({ fields, i18n }))
 
   useEffect(() => {
-    setFieldOptions(reduceClientFields({ fields, i18n }))
+    setOptions(reduceClientFields({ fields, i18n }))
   }, [fields, i18n])
 
   const { handleWhereChange, query } = useListQuery()
@@ -187,7 +187,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                               fieldName={initialFieldName}
                               initialValue={initialValue}
                               operator={initialOperator}
-                              options={fieldOptions}
+                              options={options}
                               orIndex={orIndex}
                               removeCondition={removeCondition}
                               RenderedFilter={renderedFilters?.get(initialFieldName)}
@@ -210,7 +210,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             onClick={() => {
               addCondition({
                 andIndex: 0,
-                fieldName: fieldOptions[0].value,
+                fieldName: options[0].value,
                 orIndex: conditions.length,
                 relation: 'or',
               })
@@ -230,10 +230,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             iconPosition="left"
             iconStyle="with-border"
             onClick={() => {
-              if (fieldOptions.length > 0) {
+              if (options.length > 0) {
                 addCondition({
                   andIndex: 0,
-                  fieldName: fieldOptions[0].value,
+                  fieldName: options.find((field) => !field.field.admin?.disableListFilter).value,
                   orIndex: conditions.length,
                   relation: 'or',
                 })

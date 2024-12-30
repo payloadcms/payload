@@ -194,7 +194,7 @@ export const Condition: React.FC<Props> = (props) => {
             onClick={() =>
               addCondition({
                 andIndex: andIndex + 1,
-                fieldName: options[0].value,
+                fieldName: options.find((field) => !field.field.admin?.disableListFilter).value,
                 orIndex,
                 relation: 'and',
               })
