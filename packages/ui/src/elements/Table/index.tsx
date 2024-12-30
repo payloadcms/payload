@@ -19,7 +19,6 @@ export type Column = {
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
-  readonly beforeRows?: Column[]
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
 }
