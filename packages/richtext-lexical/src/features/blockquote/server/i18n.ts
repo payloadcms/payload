@@ -40,6 +40,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Idézetblokk',
   },
+  is: {
+    label: 'Tilvitnun',
+  },
   it: {
     label: 'Citazione',
   },
