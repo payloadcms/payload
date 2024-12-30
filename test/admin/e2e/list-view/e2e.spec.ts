@@ -301,19 +301,6 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
-    test('should show field in filter when admin.disableListColumn is true', async () => {
-      await page.goto(postsUrl.list)
-      await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
-
-      const initialField = page.locator('.condition__field')
-      await initialField.click()
-
-      await expect(
-        initialField.locator(`.rs__menu-list:has-text("Disable List Column Text")`),
-      ).toBeVisible()
-    })
-
     test('should display field in list view column selector despite admin.disableListFilter', async () => {
       await page.goto(postsUrl.list)
       await page.locator('.list-controls__toggle-columns').click()
@@ -663,6 +650,20 @@ describe('List View', () => {
   })
 
   describe('table columns', () => {
+    test('should hide field when admin.hidden is true', async () => {
+      await page.goto(postsUrl.list)
+      await page.locator('.list-controls__toggle-columns').click()
+
+      await expect(page.locator('.column-selector')).toBeVisible()
+
+      // Check if "Hidden Text" is not present in the column options
+      await expect(
+        page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('Hidden Field'),
+        }),
+      ).toBeHidden()
+    })
+
     test('should hide field in column selector when admin.disableListColumn is true', async () => {
       await page.goto(postsUrl.list)
       await page.locator('.list-controls__toggle-columns').click()

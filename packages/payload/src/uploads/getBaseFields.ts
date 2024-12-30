@@ -170,8 +170,6 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           name,
           type: 'number',
           admin: {
-            disableListColumn: true,
-            disableListFilter: true,
             hidden: true,
           },
         }
