@@ -29,7 +29,8 @@ export const reduceClientFields = ({
   pathPrefix,
 }: ReduceClientFieldsArgs): FieldCondition[] => {
   return fields.reduce((reduced, field) => {
-    if ((fieldIsHiddenOrDisabled(field) || field.admin.disableListFilter) && !fieldIsID(field)) {
+    // Do not filter out `field.admin.disableListFilter` fields here, as these should still render as disabled if they appear in the URL query
+    if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
       return reduced
     }
 

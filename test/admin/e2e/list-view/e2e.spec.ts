@@ -590,6 +590,8 @@ describe('List View', () => {
         )}`,
       )
 
+      console.log('URL', page.url())
+
       await openListFilters(page, {})
 
       const condition = page.locator('.condition__field')

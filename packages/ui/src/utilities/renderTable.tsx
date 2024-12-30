@@ -104,7 +104,7 @@ export const renderTable = ({
     useAsTitle,
   })
 
-  const columnsToUse = columnState
+  const columnsToUse = [...columnState]
 
   if (renderRowTypes) {
     columnsToUse.unshift({
