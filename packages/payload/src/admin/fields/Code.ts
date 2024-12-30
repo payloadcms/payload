@@ -1,3 +1,4 @@
+import type { EditorProps } from '@monaco-editor/react'
 import type { MarkOptional } from 'ts-essentials'
 
 import type { CodeField, CodeFieldClient } from '../../fields/config/types.js'
@@ -20,6 +21,7 @@ type CodeFieldClientWithoutType = MarkOptional<CodeFieldClient, 'type'>
 
 type CodeFieldBaseClientProps = {
   readonly autoComplete?: string
+  readonly onMount?: EditorProps['onMount']
   readonly path: string
   readonly validate?: CodeFieldValidation
 }

@@ -281,7 +281,8 @@ export class Main {
       }
 
       info('Payload project successfully created!')
-      p.note(successMessage(projectDir, packageManager), chalk.bgGreen(chalk.black(' Next Steps ')))
+      p.log.step(chalk.bgGreen(chalk.black(' Next Steps ')))
+      p.log.message(successMessage(projectDir, packageManager))
       p.outro(feedbackOutro())
     } catch (err: unknown) {
       error(err instanceof Error ? err.message : 'An error occurred')

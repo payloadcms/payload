@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.11.0",
+  "version": "3.12.0",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -362,6 +362,7 @@
     "bson-objectid": "2.0.4",
     "dequal": "2.0.3",
     "escape-html": "1.0.3",
+    "jsox": "1.2.121",
     "lexical": "0.20.0",
     "mdast-util-from-markdown": "2.0.2",
     "mdast-util-mdx-jsx": "3.1.3",
