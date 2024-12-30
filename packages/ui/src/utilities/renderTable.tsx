@@ -19,7 +19,7 @@ import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { Pill, Table } from '../exports/client/index.js'
+import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 
 export const renderFilters = (
   fields: Field[],
@@ -122,9 +122,21 @@ export const renderTable = ({
     Table: (
       <Table
         appearance={tableAppearance}
+        beforeRows={
+          enableRowSelections
+            ? [
+                {
+                  accessor: '_select',
+                  active: true,
+                  field: null,
+                  Heading: <SelectAll />,
+                  renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
+                },
+              ]
+            : undefined
+        }
         columns={columnState}
         data={docs}
-        enableRowSelections={enableRowSelections}
       />
     ),
   }

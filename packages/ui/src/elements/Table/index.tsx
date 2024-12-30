@@ -4,8 +4,6 @@ import type { ClientField } from 'payload'
 
 import React from 'react'
 
-import { SelectAll } from '../SelectAll/index.js'
-import { SelectRow } from '../SelectRow/index.js'
 import './index.scss'
 
 const baseClass = 'table'
@@ -21,12 +19,12 @@ export type Column = {
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
+  readonly beforeRows?: Column[]
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
-  readonly enableRowSelections?: boolean
 }
 
-export const Table: React.FC<Props> = ({ appearance, columns, data, enableRowSelections }) => {
+export const Table: React.FC<Props> = ({ appearance, beforeRows, columns, data }) => {
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -42,11 +40,13 @@ export const Table: React.FC<Props> = ({ appearance, columns, data, enableRowSel
       <table cellPadding="0" cellSpacing="0">
         <thead>
           <tr>
-            {enableRowSelections ? (
-              <th id="heading-_select">
-                <SelectAll />
-              </th>
-            ) : null}
+            {beforeRows
+              ? beforeRows.map((col, i) => (
+                  <th id={`heading-${col.accessor}`} key={i}>
+                    {col.Heading}
+                  </th>
+                ))
+              : null}
             {activeColumns.map((col, i) => (
               <th id={`heading-${col.accessor}`} key={i}>
                 {col.Heading}
@@ -58,11 +58,17 @@ export const Table: React.FC<Props> = ({ appearance, columns, data, enableRowSel
           {data &&
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
-                {enableRowSelections ? (
-                  <td className={`cell-_select`}>
-                    <SelectRow rowData={row as any} />
-                  </td>
-                ) : null}
+                {beforeRows
+                  ? beforeRows.map((col, colIndex) => {
+                      const { accessor } = col
+
+                      return (
+                        <td className={`cell-${accessor}`} key={colIndex}>
+                          {col.renderedCells[rowIndex]}
+                        </td>
+                      )
+                    })
+                  : null}
                 {activeColumns.map((col, colIndex) => {
                   const { accessor } = col
 
