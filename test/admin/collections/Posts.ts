@@ -183,6 +183,20 @@ export const Posts: CollectionConfig = {
       },
     },
     {
+      name: 'disableListColumnText',
+      type: 'text',
+      admin: {
+        disableListColumn: true,
+      },
+    },
+    {
+      name: 'disableListFilterText',
+      type: 'text',
+      admin: {
+        disableListFilter: true,
+      },
+    },
+    {
       name: 'sidebarField',
       type: 'text',
       access: {
