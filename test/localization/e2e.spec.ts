@@ -28,7 +28,6 @@ import {
   spanishLocale,
   withRequiredLocalizedFields,
 } from './shared.js'
-import { wait } from 'payload/shared'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -267,8 +266,6 @@ describe('Localization', () => {
       const postUrl = await post.getAttribute('href')
       await page.goto(serverURL + postUrl)
       await page.waitForURL(serverURL + postUrl)
-
-      await wait(2000)
 
       await openDocDrawer(
         page,
