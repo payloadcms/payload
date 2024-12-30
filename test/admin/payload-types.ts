@@ -175,11 +175,11 @@ export interface Post {
   defaultValueField?: string | null;
   relationship?: (string | null) | Post;
   customCell?: string | null;
+  hiddenField?: string | null;
+  adminHiddenField?: string | null;
   disableListColumnText?: string | null;
   disableListFilterText?: string | null;
   sidebarField?: string | null;
-  disableListColumnText?: string | null;
-  disableListFilterText?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -548,11 +548,11 @@ export interface PostsSelect<T extends boolean = true> {
   defaultValueField?: T;
   relationship?: T;
   customCell?: T;
+  hiddenField?: T;
+  adminHiddenField?: T;
   disableListColumnText?: T;
   disableListFilterText?: T;
   sidebarField?: T;
-  disableListColumnText?: T;
-  disableListFilterText?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
