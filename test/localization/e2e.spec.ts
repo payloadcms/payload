@@ -12,6 +12,7 @@ import {
   changeLocale,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -266,10 +267,10 @@ describe('Localization', () => {
       await page.goto(serverURL + postUrl)
       await page.waitForURL(serverURL + postUrl)
 
-      const editButton = page.locator(
+      await openDocDrawer(
+        page,
         '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler',
       )
-      await editButton.click()
 
       await expect(page.locator('.doc-drawer__header-text')).toContainText('spanish-relation2')
     })
