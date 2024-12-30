@@ -50,6 +50,10 @@ export const Posts: CollectionConfig = {
         },
       ],
     },
+    pagination: {
+      defaultLimit: 5,
+      limits: [5, 10, 15],
+    },
     meta: {
       description: 'This is a custom meta description for posts',
       openGraph: {

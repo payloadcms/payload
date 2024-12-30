@@ -424,8 +424,8 @@ describe('List View', () => {
       await deleteAllPosts()
 
       await Promise.all(
-        Array.from({ length: 12 }, async (_, i) => {
-          if (i < 6) {
+        Array.from({ length: 6 }, async (_, i) => {
+          if (i < 3) {
             await createPost()
           } else {
             await createPost({ title: 'test' })
@@ -437,10 +437,10 @@ describe('List View', () => {
 
       const tableItems = page.locator(tableRowLocator)
 
-      await expect(tableItems).toHaveCount(10)
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-10 of 12')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 10')
-      await page.goto(`${postsUrl.list}?limit=10&page=2`)
+      await expect(tableItems).toHaveCount(5)
+      await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
+      await page.goto(`${postsUrl.list}?limit=5&page=2`)
       await openListFilters(page, {})
       await page.locator('.where-builder__add-first-filter').click()
       await page.locator('.condition__field .rs__control').click()
@@ -449,7 +449,8 @@ describe('List View', () => {
       await page.locator('.condition__operator .rs__control').click()
       await options.locator('text=equals').click()
       await page.locator('.condition__value input').fill('test')
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-6 of 6')
+      await page.waitForURL(new RegExp(`${postsUrl.list}\\?limit=5&page=1`))
+      await expect(page.locator('.collection-list__page-info')).toHaveText('1-3 of 3')
     })
   })
 
@@ -638,53 +639,81 @@ describe('List View', () => {
   })
 
   describe('pagination', () => {
+    test('should use custom admin.pagination.defaultLimit', async () => {
+      await deleteAllPosts()
+
+      await mapAsync([...Array(6)], async () => {
+        await createPost()
+      })
+
+      await page.goto(postsUrl.list)
+      await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 5')
+      await expect(page.locator(tableRowLocator)).toHaveCount(5)
+    })
+
+    test('should use custom admin.pagination.limits', async () => {
+      await deleteAllPosts()
+
+      await mapAsync([...Array(6)], async () => {
+        await createPost()
+      })
+
+      await page.goto(postsUrl.list)
+      await page.locator('.per-page .popup-button').click()
+      await page.locator('.per-page .popup-button').click()
+      const options = await page.locator('.per-page button.per-page__button')
+      await expect(options).toHaveCount(3)
+      await expect(options.nth(0)).toContainText('5')
+      await expect(options.nth(1)).toContainText('10')
+      await expect(options.nth(2)).toContainText('15')
+    })
+
     test('should paginate', async () => {
       await deleteAllPosts()
 
-      await mapAsync([...Array(11)], async () => {
+      await mapAsync([...Array(6)], async () => {
         await createPost()
       })
 
       await page.reload()
-      const tableItems = page.locator(tableRowLocator)
-      await expect(tableItems).toHaveCount(10)
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-10 of 11')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 10')
+      await expect(page.locator(tableRowLocator)).toHaveCount(5)
+      await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 6')
+      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
       await page.locator('.paginator button').nth(1).click()
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
-      await expect(tableItems).toHaveCount(1)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
       await page.locator('.paginator button').nth(0).click()
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=1')
-      await expect(tableItems).toHaveCount(10)
+      await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
 
-    test('should paginate and maintain perPage', async () => {
+    test('should paginate without resetting selected limit', async () => {
       await deleteAllPosts()
 
-      await mapAsync([...Array(26)], async () => {
+      await mapAsync([...Array(16)], async () => {
         await createPost()
       })
 
       await page.reload()
       const tableItems = page.locator(tableRowLocator)
-      await expect(tableItems).toHaveCount(10)
-      await expect(page.locator('.collection-list__page-info')).toHaveText('1-10 of 26')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 10')
+      await expect(tableItems).toHaveCount(5)
+      await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 16')
+      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
       await page.locator('.per-page .popup-button').click()
 
       await page
         .locator('.per-page button.per-page__button', {
-          hasText: '25',
+          hasText: '15',
         })
         .click()
 
-      await expect(tableItems).toHaveCount(25)
-      await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 25')
+      await expect(tableItems).toHaveCount(15)
+      await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 15')
       await page.locator('.paginator button').nth(1).click()
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
       await expect(tableItems).toHaveCount(1)
-      await expect(page.locator('.per-page')).toContainText('Per Page: 25')
-      await expect(page.locator('.collection-list__page-info')).toHaveText('26-26 of 26')
+      await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
+      await expect(page.locator('.collection-list__page-info')).toHaveText('16-16 of 16')
     })
   })
 
