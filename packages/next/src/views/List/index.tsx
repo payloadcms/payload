@@ -222,6 +222,7 @@ export const renderListView = async (
     const clientProps: ListViewClientProps = {
       ...listViewSlots,
       ...sharedClientProps,
+      collectionConfig: clientCollectionConfig,
       columnState,
       disableBulkDelete,
       disableBulkEdit,
