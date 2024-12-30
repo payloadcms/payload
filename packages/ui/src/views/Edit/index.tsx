@@ -83,6 +83,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     savedDocumentData,
     setCurrentEditor,
     setDocumentIsLocked,
+    setInitialData,
+    setInitialState,
     unlockDocument,
     updateDocumentEditor,
     updateSavedDocumentData,
@@ -291,38 +293,43 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           setDocumentIsLocked(false)
         }
 
+        setInitialData(json?.doc || json?.result)
+        setInitialState(state)
+
         abortOnSaveRef.current = null
 
         return state
       }
     },
     [
-      adminRoute,
-      collectionSlug,
-      depth,
-      docPermissions,
+      reportUpdate,
+      id,
       entitySlug,
+      user,
+      collectionSlug,
+      userSlug,
+      incrementVersionCount,
+      updateSavedDocumentData,
+      onSaveFromContext,
+      isEditing,
+      depth,
       getDocPermissions,
+      globalSlug,
+      autosaveEnabled,
+      refreshCookieAsync,
+      adminRoute,
+      locale,
+      router,
+      resetUploadEdits,
       getDocPreferences,
       getFormState,
-      globalSlug,
-      id,
-      incrementVersionCount,
-      isEditing,
-      isLockingEnabled,
-      locale,
-      onSaveFromContext,
+      docPermissions,
       operation,
-      refreshCookieAsync,
-      reportUpdate,
-      resetUploadEdits,
-      router,
       schemaPathSegments,
+      isLockingEnabled,
+      setInitialData,
+      setInitialState,
       setDocumentIsLocked,
-      updateSavedDocumentData,
-      user,
-      userSlug,
-      autosaveEnabled,
     ],
   )
 
