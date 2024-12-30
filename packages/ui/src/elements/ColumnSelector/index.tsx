@@ -1,7 +1,7 @@
 'use client'
 import type { SanitizedCollectionConfig } from 'payload'
 
-import React, { useId } from 'react'
+import React, { useId, useState } from 'react'
 
 import type { Column } from '../Table/index.js'
 
@@ -20,11 +20,14 @@ export type Props = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
 }
 
-const filterColumnFields = (columns: Column[]): Column[] => {
-  return columns.filter((c) => {
-    return !c?.field?.admin?.disableListColumn
-  })
-}
+const filterColumnFields = (columns: Column[]): Column[] =>
+  columns.filter(
+    (col) =>
+      col.accessor !== '_select' &&
+      col.field &&
+      col.CustomLabel !== null &&
+      !col?.field?.admin?.disableListColumn,
+  )
 
 export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const { columns, moveColumn, toggleColumn } = useTableColumns()
@@ -32,11 +35,11 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const uuid = useId()
   const editDepth = useEditDepth()
 
+  const [filteredColumns] = useState(() => filterColumnFields(columns))
+
   if (!columns) {
     return null
   }
-
-  const filteredColumns = filterColumnFields(columns)
 
   return (
     <DraggableSortable
@@ -50,20 +53,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       }}
     >
       {filteredColumns.map((col, i) => {
-        if (!col) {
-          return null
-        }
-
         const { accessor, active, field } = col
-
-        if (
-          col.accessor === '_select' ||
-          !field ||
-          col.CustomLabel === null ||
-          (col.CustomLabel === undefined && !('label' in field))
-        ) {
-          return null
-        }
 
         return (
           <Pill
@@ -80,7 +70,9 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
               void toggleColumn(accessor)
             }}
           >
-            {col.CustomLabel ?? <FieldLabel label={'label' in field && field.label} unstyled />}
+            {col.CustomLabel ?? (
+              <FieldLabel label={field && 'label' in field && field.label} unstyled />
+            )}
           </Pill>
         )
       })}

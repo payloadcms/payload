@@ -194,6 +194,20 @@ export const Posts: CollectionConfig = {
         position: 'sidebar',
       },
     },
+    {
+      name: 'disableListColumnText',
+      type: 'text',
+      admin: {
+        disableListColumn: true,
+      },
+    },
+    {
+      name: 'disableListFilterText',
+      type: 'text',
+      admin: {
+        disableListFilter: true,
+      },
+    },
   ],
   labels: {
     plural: slugPluralLabel,

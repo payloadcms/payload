@@ -125,6 +125,8 @@ export interface Upload {
   focalY?: number | null;
 }
 /**
+ * This is a custom collection description.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
@@ -165,7 +167,12 @@ export interface Post {
   defaultValueField?: string | null;
   relationship?: (string | null) | Post;
   customCell?: string | null;
+  /**
+   * This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.
+   */
   sidebarField?: string | null;
+  disableListColumnText?: string | null;
+  disableListFilterText?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -246,7 +253,13 @@ export interface CustomField {
   id: string;
   customTextServerField?: string | null;
   customTextClientField?: string | null;
+  /**
+   * Static field description.
+   */
   descriptionAsString?: string | null;
+  /**
+   * Function description
+   */
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
@@ -521,6 +534,8 @@ export interface PostsSelect<T extends boolean = true> {
   relationship?: T;
   customCell?: T;
   sidebarField?: T;
+  disableListColumnText?: T;
+  disableListFilterText?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
