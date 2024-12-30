@@ -15,6 +15,7 @@ import { InlineCodeBlock } from '../../mdx/jsxBlocks/inlineCode.js'
 import { PackageInstallOptions } from '../../mdx/jsxBlocks/packageInstallOptions.js'
 import { TextContainerBlock } from '../../mdx/jsxBlocks/TextContainer.js'
 import { TextContainerNoTrimBlock } from '../../mdx/jsxBlocks/TextContainerNoTrim.js'
+import { RestExamplesBlock } from '../../mdx/jsxBlocks/restExamples/index.js'
 
 export const postsSlug = 'posts'
 
@@ -72,6 +73,7 @@ export const PostsCollection: CollectionConfig = {
               PackageInstallOptions,
               TextContainerNoTrimBlock,
               TextContainerBlock,
+              RestExamplesBlock,
             ],
             inlineBlocks: [InlineCodeBlock],
           }),
@@ -94,6 +96,7 @@ export const PostsCollection: CollectionConfig = {
               PackageInstallOptions,
               TextContainerNoTrimBlock,
               TextContainerBlock,
+              RestExamplesBlock,
             ],
             inlineBlocks: [InlineCodeBlock],
           }),
