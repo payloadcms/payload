@@ -122,7 +122,7 @@ export const renderTable = ({
     Table: (
       <Table
         appearance={tableAppearance}
-        beforeRows={
+        columns={
           enableRowSelections
             ? [
                 {
@@ -131,11 +131,10 @@ export const renderTable = ({
                   field: null,
                   Heading: <SelectAll />,
                   renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
-                },
-              ]
-            : undefined
+                } as Column,
+              ].concat(columnState)
+            : columnState
         }
-        columns={columnState}
         data={docs}
       />
     ),

@@ -24,7 +24,7 @@ export type Props = {
   readonly data: Record<string, unknown>[]
 }
 
-export const Table: React.FC<Props> = ({ appearance, beforeRows, columns, data }) => {
+export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -40,13 +40,6 @@ export const Table: React.FC<Props> = ({ appearance, beforeRows, columns, data }
       <table cellPadding="0" cellSpacing="0">
         <thead>
           <tr>
-            {beforeRows
-              ? beforeRows.map((col, i) => (
-                  <th id={`heading-${col.accessor}`} key={i}>
-                    {col.Heading}
-                  </th>
-                ))
-              : null}
             {activeColumns.map((col, i) => (
               <th id={`heading-${col.accessor}`} key={i}>
                 {col.Heading}
@@ -58,17 +51,6 @@ export const Table: React.FC<Props> = ({ appearance, beforeRows, columns, data }
           {data &&
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
-                {beforeRows
-                  ? beforeRows.map((col, colIndex) => {
-                      const { accessor } = col
-
-                      return (
-                        <td className={`cell-${accessor}`} key={colIndex}>
-                          {col.renderedCells[rowIndex]}
-                        </td>
-                      )
-                    })
-                  : null}
                 {activeColumns.map((col, colIndex) => {
                   const { accessor } = col
 
