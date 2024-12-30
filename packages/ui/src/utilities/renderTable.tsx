@@ -91,19 +91,6 @@ export const renderTable = ({
       )
 
   const columnState = buildColumnState({
-    beforeRows: renderRowTypes
-      ? [
-          {
-            accessor: 'collection',
-            active: true,
-            field: null,
-            Heading: i18n.t('version:type'),
-            renderedCells: docs.map((_, i) => (
-              <Pill key={i}>{getTranslation(clientCollectionConfig.labels.singular, i18n)}</Pill>
-            )),
-          },
-        ]
-      : undefined,
     clientCollectionConfig,
     collectionConfig,
     columnPreferences,
@@ -117,26 +104,42 @@ export const renderTable = ({
     useAsTitle,
   })
 
+  const columnsToUse = columnState
+
+  if (renderRowTypes) {
+    columnsToUse.unshift({
+      accessor: 'collection',
+      active: true,
+      field: {
+        admin: {
+          disabled: true,
+        },
+        hidden: true,
+      },
+      Heading: i18n.t('version:type'),
+      renderedCells: docs.map((_, i) => (
+        <Pill key={i}>{getTranslation(clientCollectionConfig.labels.singular, i18n)}</Pill>
+      )),
+    } as Column)
+  }
+
+  if (enableRowSelections) {
+    columnsToUse.unshift({
+      accessor: '_select',
+      active: true,
+      field: {
+        admin: {
+          disabled: true,
+        },
+        hidden: true,
+      },
+      Heading: <SelectAll />,
+      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
+    } as Column)
+  }
+
   return {
     columnState,
-    Table: (
-      <Table
-        appearance={tableAppearance}
-        columns={
-          enableRowSelections
-            ? [
-                {
-                  accessor: '_select',
-                  active: true,
-                  field: null,
-                  Heading: <SelectAll />,
-                  renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
-                } as Column,
-              ].concat(columnState)
-            : columnState
-        }
-        data={docs}
-      />
-    ),
+    Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} />,
   }
 }
