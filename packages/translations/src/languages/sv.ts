@@ -29,7 +29,7 @@ export const svTranslations: DefaultTranslationsObject = {
       'Vänligen ange din e-postadress nedan. Du kommer att få ett e-postmeddelande med instruktioner om hur du återställer ditt lösenord.',
     forgotPasswordQuestion: 'Glömt lösenordet?',
     forgotPasswordUsernameInstructions:
-      'Ange ditt användarnamn nedan. Instruktioner om hur du återställer ditt lösenord kommer att skickas till mejladressen kopplad till ditt användarnamn.',
+      'Ange ditt användarnamn nedan. Instruktioner om hur du återställer ditt lösenord kommer att skickas till e-postadressen kopplad till ditt användarnamn.',
     generate: 'Generera',
     generateNewAPIKey: 'Generera ny API-nyckel',
     generatingNewAPIKeyWillInvalidate:
