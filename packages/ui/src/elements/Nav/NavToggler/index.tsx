@@ -40,9 +40,13 @@ export const NavToggler: React.FC<{
         // only when the user explicitly toggles the nav on desktop do we want to set the preference
         // this is because the js may open or close the nav based on the window size, routing, etc
         if (!largeBreak) {
-          await setPreference('nav', {
-            open: !navOpen,
-          })
+          await setPreference(
+            'nav',
+            {
+              open: !navOpen,
+            },
+            true,
+          )
         }
       }}
       tabIndex={tabIndex}

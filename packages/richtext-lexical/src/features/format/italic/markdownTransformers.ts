@@ -1,4 +1,4 @@
-import type { TextFormatTransformer } from '@lexical/markdown'
+import type { TextFormatTransformer } from '../../../packages/@lexical/markdown/MarkdownTransformers.js'
 
 export const ITALIC_STAR: TextFormatTransformer = {
   type: 'text-format',

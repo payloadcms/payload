@@ -1,22 +1,22 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
-import generateForgotPasswordEmail from '../email/generateForgotPasswordEmail'
-import generateVerificationEmail from '../email/generateVerificationEmail'
+import { generateForgotPasswordEmail } from '../email/generateForgotPasswordEmail'
+import { generateVerificationEmail } from '../email/generateVerificationEmail'
 
-const Users: CollectionConfig = {
+export const Users: CollectionConfig = {
   slug: 'users',
-  auth: {
-    verify: {
-      generateEmailSubject: () => 'Verify your email',
-      generateEmailHTML: generateVerificationEmail,
-    },
-    forgotPassword: {
-      generateEmailSubject: () => 'Reset your password',
-      generateEmailHTML: generateForgotPasswordEmail,
-    },
-  },
   admin: {
     useAsTitle: 'email',
+  },
+  auth: {
+    forgotPassword: {
+      generateEmailHTML: generateForgotPasswordEmail,
+      generateEmailSubject: () => 'Reset your password',
+    },
+    verify: {
+      generateEmailHTML: generateVerificationEmail,
+      generateEmailSubject: () => 'Verify your email',
+    },
   },
   fields: [
     {
@@ -25,5 +25,3 @@ const Users: CollectionConfig = {
     },
   ],
 }
-
-export default Users

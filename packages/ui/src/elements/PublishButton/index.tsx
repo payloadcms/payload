@@ -1,48 +1,68 @@
 'use client'
 
-import type { MappedComponent } from 'payload'
-
+import { useModal } from '@faceless-ui/modal'
+import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { PopupList } from '../Popup/index.js'
+import { ScheduleDrawer } from './ScheduleDrawer/index.js'
 
-export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
-  const {
-    config: {
-      routes: { api },
-      serverURL,
-    },
-  } = useConfig()
-
+export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const {
     id,
     collectionSlug,
     docConfig,
     globalSlug,
+    hasPublishedDoc,
     hasPublishPermission,
-    publishedDoc,
-    unpublishedVersions,
+    setHasPublishedDoc,
+    setUnpublishedVersionCount,
+    unpublishedVersionCount,
   } = useDocumentInfo()
 
+  const { config } = useConfig()
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
-  const { code: locale } = useLocale()
+  const { code: localeCode } = useLocale()
+  const { isModalOpen, toggleModal } = useModal()
 
-  const { t } = useTranslation()
+  const drawerSlug = `schedule-publish-${id}`
+
+  const {
+    localization,
+    routes: { api },
+    serverURL,
+  } = config
+
+  const { i18n, t } = useTranslation()
   const label = labelProp || t('version:publishChanges')
 
-  const hasNewerVersions = unpublishedVersions?.totalDocs > 0
-  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !publishedDoc)
+  const entityConfig = React.useMemo(() => {
+    if (collectionSlug) {
+      return config.collections.find(({ slug }) => slug === collectionSlug)
+    }
+
+    if (globalSlug) {
+      return config.globals.find(({ slug }) => slug === globalSlug)
+    }
+  }, [collectionSlug, globalSlug, config])
+
+  const scheduledPublishEnabled =
+    typeof entityConfig?.versions?.drafts === 'object' &&
+    entityConfig?.versions?.drafts.schedulePublish
+
+  const hasNewerVersions = unpublishedVersionCount > 0
+  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !hasPublishedDoc)
   const operation = useOperation()
 
   const forceDisable = operation === 'update' && !modified
@@ -52,7 +72,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       return
     }
 
-    const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
+    const search = `?locale=${localeCode}&depth=0&fallback-locale=null&draft=true`
     let action
     let method = 'POST'
 
@@ -75,7 +95,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id, forceDisable])
+  }, [submit, collectionSlug, globalSlug, serverURL, api, localeCode, id, forceDisable])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -92,32 +112,93 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
         _status: 'published',
       },
     })
-  }, [submit])
+
+    setUnpublishedVersionCount(0)
+    setHasPublishedDoc(true)
+  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount])
+
+  const publishSpecificLocale = useCallback(
+    (locale) => {
+      const params = qs.stringify({
+        publishSpecificLocale: locale,
+      })
+
+      const action = `${serverURL}${api}${
+        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}/${id ? `${'/' + id}` : ''}`
+      }${params ? '?' + params : ''}`
+
+      void submit({
+        action,
+        overrides: {
+          _status: 'published',
+        },
+      })
+
+      setHasPublishedDoc(true)
+    },
+    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit],
+  )
 
   if (!hasPublishPermission) {
     return null
   }
 
   return (
-    <FormSubmit
-      buttonId="action-save"
-      disabled={!canPublish}
-      onClick={publish}
-      size="medium"
-      type="button"
-    >
-      {label}
-    </FormSubmit>
+    <React.Fragment>
+      <FormSubmit
+        buttonId="action-save"
+        disabled={!canPublish}
+        onClick={publish}
+        size="medium"
+        SubMenuPopupContent={
+          localization || scheduledPublishEnabled
+            ? ({ close }) => {
+                return (
+                  <React.Fragment>
+                    {scheduledPublishEnabled && (
+                      <PopupList.ButtonGroup key="schedule-publish">
+                        <PopupList.Button onClick={() => [toggleModal(drawerSlug), close()]}>
+                          {t('version:schedulePublish')}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    )}
+                    {localization
+                      ? localization.locales.map((locale) => {
+                          const formattedLabel =
+                            typeof locale.label === 'string'
+                              ? locale.label
+                              : locale.label && locale.label[i18n?.language]
+
+                          const isActive =
+                            typeof locale === 'string'
+                              ? locale === localeCode
+                              : locale.code === localeCode
+
+                          if (isActive) {
+                            return (
+                              <PopupList.ButtonGroup key={locale.code}>
+                                <PopupList.Button
+                                  onClick={() => [publishSpecificLocale(locale.code), close()]}
+                                >
+                                  {t('version:publishIn', {
+                                    locale: formattedLabel || locale.code,
+                                  })}
+                                </PopupList.Button>
+                              </PopupList.ButtonGroup>
+                            )
+                          }
+                        })
+                      : null}
+                  </React.Fragment>
+                )
+              }
+            : undefined
+        }
+        type="button"
+      >
+        {label}
+      </FormSubmit>
+      {scheduledPublishEnabled && isModalOpen(drawerSlug) && <ScheduleDrawer slug={drawerSlug} />}
+    </React.Fragment>
   )
-}
-
-type Props = {
-  CustomComponent?: MappedComponent
-}
-
-export const PublishButton: React.FC<Props> = ({ CustomComponent }) => {
-  if (CustomComponent) {
-    return <RenderComponent mappedComponent={CustomComponent} />
-  }
-  return <DefaultPublishButton />
 }

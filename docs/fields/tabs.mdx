@@ -18,7 +18,7 @@ The Tabs Field is presentational-only and only affects the [Admin Panel](../admi
 To add a Tabs Field, set the `type` to `tabs` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyTabsField: Field = {
   // ...
@@ -50,6 +50,7 @@ Each tab must have either a `name` or `label` and the required `fields` array. Y
 | **`fields`** \*     | The fields to render within this tab.                                                                                                                                                                        |
 | **`description`**   | Optionally render a description within this tab to describe the contents of the tab itself.                                                                                                                  |
 | **`interfaceName`** | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). (`name` must be present) |
+| **`virtual`**       | Provide `true` to disable field in the database (`name` must be present). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)                    |
 
 _\* An asterisk denotes that a property is required._
 
@@ -58,7 +59,7 @@ _\* An asterisk denotes that a property is required._
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

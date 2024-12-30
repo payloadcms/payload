@@ -4,6 +4,7 @@ import type { Connect } from 'payload'
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { sql, VercelPool } from '@vercel/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import pg from 'pg'
 
 import type { VercelPostgresAdapter } from './types.js'
 
@@ -24,9 +25,30 @@ export const connect: Connect = async function connect(
 
   try {
     const logger = this.logger || false
+
+    let client: pg.Pool | VercelPool
+
+    const connectionString = this.poolOptions?.connectionString ?? process.env.POSTGRES_URL
+
+    // Use non-vercel postgres for local database
+    if (
+      !this.forceUseVercelPostgres &&
+      connectionString &&
+      ['127.0.0.1', 'localhost'].includes(new URL(connectionString).hostname)
+    ) {
+      client = new pg.Pool(
+        this.poolOptions ?? {
+          connectionString,
+        },
+      )
+    } else {
+      client = this.poolOptions ? new VercelPool(this.poolOptions) : sql
+    }
+
     // Passed the poolOptions if provided,
     // else have vercel/postgres detect the connection string from the environment
-    this.drizzle = drizzle(this.poolOptions ? new VercelPool(this.poolOptions) : sql, {
+    this.drizzle = drizzle({
+      client,
       logger,
       schema: this.schema,
     })
@@ -39,12 +61,31 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error({ err, msg: `Error: cannot connect to Postgres: ${err.message}` })
+    if (err.message?.match(/database .* does not exist/i) && !this.disableCreateDatabase) {
+      // capitalize first char of the err msg
+      this.payload.logger.info(
+        `${err.message.charAt(0).toUpperCase() + err.message.slice(1)}, creating...`,
+      )
+      const isCreated = await this.createDatabase()
+
+      if (isCreated) {
+        await this.connect(options)
+        return
+      }
+    } else {
+      this.payload.logger.error({
+        err,
+        msg: `Error: cannot connect to Postgres. Details: ${err.message}`,
+      })
+    }
+
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
     process.exit(1)
   }
+
+  await this.createExtensions()
 
   // Only push schema if not in production
   if (

@@ -11,7 +11,7 @@ export const SlateBlockquoteConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'quote',
-        slateNodes: slateNode.children,
+        slateNodes: slateNode.children!,
       }),
       direction: 'ltr',
       format: '',

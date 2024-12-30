@@ -11,6 +11,7 @@ import { blocksDoc } from './collections/Blocks/shared.js'
 import { codeDoc } from './collections/Code/shared.js'
 import { collapsibleDoc } from './collections/Collapsible/shared.js'
 import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
+import { customRowID, customTabID, nonStandardID } from './collections/CustomID/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { anotherEmailDoc, emailDoc } from './collections/Email/shared.js'
 import { groupDoc } from './collections/Group/shared.js'
@@ -34,6 +35,9 @@ import {
   collapsibleFieldsSlug,
   collectionSlugs,
   conditionalLogicSlug,
+  customIDSlug,
+  customRowIDSlug,
+  customTabIDSlug,
   dateFieldsSlug,
   emailFieldsSlug,
   groupFieldsSlug,
@@ -45,6 +49,7 @@ import {
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,
+  relationshipFieldsSlug,
   richTextFieldsSlug,
   selectFieldsSlug,
   tabsFieldsSlug,
@@ -62,21 +67,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
-  if (_payload.db.name === 'mongoose') {
-    await Promise.all(
-      _payload.config.collections.map(async (coll) => {
-        await new Promise((resolve, reject) => {
-          _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
-            if (err) {
-              reject(err)
-            }
-            resolve(true)
-          })
-        })
-      }),
-    )
-  }
-
   const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
   const pngPath = path.resolve(dirname, './uploads/payload.png')
 
@@ -339,6 +329,37 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
+  const relationshipField1 = await _payload.create({
+    collection: relationshipFieldsSlug,
+    data: {
+      text: 'Relationship 1',
+      relationship: {
+        relationTo: textFieldsSlug,
+        value: createdTextDoc.id,
+      },
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  try {
+    await _payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        text: 'Relationship 2',
+        relationToSelf: relationshipField1.id,
+        relationship: {
+          relationTo: textFieldsSlug,
+          value: createdAnotherTextDoc.id,
+        },
+      },
+      depth: 0,
+      overrideAccess: true,
+    })
+  } catch (e) {
+    console.error(e)
+  }
+
   await _payload.create({
     collection: lexicalFieldsSlug,
     data: lexicalDocWithRelId,
@@ -350,7 +371,7 @@ export const seed = async (_payload: Payload) => {
     collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical en',
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }) as any,
+      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'English text in block',
@@ -364,7 +385,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: lexicalRelationshipFieldsSlug,
     data: {
-      richText: textToLexicalJSON({ text: 'English text' }) as any,
+      richText: textToLexicalJSON({ text: 'English text' }),
     },
     depth: 0,
     overrideAccess: true,
@@ -375,7 +396,7 @@ export const seed = async (_payload: Payload) => {
     id: lexicalLocalizedDoc1.id,
     data: {
       title: 'Localized Lexical es',
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }) as any,
+      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'Spanish text in block',
@@ -391,10 +412,7 @@ export const seed = async (_payload: Payload) => {
     collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical en 2',
-      lexicalSimple: textToLexicalJSON({
-        text: 'English text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
-      }),
+
       lexicalBlocksLocalized: textToLexicalJSON({
         text: 'English text 2',
         lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
@@ -414,10 +432,7 @@ export const seed = async (_payload: Payload) => {
     id: lexicalLocalizedDoc2.id,
     data: {
       title: 'Localized Lexical es 2',
-      lexicalSimple: textToLexicalJSON({
-        text: 'Spanish text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
-      }),
+
       lexicalBlocksLocalized: textToLexicalJSON({
         text: 'Spanish text 2',
         lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
@@ -462,6 +477,45 @@ export const seed = async (_payload: Payload) => {
       text: 'text',
     },
   })
+
+  await _payload.create({
+    collection: 'LexicalInBlock',
+    data: {
+      blocks: [
+        {
+          blockType: 'lexicalInBlock2',
+          blockName: '1',
+          lexical: textToLexicalJSON({ text: '1' }),
+        },
+        {
+          blockType: 'lexicalInBlock2',
+          blockName: '2',
+          lexical: textToLexicalJSON({ text: '2' }),
+        },
+      ],
+    },
+  })
+
+  await Promise.all([
+    _payload.create({
+      collection: customIDSlug,
+      data: {
+        id: nonStandardID,
+      },
+    }),
+    _payload.create({
+      collection: customTabIDSlug,
+      data: {
+        id: customTabID,
+      },
+    }),
+    _payload.create({
+      collection: customRowIDSlug,
+      data: {
+        id: customRowID,
+      },
+    }),
+  ])
 }
 
 export async function clearAndSeedEverything(_payload: Payload) {

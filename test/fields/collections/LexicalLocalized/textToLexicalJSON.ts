@@ -1,5 +1,9 @@
 import type { SerializedRelationshipNode } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
+import type {
+  SerializedEditorState,
+  SerializedParagraphNode,
+  SerializedTextNode,
+} from '@payloadcms/richtext-lexical/lexical'
 
 import { lexicalLocalizedFieldsSlug } from '../../slugs.js'
 
@@ -9,7 +13,7 @@ export function textToLexicalJSON({
 }: {
   lexicalLocalizedRelID?: number | string
   text: string
-}) {
+}): any {
   const editorJSON: SerializedEditorState = {
     root: {
       type: 'root',
@@ -35,6 +39,7 @@ export function textToLexicalJSON({
           indent: 0,
           textFormat: 0,
           type: 'paragraph',
+          textStyle: '',
           version: 1,
         } as SerializedParagraphNode,
       ],

@@ -18,7 +18,7 @@ With the UI Field, you can:
 To add a UI Field, set the `type` to `ui` in your [Field Config](./overview):
 
 ```ts
-import type { Field } from 'payload/types'
+import type { Field } from 'payload'
 
 export const MyUIField: Field = {
   // ...
@@ -28,14 +28,14 @@ export const MyUIField: Field = {
 
 ## Config Options
 
-| Option                          | Description                                                                                                            |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **`name`** \*                   | A unique identifier for this field.                                                                                    |
-| **`label`**                     | Human-readable label for this UI field.                                                                                |
-| **`admin.components.Field`** \* | React component to be rendered for this field within the Edit View. [More](../admin/components/#field-component)    |
-| **`admin.components.Cell`**     | React component to be rendered as a Cell within collection List views. [More](../admin/components/#field-component) |
-| **`admin.disableListColumn`**   | Set `disableListColumn` to `true` to prevent the UI field from appearing in the list view column selector.             |
-| **`custom`**                    | Extension point for adding custom data (e.g. for plugins)                                                              |
+| Option                          | Description                                                                                                         |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*                   | A unique identifier for this field.                                                                                 |
+| **`label`**                     | Human-readable label for this UI field.                                                                             |
+| **`admin.components.Field`** \* | React component to be rendered for this field within the Edit View. [More](../admin/components/#field)    |
+| **`admin.components.Cell`**     | React component to be rendered as a Cell within collection List views. [More](../admin/components/#field) |
+| **`admin.disableListColumn`**   | Set `disableListColumn` to `true` to prevent the UI field from appearing in the list view column selector.          |
+| **`custom`**                    | Extension point for adding custom data (e.g. for plugins)                                                           |
 
 _\* An asterisk denotes that a property is required._
 
@@ -44,7 +44,7 @@ _\* An asterisk denotes that a property is required._
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',

@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { findVersionByIDOperation } from 'payload'
+import { findVersionByIDOperation, sanitizePopulateParam, sanitizeSelectParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
@@ -25,7 +25,9 @@ export const findVersionByID: CollectionRouteHandlerWithID = async ({
     id,
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
+    populate: sanitizePopulateParam(req.query.populate),
     req,
+    select: sanitizeSelectParam(req.query.select),
   })
 
   return Response.json(result, {

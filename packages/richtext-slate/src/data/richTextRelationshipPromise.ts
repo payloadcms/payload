@@ -1,4 +1,10 @@
-import type { PayloadRequest, RichTextAdapter, RichTextField } from 'payload'
+import type {
+  CollectionConfig,
+  PayloadRequest,
+  PopulateType,
+  RichTextAdapter,
+  RichTextField,
+} from 'payload'
 
 import type { AdapterArguments } from '../types.js'
 
@@ -16,6 +22,7 @@ type RecurseRichTextArgs = {
   draft: boolean
   field: RichTextField<any[], any, any>
   overrideAccess: boolean
+  populateArg?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
@@ -28,6 +35,7 @@ export const recurseRichText = ({
   draft,
   field,
   overrideAccess = false,
+  populateArg,
   populationPromises,
   req,
   showHiddenFields,
@@ -54,6 +62,10 @@ export const recurseRichText = ({
               key: 'value',
               overrideAccess,
               req,
+              select:
+                req.payloadAPI !== 'GraphQL'
+                  ? (populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate)
+                  : undefined,
               showHiddenFields,
             }),
           )
@@ -69,6 +81,7 @@ export const recurseRichText = ({
             draft,
             fields: field.admin.upload.collections[element.relationTo].fields,
             overrideAccess,
+            populateArg,
             populationPromises,
             req,
             showHiddenFields,
@@ -93,6 +106,10 @@ export const recurseRichText = ({
                 key: 'value',
                 overrideAccess,
                 req,
+                select:
+                  req.payloadAPI !== 'GraphQL'
+                    ? (populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate)
+                    : undefined,
                 showHiddenFields,
               }),
             )
@@ -107,6 +124,7 @@ export const recurseRichText = ({
             draft,
             fields: field.admin?.link?.fields,
             overrideAccess,
+            populateArg,
             populationPromises,
             req,
             showHiddenFields,
@@ -122,6 +140,7 @@ export const recurseRichText = ({
           draft,
           field,
           overrideAccess,
+          populateArg,
           populationPromises,
           req,
           showHiddenFields,
@@ -137,6 +156,7 @@ export const richTextRelationshipPromise = ({
   draft,
   field,
   overrideAccess,
+  populateArg,
   populationPromises,
   req,
   showHiddenFields,
@@ -149,6 +169,7 @@ export const richTextRelationshipPromise = ({
     draft,
     field,
     overrideAccess,
+    populateArg,
     populationPromises,
     req,
     showHiddenFields,

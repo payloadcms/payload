@@ -7,12 +7,12 @@ import { DatePickerField } from '../../../DatePicker/index.js'
 
 const baseClass = 'condition-value-date'
 
-export const DateField: React.FC<Props> = ({ admin, disabled, onChange, value }) => {
+export const DateField: React.FC<Props> = ({ disabled, field: { admin }, onChange, value }) => {
   const { date } = admin || {}
 
   return (
     <div className={baseClass}>
-      <DatePickerField {...date} onChange={onChange} readOnly={disabled} value={value} />
+      <DatePickerField {...date} onChange={onChange} readOnly={disabled} value={value as Date} />
     </div>
   )
 }

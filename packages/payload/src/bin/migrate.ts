@@ -32,7 +32,27 @@ type Args = {
 }
 
 export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
-  const { _: args, file, forceAcceptWarning, help } = parsedArgs
+  const { _: args, file, forceAcceptWarning: forceAcceptFromProps, help } = parsedArgs
+
+  const formattedArgs = Object.keys(parsedArgs)
+    .map((key) => {
+      const formattedKey = key.replace(/^[-_]+/, '')
+      if (!formattedKey) {
+        return null
+      }
+
+      return formattedKey
+        .split('-')
+        .map((word, index) =>
+          index === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1),
+        )
+        .join('')
+    })
+    .filter(Boolean)
+
+  const forceAcceptWarning = forceAcceptFromProps || formattedArgs.includes('forceAcceptWarning')
+  const skipEmpty = formattedArgs.includes('skipEmpty')
+
   if (help) {
     // eslint-disable-next-line no-console
     console.log(`\n\n${availableCommandsMsg}\n`) // Avoid having to init payload to get the logger
@@ -65,21 +85,6 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
     case 'migrate':
       await adapter.migrate()
       break
-    case 'migrate:status':
-      await adapter.migrateStatus()
-      break
-    case 'migrate:down':
-      await adapter.migrateDown()
-      break
-    case 'migrate:refresh':
-      await adapter.migrateRefresh()
-      break
-    case 'migrate:reset':
-      await adapter.migrateReset()
-      break
-    case 'migrate:fresh':
-      await adapter.migrateFresh({ forceAcceptWarning })
-      break
     case 'migrate:create':
       try {
         await adapter.createMigration({
@@ -87,10 +92,26 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
           forceAcceptWarning,
           migrationName: args[1],
           payload,
+          skipEmpty,
         })
       } catch (err) {
         throw new Error(`Error creating migration: ${err.message}`)
       }
+      break
+    case 'migrate:down':
+      await adapter.migrateDown()
+      break
+    case 'migrate:fresh':
+      await adapter.migrateFresh({ forceAcceptWarning })
+      break
+    case 'migrate:refresh':
+      await adapter.migrateRefresh()
+      break
+    case 'migrate:reset':
+      await adapter.migrateReset()
+      break
+    case 'migrate:status':
+      await adapter.migrateStatus()
       break
 
     default:

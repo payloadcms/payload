@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import type { AdminViewConfig } from '../../admin/views/types.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
@@ -36,10 +37,12 @@ export function iterateConfig({
     imports,
   })
 
-  typeof config.admin?.avatar === 'object' && addToImportMap(config.admin?.avatar?.Component)
+  if (typeof config.admin?.avatar === 'object') {
+    addToImportMap(config.admin?.avatar?.Component)
+  }
 
   addToImportMap(config.admin?.components?.Nav)
-
+  addToImportMap(config.admin?.components?.header)
   addToImportMap(config.admin?.components?.logout?.Button)
   addToImportMap(config.admin?.components?.graphics?.Icon)
   addToImportMap(config.admin?.components?.graphics?.Logo)

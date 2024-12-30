@@ -1,10 +1,26 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const groupSlug = 'groups'
 
 export const Group: CollectionConfig = {
   slug: groupSlug,
   fields: [
+    {
+      name: 'groupLocalizedRow',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
     {
       name: 'groupLocalized',
       type: 'group',
@@ -16,6 +32,7 @@ export const Group: CollectionConfig = {
       ],
       localized: true,
     },
+
     {
       name: 'group',
       type: 'group',

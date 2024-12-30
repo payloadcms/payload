@@ -1,0 +1,8 @@
+@layer payload-default {
+  .form-header {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) * 0.5);
+    margin-bottom: var(--base);
+  }
+}

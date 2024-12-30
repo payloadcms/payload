@@ -3,9 +3,8 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
-import { CustomIdRow } from './collections/CustomIdRow.js'
-import { CustomIdTab } from './collections/CustomIdTab.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
@@ -16,6 +15,7 @@ import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
+import { CollectionNotInView } from './collections/NotInView.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
 import { Users } from './collections/Users.js'
@@ -26,6 +26,8 @@ import { GlobalGroup1A } from './globals/Group1A.js'
 import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
+import { GlobalNotInView } from './globals/NotInView.js'
+import { Settings } from './globals/Settings.js'
 import { seed } from './seed.js'
 import {
   customAdminRoutes,
@@ -33,7 +35,10 @@ import {
   customParamViewPath,
   customRootViewMetaTitle,
   customViewPath,
+  protectedCustomNestedViewPath,
+  publicCustomViewPath,
 } from './shared.js'
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -47,11 +52,16 @@ export default buildConfigWithDefaults({
       ],
       afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
+      graphics: {
+        Logo: '/components/graphics/Logo.js#Logo',
+        Icon: '/components/graphics/Icon.js#Icon',
+      },
+      header: ['/components/CustomHeader/index.js#CustomHeader'],
       logout: {
         Button: '/components/Logout/index.js#Logout',
       },
       providers: [
-        '/components/CustomProvider/index.js#CustomProvider',
+        '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
       ],
       views: {
@@ -77,6 +87,17 @@ export default buildConfigWithDefaults({
           Component: '/components/views/CustomView/index.js#CustomView',
           exact: true,
           path: customViewPath,
+          strict: true,
+        },
+        ProtectedCustomNestedView: {
+          Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
+          exact: true,
+          path: protectedCustomNestedViewPath,
+        },
+        PublicCustomView: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          exact: true,
+          path: publicCustomViewPath,
           strict: true,
         },
         CustomViewWithParam: {
@@ -122,6 +143,7 @@ export default buildConfigWithDefaults({
     Posts,
     Users,
     CollectionHidden,
+    CollectionNotInView,
     CollectionNoApiView,
     CustomViews1,
     CustomViews2,
@@ -131,18 +153,19 @@ export default buildConfigWithDefaults({
     CollectionGroup2A,
     CollectionGroup2B,
     Geo,
-    CustomIdTab,
-    CustomIdRow,
     DisableDuplicate,
+    BaseListFilter,
   ],
   globals: [
     GlobalHidden,
+    GlobalNotInView,
     GlobalNoApiView,
     Global,
     CustomGlobalViews1,
     CustomGlobalViews2,
     GlobalGroup1A,
     GlobalGroup1B,
+    Settings,
   ],
   i18n: {
     translations: {

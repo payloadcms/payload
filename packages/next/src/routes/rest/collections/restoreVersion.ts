@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { restoreVersionOperation } from 'payload'
+import { restoreVersionOperation, sanitizePopulateParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
@@ -27,6 +27,7 @@ export const restoreVersion: CollectionRouteHandlerWithID = async ({
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true' ? true : undefined,
+    populate: sanitizePopulateParam(req.query.populate),
     req,
   })
 

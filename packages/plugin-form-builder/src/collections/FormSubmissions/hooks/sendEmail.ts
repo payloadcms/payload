@@ -22,7 +22,7 @@ export const sendEmail = async (
 
     const { form: formID, submissionData } = data || {}
 
-    const { beforeEmail, formOverrides } = formConfig || {}
+    const { beforeEmail, defaultToEmail, formOverrides } = formConfig || {}
 
     try {
       const form = await payload.findByID({
@@ -41,11 +41,13 @@ export const sendEmail = async (
               bcc: emailBCC,
               cc: emailCC,
               emailFrom,
-              emailTo,
+              emailTo: emailToFromConfig,
               message,
               replyTo: emailReplyTo,
               subject,
             } = email
+
+            const emailTo = emailToFromConfig || defaultToEmail || payload.email.defaultFromAddress
 
             const to = replaceDoubleCurlys(emailTo, submissionData)
             const cc = emailCC ? replaceDoubleCurlys(emailCC, submissionData) : ''
@@ -85,9 +87,8 @@ export const sendEmail = async (
               return emailPromise
             } catch (err: unknown) {
               payload.logger.error({
-                err: `Error while sending email to address: ${to}. Email not sent: ${JSON.stringify(
-                  err,
-                )}`,
+                err,
+                msg: `Error while sending email to address: ${to}. Email not sent.`,
               })
             }
           }),
@@ -97,7 +98,7 @@ export const sendEmail = async (
       }
     } catch (err: unknown) {
       const msg = `Error while sending one or more emails in form submission id: ${formSubmissionID}.`
-      payload.logger.error({ err: msg })
+      payload.logger.error({ err, msg })
     }
   }
 

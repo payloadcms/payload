@@ -14,10 +14,6 @@ const reduceToIDs = (options) =>
 
 const optionsReducer = (state: Option[], action: Action): Option[] => {
   switch (action.type) {
-    case 'CLEAR': {
-      return action.required ? [] : [{ label: action.i18n.t('general:none'), value: 'null' }]
-    }
-
     case 'ADD': {
       const { collection, data, hasMultipleRelations, i18n, relation } = action
 
@@ -77,6 +73,10 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
       }
 
       return newOptions
+    }
+
+    case 'CLEAR': {
+      return action.required ? [] : [{ label: action.i18n.t('general:none'), value: 'null' }]
     }
 
     default: {

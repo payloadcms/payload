@@ -16,7 +16,7 @@ export const redirectsPlugin =
         pluginConfig?.redirectTypes?.includes(option.value),
       ),
       required: true,
-      ...(pluginConfig?.redirectTypeFieldOverride || {}),
+      ...((pluginConfig?.redirectTypeFieldOverride || {}) as SelectField),
     }
 
     const defaultFields: Field[] = [

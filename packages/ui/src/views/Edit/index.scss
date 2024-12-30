@@ -1,0 +1,23 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .collection-edit {
+    width: 100%;
+
+    &__form {
+      height: 100%;
+    }
+
+    &__auth {
+      margin-bottom: base(1.6);
+      border-radius: var(--style-radius-s);
+    }
+
+    @include small-break {
+      &__auth {
+        margin-top: 0;
+        margin-bottom: var(--base);
+      }
+    }
+  }
+}

@@ -4,6 +4,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { TextField } from 'payload'
 
+import { v4 as uuid } from 'uuid'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
@@ -29,6 +31,16 @@ export default buildConfigWithDefaults({
           required: true,
         },
         {
+          name: 'hasTransaction',
+          type: 'checkbox',
+          hooks: {
+            beforeChange: [({ req }) => !!req.transactionID],
+          },
+          admin: {
+            readOnly: true,
+          },
+        },
+        {
           name: 'throwAfterChange',
           type: 'checkbox',
           defaultValue: false,
@@ -41,6 +53,31 @@ export default buildConfigWithDefaults({
               },
             ],
           },
+        },
+        {
+          name: 'arrayWithIDs',
+          type: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'blocksWithIDs',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
         },
       ],
       hooks: {
@@ -90,6 +127,11 @@ export default buildConfigWithDefaults({
             { value: 'option1', label: 'Option 1' },
             { value: 'default', label: 'Default' },
           ],
+        },
+        {
+          name: 'point',
+          type: 'point',
+          defaultValue: [10, 20],
         },
       ],
     },
@@ -274,6 +316,153 @@ export default buildConfigWithDefaults({
       versions: {
         drafts: true,
       },
+    },
+    {
+      slug: 'places',
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'fields-persistance',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          virtual: true,
+        },
+        {
+          name: 'textHooked',
+          type: 'text',
+          virtual: true,
+          hooks: { afterRead: [() => 'hooked'] },
+        },
+        {
+          name: 'array',
+          type: 'array',
+          virtual: true,
+          fields: [],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              type: 'text',
+              name: 'textWithinRow',
+              virtual: true,
+            },
+          ],
+        },
+        {
+          type: 'collapsible',
+          fields: [
+            {
+              type: 'text',
+              name: 'textWithinCollapsible',
+              virtual: true,
+            },
+          ],
+          label: 'Colllapsible',
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'tab',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'textWithinTabs',
+                  virtual: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'custom-ids',
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+          admin: {
+            readOnly: true,
+          },
+          hooks: {
+            beforeChange: [
+              ({ value, operation }) => {
+                if (operation === 'create') {
+                  return uuid()
+                }
+                return value
+              },
+            ],
+          },
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      versions: { drafts: true },
+    },
+    {
+      slug: 'fake-custom-ids',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'id',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'myTab',
+              fields: [
+                {
+                  name: 'id',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'relationships-migration',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'default-values',
+          name: 'relationship',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['default-values'],
+          name: 'relationship_2',
+        },
+      ],
+      versions: true,
     },
   ],
   globals: [

@@ -22,6 +22,7 @@ type ProcessMultipart = (args: {
 export const processMultipart: ProcessMultipart = async ({ options, request }) => {
   let parsingRequest = true
 
+  let shouldAbortProccessing = false
   let fileCount = 0
   let filesCompleted = 0
   let allFilesHaveResolved: (value?: unknown) => void
@@ -42,13 +43,15 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     headersObject[name] = value
   })
 
-  function abortAndDestroyFile(file: Readable, err: APIError) {
-    file.destroy()
-    parsingRequest = false
-    failedResolvingFiles(err)
-  }
+  const reader = request.body.getReader()
 
   const busboy = Busboy({ ...options, headers: headersObject })
+
+  function abortAndDestroyFile(file: Readable, err: APIError) {
+    file.destroy()
+    shouldAbortProccessing = true
+    failedResolvingFiles(err)
+  }
 
   // Build multipart req.body fields
   busboy.on('field', (field, val) => {
@@ -136,7 +139,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
             mimetype: mime,
             size,
             tempFilePath: getFilePath(),
-            truncated: Boolean('truncated' in file && file.truncated),
+            truncated: Boolean('truncated' in file && file.truncated) || false,
           },
           options,
         ),
@@ -164,8 +167,6 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     uploadTimer.set()
   })
 
-  // TODO: Valid eslint error - this will likely be a floating promise. Evaluate if we need to handle this differently.
-
   busboy.on('finish', async () => {
     debugLog(options, `Busboy finished parsing request.`)
     if (options.parseNested) {
@@ -190,14 +191,10 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     'error',
     (err = new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)) => {
       debugLog(options, `Busboy error`)
-      parsingRequest = false
       throw err
     },
   )
 
-  const reader = request.body.getReader()
-
-  // Start parsing request
   while (parsingRequest) {
     const { done, value } = await reader.read()
 
@@ -205,7 +202,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       parsingRequest = false
     }
 
-    if (value) {
+    if (value && !shouldAbortProccessing) {
       busboy.write(value)
     }
   }

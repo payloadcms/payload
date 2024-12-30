@@ -4,7 +4,6 @@ import type { HiddenFieldProps } from 'payload'
 
 import React, { useEffect } from 'react'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 
@@ -13,17 +12,10 @@ import { withCondition } from '../../forms/withCondition/index.js'
  * For example, this sets the `ìd` property of a block in the Blocks field.
  */
 const HiddenFieldComponent: React.FC<HiddenFieldProps> = (props) => {
-  const {
-    disableModifyingForm = true,
-    field: { name, _path: pathFromProps },
-    forceUsePathFromProps,
-    value: valueFromProps,
-  } = props
+  const { disableModifyingForm = true, path, value: valueFromProps } = props
 
-  const { path: pathFromContext } = useFieldProps()
-
-  const { path, setValue, value } = useField({
-    path: (!forceUsePathFromProps ? pathFromContext : null) || pathFromProps || name,
+  const { setValue, value } = useField({
+    path,
   })
 
   useEffect(() => {

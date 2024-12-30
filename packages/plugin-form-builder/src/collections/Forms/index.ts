@@ -138,9 +138,12 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
     {
       name: 'emails',
       type: 'array',
+      access: {
+        read: ({ req: { user } }) => !!user,
+      },
       admin: {
         description:
-          "Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}.",
+          "Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.",
       },
       fields: [
         {

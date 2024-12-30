@@ -5,6 +5,7 @@ import type {
   ImageSize,
   PayloadRequest,
   TypeWithID,
+  UploadCollectionSlug,
 } from 'payload'
 
 export interface File {
@@ -79,7 +80,7 @@ export interface CollectionOptions {
 }
 
 export interface PluginOptions {
-  collections: Record<string, CollectionOptions>
+  collections: Partial<Record<UploadCollectionSlug, CollectionOptions>>
   /**
    * Whether or not to enable the plugin
    *

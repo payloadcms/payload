@@ -46,17 +46,13 @@ describe('Point', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'fieldsPointTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
-    })
+
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsPointTest',
+      snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 

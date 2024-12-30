@@ -5,11 +5,19 @@ import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
-import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../types.js'
+import type {
+  CliArgs,
+  DbDetails,
+  PackageManager,
+  ProjectExample,
+  ProjectTemplate,
+} from '../types.js'
 
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
+import { configurePluginProject } from './configure-plugin-project.js'
+import { downloadExample } from './download-example.js'
 import { downloadTemplate } from './download-template.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -52,15 +60,24 @@ async function installDeps(args: {
   }
 }
 
-export async function createProject(args: {
-  cliArgs: CliArgs
-  dbDetails?: DbDetails
-  packageManager: PackageManager
-  projectDir: string
-  projectName: string
-  template: ProjectTemplate
-}): Promise<void> {
-  const { cliArgs, dbDetails, packageManager, projectDir, projectName, template } = args
+type TemplateOrExample =
+  | {
+      example: ProjectExample
+    }
+  | {
+      template: ProjectTemplate
+    }
+
+export async function createProject(
+  args: {
+    cliArgs: CliArgs
+    dbDetails?: DbDetails
+    packageManager: PackageManager
+    projectDir: string
+    projectName: string
+  } & TemplateOrExample,
+): Promise<void> {
+  const { cliArgs, dbDetails, packageManager, projectDir, projectName } = args
 
   if (cliArgs['--dry-run']) {
     debug(`Dry run: Creating project in ${chalk.green(projectDir)}`)
@@ -68,6 +85,12 @@ export async function createProject(args: {
   }
 
   await createOrFindProjectDir(projectDir)
+
+  if (cliArgs['--local-example']) {
+    // Copy example from local path. For development purposes.
+    const localExample = path.resolve(dirname, '../../../../examples/', cliArgs['--local-example'])
+    await fse.copy(localExample, projectDir)
+  }
 
   if (cliArgs['--local-template']) {
     // Copy template from local path. For development purposes.
@@ -77,15 +100,26 @@ export async function createProject(args: {
       cliArgs['--local-template'],
     )
     await fse.copy(localTemplate, projectDir)
-  } else if ('url' in template) {
-    let templateUrl = template.url
-    if (cliArgs['--template-branch']) {
-      templateUrl = `${template.url}#${cliArgs['--template-branch']}`
-      debug(`Using template url: ${templateUrl}`)
+  } else if ('template' in args && 'url' in args.template) {
+    const { template } = args
+    if (cliArgs['--branch']) {
+      template.url = `${template.url.split('#')?.[0]}#${cliArgs['--branch']}`
     }
+
     await downloadTemplate({
-      name: template.name,
-      branch: 'beta',
+      debug: cliArgs['--debug'],
+      projectDir,
+      template,
+    })
+  } else if ('example' in args && 'url' in args.example) {
+    const { example } = args
+    if (cliArgs['--branch']) {
+      example.url = `${example.url.split('#')?.[0]}#${cliArgs['--branch']}`
+    }
+
+    await downloadExample({
+      debug: cliArgs['--debug'],
+      example,
       projectDir,
     })
   }
@@ -94,14 +128,22 @@ export async function createProject(args: {
   spinner.start('Checking latest Payload version...')
 
   await updatePackageJSON({ projectDir, projectName })
-  spinner.message('Configuring Payload...')
-  await configurePayloadConfig({
-    dbType: dbDetails?.type,
-    projectDirOrConfigPath: { projectDir },
-  })
+
+  if ('template' in args) {
+    if (args.template.type === 'plugin') {
+      spinner.message('Configuring Plugin...')
+      configurePluginProject({ projectDirPath: projectDir, projectName })
+    } else {
+      spinner.message('Configuring Payload...')
+      await configurePayloadConfig({
+        dbType: dbDetails?.type,
+        projectDirOrConfigPath: { projectDir },
+      })
+    }
+  }
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
-  const lockPath = path.resolve(projectDir, 'yarn.lock')
+  const lockPath = path.resolve(projectDir, 'pnpm-lock.yaml')
   if (fse.existsSync(lockPath)) {
     await fse.remove(lockPath)
   }

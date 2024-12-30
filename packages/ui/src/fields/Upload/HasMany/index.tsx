@@ -11,6 +11,8 @@ import { UploadCard } from '../UploadCard/index.js'
 
 const baseClass = 'upload upload--has-many'
 
+import type { ReloadDoc } from '../types.js'
+
 import './index.scss'
 
 type Props = {
@@ -23,10 +25,12 @@ type Props = {
   readonly onRemove?: (value) => void
   readonly onReorder?: (value) => void
   readonly readonly?: boolean
+  readonly reloadDoc: ReloadDoc
   readonly serverURL: string
 }
 export function UploadComponentHasMany(props: Props) {
-  const { className, fileDocs, isSortable, onRemove, onReorder, readonly, serverURL } = props
+  const { className, fileDocs, isSortable, onRemove, onReorder, readonly, reloadDoc, serverURL } =
+    props
 
   const moveRow = React.useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
@@ -62,8 +66,17 @@ export function UploadComponentHasMany(props: Props) {
       >
         {fileDocs.map(({ relationTo, value }, index) => {
           const id = String(value.id)
+          const url: string = value.thumbnailURL || value.url
+          let src: string
+
+          try {
+            src = new URL(url, serverURL).toString()
+          } catch {
+            src = `${serverURL}${url}`
+          }
+
           return (
-            <DraggableSortableItem disabled={!isSortable} id={id} key={id}>
+            <DraggableSortableItem disabled={!isSortable || readonly} id={id} key={id}>
               {(draggableSortableItemProps) => (
                 <div
                   className={[
@@ -80,7 +93,7 @@ export function UploadComponentHasMany(props: Props) {
                   }}
                 >
                   <UploadCard size="small">
-                    {isSortable && draggableSortableItemProps && (
+                    {draggableSortableItemProps && (
                       <div
                         className={`${baseClass}__drag`}
                         {...draggableSortableItemProps.attributes}
@@ -100,7 +113,8 @@ export function UploadComponentHasMany(props: Props) {
                       id={id}
                       mimeType={value?.mimeType as string}
                       onRemove={() => removeItem(index)}
-                      src={`${serverURL}${value.url}`}
+                      reloadDoc={reloadDoc}
+                      src={src}
                       withMeta={false}
                       x={value?.width as number}
                       y={value?.height as number}

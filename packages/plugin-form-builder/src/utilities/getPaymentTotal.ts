@@ -28,16 +28,16 @@ export const getPaymentTotal = (
               total += valueToUse
               break
             }
-            case 'subtract': {
-              total -= valueToUse
+            case 'divide': {
+              total /= valueToUse
               break
             }
             case 'multiply': {
               total *= valueToUse
               break
             }
-            case 'divide': {
-              total /= valueToUse
+            case 'subtract': {
+              total -= valueToUse
               break
             }
             default: {

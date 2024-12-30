@@ -67,11 +67,11 @@ type ActionsProps = {
   readonly className?: string
 }
 export function Actions({ className }: ActionsProps) {
-  const { config } = useConfig()
+  const { getEntityConfig } = useConfig()
   const { t } = useTranslation()
   const { collectionSlug, hasPublishPermission, hasSavePermission, saveAllDocs } = useFormsManager()
 
-  const collectionConfig = config.collections.find((c) => c.slug === collectionSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   return (
     <div className={[`${baseClass}__buttons`, className].filter(Boolean).join(' ')}>

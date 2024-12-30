@@ -1,6 +1,8 @@
 'use client'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
+import { useConfig } from '../Config/index.js'
+
 export type Theme = 'dark' | 'light'
 
 export type ThemeContext = {
@@ -55,20 +57,26 @@ export const defaultTheme = 'light'
 
 export const ThemeProvider: React.FC<{
   children?: React.ReactNode
-  cookiePrefix?: string
   theme?: Theme
-}> = ({ children, cookiePrefix, theme: initialTheme }) => {
-  const cookieKey = `${cookiePrefix || 'payload'}-theme`
+}> = ({ children, theme: initialTheme }) => {
+  const { config } = useConfig()
+
+  const preselectedTheme = config.admin.theme
+  const cookieKey = `${config.cookiePrefix || 'payload'}-theme`
 
   const [theme, setThemeState] = useState<Theme>(initialTheme || defaultTheme)
 
   const [autoMode, setAutoMode] = useState<boolean>()
 
   useEffect(() => {
+    if (preselectedTheme !== 'all') {
+      return
+    }
+
     const { theme, themeFromCookies } = getTheme(cookieKey)
     setThemeState(theme)
     setAutoMode(!themeFromCookies)
-  }, [cookieKey])
+  }, [preselectedTheme, cookieKey])
 
   const setTheme = useCallback(
     (themeToSet: 'auto' | Theme) => {

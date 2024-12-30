@@ -1,31 +1,44 @@
-import type { Where } from 'payload'
+import type { JoinQuery, Where } from 'payload'
 
 import httpStatus from 'http-status'
-import { findOperation } from 'payload'
+import {
+  findOperation,
+  sanitizeJoinParams,
+  sanitizePopulateParam,
+  sanitizeSelectParam,
+} from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-
 export const find: CollectionRouteHandler = async ({ collection, req }) => {
-  const { depth, draft, limit, page, sort, where } = req.query as {
-    depth?: string
-    draft?: string
-    limit?: string
-    page?: string
-    sort?: string
-    where?: Where
-  }
+  const { depth, draft, joins, limit, page, pagination, populate, select, sort, where } =
+    req.query as {
+      depth?: string
+      draft?: string
+      joins?: JoinQuery
+      limit?: string
+      page?: string
+      pagination?: string
+      populate?: Record<string, unknown>
+      select?: Record<string, unknown>
+      sort?: string
+      where?: Where
+    }
 
   const result = await findOperation({
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: draft === 'true',
+    joins: sanitizeJoinParams(joins),
     limit: isNumber(limit) ? Number(limit) : undefined,
     page: isNumber(page) ? Number(page) : undefined,
+    pagination: pagination === 'false' ? false : undefined,
+    populate: sanitizePopulateParam(populate),
     req,
-    sort,
+    select: sanitizeSelectParam(select),
+    sort: typeof sort === 'string' ? sort.split(',') : undefined,
     where,
   })
 

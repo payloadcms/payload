@@ -5,7 +5,7 @@ import React from 'react'
 
 import './index.scss'
 
-export interface CodeCellProps extends DefaultCellComponentProps<string, CodeFieldClient> {
+export interface CodeCellProps extends DefaultCellComponentProps<CodeFieldClient> {
   readonly nowrap?: boolean
 }
 

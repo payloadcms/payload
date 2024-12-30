@@ -4,7 +4,7 @@ import type {
   SerializedTableRowNode as _SerializedTableRowNode,
 } from '@lexical/table'
 import type { Spread } from 'lexical'
-import type { Config, Field } from 'payload'
+import type { Config, Field, FieldSchemaMap } from 'payload'
 
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { sanitizeFields } from 'payload'
@@ -12,6 +12,7 @@ import { sanitizeFields } from 'payload'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/html/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
+import { TableMarkdownTransformer } from '../markdownTransformer.js'
 
 const fields: Field[] = [
   {
@@ -62,12 +63,15 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#TableFeatureClient',
       generateSchemaMap: () => {
-        const schemaMap = new Map<string, Field[]>()
+        const schemaMap: FieldSchemaMap = new Map()
 
-        schemaMap.set('fields', sanitizedFields)
+        schemaMap.set('fields', {
+          fields: sanitizedFields,
+        })
 
         return schemaMap
       },
+      markdownTransformers: [TableMarkdownTransformer],
       nodes: [
         createNode({
           converters: {
@@ -138,8 +142,8 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
                 const backgroundColor = node.backgroundColor
                   ? `background-color: ${node.backgroundColor};`
                   : ''
-                const colSpan = node.colSpan > 1 ? `colspan="${node.colSpan}"` : ''
-                const rowSpan = node.rowSpan > 1 ? `rowspan="${node.rowSpan}"` : ''
+                const colSpan = node.colSpan && node.colSpan > 1 ? `colspan="${node.colSpan}"` : ''
+                const rowSpan = node.rowSpan && node.rowSpan > 1 ? `rowspan="${node.rowSpan}"` : ''
 
                 return `<${tagName} class="lexical-table-cell ${headerStateClass}" style="border: 1px solid #ccc; padding: 8px; ${backgroundColor}" ${colSpan} ${rowSpan}>${childrenText}</${tagName}>`
               },

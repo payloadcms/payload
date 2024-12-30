@@ -141,8 +141,8 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   line-height: base(1);
   padding: base(0.4) base(0.75);
   -webkit-appearance: none;
-  transition-property: border, box-shadow;
-  transition-duration: 100ms;
+  transition-property: border, box-shadow, background-color;
+  transition-duration: 100ms, 100ms, 500ms;
   transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
   &[data-rtl='true'] {

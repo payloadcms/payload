@@ -1,9 +1,10 @@
-import type { PaginatedDocs, SanitizedCollectionConfig } from 'payload'
+import type { PaginatedDocs, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import type { CompareOption } from '../Default/types.js'
 
 export type Props = {
   baseURL: string
+  draftsEnabled?: boolean
   latestDraftVersion?: string
   latestPublishedVersion?: string
   onChange: (val: CompareOption) => void

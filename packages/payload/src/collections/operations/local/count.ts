@@ -1,5 +1,5 @@
-import type { CollectionSlug, Payload, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type { Document, PayloadRequest, Where } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -15,11 +15,12 @@ export type Options<TSlug extends CollectionSlug> = {
   disableErrors?: boolean
   locale?: TypedLocale
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   user?: Document
   where?: Where
 }
 
+// eslint-disable-next-line no-restricted-exports
 export default async function countLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,

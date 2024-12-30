@@ -10,6 +10,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "missing": {
+          "type": "string"
+        },
         "almostThere": {
           "type": "string"
         },
@@ -79,7 +82,8 @@
         "noImage",
         "checksPassing",
         "preview",
-        "previewDescription"
+        "previewDescription",
+        "missing"
       ]
     }
   },

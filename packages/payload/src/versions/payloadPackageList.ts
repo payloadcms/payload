@@ -11,7 +11,7 @@ export const PAYLOAD_PACKAGE_LIST = [
   '@payloadcms/live-preview',
   '@payloadcms/next/utilities',
   '@payloadcms/plugin-cloud-storage',
-  '@payloadcms/plugin-cloud',
+  '@payloadcms/payload-cloud',
   '@payloadcms/plugin-form-builder',
   '@payloadcms/plugin-nested-docs',
   '@payloadcms/plugin-redirects',

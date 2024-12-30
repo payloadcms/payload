@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload'
+import type { Payload } from 'payload'
 
 import mongoose from 'mongoose'
 
@@ -7,8 +7,8 @@ import type { GlobalModel } from '../types.js'
 import { getBuildQueryPlugin } from '../queries/buildQuery.js'
 import { buildSchema } from './buildSchema.js'
 
-export const buildGlobalModel = (config: SanitizedConfig): GlobalModel | null => {
-  if (config.globals && config.globals.length > 0) {
+export const buildGlobalModel = (payload: Payload): GlobalModel | null => {
+  if (payload.config.globals && payload.config.globals.length > 0) {
     const globalsSchema = new mongoose.Schema(
       {},
       { discriminatorKey: 'globalType', minimize: false, timestamps: true },
@@ -18,8 +18,8 @@ export const buildGlobalModel = (config: SanitizedConfig): GlobalModel | null =>
 
     const Globals = mongoose.model('globals', globalsSchema, 'globals') as unknown as GlobalModel
 
-    Object.values(config.globals).forEach((globalConfig) => {
-      const globalSchema = buildSchema(config, globalConfig.fields, {
+    Object.values(payload.config.globals).forEach((globalConfig) => {
+      const globalSchema = buildSchema(payload, globalConfig.fields, {
         options: {
           minimize: false,
         },

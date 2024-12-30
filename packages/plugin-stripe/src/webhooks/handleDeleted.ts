@@ -5,7 +5,7 @@ type HandleDeleted = (
     resourceType: string
     syncConfig: SanitizedStripePluginConfig['sync'][0]
   } & Parameters<StripeWebhookHandler>[0],
-) => void
+) => Promise<void>
 
 export const handleDeleted: HandleDeleted = async (args) => {
   const { event, payload, pluginConfig, resourceType, syncConfig } = args

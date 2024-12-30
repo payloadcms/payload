@@ -11,7 +11,8 @@ export function transformExtraFields(
         config: SanitizedConfig
         defaultFields: FieldAffectingData[]
       }) => (Field | FieldAffectingData)[])
-    | Field[],
+    | Field[]
+    | null,
   config: SanitizedConfig,
   enabledCollections?: CollectionSlug[],
   disabledCollections?: CollectionSlug[],

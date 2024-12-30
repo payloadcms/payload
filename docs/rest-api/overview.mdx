@@ -18,6 +18,8 @@ All Payload API routes are mounted and prefixed to your config's `routes.api` UR
 - [depth](../queries/depth) - automatically populates relationships and uploads
 - [locale](/docs/configuration/localization#retrieving-localized-docs) - retrieves document(s) in a specific locale
 - [fallback-locale](/docs/configuration/localization#retrieving-localized-docs) - specifies a fallback locale if no locale value exists
+- [select](../queries/select) - specifies which fields to include to the result
+- [populate](../queries/select#populate) - specifies which fields to include to the result from populated documents
 
 ## Collections
 
@@ -48,29 +50,16 @@ Note: Collection slugs must be formatted in kebab-case
             updatedAt: "2023-04-27T11:27:32.419Z",
           },
         },
-        drawerContent: (
-          <>
-            <h6>Additional <code>find</code> query parameters</h6>
-            The <code>find</code> endpoint supports the following additional query parameters:
-            <ul>
-              <li>
-                <a href="/docs/queries/overview#sort">sort</a> - sort by field
-              </li>
-              <li>
-                <a href="/docs/queries/overview">where</a> - pass a where query to constrain returned
-                documents
-              </li>
-              <li>
-                <a href="/docs/queries/pagination#pagination-controls">limit</a> - limit the returned
-                documents to a certain number
-              </li>
-              <li>
-                <a href="/docs/queries/pagination#pagination-controls">page</a> - get a specific page of
-                documents
-              </li>
-            </ul>
-          </>
-        ),
+        drawerContent: `
+#### Additional \`find\` query parameters
+
+The \`find\` endpoint supports the following additional query parameters:
+
+-  [sort](/docs/queries/overview#sort) - sort by field
+-  [where](/docs/queries/overview) - pass a where query to constrain returned documents
+-  [limit](/docs/queries/pagination#pagination-controls) - limit the returned documents to a certain number
+-  [page](/docs/queries/pagination#pagination-controls) - get a specific page of documents
+        `
       },
     },
     {
@@ -499,7 +488,7 @@ Globals cannot be created or deleted, so there are only two REST endpoints opene
 
 ## Preferences
 
-In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/overview#preferences) for data specific to the authenticated user.
+In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/preferences) for data specific to the authenticated user.
 
 <RestExamples
   data={[
@@ -573,6 +562,11 @@ In addition to the dynamically generated endpoints above Payload also has REST e
 
 Additional REST API endpoints can be added to your application by providing an array of `endpoints` in various places within a Payload Config. Custom endpoints are useful for adding additional middleware on existing routes or for building custom functionality into Payload apps and plugins. Endpoints can be added at the top of the Payload Config, `collections`, and `globals` and accessed respective of the api and slugs you have configured.
 
+<Banner type="warning">
+  Custom endpoints are not authenticated by default. You are responsible for securing your own endpoints.
+</Banner>
+
+
 Each endpoint object needs to have:
 
 | Property      | Description                                                                                                                                                                                                                                                |
@@ -586,7 +580,7 @@ Each endpoint object needs to have:
 Example:
 
 ```ts
-import { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 // a collection of 'orders' with an additional route for tracking details, reachable at /api/orders/:id/tracking
 export const Orders: CollectionConfig = {
@@ -600,7 +594,7 @@ export const Orders: CollectionConfig = {
       path: '/:id/tracking',
       method: 'get',
       handler: async (req) => {
-        const tracking = await getTrackingInfo(req.params.id)
+        const tracking = await getTrackingInfo(req.routeParams.id)
 
         if (!tracking) {
           return Response.json({ error: 'not found' }, { status: 404})
@@ -629,6 +623,22 @@ export const Orders: CollectionConfig = {
           message: 'successfully updated tracking info'
         })
       }
+    },
+    {
+      path: '/:id/forbidden',
+      method: 'post',
+      handler: async (req) => {
+        // this is an example of an authenticated endpoint
+        if (!req.user) {
+          return Response.json({ error: 'forbidden' }, { status: 403 })
+        }
+
+        // do something
+
+        return Response.json({
+          message: 'successfully updated tracking info'
+        })
+      }
     }
   ],
   // highlight-end
@@ -636,7 +646,7 @@ export const Orders: CollectionConfig = {
 ```
 
 <Banner>
-  <strong>Note:</strong>
+  **Note:**
   **req** will have the **payload** object and can be used inside your endpoint handlers for making calls like req.payload.find() that will make use of [Access Control](../access-control/overview) and [Hooks](../hooks/overview).
 </Banner>
 

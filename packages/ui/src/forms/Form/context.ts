@@ -1,4 +1,6 @@
 'use client'
+import type { RenderedField } from 'payload'
+
 import { createContext, useContext } from 'react'
 import {
   createContext as createSelectorContext,
@@ -15,6 +17,8 @@ const ProcessingContext = createContext(false)
 const ModifiedContext = createContext(false)
 const InitializingContext = createContext(false)
 const FormFieldsContext = createSelectorContext<FormFieldsContextType>([{}, () => null])
+
+export type RenderedFieldSlots = Map<string, RenderedField>
 
 /**
  * Get the state of the form, can be used to submit & validate the form.

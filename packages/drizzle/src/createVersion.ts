@@ -1,4 +1,4 @@
-import type { CreateVersionArgs, PayloadRequest, TypeWithID, TypeWithVersion } from 'payload'
+import type { CreateVersionArgs, TypeWithID, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload'
@@ -7,18 +7,24 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
+import { getTransaction } from './utilities/getTransaction.js'
 
 export async function createVersion<T extends TypeWithID>(
   this: DrizzleAdapter,
   {
     autosave,
     collectionSlug,
+    createdAt,
     parent,
-    req = {} as PayloadRequest,
+    publishedLocale,
+    req,
+    select,
+    snapshot,
+    updatedAt,
     versionData,
   }: CreateVersionArgs<T>,
 ) {
-  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
+  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
   const defaultTableName = toSnakeCase(collection.slug)
 
@@ -29,18 +35,25 @@ export async function createVersion<T extends TypeWithID>(
     delete version.id
   }
 
+  const data: Record<string, unknown> = {
+    autosave,
+    createdAt,
+    latest: true,
+    parent,
+    publishedLocale,
+    snapshot,
+    updatedAt,
+    version,
+  }
+
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
-    data: {
-      autosave,
-      latest: true,
-      parent,
-      version,
-    },
+    data,
     db,
-    fields: buildVersionCollectionFields(collection),
+    fields: buildVersionCollectionFields(this.payload.config, collection, true),
     operation: 'create',
     req,
+    select,
     tableName,
   })
 
@@ -50,11 +63,12 @@ export async function createVersion<T extends TypeWithID>(
     await this.execute({
       db,
       sql: sql`
-      UPDATE ${table}
-      SET latest = false
-      WHERE ${table.id} != ${result.id}
-        AND ${table.parent} = ${parent}
-    `,
+        UPDATE ${table}
+        SET latest = false
+        WHERE ${table.id} != ${result.id}
+          AND ${table.parent} = ${parent}
+          AND ${table.updatedAt} < ${result.updatedAt}
+      `,
     })
   }
 

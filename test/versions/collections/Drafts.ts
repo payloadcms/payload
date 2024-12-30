@@ -44,7 +44,6 @@ const DraftPosts: CollectionConfig = {
       },
     },
     defaultColumns: ['title', 'description', 'createdAt', '_status'],
-    preview: () => 'https://payloadcms.com',
     useAsTitle: 'title',
   },
   fields: [
@@ -114,7 +113,9 @@ const DraftPosts: CollectionConfig = {
     },
   ],
   versions: {
-    drafts: true,
+    drafts: {
+      schedulePublish: true,
+    },
     maxPerDoc: 35,
   },
 }

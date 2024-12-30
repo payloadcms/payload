@@ -4,7 +4,7 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Field, Plugin } from 'payload'
+import type { Config, Field, Plugin, UploadCollectionSlug } from 'payload'
 import type { UTApiOptions } from 'uploadthing/types'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
@@ -19,7 +19,7 @@ export type UploadthingStorageOptions = {
   /**
    * Collection options to apply the adapter to.
    */
-  collections: Record<string, Omit<CollectionOptions, 'adapter'> | true>
+  collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
 
   /**
    * Whether or not to enable the plugin

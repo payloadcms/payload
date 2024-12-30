@@ -1,30 +1,50 @@
-import type { CreateGlobalVersion, Document, PayloadRequest } from 'payload'
+import type { CreateOptions } from 'mongoose'
+
+import { buildVersionGlobalFields, type CreateGlobalVersion, type Document } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { getSession } from './utilities/getSession.js'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: MongooseAdapter,
-  { autosave, createdAt, globalSlug, parent, req = {} as PayloadRequest, updatedAt, versionData },
+  {
+    autosave,
+    createdAt,
+    globalSlug,
+    parent,
+    publishedLocale,
+    req,
+    snapshot,
+    updatedAt,
+    versionData,
+  },
 ) {
   const VersionModel = this.versions[globalSlug]
-  const options = await withSession(this, req)
+  const options: CreateOptions = {
+    session: await getSession(this, req),
+  }
 
-  const [doc] = await VersionModel.create(
-    [
-      {
-        autosave,
-        createdAt,
-        latest: true,
-        parent,
-        updatedAt,
-        version: versionData,
-      },
-    ],
-    options,
-    req,
-  )
+  const data = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data: {
+      autosave,
+      createdAt,
+      latest: true,
+      parent,
+      publishedLocale,
+      snapshot,
+      updatedAt,
+      version: versionData,
+    },
+    fields: buildVersionGlobalFields(
+      this.payload.config,
+      this.payload.config.globals.find((global) => global.slug === globalSlug),
+    ),
+  })
+
+  const [doc] = await VersionModel.create([data], options, req)
 
   await VersionModel.updateMany(
     {

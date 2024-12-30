@@ -25,6 +25,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Zarovnat vlevo',
     alignRightLabel: 'Zarovnat vpravo',
   },
+  da: {
+    alignCenterLabel: 'Centrer teksten',
+    alignJustifyLabel: 'Justér til begge sider',
+    alignLeftLabel: 'Justér til venstre',
+    alignRightLabel: 'Juster til højre',
+  },
   de: {
     alignCenterLabel: 'Zentrieren',
     alignJustifyLabel: 'Blocksatz',
@@ -128,14 +134,14 @@ export const i18n: Partial<GenericLanguages> = {
     alignRightLabel: 'Aliniați la dreapta',
   },
   rs: {
-    alignCenterLabel: 'Centriraj',
-    alignJustifyLabel: 'Poravnaj opravdaj',
-    alignLeftLabel: 'Poravnaj levo',
-    alignRightLabel: 'Poravnaj desno',
+    alignCenterLabel: 'Поравнај по средини',
+    alignJustifyLabel: 'Поравнај обострано',
+    alignLeftLabel: 'Поравнај лево',
+    alignRightLabel: 'Поравнај десно',
   },
   'rs-latin': {
-    alignCenterLabel: 'Poravnaj centar',
-    alignJustifyLabel: 'Poravnaj opravdanje',
+    alignCenterLabel: 'Poravnaj po sredini',
+    alignJustifyLabel: 'Poravnaj obostrano',
     alignLeftLabel: 'Poravnaj levo',
     alignRightLabel: 'Poravnaj desno',
   },

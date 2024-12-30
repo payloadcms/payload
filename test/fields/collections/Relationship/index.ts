@@ -38,10 +38,25 @@ const RelationshipFields: CollectionConfig = {
     },
     {
       name: 'relationToSelfSelectOnly',
+      relationTo: relationshipFieldsSlug,
+      type: 'relationship',
+    },
+    {
+      name: 'relationWithAllowCreateToFalse',
       admin: {
         allowCreate: false,
       },
-      relationTo: relationshipFieldsSlug,
+      defaultValue: ({ user }) => user?.id,
+      relationTo: 'users',
+      type: 'relationship',
+    },
+    {
+      name: 'relationWithAllowEditToFalse',
+      admin: {
+        allowEdit: false,
+      },
+      defaultValue: ({ user }) => user?.id,
+      relationTo: 'users',
       type: 'relationship',
     },
     {
@@ -99,6 +114,17 @@ const RelationshipFields: CollectionConfig = {
       hasMany: true,
       minRows: 2,
       type: 'relationship',
+    },
+    {
+      name: 'relationToRow',
+      relationTo: 'row-fields',
+      type: 'relationship',
+    },
+    {
+      name: 'relationToRowMany',
+      relationTo: 'row-fields',
+      type: 'relationship',
+      hasMany: true,
     },
   ],
   slug: relationshipFieldsSlug,

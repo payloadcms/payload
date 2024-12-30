@@ -30,7 +30,13 @@ export const ParagraphHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
       req,
       showHiddenFields,
     })
-    return `<p>${childrenText}</p>`
+    const style = [
+      node.format ? `text-align: ${node.format};` : '',
+      node.indent > 0 ? `padding-inline-start: ${node.indent * 40}px;` : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+    return `<p${style ? ` style='${style}'` : ''}>${childrenText}</p>`
   },
   nodeTypes: ['paragraph'],
 }

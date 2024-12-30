@@ -2,7 +2,7 @@ import type { TypedCollection } from '../../index.js'
 import type { Where } from '../../types/index.js'
 import type { PreferenceRequest } from '../types.js'
 
-async function findOne(args: PreferenceRequest): Promise<TypedCollection['_preference']> {
+export async function findOne(args: PreferenceRequest): Promise<TypedCollection['_preference']> {
   const {
     key,
     req: { payload },
@@ -22,11 +22,14 @@ async function findOne(args: PreferenceRequest): Promise<TypedCollection['_prefe
     ],
   }
 
-  return await payload.db.findOne({
+  const { docs } = await payload.db.find({
     collection: 'payload-preferences',
+    limit: 1,
+    pagination: false,
     req,
+    sort: '-updatedAt',
     where,
   })
-}
 
-export default findOne
+  return docs?.[0] || null
+}

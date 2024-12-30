@@ -17,12 +17,15 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
   if (type === 'email') {
     return (
       <EmailField
-        autoComplete="email"
         field={{
           name: 'email',
+          admin: {
+            autoComplete: 'email',
+          },
           label: t('general:email'),
           required,
         }}
+        path="email"
         validate={email}
       />
     )
@@ -36,6 +39,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
           label: t('authentication:username'),
           required,
         }}
+        path="username"
         validate={username}
       />
     )
@@ -49,6 +53,7 @@ export const LoginField: React.FC<LoginFieldProps> = ({ type, required = true })
           label: t('authentication:emailOrUsername'),
           required,
         }}
+        path="username"
         validate={(value, options) => {
           const passesUsername = username(value, options)
           const passesEmail = email(

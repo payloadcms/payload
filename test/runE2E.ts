@@ -1,3 +1,4 @@
+import { spawn } from 'child_process'
 import globby from 'globby'
 import minimist from 'minimist'
 import path from 'path'
@@ -53,15 +54,17 @@ if (!suiteName) {
   }
   console.log(`${files.join('\n')}\n`)
 
-  files.forEach((file) => {
+  for (const file of files) {
     clearWebpackCache()
-    executePlaywright(file, bail)
-  })
+    const baseTestFolder = file.split('/test/')[1].split('/')[0]
+    await executePlaywright(file, baseTestFolder, bail)
+  }
 } else {
   // Run specific suite
   clearWebpackCache()
   const suitePath = path.resolve(dirname, suiteName, 'e2e.spec.ts').replaceAll('__', '/')
-  executePlaywright(suitePath)
+  const baseTestFolder = suiteName.split('__')[0]
+  await executePlaywright(suitePath, baseTestFolder)
 }
 
 console.log('\nRESULTS:')
@@ -70,27 +73,50 @@ testRunCodes.forEach((tr) => {
 })
 console.log('\n')
 
-if (testRunCodes.some((tr) => tr.code > 0)) process.exit(1)
-
-function executePlaywright(suitePath: string, bail = false) {
+// baseTestFolder is the most top level folder of the test suite, that contains the payload config.
+// We need this because pnpm dev for a given test suite will always be run from the top level test folder,
+// not from a nested suite folder.
+async function executePlaywright(suitePath: string, baseTestFolder: string, bail = false) {
   console.log(`Executing ${suitePath}...`)
   const playwrightCfg = path.resolve(
     dirname,
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
+  const spawnDevArgs: string[] = ['dev', baseTestFolder, '--start-memory-db']
+  if (prod) {
+    spawnDevArgs.push('--prod')
+  }
+
+  process.env.START_MEMORY_DB = 'true'
+
+  const child = spawn('pnpm', spawnDevArgs, {
+    stdio: 'inherit',
+    cwd: path.resolve(dirname, '..'),
+    env: {
+      ...process.env,
+    },
+  })
+
   const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
   console.log('\n', cmd)
-  const { code, stdout } = shelljs.exec(cmd)
+  const { code, stdout } = shelljs.exec(cmd, {
+    cwd: path.resolve(dirname, '..'),
+  })
   const suite = path.basename(path.dirname(suitePath))
   const results = { code, suiteName: suite }
+
   if (code) {
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)
-      process.exit(1)
     }
+    child.kill(1)
+    process.exit(1)
+  } else {
+    child.kill()
   }
   testRunCodes.push(results)
+
   return stdout
 }
 

@@ -220,9 +220,6 @@ export default buildConfigWithDefaults({
       slug: relationWithTitleSlug,
     },
     {
-      admin: {
-        useAsTitle: 'name',
-      },
       fields: [
         {
           fields: [
@@ -241,8 +238,9 @@ export default buildConfigWithDefaults({
                   Field: {
                     path: '/PrePopulateFieldUI/index.js#PrePopulateFieldUI',
                     clientProps: {
+                      hasMany: false,
                       hasMultipleRelations: false,
-                      path: 'relationPrePopulate',
+                      targetFieldPath: 'relationPrePopulate',
                     },
                   },
                 },
@@ -272,7 +270,7 @@ export default buildConfigWithDefaults({
                     path: '/PrePopulateFieldUI/index.js#PrePopulateFieldUI',
                     clientProps: {
                       hasMultipleRelations: false,
-                      path: 'relationHasMany',
+                      targetFieldPath: 'relationHasMany',
                     },
                   },
                 },
@@ -302,7 +300,7 @@ export default buildConfigWithDefaults({
                     path: '/PrePopulateFieldUI/index.js#PrePopulateFieldUI',
                     clientProps: {
                       hasMultipleRelations: true,
-                      path: 'relationToManyHasMany',
+                      targetFieldPath: 'relationToManyHasMany',
                     },
                   },
                 },

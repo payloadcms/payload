@@ -1,6 +1,6 @@
-import type { ClientField, FieldPermissions, Operation } from 'payload'
+import type { ClientField, SanitizedFieldPermissions } from 'payload'
 
-export type Props = {
+export type RenderFieldsProps = {
   readonly className?: string
   readonly fields: ClientField[]
   /**
@@ -10,14 +10,15 @@ export type Props = {
    *
    * If a number is provided, will immediately render fields _up to that index_.
    */
-  readonly forceRender?: boolean | number
-  readonly indexPath?: string
+  readonly forceRender?: boolean
   readonly margins?: 'small' | false
-  readonly operation?: Operation
-  readonly path: string
-  readonly permissions?: {
-    [fieldName: string]: FieldPermissions
-  }
-  readonly readOnly: boolean
-  readonly schemaPath: string
+  readonly parentIndexPath: string
+  readonly parentPath: string
+  readonly parentSchemaPath: string
+  readonly permissions:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | SanitizedFieldPermissions
+  readonly readOnly?: boolean
 }

@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { findVersionByIDOperationGlobal } from 'payload'
+import { findVersionByIDOperationGlobal, sanitizePopulateParam, sanitizeSelectParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { GlobalRouteHandlerWithID } from '../types.js'
@@ -14,7 +14,9 @@ export const findVersionByID: GlobalRouteHandlerWithID = async ({ id, globalConf
     id,
     depth: isNumber(depth) ? Number(depth) : undefined,
     globalConfig,
+    populate: sanitizePopulateParam(req.query.populate),
     req,
+    select: sanitizeSelectParam(req.query.select),
   })
 
   return Response.json(result, {

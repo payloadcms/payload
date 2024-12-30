@@ -24,10 +24,10 @@ const Uploads: CollectionConfig = {
       },
       relationTo: uploadsSlug,
     },
-    {
-      name: 'richText',
-      type: 'richText',
-    },
+    // {
+    //   name: 'richText',
+    //   type: 'richText',
+    // },
   ],
   upload: {
     staticDir: path.resolve(dirname, './uploads'),

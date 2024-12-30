@@ -1,4 +1,4 @@
-import type { Payload, Config as PayloadConfig, PayloadRequest } from 'payload'
+import type { CollectionSlug, Payload, Config as PayloadConfig, PayloadRequest } from 'payload'
 import type Stripe from 'stripe'
 
 export type StripeWebhookHandler<T = any> = (args: {
@@ -20,7 +20,7 @@ export type FieldSyncConfig = {
 }
 
 export type SyncConfig = {
-  collection: string
+  collection: CollectionSlug
   fields: FieldSyncConfig[]
   stripeResourceType: 'customers' | 'products' // TODO: get this from Stripe types
   stripeResourceTypeSingular: 'customer' | 'product' // TODO: there must be a better way to do this

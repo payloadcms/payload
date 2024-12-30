@@ -1,5 +1,5 @@
 import type { FilterQuery } from 'mongoose'
-import type { Field, Operator, Payload, Where } from 'payload'
+import type { FlattenedField, Operator, Payload, Where } from 'payload'
 
 import { deepMergeWithCombinedArrays } from 'payload'
 import { validOperators } from 'payload/shared'
@@ -16,7 +16,7 @@ export async function parseParams({
   where,
 }: {
   collectionSlug?: string
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   locale: string
   payload: Payload
@@ -71,7 +71,10 @@ export async function parseParams({
                   [searchParam.path]: searchParam.value,
                 }
               } else if (typeof searchParam?.value === 'object') {
-                result = deepMergeWithCombinedArrays(result, searchParam.value)
+                result = deepMergeWithCombinedArrays(result, searchParam.value, {
+                  // dont clone Types.ObjectIDs
+                  clone: false,
+                })
               }
             }
           }

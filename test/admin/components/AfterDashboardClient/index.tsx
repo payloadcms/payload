@@ -1,17 +1,18 @@
-'use client'
-import type { PayloadClientReactComponent, SanitizedConfig } from 'payload'
+import type { CustomComponent, PayloadServerReactComponent } from 'payload'
 
-import { RenderComponent, useConfig } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-export const AfterDashboardClient: PayloadClientReactComponent<
-  SanitizedConfig['admin']['components']['afterDashboard'][0]
-> = () => {
-  const { config } = useConfig()
+import { Banner } from '../Banner/index.js'
+
+export const AfterDashboardClient: PayloadServerReactComponent<CustomComponent> = ({ payload }) => {
   return (
-    <div>
+    <Banner>
       <p>Admin Dependency test component:</p>
-      <RenderComponent mappedComponent={config.admin.dependencies?.myTestComponent} />
-    </div>
+      {RenderServerComponent({
+        Component: payload.config.admin.dependencies?.myTestComponent,
+        importMap: payload.importMap,
+      })}
+    </Banner>
   )
 }

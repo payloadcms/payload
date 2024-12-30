@@ -16,15 +16,6 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
     let result = acc
 
     switch (field.type) {
-      case 'group':
-        acc.push({
-          name: field.name,
-          type: field.type,
-          fields: fieldSchemaToJSON(field.fields),
-        })
-
-        break
-
       case 'array':
         acc.push({
           name: field.name,
@@ -61,9 +52,29 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
 
         break
 
+      case 'collapsible': // eslint-disable no-fallthrough
       case 'row':
-      case 'collapsible':
         result = result.concat(fieldSchemaToJSON(field.fields))
+        break
+
+      case 'group':
+        acc.push({
+          name: field.name,
+          type: field.type,
+          fields: fieldSchemaToJSON(field.fields),
+        })
+
+        break
+
+      case 'relationship': // eslint-disable no-fallthrough
+      case 'upload':
+        acc.push({
+          name: field.name,
+          type: field.type,
+          hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
+          relationTo: field.relationTo,
+        })
+
         break
 
       case 'tabs': {
@@ -86,17 +97,6 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
 
         break
       }
-
-      case 'relationship':
-      case 'upload':
-        acc.push({
-          name: field.name,
-          type: field.type,
-          hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
-          relationTo: field.relationTo,
-        })
-
-        break
 
       default:
         if ('name' in field) {

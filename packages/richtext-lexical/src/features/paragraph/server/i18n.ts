@@ -17,6 +17,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Odstavec',
     label2: 'Normální text',
   },
+  da: {
+    label: 'Afsnit',
+    label2: 'Normal tekst',
+  },
   de: {
     label: 'Paragraph',
     label2: 'Normaler Text',
@@ -86,12 +90,12 @@ export const i18n: Partial<GenericLanguages> = {
     label2: 'Text normal',
   },
   rs: {
-    label: 'Paragraf',
-    label2: 'Normalan tekst',
+    label: 'Параграф',
+    label2: 'Oбичан текст',
   },
   'rs-latin': {
     label: 'Paragraf',
-    label2: 'Normalan tekst',
+    label2: 'Običan tekst',
   },
   ru: {
     label: 'Параграф',

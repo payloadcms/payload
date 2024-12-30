@@ -20,7 +20,7 @@ export type CollectionBeforeValidateHookWithArgs = (
     collection?: CollectionConfig
     pluginConfig?: StripePluginConfig
   } & HookArgsWithCustomCollection,
-) => void
+) => Promise<Partial<any>>
 
 export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (args) => {
   const { collection, data, operation, pluginConfig, req } = args

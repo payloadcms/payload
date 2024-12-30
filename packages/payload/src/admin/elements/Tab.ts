@@ -1,6 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 
-import type { Permissions } from '../../auth/types.js'
+import type { SanitizedPermissions } from '../../auth/types.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
@@ -12,14 +12,14 @@ export type DocumentTabProps = {
   readonly globalConfig?: SanitizedGlobalConfig
   readonly i18n: I18n
   readonly payload: Payload
-  readonly permissions: Permissions
+  readonly permissions: SanitizedPermissions
 }
 
 export type DocumentTabCondition = (args: {
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig
   globalConfig: SanitizedGlobalConfig
-  permissions: Permissions
+  permissions: SanitizedPermissions
 }) => boolean
 
 // Everything is optional because we merge in the defaults

@@ -83,6 +83,88 @@ const SelectFields: CollectionConfig = {
       ],
     },
     {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'selectHasMany',
+          hasMany: true,
+          type: 'select',
+          admin: {
+            isClearable: true,
+            isSortable: true,
+          },
+          options: [
+            {
+              label: 'Value One',
+              value: 'one',
+            },
+            {
+              label: 'Value Two',
+              value: 'two',
+            },
+            {
+              label: 'Value Three',
+              value: 'three',
+            },
+            {
+              label: 'Value Four',
+              value: 'four',
+            },
+            {
+              label: 'Value Five',
+              value: 'five',
+            },
+            {
+              label: 'Value Six',
+              value: 'six',
+            },
+          ],
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'selectHasMany',
+              hasMany: true,
+              type: 'select',
+              admin: {
+                isClearable: true,
+                isSortable: true,
+              },
+              options: [
+                {
+                  label: 'Value One',
+                  value: 'one',
+                },
+                {
+                  label: 'Value Two',
+                  value: 'two',
+                },
+                {
+                  label: 'Value Three',
+                  value: 'three',
+                },
+                {
+                  label: 'Value Four',
+                  value: 'four',
+                },
+                {
+                  label: 'Value Five',
+                  value: 'five',
+                },
+                {
+                  label: 'Value Six',
+                  value: 'six',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'selectHasManyLocalized',
       type: 'select',
       hasMany: true,

@@ -7,9 +7,10 @@ import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { formatDate } from '../../../../../utilities/formatDate.js'
 
-export const DateCell: React.FC<
-  DefaultCellComponentProps<Date | number | string, DateFieldClient>
-> = ({ cellData, field: { admin: { date } = {} } }) => {
+export const DateCell: React.FC<DefaultCellComponentProps<DateFieldClient>> = ({
+  cellData,
+  field: { admin: { date } = {} },
+}) => {
   const {
     config: {
       admin: { dateFormat: dateFormatFromRoot },

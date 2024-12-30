@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { count } from 'drizzle-orm'
 
 import type { ChainedMethods, TransactionPg } from '../types.js'
 import type { BasePostgresAdapter, CountDistinct } from './types.js'
@@ -22,8 +22,7 @@ export const countDistinct: CountDistinct = async function countDistinct(
     methods: chainedMethods,
     query: (db as TransactionPg)
       .select({
-        count: sql<string>`count
-            (DISTINCT ${this.tables[tableName].id})`,
+        count: count(),
       })
       .from(this.tables[tableName])
       .where(where),

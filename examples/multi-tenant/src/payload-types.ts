@@ -7,93 +7,256 @@
  */
 
 export interface Config {
+  auth: {
+    users: UserAuthOperations;
+  };
   collections: {
-    users: User
-    tenants: Tenant
-    pages: Page
-    'payload-preferences': PayloadPreference
-    'payload-migrations': PayloadMigration
-  }
-  globals: {}
+    pages: Page;
+    users: User;
+    tenants: Tenant;
+    'payload-locked-documents': PayloadLockedDocument;
+    'payload-preferences': PayloadPreference;
+    'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    pages: PagesSelect<false> | PagesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    tenants: TenantsSelect<false> | TenantsSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
+  db: {
+    defaultIDType: string;
+  };
+  globals: {};
+  globalsSelect: {};
+  locale: null;
+  user: User & {
+    collection: 'users';
+  };
+  jobs?: {
+    tasks: unknown;
+    workflows?: unknown;
+  };
 }
-export interface User {
-  id: string
-  firstName?: string
-  lastName?: string
-  roles: ('super-admin' | 'user')[]
-  tenants?: {
-    tenant: string | Tenant
-    roles: ('admin' | 'user')[]
-    id?: string
-  }[]
-  lastLoggedInTenant?: string | Tenant
-  updatedAt: string
-  createdAt: string
-  email: string
-  resetPasswordToken?: string
-  resetPasswordExpiration?: string
-  salt?: string
-  hash?: string
-  loginAttempts?: number
-  lockUntil?: string
-  password?: string
+export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
 }
-export interface Tenant {
-  id: string
-  name: string
-  domains?: {
-    domain: string
-    id?: string
-  }[]
-  updatedAt: string
-  createdAt: string
-}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
 export interface Page {
-  id: string
-  title: string
-  slug?: string
-  tenant?: string | Tenant
-  richText: {
-    [k: string]: unknown
-  }[]
-  updatedAt: string
-  createdAt: string
+  id: string;
+  title?: string | null;
+  slug?: string | null;
+  tenant: string | Tenant;
+  updatedAt: string;
+  createdAt: string;
 }
-export interface PayloadPreference {
-  id: string
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants".
+ */
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  public?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  roles?: ('super-admin' | 'user')[] | null;
+  tenants?:
+    | {
+        tenant: string | Tenant;
+        roles: ('tenant-admin' | 'tenant-viewer')[];
+        id?: string | null;
+      }[]
+    | null;
+  username?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'tenants';
+        value: string | Tenant;
+      } | null);
+  globalSlug?: string | null;
   user: {
-    relationTo: 'users'
-    value: string | User
-  }
-  key?: string
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
+export interface PayloadPreference {
+  id: string;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  key?: string | null;
   value?:
     | {
-        [k: string]: unknown
+        [k: string]: unknown;
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null
-  updatedAt: string
-  createdAt: string
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
-  id: string
-  name?: string
-  batch?: number
-  updatedAt: string
-  createdAt: string
+  id: string;
+  name?: string | null;
+  batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
+  tenants?:
+    | T
+    | {
+        tenant?: T;
+        roles?: T;
+        id?: T;
+      };
+  username?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants_select".
+ */
+export interface TenantsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  public?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
+export interface Auth {
+  [k: string]: unknown;
 }
 
+
 declare module 'payload' {
-  export interface GeneratedTypes {
-    collections: {
-      users: User
-      tenants: Tenant
-      pages: Page
-      'payload-preferences': PayloadPreference
-      'payload-migrations': PayloadMigration
-    }
-  }
+  export interface GeneratedTypes extends Config {}
 }

@@ -3,6 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { GenerateDescription, GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
+import type { Field } from 'payload'
 import type { Page } from 'plugin-seo/payload-types.js'
 
 import { seoPlugin } from '@payloadcms/plugin-seo'
@@ -68,18 +69,34 @@ export default buildConfigWithDefaults({
   plugins: [
     seoPlugin({
       collections: ['pages'],
-      fieldOverrides: {
-        title: {
-          required: true,
-        },
+      fields: ({ defaultFields }) => {
+        const modifiedFields = defaultFields.map((field) => {
+          if ('name' in field && field.name === 'title') {
+            return {
+              ...field,
+              required: true,
+              admin: {
+                ...field.admin,
+                components: {
+                  ...field.admin.components,
+                  afterInput: '/components/AfterInput.js#AfterInput',
+                  beforeInput: '/components/BeforeInput.js#BeforeInput',
+                },
+              },
+            } as Field
+          }
+          return field
+        })
+
+        return [
+          ...modifiedFields,
+          {
+            name: 'ogTitle',
+            type: 'text',
+            label: 'og:title',
+          },
+        ]
       },
-      fields: [
-        {
-          name: 'ogTitle',
-          type: 'text',
-          label: 'og:title',
-        },
-      ],
       generateDescription,
       generateTitle,
       generateURL,

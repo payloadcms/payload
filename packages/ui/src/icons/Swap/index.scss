@@ -1,12 +1,14 @@
 @import '../../scss/styles';
 
-.icon--swap {
-  height: $baseline;
-  width: $baseline;
+@layer payload-default {
+  .icon--swap {
+    height: $baseline;
+    width: $baseline;
 
-  .stroke {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: $style-stroke-width-s;
+    .stroke {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: $style-stroke-width-s;
+    }
   }
 }

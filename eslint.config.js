@@ -19,21 +19,22 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
+  '**/*.spec.ts',
+  'next-env.d.ts',
 ]
 
-/** @typedef {import('eslint').Linter.FlatConfig} */
-let FlatConfig
+/** @typedef {import('eslint').Linter.Config} Config */
 
 export const rootParserOptions = {
   sourceType: 'module',
   ecmaVersion: 'latest',
   projectService: {
     maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
-    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs', '*.spec.ts', '*.d.ts'],
+    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs', '*.d.ts'],
   },
 }
 
-/** @type {FlatConfig[]} */
+/** @type {Config[]} */
 export const rootEslintConfig = [
   ...payloadEsLintConfig,
   {
@@ -43,6 +44,7 @@ export const rootEslintConfig = [
       'test/live-preview/next-app',
       'packages/**/*.spec.ts',
       'templates/**',
+      'examples/**',
     ],
   },
   {
@@ -54,6 +56,7 @@ export const rootEslintConfig = [
       'payload/no-relative-monorepo-imports': 'error',
       'payload/no-imports-from-exports-dir': 'error',
       'payload/no-imports-from-self': 'error',
+      'payload/proper-payload-logger-usage': 'error',
     },
   },
   {

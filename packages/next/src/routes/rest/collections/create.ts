@@ -1,6 +1,6 @@
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
-import { createOperation } from 'payload'
+import { createOperation, sanitizePopulateParam, sanitizeSelectParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandler } from '../types.js'
@@ -19,7 +19,9 @@ export const create: CollectionRouteHandler = async ({ collection, req }) => {
     data: req.data,
     depth: isNumber(depth) ? depth : undefined,
     draft,
+    populate: sanitizePopulateParam(req.query.populate),
     req,
+    select: sanitizeSelectParam(req.query.select),
   })
 
   return Response.json(

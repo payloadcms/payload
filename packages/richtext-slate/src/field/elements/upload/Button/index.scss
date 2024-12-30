@@ -1,7 +1,9 @@
 @import '../../../../scss/styles.scss';
 
-.upload-rich-text-button {
-  display: flex;
-  align-items: center;
-  height: 100%;
+@layer payload-default {
+  .upload-rich-text-button {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
 }

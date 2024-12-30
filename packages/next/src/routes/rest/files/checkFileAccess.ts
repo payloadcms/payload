@@ -19,6 +19,10 @@ export async function checkFileAccess({
     return disableEndpoints
   }
 
+  if (filename.includes('../') || filename.includes('..\\')) {
+    throw new Forbidden(req.t)
+  }
+
   const accessResult = await executeAccess({ isReadingStaticFile: true, req }, config.access.read)
 
   if (typeof accessResult === 'object') {

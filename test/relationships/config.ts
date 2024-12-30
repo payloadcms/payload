@@ -84,6 +84,22 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: relationSlug,
         },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  name: 'relationField',
+                  type: 'relationship',
+                  relationTo: relationSlug,
+                },
+              ],
+            },
+          ],
+        },
         // Relationship w/ default access
         {
           name: 'defaultAccessRelation',
@@ -274,6 +290,25 @@ export default buildConfigWithDefaults({
           name: 'polymorphic',
           relationTo: ['movies'],
         },
+        {
+          type: 'relationship',
+          name: 'polymorphicLocalized',
+          relationTo: ['movies'],
+          localized: true,
+        },
+        {
+          type: 'relationship',
+          name: 'polymorphicMany',
+          hasMany: true,
+          relationTo: ['movies'],
+        },
+        {
+          type: 'relationship',
+          hasMany: true,
+          name: 'polymorphicManyLocalized',
+          localized: true,
+          relationTo: ['movies'],
+        },
       ],
     },
     {
@@ -287,6 +322,109 @@ export default buildConfigWithDefaults({
           name: 'parent',
           type: 'relationship',
           relationTo: 'tree',
+        },
+      ],
+    },
+    {
+      slug: 'pages',
+      fields: [
+        {
+          type: 'array',
+          name: 'menu',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'rels-to-pages',
+      fields: [
+        {
+          name: 'page',
+          type: 'relationship',
+          relationTo: 'pages',
+        },
+      ],
+    },
+    {
+      slug: 'rels-to-pages-and-custom-text-ids',
+      fields: [
+        {
+          name: 'rel',
+          type: 'relationship',
+          relationTo: ['pages', 'custom-id', 'custom-id-number'],
+        },
+      ],
+    },
+    {
+      slug: 'object-writes',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'movies',
+          name: 'one',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'movies',
+          name: 'many',
+          hasMany: true,
+        },
+        {
+          type: 'relationship',
+          relationTo: ['movies'],
+          name: 'onePoly',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['movies'],
+          name: 'manyPoly',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      slug: 'deep-nested',
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'content',
+              fields: [
+                {
+                  type: 'blocks',
+                  name: 'blocks',
+                  blocks: [
+                    {
+                      slug: 'testBlock',
+                      fields: [
+                        {
+                          type: 'tabs',
+                          tabs: [
+                            {
+                              name: 'meta',
+                              fields: [
+                                {
+                                  type: 'relationship',
+                                  relationTo: 'movies',
+                                  name: 'movie',
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     },

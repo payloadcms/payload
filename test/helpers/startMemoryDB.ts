@@ -2,12 +2,13 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 
 // eslint-disable-next-line no-restricted-exports
 export default async () => {
+  console.log('Starting memory db...')
+
   // @ts-expect-error
   process.env.NODE_ENV = 'test'
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_OPTIONS = '--no-deprecation'
   process.env.DISABLE_PAYLOAD_HMR = 'true'
-  process.env.NODE_OPTIONS = '--no-deprecation'
 
   if (
     (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') &&

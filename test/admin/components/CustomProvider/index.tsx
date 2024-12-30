@@ -17,9 +17,14 @@ export const CustomProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setCustom,
   }
 
-  console.log('custom provider called')
-
-  return <Context.Provider value={value}>{children}</Context.Provider>
+  return (
+    <Context.Provider value={value}>
+      <div className="custom-provider" style={{ display: 'none' }}>
+        This is a custom provider.
+      </div>
+      {children}
+    </Context.Provider>
+  )
 }
 
 export const useCustom = () => useContext(Context)

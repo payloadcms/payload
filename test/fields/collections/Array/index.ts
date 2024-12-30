@@ -24,6 +24,25 @@ const ArrayFields: CollectionConfig = {
           required: true,
         },
         {
+          name: 'anotherText',
+          type: 'text',
+        },
+        {
+          name: 'uiField',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: {
+                path: './collections/Array/LabelComponent.js#ArrayRowLabel',
+                serverProps: {
+                  // While this doesn't do anything, this will reproduce a bug where having server-only props in here will throw a "Functions cannot be passed directly to Client Components" error
+                  someFn: () => 'Hello',
+                },
+              },
+            },
+          },
+        },
+        {
           name: 'localizedText',
           type: 'text',
           localized: true,
@@ -152,6 +171,62 @@ const ArrayFields: CollectionConfig = {
         },
       ],
       type: 'array',
+    },
+    {
+      name: 'nestedArrayLocalized',
+      type: 'array',
+      fields: [
+        {
+          type: 'array',
+          name: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'externallyUpdatedArray',
+      type: 'array',
+      fields: [
+        {
+          name: 'customTextField',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '/collections/Array/CustomTextField.js#CustomTextField',
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'customArrayField',
+      type: 'array',
+      admin: {
+        components: {
+          Field: '/collections/Array/CustomArrayField.js#CustomArrayField',
+        },
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'ui',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Array/AddRowButton.js',
+        },
+      },
     },
   ],
   slug: arrayFieldsSlug,

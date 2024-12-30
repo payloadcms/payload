@@ -1,8 +1,12 @@
-import type { CreateVersion, Document, PayloadRequest } from 'payload'
+import type { CreateOptions } from 'mongoose'
+
+import { Types } from 'mongoose'
+import { buildVersionCollectionFields, type CreateVersion, type Document } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { getSession } from './utilities/getSession.js'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 
 export const createVersion: CreateVersion = async function createVersion(
   this: MongooseAdapter,
@@ -11,28 +15,54 @@ export const createVersion: CreateVersion = async function createVersion(
     collectionSlug,
     createdAt,
     parent,
-    req = {} as PayloadRequest,
+    publishedLocale,
+    req,
+    snapshot,
     updatedAt,
     versionData,
   },
 ) {
   const VersionModel = this.versions[collectionSlug]
-  const options = await withSession(this, req)
+  const options: CreateOptions = {
+    session: await getSession(this, req),
+  }
 
-  const [doc] = await VersionModel.create(
-    [
+  const data = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data: {
+      autosave,
+      createdAt,
+      latest: true,
+      parent,
+      publishedLocale,
+      snapshot,
+      updatedAt,
+      version: versionData,
+    },
+    fields: buildVersionCollectionFields(
+      this.payload.config,
+      this.payload.collections[collectionSlug].config,
+    ),
+  })
+
+  const [doc] = await VersionModel.create([data], options, req)
+
+  const parentQuery = {
+    $or: [
       {
-        autosave,
-        createdAt,
-        latest: true,
-        parent,
-        updatedAt,
-        version: versionData,
+        parent: {
+          $eq: data.parent,
+        },
       },
     ],
-    options,
-    req,
-  )
+  }
+  if (data.parent instanceof Types.ObjectId) {
+    parentQuery.$or.push({
+      parent: {
+        $eq: data.parent.toString(),
+      },
+    })
+  }
 
   await VersionModel.updateMany(
     {
@@ -42,14 +72,15 @@ export const createVersion: CreateVersion = async function createVersion(
             $ne: doc._id,
           },
         },
-        {
-          parent: {
-            $eq: parent,
-          },
-        },
+        parentQuery,
         {
           latest: {
             $eq: true,
+          },
+        },
+        {
+          updatedAt: {
+            $lt: new Date(doc.updatedAt),
           },
         },
       ],

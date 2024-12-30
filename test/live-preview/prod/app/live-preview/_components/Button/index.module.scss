@@ -1,0 +1,72 @@
+@import '../../_css/type.scss';
+
+.button {
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  background-color: transparent;
+  text-decoration: none;
+  display: inline-flex;
+  padding: 12px 24px;
+  font-family: inherit;
+  line-height: inherit;
+  font-size: inherit;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+
+  svg {
+    margin-right: calc(var(--base) / 2);
+    width: var(--base);
+    height: var(--base);
+  }
+}
+
+.label {
+  @extend %label;
+  text-align: center;
+  display: flex;
+  align-items: center;
+}
+
+.appearance--primary {
+  background-color: var(--color-base-1000);
+  color: var(--color-base-0);
+}
+
+.appearance--secondary {
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--color-base-1000);
+}
+
+.primary--invert {
+  background-color: var(--color-base-0);
+  color: var(--color-base-1000);
+}
+
+.secondary--invert {
+  background-color: var(--color-base-1000);
+  box-shadow: inset 0 0 0 1px var(--color-base-0);
+}
+
+.appearance--default {
+  padding: 0;
+  color: var(--theme-text);
+}
+
+.appearance--none {
+  padding: 0;
+  color: var(--theme-text);
+
+  &:local() {
+    .label {
+      text-transform: none;
+      line-height: inherit;
+      font-size: inherit;
+    }
+  }
+}

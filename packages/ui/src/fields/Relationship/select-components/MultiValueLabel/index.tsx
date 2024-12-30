@@ -24,14 +24,14 @@ export const MultiValueLabel: React.FC<
   } & MultiValueProps<Option>
 > = (props) => {
   const {
-    data: { label, relationTo, value },
+    data: { allowEdit, label, relationTo, value },
     selectProps: { customProps: { draggableProps, onDocumentDrawerOpen } = {} } = {},
   } = props
 
   const { permissions } = useAuth()
   const [showTooltip, setShowTooltip] = useState(false)
   const { t } = useTranslation()
-  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
+  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
 
   return (
     <div className={baseClass}>
@@ -44,7 +44,7 @@ export const MultiValueLabel: React.FC<
           }}
         />
       </div>
-      {relationTo && hasReadPermission && (
+      {relationTo && hasReadPermission && allowEdit !== false && (
         <Fragment>
           <button
             aria-label={`Edit ${label}`}

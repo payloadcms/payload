@@ -1,11 +1,15 @@
-import type { CollectionPermission, DocumentPermissions, GlobalPermission } from 'payload'
+import type {
+  SanitizedCollectionPermission,
+  SanitizedDocumentPermissions,
+  SanitizedGlobalPermission,
+} from 'payload'
 
 export const hasSavePermission = (args: {
   /*
    * Pass either `collectionSlug` or `globalSlug`
    */
   collectionSlug?: string
-  docPermissions: DocumentPermissions
+  docPermissions: SanitizedDocumentPermissions
   /*
    * Pass either `collectionSlug` or `globalSlug`
    */
@@ -16,13 +20,13 @@ export const hasSavePermission = (args: {
 
   if (collectionSlug) {
     return Boolean(
-      (isEditing && docPermissions?.update?.permission) ||
-        (!isEditing && (docPermissions as CollectionPermission)?.create?.permission),
+      (isEditing && docPermissions?.update) ||
+        (!isEditing && (docPermissions as SanitizedCollectionPermission)?.create),
     )
   }
 
   if (globalSlug) {
-    return Boolean((docPermissions as GlobalPermission)?.update?.permission)
+    return Boolean((docPermissions as SanitizedGlobalPermission)?.update)
   }
 
   return false

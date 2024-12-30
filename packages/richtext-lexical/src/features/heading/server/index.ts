@@ -69,8 +69,13 @@ export const HeadingFeature = createServerFeature<
                   req,
                   showHiddenFields,
                 })
-
-                return '<' + node?.tag + '>' + childrenText + '</' + node?.tag + '>'
+                const style = [
+                  node.format ? `text-align: ${node.format};` : '',
+                  node.indent > 0 ? `padding-inline-start: ${node.indent * 40}px;` : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+                return `<${node?.tag}${style ? ` style='${style}'` : ''}>${childrenText}</${node?.tag}>`
               },
               nodeTypes: [HeadingNode.getType()],
             },

@@ -24,12 +24,16 @@ export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsAc
   const { i18n } = useTranslation()
   const [errorCount, setErrorCount] = useState(undefined)
 
-  const path = `${parentPath ? `${parentPath}.` : ''}${tabHasName(tab) ? tab.name : ''}`
+  const path = [
+    ...(parentPath ? parentPath.split('.') : []),
+    ...(tabHasName(tab) ? [tab.name] : []),
+  ].join('.')
+
   const fieldHasErrors = errorCount > 0
 
   return (
     <React.Fragment>
-      <WatchChildErrors fields={tab.fields} path={path} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={tab.fields} path={path.split('.')} setErrorCount={setErrorCount} />
       <button
         className={[
           baseClass,

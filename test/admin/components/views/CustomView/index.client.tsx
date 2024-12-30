@@ -47,6 +47,7 @@ const CustomPassword: React.FC = () => {
         label: 'Password',
         required: true,
       }}
+      path="password"
       validate={(value) => {
         if (value && confirmValue) {
           return confirmValue === value ? true : 'Passwords must match!!!!'

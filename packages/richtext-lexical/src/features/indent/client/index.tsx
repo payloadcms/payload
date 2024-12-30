@@ -7,6 +7,7 @@ import type { ToolbarGroup } from '../../toolbars/types.js'
 import { IndentDecreaseIcon } from '../../../lexical/ui/icons/IndentDecrease/index.js'
 import { IndentIncreaseIcon } from '../../../lexical/ui/icons/IndentIncrease/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
+import { IndentPlugin } from './plugins/index.js'
 import { toolbarIndentGroupWithItems } from './toolbarIndentGroup.js'
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -19,10 +20,11 @@ const toolbarGroups: ToolbarGroup[] = [
           return false
         }
         for (const node of selection.getNodes()) {
+          const parent = node.getParentOrThrow()
           // If at least one node is indented, this should be active
           if (
             ('__indent' in node && (node.__indent as number) > 0) ||
-            (node.getParent() && '__indent' in node.getParent() && node.getParent().__indent > 0)
+            ('__indent' in parent && parent.__indent > 0)
           ) {
             return true
           }
@@ -54,6 +56,12 @@ const toolbarGroups: ToolbarGroup[] = [
 ]
 
 export const IndentFeatureClient = createClientFeature({
+  plugins: [
+    {
+      Component: IndentPlugin,
+      position: 'normal',
+    },
+  ],
   toolbarFixed: {
     groups: toolbarGroups,
   },

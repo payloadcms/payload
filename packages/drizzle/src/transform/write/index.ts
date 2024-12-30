@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { FlattenedField } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { RowToInsert } from './types.js'
@@ -8,7 +8,7 @@ import { traverseFields } from './traverseFields.js'
 type Args = {
   adapter: DrizzleAdapter
   data: Record<string, unknown>
-  fields: Field[]
+  fields: FlattenedField[]
   path?: string
   tableName: string
 }

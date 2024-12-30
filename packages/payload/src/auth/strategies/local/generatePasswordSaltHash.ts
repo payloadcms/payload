@@ -44,7 +44,7 @@ export const generatePasswordSaltHash = async ({
   if (typeof validationResult === 'string') {
     throw new ValidationError({
       collection: collection?.slug,
-      errors: [{ field: 'password', message: validationResult }],
+      errors: [{ message: validationResult, path: 'password' }],
     })
   }
 

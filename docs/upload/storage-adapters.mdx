@@ -9,23 +9,23 @@ keywords: uploads, images, media, storage, adapters, s3, vercel, google cloud, a
 Payload offers additional storage adapters to handle file uploads. These adapters allow you to store files in different locations, such as Amazon S3, Vercel Blob Storage, Google Cloud Storage, and more.
 
 | Service              | Package                                                                                                           |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Vercel Blob          | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/beta/packages/storage-vercel-blob) |
-| AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/beta/packages/storage-s3)                   |
-| Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/beta/packages/storage-azure)             |
-| Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/beta/packages/storage-gcs)                 |
-
+| -------------------- |-------------------------------------------------------------------------------------------------------------------|
+| Vercel Blob          | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob) |
+| AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/main/packages/storage-s3)                   |
+| Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)             |
+| Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)                 |
+| Uploadthing          | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/main/packages/storage-uploadthing) |
 
 ## Vercel Blob Storage
 [`@payloadcms/storage-vercel-blob`](https://www.npmjs.com/package/@payloadcms/storage-vercel-blob)
 
-### Installation
+### Installation#vercel-blob-installation
 
 ```sh
 pnpm add @payloadcms/storage-vercel-blob
 ```
 
-### Usage
+### Usage#vercel-blob-usage
 
 - Configure the `collections` object to specify which collections should use the Vercel Blob adapter. The slug _must_ match one of your existing collection slugs.
 - Ensure you have `BLOB_READ_WRITE_TOKEN` set in your Vercel environment variables. This is usually set by Vercel automatically after adding blob storage to your project.
@@ -43,8 +43,8 @@ export default buildConfig({
       enabled: true, // Optional, defaults to true
       // Specify which collections should use Vercel Blob
       collections: {
-        [Media.slug]: true,
-        [MediaWithPrefix.slug]: {
+        media: true,
+        'media-with-prefix': {
           prefix: 'my-prefix',
         },
       },
@@ -55,7 +55,7 @@ export default buildConfig({
 })
 ```
 
-### Configuration Options
+### Configuration Options#vercel-blob-configuration
 
 | Option               | Description                                                          | Default                       |
 | -------------------- | -------------------------------------------------------------------- | ----------------------------- |
@@ -68,15 +68,15 @@ export default buildConfig({
 ## S3 Storage
 [`@payloadcms/storage-s3`](https://www.npmjs.com/package/@payloadcms/storage-s3)
 
-### Installation
+### Installation#s3-installation
 
 ```sh
 pnpm add @payloadcms/storage-s3
 ```
 
-### Usage
+### Usage#s3-usage
 
-- Configure the `collections` object to specify which collections should use the Vercel Blob adapter. The slug _must_ match one of your existing collection slugs.
+- Configure the `collections` object to specify which collections should use the S3 Storage adapter. The slug _must_ match one of your existing collection slugs.
 - The `config` object can be any [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object (from [`@aws-sdk/client-s3`](https://github.com/aws/aws-sdk-js-v3)). _This is highly dependent on your AWS setup_. Check the AWS documentation for more information.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 
@@ -90,8 +90,8 @@ export default buildConfig({
   plugins: [
     s3Storage({
       collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
+        media: true,
+        'media-with-prefix': {
           prefix,
         },
       },
@@ -109,22 +109,22 @@ export default buildConfig({
 })
 ```
 
-#### Configuration Options
+### Configuration Options#s3-configuration
 
 See the the [AWS SDK Package](https://github.com/aws/aws-sdk-js-v3) and [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object for guidance on AWS S3 configuration.
 
 ## Azure Blob Storage
 [`@payloadcms/storage-azure`](https://www.npmjs.com/package/@payloadcms/storage-azure)
 
-### Installation
+### Installation#azure-installation
 
 ```sh
 pnpm add @payloadcms/storage-azure
 ```
 
-### Usage
+### Usage#azure-usage
 
-- Configure the `collections` object to specify which collections should use the Vercel Blob adapter. The slug _must_ match one of your existing collection slugs.
+- Configure the `collections` object to specify which collections should use the Azure Blob adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 
 ```ts
@@ -137,8 +137,8 @@ export default buildConfig({
   plugins: [
     azureStorage({
       collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
+        media: true,
+        'media-with-prefix': {
           prefix,
         },
       },
@@ -151,7 +151,7 @@ export default buildConfig({
 })
 ```
 
-### Configuration Options
+### Configuration Options#azure-configuration
 
 | Option                 | Description                                                              | Default |
 | ---------------------- | ------------------------------------------------------------------------ | ------- |
@@ -165,15 +165,15 @@ export default buildConfig({
 ## Google Cloud Storage
 [`@payloadcms/storage-gcs`](https://www.npmjs.com/package/@payloadcms/storage-gcs)
 
-### Installation
+### Installation#gcs-installation
 
 ```sh
 pnpm add @payloadcms/storage-gcs
 ```
 
-### Usage
+### Usage#gcs-usage
 
-- Configure the `collections` object to specify which collections should use the Vercel Blob adapter. The slug _must_ match one of your existing collection slugs.
+- Configure the `collections` object to specify which collections should use the Google Cloud Storage adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 
 ```ts
@@ -186,8 +186,8 @@ export default buildConfig({
   plugins: [
     gcsStorage({
       collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
+        media: true,
+        'media-with-prefix': {
           prefix,
         },
       },
@@ -201,7 +201,7 @@ export default buildConfig({
 })
 ```
 
-### Configuration Options
+### Configuration Options#gcs-configuration
 
 | Option        | Description                                                                                         | Default   |
 | ------------- | --------------------------------------------------------------------------------------------------- | --------- |
@@ -215,16 +215,16 @@ export default buildConfig({
 ## Uploadthing Storage
 [`@payloadcms/storage-uploadthing`](https://www.npmjs.com/package/@payloadcms/storage-uploadthing)
 
-### Installation
+### Installation#uploadthing-installation
 
 ```sh
 pnpm add @payloadcms/storage-uploadthing
 ```
 
-### Usage
+### Usage#uploadthing-usage
 
 - Configure the `collections` object to specify which collections should use uploadthing. The slug _must_ match one of your existing collection slugs and be an `upload` type.
-- Get an API key from Uploadthing and set it as `apiKey` in the `options` object.
+- Get a token from Uploadthing and set it as `token` in the `options` object.
 - `acl` is optional and defaults to `public-read`.
 
 ```ts
@@ -233,10 +233,10 @@ export default buildConfig({
   plugins: [
     uploadthingStorage({
       collections: {
-        [mediaSlug]: true,
+        media: true,
       },
       options: {
-        apiKey: process.env.UPLOADTHING_SECRET,
+        token: process.env.UPLOADTHING_TOKEN,
         acl: 'public-read',
       },
     }),
@@ -244,11 +244,11 @@ export default buildConfig({
 })
 ```
 
-### Configuration Options
+### Configuration Options#uploadthing-configuration
 
 | Option           | Description                                     | Default       |
 | ---------------- | ----------------------------------------------- | ------------- |
-| `apiKey`         | API key from Uploadthing. Required.             |               |
+| `token`          | Token from Uploadthing. Required.               |               |
 | `acl`            | Access control list for files that are uploaded | `public-read` |
 | `logLevel`       | Log level for Uploadthing                       | `info`        |
 | `fetch`          | Custom fetch function                           | `fetch`       |
@@ -259,11 +259,11 @@ export default buildConfig({
 
 If you need to create a custom storage adapter, you can use the [`@payloadcms/plugin-cloud-storage`](https://www.npmjs.com/package/@payloadcms/plugin-cloud-storage) package. This package is used internally by the storage adapters mentioned above.
 
-### Installation
+### Installation#custom-installation
 
 `pnpm add @payloadcms/plugin-cloud-storage`
 
-### Usage
+### Usage#custom-usage
 
 Reference any of the existing storage adapters for guidance on how this should be structured. Create an adapter following the `GeneratedAdapter` interface. Then, pass the adapter to the `cloudStorage` plugin.
 
@@ -310,7 +310,7 @@ This plugin is configurable to work across many different Payload collections. A
 | Option           | Type                                | Description                                                                                                                       |
 | ---------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `collections` \* | `Record<string, CollectionOptions>` | Object with keys set to the slug of collections you want to enable the plugin for, and values set to collection-specific options. |
-| `enabled`        |                                     | `boolean` to conditionally enable/disable plugin. Default: true.                                                                  |
+| `enabled`        | `boolean`                           | To conditionally enable/disable plugin. Default: `true`.                                                                          |
 
 ## Collection-specific options
 

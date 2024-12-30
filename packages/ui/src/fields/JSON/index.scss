@@ -1,16 +1,18 @@
 @import '../../scss/styles.scss';
 
-.json-field {
-  position: relative;
+@layer payload-default {
+  .json-field {
+    position: relative;
 
-  &.error {
-    .code-editor {
-      border-color: var(--theme-error-500);
-    }
+    &.error {
+      .code-editor {
+        border-color: var(--theme-error-500);
+      }
 
-    .monaco-editor-background,
-    .margin {
-      background-color: var(--theme-error-50);
+      .monaco-editor-background,
+      .margin {
+        background-color: var(--theme-error-50);
+      }
     }
   }
 }

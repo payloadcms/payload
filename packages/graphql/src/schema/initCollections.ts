@@ -14,7 +14,7 @@ import {
   GraphQLString,
 } from 'graphql'
 import { buildVersionCollectionFields, flattenTopLevelFields, formatNames, toWords } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, getLoginOptions } from 'payload/shared'
 
 import type { ObjectTypeConfig } from './buildObjectType.js'
 
@@ -97,7 +97,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     const whereInputFields = [...fields]
 
     if (!hasIDField) {
-      baseFields.id = { type: idType }
+      baseFields.id = { type: new GraphQLNonNull(idType) }
       whereInputFields.push({
         name: 'id',
         type: config.db.defaultIDType as 'text',
@@ -124,19 +124,29 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       parentName: singularName,
     })
 
-    if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
-      fields.push({
+    const mutationInputFields = [...fields]
+
+    if (
+      collectionConfig.auth &&
+      (!collectionConfig.auth.disableLocalStrategy ||
+        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.optionalPassword))
+    ) {
+      mutationInputFields.push({
         name: 'password',
         type: 'text',
         label: 'Password',
-        required: true,
+        required: !(
+          typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.optionalPassword
+        ),
       })
     }
 
     const createMutationInputType = buildMutationInputType({
       name: singularName,
       config,
-      fields,
+      fields: mutationInputFields,
       graphqlResult,
       parentName: singularName,
     })
@@ -147,7 +157,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     const updateMutationInputType = buildMutationInputType({
       name: `${singularName}Update`,
       config,
-      fields: fields.filter((field) => !(fieldAffectsData(field) && field.name === 'id')),
+      fields: mutationInputFields.filter(
+        (field) => !(fieldAffectsData(field) && field.name === 'id'),
+      ),
       forceNullable: true,
       graphqlResult,
       parentName: `${singularName}Update`,
@@ -184,6 +196,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           : {}),
         limit: { type: GraphQLInt },
         page: { type: GraphQLInt },
+        pagination: { type: GraphQLBoolean },
         sort: { type: GraphQLString },
       },
       resolve: findResolver(collection),
@@ -268,6 +281,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         type: collection.graphQL.type,
         args: {
           id: { type: new GraphQLNonNull(idType) },
+          ...(createMutationInputType
+            ? { data: { type: collection.graphQL.mutationInputType } }
+            : {}),
         },
         resolve: duplicateResolver(collection),
       }
@@ -276,7 +292,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     if (collectionConfig.versions) {
       const versionIDType = config.db.defaultIDType === 'text' ? GraphQLString : GraphQLInt
       const versionCollectionFields: Field[] = [
-        ...buildVersionCollectionFields(collectionConfig),
+        ...buildVersionCollectionFields(config, collectionConfig),
         {
           name: 'id',
           type: config.db.defaultIDType as 'text',
@@ -336,6 +352,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             : {}),
           limit: { type: GraphQLInt },
           page: { type: GraphQLInt },
+          pagination: { type: GraphQLBoolean },
           sort: { type: GraphQLString },
         },
         resolve: findVersionsResolver(collection),
@@ -438,10 +455,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       if (!collectionConfig.auth.disableLocalStrategy) {
         const authArgs = {}
 
-        const canLoginWithEmail =
-          !collectionConfig.auth.loginWithUsername ||
-          collectionConfig.auth.loginWithUsername?.allowEmailLogin
-        const canLoginWithUsername = collectionConfig.auth.loginWithUsername
+        const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(
+          collectionConfig.auth.loginWithUsername,
+        )
 
         if (canLoginWithEmail) {
           authArgs['email'] = { type: new GraphQLNonNull(GraphQLString) }

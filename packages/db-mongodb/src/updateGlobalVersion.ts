@@ -1,26 +1,42 @@
-import type { PayloadRequest, TypeWithID, UpdateGlobalVersionArgs } from 'payload'
+import type { QueryOptions } from 'mongoose'
+
+import { buildVersionGlobalFields, type TypeWithID, type UpdateGlobalVersionArgs } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: MongooseAdapter,
   {
     id,
-    global,
+    global: globalSlug,
     locale,
-    req = {} as PayloadRequest,
+    options: optionsArgs = {},
+    req,
+    select,
     versionData,
     where,
   }: UpdateGlobalVersionArgs<T>,
 ) {
-  const VersionModel = this.versions[global]
+  const VersionModel = this.versions[globalSlug]
   const whereToUse = where || { id: { equals: id } }
-  const options = {
-    ...(await withSession(this, req)),
+
+  const currentGlobal = this.payload.config.globals.find((global) => global.slug === globalSlug)
+  const fields = buildVersionGlobalFields(this.payload.config, currentGlobal)
+
+  const options: QueryOptions = {
+    ...optionsArgs,
     lean: true,
     new: true,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: buildVersionGlobalFields(this.payload.config, currentGlobal, true),
+      select,
+    }),
+    session: await getSession(this, req),
   }
 
   const query = await VersionModel.buildQuery({
@@ -29,7 +45,13 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where: whereToUse,
   })
 
-  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
+  const sanitizedData = sanitizeRelationshipIDs({
+    config: this.payload.config,
+    data: versionData,
+    fields,
+  })
+
+  const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
 
   const result = JSON.parse(JSON.stringify(doc))
 

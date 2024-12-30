@@ -1,16 +1,25 @@
-import type { DeleteOne, Document, PayloadRequest } from 'payload'
+import type { QueryOptions } from 'mongoose'
+import type { DeleteOne, Document } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,
-  { collection, req = {} as PayloadRequest, where },
+  { collection, req, select, where },
 ) {
   const Model = this.collections[collection]
-  const options = await withSession(this, req)
+  const options: QueryOptions = {
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: this.payload.collections[collection].config.flattenedFields,
+      select,
+    }),
+    session: await getSession(this, req),
+  }
 
   const query = await Model.buildQuery({
     payload: this.payload,

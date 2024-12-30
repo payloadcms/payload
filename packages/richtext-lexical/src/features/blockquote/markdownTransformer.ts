@@ -1,7 +1,7 @@
-import type { ElementTransformer } from '@lexical/markdown'
-
 import { $createQuoteNode, $isQuoteNode, QuoteNode } from '@lexical/rich-text'
 import { $createLineBreakNode } from 'lexical'
+
+import type { ElementTransformer } from '../../packages/@lexical/markdown/index.js'
 
 export const MarkdownTransformer: ElementTransformer = {
   type: 'element',
@@ -12,7 +12,7 @@ export const MarkdownTransformer: ElementTransformer = {
     }
 
     const lines = exportChildren(node).split('\n')
-    const output = []
+    const output: string[] = []
     for (const line of lines) {
       output.push('> ' + line)
     }

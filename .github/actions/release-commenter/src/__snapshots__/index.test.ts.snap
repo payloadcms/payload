@@ -1,0 +1,266 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`tests feature tests can apply labels 1`] = `
+[
+  [
+    {
+      "issue_number": 123,
+      "labels": [
+        ":dart: landed",
+        "release-current_tag_name",
+        "Release Name",
+      ],
+    },
+  ],
+  [
+    {
+      "issue_number": 7,
+      "labels": [
+        ":dart: landed",
+        "release-current_tag_name",
+        "Release Name",
+      ],
+    },
+  ],
+]
+`;
+
+exports[`tests main test 1`] = `
+{
+  "graphql": [MockFunction] {
+    "calls": [
+      [
+        "
+            {
+              resource(url: "http://repository/commit/SHA1") {
+                ... on Commit {
+                  messageHeadlineHTML
+                  messageBodyHTML
+                  associatedPullRequests(first: 10) {
+                    pageInfo {
+                      hasNextPage
+                    }
+                    edges {
+                      node {
+                        bodyHTML
+                        number
+                        state
+                        labels(first: 10) {
+                          pageInfo {
+                            hasNextPage
+                          }
+                          nodes {
+                            name
+                          }
+                        }
+                        timelineItems(itemTypes: [CONNECTED_EVENT, DISCONNECTED_EVENT], first: 100) {
+                          pageInfo {
+                            hasNextPage
+                          }
+                          nodes {
+                            ... on ConnectedEvent {
+                              __typename
+                              isCrossRepository
+                              subject {
+                                ... on Issue {
+                                  number
+                                }
+                              }
+                            }
+                            ... on DisconnectedEvent {
+                              __typename
+                              isCrossRepository
+                              subject {
+                                ... on Issue {
+                                  number
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ",
+      ],
+      [
+        "
+            {
+              resource(url: "http://repository/commit/SHA2") {
+                ... on Commit {
+                  messageHeadlineHTML
+                  messageBodyHTML
+                  associatedPullRequests(first: 10) {
+                    pageInfo {
+                      hasNextPage
+                    }
+                    edges {
+                      node {
+                        bodyHTML
+                        number
+                        state
+                        labels(first: 10) {
+                          pageInfo {
+                            hasNextPage
+                          }
+                          nodes {
+                            name
+                          }
+                        }
+                        timelineItems(itemTypes: [CONNECTED_EVENT, DISCONNECTED_EVENT], first: 100) {
+                          pageInfo {
+                            hasNextPage
+                          }
+                          nodes {
+                            ... on ConnectedEvent {
+                              __typename
+                              isCrossRepository
+                              subject {
+                                ... on Issue {
+                                  number
+                                }
+                              }
+                            }
+                            ... on DisconnectedEvent {
+                              __typename
+                              isCrossRepository
+                              subject {
+                                ... on Issue {
+                                  number
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ",
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": Promise {},
+      },
+      {
+        "type": "return",
+        "value": Promise {},
+      },
+    ],
+  },
+  "rest": {
+    "issues": {
+      "addLabels": [MockFunction],
+      "createComment": [MockFunction] {
+        "calls": [
+          [
+            {
+              "body": "Included in release [current_tag_name](http://current_release). Replacements: current_tag_name, current_tag_name.",
+              "issue_number": 3,
+            },
+          ],
+          [
+            {
+              "body": "Included in release [current_tag_name](http://current_release). Replacements: current_tag_name, current_tag_name.",
+              "issue_number": 123,
+            },
+          ],
+          [
+            {
+              "body": "Included in release [current_tag_name](http://current_release). Replacements: current_tag_name, current_tag_name.",
+              "issue_number": 7,
+            },
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": Promise {},
+          },
+          {
+            "type": "return",
+            "value": Promise {},
+          },
+          {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+      "get": [MockFunction] {
+        "calls": [
+          [
+            {
+              "issue_number": 3,
+            },
+          ],
+          [
+            {
+              "issue_number": 123,
+            },
+          ],
+          [
+            {
+              "issue_number": 7,
+            },
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": Promise {},
+          },
+          {
+            "type": "return",
+            "value": Promise {},
+          },
+          {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    },
+    "repos": {
+      "compareCommits": [MockFunction] {
+        "calls": [
+          [
+            {
+              "base": "prior_tag_name",
+              "head": "current_tag_name",
+            },
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+      "listReleases": [MockFunction] {
+        "calls": [
+          [
+            {
+              "per_page": 100,
+            },
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    },
+  },
+}
+`;

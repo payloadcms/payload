@@ -1,8 +1,6 @@
 'use client'
-import type { TextNode } from 'lexical'
-
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useFieldProps, useTranslation } from '@payloadcms/ui'
+import { useTranslation } from '@payloadcms/ui'
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
@@ -26,19 +24,20 @@ function SlashMenuItem({
   item,
   onClick,
   onMouseEnter,
+  ref,
 }: {
   index: number
   isSelected: boolean
   item: SlashMenuItemInternal
   onClick: () => void
   onMouseEnter: () => void
+  ref?: React.Ref<HTMLButtonElement>
 }) {
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
-  const { schemaPath } = useFieldProps()
 
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
 
   let className = `${baseClass}__item ${baseClass}__item-${item.key}`
   if (isSelected) {
@@ -49,7 +48,7 @@ function SlashMenuItem({
   if (item.label) {
     title =
       typeof item.label === 'function'
-        ? item.label({ i18n, richTextComponentMap, schemaPath })
+        ? item.label({ featureClientSchemaMap, i18n, schemaPath })
         : item.label
   }
   // Crop title to max. 25 characters
@@ -65,9 +64,7 @@ function SlashMenuItem({
       key={item.key}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
-      ref={(element) => {
-        item.ref = { current: element }
-      }}
+      ref={ref}
       role="option"
       tabIndex={-1}
       type="button"
@@ -87,11 +84,10 @@ export function SlashMenuPlugin({
   const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
   const {
-    field: { richTextComponentMap },
+    fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
-  const { schemaPath } = useFieldProps()
 
   const checkForTriggerMatch = useMenuTriggerMatch('/', {
     minLength: 0,
@@ -101,11 +97,13 @@ export function SlashMenuPlugin({
     let groupWithItems: Array<SlashMenuGroup> = []
 
     for (const dynamicItem of editorConfig.features.slashMenu.dynamicGroups) {
-      const dynamicGroupWithItems = dynamicItem({
-        editor,
-        queryString,
-      })
-      groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
+      if (queryString) {
+        const dynamicGroupWithItems = dynamicItem({
+          editor,
+          queryString,
+        })
+        groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
+      }
     }
 
     return groupWithItems
@@ -119,13 +117,14 @@ export function SlashMenuPlugin({
 
     if (queryString) {
       // Filter current groups first
+      // @ts-expect-error - TODO: fix this
       groupsWithItems = groupsWithItems.map((group) => {
         const filteredItems = group.items.filter((item) => {
           let itemTitle = item.key
           if (item.label) {
             itemTitle =
               typeof item.label === 'function'
-                ? item.label({ i18n, richTextComponentMap, schemaPath })
+                ? item.label({ featureClientSchemaMap, i18n, schemaPath })
                 : item.label
           }
 
@@ -173,26 +172,14 @@ export function SlashMenuPlugin({
     }
 
     return groupsWithItems
-  }, [getDynamicItems, queryString, editorConfig?.features, i18n])
-
-  const onSelectItem = useCallback(
-    (
-      selectedItem: SlashMenuItemType,
-      nodeToRemove: null | TextNode,
-      closeMenu: () => void,
-      matchingString: string,
-    ) => {
-      if (nodeToRemove) {
-        editor.update(() => {
-          nodeToRemove.remove()
-        })
-      }
-      selectedItem.onSelect({ editor, queryString: matchingString })
-
-      closeMenu()
-    },
-    [editor],
-  )
+  }, [
+    queryString,
+    editorConfig?.features.slashMenu.groups,
+    getDynamicItems,
+    featureClientSchemaMap,
+    i18n,
+    schemaPath,
+  ])
 
   return (
     <LexicalTypeaheadMenuPlugin
@@ -207,10 +194,10 @@ export function SlashMenuPlugin({
               <div className={baseClass}>
                 {groups.map((group) => {
                   let groupTitle = group.key
-                  if (group.label) {
+                  if (group.label && featureClientSchemaMap) {
                     groupTitle =
                       typeof group.label === 'function'
-                        ? group.label({ i18n, richTextComponentMap, schemaPath })
+                        ? group.label({ featureClientSchemaMap, i18n, schemaPath })
                         : group.label
                   }
 
@@ -233,6 +220,9 @@ export function SlashMenuPlugin({
                           onMouseEnter={() => {
                             setSelectedItemKey(item.key)
                           }}
+                          ref={(el) => {
+                            ;(item as SlashMenuItemInternal).ref = { current: el }
+                          }}
                         />
                       ))}
                     </div>
@@ -244,7 +234,6 @@ export function SlashMenuPlugin({
           : null
       }
       onQueryChange={setQueryString}
-      onSelectItem={onSelectItem}
       triggerFn={checkForTriggerMatch}
     />
   )

@@ -29,10 +29,10 @@ export type SizeReducerAction =
 
 export const sizeReducer = (state: SizeReducerState, action: SizeReducerAction) => {
   switch (action.type) {
-    case 'width':
-      return { ...state, width: action.value }
     case 'height':
       return { ...state, height: action.value }
+    case 'width':
+      return { ...state, width: action.value }
     default:
       return { ...state, ...(action?.value || {}) }
   }

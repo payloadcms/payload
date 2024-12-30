@@ -60,7 +60,7 @@ const NumberFields: CollectionConfig = {
       name: 'validatesHasMany',
       type: 'number',
       hasMany: true,
-      validate: (value: number[]) => {
+      validate: (value) => {
         if (value && !Array.isArray(value)) {
           return 'value should be an array'
         }

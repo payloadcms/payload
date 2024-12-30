@@ -1,14 +1,19 @@
 'use client'
-import type { Option, OptionObject, SelectFieldProps } from 'payload'
+import type {
+  Option,
+  OptionObject,
+  SelectFieldClientComponent,
+  SelectFieldClientProps,
+} from 'payload'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { SelectInputProps } from './Input.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { SelectInput } from './Input.js'
 
 const formatOptions = (options: Option[]): OptionObject[] =>
@@ -23,31 +28,28 @@ const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
+const SelectFieldComponent: SelectFieldClientComponent = (props) => {
   const {
     field,
     field: {
       name,
-      _path: pathFromProps,
       admin: {
         className,
         description,
         isClearable = true,
         isSortable = true,
-        readOnly: readOnlyFromAdmin,
-        style,
-        width,
-      } = {} as SelectFieldProps['field']['admin'],
+      } = {} as SelectFieldClientProps['field']['admin'],
       hasMany = false,
       label,
+      localized,
       options: optionsFromProps = [],
       required,
     },
     onChange: onChangeFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path,
+    readOnly,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const options = React.useMemo(() => formatOptions(optionsFromProps), [optionsFromProps])
 
@@ -60,18 +62,19 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
     [validate, required, hasMany, options],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField({
+    path,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
-
   const onChange: ReactSelectAdapterProps['onChange'] = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {
-      if (!disabled) {
+      if (!readOnly) {
         let newValue: string | string[] = null
         if (selectedOption && hasMany) {
           if (Array.isArray(selectedOption)) {
@@ -90,33 +93,34 @@ const SelectFieldComponent: React.FC<SelectFieldProps> = (props) => {
         setValue(newValue)
       }
     },
-    [disabled, hasMany, setValue, onChangeFromProps],
+    [readOnly, hasMany, setValue, onChangeFromProps],
   )
+
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
     <SelectInput
-      afterInput={field?.admin?.components?.afterInput}
-      beforeInput={field?.admin?.components?.beforeInput}
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
       className={className}
-      Description={field?.admin?.components?.Description}
+      Description={Description}
       description={description}
-      Error={field?.admin?.components?.Error}
-      field={field}
+      Error={Error}
       hasMany={hasMany}
       isClearable={isClearable}
       isSortable={isSortable}
-      Label={field?.admin?.components?.Label}
+      Label={Label}
       label={label}
+      localized={localized}
       name={name}
       onChange={onChange}
       options={options}
       path={path}
-      readOnly={disabled}
+      readOnly={readOnly}
       required={required}
       showError={showError}
-      style={style}
+      style={styles}
       value={value as string | string[]}
-      width={width}
     />
   )
 }

@@ -16,11 +16,30 @@ export interface Config {
     'autosave-posts': AutosavePost;
     'draft-posts': DraftPost;
     'draft-with-max-posts': DraftWithMaxPost;
+    'localized-posts': LocalizedPost;
     'version-posts': VersionPost;
     'custom-ids': CustomId;
     users: User;
+    'payload-jobs': PayloadJob;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    'disable-publish': DisablePublishSelect<false> | DisablePublishSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
+    'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
+    'draft-with-max-posts': DraftWithMaxPostsSelect<false> | DraftWithMaxPostsSelect<true>;
+    'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
+    'version-posts': VersionPostsSelect<false> | VersionPostsSelect<true>;
+    'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -30,10 +49,28 @@ export interface Config {
     'draft-global': DraftGlobal;
     'draft-with-max-global': DraftWithMaxGlobal;
     'disable-publish-global': DisablePublishGlobal;
+    'localized-global': LocalizedGlobal;
   };
-  locale: 'en' | 'es';
+  globalsSelect: {
+    'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
+    'draft-global': DraftGlobalSelect<false> | DraftGlobalSelect<true>;
+    'draft-with-max-global': DraftWithMaxGlobalSelect<false> | DraftWithMaxGlobalSelect<true>;
+    'disable-publish-global': DisablePublishGlobalSelect<false> | DisablePublishGlobalSelect<true>;
+    'localized-global': LocalizedGlobalSelect<false> | LocalizedGlobalSelect<true>;
+  };
+  locale: 'en' | 'es' | 'de';
   user: User & {
     collection: 'users';
+  };
+  jobs: {
+    tasks: {
+      schedulePublish: TaskSchedulePublish;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -150,6 +187,18 @@ export interface DraftWithMaxPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts".
+ */
+export interface LocalizedPost {
+  id: string;
+  text?: string | null;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids".
  */
 export interface CustomId {
@@ -174,6 +223,153 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: string;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'schedulePublish';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'schedulePublish') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'disable-publish';
+        value: string | DisablePublish;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'autosave-posts';
+        value: string | AutosavePost;
+      } | null)
+    | ({
+        relationTo: 'draft-posts';
+        value: string | DraftPost;
+      } | null)
+    | ({
+        relationTo: 'draft-with-max-posts';
+        value: string | DraftWithMaxPost;
+      } | null)
+    | ({
+        relationTo: 'localized-posts';
+        value: string | LocalizedPost;
+      } | null)
+    | ({
+        relationTo: 'version-posts';
+        value: string | VersionPost;
+      } | null)
+    | ({
+        relationTo: 'custom-ids';
+        value: string | CustomId;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'payload-jobs';
+        value: string | PayloadJob;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -208,6 +404,199 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-publish_select".
+ */
+export interface DisablePublishSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  relationToAutosaves?: T;
+  relationToVersions?: T;
+  relationToDrafts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-posts_select".
+ */
+export interface AutosavePostsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts_select".
+ */
+export interface DraftPostsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  radio?: T;
+  select?: T;
+  blocksField?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              text?: T;
+              localized?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  relation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-max-posts_select".
+ */
+export interface DraftWithMaxPostsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  radio?: T;
+  select?: T;
+  blocksField?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              text?: T;
+              localized?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  relation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts_select".
+ */
+export interface LocalizedPostsSelect<T extends boolean = true> {
+  text?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "version-posts_select".
+ */
+export interface VersionPostsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids_select".
+ */
+export interface CustomIdsSelect<T extends boolean = true> {
+  id?: T;
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -252,6 +641,90 @@ export interface DisablePublishGlobal {
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-global".
+ */
+export interface LocalizedGlobal {
+  id: string;
+  title?: string | null;
+  content?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-global_select".
+ */
+export interface AutosaveGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-global_select".
+ */
+export interface DraftGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-max-global_select".
+ */
+export interface DraftWithMaxGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-publish-global_select".
+ */
+export interface DisablePublishGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-global_select".
+ */
+export interface LocalizedGlobalSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSchedulePublish".
+ */
+export interface TaskSchedulePublish {
+  input: {
+    type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
+    doc?: {
+      relationTo: 'draft-posts';
+      value: string | DraftPost;
+    } | null;
+    global?: 'draft-global' | null;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

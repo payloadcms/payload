@@ -6,7 +6,6 @@ const DraftWithMaxGlobal: GlobalConfig = {
   slug: draftWithMaxGlobalSlug,
   label: 'Draft Global',
   admin: {
-    preview: () => 'https://payloadcms.com',
     components: {
       views: {
         edit: {

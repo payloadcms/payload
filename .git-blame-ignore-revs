@@ -28,3 +28,6 @@ fb7d1be2f3325d076b7c967b1730afcef37922c2
 
 # Prettier and lint remaining db packages
 7fd736ea5b2e9fc4ef936e9dc9e5e3d722f6d8bf
+
+# Bump all eslint deps, lint and format
+03291472d6e427ff94e61fca0616cca7796a3a95

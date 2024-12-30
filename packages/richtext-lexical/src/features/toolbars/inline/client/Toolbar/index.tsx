@@ -40,10 +40,13 @@ function ButtonGroupItem({
       )
     )
   }
+  if (!item.ChildComponent) {
+    return null
+  }
 
   return (
     <ToolbarButton editor={editor} item={item} key={item.key}>
-      {item?.ChildComponent && <item.ChildComponent />}
+      <item.ChildComponent />
     </ToolbarButton>
   )
 }
@@ -61,63 +64,64 @@ function ToolbarGroupComponent({
 }): React.ReactNode {
   const { editorConfig } = useEditorConfigContext()
 
-  const [DropdownIcon, setDropdownIcon] = React.useState<null | React.FC>(null)
+  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | undefined>()
 
   React.useEffect(() => {
     if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
       setDropdownIcon(() => group.ChildComponent)
     } else {
-      setDropdownIcon(null)
+      setDropdownIcon(undefined)
     }
   }, [group])
 
-  const onActiveChange = ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
-    if (!activeItems.length) {
-      if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-        setDropdownIcon(() => group.ChildComponent)
-      } else {
-        setDropdownIcon(null)
+  const onActiveChange = useCallback(
+    ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
+      if (!activeItems.length) {
+        if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+          setDropdownIcon(() => group.ChildComponent)
+        } else {
+          setDropdownIcon(undefined)
+        }
+        return
       }
-      return
-    }
-    const item = activeItems[0]
-    setDropdownIcon(() => item.ChildComponent)
-  }
+      const item = activeItems[0]
+      setDropdownIcon(() => item.ChildComponent)
+    },
+    [group],
+  )
 
   return (
     <div
       className={`inline-toolbar-popup__group inline-toolbar-popup__group-${group.key}`}
       key={group.key}
     >
-      {group.type === 'dropdown' &&
-        group.items.length &&
-        (DropdownIcon ? (
+      {group.type === 'dropdown' && group.items.length ? (
+        DropdownIcon ? (
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
-            groupKey={group.key}
+            group={group}
             Icon={DropdownIcon}
-            items={group.items}
-            maxActiveItems={1}
+            maxActiveItems={group.maxActiveItems ?? 1}
             onActiveChange={onActiveChange}
           />
         ) : (
           <ToolbarDropdown
             anchorElem={anchorElem}
             editor={editor}
-            groupKey={group.key}
-            items={group.items}
-            maxActiveItems={1}
+            group={group}
+            maxActiveItems={group.maxActiveItems ?? 1}
             onActiveChange={onActiveChange}
           />
-        ))}
-      {group.type === 'buttons' &&
-        group.items.length &&
-        group.items.map((item) => {
-          return (
-            <ButtonGroupItem anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
-          )
-        })}
+        )
+      ) : null}
+      {group.type === 'buttons' && group.items.length
+        ? group.items.map((item) => {
+            return (
+              <ButtonGroupItem anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
+            )
+          })
+        : null}
       {index < editorConfig.features.toolbarInline?.groups.length - 1 && (
         <div className="divider" />
       )}
@@ -205,7 +209,7 @@ function InlineToolbar({
     const isLinkEditorVisible =
       possibleLinkEditor !== null &&
       'style' in possibleLinkEditor &&
-      possibleLinkEditor?.style?.['opacity'] === '1'
+      possibleLinkEditor?.style?.['opacity' as keyof typeof possibleLinkEditor.style] === '1'
 
     const rootElement = editor.getRootElement()
     if (
@@ -291,22 +295,18 @@ function InlineToolbar({
   return (
     <div className="inline-toolbar-popup" ref={floatingToolbarRef}>
       <div className="caret" ref={caretRef} />
-      {editor.isEditable() && (
-        <React.Fragment>
-          {editorConfig?.features &&
-            editorConfig.features?.toolbarInline?.groups.map((group, i) => {
-              return (
-                <ToolbarGroupComponent
-                  anchorElem={anchorElem}
-                  editor={editor}
-                  group={group}
-                  index={i}
-                  key={group.key}
-                />
-              )
-            })}
-        </React.Fragment>
-      )}
+      {editorConfig?.features &&
+        editorConfig.features?.toolbarInline?.groups.map((group, i) => {
+          return (
+            <ToolbarGroupComponent
+              anchorElem={anchorElem}
+              editor={editor}
+              group={group}
+              index={i}
+              key={group.key}
+            />
+          )
+        })}
     </div>
   )
 }
@@ -388,7 +388,7 @@ function useInlineToolbar(
     )
   }, [editor, updatePopup])
 
-  if (!isText) {
+  if (!isText || !editor.isEditable()) {
     return null
   }
 

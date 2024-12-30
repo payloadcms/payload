@@ -51,6 +51,7 @@ export function convertLexicalPluginNodesToLexical({
     return []
   }
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
+  // @ts-expect-error - vestiges of the migration to strict mode. Probably not important enough in this file to fix
   return (
     lexicalPluginNodes.map((lexicalPluginNode, i) => {
       if (lexicalPluginNode.type === 'paragraph') {

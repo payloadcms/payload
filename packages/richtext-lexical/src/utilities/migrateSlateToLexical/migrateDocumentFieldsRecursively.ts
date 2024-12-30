@@ -2,13 +2,16 @@ import type { Field } from 'payload'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
-import type { SlateNodeConverter } from '../../features/migrations/slateToLexical/converter/types.js'
+import type {
+  SlateNode,
+  SlateNodeConverter,
+} from '../../features/migrations/slateToLexical/converter/types.js'
 import type { LexicalRichTextAdapter } from '../../types.js'
 
 import { convertSlateToLexical } from '../../features/migrations/slateToLexical/converter/index.js'
 
 type NestedRichTextFieldsArgs = {
-  data: unknown
+  data: Record<string, unknown>
 
   fields: Field[]
   found: number
@@ -23,7 +26,7 @@ export const migrateDocumentFieldsRecursively = ({
     if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
       if (fieldAffectsData(field) && typeof data[field.name] === 'object') {
         found += migrateDocumentFieldsRecursively({
-          data: data[field.name],
+          data: data[field.name] as Record<string, unknown>,
           fields: field.fields,
           found,
         })
@@ -37,18 +40,18 @@ export const migrateDocumentFieldsRecursively = ({
     } else if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         found += migrateDocumentFieldsRecursively({
-          data: tabHasName(tab) ? data[tab.name] : data,
+          data: (tabHasName(tab) ? data[tab.name] : data) as Record<string, unknown>,
           fields: tab.fields,
           found,
         })
       })
     } else if (Array.isArray(data[field.name])) {
       if (field.type === 'blocks') {
-        data[field.name].forEach((row, i) => {
+        ;(data[field.name] as Array<Record<string, unknown>>).forEach((row, i) => {
           const block = field.blocks.find(({ slug }) => slug === row?.blockType)
           if (block) {
             found += migrateDocumentFieldsRecursively({
-              data: data[field.name][i],
+              data: (data[field.name] as Array<Record<string, unknown>>)[i],
               fields: block.fields,
               found,
             })
@@ -57,9 +60,9 @@ export const migrateDocumentFieldsRecursively = ({
       }
 
       if (field.type === 'array') {
-        data[field.name].forEach((_, i) => {
+        ;(data[field.name] as Array<Record<string, unknown>>).forEach((_, i) => {
           found += migrateDocumentFieldsRecursively({
-            data: data[field.name][i],
+            data: (data[field.name] as Array<Record<string, unknown>>)[i],
             fields: field.fields,
             found,
           })
@@ -82,8 +85,8 @@ export const migrateDocumentFieldsRecursively = ({
             }
 
             data[field.name] = convertSlateToLexical({
-              converters,
-              slateData: data[field.name],
+              converters: converters!,
+              slateData: data[field.name] as SlateNode[],
             })
 
             found++

@@ -45,7 +45,7 @@ const toolbarGroups: ToolbarGroup[] = [
       },
       onSelect: ({ editor, isActive }) => {
         if (!isActive) {
-          let selectedText: string = null
+          let selectedText: string | undefined
           let selectedNodes: LexicalNode[] = []
           editor.getEditorState().read(() => {
             selectedText = $getSelection()?.getTextContent()

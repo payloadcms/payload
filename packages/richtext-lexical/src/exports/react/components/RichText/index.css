@@ -1,0 +1,4 @@
+.payload-richtext .nestedListItem,
+.payload-richtext .list-check {
+  list-style-type: none;
+}

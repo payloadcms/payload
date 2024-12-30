@@ -273,7 +273,7 @@ const result = await payload.verifyEmail({
 
 If a user locks themselves out and you wish to deliberately unlock them, you can utilize the Unlock operation. The [Admin Panel](../admin/overview) features an Unlock control automatically for all collections that feature max login attempts, but you can programmatically unlock users as well by using the Unlock operation.
 
-To restrict who is allowed to unlock users, you can utilize the [`unlock`](../access-control/overview#unlock) access control function.
+To restrict who is allowed to unlock users, you can utilize the [`unlock`](../access-control/collections#unlock) access control function.
 
 **Example REST API unlock**:
 
@@ -345,8 +345,8 @@ const token = await payload.forgotPassword({
 ```
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   You can stop the reset-password email from being sent via using the local API. This is helpful if
   you need to create user accounts programmatically, but not set their password for them. This
   effectively generates a reset password token which you can then use to send to a page you create,

@@ -6,4 +6,5 @@ export {
   OPTIONS as REST_OPTIONS,
   PATCH as REST_PATCH,
   POST as REST_POST,
+  PUT as REST_PUT,
 } from '../routes/rest/index.js'

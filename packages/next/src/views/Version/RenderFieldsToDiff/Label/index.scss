@@ -1,4 +1,6 @@
-.field-diff-label {
-  margin-bottom: calc(var(--base) * 0.25);
-  font-weight: 600;
+@layer payload-default {
+  .field-diff-label {
+    margin-bottom: calc(var(--base) * 0.25);
+    font-weight: 600;
+  }
 }

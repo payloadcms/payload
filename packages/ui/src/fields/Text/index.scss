@@ -1,36 +1,38 @@
 @import '../../scss/styles.scss';
 
-.field-type.text {
-  position: relative;
-
-  &:not(.has-many) {
-    input {
-      @include formInput;
-    }
-  }
-}
-
-.has-many {
-  .rs__input-container {
-    overflow: hidden;
-  }
-}
-
-html[data-theme='light'] {
+@layer payload-default {
   .field-type.text {
-    &.error {
+    position: relative;
+
+    &:not(.has-many) {
       input {
-        @include lightInputError;
+        @include formInput;
       }
     }
   }
-}
 
-html[data-theme='dark'] {
-  .field-type.text {
-    &.error {
-      input {
-        @include darkInputError;
+  .has-many {
+    .rs__input-container {
+      overflow: hidden;
+    }
+  }
+
+  html[data-theme='light'] {
+    .field-type.text {
+      &.error {
+        input {
+          @include lightInputError;
+        }
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .field-type.text {
+      &.error {
+        input {
+          @include darkInputError;
+        }
       }
     }
   }

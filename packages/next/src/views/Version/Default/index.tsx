@@ -1,14 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, ClientGlobalConfig, OptionObject } from 'payload'
 
-import {
-  Gutter,
-  SetViewActions,
-  useConfig,
-  useDocumentInfo,
-  usePayloadAPI,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Gutter, useConfig, useDocumentInfo, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import React, { useState } from 'react'
 
@@ -72,17 +65,14 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const comparison = compareValue?.value && currentComparisonDoc?.version // the `version` key is only present on `versions` documents
 
-  const canUpdate = docPermissions?.update?.permission
+  const canUpdate = docPermissions?.update
 
   const localeValues = locales && locales.map((locale) => locale.value)
 
+  const draftsEnabled = Boolean((collectionConfig || globalConfig)?.versions.drafts)
+
   return (
     <main className={baseClass}>
-      <SetViewActions
-        actions={
-          (collectionConfig || globalConfig)?.admin?.components?.views?.edit?.version?.actions
-        }
-      />
       <SetStepNav
         collectionConfig={collectionConfig}
         collectionSlug={collectionSlug}
@@ -118,6 +108,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         <div className={`${baseClass}__controls`}>
           <SelectComparison
             baseURL={compareBaseURL}
+            draftsEnabled={draftsEnabled}
             latestDraftVersion={latestDraftVersion}
             latestPublishedVersion={latestPublishedVersion}
             onChange={setCompareValue}

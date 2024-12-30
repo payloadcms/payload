@@ -11,12 +11,20 @@ import type { SanitizedConfig } from 'payload'
 
 import { fileURLToPath } from 'url'
 
+import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let testDir: string
 
+const writeDBAdapter = process.env.WRITE_DB_ADAPTER !== 'false'
 async function run() {
+  if (writeDBAdapter) {
+    generateDatabaseAdapter(process.env.PAYLOAD_DATABASE || 'mongodb')
+    process.env.WRITE_DB_ADAPTER = 'false'
+  }
+
   if (testConfigDir) {
     testDir = path.resolve(dirname, testConfigDir)
 
@@ -45,6 +53,7 @@ async function run() {
     for (const suiteDir of foundDirs) {
       i++
       const pathWithConfig = path.resolve(suiteDir, 'config.ts')
+
       console.log(`Generating types for config ${i} / ${foundDirs.length}:`, pathWithConfig)
 
       // start a new node process which runs test/generateTypes with pathWithConfig as argument. Can't run it in this process, as there could otherwise be

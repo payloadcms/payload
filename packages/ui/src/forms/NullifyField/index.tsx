@@ -55,9 +55,12 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
       <CheckboxField
         checked={checked}
         field={{
+          name: '',
           label: t('general:fallbackToDefaultLocale'),
         }}
         id={`field-${path.replace(/\./g, '__')}`}
+        path={path}
+        schemaPath=""
         // onToggle={onChange}
       />
     </Banner>

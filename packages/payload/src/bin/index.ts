@@ -1,3 +1,4 @@
+import { Cron } from 'croner'
 import minimist from 'minimist'
 import { pathToFileURL } from 'node:url'
 import path from 'path'
@@ -5,6 +6,7 @@ import path from 'path'
 import type { BinScript } from '../config/types.js'
 
 import { findConfig } from '../config/find.js'
+import payload, { getPayload } from '../index.js'
 import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
@@ -81,6 +83,54 @@ export const bin = async () => {
 
   if (script === 'generate:importmap') {
     return generateImportMap(config)
+  }
+
+  if (script === 'jobs:run') {
+    const payload = await getPayload({ config })
+    const limit = args.limit ? parseInt(args.limit, 10) : undefined
+    const queue = args.queue ? args.queue : undefined
+
+    if (args.cron) {
+      new Cron(args.cron, async () => {
+        await payload.jobs.run({
+          limit,
+          queue,
+        })
+      })
+
+      process.stdin.resume() // Keep the process alive
+
+      return
+    } else {
+      return await payload.jobs.run({
+        limit,
+        queue,
+      })
+    }
+  }
+
+  if (script === 'generate:db-schema') {
+    // Barebones instance to access database adapter, without connecting to the DB
+    await payload.init({
+      config,
+      disableDBConnect: true,
+      disableOnInit: true,
+    })
+
+    if (typeof payload.db.generateSchema !== 'function') {
+      payload.logger.error({
+        msg: `${payload.db.packageName} does not support database schema generation`,
+      })
+
+      process.exit(1)
+    }
+
+    await payload.db.generateSchema({
+      log: args.log === 'false' ? false : true,
+      prettify: args.prettify === 'false' ? false : true,
+    })
+
+    process.exit(0)
   }
 
   console.error(`Unknown script: "${script}".`)

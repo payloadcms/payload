@@ -2,7 +2,7 @@ import type { Config } from '../../config/types.js'
 import type {
   ArrayField,
   Block,
-  BlockField,
+  BlocksField,
   CheckboxField,
   Field,
   NumberField,
@@ -156,7 +156,7 @@ describe('sanitizeFields', () => {
             fields,
             validRelationships: [],
           })
-        )[0] as BlockField
+        )[0] as BlocksField
         expect(sanitizedField.name).toStrictEqual('noLabelBlock')
         expect(sanitizedField.label).toStrictEqual(false)
         expect(sanitizedField.type).toStrictEqual('blocks')
@@ -209,7 +209,7 @@ describe('sanitizeFields', () => {
           fields,
           validRelationships: [],
         })
-      )[0] as BlockField
+      )[0] as BlocksField
       expect(sanitizedField.name).toStrictEqual('specialBlock')
       expect(sanitizedField.label).toStrictEqual('Special Block')
       expect(sanitizedField.type).toStrictEqual('blocks')

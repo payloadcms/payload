@@ -1,4 +1,12 @@
-import type { ClientField, Data, FormField, FormState, Row, User } from 'payload'
+import type {
+  ClientField,
+  Data,
+  FormField,
+  FormState,
+  Row,
+  User,
+  ValidationFieldError,
+} from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
@@ -33,7 +41,7 @@ export type FormProps = {
   log?: boolean
   onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
-  onSuccess?: (json: unknown) => Promise<void> | void
+  onSuccess?: (json: unknown) => Promise<FormState | void> | void
   redirect?: string
   submitted?: boolean
   uuid?: string
@@ -52,7 +60,7 @@ export type FormProps = {
 export type SubmitOptions = {
   action?: string
   method?: string
-  overrides?: Record<string, unknown>
+  overrides?: ((formState) => FormData) | Record<string, unknown>
   skipValidation?: boolean
 }
 
@@ -62,7 +70,14 @@ export type Submit = (
   e?: React.FormEvent<HTMLFormElement>,
 ) => Promise<void>
 export type ValidateForm = () => Promise<boolean>
-export type CreateFormData = (overrides?: any) => FormData
+export type CreateFormData = (
+  overrides?: Record<string, unknown>,
+  /**
+   * If mergeOverrideData true, the data will be merged with the existing data in the form state.
+   * @default true
+   */
+  options?: { mergeOverrideData?: boolean },
+) => FormData
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data
@@ -96,6 +111,11 @@ export type UPDATE = {
   path: string
   type: 'UPDATE'
 } & Partial<FormField>
+
+export type UPDATE_MANY = {
+  formState: FormState
+  type: 'UPDATE_MANY'
+}
 
 export type REMOVE_ROW = {
   path: string
@@ -133,10 +153,7 @@ export type MOVE_ROW = {
 }
 
 export type ADD_SERVER_ERRORS = {
-  errors: {
-    field: string
-    message: string
-  }[]
+  errors: ValidationFieldError[]
   type: 'ADD_SERVER_ERRORS'
 }
 
@@ -165,24 +182,24 @@ export type FieldAction =
   | SET_ALL_ROWS_COLLAPSED
   | SET_ROW_COLLAPSED
   | UPDATE
+  | UPDATE_MANY
 
 export type FormFieldsContext = [FormState, Dispatch<FieldAction>]
 
 export type Context = {
   addFieldRow: ({
-    data,
+    blockType,
     path,
     rowIndex,
     schemaPath,
+    subFieldState,
   }: {
-    data?: Data
+    blockType?: string
     path: string
-    /*
-     * by default the new row will be added to the end of the list
-     */
     rowIndex?: number
     schemaPath: string
-  }) => Promise<void>
+    subFieldState?: FormState
+  }) => void
   buildRowErrors: () => void
   createFormData: CreateFormData
   disabled: boolean
@@ -200,16 +217,18 @@ export type Context = {
   initializing: boolean
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
-    data,
+    blockType,
     path,
     rowIndex,
     schemaPath,
+    subFieldState,
   }: {
-    data?: Data
+    blockType?: string
     path: string
     rowIndex: number
     schemaPath: string
-  }) => Promise<void>
+    subFieldState?: FormState
+  }) => void
   replaceState: (state: FormState) => void
   reset: Reset
   setDisabled: (disabled: boolean) => void

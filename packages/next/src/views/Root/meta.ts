@@ -27,17 +27,21 @@ const oneSegmentMeta = {
 
 type Args = {
   config: Promise<SanitizedConfig>
-  params: {
+  params: Promise<{
     [key: string]: string | string[]
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     [key: string]: string | string[]
-  }
+  }>
 }
 
-export const generatePageMetadata = async ({ config: configPromise, params }: Args) => {
+export const generatePageMetadata = async ({
+  config: configPromise,
+  params: paramsPromise,
+}: Args) => {
   const config = await configPromise
 
+  const params = await paramsPromise
   const segments = Array.isArray(params.segments) ? params.segments : []
 
   const currentRoute = `/${segments.join('/')}`
@@ -85,7 +89,7 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
       break
     }
     case 2: {
-      if (segmentOne === 'reset') {
+      if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         meta = await generateResetPasswordMetadata({ config, i18n })
       }

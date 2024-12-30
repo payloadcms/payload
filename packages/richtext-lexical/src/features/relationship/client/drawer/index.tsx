@@ -2,10 +2,10 @@
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useListDrawer } from '@payloadcms/ui'
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import { useLexicalListDrawer } from '../../../../utilities/fieldsDrawer/useLexicalListDrawer.js'
 import { $createRelationshipNode } from '../nodes/RelationshipNode.js'
 import { INSERT_RELATIONSHIP_COMMAND } from '../plugins/index.js'
 import { EnabledRelationshipsCondition } from '../utils/EnabledRelationshipsCondition.js'
@@ -44,12 +44,12 @@ type Props = {
 const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   const [editor] = useLexicalComposerContext()
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState(
-    () => enabledCollectionSlugs[0],
+    () => enabledCollectionSlugs?.[0],
   )
   const [replaceNodeKey, setReplaceNodeKey] = useState<null | string>(null)
 
-  const [ListDrawer, ListDrawerToggler, { closeDrawer, isDrawerOpen, openDrawer }] = useListDrawer({
-    collectionSlugs: enabledCollectionSlugs,
+  const { closeListDrawer, isListDrawerOpen, ListDrawer, openListDrawer } = useLexicalListDrawer({
+    collectionSlugs: enabledCollectionSlugs ? enabledCollectionSlugs : undefined,
     selectedCollection: selectedCollectionSlug,
   })
 
@@ -60,37 +60,37 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
       INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND,
       (payload) => {
         setReplaceNodeKey(payload?.replace ? payload?.replace.nodeKey : null)
-        openDrawer()
+        openListDrawer()
         return true
       },
       COMMAND_PRIORITY_EDITOR,
     )
-  }, [editor, openDrawer])
+  }, [editor, openListDrawer])
 
   const onSelect = useCallback(
-    ({ collectionSlug, docID }) => {
+    ({ collectionSlug, docID }: { collectionSlug: string; docID: number | string }) => {
       insertRelationship({
         editor,
         relationTo: collectionSlug,
         replaceNodeKey,
         value: docID,
       })
-      closeDrawer()
+      closeListDrawer()
     },
-    [editor, closeDrawer, replaceNodeKey],
+    [editor, closeListDrawer, replaceNodeKey],
   )
 
   useEffect(() => {
     // always reset back to first option
     // TODO: this is not working, see the ListDrawer component
-    setSelectedCollectionSlug(enabledCollectionSlugs[0])
-  }, [isDrawerOpen, enabledCollectionSlugs])
+    setSelectedCollectionSlug(enabledCollectionSlugs?.[0])
+  }, [isListDrawerOpen, enabledCollectionSlugs])
 
   return <ListDrawer onSelect={onSelect} />
 }
 
 export const RelationshipDrawer = (props: Props): React.ReactNode => {
-  return props?.enabledCollectionSlugs?.length > 0 ? ( // If enabledCollectionSlugs it overrides what EnabledRelationshipsCondition is doing
+  return (props?.enabledCollectionSlugs?.length ?? -1) > 0 ? ( // If enabledCollectionSlugs it overrides what EnabledRelationshipsCondition is doing
     <RelationshipDrawerComponent {...props} />
   ) : (
     <EnabledRelationshipsCondition {...props}>

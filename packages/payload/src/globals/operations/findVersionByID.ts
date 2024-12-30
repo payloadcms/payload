@@ -1,5 +1,5 @@
 import type { FindGlobalVersionsArgs } from '../../database/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -17,7 +17,9 @@ export type Arguments = {
   globalConfig: SanitizedGlobalConfig
   id: number | string
   overrideAccess?: boolean
+  populate?: PopulateType
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields?: boolean
 }
 
@@ -31,8 +33,10 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     disableErrors,
     globalConfig,
     overrideAccess,
+    populate,
     req: { fallbackLocale, locale, payload },
     req,
+    select,
     showHiddenFields,
   } = args
 
@@ -57,6 +61,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       limit: 1,
       locale,
       req,
+      select,
       where: combineQueries({ id: { equals: id } }, accessResults),
     }
 
@@ -84,6 +89,10 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
 
     // Clone the result - it may have come back memoized
     let result: any = deepCopyObjectSimple(results[0])
+
+    if (!result.version) {
+      result.version = {}
+    }
 
     // Patch globalType onto version doc
     result.version.globalType = globalConfig.slug
@@ -119,7 +128,9 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       global: globalConfig,
       locale,
       overrideAccess,
+      populate,
       req,
+      select: typeof select?.version === 'object' ? select.version : undefined,
       showHiddenFields,
     })
 

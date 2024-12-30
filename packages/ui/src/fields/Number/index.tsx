@@ -1,54 +1,47 @@
 'use client'
-import type { NumberFieldProps } from 'payload'
+import type { NumberFieldClientComponent, NumberFieldClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { isNumber } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { RenderComponent } from '../../providers/Config/RenderComponent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-import { fieldBaseClass } from '../shared/index.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 
-const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
+const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
-    descriptionProps,
-    errorProps,
     field,
     field: {
-      name,
-      _path: pathFromProps,
       admin: {
         className,
         description,
         placeholder,
-        readOnly: readOnlyFromAdmin,
         step = 1,
-        style,
-        width,
-      } = {} as NumberFieldProps['field']['admin'],
+      } = {} as NumberFieldClientProps['field']['admin'],
       hasMany = false,
       label,
+      localized,
       max = Infinity,
       maxRows = Infinity,
       min = -Infinity,
       required,
     },
-    labelProps,
     onChange: onChangeFromProps,
-    readOnly: readOnlyFromTopLevelProps,
+    path,
+    readOnly,
     validate,
   } = props
-  const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const { i18n, t } = useTranslation()
 
@@ -61,16 +54,15 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     [validate, min, max, required],
   )
 
-  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
-
-  const { formInitializing, formProcessing, path, setValue, showError, value } = useField<
-    number | number[]
-  >({
-    path: pathFromContext ?? pathFromProps ?? name,
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    setValue,
+    showError,
+    value,
+  } = useField<number | number[]>({
+    path,
     validate: memoizedValidate,
   })
-
-  const disabled = readOnlyFromProps || readOnlyFromContext || formProcessing || formInitializing
 
   const handleChange = useCallback(
     (e) => {
@@ -78,7 +70,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
       let newVal = val
 
       if (Number.isNaN(val)) {
-        newVal = undefined
+        newVal = null
       }
 
       if (typeof onChangeFromProps === 'function') {
@@ -96,7 +88,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!disabled) {
+      if (!readOnly) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -109,7 +101,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         setValue(newValue)
       }
     },
-    [disabled, setValue],
+    [readOnly, setValue],
   )
 
   // useEffect update valueToRender:
@@ -130,6 +122,8 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     }
   }, [value, hasMany])
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -137,34 +131,29 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         'number',
         className,
         showError && 'error',
-        disabled && 'read-only',
+        readOnly && 'read-only',
         hasMany && 'has-many',
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+      style={styles}
     >
-      <FieldLabel
-        field={field}
-        Label={field?.admin?.components?.Label}
-        label={label}
-        required={required}
-        {...(labelProps || {})}
+      <RenderCustomComponent
+        CustomComponent={Label}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <FieldError
-          CustomError={field?.admin?.components?.Error}
-          field={field}
-          path={path}
-          {...(errorProps || {})}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
         />
+        {BeforeInput}
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
-            disabled={disabled}
+            disabled={readOnly}
             filterOption={(_, rawInput) => {
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
               return isNumber(rawInput) && !isOverHasMany
@@ -189,9 +178,8 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
           />
         ) : (
           <div>
-            <RenderComponent mappedComponent={field?.admin?.components?.beforeInput} />
             <input
-              disabled={disabled}
+              disabled={readOnly}
               id={`field-${path.replace(/\./g, '__')}`}
               max={max}
               min={min}
@@ -206,14 +194,12 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
               type="number"
               value={typeof value === 'number' ? value : ''}
             />
-            <RenderComponent mappedComponent={field?.admin?.components?.afterInput} />
           </div>
         )}
-        <FieldDescription
-          Description={field?.admin?.components?.Description}
-          description={description}
-          field={field}
-          {...(descriptionProps || {})}
+        {AfterInput}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
         />
       </div>
     </div>

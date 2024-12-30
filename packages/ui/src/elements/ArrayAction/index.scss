@@ -1,32 +1,34 @@
 @import '../../scss/styles.scss';
 
-.array-actions {
-  &__button {
-    @extend %btn-reset;
-    cursor: pointer;
-    border-radius: 100px;
+@layer payload-default {
+  .array-actions {
+    &__button {
+      @extend %btn-reset;
+      cursor: pointer;
+      border-radius: 100px;
 
-    &:hover {
-      background: var(--theme-elevation-0);
+      &:hover {
+        background: var(--theme-elevation-0);
+      }
     }
-  }
 
-  &__actions {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
+    &__actions {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
 
-  &__action {
-    display: flex;
-    gap: calc(var(--base) / 2);
-    align-items: center;
+    &__action {
+      display: flex;
+      gap: calc(var(--base) / 2);
+      align-items: center;
 
-    svg {
-      position: relative;
+      svg {
+        position: relative;
 
-      .stroke {
-        stroke-width: 1px;
+        .stroke {
+          stroke-width: 1px;
+        }
       }
     }
   }

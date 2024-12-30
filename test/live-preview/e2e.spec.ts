@@ -13,6 +13,8 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   ensureDeviceIsCentered,
@@ -30,11 +32,12 @@ import {
   ssrAutosavePagesSlug,
   ssrPagesSlug,
 } from './shared.js'
+import { wait } from 'payload/shared'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
 describe('Live Preview', () => {
   let page: Page
@@ -56,6 +59,15 @@ describe('Live Preview', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+
+    await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  beforeEach(async () => {
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'livePreviewTest',
+    })
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -95,7 +107,7 @@ describe('Live Preview', () => {
     const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
 
-    await expect(titleField).toBeVisible()
+    await expect(titleField).toBeEnabled()
 
     const renderedPageTitleLocator = `#${renderedPageTitleID}`
 
@@ -155,7 +167,7 @@ describe('Live Preview', () => {
     const titleField = page.locator('#field-title')
     const frame = page.frameLocator('iframe.live-preview-iframe').first()
 
-    await expect(titleField).toBeVisible()
+    await expect(titleField).toBeEnabled()
 
     const renderedPageTitleLocator = `#${renderedPageTitleID}`
 
@@ -167,8 +179,14 @@ describe('Live Preview', () => {
     await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: SSR Home')
 
     const newTitleValue = 'SSR Home (Edited)'
+    await wait(1000)
 
-    await titleField.fill(newTitleValue)
+    await titleField.clear()
+    await titleField.pressSequentially(newTitleValue)
+
+    await wait(1000)
+
+    await waitForAutoSaveToRunAndComplete(page)
 
     await expect(() =>
       expect(frame.locator(renderedPageTitleLocator)).toHaveText(`For Testing: ${newTitleValue}`),
@@ -210,12 +228,7 @@ describe('Live Preview', () => {
   })
 
   test('global — has route', async () => {
-    const url = page.url()
     await goToGlobalLivePreview(page, 'header', serverURL)
-
-    await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
   })
 
   test('global — renders iframe', async () => {

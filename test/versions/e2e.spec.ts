@@ -40,16 +40,17 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
-  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { titleToDelete } from './shared.js'
 import {
-  autoSaveGlobalSlug,
   autosaveCollectionSlug,
+  autoSaveGlobalSlug,
   customIDSlug,
   disablePublishGlobalSlug,
   disablePublishSlug,
@@ -57,6 +58,8 @@ import {
   draftGlobalSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
+  localizedCollectionSlug,
+  localizedGlobalSlug,
   postCollectionSlug,
 } from './slugs.js'
 
@@ -66,30 +69,9 @@ const dirname = path.dirname(filename)
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-
-const waitForAutoSaveToComplete = async (page: Page) => {
-  await expect(async () => {
-    await expect(
-      page.locator('.autosave:has-text("Last saved less than a minute ago")'),
-    ).toBeVisible()
-  }).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-}
-
-const waitForAutoSaveToRunAndComplete = async (page: Page) => {
-  await expect(async () => {
-    await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
-  }).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await waitForAutoSaveToComplete(page)
-}
-
 let context: BrowserContext
 
-describe('versions', () => {
+describe('Versions', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
@@ -97,6 +79,7 @@ describe('versions', () => {
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
+  let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -107,9 +90,15 @@ describe('versions', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
+    /* await throttleTest({
+      page,
+      context,
+      delay: 'Slow 4G',
+    }) */
     await reInitializeDB({
       serverURL,
       snapshotKey: 'versionsTest',
@@ -282,7 +271,7 @@ describe('versions', () => {
         hasText: 'Versions',
       })
       await versionsTab.waitFor({ state: 'visible' })
-      const versionsPill = versionsTab.locator('.doc-tab__count--has-count')
+      const versionsPill = versionsTab.locator('.doc-tab__count')
       await versionsPill.waitFor({ state: 'visible' })
       const versionCount = versionsTab.locator('.doc-tab__count').first()
       await expect(versionCount).toHaveText('11')
@@ -320,11 +309,11 @@ describe('versions', () => {
       await saveDocAndAssert(page, '#action-save-draft')
       const savedDocURL = page.url()
       await page.goto(`${savedDocURL}/versions`)
-      await page.waitForURL(`${savedDocURL}/versions`)
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
       await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
+      await expect(page.locator('.render-field-diffs')).toBeVisible()
       await page.locator('.restore-version__button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
@@ -401,6 +390,42 @@ describe('versions', () => {
       expect(page.url()).toMatch(/\/versions$/)
     })
 
+    test('collection - should autosave', async () => {
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const { id: postID } = await payload.create({
+        collection: postCollectionSlug,
+        data: {
+          title: 'post title',
+          description: 'post description',
+        },
+      })
+
+      await page.goto(postURL.edit(postID))
+
+      await trackNetworkRequests(
+        page,
+        `${serverURL}/admin/collections/${postCollectionSlug}/${postID}`,
+        async () => {
+          await page
+            .locator(
+              '#field-relationToAutosaves.field-type.relationship .relationship-add-new__add-button.doc-drawer__toggler',
+            )
+            .click()
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
+      await expect(drawer).toBeVisible()
+      await expect(drawer.locator('.id-label')).toBeVisible()
+    })
+
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       await page.goto(url.global(autoSaveGlobalSlug))
@@ -420,7 +445,6 @@ describe('versions', () => {
       const spanishTitle = 'spanish title'
       const newDescription = 'new description'
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page)
       const titleField = page.locator('#field-title')
       await expect(titleField).toBeEnabled()
       await titleField.fill(englishTitle)
@@ -484,22 +508,18 @@ describe('versions', () => {
 
     test('collection — autosave should only update the current document', async () => {
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('first post description')
       await saveDocAndAssert(page)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await page.goto(autosaveURL.create)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('second post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('second post description')
       await saveDocAndAssert(page)
-      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
       await waitForAutoSaveToRunAndComplete(page)
@@ -610,6 +630,173 @@ describe('versions', () => {
       await versionsTabUpdated.waitFor({ state: 'visible' })
 
       expect(versionsTabUpdated).toBeTruthy()
+    })
+  })
+  describe('Collections - publish specific locale', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, localizedCollectionSlug)
+    })
+
+    test('should show publish individual locale dropdown', async () => {
+      await page.goto(url.create)
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+
+      await expect(publishOptions).toBeVisible()
+    })
+
+    test('should show option to publish current locale', async () => {
+      await page.goto(url.create)
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+
+      await expect(publishSpecificLocale).toContainText('English')
+    })
+
+    test('should publish specific locale', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, 'es')
+      const textField = page.locator('#field-text')
+      const status = page.locator('.status__value')
+
+      await textField.fill('spanish published')
+      await saveDocAndAssert(page)
+      await expect(status).toContainText('Published')
+
+      await textField.fill('spanish draft')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(status).toContainText('Changed')
+
+      await changeLocale(page, 'en')
+      await textField.fill('english published')
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.popup-button-list button').first()
+      await expect(publishSpecificLocale).toContainText('English')
+      await publishSpecificLocale.click()
+
+      await wait(500)
+
+      await expect(async () => {
+        await expect(
+          page.locator('.payload-toast-item:has-text("Updated successfully.")'),
+        ).toBeVisible()
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      id = await page.locator('.id-label').getAttribute('title')
+
+      const data = await payload.find({
+        collection: localizedCollectionSlug,
+        locale: '*',
+        where: {
+          id: { equals: id },
+        },
+      })
+
+      const publishedDoc = data.docs[0]
+
+      expect(publishedDoc.text).toStrictEqual({
+        en: 'english published',
+        es: 'spanish published',
+      })
+    })
+  })
+
+  describe('Globals - publish individual locale', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, localizedGlobalSlug)
+    })
+
+    test('should show publish individual locale dropdown', async () => {
+      await page.goto(url.global(localizedGlobalSlug))
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+
+      await expect(publishOptions).toBeVisible()
+    })
+
+    test('should show option to publish current locale', async () => {
+      await page.goto(url.global(localizedGlobalSlug))
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+
+      await expect(publishSpecificLocale).toContainText('English')
+    })
+  })
+
+  describe('Versions diff view', () => {
+    let postID: string
+    let versionID: string
+
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+    })
+
+    beforeEach(async () => {
+      const newPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'new post',
+          description: 'new description',
+        },
+      })
+
+      postID = newPost.id
+
+      await payload.update({
+        collection: draftCollectionSlug,
+        id: postID,
+        draft: true,
+        data: {
+          title: 'draft post',
+          description: 'draft description',
+          blocksField: [
+            {
+              blockName: 'block1',
+              blockType: 'block',
+              text: 'block text',
+            },
+          ],
+        },
+      })
+
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: { equals: postID },
+        },
+      })
+
+      versionID = versions.docs[0].id
+    })
+
+    test('should render diff', async () => {
+      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
+      await page.goto(versionURL)
+      await page.waitForURL(versionURL)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+    })
+
+    test('should render diff for nested fields', async () => {
+      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
+      await page.goto(versionURL)
+      await page.waitForURL(versionURL)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+
+      const blocksDiffLabel = page.locator('.field-diff-label', {
+        hasText: exactText('Blocks Field'),
+      })
+
+      await expect(blocksDiffLabel).toBeVisible()
+      const blocksDiff = blocksDiffLabel.locator('+ .iterable-diff__wrap > .render-field-diffs')
+      await expect(blocksDiff).toBeVisible()
+      const blockTypeDiffLabel = blocksDiff.locator('.render-field-diffs__field').first()
+      await expect(blockTypeDiffLabel).toBeVisible()
     })
   })
 })

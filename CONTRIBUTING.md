@@ -122,3 +122,19 @@ This is how you can preview changes you made locally to the docs:
 4. Add a `DOCS_DIR` environment variable to the `.env` file which points to the absolute path of your modified docs folder. For example `DOCS_DIR=/Users/yourname/Documents/GitHub/payload/docs`
 5. Run `yarn run fetchDocs:local`. If this was successful, you should see no error messages and the following output: _Docs successfully written to /.../website/src/app/docs.json_. There could be error messages if you have incorrect markdown in your local docs folder. In this case, it will tell you how you can fix it
 6. You're done! Now you can start the website locally using `yarn run dev` and preview the docs under [http://localhost:3000/docs/](http://localhost:3000/docs/)
+
+## Internationalization (i18n)
+
+If your PR adds a string to the UI, we need to make sure to translate it into all the languages ​​that Payload supports. To do that:
+
+- Find the appropriate internationalization file for your package. These are typically located in `packages/translations/src/languages`, although some packages (e.g., richtext-lexical) have separate i18n files for each feature.
+- Add the string to the English locale "en".
+- Translate it to other languages. You can use the `translateNewKeys` script if you have an OpenAI API key in your `.env` (under `OPENAI_KEY`), or you can use ChatGPT or Google translate - whatever is easier for you. For payload core translations (in packages/translations) you can run the `translateNewKeys` script using `cd packages/translations && pnpm translateNewKeys`. For lexical translations, you can run it using `cd packages/richtext-lexical && pnpm translateNewKeys`. External contributors can skip this step and leave it to us.
+
+To display translation strings in the UI, make sure to use the `t` utility of the `useTranslation` hook:
+
+```ts
+const { t } = useTranslation()
+// ...
+t('yourStringKey')
+```

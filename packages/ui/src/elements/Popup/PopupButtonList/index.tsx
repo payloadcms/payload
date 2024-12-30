@@ -60,6 +60,7 @@ export const Button: React.FC<MenuButtonProps> = ({
             onClick(e)
           }
         }}
+        prefetch={false}
       >
         {children}
       </Link>

@@ -2,8 +2,6 @@ name: release-canary
 
 on:
   workflow_dispatch:
-    branches:
-      - beta
 
 env:
   NODE_VERSION: 22.6.0
@@ -13,9 +11,10 @@ env:
 
 jobs:
   release:
+    name: release-canary-${{ github.ref_name }}-${{ github.sha }}
     permissions:
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4

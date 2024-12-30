@@ -19,8 +19,8 @@ export function login(collection: Collection): any {
 
     const result = await loginOperation(options)
     const cookie = generatePayloadCookie({
-      collectionConfig: collection.config,
-      payload: context.req.payload,
+      collectionAuthConfig: collection.config.auth,
+      cookiePrefix: context.req.payload.config.cookiePrefix,
       token: result.token,
     })
 

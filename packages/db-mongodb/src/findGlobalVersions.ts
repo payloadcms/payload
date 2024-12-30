@@ -1,35 +1,30 @@
-import type { PaginateOptions } from 'mongoose'
-import type { FindGlobalVersions, PayloadRequest } from 'payload'
+import type { PaginateOptions, QueryOptions } from 'mongoose'
+import type { FindGlobalVersions } from 'payload'
 
 import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
+import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,
-  {
-    global,
-    limit,
-    locale,
-    page,
-    pagination,
-    req = {} as PayloadRequest,
-    skip,
-    sort: sortArg,
-    where,
-  },
+  { global, limit, locale, page, pagination, req, select, skip, sort: sortArg, where },
 ) {
   const Model = this.versions[global]
   const versionFields = buildVersionGlobalFields(
+    this.payload.config,
     this.payload.globals.config.find(({ slug }) => slug === global),
+    true,
   )
-  const options = {
-    ...(await withSession(this, req)),
+
+  const session = await getSession(this, req)
+  const options: QueryOptions = {
     limit,
+    session,
     skip,
   }
 
@@ -61,13 +56,13 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
   const paginationOptions: PaginateOptions = {
-    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
     limit,
     options,
     page,
     pagination,
+    projection: buildProjectionFromSelect({ adapter: this, fields: versionFields, select }),
     sort,
     useEstimatedCount,
   }
@@ -88,8 +83,8 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
-          ...options,
           hint: { _id: 1 },
+          session,
         }),
       )
     }

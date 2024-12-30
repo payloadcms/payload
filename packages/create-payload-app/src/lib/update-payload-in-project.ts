@@ -39,7 +39,7 @@ export async function updatePayloadInProject(
   // Fetch latest Payload version from npm
   const { exitCode: getLatestVersionExitCode, stdout: latestPayloadVersion } = await execa('npm', [
     'show',
-    'payload@beta',
+    'payload',
     'version',
   ])
   if (getLatestVersionExitCode !== 0) {

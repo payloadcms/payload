@@ -1,5 +1,4 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { Connect } from 'payload'
 
 import { createClient } from '@libsql/client'
@@ -27,7 +26,7 @@ export const connect: Connect = async function connect(
     }
 
     const logger = this.logger || false
-    this.drizzle = drizzle(this.client, { logger, schema: this.schema }) as LibSQLDatabase
+    this.drizzle = drizzle(this.client, { logger, schema: this.schema })
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {

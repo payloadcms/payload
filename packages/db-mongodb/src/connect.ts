@@ -57,6 +57,14 @@ export const connect: Connect = async function connect(
       }
     }
 
+    if (this.ensureIndexes) {
+      await Promise.all(
+        this.payload.config.collections.map(async (coll) => {
+          await this.collections[coll.slug]?.ensureIndexes()
+        }),
+      )
+    }
+
     if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
       await this.migrate({ migrations: this.prodMigrations })
     }

@@ -19,6 +19,7 @@ const handler: PayloadHandler = async (req) => {
       snapshotKey: String(data.snapshotKey),
       // uploadsDir can be string or stringlist
       uploadsDir: data.uploadsDir as string | string[],
+      deleteOnly: data.deleteOnly,
     })
 
     return Response.json(

@@ -5,7 +5,6 @@ import { executePromises } from '../helpers/executePromises.js'
 import { seedDB } from '../helpers/seed.js'
 import {
   collectionSlugs,
-  customIdCollectionId,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
@@ -15,21 +14,6 @@ import {
 } from './slugs.js'
 
 export const seed = async (_payload) => {
-  if (_payload.db.name === 'mongoose') {
-    await Promise.all(
-      _payload.config.collections.map(async (coll) => {
-        await new Promise((resolve, reject) => {
-          _payload.db?.collections[coll.slug]?.ensureIndexes(function (err) {
-            if (err) {
-              reject(err)
-            }
-            resolve(true)
-          })
-        })
-      }),
-    )
-  }
-
   await executePromises(
     [
       () =>
@@ -42,12 +26,30 @@ export const seed = async (_payload) => {
           depth: 0,
           overrideAccess: true,
         }),
-      ...[...Array(11)].map(() => async () => {
+      () =>
+        _payload.create({
+          collection: 'base-list-filters',
+          data: {
+            title: 'show me',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: 'base-list-filters',
+          data: {
+            title: 'hide me',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      ...[...Array(11)].map((_, i) => async () => {
         const postDoc = await _payload.create({
           collection: postsCollectionSlug,
           data: {
             description: 'Description',
-            title: 'Title',
+            title: `Post ${i + 1}`,
           },
           depth: 0,
           overrideAccess: true,
@@ -110,26 +112,6 @@ export const seed = async (_payload) => {
           depth: 0,
           overrideAccess: true,
         }),
-      () =>
-        _payload.create({
-          collection: 'customIdTab',
-          data: {
-            id: customIdCollectionId,
-            title: 'Hello world title',
-          },
-          depth: 0,
-          overrideAccess: true,
-        }),
-      () =>
-        _payload.create({
-          collection: 'customIdRow',
-          data: {
-            id: customIdCollectionId,
-            title: 'Hello world title',
-          },
-          depth: 0,
-          overrideAccess: true,
-        }),
     ],
     false,
   )
@@ -140,6 +122,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs,
     seedFunction: seed,
-    snapshotKey: 'adminTest',
+    snapshotKey: 'adminTests',
   })
 }

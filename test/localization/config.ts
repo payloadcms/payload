@@ -13,6 +13,8 @@ import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized
 import { NestedArray } from './collections/NestedArray/index.js'
 import { NestedFields } from './collections/NestedFields/index.js'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
+import { NoLocalizedFieldsCollection } from './collections/NoLocalizedFields/index.js'
+import { RichTextCollection } from './collections/RichText/index.js'
 import { Tab } from './collections/Tab/index.js'
 import {
   blocksWithLocalizedSameName,
@@ -24,9 +26,9 @@ import {
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
+  relationshipLocalizedSlug,
   relationSpanishTitle,
   relationSpanishTitle2,
-  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
   withLocalizedRelSlug,
@@ -54,6 +56,7 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [
+    RichTextCollection,
     BlocksCollection,
     NestedArray,
     NestedFields,
@@ -111,8 +114,15 @@ export default buildConfigWithDefaults({
           ],
           type: 'group',
         },
+        {
+          name: 'unique',
+          type: 'text',
+          localized: true,
+          unique: true,
+        },
       ],
     },
+    NoLocalizedFieldsCollection,
     ArrayCollection,
     {
       fields: [
@@ -123,30 +133,108 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
-          name: 'layout',
-          blocks: [
+          type: 'tabs',
+          tabs: [
             {
+              label: 'Main Nav',
+              fields: [
+                {
+                  name: 'nav',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'layout',
+                      blocks: [
+                        {
+                          fields: [
+                            {
+                              name: 'text',
+                              type: 'text',
+                            },
+                            {
+                              name: 'nestedArray',
+                              type: 'array',
+                              fields: [
+                                {
+                                  name: 'text',
+                                  type: 'text',
+                                },
+                                {
+                                  name: 'l2',
+                                  type: 'array',
+                                  fields: [
+                                    {
+                                      name: 'l3',
+                                      type: 'array',
+                                      fields: [
+                                        {
+                                          name: 'l4',
+                                          type: 'array',
+                                          fields: [
+                                            {
+                                              name: 'superNestedText',
+                                              type: 'text',
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                          slug: 'text',
+                        },
+                        {
+                          fields: [
+                            {
+                              name: 'number',
+                              type: 'number',
+                            },
+                          ],
+                          slug: 'number',
+                        },
+                      ],
+                      localized: true,
+                      required: true,
+                      type: 'blocks',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'myTab',
               fields: [
                 {
                   name: 'text',
                   type: 'text',
                 },
-              ],
-              slug: 'text',
-            },
-            {
-              fields: [
                 {
-                  name: 'number',
-                  type: 'number',
+                  name: 'group',
+                  type: 'group',
+                  localized: true,
+                  fields: [
+                    {
+                      name: 'nestedArray2',
+                      type: 'array',
+                      fields: [
+                        {
+                          name: 'nestedText',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                    {
+                      name: 'nestedText',
+                      type: 'text',
+                    },
+                  ],
                 },
               ],
-              slug: 'number',
             },
           ],
-          localized: true,
-          required: true,
-          type: 'blocks',
         },
       ],
       slug: withRequiredLocalizedFields,
@@ -308,6 +396,16 @@ export default buildConfigWithDefaults({
       ],
       slug: 'global-array',
     },
+    {
+      fields: [
+        {
+          name: 'text',
+          localized: true,
+          type: 'text',
+        },
+      ],
+      slug: 'global-text',
+    },
   ],
   localization: {
     defaultLocale,
@@ -342,19 +440,6 @@ export default buildConfigWithDefaults({
   },
   onInit: async (payload) => {
     const collection = localizedPostsSlug
-
-    console.log('SEED BEGIN')
-
-    if (payload.db.name === 'mongoose') {
-      await new Promise((resolve, reject) => {
-        payload.db?.collections[localizedPostsSlug]?.ensureIndexes(function (err) {
-          if (err) reject(err)
-          resolve(true)
-        })
-      })
-    }
-
-    console.log('INDEXES CREATED')
 
     await payload.create({
       collection,

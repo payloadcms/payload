@@ -1,9 +1,9 @@
-import type { MappedComponent } from 'payload'
+import type { ClientField } from 'payload'
 
 import type { EnabledFeatures } from './types.js'
 
 export const createFeatureMap = (
-  richTextComponentMap: Map<string, MappedComponent>,
+  richTextComponentMap: Map<string, ClientField[] | React.ReactNode>,
 ): EnabledFeatures => {
   const features: EnabledFeatures = {
     elements: {},
@@ -12,6 +12,9 @@ export const createFeatureMap = (
   }
 
   for (const [key, value] of richTextComponentMap) {
+    if (Array.isArray(value)) {
+      continue // We only wanna process react nodes here
+    }
     if (key.startsWith('leaf.button') || key.startsWith('leaf.component.')) {
       const leafName = key.replace('leaf.button.', '').replace('leaf.component.', '')
 

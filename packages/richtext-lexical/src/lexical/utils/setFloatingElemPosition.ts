@@ -16,7 +16,7 @@ export function setFloatingElemPosition(args: {
   specialHandlingForCaret?: boolean
   targetRect: ClientRect | null
   verticalGap?: number
-}): number {
+}): number | undefined {
   const {
     alwaysDisplayOnTop = false,
     anchorElem,

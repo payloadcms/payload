@@ -1,4 +1,4 @@
-import type { Collection, Field, PayloadRequest, RichTextField } from 'payload'
+import type { Collection, Field, PayloadRequest, RichTextField, SelectType } from 'payload'
 
 import { createDataloaderCacheKey } from 'payload'
 
@@ -13,6 +13,7 @@ type Arguments = {
   key: number | string
   overrideAccess?: boolean
   req: PayloadRequest
+  select?: SelectType
   showHiddenFields: boolean
 }
 
@@ -26,6 +27,7 @@ export const populate = async ({
   key,
   overrideAccess,
   req,
+  select,
   showHiddenFields,
 }: {
   collection: Collection
@@ -44,6 +46,7 @@ export const populate = async ({
       fallbackLocale: req.locale,
       locale: req.fallbackLocale,
       overrideAccess: typeof overrideAccess === 'undefined' ? false : overrideAccess,
+      select,
       showHiddenFields,
       transactionID: req.transactionID,
     }),

@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres
+    ports:
+      - '54320:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: your-database-name # THIS MUST MATCH YOUR DB NAME IN .env
+      POSTGRES_HOST_AUTH_METHOD: trust
+    env_file:
+      - .env

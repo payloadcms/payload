@@ -2,11 +2,15 @@ import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
   beginTransaction,
+  buildCreateMigration,
   commitTransaction,
   count,
+  countGlobalVersions,
+  countVersions,
   create,
   createGlobal,
   createGlobalVersion,
+  createSchemaGenerator,
   createVersion,
   deleteMany,
   deleteOne,
@@ -33,25 +37,28 @@ import {
   updateVersion,
 } from '@payloadcms/drizzle'
 import {
-  convertPathToJSONTraversal,
+  columnToCodeConverter,
   countDistinct,
+  createDatabase,
+  createExtensions,
   createJSONQuery,
-  createMigration,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
-  getMigrationTemplate,
   init,
   insert,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { fileURLToPath } from 'url'
 
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+
+const filename = fileURLToPath(import.meta.url)
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -74,16 +81,41 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       adapterSchema = { enum: pgEnum, table: pgTable }
     }
 
+    const extensions = (args.extensions ?? []).reduce((acc, name) => {
+      acc[name] = true
+      return acc
+    }, {})
+
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
+      afterSchemaInit: args.afterSchemaInit ?? [],
+      beforeSchemaInit: args.beforeSchemaInit ?? [],
+      createDatabase,
+      createExtensions,
+      createMigration: buildCreateMigration({
+        executeMethod: 'execute',
+        filename,
+        sanitizeStatements({ sqlExecute, statements }) {
+          return `${sqlExecute}\n ${statements.join('\n')}\`)`
+        },
+      }),
       defaultDrizzleSnapshot,
+      disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
       enums: {},
+      extensions,
       features: {
         json: true,
       },
       fieldConstraints: {},
-      getMigrationTemplate,
+      generateSchema: createSchemaGenerator({
+        columnToCodeConverter,
+        corePackageSuffix: 'pg-core',
+        defaultOutputFile: args.generateSchemaOutputFile,
+        enumImport: 'pgEnum',
+        schemaImport: 'pgSchema',
+        tableImport: 'pgTable',
+      }),
       idType: postgresIDType,
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
@@ -101,21 +133,23 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       sessions: {},
       tableNameMap: new Map<string, string>(),
       tables: {},
+      tablesFilter: args.tablesFilter,
       transactionOptions: args.transactionOptions || undefined,
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
-      beginTransaction: args.transactionOptions === false ? undefined : beginTransaction,
+      beginTransaction:
+        args.transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       commitTransaction,
       connect,
-      convertPathToJSONTraversal,
       count,
       countDistinct,
+      countGlobalVersions,
+      countVersions,
       create,
       createGlobal,
       createGlobalVersion,
       createJSONQuery,
-      createMigration,
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,
@@ -130,6 +164,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       findGlobalVersions,
       findOne,
       findVersions,
+      indexes: new Set<string>(),
       init,
       insert,
       migrate,
@@ -142,6 +177,8 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       packageName: '@payloadcms/db-postgres',
       payload,
       queryDrafts,
+      rawRelations: {},
+      rawTables: {},
       rejectInitializing,
       requireDrizzleKit,
       resolveInitializing,
@@ -150,6 +187,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateGlobalVersion,
       updateOne,
       updateVersion,
+      upsert: updateOne,
     })
   }
 
@@ -160,4 +198,5 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
 }
 
 export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
+export { geometryColumn } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'

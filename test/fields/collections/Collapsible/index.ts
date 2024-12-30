@@ -82,7 +82,7 @@ const CollapsibleFields: CollectionConfig = {
         description: 'Collapsible label rendered from a function.',
         initCollapsed: true,
         components: {
-          RowLabel: getCustomLabel({
+          Label: getCustomLabel({
             path: 'functionTitleField',
             fallback: 'Custom Collapsible Label',
             style: {},
@@ -101,7 +101,7 @@ const CollapsibleFields: CollectionConfig = {
       admin: {
         description: 'Collapsible label rendered as a react component.',
         components: {
-          RowLabel: getCustomLabel({ path: 'componentTitleField', style: {} }),
+          Label: getCustomLabel({ path: 'componentTitleField', style: {} }),
         },
       },
       fields: [
@@ -113,7 +113,7 @@ const CollapsibleFields: CollectionConfig = {
           type: 'collapsible',
           admin: {
             components: {
-              RowLabel: getCustomLabel({
+              Label: getCustomLabel({
                 path: 'nestedTitle',
                 fallback: 'Nested Collapsible',
                 style: {},
@@ -134,12 +134,12 @@ const CollapsibleFields: CollectionConfig = {
       type: 'array',
       fields: [
         {
+          type: 'collapsible',
           admin: {
             components: {
-              RowLabel: '/collections/Collapsible/NestedCustomLabel/index.js#NestedCustomLabel',
+              Label: '/collections/Collapsible/NestedCustomLabel/index.js#NestedCustomLabel',
             },
           },
-          type: 'collapsible',
           fields: [
             {
               name: 'innerCollapsible',
