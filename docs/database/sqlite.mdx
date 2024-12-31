@@ -36,7 +36,7 @@ export default buildConfig({
 
 | Option                     | Description                                                                                                                                                                      |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `client` \*                | [Client connection options](https://orm.drizzle.team/docs/get-started-sqlite#turso) that will be passed to `createClient` from `@libsql/client`.                                 |
+| `client` *                | [Client connection options](https://orm.drizzle.team/docs/get-started-sqlite#turso) that will be passed to `createClient` from `@libsql/client`.                                 |
 | `push`                     | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
 | `migrationDir`             | Customize the directory that migrations are stored.                                                                                                                              |
 | `logger`                   | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                           |
@@ -172,7 +172,7 @@ sqliteAdapter({
 })
 ```
 
-Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection. 
+Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection.
 
 
 ### afterSchemaInit
