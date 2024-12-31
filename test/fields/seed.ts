@@ -31,6 +31,7 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
+  checkboxFieldsSlug,
   codeFieldsSlug,
   collapsibleFieldsSlug,
   collectionSlugs,
@@ -304,6 +305,24 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: dateFieldsSlug,
     data: dateDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: checkboxFieldsSlug,
+    data: {
+      checkbox: true,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: checkboxFieldsSlug,
+    data: {
+      checkbox: false,
+    },
     depth: 0,
     overrideAccess: true,
   })

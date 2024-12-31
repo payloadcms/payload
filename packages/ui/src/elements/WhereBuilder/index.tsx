@@ -174,7 +174,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                         const initialValue =
                           conditions[orIndex].and[andIndex]?.[initialFieldName]?.[
                             initialOperator
-                          ] || ''
+                          ] || undefined
 
                         return (
                           <li key={andIndex}>
