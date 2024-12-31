@@ -33,26 +33,6 @@
       "import": "./src/exports/utilities.ts",
       "types": "./src/exports/utilities.ts",
       "default": "./src/exports/utilities.ts"
-    },
-    "./azure": {
-      "import": "./src/exports/azure.ts",
-      "types": "./src/exports/azure.ts",
-      "default": "./src/exports/azure.ts"
-    },
-    "./gcs": {
-      "import": "./src/exports/gcs.ts",
-      "types": "./src/exports/gcs.ts",
-      "default": "./src/exports/gcs.ts"
-    },
-    "./s3": {
-      "import": "./src/exports/s3.ts",
-      "types": "./src/exports/s3.ts",
-      "default": "./src/exports/s3.ts"
-    },
-    "./vercelBlob": {
-      "import": "./src/exports/vercelBlob.ts",
-      "types": "./src/exports/vercelBlob.ts",
-      "default": "./src/exports/vercelBlob.ts"
     }
   },
   "main": "./src/index.ts",
@@ -77,42 +57,11 @@
     "range-parser": "^1.2.1"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.614.0",
-    "@aws-sdk/lib-storage": "^3.614.0",
-    "@azure/storage-blob": "^12.11.0",
-    "@google-cloud/storage": "^7.7.0",
     "@types/find-node-modules": "^2.1.2",
-    "@vercel/blob": "^0.22.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@aws-sdk/client-s3": "^3.614.0",
-    "@aws-sdk/lib-storage": "^3.614.0",
-    "@azure/abort-controller": "^1.0.0",
-    "@azure/storage-blob": "^12.11.0",
-    "@google-cloud/storage": "^7.7.0",
-    "@vercel/blob": "^0.22.3",
     "payload": "workspace:*"
-  },
-  "peerDependenciesMeta": {
-    "@aws-sdk/client-s3": {
-      "optional": true
-    },
-    "@aws-sdk/lib-storage": {
-      "optional": true
-    },
-    "@azure/abort-controller": {
-      "optional": true
-    },
-    "@azure/storage-blob": {
-      "optional": true
-    },
-    "@google-cloud/storage": {
-      "optional": true
-    },
-    "@vercel/blob": {
-      "optional": true
-    }
   },
   "publishConfig": {
     "exports": {
@@ -130,26 +79,6 @@
         "import": "./dist/exports/utilities.js",
         "types": "./dist/exports/utilities.d.ts",
         "default": "./dist/exports/utilities.js"
-      },
-      "./azure": {
-        "import": "./dist/exports/azure.js",
-        "types": "./dist/exports/azure.d.ts",
-        "default": "./dist/exports/azure.js"
-      },
-      "./gcs": {
-        "import": "./dist/exports/gcs.js",
-        "types": "./dist/exports/gcs.d.ts",
-        "default": "./dist/exports/gcs.js"
-      },
-      "./s3": {
-        "import": "./dist/exports/s3.js",
-        "types": "./dist/exports/s3.d.ts",
-        "default": "./dist/exports/s3.js"
-      },
-      "./vercelBlob": {
-        "import": "./dist/exports/vercelBlob.js",
-        "types": "./dist/exports/vercelBlob.d.ts",
-        "default": "./dist/exports/vercelBlob.js"
       }
     },
     "main": "./dist/index.js",

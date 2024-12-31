@@ -968,9 +968,6 @@ importers:
 
   packages/plugin-cloud-storage:
     dependencies:
-      '@azure/abort-controller':
-        specifier: ^1.0.0
-        version: 1.1.0
       find-node-modules:
         specifier: ^2.1.3
         version: 2.1.3
@@ -978,24 +975,9 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1
     devDependencies:
-      '@aws-sdk/client-s3':
-        specifier: ^3.614.0
-        version: 3.687.0
-      '@aws-sdk/lib-storage':
-        specifier: ^3.614.0
-        version: 3.687.0(@aws-sdk/client-s3@3.687.0)
-      '@azure/storage-blob':
-        specifier: ^12.11.0
-        version: 12.25.0
-      '@google-cloud/storage':
-        specifier: ^7.7.0
-        version: 7.14.0
       '@types/find-node-modules':
         specifier: ^2.1.2
         version: 2.1.2
-      '@vercel/blob':
-        specifier: ^0.22.3
-        version: 0.22.3
       payload:
         specifier: workspace:*
         version: link:../payload
