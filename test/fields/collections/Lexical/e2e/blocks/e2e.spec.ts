@@ -1184,7 +1184,7 @@ describe('lexicalBlocks', () => {
 
       await expect(
         page.locator('.lexical-block-blockInLexical .render-fields label.field-label'),
-      ).toHaveText('My Label')
+      ).toHaveText('My Label*')
       await expect(
         page.locator('.lexical-block-blockInLexical .render-fields .required'),
       ).toHaveText('*')
