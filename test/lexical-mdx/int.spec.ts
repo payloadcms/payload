@@ -19,6 +19,7 @@ import { restExamplesTest2 } from './tests/restExamples2.test.js'
 
 import { defaultTests } from './tests/default.test.js'
 import { writeFileSync } from 'fs'
+import { codeTest1 } from './tests/code1.test.js'
 
 let config: SanitizedConfig
 let editorConfig: SanitizedServerEditorConfig
@@ -61,7 +62,12 @@ describe('Lexical MDX', () => {
     editorConfig = (richTextField.editor as LexicalRichTextAdapter).editorConfig
   })
 
-  const INPUT_AND_OUTPUTBase: Tests = [...defaultTests, restExamplesTest1, restExamplesTest2]
+  const INPUT_AND_OUTPUTBase: Tests = [
+    ...defaultTests,
+    restExamplesTest1,
+    restExamplesTest2,
+    codeTest1,
+  ]
 
   const INPUT_AND_OUTPUT: Tests = INPUT_AND_OUTPUTBase.find((test) => test.debugFlag)
     ? [INPUT_AND_OUTPUTBase.find((test) => test.debugFlag)]
