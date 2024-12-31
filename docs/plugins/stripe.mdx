@@ -65,14 +65,14 @@ export default config
 
 | Option                         | Type               | Default     | Description                                                                                                              |
 | ------------------------------ | ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `stripeSecretKey` \*           | string             | `undefined` | Your Stripe secret key                                                                                                   |
+| `stripeSecretKey` *            | string             | `undefined` | Your Stripe secret key                                                                                                   |
 | `stripeWebhooksEndpointSecret` | string             | `undefined` | Your Stripe webhook endpoint secret                                                                                      |
 | `rest`                         | boolean            | `false`     | When `true`, opens the `/api/stripe/rest` endpoint                                                                       |
-| `webhooks`                     | object \| function | `undefined` | Either a function to handle all webhooks events, or an object of Stripe webhook handlers, keyed to the name of the event |
+| `webhooks`                     | object or function | `undefined` | Either a function to handle all webhooks events, or an object of Stripe webhook handlers, keyed to the name of the event |
 | `sync`                         | array              | `undefined` | An array of sync configs                                                                                                 |
 | `logs`                         | boolean            | `false`     | When `true`, logs sync events to the console as they happen                                                              |
 
-_\* An asterisk denotes that a property is required._
+_* An asterisk denotes that a property is required._
 
 ## Endpoints
 
