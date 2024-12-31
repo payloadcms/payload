@@ -524,7 +524,7 @@ export default buildConfigWithDefaults({
         relationship: localizedRelation.id,
       },
     })
-    await payload.create({
+    const relationshipLocalized = await payload.create({
       collection: relationshipLocalizedSlug,
       data: {
         arrayField: [
@@ -541,6 +541,15 @@ export default buildConfigWithDefaults({
         relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
       },
       locale: 'en',
+    })
+
+    await payload.update({
+      collection: relationshipLocalizedSlug,
+      id: relationshipLocalized.id,
+      data: {
+        relationMultiRelationTo: { relationTo: collection, value: localizedPost.id },
+      },
+      locale: 'es',
     })
 
     console.log('SEED 5')

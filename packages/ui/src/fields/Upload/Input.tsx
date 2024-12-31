@@ -115,8 +115,14 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   const { openModal } = useModal()
-  const { drawerSlug, setCollectionSlug, setInitialFiles, setMaxFiles, setOnSuccess } =
-    useBulkUpload()
+  const {
+    drawerSlug,
+    setCollectionSlug,
+    setCurrentActivePath,
+    setInitialFiles,
+    setMaxFiles,
+    setOnSuccess,
+  } = useBulkUpload()
   const { permissions } = useAuth()
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
@@ -269,6 +275,7 @@ export function UploadInput(props: UploadInputProps) {
       if (typeof maxRows === 'number') {
         setMaxFiles(maxRows)
       }
+      setCurrentActivePath(path)
       openModal(drawerSlug)
     },
     [
@@ -280,6 +287,8 @@ export function UploadInput(props: UploadInputProps) {
       setInitialFiles,
       maxRows,
       setMaxFiles,
+      path,
+      setCurrentActivePath,
     ],
   )
 
@@ -426,8 +435,8 @@ export function UploadInput(props: UploadInputProps) {
   }, [populateDocs, activeRelationTo, value])
 
   useEffect(() => {
-    setOnSuccess(onUploadSuccess)
-  }, [value, onUploadSuccess, setOnSuccess])
+    setOnSuccess(path, onUploadSuccess)
+  }, [value, path, onUploadSuccess, setOnSuccess])
 
   const showDropzone =
     !value ||

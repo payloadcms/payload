@@ -45,7 +45,7 @@ For security and safety reasons, the [Admin Panel](../admin/overview) does **not
 If you are building a [Custom Component](../admin/components) and need to access Environment Variables from the client-side, you can do so by prefixing them with `NEXT_PUBLIC_`.
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   Be careful about what variables you provide to your client-side code. Analyze every single one to make sure that you're not accidentally leaking sensitive information. Only ever include keys that are safe for the public to read in plain text.
 </Banner>
 
@@ -95,7 +95,7 @@ export default buildConfig({
 ```
 
 <Banner type="warning">
-  <strong>Tip:</strong>
+  **Tip:**
   Be sure that `dotenv` can find your `.env` file. By default, it will look for a file named `.env` in the root of your project. If you need to specify a different file, pass the path into the config options.
 </Banner>
 

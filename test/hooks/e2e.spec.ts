@@ -21,7 +21,7 @@ const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 
-describe('hooks', () => {
+describe('Hooks', () => {
   let url: AdminUrlUtil
   let page: Page
   let serverURL: string
