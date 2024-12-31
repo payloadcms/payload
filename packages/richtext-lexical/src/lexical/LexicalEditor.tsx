@@ -115,7 +115,7 @@ export const LexicalEditor: React.FC<
           contentEditable={
             <div className="editor-scroller">
               <div className="editor" ref={onRef} tabIndex={-1}>
-                <LexicalContentEditable />
+                <LexicalContentEditable editorConfig={editorConfig} />
               </div>
             </div>
           }
