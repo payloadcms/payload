@@ -412,6 +412,21 @@ export interface User {
  */
 export interface LexicalInBlock {
   id: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   blocks?:
     | {
         lexical?: {
@@ -2041,6 +2056,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "LexicalInBlock_select".
  */
 export interface LexicalInBlockSelect<T extends boolean = true> {
+  content?: T;
   blocks?:
     | T
     | {
