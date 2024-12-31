@@ -679,20 +679,25 @@ const CustomComponent: React.FC = () => {
 
 ## useDocumentInfo
 
-The `useDocumentInfo` hook provides lots of information about the document currently being edited, including the following:
+The `useDocumentInfo` hook provides information about the current document being edited, including the following:
 
 | Property                  | Description                                                                                                        |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **`collection`**          | If the doc is a collection, its Collection Config will be returned                                                 |
-| **`global`**              | If the doc is a global, its Global Config will be returned                                                         |
+| **`currentEditor`**       | The user currently editing the document.                                                                             |
+| **`docConfig`**              | Either the Collection or Global config of the document, depending on what is being edited.                         |
+| **`documentIsLocked`**    | Whether the document is currently locked by another user.                                                          |
 | **`id`**                  | If the doc is a collection, its ID will be returned                                                                |
-| **`preferencesKey`**      | The `preferences` key to use when interacting with document-level user preferences                                 |
-| **`versions`**            | Versions of the current doc                                                                                        |
-| **`unpublishedVersions`** | Unpublished versions of the current doc                                                                            |
-| **`publishedDoc`**        | The currently published version of the doc being edited                                                            |
-| **`getVersions`**         | Method to trigger the retrieval of document versions                                                               |
-| **`docPermissions`**      | The current documents permissions. Collection document permissions fallback when no id is present (i.e. on create) |
-| **`getDocPermissions`**   | Method to trigger the retrieval of document level permissions                                                      |
+| **`getDocPermissions`**   | Method to retrieve document-level user preferences.                                                 |
+| **`getDocPreferences`**   | Method to retrieve document-level user preferences.                                                 |
+| **`hasPublishedDoc`**     | Whether the document has a published version.                                                                      |
+| **`incrementVersionCount`** | Method to increment the version count of the document.                                                           |
+| **`preferencesKey`**      | The `preferences` key to use when interacting with document-level user preferences.                                 |
+| **`versions`**            | Versions of the current doc.                                                                                        |
+| **`unpublishedVersions`** | Unpublished versions of the current doc.                                                                            |
+| **`publishedDoc`**        | The currently published version of the doc being edited.                                                            |
+| **`getVersions`**         | Method to retrieve document versions.                                                               |
+| **`docPermissions`**      | The current documents permissions. Collection document permissions fallback when no id is present (i.e. on create). |
+| **`versionCount`**        | The current version count of the document.                                                                          |
 
 **Example:**
 
@@ -717,6 +722,37 @@ const LinkFromCategoryToPosts: React.FC = () => {
   )
 }
 ```
+
+## useListQuery
+
+The `useListQuery` hook is used to subscribe to the data, current query, and other properties used within the List View. You can use this hook within any Custom Component rendered within the List View.
+
+```tsx
+'use client'
+import { useListQuery } from '@payloadcms/ui'
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const { data, query } = useListQuery()
+  // highlight-end
+
+  // ...
+}
+```
+
+The `useListQuery` hook returns an object with the following properties:
+
+| Property          | Description                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| **`data`**        | The data that is being displayed in the List View.                                           |
+| **`defaultLimit`**| The default limit of items to display in the List View.                                      |
+| **`defaultSort`** | The default sort order of items in the List View.                                             |
+| **`handlePageChange`** | A method to handle page changes in the List View.                                         |
+| **`handlePerPageChange`** | A method to handle per page changes in the List View.                                   |
+| **`handleSearchChange`** | A method to handle search changes in the List View.                                     |
+| **`handleSortChange`** | A method to handle sort changes in the List View.                                         |
+| **`handleWhereChange`** | A method to handle where changes in the List View.                                       |
+| **`query`**       | The current query that is being used to fetch the data in the List View.                             |
 
 ## useLocale
 
