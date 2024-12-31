@@ -5,6 +5,7 @@ import {
   type ClientField,
   type ClientFieldSchemaMap,
   createClientFields,
+  type Field,
   type FieldSchemaMap,
   type Payload,
 } from 'payload'
@@ -108,16 +109,25 @@ export const traverseFields = ({
 
         // Now loop through them, convert each entry to a client field and add it to the client schema map
         for (const [path, subField] of richTextFieldSchemaMap.entries()) {
+          // check if fields is the only key in the subField object
+          const isFieldsOnly = Object.keys(subField).length === 1 && 'fields' in subField
+
           const clientFields = createClientFields({
             defaultIDType: payload.config.db.defaultIDType,
             disableAddingID: true,
-            fields: 'fields' in subField ? subField.fields : [subField],
+            fields: isFieldsOnly ? subField.fields : [subField as Field],
             i18n,
             importMap: payload.importMap,
           })
-          clientSchemaMap.set(path, {
-            fields: clientFields,
-          })
+
+          clientSchemaMap.set(
+            path,
+            isFieldsOnly
+              ? {
+                  fields: clientFields,
+                }
+              : clientFields[0],
+          )
         }
         break
       }
