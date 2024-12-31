@@ -87,9 +87,11 @@ export type SingleErrorResult = { data: never; errors: unknown; message: string;
 
 const handleErrors = (result: ErrorResult | SingleErrorResult) => {
   if (result && 'errors' in result && Array.isArray(result.errors)) {
-    toast.error(result?.errors?.[0].message)
+    toast.error(result.errors[0]?.message)
+    console.error(result.errors[0]?.message) // eslint-disable-line no-console
   } else if (result && 'message' in result) {
     toast.error(result.message)
+    console.error(result.message) // eslint-disable-line no-console
   }
 }
 
@@ -160,7 +162,7 @@ export const ServerFunctionsProvider: React.FC<{
           }
         }
       } catch (_err) {
-        toast.error('Error fetching form state')
+        console.error(_err) // eslint-disable-line no-console
       }
 
       return { state: null }
