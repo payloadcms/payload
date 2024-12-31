@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const caTranslations = {
+export const caTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Compte',
     accountOfCurrentUser: 'Usuari actual',
