@@ -10,29 +10,22 @@ Before you begin building custom features for Lexical, it is crucial to familiar
 
 Lexical features are designed to be modular, meaning each piece of functionality is encapsulated within just two specific interfaces: one for server-side code and one for client-side code.
 
-By convention, these are named feature.server.ts for server-side functionality and feature.client.ts for client-side functionality. The primary functionality is housed within feature.server.ts, which users will import into their projects. The client-side feature, although defined separately, is integrated and rendered server-side through the server feature. That way, we still maintain a clear boundary between server and client code, while also centralizing the code needed for a feature in basically one place. This approach is beneficial for managing all the bits and pieces which make up your feature as a whole, such as toolbar entries, buttons, or new nodes, allowing each feature to be neatly contained and managed independently.
+By convention, these are named `feature.server.ts` for server-side functionality and `feature.client.ts` for client-side functionality. The primary functionality is housed within `feature.server.ts`, which users will import into their projects. The client-side feature, although defined separately, is integrated and rendered server-side through the server feature.
+
+That way, we still maintain a clear boundary between server and client code, while also centralizing the code needed for a feature in basically one place. This approach is beneficial for managing all the bits and pieces which make up your feature as a whole, such as toolbar entries, buttons, or new nodes, allowing each feature to be neatly contained and managed independently.
 
 <Banner type="warning">
   **Important:**
-  Do not import directly from core lexical packages - this may break in minor Payload version bumps. Instead, import the re-exported versions from
-  `@payloadcms/richtext-lexical`. For example, change
+  Do not import directly from core lexical packages - this may break in minor Payload version bumps.
 
-  ```ts
-  import { $insertNodeToNearestRoot } from '@lexical/utils'
-  ```
-
-  to
-
-  ```ts
-  import { $insertNodeToNearestRoot } from '@payloadcms/richtext-lexical/lexical/utils'
-  ```
+  Instead, import the re-exported versions from `@payloadcms/richtext-lexical`. For example, change `import { $insertNodeToNearestRoot } from '@lexical/utils'` to `import { $insertNodeToNearestRoot } from '@payloadcms/richtext-lexical/lexical/utils'`
 </Banner>
 
 ## Do I need a custom feature?
 
 Before you start building a custom feature, consider whether you can achieve your desired functionality using the existing `BlocksFeature`. The `BlocksFeature` is a powerful feature that allows you to create custom blocks with a variety of options, including custom React components, markdown converters, and more. If you can achieve your desired functionality using the `BlocksFeature`, it is recommended to use it instead of building a custom feature.
 
-Using the BlocksFeature, you can add both inline blocks (= can be inserted into a paragraph, in between text) and block blocks (= take up the whole line).
+Using the BlocksFeature, you can add both inline blocks (= can be inserted into a paragraph, in between text) and block blocks (= take up the whole line) to the editor. If you simply want to bring custom react components into the editor, this is the way to go.
 
 ### Example: Code Field Block with language picker
 
