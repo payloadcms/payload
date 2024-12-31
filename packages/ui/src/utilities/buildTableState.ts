@@ -26,17 +26,19 @@ type BuildTableStateSuccessResult = {
   Table: React.ReactNode
 }
 
-type BuildTableStateErrorResult = {
-  data?: any
-  renderedFilters?: never
-  state?: never
-  Table?: never
-} & (
+type BuildTableStateErrorResult =
   | {
-      message: string
+      data?: any
+      renderedFilters?: never
+      state?: never
+      Table?: never
     }
-  | ErrorResult
-)
+  | (
+      | {
+          message: string
+        }
+      | ErrorResult
+    )
 
 export type BuildTableStateResult = BuildTableStateErrorResult | BuildTableStateSuccessResult
 
