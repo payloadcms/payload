@@ -48,7 +48,9 @@ type RenderDocument = (args: {
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   signal?: AbortSignal
-}) => Promise<{ data: Data; Document: React.ReactNode } | ErrorResult>
+}) => Promise<
+  { data: Data; Document: React.ReactNode } | ({ data: never; Document: never } & ErrorResult)
+>
 
 type CopyDataFromLocaleClient = (
   args: {
@@ -204,7 +206,7 @@ export const ServerFunctionsProvider: React.FC<{
         const result = (await serverFunction({
           name: 'render-document',
           args: { fallbackLocale: false, ...rest },
-        })) as { data: Data; Document: React.ReactNode } | ErrorResult
+        })) as Awaited<ReturnType<typeof renderDocument>> // TODO: infer this type when `strictNullChecks` is enabled
 
         handleErrors(result as ErrorResult)
 
