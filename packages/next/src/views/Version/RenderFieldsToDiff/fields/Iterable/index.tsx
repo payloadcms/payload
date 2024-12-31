@@ -2,14 +2,15 @@
 import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getUniqueListBy } from 'payload/shared'
+import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
 import { FieldDiffCollapser } from '../../FieldDiffCollapser/index.js'
-import RenderFieldsToDiff from '../../index.js'
 import './index.scss'
+import RenderFieldsToDiff from '../../index.js'
+import { getFieldsForRowComparison } from './getFieldsForRowComparison.js'
 
 const baseClass = 'iterable-diff'
 
@@ -27,11 +28,15 @@ const Iterable: React.FC<DiffComponentProps> = ({
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
   const maxRows = Math.max(versionRowCount, comparisonRowCount)
 
+  if (!fieldIsArrayType(field) && !fieldIsBlockType(field)) {
+    throw new Error(`Expected field to be an array or blocks type but got: ${field.type}`)
+  }
+
   return (
     <div className={baseClass}>
       <FieldDiffCollapser
-        comparison={comparison}
-        isIterable
+        comparison={{ [field.name]: comparison }}
+        fields={[field]}
         label={
           'label' in field &&
           field.label &&
@@ -42,7 +47,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
             </span>
           )
         }
-        version={version}
+        version={{ [field.name]: version }}
       >
         {maxRows > 0 && (
           <React.Fragment>
@@ -50,45 +55,11 @@ const Iterable: React.FC<DiffComponentProps> = ({
               const versionRow = version?.[i] || {}
               const comparisonRow = comparison?.[i] || {}
 
-              let fields: ClientField[] = []
-
-              if (field.type === 'array' && 'fields' in field) {
-                fields = field.fields
-              }
-
-              if (field.type === 'blocks') {
-                fields = [
-                  // {
-                  //   name: 'blockType',
-                  //   label: i18n.t('fields:blockType'),
-                  //   type: 'text',
-                  // },
-                ]
-
-                if (versionRow?.blockType === comparisonRow?.blockType) {
-                  const matchedBlock = ('blocks' in field &&
-                    field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
-                    fields: [],
-                  }
-
-                  fields = [...fields, ...matchedBlock.fields]
-                } else {
-                  const matchedVersionBlock = ('blocks' in field &&
-                    field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
-                    fields: [],
-                  }
-
-                  const matchedComparisonBlock = ('blocks' in field &&
-                    field.blocks?.find((block) => block.slug === comparisonRow?.blockType)) || {
-                    fields: [],
-                  }
-
-                  fields = getUniqueListBy<ClientField>(
-                    [...fields, ...matchedVersionBlock.fields, ...matchedComparisonBlock.fields],
-                    'name',
-                  )
-                }
-              }
+              const fields: ClientField[] = getFieldsForRowComparison({
+                comparisonRow,
+                field,
+                versionRow,
+              })
 
               const iterableItemNumber = String(i + 1).padStart(2, '0')
               let iterableItemLabel = `Item ${iterableItemNumber}`
