@@ -301,9 +301,16 @@ Lexical does not generate the accurate type definitions for your richText fields
 
 ## Admin customization
 
+The Rich Text Field editor configuration has an `admin` property with the following options:
+
+| Property                       | Description                                                                                                                            |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **`placeholder`**              | Set this property to define a placeholder string for the field.                                                                        |
+| **`hideGutter`**               | Set this property to `true` to hide this field's gutter within the Admin Panel.                                                        |
+
 ### Disable the gutter
 
-You can disable the gutter (the vertical line padding  between the editor and the left edge of the screen) by setting the `hideGutter` prop to `true`:
+You can disable the gutter (the vertical line padding between the editor and the left edge of the screen) by setting the `hideGutter` prop to `true`:
 
 ```ts
 {
