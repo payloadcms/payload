@@ -12,10 +12,159 @@ Lexical features are designed to be modular, meaning each piece of functionality
 
 By convention, these are named feature.server.ts for server-side functionality and feature.client.ts for client-side functionality. The primary functionality is housed within feature.server.ts, which users will import into their projects. The client-side feature, although defined separately, is integrated and rendered server-side through the server feature. That way, we still maintain a clear boundary between server and client code, while also centralizing the code needed for a feature in basically one place. This approach is beneficial for managing all the bits and pieces which make up your feature as a whole, such as toolbar entries, buttons, or new nodes, allowing each feature to be neatly contained and managed independently.
 
+<Banner type="warning">
+  **Important:**
+  Do not import directly from core lexical packages - this may break in minor Payload version bumps. Instead, import the re-exported versions from
+  `@payloadcms/richtext-lexical`. For example, change
+
+  ```ts
+  import { $insertNodeToNearestRoot } from '@lexical/utils'
+  ```
+
+  to
+
+  ```ts
+  import { $insertNodeToNearestRoot } from '@payloadcms/richtext-lexical/lexical/utils'
+  ```
+</Banner>
+
+## Do I need a custom feature?
+
+Before you start building a custom feature, consider whether you can achieve your desired functionality using the existing `BlocksFeature`. The `BlocksFeature` is a powerful feature that allows you to create custom blocks with a variety of options, including custom React components, markdown converters, and more. If you can achieve your desired functionality using the `BlocksFeature`, it is recommended to use it instead of building a custom feature.
+
+Using the BlocksFeature, you can add both inline blocks (= can be inserted into a paragraph, in between text) and block blocks (= take up the whole line).
+
+### Example: Code Field Block with language picker
+
+This example demonstrates how to create a custom code field block with a language picker using the `BlocksFeature`. Make sure to manually install `@payloadcms/ui`first.
+
+Field config:
+
+```ts
+import {
+  BlocksFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
+
+export const languages = {
+  ts: 'TypeScript',
+  plaintext: 'Plain Text',
+  tsx: 'TSX',
+  js: 'JavaScript',
+  jsx: 'JSX',
+}
+
+// ...
+{
+  name: 'richText',
+  type: 'richText',
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      BlocksFeature({
+        blocks: [
+          {
+            slug: 'Code',
+            fields: [
+              {
+                type: 'select',
+                name: 'language',
+                options: Object.entries(languages).map(([key, value]) => ({
+                  label: value,
+                  value: key,
+                })),
+                defaultValue: 'ts',
+              },
+              {
+                admin: {
+                  components: {
+                    Field: './path/to/CodeComponent#Code',
+                  },
+                },
+                name: 'code',
+                type: 'code',
+              },
+            ],
+          }
+        ],
+        inlineBlocks: [],
+      }),
+    ],
+  }),
+},
+```
+
+CodeComponent.tsx:
+
+```tsx
+'use client'
+
+import type { CodeFieldClient, CodeFieldClientProps } from 'payload'
+
+import { CodeField, useFormFields } from '@payloadcms/ui'
+import React, { useMemo } from 'react'
+
+import { languages } from './yourFieldConfig'
+
+const languageKeyToMonacoLanguageMap = {
+  plaintext: 'plaintext',
+  ts: 'typescript',
+  tsx: 'typescript',
+}
+
+export const Code: React.FC<CodeFieldClientProps> = ({
+  autoComplete,
+  field,
+  forceRender,
+  path,
+  permissions,
+  readOnly,
+  renderedBlocks,
+  schemaPath,
+  validate,
+}) => {
+  const languageField = useFormFields(([fields]) => fields['language'])
+
+  const language: string =
+    (languageField?.value as string) || (languageField.initialValue as string) || 'typescript'
+
+  const label = languages[language as keyof typeof languages]
+
+  const props: CodeFieldClient = useMemo<CodeFieldClient>(
+    () => ({
+      ...field,
+      type: 'code',
+      admin: {
+        ...field.admin,
+        label,
+        language: languageKeyToMonacoLanguageMap[language] || language,
+      },
+    }),
+    [field, language, label],
+  )
+
+  const key = `${field.name}-${language}-${label}`
+
+  return (
+    <CodeField
+      autoComplete={autoComplete}
+      field={props}
+      forceRender={forceRender}
+      key={key}
+      path={path}
+      permissions={permissions}
+      readOnly={readOnly}
+      renderedBlocks={renderedBlocks}
+      schemaPath={schemaPath}
+      validate={validate}
+    />
+  )
+}
+```
 
 ## Server Feature
 
-To start building new features, you should start with the server feature, which is the entry-point.
+Custom Blocks are not enough? To start building a custom feature, you should start with the server feature, which is the entry-point.
 
 **Example myFeature/feature.server.ts:**
 
@@ -265,6 +414,22 @@ export const MyClientFeature = createClientFeature({
 ```
 
 Explore the APIs available through ClientFeature to add the specific functionality you need. Remember, do not import directly from `'@payloadcms/richtext-lexical'` when working on the client-side, as it will cause errors with webpack or turbopack. Instead, use `'@payloadcms/richtext-lexical/client'` for all client-side imports. Type-imports are excluded from this rule and can always be imported.
+
+### Adding a client feature to the server feature
+
+Inside of your server feature, you can provide an [import path](/docs/admin/components#component-paths) to the client feature like this:
+
+```ts
+import { createServerFeature } from '@payloadcms/richtext-lexical';
+
+export const MyFeature = createServerFeature({
+  feature: {
+    ClientFeature: './path/to/feature.client#MyClientFeature',
+  },
+  key: 'myFeature',
+  dependenciesPriority: ['otherFeature'],
+})
+```
 
 ### Nodes#client-feature-nodes
 
