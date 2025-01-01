@@ -2537,6 +2537,32 @@ describe('Localization', () => {
         expect(res.topLevelArray[0].localizedText).toBe('some-localized-text')
         expect(res.topLevelArray[0].notLocalizedText).toBe('some-not-localized-text')
       })
+
+      it('should copy localized arrays', async () => {
+        const doc = await payload.create({
+          collection: 'nested',
+          locale: 'en',
+          data: {
+            topLevelArrayLocalized: [
+              {
+                text: 'some-text',
+              },
+            ],
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'nested',
+        })) as Nested
+
+        expect(res.topLevelArrayLocalized[0].text).toBe('some-text')
+      })
     })
   })
 

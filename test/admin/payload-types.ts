@@ -54,7 +54,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {
     'hidden-global': HiddenGlobal;
@@ -110,7 +110,7 @@ export interface UserAuthOperations {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -135,11 +135,13 @@ export interface Upload {
   };
 }
 /**
+ * This is a custom collection description.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
   description?: string | null;
   number?: number | null;
@@ -173,12 +175,15 @@ export interface Post {
       }[]
     | null;
   defaultValueField?: string | null;
-  relationship?: (string | null) | Post;
+  relationship?: (number | null) | Post;
   customCell?: string | null;
   hiddenField?: string | null;
   adminHiddenField?: string | null;
   disableListColumnText?: string | null;
   disableListFilterText?: string | null;
+  /**
+   * This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.
+   */
   sidebarField?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -189,7 +194,7 @@ export interface Post {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   textField?: string | null;
   sidebarField?: string | null;
   updatedAt: string;
@@ -208,7 +213,7 @@ export interface User {
  * via the `definition` "hidden-collection".
  */
 export interface HiddenCollection {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -218,7 +223,7 @@ export interface HiddenCollection {
  * via the `definition` "not-in-view-collection".
  */
 export interface NotInViewCollection {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -228,7 +233,7 @@ export interface NotInViewCollection {
  * via the `definition` "collection-no-api-view".
  */
 export interface CollectionNoApiView {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -237,7 +242,7 @@ export interface CollectionNoApiView {
  * via the `definition` "custom-views-one".
  */
 export interface CustomViewsOne {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -247,7 +252,7 @@ export interface CustomViewsOne {
  * via the `definition` "custom-views-two".
  */
 export interface CustomViewsTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -257,14 +262,20 @@ export interface CustomViewsTwo {
  * via the `definition` "custom-fields".
  */
 export interface CustomField {
-  id: string;
+  id: number;
   customTextServerField?: string | null;
   customTextClientField?: string | null;
+  /**
+   * Static field description.
+   */
   descriptionAsString?: string | null;
+  /**
+   * Function description
+   */
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
-  relationshipFieldWithBeforeAfterInputs?: (string | null) | Post;
+  relationshipFieldWithBeforeAfterInputs?: (number | null) | Post;
   arrayFieldWithBeforeAfterInputs?:
     | {
         someTextField?: string | null;
@@ -293,7 +304,7 @@ export interface CustomField {
  * via the `definition` "group-one-collection-ones".
  */
 export interface GroupOneCollectionOne {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -303,7 +314,7 @@ export interface GroupOneCollectionOne {
  * via the `definition` "group-one-collection-twos".
  */
 export interface GroupOneCollectionTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -313,7 +324,7 @@ export interface GroupOneCollectionTwo {
  * via the `definition` "group-two-collection-ones".
  */
 export interface GroupTwoCollectionOne {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -323,7 +334,7 @@ export interface GroupTwoCollectionOne {
  * via the `definition` "group-two-collection-twos".
  */
 export interface GroupTwoCollectionTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -333,7 +344,7 @@ export interface GroupTwoCollectionTwo {
  * via the `definition` "geo".
  */
 export interface Geo {
-  id: string;
+  id: number;
   /**
    * @minItems 2
    * @maxItems 2
@@ -347,7 +358,7 @@ export interface Geo {
  * via the `definition` "disable-duplicate".
  */
 export interface DisableDuplicate {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -357,7 +368,7 @@ export interface DisableDuplicate {
  * via the `definition` "base-list-filters".
  */
 export interface BaseListFilter {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -367,76 +378,76 @@ export interface BaseListFilter {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'uploads';
-        value: string | Upload;
+        value: number | Upload;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'hidden-collection';
-        value: string | HiddenCollection;
+        value: number | HiddenCollection;
       } | null)
     | ({
         relationTo: 'not-in-view-collection';
-        value: string | NotInViewCollection;
+        value: number | NotInViewCollection;
       } | null)
     | ({
         relationTo: 'collection-no-api-view';
-        value: string | CollectionNoApiView;
+        value: number | CollectionNoApiView;
       } | null)
     | ({
         relationTo: 'custom-views-one';
-        value: string | CustomViewsOne;
+        value: number | CustomViewsOne;
       } | null)
     | ({
         relationTo: 'custom-views-two';
-        value: string | CustomViewsTwo;
+        value: number | CustomViewsTwo;
       } | null)
     | ({
         relationTo: 'custom-fields';
-        value: string | CustomField;
+        value: number | CustomField;
       } | null)
     | ({
         relationTo: 'group-one-collection-ones';
-        value: string | GroupOneCollectionOne;
+        value: number | GroupOneCollectionOne;
       } | null)
     | ({
         relationTo: 'group-one-collection-twos';
-        value: string | GroupOneCollectionTwo;
+        value: number | GroupOneCollectionTwo;
       } | null)
     | ({
         relationTo: 'group-two-collection-ones';
-        value: string | GroupTwoCollectionOne;
+        value: number | GroupTwoCollectionOne;
       } | null)
     | ({
         relationTo: 'group-two-collection-twos';
-        value: string | GroupTwoCollectionTwo;
+        value: number | GroupTwoCollectionTwo;
       } | null)
     | ({
         relationTo: 'geo';
-        value: string | Geo;
+        value: number | Geo;
       } | null)
     | ({
         relationTo: 'disable-duplicate';
-        value: string | DisableDuplicate;
+        value: number | DisableDuplicate;
       } | null)
     | ({
         relationTo: 'base-list-filters';
-        value: string | BaseListFilter;
+        value: number | BaseListFilter;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -446,10 +457,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -469,7 +480,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -758,7 +769,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "hidden-global".
  */
 export interface HiddenGlobal {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -768,7 +779,7 @@ export interface HiddenGlobal {
  * via the `definition` "not-in-view-global".
  */
 export interface NotInViewGlobal {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -778,7 +789,7 @@ export interface NotInViewGlobal {
  * via the `definition` "global-no-api-view".
  */
 export interface GlobalNoApiView {
-  id: string;
+  id: number;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -787,7 +798,7 @@ export interface GlobalNoApiView {
  * via the `definition` "global".
  */
 export interface Global {
-  id: string;
+  id: number;
   title?: string | null;
   sidebarField?: string | null;
   _status?: ('draft' | 'published') | null;
@@ -799,7 +810,7 @@ export interface Global {
  * via the `definition` "custom-global-views-one".
  */
 export interface CustomGlobalViewsOne {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -809,7 +820,7 @@ export interface CustomGlobalViewsOne {
  * via the `definition` "custom-global-views-two".
  */
 export interface CustomGlobalViewsTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -819,7 +830,7 @@ export interface CustomGlobalViewsTwo {
  * via the `definition` "group-globals-one".
  */
 export interface GroupGlobalsOne {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -829,7 +840,7 @@ export interface GroupGlobalsOne {
  * via the `definition` "group-globals-two".
  */
 export interface GroupGlobalsTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -839,7 +850,7 @@ export interface GroupGlobalsTwo {
  * via the `definition` "settings".
  */
 export interface Setting {
-  id: string;
+  id: number;
   canAccessProtected?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
