@@ -959,6 +959,8 @@ describe('database', () => {
       expect(payload.db.rawTables.custom_column_names.columns.title.name).toStrictEqual(
         'custom_title',
       )
+
+      expect(payload.db.rawTables.custom_column_names.columns.id.name).toStrictEqual('custom_id')
     })
 
     it('should create and read doc with custom column names', async () => {

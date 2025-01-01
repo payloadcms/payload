@@ -2,10 +2,17 @@ import type { SetColumnID } from '../../types.js'
 
 export const setColumnID: SetColumnID = ({ adapter, columns, fields }) => {
   const idField = fields.find((field) => field.name === 'id')
+
+  let name: string = 'id'
+
+  if (idField && (idField.type === 'number' || idField.type === 'text') && idField.dbColumnName) {
+    name = idField.dbColumnName
+  }
+
   if (idField) {
     if (idField.type === 'number') {
       columns.id = {
-        name: 'id',
+        name,
         type: 'numeric',
         primaryKey: true,
       }
@@ -15,7 +22,7 @@ export const setColumnID: SetColumnID = ({ adapter, columns, fields }) => {
 
     if (idField.type === 'text') {
       columns.id = {
-        name: 'id',
+        name,
         type: 'varchar',
         primaryKey: true,
       }
@@ -25,7 +32,7 @@ export const setColumnID: SetColumnID = ({ adapter, columns, fields }) => {
 
   if (adapter.idType === 'uuid') {
     columns.id = {
-      name: 'id',
+      name,
       type: 'uuid',
       defaultRandom: true,
       primaryKey: true,
