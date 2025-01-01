@@ -47,10 +47,10 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
             filename,
           },
         })
-      }
 
-      if (customResponse instanceof Response) {
-        return customResponse
+        if (customResponse instanceof Response) {
+          return customResponse
+        }
       }
     }
 
