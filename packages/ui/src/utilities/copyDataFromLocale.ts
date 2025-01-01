@@ -37,10 +37,11 @@ function iterateFields(fields: Field[], fromLocaleData: Data, toLocaleData: Data
             break
           }
 
-          // if the field has a value but is not localized, loop over the data from target
+          // if the field has a value - loop over the data from target
           if (field.name in toLocaleData) {
             toLocaleData[field.name].map((item: Data, index: number) => {
               if (fromLocaleData[field.name]?.[index]) {
+                // Generate new IDs if the field is localized to prevent errors with relational DBs.
                 if (field.localized) {
                   toLocaleData[field.name][index].id = new ObjectId().toHexString()
                 }
@@ -63,13 +64,14 @@ function iterateFields(fields: Field[], fromLocaleData: Data, toLocaleData: Data
             break
           }
 
-          // if the field has a value but is not localized, loop over the data from target
+          // if the field has a value - loop over the data from target
           if (field.name in toLocaleData) {
             toLocaleData[field.name].map((blockData: Data, index: number) => {
               const blockFields = field.blocks.find(
                 ({ slug }) => slug === blockData.blockType,
               )?.fields
 
+              // Generate new IDs if the field is localized to prevent errors with relational DBs.
               if (field.localized) {
                 toLocaleData[field.name][index].id = new ObjectId().toHexString()
               }
