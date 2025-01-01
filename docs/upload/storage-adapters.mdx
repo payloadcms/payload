@@ -228,6 +228,8 @@ pnpm add @payloadcms/storage-uploadthing
 - `acl` is optional and defaults to `public-read`.
 
 ```ts
+import { uploadthingStorage } from '@payloadcms/storage-uploadthing'
+
 export default buildConfig({
   collections: [Media],
   plugins: [
