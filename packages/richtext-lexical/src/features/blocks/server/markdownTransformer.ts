@@ -403,8 +403,7 @@ function getMarkdownTransformerForBlock(
 
         let childrenString = ''
         if (block?.jsx?.doNotTrimChildren) {
-          // Do not trim, but remove empty lines
-          childrenString = linesInBetween.filter((line) => line.trim().length > 0).join('\n')
+          childrenString = linesInBetween.join('\n')
         } else {
           childrenString = linesInBetween.join('\n').trim()
         }

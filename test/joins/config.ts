@@ -6,6 +6,7 @@ import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
 import { HiddenPosts } from './collections/HiddenPosts.js'
 import { Posts } from './collections/Posts.js'
+import { SelfJoins } from './collections/SelfJoins.js'
 import { Singular } from './collections/Singular.js'
 import { Uploads } from './collections/Uploads.js'
 import { Versions } from './collections/Versions.js'
@@ -37,6 +38,7 @@ export default buildConfigWithDefaults({
     Versions,
     CategoriesVersions,
     Singular,
+    SelfJoins,
     {
       slug: localizedPostsSlug,
       admin: {

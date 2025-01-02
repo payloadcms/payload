@@ -952,6 +952,10 @@ describe('database', () => {
   })
 
   describe('drizzle: schema hooks', () => {
+    beforeAll(() => {
+      process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+    })
+
     it('should add tables with hooks', async () => {
       // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'mongoose') {

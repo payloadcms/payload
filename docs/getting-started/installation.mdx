@@ -15,7 +15,7 @@ Payload requires the following software:
 - Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   Before proceeding any further, please ensure that you have the above requirements met.
 </Banner>
 
@@ -36,7 +36,7 @@ Adding Payload to an existing Next.js app is super straightforward. You can eith
 If you don't have a Next.js app already, but you still want to start a project from a blank Next.js app, you can create a new Next.js app using `npx create-next-app` - and then just follow the steps below to install Payload.
 
 <Banner type="info">
-  <strong>Note:</strong> Next.js version 15 or higher is required for Payload.
+  **Note:** Next.js version 15 or higher is required for Payload.
 </Banner>
 
 #### 1. Install the relevant packages
@@ -48,7 +48,7 @@ pnpm i payload @payloadcms/next @payloadcms/richtext-lexical sharp graphql
 ```
 
 <Banner type="warning">
-  <strong>Note:</strong>
+  **Note:**
   Swap out `pnpm` for your package manager. If you are using npm, you might need to install using legacy peer deps: `npm i --legacy-peer-deps`.
 </Banner>
 
@@ -67,7 +67,7 @@ To install a Database Adapter, you can run **one** of the following commands:
     ```
 
 <Banner type="success">
-  <strong>Note:</strong>
+  **Note:**
   New [Database Adapters](/docs/database/overview) are becoming available every day. Check the docs for the most up-to-date list of what's available.
 </Banner>
 
@@ -116,7 +116,7 @@ export default withPayload(nextConfig) // highlight-line
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   Payload is a fully ESM project, and that means the `withPayload` function is an ECMAScript module.
 </Banner>
 

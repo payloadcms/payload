@@ -7,6 +7,7 @@ import type {
   ClientGlobalConfig,
   ClientUser,
   Data,
+  FormState,
   LivePreviewConfig,
 } from 'payload'
 
@@ -25,21 +26,25 @@ import {
   useDocumentDrawerContext,
   useDocumentEvents,
   useDocumentInfo,
+  useEditDepth,
   useServerFunctions,
   useTranslation,
+  useUploadEdits,
 } from '@payloadcms/ui'
 import {
   abortAndIgnore,
+  formatAdminURL,
+  handleAbortRef,
   handleBackToDashboard,
   handleGoBack,
   handleTakeOver,
 } from '@payloadcms/ui/shared'
-import { useRouter } from 'next/navigation.js'
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import { useLivePreviewContext } from './Context/context.js'
-import { LivePreviewProvider } from './Context/index.js'
 import './index.scss'
+import { LivePreviewProvider } from './Context/index.js'
 import { LivePreview } from './Preview/index.js'
 import { usePopupWindow } from './usePopupWindow.js'
 
@@ -75,10 +80,12 @@ const PreviewView: React.FC<Props> = ({
     disableLeaveWithoutSaving,
     docPermissions,
     documentIsLocked,
+    getDocPermissions,
     getDocPreferences,
     globalSlug,
     hasPublishPermission,
     hasSavePermission,
+    incrementVersionCount,
     initialData,
     initialState,
     isEditing,
@@ -88,11 +95,10 @@ const PreviewView: React.FC<Props> = ({
     setDocumentIsLocked,
     unlockDocument,
     updateDocumentEditor,
+    updateSavedDocumentData,
   } = useDocumentInfo()
 
-  const { getFormState } = useServerFunctions()
-
-  const { onSave: onSaveFromProps } = useDocumentDrawerContext()
+  const { onSave: onSaveFromContext } = useDocumentDrawerContext()
 
   const operation = id ? 'update' : 'create'
 
@@ -103,12 +109,20 @@ const PreviewView: React.FC<Props> = ({
     },
   } = useConfig()
   const router = useRouter()
+  const params = useSearchParams()
+  const locale = params.get('locale')
   const { t } = useTranslation()
   const { previewWindowType } = useLivePreviewContext()
   const { refreshCookieAsync, user } = useAuth()
   const { reportUpdate } = useDocumentEvents()
+  const { resetUploadEdits } = useUploadEdits()
+  const { getFormState } = useServerFunctions()
 
   const docConfig = collectionConfig || globalConfig
+
+  const entitySlug = collectionConfig?.slug || globalConfig?.slug
+
+  const depth = useEditDepth()
 
   const lockDocumentsProp = docConfig?.lockDocuments !== undefined ? docConfig?.lockDocuments : true
   const isLockingEnabled = lockDocumentsProp !== false
@@ -118,10 +132,19 @@ const PreviewView: React.FC<Props> = ({
     typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
   const lockDurationInMilliseconds = lockDuration * 1000
 
+  const autosaveEnabled = Boolean(
+    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
+      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
+  )
+
+  const preventLeaveWithoutSaving =
+    typeof disableLeaveWithoutSaving !== 'undefined' ? !disableLeaveWithoutSaving : !autosaveEnabled
+
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
 
-  const formStateAbortControllerRef = useRef(new AbortController())
+  const abortOnChangeRef = useRef<AbortController>(null)
+  const abortOnSaveRef = useRef<AbortController>(null)
 
   const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
 
@@ -140,10 +163,12 @@ const PreviewView: React.FC<Props> = ({
   })
 
   const onSave = useCallback(
-    (json) => {
+    async (json): Promise<FormState> => {
+      const controller = handleAbortRef(abortOnSaveRef)
+
       reportUpdate({
         id,
-        entitySlug: collectionSlug,
+        entitySlug,
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
 
@@ -153,38 +178,91 @@ const PreviewView: React.FC<Props> = ({
         void refreshCookieAsync()
       }
 
-      // Unlock the document after save
-      if ((id || globalSlug) && isLockingEnabled) {
-        setDocumentIsLocked(false)
+      incrementVersionCount()
+
+      if (typeof updateSavedDocumentData === 'function') {
+        void updateSavedDocumentData(json?.doc || {})
       }
 
-      if (typeof onSaveFromProps === 'function') {
-        void onSaveFromProps({
+      if (typeof onSaveFromContext === 'function') {
+        void onSaveFromContext({
           ...json,
           operation: id ? 'update' : 'create',
         })
       }
+
+      if (!isEditing && depth < 2) {
+        // Redirect to the same locale if it's been set
+        const redirectRoute = formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
+        })
+        router.push(redirectRoute)
+      } else {
+        resetUploadEdits()
+      }
+
+      await getDocPermissions(json)
+
+      if ((id || globalSlug) && !autosaveEnabled) {
+        const docPreferences = await getDocPreferences()
+
+        const { state } = await getFormState({
+          id,
+          collectionSlug,
+          data: json?.doc || json?.result,
+          docPermissions,
+          docPreferences,
+          globalSlug,
+          operation,
+          renderAllFields: true,
+          returnLockStatus: false,
+          schemaPath: entitySlug,
+          signal: controller.signal,
+        })
+
+        // Unlock the document after save
+        if (isLockingEnabled) {
+          setDocumentIsLocked(false)
+        }
+
+        abortOnSaveRef.current = null
+
+        return state
+      }
     },
     [
+      adminRoute,
       collectionSlug,
+      depth,
+      docPermissions,
+      entitySlug,
+      getDocPermissions,
+      getDocPreferences,
+      getFormState,
       globalSlug,
       id,
+      incrementVersionCount,
+      isEditing,
       isLockingEnabled,
-      onSaveFromProps,
+      locale,
+      onSaveFromContext,
+      operation,
       refreshCookieAsync,
       reportUpdate,
+      resetUploadEdits,
+      router,
       setDocumentIsLocked,
+      updateSavedDocumentData,
       user,
       userSlug,
+      autosaveEnabled,
     ],
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      abortAndIgnore(formStateAbortControllerRef.current)
-
-      const controller = new AbortController()
-      formStateAbortControllerRef.current = controller
+      const controller = handleAbortRef(abortOnChangeRef)
 
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - editSessionStartTime
@@ -241,6 +319,8 @@ const PreviewView: React.FC<Props> = ({
           }
         }
       }
+
+      abortOnChangeRef.current = null
 
       return state
     },
@@ -308,8 +388,12 @@ const PreviewView: React.FC<Props> = ({
   ])
 
   useEffect(() => {
+    const abortOnChange = abortOnChangeRef.current
+    const abortOnSave = abortOnSaveRef.current
+
     return () => {
-      abortAndIgnore(formStateAbortControllerRef.current)
+      abortAndIgnore(abortOnChange)
+      abortAndIgnore(abortOnSave)
     }
   })
 
@@ -372,12 +456,7 @@ const PreviewView: React.FC<Props> = ({
             }}
           />
         )}
-        {((collectionConfig &&
-          !(collectionConfig.versions?.drafts && collectionConfig.versions?.drafts?.autosave)) ||
-          (globalConfig &&
-            !(globalConfig.versions?.drafts && globalConfig.versions?.drafts?.autosave))) &&
-          !disableLeaveWithoutSaving &&
-          !isReadOnlyForIncomingUser && <LeaveWithoutSaving />}
+        {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}
         <SetDocumentStepNav
           collectionSlug={collectionSlug}
           globalLabel={globalConfig?.label}
