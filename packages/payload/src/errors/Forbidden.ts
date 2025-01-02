@@ -7,9 +7,13 @@ import { APIError } from './APIError.js'
 
 export class Forbidden extends APIError {
   constructor(t?: TFunction) {
+    const newPrototype = new.target.prototype
+
     super(
       t ? t('error:notAllowedToPerformAction') : en.translations.error.notAllowedToPerformAction,
       httpStatus.FORBIDDEN,
     )
+
+    Reflect.setPrototypeOf(this, newPrototype)
   }
 }
