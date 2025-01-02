@@ -302,6 +302,10 @@ export const nlTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',
     remove: 'Verwijderen',
     reset: 'Resetten',
+    resetPreferences: 'Voorkeuren resetten',
+    resetPreferencesDescription:
+      'Dit zal al je voorkeuren terugzetten naar de standaardinstellingen.',
+    resettingPreferences: 'Voorkeuren worden gereset.',
     row: 'Rij',
     rows: 'Rijen',
     save: 'Bewaar',
