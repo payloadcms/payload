@@ -255,7 +255,6 @@ export class Main {
           }
           case 'starter': {
             const dbDetails = await selectDb(this.args, projectName)
-            const payloadSecret = generateSecret()
 
             await createProject({
               cliArgs: this.args,
@@ -263,15 +262,6 @@ export class Main {
               packageManager,
               projectDir,
               projectName,
-              template,
-            })
-
-            await manageEnvFiles({
-              cliArgs: this.args,
-              databaseType: dbDetails.type,
-              databaseUri: dbDetails.dbUri,
-              payloadSecret,
-              projectDir,
               template,
             })
 
