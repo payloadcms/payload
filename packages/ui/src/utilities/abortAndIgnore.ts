@@ -11,16 +11,16 @@ export function abortAndIgnore(abortController: AbortController) {
 export function handleAbortRef(
   abortControllerRef: React.RefObject<AbortController>,
 ): AbortController {
+  const newController = new AbortController()
+
   if (abortControllerRef.current) {
     try {
       abortControllerRef.current.abort()
-      abortControllerRef.current = null
     } catch (_err) {
       // swallow error
     }
-  } else {
-    const controller = new AbortController()
-    abortControllerRef.current = controller
-    return controller
   }
+
+  abortControllerRef.current = newController
+  return newController
 }

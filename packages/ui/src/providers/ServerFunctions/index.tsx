@@ -100,7 +100,7 @@ export const ServerFunctionsProvider: React.FC<{
 
   const schedulePublish = useCallback<SchedulePublishClient>(
     async (args) => {
-      const { signal: remoteSignal, ...rest } = args
+      const { signal: remoteSignal, ...rest } = args || {}
 
       try {
         if (!remoteSignal?.aborted) {
