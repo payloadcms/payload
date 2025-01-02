@@ -857,7 +857,12 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 export { AlignFeature } from './features/align/server/index.js'
 export { BlockquoteFeature } from './features/blockquote/server/index.js'
 export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/server/index.js'
-export { type BlockFields } from './features/blocks/server/nodes/BlocksNode.js'
+export {
+  $createServerBlockNode,
+  $isServerBlockNode,
+  type BlockFields,
+  ServerBlockNode,
+} from './features/blocks/server/nodes/BlocksNode.js'
 
 export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
 export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'

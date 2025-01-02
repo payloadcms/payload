@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, TypeWithID } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -974,6 +974,15 @@ describe('Joins Field', () => {
     expect(find.docs).toHaveLength(5)
 
     await payload.delete({ collection: categoriesSlug, where: { name: { equals: 'totalDocs' } } })
+  })
+
+  it('should self join', async () => {
+    const doc_1 = await payload.create({ collection: 'self-joins', data: {} })
+    const doc_2 = await payload.create({ collection: 'self-joins', data: { rel: doc_1 }, depth: 0 })
+
+    const data = await payload.findByID({ collection: 'self-joins', id: doc_1.id, depth: 1 })
+
+    expect((data.joins.docs[0] as TypeWithID).id).toBe(doc_2.id)
   })
 })
 

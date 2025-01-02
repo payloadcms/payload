@@ -135,9 +135,6 @@ export interface Page {
                         } | null);
                     url?: string | null;
                     label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -172,9 +169,6 @@ export interface Page {
                         } | null);
                     url?: string | null;
                     label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -208,18 +202,12 @@ export interface Page {
                   value: string | Post;
                 }[]
               | null;
-            /**
-             * This field is auto-populated after-read
-             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
-            /**
-             * This field is auto-populated after-read
-             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -379,9 +367,6 @@ export interface Post {
                         } | null);
                     url?: string | null;
                     label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -416,9 +401,6 @@ export interface Post {
                         } | null);
                     url?: string | null;
                     label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -452,18 +434,12 @@ export interface Post {
                   value: string | Post;
                 }[]
               | null;
-            /**
-             * This field is auto-populated after-read
-             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
-            /**
-             * This field is auto-populated after-read
-             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -534,9 +510,6 @@ export interface Ssr {
                         } | null);
                     url?: string | null;
                     label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -571,9 +544,6 @@ export interface Ssr {
                         } | null);
                     url?: string | null;
                     label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -607,18 +577,12 @@ export interface Ssr {
                   value: string | Post;
                 }[]
               | null;
-            /**
-             * This field is auto-populated after-read
-             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
-            /**
-             * This field is auto-populated after-read
-             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -677,9 +641,6 @@ export interface SsrAutosave {
                         } | null);
                     url?: string | null;
                     label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -714,9 +675,6 @@ export interface SsrAutosave {
                         } | null);
                     url?: string | null;
                     label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -750,18 +708,12 @@ export interface SsrAutosave {
                   value: string | Post;
                 }[]
               | null;
-            /**
-             * This field is auto-populated after-read
-             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
-            /**
-             * This field is auto-populated after-read
-             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -1393,9 +1345,6 @@ export interface Header {
               } | null);
           url?: string | null;
           label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
           appearance?: ('default' | 'primary' | 'secondary') | null;
         };
         id?: string | null;
@@ -1426,9 +1375,6 @@ export interface Footer {
               } | null);
           url?: string | null;
           label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
           appearance?: ('default' | 'primary' | 'secondary') | null;
         };
         id?: string | null;

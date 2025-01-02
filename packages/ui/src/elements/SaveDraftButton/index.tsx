@@ -21,7 +21,8 @@ export const SaveDraftButton: React.FC = () => {
       serverURL,
     },
   } = useConfig()
-  const { id, collectionSlug, globalSlug, setUnpublishedVersionCount } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, setUnpublishedVersionCount, uploadStatus } =
+    useDocumentInfo()
   const modified = useFormModified()
   const { code: locale } = useLocale()
   const ref = useRef<HTMLButtonElement>(null)
@@ -30,7 +31,7 @@ export const SaveDraftButton: React.FC = () => {
   const { submit } = useForm()
   const operation = useOperation()
 
-  const forceDisable = operation === 'update' && !modified
+  const forceDisable = (operation === 'update' && !modified) || uploadStatus === 'uploading'
 
   const saveDraft = useCallback(async () => {
     if (forceDisable) {

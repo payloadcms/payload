@@ -20,8 +20,8 @@ import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
-import { Thumbnail } from '../Thumbnail/index.js'
 import './index.scss'
+import { Thumbnail } from '../Thumbnail/index.js'
 
 const baseClass = 'file-field'
 export const editDrawerSlug = 'edit-upload'
@@ -102,7 +102,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
-  const { id, docPermissions, savedDocumentData } = useDocumentInfo()
+  const { id, docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
@@ -182,6 +182,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const handleUrlSubmit = async () => {
     if (fileUrl) {
+      setUploadStatus('uploading')
       try {
         // Check if ID exists and append it to the URL
         const idSegment = id ? `${id}/` : ''
@@ -201,8 +202,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
         // Update the field with the new file
         handleFileChange(file)
+        setUploadStatus('idle')
       } catch (e) {
         toast.error(e.message)
+        setUploadStatus('failed')
       }
     }
   }
