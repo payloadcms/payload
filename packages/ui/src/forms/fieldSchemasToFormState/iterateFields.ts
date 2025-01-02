@@ -121,6 +121,8 @@ export const iterateFields = async ({
             : true) && parentPassesCondition,
         )
       } catch (err) {
+        passesCondition = false
+
         req.payload.logger.error({
           err,
           msg: `Error evaluating field condition at path: ${path}`,
