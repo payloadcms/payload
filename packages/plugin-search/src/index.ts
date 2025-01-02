@@ -37,6 +37,7 @@ export const searchPlugin =
 
       const pluginConfig: SearchPluginConfigWithLocales = {
         // write any config defaults here
+        apiBasePath: config.routes?.api,
         deleteDrafts: true,
         labels,
         locales,

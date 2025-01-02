@@ -200,11 +200,9 @@ export function withNullableJSONSchemaType(
 }
 
 function entityOrFieldToJsDocs({
-  config,
   entity,
   i18n,
 }: {
-  config: SanitizedConfig
   entity: FlattenedField | SanitizedCollectionConfig | SanitizedGlobalConfig
   i18n?: I18n
 }): string | undefined {
@@ -213,11 +211,10 @@ function entityOrFieldToJsDocs({
     if (typeof entity?.admin?.description === 'string') {
       description = entity?.admin?.description
     } else if (typeof entity?.admin?.description === 'object') {
-      const defaultLocale = config?.localization ? config?.localization?.defaultLocale : undefined
       if (entity?.admin?.description?.en) {
         description = entity?.admin?.description?.en
-      } else if (entity?.admin?.description?.[defaultLocale]) {
-        description = entity?.admin?.description?.[defaultLocale]
+      } else if (entity?.admin?.description?.[i18n.language]) {
+        description = entity?.admin?.description?.[i18n.language]
       }
     } else if (typeof entity?.admin?.description === 'function' && i18n) {
       description = entity?.admin?.description(i18n)
@@ -255,7 +252,7 @@ export function fieldsToJSONSchema(
           requiredFieldNames.add(field.name)
         }
 
-        const fieldDescription = entityOrFieldToJsDocs({ config, entity: field, i18n })
+        const fieldDescription = entityOrFieldToJsDocs({ entity: field, i18n })
         const baseFieldSchema: JSONSchema4 = {}
         if (fieldDescription) {
           baseFieldSchema.description = fieldDescription
@@ -710,7 +707,7 @@ export function entityToJSONSchema(
     ),
   }
 
-  const entityDescription = entityOrFieldToJsDocs({ config, entity, i18n })
+  const entityDescription = entityOrFieldToJsDocs({ entity, i18n })
 
   if (entityDescription) {
     jsonSchema.description = entityDescription

@@ -1,3 +1,5 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
+
 import { initI18n } from '@payloadcms/translations'
 import fs from 'fs'
 import { compile } from 'json-schema-to-typescript'
@@ -20,7 +22,12 @@ export async function generateTypes(
   if (shouldLog) {
     logger.info('Compiling TS types for Collections and Globals...')
   }
-  const i18n = await initI18n({ config: config.i18n, context: 'api', language: 'en' })
+
+  const languages = Object.keys(config.i18n.supportedLanguages) as AcceptedLanguages[]
+
+  const language = languages.includes('en') ? 'en' : config.i18n.fallbackLanguage
+
+  const i18n = await initI18n({ config: config.i18n, context: 'api', language })
 
   const jsonSchema = configToJSONSchema(config, config.db.defaultIDType, i18n)
 

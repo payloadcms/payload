@@ -243,6 +243,7 @@ export type FilterOptionsProps<TData = any> = {
    * The collection `slug` to filter against, limited to this field's `relationTo` property.
    */
   relationTo: CollectionSlug
+  req: PayloadRequest
   /**
    * An object containing document data that is scoped to only fields within the same parent of this field.
    */

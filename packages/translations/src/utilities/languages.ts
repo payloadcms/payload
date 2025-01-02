@@ -6,6 +6,7 @@ export const acceptedLanguages = [
   'ar',
   'az',
   'bg',
+  'ca',
   'cs',
   'da',
   'de',
