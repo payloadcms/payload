@@ -1,7 +1,5 @@
 import type { PayloadRequest, SchedulePublishTaskInput } from 'payload'
 
-import type { SingleErrorResult } from '../providers/ServerFunctions/index.js'
-
 export type SchedulePublishHandlerArgs = {
   date: Date
   req: PayloadRequest
@@ -41,5 +39,5 @@ export const schedulePublishHandler = async ({
     }
   }
 
-  return { message: i18n.t('general:success') } as SingleErrorResult
+  return { message: i18n.t('general:success') }
 }

@@ -9,7 +9,6 @@ import type {
 } from 'payload'
 
 import React, { createContext, useCallback } from 'react'
-import { toast } from 'sonner'
 
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
@@ -84,8 +83,6 @@ export const useServerFunctions = () => {
   }
   return context
 }
-
-export type SingleErrorResult = { data: never; errors: unknown; message: string; stack: never }
 
 export const ServerFunctionsProvider: React.FC<{
   children: React.ReactNode
