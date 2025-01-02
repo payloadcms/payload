@@ -198,9 +198,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             siblingData: data,
           } as any,
         )
-      } catch (e) {
+      } catch (err) {
         req.payload.logger.error({
-          err: e,
+          err,
           msg: `Error validating field at path: ${path}`,
         })
       }
