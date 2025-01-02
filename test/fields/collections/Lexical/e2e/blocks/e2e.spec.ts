@@ -1174,5 +1174,25 @@ describe('lexicalBlocks', () => {
         expect(height2).toBe(74)
       }).toPass()
     })
+
+    test('ensure nested lexical field displays field label and description', async () => {
+      // Previously, we had the issue that nested lexical fields did not display the field label and description, as
+      // their client field configs were generated incorrectly on the server.
+      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.locator('.cell-id a').first().click()
+      await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+      await expect(
+        page.locator('.lexical-block-blockInLexical .render-fields label.field-label'),
+      ).toHaveText('My Label*')
+      await expect(
+        page.locator('.lexical-block-blockInLexical .render-fields .required'),
+      ).toHaveText('*')
+      await expect(
+        page.locator(
+          '.lexical-block-blockInLexical .render-fields .field-description-lexicalInBlock',
+        ),
+      ).toHaveText('Some Description')
+    })
   })
 })

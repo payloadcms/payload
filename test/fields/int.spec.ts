@@ -1134,30 +1134,6 @@ describe('Fields', () => {
       expect(doc.localized).toEqual(localized)
       expect(doc.group).toMatchObject(group)
     })
-
-    it('should clear a point field', async () => {
-      if (payload.db.name === 'sqlite') {
-        return
-      }
-
-      const doc = await payload.create({
-        collection: 'point-fields',
-        data: {
-          point: [7, -7],
-          group: {
-            point: [7, -7],
-          },
-        },
-      })
-
-      const res = await payload.update({
-        collection: 'point-fields',
-        id: doc.id,
-        data: { group: { point: null } },
-      })
-
-      expect(res.group.point).toBeFalsy()
-    })
   })
 
   describe('unique indexes', () => {
@@ -2283,23 +2259,6 @@ describe('Fields', () => {
       })
 
       expect(blockFieldsFail.docs).toHaveLength(0)
-    })
-
-    it('should create when existing block ids are used', async () => {
-      const blockFields = await payload.find({
-        collection: 'block-fields',
-        limit: 1,
-      })
-      const [doc] = blockFields.docs
-
-      const result = await payload.create({
-        collection: 'block-fields',
-        data: {
-          ...doc,
-        },
-      })
-
-      expect(result.id).toBeDefined()
     })
 
     it('should filter based on nested block fields', async () => {

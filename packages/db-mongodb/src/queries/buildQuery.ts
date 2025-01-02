@@ -1,5 +1,6 @@
-import type { ClientSession } from 'mongodb'
 import type { FlattenedField, Payload, Where } from 'payload'
+
+import { QueryError } from 'payload'
 
 import { parseParams } from './parseParams.js'
 
@@ -12,7 +13,6 @@ export type BuildQueryArgs = {
   globalSlug?: string
   locale?: string
   payload: Payload
-  session?: ClientSession
   where: Where
 }
 
@@ -28,7 +28,6 @@ export const getBuildQueryPlugin = ({
       globalSlug,
       locale,
       payload,
-      session,
       where,
     }: BuildQueryArgs): Promise<Record<string, unknown>> {
       let fields = versionsFields
@@ -42,16 +41,19 @@ export const getBuildQueryPlugin = ({
           fields = collectionConfig.flattenedFields
         }
       }
-
+      const errors = []
       const result = await parseParams({
         collectionSlug,
         fields,
         globalSlug,
         locale,
         payload,
-        session,
         where,
       })
+
+      if (errors.length > 0) {
+        throw new QueryError(errors)
+      }
 
       return result
     }

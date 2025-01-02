@@ -1,10 +1,12 @@
+import type { QueryOptions } from 'mongoose'
+
 import { buildVersionGlobalFields, type TypeWithID, type UpdateGlobalVersionArgs } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { transform } from './utilities/transform.js'
+import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: MongooseAdapter,
@@ -21,50 +23,44 @@ export async function updateGlobalVersion<T extends TypeWithID>(
 ) {
   const VersionModel = this.versions[globalSlug]
   const whereToUse = where || { id: { equals: id } }
-  const fields = buildVersionGlobalFields(
-    this.payload.config,
-    this.payload.config.globals.find((global) => global.slug === globalSlug),
-    true,
-  )
 
-  const session = await getSession(this, req)
+  const currentGlobal = this.payload.config.globals.find((global) => global.slug === globalSlug)
+  const fields = buildVersionGlobalFields(this.payload.config, currentGlobal)
+
+  const options: QueryOptions = {
+    ...optionsArgs,
+    lean: true,
+    new: true,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: buildVersionGlobalFields(this.payload.config, currentGlobal, true),
+      select,
+    }),
+    session: await getSession(this, req),
+  }
 
   const query = await VersionModel.buildQuery({
     locale,
     payload: this.payload,
-    session,
     where: whereToUse,
   })
 
-  transform({
-    adapter: this,
+  const sanitizedData = sanitizeRelationshipIDs({
+    config: this.payload.config,
     data: versionData,
     fields,
-    operation: 'update',
-    timestamps: optionsArgs.timestamps !== false,
   })
 
-  const doc: any = await VersionModel.collection.findOneAndUpdate(
-    query,
-    { $set: versionData },
-    {
-      ...optionsArgs,
-      projection: buildProjectionFromSelect({
-        adapter: this,
-        fields,
-        select,
-      }),
-      returnDocument: 'after',
-      session,
-    },
-  )
+  const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
 
-  transform({
-    adapter: this,
-    data: doc,
-    fields,
-    operation: 'read',
-  })
+  const result = JSON.parse(JSON.stringify(doc))
 
-  return doc
+  const verificationToken = doc._verificationToken
+
+  // custom id type reset
+  result.id = result._id
+  if (verificationToken) {
+    result._verificationToken = verificationToken
+  }
+  return result
 }

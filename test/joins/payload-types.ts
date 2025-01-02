@@ -18,6 +18,7 @@ export interface Config {
     versions: Version;
     'categories-versions': CategoriesVersion;
     singular: Singular;
+    'self-joins': SelfJoin;
     'localized-posts': LocalizedPost;
     'localized-categories': LocalizedCategory;
     'restricted-categories': RestrictedCategory;
@@ -38,6 +39,10 @@ export interface Config {
       'group.camelCasePosts': 'posts';
       arrayPosts: 'posts';
       blocksPosts: 'posts';
+      polymorphic: 'posts';
+      polymorphics: 'posts';
+      localizedPolymorphic: 'posts';
+      localizedPolymorphics: 'posts';
       filtered: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
@@ -48,6 +53,9 @@ export interface Config {
     'categories-versions': {
       relatedVersions: 'versions';
       relatedVersionsMany: 'versions';
+    };
+    'self-joins': {
+      joins: 'self-joins';
     };
     'localized-categories': {
       relatedPosts: 'localized-posts';
@@ -67,6 +75,7 @@ export interface Config {
     versions: VersionsSelect<false> | VersionsSelect<true>;
     'categories-versions': CategoriesVersionsSelect<false> | CategoriesVersionsSelect<true>;
     singular: SingularSelect<false> | SingularSelect<true>;
+    'self-joins': SelfJoinsSelect<false> | SelfJoinsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'localized-categories': LocalizedCategoriesSelect<false> | LocalizedCategoriesSelect<true>;
     'restricted-categories': RestrictedCategoriesSelect<false> | RestrictedCategoriesSelect<true>;
@@ -123,6 +132,48 @@ export interface Post {
   category?: (string | null) | Category;
   categories?: (string | Category)[] | null;
   categoriesLocalized?: (string | Category)[] | null;
+  polymorphic?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  polymorphics?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'users';
+            value: string | User;
+          }
+      )[]
+    | null;
+  localizedPolymorphic?:
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  localizedPolymorphics?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'users';
+            value: string | User;
+          }
+      )[]
+    | null;
   group?: {
     category?: (string | null) | Category;
     camelCaseCategory?: (string | null) | Category;
@@ -207,6 +258,22 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  polymorphic?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  polymorphics?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  localizedPolymorphic?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  localizedPolymorphics?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   singulars?: {
     docs?: (string | Singular)[] | null;
     hasNextPage?: boolean | null;
@@ -241,6 +308,23 @@ export interface Singular {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versions".
  */
 export interface Version {
@@ -269,6 +353,20 @@ export interface CategoriesVersion {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "self-joins".
+ */
+export interface SelfJoin {
+  id: string;
+  rel?: (string | null) | SelfJoin;
+  joins?: {
+    docs?: (string | SelfJoin)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -349,23 +447,6 @@ export interface RestrictedPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -398,6 +479,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'singular';
         value: string | Singular;
+      } | null)
+    | ({
+        relationTo: 'self-joins';
+        value: string | SelfJoin;
       } | null)
     | ({
         relationTo: 'localized-posts';
@@ -481,6 +566,10 @@ export interface PostsSelect<T extends boolean = true> {
   category?: T;
   categories?: T;
   categoriesLocalized?: T;
+  polymorphic?: T;
+  polymorphics?: T;
+  localizedPolymorphic?: T;
+  localizedPolymorphics?: T;
   group?:
     | T
     | {
@@ -525,6 +614,10 @@ export interface CategoriesSelect<T extends boolean = true> {
       };
   arrayPosts?: T;
   blocksPosts?: T;
+  polymorphic?: T;
+  polymorphics?: T;
+  localizedPolymorphic?: T;
+  localizedPolymorphics?: T;
   singulars?: T;
   filtered?: T;
   updatedAt?: T;
@@ -587,6 +680,16 @@ export interface CategoriesVersionsSelect<T extends boolean = true> {
  */
 export interface SingularSelect<T extends boolean = true> {
   category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "self-joins_select".
+ */
+export interface SelfJoinsSelect<T extends boolean = true> {
+  rel?: T;
+  joins?: T;
   updatedAt?: T;
   createdAt?: T;
 }

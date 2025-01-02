@@ -12,6 +12,7 @@ import {
   changeLocale,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -23,6 +24,7 @@ import {
   defaultLocale,
   englishTitle,
   localizedPostsSlug,
+  relationshipLocalizedSlug,
   spanishLocale,
   withRequiredLocalizedFields,
 } from './shared.js'
@@ -41,6 +43,7 @@ const dirname = path.dirname(filename)
 const { beforeAll, describe } = test
 let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
+let urlRelationshipLocalized: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -58,6 +61,7 @@ describe('Localization', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
+    urlRelationshipLocalized = new AdminUrlUtil(serverURL, relationshipLocalizedSlug)
     richTextURL = new AdminUrlUtil(serverURL, richTextSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
 
@@ -252,6 +256,23 @@ describe('Localization', () => {
       await selectField.click()
 
       await expect(page.locator('#field-children .rs__menu')).toContainText('spanish-relation2')
+    })
+
+    test('ensure relationship edit drawers are opened in currently selected locale', async () => {
+      await page.goto(urlRelationshipLocalized.list)
+      await changeLocale(page, spanishLocale)
+
+      const post = page.locator('.cell-id a').first()
+      const postUrl = await post.getAttribute('href')
+      await page.goto(serverURL + postUrl)
+      await page.waitForURL(serverURL + postUrl)
+
+      await openDocDrawer(
+        page,
+        '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler',
+      )
+
+      await expect(page.locator('.doc-drawer__header-text')).toContainText('spanish-relation2')
     })
   })
 

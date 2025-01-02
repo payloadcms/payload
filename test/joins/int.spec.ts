@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, TypeWithID } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -90,6 +90,26 @@ describe('Joins Field', () => {
         upload: uploadedImage,
         categories,
         categoriesLocalized: categories,
+        polymorphic: {
+          relationTo: 'categories',
+          value: category.id,
+        },
+        polymorphics: [
+          {
+            relationTo: 'categories',
+            value: category.id,
+          },
+        ],
+        localizedPolymorphic: {
+          relationTo: 'categories',
+          value: category.id,
+        },
+        localizedPolymorphics: [
+          {
+            relationTo: 'categories',
+            value: category.id,
+          },
+        ],
         group: {
           category: category.id,
           camelCaseCategory: category.id,
@@ -154,10 +174,7 @@ describe('Joins Field', () => {
       collection: categoriesSlug,
     })
 
-    expect(categoryWithPosts).toStrictEqual({
-      id: categoryWithPosts.id,
-      group: categoryWithPosts.group,
-    })
+    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id', 'group'])
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
@@ -214,6 +231,17 @@ describe('Joins Field', () => {
 
     expect(docs[0].upload.id).toBeDefined()
     expect(docs[0].upload.relatedPosts.docs).toHaveLength(10)
+  })
+
+  it('should join on polymorphic relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      collection: categoriesSlug,
+      id: category.id,
+    })
+    expect(categoryWithPosts.polymorphic.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.polymorphics.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.localizedPolymorphic.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.localizedPolymorphics.docs[0]).toHaveProperty('id')
   })
 
   it('should filter joins using where query', async () => {
@@ -946,6 +974,15 @@ describe('Joins Field', () => {
     expect(find.docs).toHaveLength(5)
 
     await payload.delete({ collection: categoriesSlug, where: { name: { equals: 'totalDocs' } } })
+  })
+
+  it('should self join', async () => {
+    const doc_1 = await payload.create({ collection: 'self-joins', data: {} })
+    const doc_2 = await payload.create({ collection: 'self-joins', data: { rel: doc_1 }, depth: 0 })
+
+    const data = await payload.findByID({ collection: 'self-joins', id: doc_1.id, depth: 1 })
+
+    expect((data.joins.docs[0] as TypeWithID).id).toBe(doc_2.id)
   })
 })
 

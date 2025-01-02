@@ -8,8 +8,8 @@ keywords: lexical, rich text, editor, headless cms
 
 <Banner type="warning">
 
-  The Payload editor is based on Lexical, Meta's rich text editor. The previous default editor was 
-  based on Slate and is still supported. You can read [its documentation](/docs/rich-text/slate), 
+  The Payload editor is based on Lexical, Meta's rich text editor. The previous default editor was
+  based on Slate and is still supported. You can read [its documentation](/docs/rich-text/slate),
   or the optional [migration guide](/docs/rich-text/migration) to migrate from Slate to Lexical (recommended).
 
 </Banner>
@@ -298,3 +298,43 @@ Make sure to only use types exported from `@payloadcms/richtext-lexical`, not fr
 ### Automatic type generation
 
 Lexical does not generate the accurate type definitions for your richText fields for you yet - this will be improved in the future. Currently, it only outputs the rough shape of the editor JSON which you can enhance using type assertions.
+
+## Admin customization
+
+The Rich Text Field editor configuration has an `admin` property with the following options:
+
+| Property                       | Description                                                                                                                            |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **`placeholder`**              | Set this property to define a placeholder string for the field.                                                                        |
+| **`hideGutter`**               | Set this property to `true` to hide this field's gutter within the Admin Panel.                                                        |
+
+### Disable the gutter
+
+You can disable the gutter (the vertical line padding between the editor and the left edge of the screen) by setting the `hideGutter` prop to `true`:
+
+```ts
+{
+  name: 'richText',
+  type: 'richText',
+  editor: lexicalEditor({
+    admin: {
+      hideGutter: true
+    },
+  }),
+}
+```
+
+### Customize the placeholder
+
+You can customize the placeholder (the text that appears in the editor when it's empty) by setting the `placeholder` prop:
+
+```ts
+{
+  name: 'richText',
+  type: 'richText',
+  editor: lexicalEditor({
+    admin: {
+      placeholder: 'Type your content here...'
+    },
+  }),
+}

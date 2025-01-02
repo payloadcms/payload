@@ -11,9 +11,10 @@ import { useCellProps } from '../../../TableColumns/RenderDefaultCell/index.js'
 import './index.scss'
 
 export const DrawerLink: React.FC<{
+  readonly onDrawerDelete?: DocumentDrawerProps['onDelete']
   readonly onDrawerSave?: DocumentDrawerProps['onSave']
 }> = (props) => {
-  const { onDrawerSave: onDrawerSaveFromProps } = props
+  const { onDrawerDelete: onDrawerDeleteFromProps, onDrawerSave: onDrawerSaveFromProps } = props
 
   const cellProps = useCellProps()
 
@@ -33,13 +34,24 @@ export const DrawerLink: React.FC<{
     [closeDrawer, onDrawerSaveFromProps],
   )
 
+  const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      closeDrawer()
+
+      if (typeof onDrawerDeleteFromProps === 'function') {
+        void onDrawerDeleteFromProps(args)
+      }
+    },
+    [closeDrawer, onDrawerDeleteFromProps],
+  )
+
   return (
     <div className="drawer-link">
       <DefaultCell {...cellProps} className="drawer-link__cell" link={false} onClick={null} />
       <DocumentDrawerToggler>
         <EditIcon />
       </DocumentDrawerToggler>
-      <DocumentDrawer onSave={onDrawerSave} />
+      <DocumentDrawer onDelete={onDrawerDelete} onSave={onDrawerSave} />
     </div>
   )
 }
