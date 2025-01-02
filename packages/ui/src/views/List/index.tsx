@@ -109,8 +109,9 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     handlePerPageChange,
     query,
   } = useListQuery()
+
   const { openModal } = useModal()
-  const { setCollectionSlug, setOnSuccess } = useBulkUpload()
+  const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
@@ -148,9 +149,18 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
+    setCurrentActivePath(collectionSlug)
     openModal(bulkUploadDrawerSlug)
-    setOnSuccess(() => router.refresh())
-  }, [router, collectionSlug, bulkUploadDrawerSlug, openModal, setCollectionSlug, setOnSuccess])
+    setOnSuccess(collectionSlug, () => router.refresh())
+  }, [
+    router,
+    collectionSlug,
+    bulkUploadDrawerSlug,
+    openModal,
+    setCollectionSlug,
+    setCurrentActivePath,
+    setOnSuccess,
+  ])
 
   useEffect(() => {
     if (drawerDepth <= 1) {

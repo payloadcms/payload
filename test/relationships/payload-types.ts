@@ -28,6 +28,7 @@ export interface Config {
     'rels-to-pages': RelsToPage;
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextId;
     'object-writes': ObjectWrite;
+    'deep-nested': DeepNested;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -52,6 +53,7 @@ export interface Config {
     'rels-to-pages': RelsToPagesSelect<false> | RelsToPagesSelect<true>;
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextIdsSelect<false> | RelsToPagesAndCustomTextIdsSelect<true>;
     'object-writes': ObjectWritesSelect<false> | ObjectWritesSelect<true>;
+    'deep-nested': DeepNestedSelect<false> | DeepNestedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -352,6 +354,27 @@ export interface ObjectWrite {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deep-nested".
+ */
+export interface DeepNested {
+  id: string;
+  content?: {
+    blocks?:
+      | {
+          meta?: {
+            movie?: (string | null) | Movie;
+          };
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'testBlock';
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -424,6 +447,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'object-writes';
         value: string | ObjectWrite;
+      } | null)
+    | ({
+        relationTo: 'deep-nested';
+        value: string | DeepNested;
       } | null)
     | ({
         relationTo: 'users';
@@ -664,6 +691,33 @@ export interface ObjectWritesSelect<T extends boolean = true> {
   many?: T;
   onePoly?: T;
   manyPoly?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deep-nested_select".
+ */
+export interface DeepNestedSelect<T extends boolean = true> {
+  content?:
+    | T
+    | {
+        blocks?:
+          | T
+          | {
+              testBlock?:
+                | T
+                | {
+                    meta?:
+                      | T
+                      | {
+                          movie?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }

@@ -31,7 +31,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
-import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
@@ -120,8 +120,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
 
-  const onChangeAbortControllerRef = useRef<AbortController>(null)
-  const onSaveAbortControllerRef = useRef<AbortController>(null)
+  const abortOnChangeRef = useRef<AbortController>(null)
+  const abortOnSaveRef = useRef<AbortController>(null)
 
   const locale = params.get('locale')
 
@@ -142,22 +142,13 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
   const lockDurationInMilliseconds = lockDuration * 1000
 
-  let preventLeaveWithoutSaving = true
-  let autosaveEnabled = false
+  const autosaveEnabled = Boolean(
+    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
+      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
+  )
 
-  if (collectionConfig) {
-    autosaveEnabled = Boolean(
-      collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave,
-    )
-    preventLeaveWithoutSaving = !autosaveEnabled
-  } else if (globalConfig) {
-    autosaveEnabled = Boolean(
-      globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave,
-    )
-    preventLeaveWithoutSaving = !autosaveEnabled
-  } else if (typeof disableLeaveWithoutSaving !== 'undefined') {
-    preventLeaveWithoutSaving = !disableLeaveWithoutSaving
-  }
+  const preventLeaveWithoutSaving =
+    typeof disableLeaveWithoutSaving !== 'undefined' ? !disableLeaveWithoutSaving : !autosaveEnabled
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
@@ -238,6 +229,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
   const onSave = useCallback(
     async (json): Promise<FormState> => {
+      const controller = handleAbortRef(abortOnSaveRef)
+
       reportUpdate({
         id,
         entitySlug,
@@ -277,10 +270,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       await getDocPermissions(json)
 
       if ((id || globalSlug) && !autosaveEnabled) {
-        abortAndIgnore(onSaveAbortControllerRef.current)
-        const controller = new AbortController()
-        onSaveAbortControllerRef.current = controller
-
         const docPreferences = await getDocPreferences()
 
         const { state } = await getFormState({
@@ -301,6 +290,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         if (isLockingEnabled) {
           setDocumentIsLocked(false)
         }
+
+        abortOnSaveRef.current = null
 
         return state
       }
@@ -337,10 +328,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-
-      const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
+      const controller = handleAbortRef(abortOnChangeRef)
 
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - editSessionStartTime
@@ -373,6 +361,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
       }
+
+      abortOnChangeRef.current = null
 
       return state
     },
@@ -428,9 +418,12 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   ])
 
   useEffect(() => {
+    const abortOnChange = abortOnChangeRef.current
+    const abortOnSave = abortOnSaveRef.current
+
     return () => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-      abortAndIgnore(onSaveAbortControllerRef.current)
+      abortAndIgnore(abortOnChange)
+      abortAndIgnore(abortOnSave)
     }
   }, [])
 
