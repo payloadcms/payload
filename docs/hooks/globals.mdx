@@ -163,14 +163,14 @@ const afterReadHook: GlobalAfterReadHook = async ({
 
 The following arguments are provided to the `beforeRead` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`global`**         | The [Global](../configuration/globals) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`findMany`**            | Boolean to denote if this hook is running against finding one, or finding many (useful in versions).                                                                                                                              |
-| **`doc`**               | The resulting Document after changes are applied. |
-| **`query`**          | The [Query](../queries/overview) of the request.
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option         | Description                                                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**   | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
+| **`context`**  | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`findMany`** | Boolean to denote if this hook is running against finding one, or finding many (useful in versions).                                                  |
+| **`doc`**      | The resulting Document after changes are applied.                                                                                                     |
+| **`query`**    | The [Query](../queries/overview) of the request.                                                                                                      |
+| **`req`**      | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ## TypeScript
 

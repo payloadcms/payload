@@ -73,16 +73,16 @@ The following options are available:
 | **`dbName`**        | Custom table or collection name for this Global depending on the Database Adapter. Auto-generated from slug if not defined.                                                                    |
 | **`description`**   | Text or React component to display below the Global header to give editors more information.                                                                                                   |
 | **`endpoints`**     | Add custom routes to the REST API. [More details](../rest-api/overview#custom-endpoints).                                                                                                      |
-| **`fields`** \*     | Array of field types that will determine the structure and functionality of the data stored within this Global. [More details](../fields/overview).                                            |
-| **`graphQL.name`**  | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                       |
+| **`fields`** *     | Array of field types that will determine the structure and functionality of the data stored within this Global. [More details](../fields/overview).                                            |
+| **`graphQL`**       | Manage GraphQL-related properties related to this global. [More details](#graphql)                                                                                                             |
 | **`hooks`**         | Entry point for Hooks. [More details](../hooks/overview#global-hooks).                                                                                                                         |
 | **`label`**         | Text for the name in the Admin Panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                        |
 | **`lockDocuments`** | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents). |
-| **`slug`** \*       | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                    |
+| **`slug`** *       | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                    |
 | **`typescript`**    | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                            |
 | **`versions`**      | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#globals-config).                                                               |
 
-_\* An asterisk denotes that a property is required._
+_* An asterisk denotes that a property is required._
 
 ### Fields
 
@@ -99,6 +99,18 @@ Fields define the schema of the Global. To learn more, go to the [Fields](../fie
 ### Admin Options
 
 You can customize the way that the [Admin Panel](../admin/overview) behaves on a Global-by-Global basis. To learn more, go to the [Global Admin Options](../admin/globals) documentation.
+
+## GraphQL
+
+You can completely disable GraphQL for this global by passing `graphQL: false` to your global config. This will completely disable all queries, mutations, and types from appearing in your GraphQL schema.
+
+You can also pass an object to the global's `graphQL` property, which allows you to define the following properties:
+
+| Option                 | Description                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| **`name`**             | Override the name that will be used in GraphQL schema generation.                   |
+| **`disableQueries`**   | Disable all GraphQL queries that correspond to this global by passing `true`.       |
+| **`disableMutations`** | Disable all GraphQL mutations that correspond to this global by passing `true`.     |
 
 ## TypeScript
 

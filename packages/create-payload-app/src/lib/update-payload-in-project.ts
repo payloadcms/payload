@@ -87,6 +87,7 @@ export async function updatePayloadInProject(
   copyRecursiveSync(
     templateSrcDir,
     path.resolve(projectDir, appDetails.isSrcDir ? 'src/app' : 'app', '(payload)'),
+    ['custom.scss$'], // Do not overwrite user's custom.scss
   )
 
   return { message: 'Payload updated successfully.', success: true }

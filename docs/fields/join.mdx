@@ -123,9 +123,9 @@ powerful Admin UI.
 
 | Option                 | Description                                                                                                                                                                                    |
 |------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`name`** \*          | To be used as the property name when retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                    |
-| **`collection`** \*    | The `slug`s having the relationship field.                                                                                                                                                     |
-| **`on`** \*            | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'.                                         |
+| **`name`** *          | To be used as the property name when retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                    |
+| **`collection`** *    | The `slug`s having the relationship field.                                                                                                                                                     |
+| **`on`** *            | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'.                                         |
 | **`where`**            | A `Where` query to hide related documents from appearing. Will be merged with any `where` specified in the request.                                                                            |
 | **`maxDepth`**         | Default is 1, Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](/docs/getting-started/concepts#field-level-max-depth). |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                        |
@@ -138,7 +138,7 @@ powerful Admin UI.
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema.                                                                                                                                   |
 | **`graphQL`**          | Custom graphQL configuration for the field. [More details](/docs/graphql/overview#field-complexity)                                                                                            |
 
-_\* An asterisk denotes that a property is required._
+_* An asterisk denotes that a property is required._
 
 
 ## Admin Config Options

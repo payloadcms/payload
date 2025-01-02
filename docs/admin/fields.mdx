@@ -242,31 +242,31 @@ _For details on how to build Custom Components, see [Building Custom Components]
 
 All Field Components receive the following props by default:
 
-| Property         | Description                                                                                                                                                                                                                      |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`docPreferences`** | An object that contains the [Preferences](./preferences) for the document.
-| **`field`** | In Client Components, this is the sanitized Client Field Config. In Server Components, this is the original Field Config. Server Components will also receive the sanitized field config through the`clientField` prop (see below). |
-| **`locale`**     | The locale of the field. [More details](../configuration/localization).                                                                                                                                                                   |
-| **`readOnly`**   | A boolean value that represents if the field is read-only or not.                                                                                                                                                                  |
-| **`user`**       | The currently authenticated user. [More details](../authentication/overview). |
-| **`validate`**   | A function that can be used to validate the field.                                                                                                                                                                                 |
-| **`path`**       | A string representing the direct, dynamic path to the field at runtime, i.e. `myGroup.myArray.0.myField`. |
-| **`schemaPath`** | A string representing the direct, static path to the [Field Config](../fields/overview), i.e. `posts.myGroup.myArray.myField`. |
-| **`indexPath`**  | A hyphen-notated string representing the path to the field _within the nearest named ancestor field_, i.e. `0-0` |
+| Property             | Description                                                                                                                                                                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`docPreferences`** | An object that contains the [Preferences](./preferences) for the document.                                                                                                                                                          |
+| **`field`**          | In Client Components, this is the sanitized Client Field Config. In Server Components, this is the original Field Config. Server Components will also receive the sanitized field config through the`clientField` prop (see below). |
+| **`locale`**         | The locale of the field. [More details](../configuration/localization).                                                                                                                                                             |
+| **`readOnly`**       | A boolean value that represents if the field is read-only or not.                                                                                                                                                                   |
+| **`user`**           | The currently authenticated user. [More details](../authentication/overview).                                                                                                                                                       |
+| **`validate`**       | A function that can be used to validate the field.                                                                                                                                                                                  |
+| **`path`**           | A string representing the direct, dynamic path to the field at runtime, i.e. `myGroup.myArray.0.myField`.                                                                                                                           |
+| **`schemaPath`**     | A string representing the direct, static path to the [Field Config](../fields/overview), i.e. `posts.myGroup.myArray.myField`.                                                                                                      |
+| **`indexPath`**      | A hyphen-notated string representing the path to the field _within the nearest named ancestor field_, i.e. `0-0`                                                                                                                    |
 
 In addition to the above props, all Server Components will also receive the following props:
 
-| Property         | Description                                                                                                                                                                                                                      |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`clientField`** | The serializable Client Field Config. |
-| **`field`** | The Field Config. [More details](../fields/overview). |
-| **`data`**       | The current document being edited.                                                                                                                                                                                                   |
-| **`i18n`**       | The [i18n](../configuration/i18n) object.
-| **`payload`**    | The [Payload](../local-api/overview) class.                                                           |
-| **`permissions`** | The field permissions based on the currently authenticated user.                                                                                                                                                                                                   |
-| **`siblingData`** | The data of the field's siblings.                                                                                                                                                                                                   |
-| **`user`**       | The currently authenticated user. [More details](../authentication/overview). |
-| **`value`**      | The value of the field at render-time.                                                                                                                                                                                                   |
+| Property          | Description                                                                   |
+| ----------------- | ----------------------------------------------------------------------------- |
+| **`clientField`** | The serializable Client Field Config.                                         |
+| **`field`**       | The Field Config. [More details](../fields/overview).                         |
+| **`data`**        | The current document being edited.                                            |
+| **`i18n`**        | The [i18n](../configuration/i18n) object.                                     |
+| **`payload`**     | The [Payload](../local-api/overview) class.                                   |
+| **`permissions`** | The field permissions based on the currently authenticated user.              |
+| **`siblingData`** | The data of the field's siblings.                                             |
+| **`user`**        | The currently authenticated user. [More details](../authentication/overview). |
+| **`value`**       | The value of the field at render-time.                                        |
 
 #### Sending and receiving values from the form
 

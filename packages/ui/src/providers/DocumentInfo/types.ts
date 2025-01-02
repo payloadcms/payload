@@ -49,13 +49,8 @@ export type DocumentInfoContext = {
   documentIsLocked?: boolean
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
-  hasPublishedDoc: boolean
   incrementVersionCount: () => void
-  initialData: Data
-  initialState?: FormState
   isInitializing: boolean
-  lastUpdateTime?: number
-  mostRecentVersionIsAutosaved: boolean
   preferencesKey?: string
   savedDocumentData?: Data
   setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>

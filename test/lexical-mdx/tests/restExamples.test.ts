@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs'
-import type { Test } from '../int.spec.js'
-import { fileURLToPath } from 'url'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+import type { Test } from '../int.spec.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
