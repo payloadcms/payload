@@ -31,10 +31,10 @@ export const SaveDraftButton: React.FC = () => {
   const { submit } = useForm()
   const operation = useOperation()
 
-  const forceDisable = operation === 'update' && !modified
+  const forceDisable = (operation === 'update' && !modified) || uploadStatus === 'uploading'
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable || uploadStatus === 'uploading') {
+    if (forceDisable) {
       return
     }
 
@@ -73,7 +73,6 @@ export const SaveDraftButton: React.FC = () => {
     id,
     forceDisable,
     setUnpublishedVersionCount,
-    uploadStatus,
   ])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
@@ -93,7 +92,7 @@ export const SaveDraftButton: React.FC = () => {
       buttonId="action-save-draft"
       buttonStyle="secondary"
       className={baseClass}
-      disabled={forceDisable || uploadStatus === 'uploading'}
+      disabled={forceDisable}
       onClick={() => {
         return void saveDraft()
       }}

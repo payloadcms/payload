@@ -20,7 +20,7 @@ export const SaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) =
   const editDepth = useEditDepth()
   const operation = useOperation()
 
-  const forceDisable = operation === 'update' && !modified
+  const forceDisable = (operation === 'update' && !modified) || uploadStatus === 'uploading'
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     if (forceDisable) {
@@ -45,7 +45,7 @@ export const SaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) =
   return (
     <FormSubmit
       buttonId="action-save"
-      disabled={forceDisable || uploadStatus === 'uploading'}
+      disabled={forceDisable}
       onClick={handleSubmit}
       ref={ref}
       size="medium"
