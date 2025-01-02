@@ -87,16 +87,6 @@ export const useServerFunctions = () => {
 
 export type SingleErrorResult = { data: never; errors: unknown; message: string; stack: never }
 
-const handleErrors = (result: ErrorResult | SingleErrorResult) => {
-  if (result && 'errors' in result && Array.isArray(result.errors)) {
-    toast.error(result.errors[0]?.message)
-    console.error(result.errors[0]?.message) // eslint-disable-line no-console
-  } else if (result && 'message' in result) {
-    toast.error(result.message)
-    console.error(result.message) // eslint-disable-line no-console
-  }
-}
-
 export const ServerFunctionsProvider: React.FC<{
   children: React.ReactNode
   serverFunction: ServerFunctionClient
@@ -124,8 +114,6 @@ export const ServerFunctionsProvider: React.FC<{
             name: 'schedule-publish',
             args: { ...rest },
           })) as Awaited<ReturnType<typeof schedulePublishHandler>> // TODO: infer this type when `strictNullChecks` is enabled
-
-          handleErrors(result as ErrorResult)
 
           if (!remoteSignal?.aborted) {
             return result
@@ -157,8 +145,6 @@ export const ServerFunctionsProvider: React.FC<{
             args: { fallbackLocale: false, ...rest },
           })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
-          handleErrors(result as ErrorResult)
-
           if (!remoteSignal?.aborted) {
             return result
           }
@@ -183,8 +169,6 @@ export const ServerFunctionsProvider: React.FC<{
             args: { fallbackLocale: false, ...rest },
           })) as Awaited<ReturnType<typeof buildTableStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
-          handleErrors(result as ErrorResult)
-
           if (!remoteSignal?.aborted) {
             return result
           }
@@ -208,8 +192,6 @@ export const ServerFunctionsProvider: React.FC<{
           args: { fallbackLocale: false, ...rest },
         })) as Awaited<ReturnType<typeof renderDocument>> // TODO: infer this type when `strictNullChecks` is enabled
 
-        handleErrors(result as ErrorResult)
-
         return result
       } catch (_err) {
         console.error(_err) // eslint-disable-line no-console
@@ -227,8 +209,6 @@ export const ServerFunctionsProvider: React.FC<{
           name: 'copy-data-from-locale',
           args: rest,
         })) as { data: Data }
-
-        handleErrors(result as ErrorResult)
 
         if (!remoteSignal?.aborted) {
           return result
