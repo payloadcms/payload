@@ -57,6 +57,7 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormState> =>
       'clientFieldSchemaMap is not passed to fieldSchemasToFormState - this will reduce performance',
     )
   }
+
   const {
     id,
     clientFieldSchemaMap,
