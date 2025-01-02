@@ -101,16 +101,15 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     slug: `lexical-inlineBlocks-create-${uuidFromContext}-${formData.id}`,
     depth: editDepth,
   })
-  const { closeDrawer, toggleDrawer } = useLexicalDrawer(drawerSlug, true)
+  const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
 
   // Open drawer on mount
   useEffect(() => {
     if (!hasMounted.current) {
-      closeDrawer()
       toggleDrawer()
       hasMounted.current = true
     }
-  }, [closeDrawer, toggleDrawer])
+  }, [toggleDrawer])
 
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
