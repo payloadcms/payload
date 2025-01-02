@@ -81,6 +81,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   } = useEditorConfigContext()
   const { getFormState } = useServerFunctions()
   const editDepth = useEditDepth()
+  const hasMounted = useRef(false)
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
     initialLexicalFormState?.[formData.id]?.formState,
@@ -100,7 +101,16 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     slug: `lexical-inlineBlocks-create-${uuidFromContext}-${formData.id}`,
     depth: editDepth,
   })
-  const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
+  const { closeDrawer, toggleDrawer } = useLexicalDrawer(drawerSlug, true)
+
+  // Open drawer on mount
+  useEffect(() => {
+    if (!hasMounted.current) {
+      closeDrawer()
+      toggleDrawer()
+      hasMounted.current = true
+    }
+  }, [closeDrawer, toggleDrawer])
 
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
