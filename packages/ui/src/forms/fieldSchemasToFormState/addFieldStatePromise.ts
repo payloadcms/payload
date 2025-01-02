@@ -59,6 +59,7 @@ export type AddFieldStatePromiseArgs = {
    * Whether the field schema should be included in the state
    */
   includeSchema?: boolean
+  indexPath: string
   /**
    * Whether to omit parent fields in the state. @default false
    */
@@ -69,6 +70,7 @@ export type AddFieldStatePromiseArgs = {
   parentPermissions: SanitizedFieldsPermissions
   parentSchemaPath: string
   passesCondition: boolean
+  path: string
   preferences: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
@@ -78,6 +80,7 @@ export type AddFieldStatePromiseArgs = {
    * just create your own req and pass in the locale and the user
    */
   req: PayloadRequest
+  schemaPath: string
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -102,24 +105,25 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     collectionSlug,
     data,
     field,
-    fieldIndex,
     fieldSchemaMap,
     filter,
     forceFullValue = false,
     fullData,
     includeSchema = false,
+    indexPath,
     omitParents = false,
     operation,
-    parentIndexPath,
     parentPath,
     parentPermissions,
     parentSchemaPath,
     passesCondition,
+    path,
     preferences,
     previousFormState,
     renderAllFields,
     renderFieldFn,
     req,
+    schemaPath,
     skipConditionChecks = false,
     skipValidation = false,
     state,
@@ -130,14 +134,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       'clientFieldSchemaMap is not passed to addFieldStatePromise - this will reduce performance',
     )
   }
-
-  const { indexPath, path, schemaPath } = getFieldPaths({
-    field,
-    index: fieldIndex,
-    parentIndexPath: 'name' in field ? '' : parentIndexPath,
-    parentPath,
-    parentSchemaPath,
-  })
 
   const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
 
@@ -187,20 +183,29 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
       }
 
-      validationResult = await validate(
-        data?.[field.name] as never,
-        {
-          ...field,
-          id,
-          collectionSlug,
-          data: fullData,
-          jsonError,
-          operation,
-          preferences,
-          req,
-          siblingData: data,
-        } as any,
-      )
+      try {
+        validationResult = await validate(
+          data?.[field.name] as never,
+          {
+            ...field,
+            id,
+            collectionSlug,
+            data: fullData,
+            jsonError,
+            operation,
+            preferences,
+            req,
+            siblingData: data,
+          } as any,
+        )
+      } catch (err) {
+        validationResult = `Error validating field at path: ${path}`
+
+        req.payload.logger.error({
+          err,
+          msg: validationResult,
+        })
+      }
     }
 
     const addErrorPathToParent = (errorPath: string) => {
