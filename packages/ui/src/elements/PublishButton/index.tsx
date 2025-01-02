@@ -27,6 +27,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     setHasPublishedDoc,
     setUnpublishedVersionCount,
     unpublishedVersionCount,
+    uploadStatus,
   } = useDocumentInfo()
 
   const { config } = useConfig()
@@ -62,7 +63,10 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     entityConfig?.versions?.drafts.schedulePublish
 
   const hasNewerVersions = unpublishedVersionCount > 0
-  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !hasPublishedDoc)
+  const canPublish =
+    hasPublishPermission &&
+    (modified || hasNewerVersions || !hasPublishedDoc) &&
+    uploadStatus !== 'uploading'
   const operation = useOperation()
 
   const forceDisable = operation === 'update' && !modified
@@ -107,6 +111,10 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   })
 
   const publish = useCallback(() => {
+    if (uploadStatus === 'uploading') {
+      return
+    }
+
     void submit({
       overrides: {
         _status: 'published',
@@ -115,10 +123,14 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
 
     setUnpublishedVersionCount(0)
     setHasPublishedDoc(true)
-  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount])
+  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount, uploadStatus])
 
   const publishSpecificLocale = useCallback(
     (locale) => {
+      if (uploadStatus === 'uploading') {
+        return
+      }
+
       const params = qs.stringify({
         publishSpecificLocale: locale,
       })
@@ -136,7 +148,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
 
       setHasPublishedDoc(true)
     },
-    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit],
+    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadStatus],
   )
 
   if (!hasPublishPermission) {

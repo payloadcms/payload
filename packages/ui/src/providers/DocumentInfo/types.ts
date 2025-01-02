@@ -64,9 +64,12 @@ export type DocumentInfoContext = {
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
+  setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
   title: string
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
   updateDocumentEditor: (docID: number | string, slug: string, user: ClientUser) => Promise<void>
   updateSavedDocumentData: (data: Data) => void
+  uploadStatus?: 'failed' | 'idle' | 'uploading'
+  versionCount: number
 } & DocumentInfoProps
