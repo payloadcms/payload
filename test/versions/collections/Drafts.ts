@@ -5,6 +5,13 @@ import { draftCollectionSlug } from '../slugs.js'
 const DraftPosts: CollectionConfig = {
   slug: draftCollectionSlug,
   access: {
+    update: () => {
+      return {
+        restrictedToUpdate: {
+          not_equals: true,
+        },
+      }
+    },
     read: ({ req: { user } }) => {
       if (user) {
         return true
@@ -110,6 +117,10 @@ const DraftPosts: CollectionConfig = {
       name: 'relation',
       type: 'relationship',
       relationTo: draftCollectionSlug,
+    },
+    {
+      name: 'restrictedToUpdate',
+      type: 'checkbox',
     },
   ],
   versions: {

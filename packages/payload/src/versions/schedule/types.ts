@@ -8,4 +8,5 @@ export type SchedulePublishTaskInput = {
   global?: GlobalSlug
   locale?: string
   type: string
+  user?: number | string
 }
