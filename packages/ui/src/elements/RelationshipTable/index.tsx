@@ -61,7 +61,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     relationTo,
   } = props
   const [Table, setTable] = useState<React.ReactNode>(null)
-
   const { getEntityConfig } = useConfig()
 
   const { permissions } = useAuth()
@@ -195,6 +194,14 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [closeDrawer, onDrawerSave],
   )
 
+  const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      const newDocs = data.docs.filter((doc) => doc.id !== args.id)
+      void renderTable(newDocs)
+    },
+    [data.docs, renderTable],
+  )
+
   const preferenceKey = `${relationTo}-list`
 
   const canCreate = allowCreate !== false && permissions?.collections?.[relationTo]?.create
@@ -260,7 +267,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                   collectionSlug={relationTo}
                   columnState={columnState}
                   docs={data.docs}
-                  LinkedCellOverride={<DrawerLink onDrawerSave={onDrawerSave} />}
+                  LinkedCellOverride={
+                    <DrawerLink onDrawerDelete={onDrawerDelete} onDrawerSave={onDrawerSave} />
+                  }
                   preferenceKey={preferenceKey}
                   renderRowTypes
                   setTable={setTable}

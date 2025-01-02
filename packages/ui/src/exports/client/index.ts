@@ -127,6 +127,7 @@ export { EditUpload } from '../../elements/EditUpload/index.js'
 export { FileDetails } from '../../elements/FileDetails/index.js'
 export { PreviewSizes } from '../../elements/PreviewSizes/index.js'
 export { PreviewButton } from '../../elements/PreviewButton/index.js'
+export { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
@@ -303,13 +304,17 @@ export {
   type ListViewClientProps,
   type ListViewSlots,
 } from '../../views/List/index.js'
+
 export type {
   ListComponentClientProps,
   ListComponentServerProps,
   ListPreferences,
 } from '../../views/List/types.js'
+
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 
 export { DefaultEditView } from '../../views/Edit/index.js'
 export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'
 export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'
+
+export { parseSearchParams } from '../../utilities/parseSearchParams.js'

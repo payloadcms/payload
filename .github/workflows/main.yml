@@ -180,6 +180,7 @@ jobs:
           - postgres-uuid
           - supabase
           - sqlite
+          - sqlite-uuid
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -277,9 +278,9 @@ jobs:
         suite:
           - _community
           - access-control
-          - admin__e2e__1
-          - admin__e2e__2
-          - admin__e2e__3
+          - admin__e2e__general
+          - admin__e2e__list-view
+          - admin__e2e__document-view
           - admin-root
           - auth
           - auth-basic
@@ -288,6 +289,7 @@ jobs:
           - fields-relationship
           - fields__collections__Array
           - fields__collections__Blocks
+          - fields__collections__Checkbox
           - fields__collections__Collapsible
           - fields__collections__ConditionalLogic
           - fields__collections__CustomID
@@ -413,6 +415,8 @@ jobs:
           - template: with-vercel-postgres
             database: postgres
 
+          - template: plugin
+
           # Re-enable once PG conncection is figured out
           # - template: with-vercel-website
           #   database: postgres
@@ -466,6 +470,7 @@ jobs:
         uses: supercharge/mongodb-github-action@1.11.0
         with:
           mongodb-version: 6.0
+        if: matrix.database == 'mongodb'
 
       - name: Build Template
         run: |

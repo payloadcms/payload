@@ -18,8 +18,10 @@ const UNORDERED_LIST_REGEX = /^(\s*)[-*+]\s/
 const CHECK_LIST_REGEX = /^(\s*)(?:-\s)?\s?(\[(\s|x)?\])\s/i
 const HEADING_REGEX = /^(#{1,6})\s/
 const QUOTE_REGEX = /^>\s/
-const CODE_START_REGEX = /^[ \t]*```(\w+)?/
-const CODE_END_REGEX = /[ \t]*```$/
+// Match start of ``` or escaped \`\`\` code blocks
+const CODE_START_REGEX = /^[ \t]*(\\`\\`\\`|```)(\w+)?/
+// Match end of ``` or escaped \`\`\` code blocks
+const CODE_END_REGEX = /[ \t]*(\\`\\`\\`|```)$/
 const CODE_SINGLE_LINE_REGEX = /^[ \t]*```[^`]+(?:(?:`{1,2}|`{4,})[^`]+)*```(?:[^`]|$)/
 const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/
 const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/
@@ -41,15 +43,15 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines = fals
       continue
     }
 
-    if (
-      (CODE_START_REGEX.test(line) && !inCodeBlock) ||
-      (CODE_END_REGEX.test(line) && inCodeBlock)
-    ) {
-      inCodeBlock = !inCodeBlock
+    // Toggle inCodeBlock state when encountering start or end of a code block
+    if (CODE_START_REGEX.test(line)) {
+      inCodeBlock = true
+      sanitizedLines.push(line)
+      continue
     }
 
-    // Detect the start or end of a code block
-    if (CODE_START_REGEX.test(line) || CODE_END_REGEX.test(line)) {
+    if (CODE_END_REGEX.test(line)) {
+      inCodeBlock = false
       sanitizedLines.push(line)
       continue
     }

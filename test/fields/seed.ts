@@ -11,6 +11,7 @@ import { blocksDoc } from './collections/Blocks/shared.js'
 import { codeDoc } from './collections/Code/shared.js'
 import { collapsibleDoc } from './collections/Collapsible/shared.js'
 import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
+import { customRowID, customTabID, nonStandardID } from './collections/CustomID/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { anotherEmailDoc, emailDoc } from './collections/Email/shared.js'
 import { groupDoc } from './collections/Group/shared.js'
@@ -30,10 +31,14 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
+  checkboxFieldsSlug,
   codeFieldsSlug,
   collapsibleFieldsSlug,
   collectionSlugs,
   conditionalLogicSlug,
+  customIDSlug,
+  customRowIDSlug,
+  customTabIDSlug,
   dateFieldsSlug,
   emailFieldsSlug,
   groupFieldsSlug,
@@ -305,6 +310,24 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    collection: checkboxFieldsSlug,
+    data: {
+      checkbox: true,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: checkboxFieldsSlug,
+    data: {
+      checkbox: false,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
     collection: codeFieldsSlug,
     data: codeDoc,
     depth: 0,
@@ -477,6 +500,28 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: 'LexicalInBlock',
     data: {
+      content: {
+        root: {
+          children: [
+            {
+              format: '',
+              type: 'block',
+              version: 2,
+              fields: {
+                id: '6773773284be8978db7a498d',
+                lexicalInBlock: textToLexicalJSON({ text: 'text' }),
+                blockName: '',
+                blockType: 'blockInLexical',
+              },
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      },
       blocks: [
         {
           blockType: 'lexicalInBlock2',
@@ -491,6 +536,27 @@ export const seed = async (_payload: Payload) => {
       ],
     },
   })
+
+  await Promise.all([
+    _payload.create({
+      collection: customIDSlug,
+      data: {
+        id: nonStandardID,
+      },
+    }),
+    _payload.create({
+      collection: customTabIDSlug,
+      data: {
+        id: customTabID,
+      },
+    }),
+    _payload.create({
+      collection: customRowIDSlug,
+      data: {
+        id: customRowID,
+      },
+    }),
+  ])
 }
 
 export async function clearAndSeedEverything(_payload: Payload) {

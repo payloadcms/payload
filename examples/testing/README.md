@@ -2,6 +2,12 @@
 
 This example demonstrates how to get started with testing Payload using [Jest](https://jestjs.io/). You can clone this down and use it as a starting point for your own Payload projects, or you can follow the steps below to add testing to your existing Payload project.
 
+## Spin up locally:
+
+Run the following command to create a project from the example:
+
+- `npx create-payload-app --example testing`
+
 ## Add testing to your existing Payload project
 
 1. Initial setup:

@@ -55,6 +55,7 @@ export const renderField: RenderFieldMethod = ({
     customComponents: fieldState?.customComponents || {},
     field: clientField,
     path,
+    permissions,
     readOnly: typeof permissions === 'boolean' ? !permissions : !permissions?.[operation],
     schemaPath,
   }

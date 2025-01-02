@@ -42,7 +42,7 @@ const defaultPayloadAccess = ({ req: { user } }) => {
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   In the [Local API](../local-api/overview), all Access Control is _skipped_ by default. This allows your server to have full control over your application. To opt back in, you can set the `overrideAccess` option to `false` in your requests.
 </Banner>
 
@@ -53,7 +53,7 @@ The Admin Panel responds dynamically to your changes to Access Control. For exam
 To accomplish this, Payload exposes the [Access Operation](../authentication/operations#access). Upon login, Payload executes each Access Control function at the top level, across all Collections, Globals, and Fields, and returns a response that contains a reflection of what the currently authenticated user can do within your application.
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   When your access control functions are executed via the [Access Operation](../authentication/operations#access),  the `id` and `data` arguments will be `undefined`. This is because Payload is executing your functions without referencing a specific Document.
 </Banner>
 

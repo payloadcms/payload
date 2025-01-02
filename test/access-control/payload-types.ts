@@ -9,11 +9,11 @@
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'non-admin-user': NonAdminUserAuthOperations;
+    'public-users': PublicUserAuthOperations;
   };
   collections: {
     users: User;
-    'non-admin-user': NonAdminUser;
+    'public-users': PublicUser;
     posts: Post;
     unrestricted: Unrestricted;
     'relation-restricted': RelationRestricted;
@@ -40,7 +40,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
-    'non-admin-user': NonAdminUserSelect<false> | NonAdminUserSelect<true>;
+    'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     unrestricted: UnrestrictedSelect<false> | UnrestrictedSelect<true>;
     'relation-restricted': RelationRestrictedSelect<false> | RelationRestrictedSelect<true>;
@@ -86,8 +86,8 @@ export interface Config {
     | (User & {
         collection: 'users';
       })
-    | (NonAdminUser & {
-        collection: 'non-admin-user';
+    | (PublicUser & {
+        collection: 'public-users';
       });
   jobs: {
     tasks: unknown;
@@ -112,7 +112,7 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface NonAdminUserAuthOperations {
+export interface PublicUserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -150,9 +150,9 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-admin-user".
+ * via the `definition` "public-users".
  */
-export interface NonAdminUser {
+export interface PublicUser {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -624,8 +624,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       } | null)
     | ({
         relationTo: 'posts';
@@ -710,8 +710,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       }
     | {
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       };
   updatedAt: string;
   createdAt: string;
@@ -728,8 +728,8 @@ export interface PayloadPreference {
         value: string | User;
       }
     | {
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       };
   key?: string | null;
   value?:
@@ -773,9 +773,9 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-admin-user_select".
+ * via the `definition` "public-users_select".
  */
-export interface NonAdminUserSelect<T extends boolean = true> {
+export interface PublicUsersSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   email?: T;
