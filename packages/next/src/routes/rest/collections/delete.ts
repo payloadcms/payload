@@ -37,7 +37,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
     const message = req.t('general:deletedCountSuccessfully', {
       count: result.docs.length,
       label: getTranslation(
-        collection.config.labels[result.docs.length > 1 ? 'plural' : 'singular'],
+        collection.config.labels[result.docs.length === 1 ? 'singular' : 'plural'],
         req.i18n,
       ),
     })
