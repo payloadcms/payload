@@ -9,6 +9,7 @@ import { da } from '../languages/da.js'
 import { de } from '../languages/de.js'
 import { en } from '../languages/en.js'
 import { es } from '../languages/es.js'
+import { et } from '../languages/et.js'
 import { fa } from '../languages/fa.js'
 import { fr } from '../languages/fr.js'
 import { he } from '../languages/he.js'
@@ -46,6 +47,7 @@ export const translations = {
   de,
   en,
   es,
+  et,
   fa,
   fr,
   he,
