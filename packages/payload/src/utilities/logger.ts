@@ -45,7 +45,20 @@ export const getLogger = (name = 'payload', logger?: Config['logger']): PayloadL
       options.enabled = process.env.DISABLE_LOGGING !== 'true'
     }
 
-    return pino(options, destination)
+    // If destination is passed, ignore pino-pretty
+    if (destination) {
+      return pino(options, destination)
+    }
+
+    return pino({
+      transport: {
+        options: {
+          ...prettyOptions,
+        },
+        target: 'pino-pretty',
+      },
+      ...options,
+    })
   } else {
     // Instantiated logger
     return logger
