@@ -119,12 +119,15 @@ describe('Upload', () => {
 
     const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
 
+    const encodedImageURL = encodeURIComponent(remoteImage)
+    const pasteUrlEndpoint = `http://localhost:3000/api/uploads/paste-url?src=${encodedImageURL}`
+
     const inputField = page.locator('.file-field__upload .file-field__remote-file')
     await inputField.fill(remoteImage)
 
-    // Intercept the upload request
+    // Intercept the 'paste-url' upload request
     await page.route(
-      'https://payloadcms.com/images/og-image.jpg',
+      pasteUrlEndpoint,
       (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
     )
 
@@ -135,7 +138,7 @@ describe('Upload', () => {
     await expect(submitButton).toBeDisabled()
 
     // Wait for the upload to complete
-    await page.waitForResponse('https://payloadcms.com/images/og-image.jpg')
+    await page.waitForResponse(pasteUrlEndpoint)
 
     // Assert the submit button is re-enabled after upload
     await expect(submitButton).toBeEnabled()
