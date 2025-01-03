@@ -103,14 +103,6 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   })
   const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
 
-  // Open drawer on mount
-  useEffect(() => {
-    if (!hasMounted.current) {
-      toggleDrawer()
-      hasMounted.current = true
-    }
-  }, [toggleDrawer])
-
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
@@ -124,6 +116,15 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   ][0] as BlocksFieldClient
 
   const clientBlock = blocksField.blocks[0]
+
+  // Open drawer on mount
+  useEffect(() => {
+    // > 2 because they always have "id" and "blockName" fields
+    if (!hasMounted.current && clientBlock.fields.length > 2) {
+      toggleDrawer()
+      hasMounted.current = true
+    }
+  }, [clientBlock, toggleDrawer])
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
