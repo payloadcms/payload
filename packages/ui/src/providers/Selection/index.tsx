@@ -84,7 +84,6 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
   const setSelection = useCallback(
     (id) => {
-      console.log('id', id)
       const doc = docs.find((doc) => doc.id === id)
 
       if (doc?._isLocked && user?.id !== doc?._userEditing.id) {

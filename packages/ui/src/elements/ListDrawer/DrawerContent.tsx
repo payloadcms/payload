@@ -59,14 +59,14 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       collectionSlug: selectedOption.value,
     })
 
-  // useEffect(() => {
-  //   if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
-  //     setSelectedOption({
-  //       label: collections.find(({ slug }) => slug === selectedCollectionFromProps).labels,
-  //       value: selectedCollectionFromProps,
-  //     })
-  //   }
-  // }, [selectedCollectionFromProps, collections, selectedOption])
+  useEffect(() => {
+    if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
+      setSelectedOption({
+        label: collections.find(({ slug }) => slug === selectedCollectionFromProps).labels,
+        value: selectedCollectionFromProps,
+      })
+    }
+  }, [selectedCollectionFromProps, collections, selectedOption])
 
   const renderList = useCallback(
     async (slug: string, query?: ListQuery) => {

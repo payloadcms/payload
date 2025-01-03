@@ -29,7 +29,6 @@ export const ListDrawerContextProvider: React.FC<
     children: React.ReactNode
   } & ListDrawerContextProps
 > = ({ children, ...rest }) => {
-  // console.log('REST', rest)
   return (
     <ListDrawerContext.Provider value={{ isInDrawer: Boolean(rest.drawerSlug), ...rest }}>
       {children}

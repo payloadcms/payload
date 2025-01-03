@@ -110,9 +110,9 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     query,
   } = useListQuery()
 
-  // const { openModal } = useModal()
-  // const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
-  // const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
+  const { openModal } = useModal()
+  const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
+  const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
@@ -134,33 +134,33 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
 
-  // const docs = React.useMemo(() => {
-  //   if (isUploadCollection) {
-  //     return data.docs.map((doc) => {
-  //       return {
-  //         ...doc,
-  //         filesize: formatFilesize(doc.filesize),
-  //       }
-  //     })
-  //   } else {
-  //     return data.docs
-  //   }
-  // }, [data.docs, isUploadCollection])
+  const docs = React.useMemo(() => {
+    if (isUploadCollection) {
+      return data.docs.map((doc) => {
+        return {
+          ...doc,
+          filesize: formatFilesize(doc.filesize),
+        }
+      })
+    } else {
+      return data.docs
+    }
+  }, [data.docs, isUploadCollection])
 
-  // const openBulkUpload = React.useCallback(() => {
-  //   setCollectionSlug(collectionSlug)
-  //   setCurrentActivePath(collectionSlug)
-  //   openModal(bulkUploadDrawerSlug)
-  //   setOnSuccess(collectionSlug, () => router.refresh())
-  // }, [
-  //   router,
-  //   collectionSlug,
-  //   bulkUploadDrawerSlug,
-  //   openModal,
-  //   setCollectionSlug,
-  //   setCurrentActivePath,
-  //   setOnSuccess,
-  // ])
+  const openBulkUpload = React.useCallback(() => {
+    setCollectionSlug(collectionSlug)
+    setCurrentActivePath(collectionSlug)
+    openModal(bulkUploadDrawerSlug)
+    setOnSuccess(collectionSlug, () => router.refresh())
+  }, [
+    router,
+    collectionSlug,
+    bulkUploadDrawerSlug,
+    openModal,
+    setCollectionSlug,
+    setCurrentActivePath,
+    setOnSuccess,
+  ])
 
   useEffect(() => {
     if (drawerDepth <= 1) {
@@ -174,7 +174,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   return (
     <Fragment>
-      {/* <TableColumnsProvider
+      <TableColumnsProvider
         collectionSlug={collectionSlug}
         columnState={columnState}
         docs={docs}
@@ -182,30 +182,32 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
         listPreferences={listPreferences}
         preferenceKey={preferenceKey}
         setTable={setTable}
-      > */}
-      <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-        {/* <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}> */}
-        {/* {BeforeList} */}
-        {/* <Gutter className={`${baseClass}__wrap`}> */}
-        <ListHeader
-          collectionConfig={collectionConfig}
-          Description={
-            <div className={`${baseClass}__sub-header`}>
-              <RenderCustomComponent
-                CustomComponent={Description}
-                Fallback={<ViewDescription description={collectionConfig?.admin?.description} />}
+      >
+        <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
+          <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
+            {BeforeList}
+            <Gutter className={`${baseClass}__wrap`}>
+              <ListHeader
+                collectionConfig={collectionConfig}
+                Description={
+                  <div className={`${baseClass}__sub-header`}>
+                    <RenderCustomComponent
+                      CustomComponent={Description}
+                      Fallback={
+                        <ViewDescription description={collectionConfig?.admin?.description} />
+                      }
+                    />
+                  </div>
+                }
+                hasCreatePermission={hasCreatePermission}
+                i18n={i18n}
+                isBulkUploadEnabled={isBulkUploadEnabled}
+                newDocumentURL={newDocumentURL}
+                openBulkUpload={openBulkUpload}
+                smallBreak={smallBreak}
+                t={t}
               />
-            </div>
-          }
-          hasCreatePermission={hasCreatePermission}
-          i18n={i18n}
-          isBulkUploadEnabled={false}
-          newDocumentURL={newDocumentURL}
-          openBulkUpload={() => {}}
-          smallBreak={smallBreak}
-          t={t}
-        />
-        {/* <ListControls
+              <ListControls
                 beforeActions={
                   enableRowSelections && typeof onBulkSelect === 'function'
                     ? beforeActions
@@ -218,8 +220,8 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
                 renderedFilters={renderedFilters}
-              /> */}
-        {/* {BeforeListTable}
+              />
+              {BeforeListTable}
               {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
               {docs.length === 0 && (
                 <div className={`${baseClass}__no-results`}>
@@ -302,12 +304,12 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                     </Fragment>
                   )}
                 </div>
-              )} */}
-        {/* </Gutter>
-            {AfterList} */}
-        {/* </SelectionProvider> */}
-      </div>
-      {/* </TableColumnsProvider> */}
+              )}
+            </Gutter>
+            {AfterList}
+          </SelectionProvider>
+        </div>
+      </TableColumnsProvider>
     </Fragment>
   )
 }

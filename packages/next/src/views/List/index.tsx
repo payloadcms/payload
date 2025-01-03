@@ -231,46 +231,33 @@ export const renderListView = async (
       Table,
     }
 
-    console.log('DATA', data)
-
     const isInDrawer = Boolean(drawerSlug)
 
     return {
       List: (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
-          {/* <ListQueryProvider
+          <ListQueryProvider
             collectionSlug={collectionSlug}
             data={data}
             defaultLimit={limit}
             defaultSort={sort}
             modifySearchParams={!isInDrawer}
             preferenceKey={preferenceKey}
-          > */}
-          {RenderServerComponent({
-            clientProps,
-            Component: collectionConfig?.admin?.components?.views?.list?.Component,
-            Fallback: DefaultListView,
-            importMap: payload.importMap,
-            serverProps: {
-              ...sharedServerProps,
-              data: {
-                docs: [],
-                hasNextPage: false,
-                hasPrevPage: false,
-                limit: 0,
-                nextPage: 0,
-                page: 0,
-                pagingCounter: 0,
-                prevPage: 0,
-                totalDocs: 0,
-                totalPages: 0,
+          >
+            {RenderServerComponent({
+              clientProps,
+              Component: collectionConfig?.admin?.components?.views?.list?.Component,
+              Fallback: DefaultListView,
+              importMap: payload.importMap,
+              serverProps: {
+                ...sharedServerProps,
+                data,
+                listPreferences,
+                listSearchableFields: collectionConfig.admin.listSearchableFields,
               },
-              listPreferences,
-              listSearchableFields: collectionConfig.admin.listSearchableFields,
-            },
-          })}
-          {/* </ListQueryProvider> */}
+            })}
+          </ListQueryProvider>
         </Fragment>
       ),
     }
