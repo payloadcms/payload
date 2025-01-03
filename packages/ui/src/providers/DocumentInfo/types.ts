@@ -66,8 +66,6 @@ export type DocumentInfoContext = {
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setDocumentTitle: (title: string) => void
   setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
-  setInitialData: React.Dispatch<React.SetStateAction<Data>>
-  setInitialState: React.Dispatch<React.SetStateAction<FormState>>
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>

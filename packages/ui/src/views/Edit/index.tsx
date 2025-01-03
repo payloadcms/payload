@@ -83,8 +83,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     savedDocumentData,
     setCurrentEditor,
     setDocumentIsLocked,
-    setInitialData,
-    setInitialState,
     unlockDocument,
     updateDocumentEditor,
     updateSavedDocumentData,
@@ -293,9 +291,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           setDocumentIsLocked(false)
         }
 
-        setInitialData(json?.doc || json?.result)
-        setInitialState(state)
-
         abortOnSaveRef.current = null
 
         return state
@@ -327,8 +322,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       operation,
       schemaPathSegments,
       isLockingEnabled,
-      setInitialData,
-      setInitialState,
       setDocumentIsLocked,
     ],
   )

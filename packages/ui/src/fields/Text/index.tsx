@@ -12,8 +12,8 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { isFieldRTL } from '../shared/index.js'
-import './index.scss'
 import { TextInput } from './Input.js'
+import './index.scss'
 
 export { TextInput, TextInputProps }
 

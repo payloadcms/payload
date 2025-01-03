@@ -3,9 +3,7 @@ import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
   ClientUser,
-  Data,
   DocumentPreferences,
-  FormState,
   SanitizedDocumentPermissions,
 } from 'payload'
 
@@ -44,8 +42,8 @@ const DocumentInfo: React.FC<
     hasPublishedDoc: hasPublishedDocFromProps,
     hasPublishPermission: hasPublishPermissionFromProps,
     hasSavePermission: hasSavePermissionFromProps,
-    initialData: initialDataFromProps,
-    initialState: initialStateFromProps,
+    initialData,
+    initialState,
     isLocked: isLockedFromProps,
     lastUpdateTime: lastUpdateTimeFromProps,
     mostRecentVersionIsAutosaved: mostRecentVersionIsAutosavedFromProps,
@@ -57,10 +55,6 @@ const DocumentInfo: React.FC<
     useState<SanitizedDocumentPermissions>(docPermissionsFromProps)
 
   const [hasSavePermission, setHasSavePermission] = useState<boolean>(hasSavePermissionFromProps)
-
-  // Keep these in state, because saving a doc may receive new data back from update operation
-  const [initialData, setInitialData] = useState<Data>(initialDataFromProps)
-  const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
 
   const [hasPublishPermission, setHasPublishPermission] = useState<boolean>(
     hasPublishPermissionFromProps,
@@ -267,14 +261,6 @@ const DocumentInfo: React.FC<
   )
 
   useEffect(() => {
-    setInitialState(initialState)
-  }, [initialState])
-
-  useEffect(() => {
-    setInitialState(initialState)
-  }, [initialState])
-
-  useEffect(() => {
     setDocumentTitle(
       formatDocTitle({
         collectionConfig,
@@ -341,8 +327,6 @@ const DocumentInfo: React.FC<
     setDocumentIsLocked,
     setDocumentTitle,
     setHasPublishedDoc,
-    setInitialData,
-    setInitialState,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
