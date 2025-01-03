@@ -25,6 +25,9 @@ export interface Config {
     'categories-join-restricted': CategoriesJoinRestricted;
     'restricted-posts': RestrictedPost;
     'collection-restricted': CollectionRestricted;
+    'depth-joins-1': DepthJoins1;
+    'depth-joins-2': DepthJoins2;
+    'depth-joins-3': DepthJoins3;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -66,6 +69,12 @@ export interface Config {
     'categories-join-restricted': {
       collectionRestrictedJoin: 'collection-restricted';
     };
+    'depth-joins-1': {
+      joins: 'depth-joins-3';
+    };
+    'depth-joins-2': {
+      joins: 'depth-joins-1';
+    };
   };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -82,6 +91,9 @@ export interface Config {
     'categories-join-restricted': CategoriesJoinRestrictedSelect<false> | CategoriesJoinRestrictedSelect<true>;
     'restricted-posts': RestrictedPostsSelect<false> | RestrictedPostsSelect<true>;
     'collection-restricted': CollectionRestrictedSelect<false> | CollectionRestrictedSelect<true>;
+    'depth-joins-1': DepthJoins1Select<false> | DepthJoins1Select<true>;
+    'depth-joins-2': DepthJoins2Select<false> | DepthJoins2Select<true>;
+    'depth-joins-3': DepthJoins3Select<false> | DepthJoins3Select<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -453,6 +465,43 @@ export interface RestrictedPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-1".
+ */
+export interface DepthJoins1 {
+  id: string;
+  rel?: (string | null) | DepthJoins2;
+  joins?: {
+    docs?: (string | DepthJoins3)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-2".
+ */
+export interface DepthJoins2 {
+  id: string;
+  joins?: {
+    docs?: (string | DepthJoins1)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-3".
+ */
+export interface DepthJoins3 {
+  id: string;
+  rel?: (string | null) | DepthJoins1;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -513,6 +562,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collection-restricted';
         value: string | CollectionRestricted;
+      } | null)
+    | ({
+        relationTo: 'depth-joins-1';
+        value: string | DepthJoins1;
+      } | null)
+    | ({
+        relationTo: 'depth-joins-2';
+        value: string | DepthJoins2;
+      } | null)
+    | ({
+        relationTo: 'depth-joins-3';
+        value: string | DepthJoins3;
       } | null)
     | ({
         relationTo: 'users';
@@ -758,6 +819,34 @@ export interface CollectionRestrictedSelect<T extends boolean = true> {
   title?: T;
   canRead?: T;
   category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-1_select".
+ */
+export interface DepthJoins1Select<T extends boolean = true> {
+  rel?: T;
+  joins?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-2_select".
+ */
+export interface DepthJoins2Select<T extends boolean = true> {
+  joins?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-3_select".
+ */
+export interface DepthJoins3Select<T extends boolean = true> {
+  rel?: T;
   updatedAt?: T;
   createdAt?: T;
 }
