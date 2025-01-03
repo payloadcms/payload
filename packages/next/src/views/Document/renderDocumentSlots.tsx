@@ -57,6 +57,7 @@ export const renderDocumentSlots: (args: {
       : descriptionFromConfig
 
   const CustomDescription =
+    collectionConfig?.admin?.components?.edit?.Description ||
     collectionConfig?.admin?.components?.Description ||
     globalConfig?.admin?.components?.elements?.Description
 
@@ -64,7 +65,7 @@ export const renderDocumentSlots: (args: {
 
   if (hasDescription) {
     components.Description = RenderServerComponent({
-      clientProps: { description: staticDescription },
+      clientProps: staticDescription ? { description: staticDescription } : {},
       Component: CustomDescription,
       Fallback: ViewDescription,
       importMap: req.payload.importMap,
