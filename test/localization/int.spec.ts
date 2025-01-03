@@ -1,10 +1,21 @@
+import type { Payload, User, Where } from 'payload'
+
 import path from 'path'
-import { type Payload, type Where } from 'payload'
+import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { LocalizedPost, LocalizedSort, WithLocalizedRelationship } from './payload-types.js'
+import type {
+  LocalizedPost,
+  LocalizedSort,
+  Nested,
+  WithLocalizedRelationship,
+} from './payload-types.js'
 
+import { devUser } from '../credentials.js'
+
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
@@ -2449,6 +2460,108 @@ describe('Localization', () => {
             },
           }),
         ).rejects.toBeTruthy()
+      })
+    })
+
+    describe('Copying To Locale', () => {
+      let user: User
+
+      beforeAll(async () => {
+        user = (
+          await payload.find({
+            collection: 'users',
+            where: {
+              email: {
+                equals: devUser.email,
+              },
+            },
+          })
+        ).docs[0] as unknown as User
+
+        user['collection'] = 'users'
+      })
+
+      it('should copy to locale', async () => {
+        const doc = await payload.create({
+          collection: 'localized-posts',
+          data: {
+            title: 'Hello',
+            group: {
+              children: 'Children',
+            },
+            unique: 'unique-field',
+            localizedCheckbox: true,
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'localized-posts',
+        })) as LocalizedPost
+
+        expect(res.title).toBe('Hello')
+        expect(res.group.children).toBe('Children')
+        expect(res.unique).toBe('unique-field')
+        expect(res.localizedCheckbox).toBe(true)
+      })
+
+      it('should copy localized nested to arrays', async () => {
+        const doc = await payload.create({
+          collection: 'nested',
+          locale: 'en',
+          data: {
+            topLevelArray: [
+              {
+                localizedText: 'some-localized-text',
+                notLocalizedText: 'some-not-localized-text',
+              },
+            ],
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'nested',
+        })) as Nested
+
+        expect(res.topLevelArray[0].localizedText).toBe('some-localized-text')
+        expect(res.topLevelArray[0].notLocalizedText).toBe('some-not-localized-text')
+      })
+
+      it('should copy localized arrays', async () => {
+        const doc = await payload.create({
+          collection: 'nested',
+          locale: 'en',
+          data: {
+            topLevelArrayLocalized: [
+              {
+                text: 'some-text',
+              },
+            ],
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'nested',
+        })) as Nested
+
+        expect(res.topLevelArrayLocalized[0].text).toBe('some-text')
       })
     })
   })
