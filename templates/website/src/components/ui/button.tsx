@@ -49,6 +49,4 @@ const Button: React.FC<ButtonProps> = ({
   return <Comp className={cn(buttonVariants({ className, size, variant }))} ref={ref} {...props} />
 }
 
-Button.displayName = 'Button'
-
 export { Button, buttonVariants }

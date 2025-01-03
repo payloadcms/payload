@@ -16,6 +16,4 @@ const Label: React.FC<
   <LabelPrimitive.Root className={cn(labelVariants(), className)} ref={ref} {...props} />
 )
 
-Label.displayName = LabelPrimitive.Root.displayName
-
 export { Label }

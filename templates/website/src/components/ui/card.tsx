@@ -11,15 +11,11 @@ const Card: React.FC<
   />
 )
 
-Card.displayName = 'Card'
-
 const CardHeader: React.FC<
   { ref?: React.Ref<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
 > = ({ className, ref, ...props }) => (
   <div className={cn('flex flex-col space-y-1.5 p-6', className)} ref={ref} {...props} />
 )
-
-CardHeader.displayName = 'CardHeader'
 
 const CardTitle: React.FC<
   { ref?: React.Ref<HTMLHeadingElement> } & React.HTMLAttributes<HTMLHeadingElement>
@@ -31,15 +27,11 @@ const CardTitle: React.FC<
   />
 )
 
-CardTitle.displayName = 'CardTitle'
-
 const CardDescription: React.FC<
   { ref?: React.Ref<HTMLParagraphElement> } & React.HTMLAttributes<HTMLParagraphElement>
 > = ({ className, ref, ...props }) => (
   <p className={cn('text-sm text-muted-foreground', className)} ref={ref} {...props} />
 )
-
-CardDescription.displayName = 'CardDescription'
 
 const CardContent: React.FC<
   { ref?: React.Ref<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
@@ -47,14 +39,10 @@ const CardContent: React.FC<
   <div className={cn('p-6 pt-0', className)} ref={ref} {...props} />
 )
 
-CardContent.displayName = 'CardContent'
-
 const CardFooter: React.FC<
   { ref?: React.Ref<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
 > = ({ className, ref, ...props }) => (
   <div className={cn('flex items-center p-6 pt-0', className)} ref={ref} {...props} />
 )
-
-CardFooter.displayName = 'CardFooter'
 
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }

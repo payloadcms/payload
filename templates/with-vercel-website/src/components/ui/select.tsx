@@ -29,8 +29,6 @@ const SelectTrigger: React.FC<
   </SelectPrimitive.Trigger>
 )
 
-SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
-
 const SelectScrollUpButton: React.FC<
   { ref?: React.Ref<HTMLDivElement> } & React.ComponentProps<typeof SelectPrimitive.ScrollUpButton>
 > = ({ className, ref, ...props }) => (
@@ -42,8 +40,6 @@ const SelectScrollUpButton: React.FC<
     <ChevronUp className="h-4 w-4" />
   </SelectPrimitive.ScrollUpButton>
 )
-
-SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
 
 const SelectScrollDownButton: React.FC<
   { ref?: React.Ref<HTMLDivElement> } & React.ComponentProps<
@@ -58,7 +54,6 @@ const SelectScrollDownButton: React.FC<
     <ChevronDown className="h-4 w-4" />
   </SelectPrimitive.ScrollDownButton>
 )
-SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName
 
 const SelectContent: React.FC<
   {
@@ -92,8 +87,6 @@ const SelectContent: React.FC<
   </SelectPrimitive.Portal>
 )
 
-SelectContent.displayName = SelectPrimitive.Content.displayName
-
 const SelectLabel: React.FC<
   { ref?: React.Ref<HTMLDivElement> } & React.ComponentProps<typeof SelectPrimitive.Label>
 > = ({ className, ref, ...props }) => (
@@ -103,8 +96,6 @@ const SelectLabel: React.FC<
     {...props}
   />
 )
-
-SelectLabel.displayName = SelectPrimitive.Label.displayName
 
 const SelectItem: React.FC<
   { ref?: React.Ref<HTMLDivElement>; value: string } & React.ComponentProps<
@@ -129,8 +120,6 @@ const SelectItem: React.FC<
   </SelectPrimitive.Item>
 )
 
-SelectItem.displayName = SelectPrimitive.Item.displayName
-
 const SelectSeparator: React.FC<
   { ref?: React.Ref<HTMLDivElement> } & React.ComponentProps<typeof SelectPrimitive.Separator>
 > = ({ className, ref, ...props }) => (
@@ -140,8 +129,6 @@ const SelectSeparator: React.FC<
     {...props}
   />
 )
-
-SelectSeparator.displayName = SelectPrimitive.Separator.displayName
 
 export {
   Select,

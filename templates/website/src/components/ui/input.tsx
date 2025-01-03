@@ -19,6 +19,4 @@ const Input: React.FC<
   )
 }
 
-Input.displayName = 'Input'
-
 export { Input }

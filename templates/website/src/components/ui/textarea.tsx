@@ -18,6 +18,4 @@ const Textarea: React.FC<
   )
 }
 
-Textarea.displayName = 'Textarea'
-
 export { Textarea }

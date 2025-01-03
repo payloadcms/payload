@@ -14,21 +14,15 @@ const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
   />
 )
 
-Pagination.displayName = 'Pagination'
-
 const PaginationContent: React.FC<
   { ref?: React.Ref<HTMLUListElement> } & React.HTMLAttributes<HTMLUListElement>
 > = ({ className, ref, ...props }) => (
   <ul className={cn('flex flex-row items-center gap-1', className)} ref={ref} {...props} />
 )
 
-PaginationContent.displayName = 'PaginationContent'
-
 const PaginationItem: React.FC<
   { ref?: React.Ref<HTMLLIElement> } & React.HTMLAttributes<HTMLLIElement>
 > = ({ className, ref, ...props }) => <li className={cn('', className)} ref={ref} {...props} />
-
-PaginationItem.displayName = 'PaginationItem'
 
 type PaginationLinkProps = {
   isActive?: boolean
@@ -48,7 +42,6 @@ const PaginationLink = ({ className, isActive, size = 'icon', ...props }: Pagina
     {...props}
   />
 )
-PaginationLink.displayName = 'PaginationLink'
 
 const PaginationPrevious = ({
   className,
@@ -64,7 +57,6 @@ const PaginationPrevious = ({
     <span>Previous</span>
   </PaginationLink>
 )
-PaginationPrevious.displayName = 'PaginationPrevious'
 
 const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
@@ -78,8 +70,6 @@ const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof Pag
   </PaginationLink>
 )
 
-PaginationNext.displayName = 'PaginationNext'
-
 const PaginationEllipsis = ({ className, ...props }: React.ComponentProps<'span'>) => (
   <span
     aria-hidden
@@ -90,8 +80,6 @@ const PaginationEllipsis = ({ className, ...props }: React.ComponentProps<'span'
     <span className="sr-only">More pages</span>
   </span>
 )
-
-PaginationEllipsis.displayName = 'PaginationEllipsis'
 
 export {
   Pagination,

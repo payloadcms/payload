@@ -24,6 +24,4 @@ const Checkbox: React.FC<
   </CheckboxPrimitive.Root>
 )
 
-Checkbox.displayName = CheckboxPrimitive.Root.displayName
-
 export { Checkbox }
