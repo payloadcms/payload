@@ -21,8 +21,7 @@ export const Settings: React.FC<{
 }> = (props) => {
   const { className, i18n, languageOptions, payload, theme, user } = props
 
-  let apiRoute = payload.config?.routes?.api || '/api'
-  apiRoute = apiRoute.endsWith('/') ? apiRoute.slice(0, -1) : apiRoute
+  const apiRoute = payload.config.routes.api
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
