@@ -1,0 +1,105 @@
+@import '~@payloadcms/ui/scss';
+
+.folderFileCard {
+  border-radius: var(--style-radius-m);
+  background-color: var(--theme-elevation-50);
+  position: relative;
+
+  &:hover {
+    background-color: var(--theme-elevation-100);
+  }
+  
+  > button {
+    @include btn-reset;
+    cursor: pointer;
+  }
+
+  > a,
+  > button {
+    border: 1px solid transparent;
+    font-family: var(--font-body);
+    font-size: var(--base-body-size);
+    border-radius: inherit;
+    width: 100%;
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
+  }
+
+  a {
+    cursor: default;
+  }
+
+  .popup {
+    background-color: transparent;
+    border-radius: 50%;
+    pointer-events: all;
+    cursor: pointer;
+    
+    &:hover {
+      background-color: var(--theme-elevation-50);
+    }
+
+    &.popup--active {
+      z-index: var(--z-popup);
+    }
+
+    .popup-button {
+      border-radius: 50%;
+      outline-offset: var(--accessibility-outline-offset);
+    }
+  }
+
+  &--selected {
+    > button {
+      border: 1px solid var(--theme-success-500);
+      background-color: var(--theme-success-50);
+      cursor: pointer;
+    }
+
+    .popup {
+      background-color: var(--theme-success-50);
+
+      &:hover {
+        background-color: var(--theme-success-100);
+      }
+    }
+  }
+
+  &--selecting {
+    &:hover,
+    &:focus-visible {
+      background-color: var(--theme-success-50);
+    }
+
+    .popup {
+      &:hover {
+        background-color: var(--theme-success-100);
+      }
+    }
+
+    // button.folderFileCard__button {
+    //   cursor: pointer;
+    // }
+
+    // a.folderFileCard__button {
+    //   pointer-events: none;
+    //   visibility: hidden;
+    //   display: none;
+    // }
+  }
+
+  &:not(.folderFileCard--selecting) {
+    // button.folderFileCard__button {
+    //   pointer-events: none;
+    //   visibility: hidden;
+    //   display: none;
+    // }
+  }
+
+  &--deleting {
+    pointer-events: none;
+  }
+}

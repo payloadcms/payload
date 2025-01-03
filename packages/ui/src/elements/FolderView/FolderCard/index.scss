@@ -1,0 +1,66 @@
+@import '~@payloadcms/ui/scss';
+
+.folderCard {
+  > button {
+    display: flex;
+    align-items: center;
+    gap: var(--base);
+    padding: calc(var(--base) * .8) var(--base);
+  }
+
+  &__deletingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--theme-elevation-50);
+    opacity: .75;
+    border-radius: inherit;
+  }
+
+  .icon--folder {
+    flex-shrink: 0;
+  }
+
+  &__details {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-width: 0;
+    text-align: initial;
+  
+    p {
+      margin: 0;
+    }
+  }
+
+  &__title {
+    overflow: hidden;
+    font-weight: bold;
+    text-wrap: nowrap;
+  
+    > span {
+      display: inline-block;
+    }
+  }
+  
+  &__itemCount {
+    color: var(--theme-elevation-450);
+  }
+  
+  &__dotsIconPlaceholder {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  
+  .popup {
+    position: absolute;
+    right: calc(var(--base) * 1);
+    top: 50%;
+    transform: translate(-1px, -50%);
+    margin-left: auto;
+  }
+}
+
+

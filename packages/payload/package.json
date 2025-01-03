@@ -115,6 +115,7 @@
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/minimist": "1.2.2",
     "@types/nodemailer": "6.4.14",
