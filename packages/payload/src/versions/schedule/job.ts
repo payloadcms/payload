@@ -1,12 +1,15 @@
+import type { User } from '../../auth/types.js'
 import type { TaskConfig } from '../../queues/config/types/taskTypes.js'
 import type { SchedulePublishTaskInput } from './types.js'
 
 type Args = {
+  adminUserSlug: string
   collections: string[]
   globals: string[]
 }
 
 export const getSchedulePublishTask = ({
+  adminUserSlug,
   collections,
   globals,
 }: Args): TaskConfig<{ input: SchedulePublishTaskInput; output: object }> => {
@@ -14,6 +17,20 @@ export const getSchedulePublishTask = ({
     slug: 'schedulePublish',
     handler: async ({ input, req }) => {
       const _status = input?.type === 'publish' || !input?.type ? 'published' : 'draft'
+
+      const userID = input.user
+
+      let user: null | User = null
+
+      if (userID) {
+        user = (await req.payload.findByID({
+          id: userID,
+          collection: adminUserSlug,
+          depth: 0,
+        })) as User
+
+        user.collection = adminUserSlug
+      }
 
       let publishSpecificLocale: string
 
@@ -35,7 +52,9 @@ export const getSchedulePublishTask = ({
             _status,
           },
           depth: 0,
+          overrideAccess: user === null,
           publishSpecificLocale,
+          user,
         })
       }
 
@@ -46,7 +65,9 @@ export const getSchedulePublishTask = ({
             _status,
           },
           depth: 0,
+          overrideAccess: user === null,
           publishSpecificLocale,
+          user,
         })
       }
 
@@ -74,6 +95,11 @@ export const getSchedulePublishTask = ({
         name: 'global',
         type: 'select',
         options: globals,
+      },
+      {
+        name: 'user',
+        type: 'relationship',
+        relationTo: adminUserSlug,
       },
     ],
   }
