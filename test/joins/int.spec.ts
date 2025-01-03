@@ -1009,7 +1009,7 @@ describe('Joins Field', () => {
 
     expect(joinedDoc.id).toBe(depthJoin_1.id)
 
-    const joinedDoc2 = joinedDoc.joins[0] as DepthJoins3
+    const joinedDoc2 = joinedDoc.joins.docs[0] as DepthJoins3
 
     expect(joinedDoc2.id).toBe(depthJoin_3.id)
   })
