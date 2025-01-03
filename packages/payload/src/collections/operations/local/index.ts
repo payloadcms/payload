@@ -12,7 +12,7 @@ import findVersions from './findVersions.js'
 import restoreVersion from './restoreVersion.js'
 import update from './update.js'
 
-export default {
+let operations = {
   auth,
   count,
   countVersions,
@@ -26,3 +26,22 @@ export default {
   restoreVersion,
   update,
 }
+
+export const reloadOperations = () => {
+  operations = {
+    auth,
+    count,
+    countVersions,
+    create,
+    deleteLocal,
+    duplicate,
+    find: findLocal,
+    findByID,
+    findVersionByID,
+    findVersions,
+    restoreVersion,
+    update,
+  }
+}
+
+export default operations

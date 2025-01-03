@@ -70,7 +70,7 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
-import localOperations from './collections/operations/local/index.js'
+import localOperations, { reloadOperations } from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
@@ -760,6 +760,8 @@ export const reload = async (
   payload.globals = {
     config: config.globals,
   }
+
+  reloadOperations()
 
   // TODO: support HMR for other props in the future (see payload/src/index init()) that may change on Payload singleton
 
