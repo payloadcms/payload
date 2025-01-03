@@ -2,8 +2,6 @@ import type { Collection, PayloadRequest, TypeWithID, Where } from 'payload'
 
 import { executeAccess, Forbidden } from 'payload'
 
-import { endpointsAreDisabled } from '../checkEndpoints.js'
-
 export async function checkFileAccess({
   collection,
   filename,
@@ -14,10 +12,6 @@ export async function checkFileAccess({
   req: PayloadRequest
 }): Promise<Response | TypeWithID> {
   const { config } = collection
-  const disableEndpoints = endpointsAreDisabled({ endpoints: config.endpoints, request: req })
-  if (disableEndpoints) {
-    return disableEndpoints
-  }
 
   if (filename.includes('../') || filename.includes('..\\')) {
     throw new Forbidden(req.t)

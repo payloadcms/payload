@@ -9,6 +9,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
 import { useForm, useFormProcessing } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -91,10 +92,17 @@ export type UploadProps = {
 export const Upload: React.FC<UploadProps> = (props) => {
   const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
 
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
+
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
-  const { docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
+  const { id, docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
@@ -176,14 +184,23 @@ export const Upload: React.FC<UploadProps> = (props) => {
     if (fileUrl) {
       setUploadStatus('uploading')
       try {
-        const response = await fetch(fileUrl)
-        const data = await response.blob()
+        // Check if ID exists and append it to the URL
+        const idSegment = id ? `${id}/` : ''
 
-        // Extract the file name from the URL
+        // Make a request to the Payload 'paste-url' endpoint
+        const pasteURL = `/${collectionSlug}/${idSegment}paste-url?src=${encodeURIComponent(fileUrl)}`
+        const response = await fetch(`${serverURL}${api}${pasteURL}`)
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to fetch the file from the server')
+        }
+
+        const blob = await response.blob()
         const fileName = fileUrl.split('/').pop()
+        const file = new File([blob], fileName, { type: blob.type })
 
-        // Create a new File object from the Blob data
-        const file = new File([data], fileName, { type: data.type })
+        // Update the field with the new file
         handleFileChange(file)
         setUploadStatus('idle')
       } catch (e) {
