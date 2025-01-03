@@ -1,4 +1,4 @@
-import type { PgSchema } from 'drizzle-orm/pg-core/schema.js'
+import type { PgSchema } from 'drizzle-orm/pg-core'
 import type { FlattenedField, Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
@@ -43,6 +43,8 @@ export const migrateRelationships = async ({
 
   let paginationResult
 
+  const schemaName = (adapter.pgSchema as PgSchema).schemaName
+
   const where = Array.from(pathsToQuery).reduce((statement, path, i) => {
     return (statement += `
 "${tableName}${adapter.relationshipsSuffix}"."path" LIKE '${path}'${pathsToQuery.size !== i + 1 ? ' OR' : ''}
@@ -50,7 +52,7 @@ export const migrateRelationships = async ({
   }, '')
 
   while (typeof paginationResult === 'undefined' || paginationResult.rows.length > 0) {
-    const paginationStatement = `SELECT DISTINCT parent_id FROM ${(adapter.pgSchema as PgSchema).schemaName}.${tableName}${adapter.relationshipsSuffix} WHERE
+    const paginationStatement = `SELECT DISTINCT parent_id FROM ${schemaName}.${tableName}${adapter.relationshipsSuffix} WHERE
     ${where} ORDER BY parent_id LIMIT 500 OFFSET ${offset * 500};
   `
 
@@ -62,8 +64,8 @@ export const migrateRelationships = async ({
 
     offset += 1
 
-    const statement = `SELECT * FROM ${tableName}${adapter.relationshipsSuffix} WHERE
-    (${where}) AND parent_id IN (${paginationResult.rows.map((row) => row.parent_id).join(', ')});
+    const statement = `SELECT * FROM ${schemaName}.${tableName}${adapter.relationshipsSuffix} WHERE
+    (${where}) AND parent_id IN (${paginationResult.rows.map((row) => `'${row.parent_id}'`).join(', ')});
 `
     if (debug) {
       payload.logger.info('FINDING ROWS TO MIGRATE')
