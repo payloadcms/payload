@@ -4,7 +4,7 @@ import type { BasePayload, Config, LanguageOptions, User } from 'payload'
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-import { ResetPreferencesButton } from '../ResetPreferences/index.js'
+import { ResetPreferences } from '../ResetPreferences/index.js'
 import './index.scss'
 import { ToggleTheme } from '../ToggleTheme/index.js'
 import { LanguageSelector } from './LanguageSelector.js'
@@ -31,7 +31,7 @@ export const Settings: React.FC<{
         <LanguageSelector languageOptions={languageOptions} />
       </div>
       {theme === 'all' && <ToggleTheme />}
-      <ResetPreferencesButton apiRoute={apiRoute} user={user} />
+      <ResetPreferences apiRoute={apiRoute} user={user} />
     </div>
   )
 }

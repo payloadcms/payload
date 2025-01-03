@@ -3,13 +3,13 @@ import type { User } from 'payload'
 
 import { Button, LoadingOverlay, toast, useModal, useTranslation } from '@payloadcms/ui'
 import * as qs from 'qs-esm'
-import { useCallback, useState } from 'react'
+import { Fragment, useCallback, useState } from 'react'
 
 import { ConfirmResetModal } from './ConfirmResetModal/index.js'
 
 const confirmResetModalSlug = 'confirm-reset-modal'
 
-export const ResetPreferencesButton: React.FC<{
+export const ResetPreferences: React.FC<{
   readonly apiRoute: string
   readonly user?: User
 }> = ({ apiRoute, user }) => {
@@ -63,12 +63,14 @@ export const ResetPreferencesButton: React.FC<{
   }, [apiRoute, loading, user])
 
   return (
-    <div>
-      <Button buttonStyle="secondary" onClick={() => openModal(confirmResetModalSlug)}>
-        {t('general:resetPreferences')}
-      </Button>
+    <Fragment>
+      <div>
+        <Button buttonStyle="secondary" onClick={() => openModal(confirmResetModalSlug)}>
+          {t('general:resetPreferences')}
+        </Button>
+      </div>
       <ConfirmResetModal onConfirm={handleResetPreferences} slug={confirmResetModalSlug} />
       {loading && <LoadingOverlay loadingText={t('general:resettingPreferences')} />}
-    </div>
+    </Fragment>
   )
 }
