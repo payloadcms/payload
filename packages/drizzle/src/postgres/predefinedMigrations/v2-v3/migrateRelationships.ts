@@ -1,3 +1,4 @@
+import type { PgSchema } from 'drizzle-orm/pg-core/schema.js'
 import type { FlattenedField, Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
@@ -49,7 +50,7 @@ export const migrateRelationships = async ({
   }, '')
 
   while (typeof paginationResult === 'undefined' || paginationResult.rows.length > 0) {
-    const paginationStatement = `SELECT DISTINCT parent_id FROM ${tableName}${adapter.relationshipsSuffix} WHERE
+    const paginationStatement = `SELECT DISTINCT parent_id FROM ${(adapter.pgSchema as PgSchema).schemaName}.${tableName}${adapter.relationshipsSuffix} WHERE
     ${where} ORDER BY parent_id LIMIT 500 OFFSET ${offset * 500};
   `
 
