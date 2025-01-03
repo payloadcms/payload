@@ -44,7 +44,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   })
 
   const [selectedOption, setSelectedOption] = useState<Option<string>>(() => {
-    const initialSelection = selectedCollection || enabledCollections[0]?.slug
+    const initialSelection = selectedCollectionFromProps || enabledCollections[0]?.slug
     const found = getEntityConfig({ collectionSlug: initialSelection }) as ClientCollectionConfig
 
     return found
