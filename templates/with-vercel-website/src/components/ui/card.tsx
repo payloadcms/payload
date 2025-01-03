@@ -1,55 +1,84 @@
-import { cn } from 'src/utilities/cn'
-import * as React from 'react'
+'use client'
+import { cn } from '@/utilities/cn'
+import useClickableCard from '@/utilities/useClickableCard'
+import Link from 'next/link'
+import React, { Fragment } from 'react'
 
-const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      className={cn('rounded-lg border bg-card text-card-foreground shadow-sm', className)}
-      ref={ref}
-      {...props}
-    />
-  ),
-)
-Card.displayName = 'Card'
+import type { Post } from '@/payload-types'
 
-const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div className={cn('flex flex-col space-y-1.5 p-6', className)} ref={ref} {...props} />
-  ),
-)
-CardHeader.displayName = 'CardHeader'
+import { Media } from '@/components/Media'
 
-const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h3
-      className={cn('text-2xl font-semibold leading-none tracking-tight', className)}
-      ref={ref}
-      {...props}
-    />
-  ),
-)
-CardTitle.displayName = 'CardTitle'
+export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
 
-const CardDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <p className={cn('text-sm text-muted-foreground', className)} ref={ref} {...props} />
-))
-CardDescription.displayName = 'CardDescription'
+export const Card: React.FC<{
+  alignItems?: 'center'
+  className?: string
+  doc?: CardPostData
+  relationTo?: 'posts'
+  showCategories?: boolean
+  title?: string
+}> = (props) => {
+  const { card, link } = useClickableCard({})
+  const { className, doc, relationTo, showCategories, title: titleFromProps } = props
 
-const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div className={cn('p-6 pt-0', className)} ref={ref} {...props} />
-  ),
-)
-CardContent.displayName = 'CardContent'
+  const { slug, categories, meta, title } = doc || {}
+  const { description, image: metaImage } = meta || {}
 
-const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div className={cn('flex items-center p-6 pt-0', className)} ref={ref} {...props} />
-  ),
-)
-CardFooter.displayName = 'CardFooter'
+  const hasCategories = categories && Array.isArray(categories) && categories.length > 0
+  const titleToUse = titleFromProps || title
+  const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
+  const href = `/${relationTo}/${slug}`
 
-export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
+  return (
+    <article
+      className={cn(
+        'border border-border rounded-lg overflow-hidden bg-card hover:cursor-pointer',
+        className,
+      )}
+      ref={card.ref}
+    >
+      <div className="relative w-full ">
+        {!metaImage && <div className="">No image</div>}
+        {metaImage && typeof metaImage !== 'string' && <Media resource={metaImage} size="33vw" />}
+      </div>
+      <div className="p-4">
+        {showCategories && hasCategories && (
+          <div className="uppercase text-sm mb-4">
+            {showCategories && hasCategories && (
+              <div>
+                {categories?.map((category, index) => {
+                  if (typeof category === 'object') {
+                    const { title: titleFromCategory } = category
+
+                    const categoryTitle = titleFromCategory || 'Untitled category'
+
+                    const isLast = index === categories.length - 1
+
+                    return (
+                      <Fragment key={index}>
+                        {categoryTitle}
+                        {!isLast && <Fragment>, &nbsp;</Fragment>}
+                      </Fragment>
+                    )
+                  }
+
+                  return null
+                })}
+              </div>
+            )}
+          </div>
+        )}
+        {titleToUse && (
+          <div className="prose">
+            <h3>
+              <Link className="not-prose" href={href} ref={link.ref}>
+                {titleToUse}
+              </Link>
+            </h3>
+          </div>
+        )}
+        {description && <div className="mt-2">{description && <p>{sanitizedDescription}</p>}</div>}
+      </div>
+    </article>
+  )
+}
