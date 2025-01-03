@@ -13,18 +13,21 @@ const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
     {...props}
   />
 )
+
 Pagination.displayName = 'Pagination'
 
-const PaginationContent = React.forwardRef<HTMLUListElement, React.ComponentProps<'ul'>>(
-  ({ className, ...props }, ref) => (
-    <ul className={cn('flex flex-row items-center gap-1', className)} ref={ref} {...props} />
-  ),
+const PaginationContent: React.FC<
+  { ref?: React.RefObject<HTMLUListElement> } & React.HTMLAttributes<HTMLUListElement>
+> = ({ className, ref, ...props }) => (
+  <ul className={cn('flex flex-row items-center gap-1', className)} ref={ref} {...props} />
 )
+
 PaginationContent.displayName = 'PaginationContent'
 
-const PaginationItem = React.forwardRef<HTMLLIElement, React.ComponentProps<'li'>>(
-  ({ className, ...props }, ref) => <li className={cn('', className)} ref={ref} {...props} />,
-)
+const PaginationItem: React.FC<
+  { ref?: React.RefObject<HTMLLIElement> } & React.HTMLAttributes<HTMLLIElement>
+> = ({ className, ref, ...props }) => <li className={cn('', className)} ref={ref} {...props} />
+
 PaginationItem.displayName = 'PaginationItem'
 
 type PaginationLinkProps = {
@@ -74,6 +77,7 @@ const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof Pag
     <ChevronRight className="h-4 w-4" />
   </PaginationLink>
 )
+
 PaginationNext.displayName = 'PaginationNext'
 
 const PaginationEllipsis = ({ className, ...props }: React.ComponentProps<'span'>) => (
@@ -86,6 +90,7 @@ const PaginationEllipsis = ({ className, ...props }: React.ComponentProps<'span'
     <span className="sr-only">More pages</span>
   </span>
 )
+
 PaginationEllipsis.displayName = 'PaginationEllipsis'
 
 export {
