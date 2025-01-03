@@ -8,7 +8,6 @@ const baseClass = 'thumbnail'
 import type { SanitizedCollectionConfig } from 'payload'
 
 import { File } from '../../graphics/File/index.js'
-import { useIntersect } from '../../hooks/useIntersect.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
 export type ThumbnailProps = {
@@ -43,15 +42,20 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     }
   }, [fileSrc])
 
+  /**
+   * If an imageCacheTag is provided, append it to the fileSrc
+   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
+   */
+  const src = imageCacheTag
+    ? fileSrc.includes('?')
+      ? `${fileSrc}&${imageCacheTag}`
+      : `${fileSrc}?${imageCacheTag}`
+    : fileSrc
+
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && (
-        <img
-          alt={filename as string}
-          src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`}
-        />
-      )}
+      {fileExists && <img alt={filename as string} src={src} />}
       {fileExists === false && <File />}
     </div>
   )
@@ -87,12 +91,20 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
     }
   }, [fileSrc])
 
+  /**
+   * If an imageCacheTag is provided, append it to the fileSrc
+   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
+   */
+  const src = imageCacheTag
+    ? fileSrc.includes('?')
+      ? `${fileSrc}&${imageCacheTag}`
+      : `${fileSrc}?${imageCacheTag}`
+    : fileSrc
+
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && (
-        <img alt={alt || filename} src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`} />
-      )}
+      {fileExists && <img alt={alt || filename} src={src} />}
       {fileExists === false && <File />}
     </div>
   )
