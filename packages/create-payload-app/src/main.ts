@@ -255,7 +255,6 @@ export class Main {
           }
           case 'starter': {
             const dbDetails = await selectDb(this.args, projectName)
-            const payloadSecret = generateSecret()
 
             await createProject({
               cliArgs: this.args,
@@ -266,22 +265,14 @@ export class Main {
               template,
             })
 
-            await manageEnvFiles({
-              cliArgs: this.args,
-              databaseType: dbDetails.type,
-              databaseUri: dbDetails.dbUri,
-              payloadSecret,
-              projectDir,
-              template,
-            })
-
             break
           }
         }
       }
 
       info('Payload project successfully created!')
-      p.note(successMessage(projectDir, packageManager), chalk.bgGreen(chalk.black(' Next Steps ')))
+      p.log.step(chalk.bgGreen(chalk.black(' Next Steps ')))
+      p.log.message(successMessage(projectDir, packageManager))
       p.outro(feedbackOutro())
     } catch (err: unknown) {
       error(err instanceof Error ? err.message : 'An error occurred')

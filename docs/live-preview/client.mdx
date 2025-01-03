@@ -18,12 +18,12 @@ By default, all hooks accept the following args:
 
 | Path               | Description                                                                            |
 | ------------------ | -------------------------------------------------------------------------------------- |
-| **`serverURL`** \* | The URL of your Payload server.                                                        |
+| **`serverURL`** * | The URL of your Payload server.                                                        |
 | **`initialData`**  | The initial data of the document. The live data will be merged in as changes are made. |
 | **`depth`**        | The depth of the relationships to fetch. Defaults to `0`.                              |
 | **`apiRoute`**     | The path of your API route as defined in `routes.api`. Defaults to `/api`.             |
 
-_\* An asterisk denotes that a property is required._
+_* An asterisk denotes that a property is required._
 
 And return the following values:
 
@@ -151,8 +151,8 @@ The `subscribe` function takes the following args:
 
 | Path               | Description                                                                                 |
 | ------------------ | ------------------------------------------------------------------------------------------- |
-| **`callback`** \*  | A callback function that is called with `data` every time a change is made to the document. |
-| **`serverURL`** \* | The URL of your Payload server.                                                             |
+| **`callback`** *  | A callback function that is called with `data` every time a change is made to the document. |
+| **`serverURL`** * | The URL of your Payload server.                                                             |
 | **`initialData`**  | The initial data of the document. The live data will be merged in as changes are made.      |
 | **`depth`**        | The depth of the relationships to fetch. Defaults to `0`.                                   |
 

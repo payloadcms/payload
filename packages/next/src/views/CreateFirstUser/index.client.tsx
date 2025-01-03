@@ -57,7 +57,7 @@ export const CreateFirstUserClient: React.FC<{
         docPreferences,
         formState: prevFormState,
         operation: 'create',
-        schemaPath: `_${userSlug}.auth`,
+        schemaPath: userSlug,
         signal: controller.signal,
       })
 

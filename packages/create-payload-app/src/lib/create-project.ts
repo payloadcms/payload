@@ -19,6 +19,8 @@ import { configurePayloadConfig } from './configure-payload-config.js'
 import { configurePluginProject } from './configure-plugin-project.js'
 import { downloadExample } from './download-example.js'
 import { downloadTemplate } from './download-template.js'
+import { generateSecret } from './generate-secret.js'
+import { manageEnvFiles } from './manage-env-files.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -140,6 +142,18 @@ export async function createProject(
         projectDirOrConfigPath: { projectDir },
       })
     }
+  }
+
+  // Call manageEnvFiles before initializing Git
+  if (dbDetails) {
+    await manageEnvFiles({
+      cliArgs,
+      databaseType: dbDetails.type,
+      databaseUri: dbDetails.dbUri,
+      payloadSecret: generateSecret(),
+      projectDir,
+      template: 'template' in args ? args.template : undefined,
+    })
   }
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.

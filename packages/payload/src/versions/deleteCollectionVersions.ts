@@ -1,5 +1,6 @@
-import type { Payload } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
+
+import { type Payload } from '../index.js'
 
 type Args = {
   id?: number | string

@@ -3,6 +3,8 @@ import type {
   BuildTableStateArgs,
   Data,
   DocumentSlots,
+  ErrorResult,
+  Locale,
   ServerFunctionClient,
 } from 'payload'
 
@@ -40,11 +42,14 @@ type RenderDocument = (args: {
   docID?: number | string
   drawerSlug?: string
   initialData?: Data
+  locale?: Locale
   overrideEntityVisibility?: boolean
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   signal?: AbortSignal
-}) => Promise<{ data: Data; Document: React.ReactNode }>
+}) => Promise<
+  { data: Data; Document: React.ReactNode } | ({ data: never; Document: never } & ErrorResult)
+>
 
 type CopyDataFromLocaleClient = (
   args: {
@@ -105,7 +110,7 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'schedule-publish',
             args: { ...rest },
-          })) as ReturnType<typeof schedulePublishHandler> // TODO: infer this type when `strictNullChecks` is enabled
+          })) as Awaited<ReturnType<typeof schedulePublishHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
             return result
@@ -135,7 +140,7 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'form-state',
             args: { fallbackLocale: false, ...rest },
-          })) as ReturnType<typeof buildFormStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
+          })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
             return result
@@ -159,7 +164,7 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'table-state',
             args: { fallbackLocale: false, ...rest },
-          })) as ReturnType<typeof buildTableStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
+          })) as Awaited<ReturnType<typeof buildTableStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
             return result
@@ -182,7 +187,7 @@ export const ServerFunctionsProvider: React.FC<{
         const result = (await serverFunction({
           name: 'render-document',
           args: { fallbackLocale: false, ...rest },
-        })) as { data: Data; Document: React.ReactNode }
+        })) as Awaited<ReturnType<typeof renderDocument>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
       } catch (_err) {

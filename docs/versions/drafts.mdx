@@ -73,6 +73,10 @@ If you simply fetch your created document using a `find` or `findByID` operation
 
 But, if you specify `draft` as `true`, Payload will automatically replace your published document's content with content coming from the most recently saved `version`. In this case, as we have created _two_ versions in the above scenario, Payload will send back data from the newest (second) draft and your document will appear as the most recently drafted version instead of the published version.
 
+<Banner type="error">
+  **Important:** the `draft` argument on its own will not restrict documents with `_status: 'draft'` from being returned from the API. You need to use Access Control to prevent documents with `_status: 'draft'` from being returned to unauthenticated users. Read below for more information on how this works.
+</Banner>
+
 ## Controlling who can see Collection drafts
 
 <Banner type="warning">

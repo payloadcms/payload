@@ -299,6 +299,10 @@ export const ptTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexando todas as {{collections}}.',
     remove: 'Remover',
     reset: 'Redefinir',
+    resetPreferences: 'Redefinir preferências',
+    resetPreferencesDescription:
+      'Isso redefinirá todas as suas preferências para as configurações padrão.',
+    resettingPreferences: 'Redefinindo preferências.',
     row: 'Linha',
     rows: 'Linhas',
     save: 'Salvar',

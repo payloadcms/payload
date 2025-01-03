@@ -306,6 +306,10 @@ export const frTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Réindexation de toutes les {{collections}}.',
     remove: 'Retirer',
     reset: 'Réinitialiser',
+    resetPreferences: 'Réinitialiser les préférences',
+    resetPreferencesDescription:
+      'Cela réinitialisera toutes vos préférences aux paramètres par défaut.',
+    resettingPreferences: 'Réinitialisation des préférences.',
     row: 'Ligne',
     rows: 'Lignes',
     save: 'Sauvegarder',
