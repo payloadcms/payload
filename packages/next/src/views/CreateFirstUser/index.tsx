@@ -34,6 +34,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     collectionSlug: collectionConfig.slug,
     locale,
     payload: req.payload,
+    req,
     user: req.user,
   })
 
