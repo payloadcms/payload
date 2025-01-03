@@ -1,6 +1,4 @@
-import type { Ref } from 'react'
-
-import React, { forwardRef } from 'react'
+import React from 'react'
 
 import classes from './index.module.scss'
 
@@ -8,12 +6,12 @@ type Props = {
   children: React.ReactNode
   className?: string
   left?: boolean
-  ref?: Ref<HTMLDivElement>
+  ref?: React.Ref<HTMLDivElement>
   right?: boolean
 }
 
-export const Gutter: React.FC<Props> = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { children, className, left = true, right = true } = props
+export const Gutter: React.FC<Props & { ref?: React.Ref<HTMLDivElement> }> = (props) => {
+  const { children, className, left = true, right = true, ref } = props
 
   return (
     <div
@@ -30,6 +28,4 @@ export const Gutter: React.FC<Props> = forwardRef<HTMLDivElement, Props>((props,
       {children}
     </div>
   )
-})
-
-Gutter.displayName = 'Gutter'
+}
