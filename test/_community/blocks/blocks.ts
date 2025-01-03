@@ -5,5 +5,7 @@ import { generateHeroBlocks } from './Hero.js'
 
 export const generateBlocks = (blockCount: number, containerCount?: number): Block[] => [
   ...generateHeroBlocks(blockCount),
-  ...(containerCount && containerCount > 0 ? generateContainerBlocks(containerCount) : []),
+  ...(containerCount && containerCount > 0
+    ? generateContainerBlocks(containerCount, blockCount)
+    : []),
 ]
