@@ -762,7 +762,8 @@ export const reload = async (
   }
 
   const payloadCopy = new BasePayload()
-  // Copy all properties from payload in there other than find
+  // Copy all properties from payload that are not functions. We want those reloaded functions from the new payload
+  // instance to be copied over to the old payload instance.
   for (const key in payload) {
     if (typeof key !== 'function') {
       payloadCopy[key] = payload[key]
