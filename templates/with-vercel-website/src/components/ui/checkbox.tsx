@@ -6,7 +6,9 @@ import { Check } from 'lucide-react'
 import * as React from 'react'
 
 const Checkbox: React.FC<
-  { ref?: React.RefObject<HTMLButtonElement> } & React.ComponentProps<typeof CheckboxPrimitive.Root>
+  {
+    ref?: React.RefObject<HTMLButtonElement> | React.RefCallback<HTMLButtonElement>
+  } & React.ComponentProps<typeof CheckboxPrimitive.Root>
 > = ({ className, ref, ...props }) => (
   <CheckboxPrimitive.Root
     className={cn(
