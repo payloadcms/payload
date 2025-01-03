@@ -761,6 +761,20 @@ export const reload = async (
     config: config.globals,
   }
 
+  const payloadCopy = new BasePayload()
+  // Copy all properties from payload in there other than find
+  for (const key in payload) {
+    if (typeof key !== 'function') {
+      payloadCopy[key] = payload[key]
+    }
+  }
+
+  for (const key in payloadCopy) {
+    if (typeof key === 'function') {
+      payload[key] = payloadCopy[key]
+    }
+  }
+
   // TODO: support HMR for other props in the future (see payload/src/index init()) that may change on Payload singleton
 
   // Generate types
