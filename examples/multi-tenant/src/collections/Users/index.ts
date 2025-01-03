@@ -2,7 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { createAccess } from './access/create'
 import { readAccess } from './access/read'
-import { updateAndDeleteAccess } from './access/updateAndDelete'
+import { updateAccess } from './access/update'
+import { deleteAccess } from './access/delete'
 import { externalUsersLogin } from './endpoints/externalUsersLogin'
 import { ensureUniqueUsername } from './hooks/ensureUniqueUsername'
 // import { setCookieBasedOnDomain } from './hooks/setCookieBasedOnDomain'
@@ -11,9 +12,9 @@ const Users: CollectionConfig = {
   slug: 'users',
   access: {
     create: createAccess,
-    delete: updateAndDeleteAccess,
+    delete: deleteAccess,
     read: readAccess,
-    update: updateAndDeleteAccess,
+    update: updateAccess,
   },
   admin: {
     useAsTitle: 'email',
