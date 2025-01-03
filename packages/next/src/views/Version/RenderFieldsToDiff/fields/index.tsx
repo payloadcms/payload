@@ -1,3 +1,4 @@
+import Collapsible from './Collapsible/index.js'
 import Iterable from './Iterable/index.js'
 import Nested from './Nested/index.js'
 import Relationship from './Relationship/index.js'
@@ -10,10 +11,10 @@ export const diffComponents = {
   blocks: Iterable,
   checkbox: Text,
   code: Text,
-  collapsible: Nested,
+  collapsible: Collapsible,
   date: Text,
   email: Text,
-  group: Nested,
+  group: Collapsible,
   json: Text,
   number: Text,
   point: Text,
