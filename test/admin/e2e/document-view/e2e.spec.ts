@@ -51,7 +51,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -259,6 +259,28 @@ describe('Document View', () => {
       await globalLabel.click()
       await checkPageTitle(page, label)
       await checkBreadcrumb(page, label)
+    })
+  })
+
+  describe('breadcrumbs', () => {
+    test('List drawer should not effect underlying breadcrumbs', async () => {
+      await navigateToDoc(page, postsUrl)
+
+      expect(await page.locator('.step-nav.app-header__step-nav a').nth(1).innerText()).toBe(
+        'Posts',
+      )
+
+      await page.locator('#field-upload button.upload__listToggler').click()
+      await expect(page.locator('[id^=list-drawer_1_]')).toBeVisible()
+      await wait(100) // wait for the component to re-render
+
+      await expect(
+        page.locator('.step-nav.app-header__step-nav .step-nav__last'),
+      ).not.toContainText('Uploads')
+
+      expect(await page.locator('.step-nav.app-header__step-nav a').nth(1).innerText()).toBe(
+        'Posts',
+      )
     })
   })
 

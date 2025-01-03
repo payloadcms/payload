@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { slugPluralLabel, slugSingularLabel } from '../shared.js'
-import { postsCollectionSlug } from '../slugs.js'
+import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 
 export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
@@ -181,6 +181,11 @@ export const Posts: CollectionConfig = {
           Cell: '/components/CustomCell/index.js#CustomCell',
         },
       },
+    },
+    {
+      name: 'upload',
+      type: 'upload',
+      relationTo: uploadCollectionSlug,
     },
     {
       name: 'hiddenField',
