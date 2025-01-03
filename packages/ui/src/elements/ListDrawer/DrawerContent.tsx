@@ -23,7 +23,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   onBulkSelect,
   onSelect,
   overrideEntityVisibility = true,
-  selectedCollection: selectedCollectionFromProps,
+  selectedCollection,
 }) => {
   const { closeModal, isModalOpen } = useModal()
 
@@ -43,7 +43,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   })
 
   const [selectedOption, setSelectedOption] = useState<Option<string>>(() => {
-    const initialSelection = selectedCollectionFromProps || enabledCollections[0]?.slug
+    const initialSelection = selectedCollection || enabledCollections[0]?.slug
     const found = getEntityConfig({ collectionSlug: initialSelection }) as ClientCollectionConfig
 
     return found
@@ -58,15 +58,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     useDocumentDrawer({
       collectionSlug: selectedOption.value,
     })
-
-  useEffect(() => {
-    if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
-      setSelectedOption({
-        label: collections.find(({ slug }) => slug === selectedCollectionFromProps).labels,
-        value: selectedCollectionFromProps,
-      })
-    }
-  }, [selectedCollectionFromProps, collections, selectedOption])
 
   const renderList = useCallback(
     async (slug: string, query?: ListQuery) => {
