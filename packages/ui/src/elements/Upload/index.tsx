@@ -237,7 +237,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
           enableAdjustments={showCrop || showFocalPoint}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
-          imageCacheTag={savedDocumentData.updatedAt}
+          imageCacheTag={uploadConfig?.cacheTags && savedDocumentData.updatedAt}
           uploadConfig={uploadConfig}
         />
       )}

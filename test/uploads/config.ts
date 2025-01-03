@@ -7,6 +7,7 @@ import { devUser } from '../credentials.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
+import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
@@ -17,6 +18,7 @@ import {
   enlargeSlug,
   focalNoSizesSlug,
   mediaSlug,
+  mediaWithoutCacheTagsSlug,
   mediaWithoutRelationPreviewSlug,
   mediaWithRelationPreviewSlug,
   reduceSlug,
@@ -576,6 +578,7 @@ export default buildConfigWithDefaults({
     Uploads1,
     Uploads2,
     AdminThumbnailFunction,
+    AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
     {
       slug: 'optional-file',
@@ -620,6 +623,18 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         displayPreview: true,
+      },
+    },
+    {
+      slug: mediaWithoutCacheTagsSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: {
+        cacheTags: false,
       },
     },
     {
@@ -793,9 +808,24 @@ export default buildConfigWithDefaults({
       },
     })
 
+    await payload.create({
+      collection: AdminThumbnailWithSearchQueries.slug,
+      data: {},
+      file: {
+        ...imageFile,
+        name: `searchQueries-image-${imageFile.name}`,
+      },
+    })
+
     // Create media with and without relation preview
     const { id: uploadedImageWithPreview } = await payload.create({
       collection: mediaWithRelationPreviewSlug,
+      data: {},
+      file: imageFile,
+    })
+
+    await payload.create({
+      collection: mediaWithoutCacheTagsSlug,
       data: {},
       file: imageFile,
     })
