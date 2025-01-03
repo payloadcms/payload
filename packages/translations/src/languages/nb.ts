@@ -299,6 +299,10 @@ export const nbTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindekserer alle {{collections}}.',
     remove: 'Fjern',
     reset: 'Tilbakestill',
+    resetPreferences: 'Tilbakestill preferanser',
+    resetPreferencesDescription:
+      'Dette vil tilbakestille alle preferansene dine til standardinnstillingene.',
+    resettingPreferences: 'Tilbakestiller preferanser.',
     row: 'Rad',
     rows: 'Rader',
     save: 'Lagre',

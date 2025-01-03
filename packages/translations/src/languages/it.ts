@@ -302,6 +302,10 @@ export const itTranslations: DefaultTranslationsObject = {
     reindexingAll: "Rifacendo l'indice di tutte le {{collections}}.",
     remove: 'Rimuovi',
     reset: 'Ripristina',
+    resetPreferences: 'Ripristina le preferenze',
+    resetPreferencesDescription:
+      'Questo ripristinerà tutte le tue preferenze alle impostazioni predefinite.',
+    resettingPreferences: 'Ripristinando le preferenze.',
     row: 'Riga',
     rows: 'Righe',
     save: 'Salva',

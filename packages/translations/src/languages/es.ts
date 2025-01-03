@@ -303,6 +303,10 @@ export const esTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexando todas las {{collections}}.',
     remove: 'Remover',
     reset: 'Reiniciar',
+    resetPreferences: 'Restablecer preferencias',
+    resetPreferencesDescription:
+      'Esto restablecerá todas tus preferencias a la configuración predeterminada.',
+    resettingPreferences: 'Restableciendo preferencias.',
     row: 'Fila',
     rows: 'Filas',
     save: 'Guardar',

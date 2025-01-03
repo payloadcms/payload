@@ -295,6 +295,10 @@ export const arTranslations: DefaultTranslationsObject = {
     reindexingAll: 'جاري إعادة فهرسة جميع {{collections}}.',
     remove: 'إزالة',
     reset: 'إعادة تعيين',
+    resetPreferences: 'إعادة تعيين التفضيلات',
+    resetPreferencesDescription:
+      'سيؤدي ذلك إلى إعادة تعيين جميع تفضيلاتك إلى الإعدادات الافتراضية.',
+    resettingPreferences: 'إعادة تعيين التفضيلات.',
     row: 'سطر',
     rows: 'أسطُر',
     save: 'حفظ',

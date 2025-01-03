@@ -299,6 +299,10 @@ export const enTranslations = {
     reindexingAll: 'Reindexing all {{collections}}.',
     remove: 'Remove',
     reset: 'Reset',
+    resetPreferences: 'Reset Preferences',
+    resetPreferencesDescription:
+      'This will reset all of your preferences to their default settings.',
+    resettingPreferences: 'Resetting Preferences.',
     row: 'Row',
     rows: 'Rows',
     save: 'Save',
