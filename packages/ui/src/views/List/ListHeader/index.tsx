@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 import { useModal } from '@faceless-ui/modal'
-import React from 'react'
+import React, { useState } from 'react'
 
 import { Button } from '../../../elements/Button/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
@@ -101,6 +101,7 @@ const ListDrawerHeader: React.FC<ListHeaderProps> = ({
     selectedOption,
     setSelectedOption,
   } = useListDrawerContext()
+  console.log('selectedOption', selectedOption)
 
   const collectionConfig = collections.find(({ slug }) => slug === selectedOption.value)
 
@@ -140,7 +141,11 @@ const ListDrawerHeader: React.FC<ListHeaderProps> = ({
           <FieldLabel label={t('upload:selectCollectionToBrowse')} />
           <ReactSelect
             className={`${baseClass}__select-collection`}
-            onChange={setSelectedOption}
+            onChange={(value) => {
+              console.log('value', value)
+
+              setSelectedOption(value)
+            }}
             options={enabledCollectionConfigs.map((coll) => ({
               label: getTranslation(coll.labels.singular, i18n),
               value: coll.slug,
