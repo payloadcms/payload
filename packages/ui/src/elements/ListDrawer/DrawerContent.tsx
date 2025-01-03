@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { ListDrawerProps } from './types.js'
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+import { useIgnoredEffect } from '../../hooks/useIgnoredEffect.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
@@ -23,7 +24,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   onBulkSelect,
   onSelect,
   overrideEntityVisibility = true,
-  selectedCollection,
+  selectedCollection: selectedCollectionFromProps,
 }) => {
   const { closeModal, isModalOpen } = useModal()
 
@@ -58,6 +59,18 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     useDocumentDrawer({
       collectionSlug: selectedOption.value,
     })
+  useIgnoredEffect(
+    () => {
+      if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
+        setSelectedOption({
+          label: collections.find(({ slug }) => slug === selectedCollectionFromProps).labels,
+          value: selectedCollectionFromProps,
+        })
+      }
+    },
+    [selectedCollectionFromProps],
+    [collections, selectedOption],
+  )
 
   const renderList = useCallback(
     async (slug: string, query?: ListQuery) => {
