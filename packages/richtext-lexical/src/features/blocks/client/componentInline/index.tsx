@@ -81,6 +81,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   } = useEditorConfigContext()
   const { getFormState } = useServerFunctions()
   const editDepth = useEditDepth()
+  const hasMounted = useRef(false)
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
     initialLexicalFormState?.[formData.id]?.formState,
@@ -115,6 +116,15 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   ][0] as BlocksFieldClient
 
   const clientBlock = blocksField.blocks[0]
+
+  // Open drawer on mount
+  useEffect(() => {
+    // > 2 because they always have "id" and "blockName" fields
+    if (!hasMounted.current && clientBlock.fields.length > 2) {
+      toggleDrawer()
+      hasMounted.current = true
+    }
+  }, [clientBlock, toggleDrawer])
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
