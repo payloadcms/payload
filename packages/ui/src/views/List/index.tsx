@@ -163,7 +163,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   ])
 
   useEffect(() => {
-    if (drawerDepth <= 1) {
+    if (!drawerDepth) {
       setStepNav([
         {
           label: labels?.plural,
