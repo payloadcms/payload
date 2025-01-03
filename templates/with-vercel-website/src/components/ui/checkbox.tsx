@@ -7,7 +7,7 @@ import * as React from 'react'
 
 const Checkbox: React.FC<
   {
-    ref?: React.RefObject<HTMLButtonElement> | React.RefCallback<HTMLButtonElement>
+    ref?: React.Ref<HTMLButtonElement>
   } & React.ComponentProps<typeof CheckboxPrimitive.Root>
 > = ({ className, ref, ...props }) => (
   <CheckboxPrimitive.Root

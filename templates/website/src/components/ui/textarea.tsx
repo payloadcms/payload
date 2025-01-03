@@ -2,7 +2,9 @@ import { cn } from 'src/utilities/cn'
 import * as React from 'react'
 
 const Textarea: React.FC<
-  { ref?: React.RefObject<HTMLTextAreaElement> } & React.TextareaHTMLAttributes<HTMLTextAreaElement>
+  {
+    ref?: React.Ref<HTMLTextAreaElement>
+  } & React.TextareaHTMLAttributes<HTMLTextAreaElement>
 > = ({ className, ref, ...props }) => {
   return (
     <textarea

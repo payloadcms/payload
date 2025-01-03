@@ -2,7 +2,7 @@ import { cn } from 'src/utilities/cn'
 import * as React from 'react'
 
 const Card: React.FC<
-  { ref?: React.RefObject<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
+  { ref?: React.Ref<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
 > = ({ className, ref, ...props }) => (
   <div
     className={cn('rounded-lg border bg-card text-card-foreground shadow-sm', className)}
@@ -14,7 +14,7 @@ const Card: React.FC<
 Card.displayName = 'Card'
 
 const CardHeader: React.FC<
-  { ref?: React.RefObject<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
+  { ref?: React.Ref<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
 > = ({ className, ref, ...props }) => (
   <div className={cn('flex flex-col space-y-1.5 p-6', className)} ref={ref} {...props} />
 )
@@ -22,7 +22,7 @@ const CardHeader: React.FC<
 CardHeader.displayName = 'CardHeader'
 
 const CardTitle: React.FC<
-  { ref?: React.RefObject<HTMLHeadingElement> } & React.HTMLAttributes<HTMLHeadingElement>
+  { ref?: React.Ref<HTMLHeadingElement> } & React.HTMLAttributes<HTMLHeadingElement>
 > = ({ className, ref, ...props }) => (
   <h3
     className={cn('text-2xl font-semibold leading-none tracking-tight', className)}
@@ -34,7 +34,7 @@ const CardTitle: React.FC<
 CardTitle.displayName = 'CardTitle'
 
 const CardDescription: React.FC<
-  { ref?: React.RefObject<HTMLParagraphElement> } & React.HTMLAttributes<HTMLParagraphElement>
+  { ref?: React.Ref<HTMLParagraphElement> } & React.HTMLAttributes<HTMLParagraphElement>
 > = ({ className, ref, ...props }) => (
   <p className={cn('text-sm text-muted-foreground', className)} ref={ref} {...props} />
 )
@@ -42,7 +42,7 @@ const CardDescription: React.FC<
 CardDescription.displayName = 'CardDescription'
 
 const CardContent: React.FC<
-  { ref?: React.RefObject<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
+  { ref?: React.Ref<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
 > = ({ className, ref, ...props }) => (
   <div className={cn('p-6 pt-0', className)} ref={ref} {...props} />
 )
@@ -50,7 +50,7 @@ const CardContent: React.FC<
 CardContent.displayName = 'CardContent'
 
 const CardFooter: React.FC<
-  { ref?: React.RefObject<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
+  { ref?: React.Ref<HTMLDivElement> } & React.HTMLAttributes<HTMLDivElement>
 > = ({ className, ref, ...props }) => (
   <div className={cn('flex items-center p-6 pt-0', className)} ref={ref} {...props} />
 )

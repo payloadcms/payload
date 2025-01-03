@@ -2,7 +2,9 @@ import { cn } from 'src/utilities/cn'
 import * as React from 'react'
 
 const Input: React.FC<
-  { ref?: React.RefObject<HTMLInputElement> } & React.InputHTMLAttributes<HTMLInputElement>
+  {
+    ref?: React.Ref<HTMLInputElement>
+  } & React.InputHTMLAttributes<HTMLInputElement>
 > = ({ type, className, ref, ...props }) => {
   return (
     <input

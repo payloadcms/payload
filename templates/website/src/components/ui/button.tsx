@@ -34,7 +34,7 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
-  ref?: React.RefObject<HTMLButtonElement>
+  ref?: React.Ref<HTMLButtonElement>
 }
 
 const Button: React.FC<ButtonProps> = ({
