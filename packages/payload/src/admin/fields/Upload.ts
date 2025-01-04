@@ -6,6 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -23,14 +24,18 @@ type UploadFieldBaseClientProps = {
   readonly validate?: UploadFieldValidation
 }
 
+type UploadFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type UploadFieldClientProps = ClientFieldBase<UploadFieldClientWithoutType> &
   UploadFieldBaseClientProps
 
-export type UploadFieldServerProps = ServerFieldBase<UploadField, UploadFieldClientWithoutType>
+export type UploadFieldServerProps = ServerFieldBase<UploadField, UploadFieldClientWithoutType> &
+  UploadFieldBaseServerProps
 
 export type UploadFieldServerComponent = FieldServerComponent<
   UploadField,
-  UploadFieldClientWithoutType
+  UploadFieldClientWithoutType,
+  UploadFieldBaseServerProps
 >
 
 export type UploadFieldClientComponent = FieldClientComponent<

@@ -25,6 +25,9 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Relación',
   },
+  et: {
+    label: 'Seos',
+  },
   fa: {
     label: 'روابط',
   },
@@ -78,6 +81,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sk: {
     label: 'Vzťah',
+  },
+  sl: {
+    label: 'Odnos',
   },
   sv: {
     label: 'Relation',

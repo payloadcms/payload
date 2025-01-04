@@ -5,6 +5,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
+import { logError } from 'payload'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -384,7 +385,8 @@ export const Document: React.FC<AdminViewProps> = async (args) => {
     if (error?.message === 'NEXT_REDIRECT') {
       throw error
     }
-    args.initPageResult.req.payload.logger.error(error)
+
+    logError({ err: error, payload: args.initPageResult.req.payload })
 
     if (error.message === 'not-found') {
       notFound()

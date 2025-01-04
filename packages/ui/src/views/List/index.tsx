@@ -109,6 +109,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     handlePerPageChange,
     query,
   } = useListQuery()
+
   const { openModal } = useModal()
   const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
@@ -162,7 +163,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   ])
 
   useEffect(() => {
-    if (drawerDepth <= 1) {
+    if (!drawerDepth) {
       setStepNav([
         {
           label: labels?.plural,

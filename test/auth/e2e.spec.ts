@@ -4,7 +4,6 @@ import type { SanitizedConfig } from 'payload'
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -82,7 +81,7 @@ const createFirstUser = async ({
     .not.toContain('create-first-user')
 }
 
-describe('auth', () => {
+describe('Auth', () => {
   let page: Page
   let context: BrowserContext
   let url: AdminUrlUtil

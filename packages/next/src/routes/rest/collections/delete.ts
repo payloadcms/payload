@@ -37,7 +37,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
     const message = req.t('general:deletedCountSuccessfully', {
       count: result.docs.length,
       label: getTranslation(
-        collection.config.labels[result.docs.length > 1 ? 'plural' : 'singular'],
+        collection.config.labels[result.docs.length === 1 ? 'singular' : 'plural'],
         req.i18n,
       ),
     })
@@ -58,7 +58,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
 
   const message = req.t('error:unableToDeleteCount', {
     count: result.errors.length,
-    label: getTranslation(collection.config.labels[total > 1 ? 'plural' : 'singular'], req.i18n),
+    label: getTranslation(collection.config.labels[total === 1 ? 'singular' : 'plural'], req.i18n),
     total,
   })
 

@@ -1,6 +1,5 @@
-import type { Locale, Payload, TypedUser, TypeWithID } from 'payload'
-
 import { sanitizeID } from '@payloadcms/ui/shared'
+import { type Locale, logError, type Payload, type TypedUser, type TypeWithID } from 'payload'
 
 type Args = {
   collectionSlug?: string
@@ -47,8 +46,8 @@ export const getDocumentData = async ({
         user,
       })
     }
-  } catch (_err) {
-    payload.logger.error(_err)
+  } catch (err) {
+    logError({ err, payload })
   }
 
   return resolvedData
