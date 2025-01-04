@@ -21,7 +21,7 @@ To swap in your own Custom View, first consult the list of available components,
 
 Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views.
 
-To swap Root Views with your own, or to [create entirely new ones](#adding-new-root-views), use the `admin.components.views` property of your root [Payload Config](../configuration/overview):
+To swap Root Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your root [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -248,7 +248,7 @@ The following options are available:
 
 Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View or the API View. All Document Views keep their overall structure across navigation changes, such as their title and tabs, and replace only the content below.
 
-To swap out Document Views with your own, or to [create entirely new ones](#adding-new-document-views), use the `admin.components.views.Edit[key]` property in your [Collection Config](../collections/overview) or [Global Config](../configuration/globals):
+To swap out Document Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views.Edit[key]` property in your [Collection Config](../collections/overview) or [Global Config](../configuration/globals):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -278,14 +278,14 @@ _For details on how to build Custom Views, including all available props, see [B
 
 The following options are available:
 
-| Property          | Description                                                                                                                 |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **`root`**        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set.  |
-| **`default`**     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab.     |
-| **`versions`**    | The Versions View is used to navigate the version history of a single document. It is rendered within the "Versions" tab. [More details](../versions).                    |
-| **`version`**     | The Version View is used to edit a single version of a document. It is rendered within the "Version" tab. [More details](../versions). |
-| **`api`**         | The API View is used to display the REST API JSON response for a given document. It is rendered within the "API" tab.                                            |
-| **`livePreview`** | The LivePreview view is used to display the Live Preview interface. It is rendered within the "Live Preview" tab. [More details](../live-preview).                        |
+| Property          | Description                                                                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`root`**        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set.                                      |
+| **`default`**     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab.                                                    |
+| **`versions`**    | The Versions View is used to navigate the version history of a single document. It is rendered within the "Versions" tab. [More details](../versions/overview). |
+| **`version`**     | The Version View is used to edit a single version of a document. It is rendered within the "Version" tab. [More details](../versions/overview).                 |
+| **`api`**         | The API View is used to display the REST API JSON response for a given document. It is rendered within the "API" tab.                                           |
+| **`livePreview`** | The LivePreview view is used to display the Live Preview interface. It is rendered within the "Live Preview" tab. [More details](../live-preview/overview).     |
 
 ### Document Tabs
 
@@ -354,14 +354,14 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 Your Custom Views will be provided with the following props:
 
-| Prop                      | Description                                                                                                                            |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **`initPageResult`**      | An object containing `req`, `payload`, `permissions`, etc.                                                                  |
-| **`clientConfig`**        | The Client Config object. [More details](../components#accessing-the-payload-config).                                                             |
-| **`importMap`**           | The import map object.                                                        |
-| **`params`**              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes).     |
-| **`searchParams`**        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).      |
-| **`doc`**                 | The document being edited. Only available in Document Views. [More details](#document-views).                                           |
+| Prop                      | Description                                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **`initPageResult`**      | An object containing `req`, `payload`, `permissions`, etc.                                                                         |
+| **`clientConfig`**        | The Client Config object. [More details](../admin/components#accessing-the-payload-config).                                        |
+| **`importMap`**           | The import map object.                                                                                                             |
+| **`params`**              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes). |
+| **`searchParams`**        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).  |
+| **`doc`**                 | The document being edited. Only available in Document Views. [More details](#document-views).                                      |
 
 <Banner type="success">
   **Reminder:**
