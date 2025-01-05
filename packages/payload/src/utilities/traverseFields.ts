@@ -112,7 +112,11 @@ export const traverseFields = ({
         if ('name' in tab && tab.name) {
           if (!ref[tab.name] || typeof ref[tab.name] !== 'object') {
             if (fillEmpty) {
-              ref[tab.name] = {}
+              if (tab.localized) {
+                ref[tab.name] = { en: {} }
+              } else {
+                ref[tab.name] = {}
+              }
             } else {
               continue
             }
@@ -166,10 +170,18 @@ export const traverseFields = ({
         if (!ref[field.name]) {
           if (fillEmpty) {
             if (field.type === 'group') {
-              ref[field.name] = {}
+              if (field.localized) {
+                ref[field.name] = {
+                  en: {},
+                }
+              } else {
+                ref[field.name] = {}
+              }
             } else if (field.type === 'array' || field.type === 'blocks') {
               if (field.localized) {
-                ref[field.name] = {}
+                ref[field.name] = {
+                  en: [],
+                }
               } else {
                 ref[field.name] = []
               }

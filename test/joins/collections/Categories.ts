@@ -110,6 +110,12 @@ export const Categories: CollectionConfig = {
       on: 'array.category',
     },
     {
+      name: 'localizedArrayPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'localizedArray.category',
+    },
+    {
       name: 'blocksPosts',
       type: 'join',
       collection: 'posts',

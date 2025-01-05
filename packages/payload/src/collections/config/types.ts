@@ -517,6 +517,7 @@ export type SanitizedJoin = {
    * The field configuration defining the join
    */
   field: JoinField
+  getLocalizedPath?(locale: string): string
   /**
    * The path of the join field in dot notation
    */

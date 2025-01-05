@@ -105,6 +105,18 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
+      name: 'localizedArray',
+      type: 'array',
+      localized: true,
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: categoriesSlug,
+        },
+      ],
+    },
+    {
       name: 'blocks',
       type: 'blocks',
       blocks: [
