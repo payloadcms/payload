@@ -1288,6 +1288,7 @@ export type {
 } from './preferences/types.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
+  RunInlineTaskFunction,
   RunTaskFunction,
   TaskConfig,
   TaskHandler,
