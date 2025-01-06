@@ -102,7 +102,7 @@ export const migrateRelationships = async ({
     })
   }
 
-  const deleteStatement = `DELETE FROM "${adapter.schemaName}"."${tableName}${adapter.relationshipsSuffix}" WHERE ${where}`
+  const deleteStatement = `DELETE FROM "${schemaName}"."${tableName}${adapter.relationshipsSuffix}" WHERE ${where}`
   if (debug) {
     payload.logger.info('DELETING ROWS')
     payload.logger.info(deleteStatement)
