@@ -14,17 +14,13 @@ npx create-payload-app --example multi-tenant
 ```
 
 ### 2. Configure Environment Variables
-Duplicate the .env.example file and rename it to .env.
-
+Duplicate the .env.example file and rename it to .env
 
 ```bash  
-DATABASE_URI=mongodb://127.0.0.1/payload-example-multi-tenant
-PAYLOAD_SECRET=PAYLOAD_MULTI_TENANT_EXAMPLE_SECRET_KEY
-PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3000
+cp .env.example .env
 ```
 
 ### 3. Start the Development Server
-
 Use your preferred package manager to start the server:
 
 ```bash  
