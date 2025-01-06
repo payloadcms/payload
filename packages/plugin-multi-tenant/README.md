@@ -1,0 +1,255 @@
+# Multi Tenant Plugin
+
+A plugin for [Payload](https://github.com/payloadcms/payload) to easily manage multiple tenants from within your admin panel.
+
+- [Source code](https://github.com/payloadcms/payload/tree/main/packages/plugin-multi-tenant)
+<!-- - [Documentation](https://payloadcms.com/docs/plugins/multi-tenant)
+- [Documentation source](https://github.com/payloadcms/payload/tree/main/docs/plugins/multi-tenant.mdx) -->
+
+## Plugin config example
+
+```ts
+multiTenantPlugin({
+  /**
+   * Enables/Disables the plugin
+   */
+  enabled: true, // optional, default true
+  /**
+   * The slug of the tenants collection you added to your config
+   *
+   * @default
+   */
+  tenantsSlug: 'tenants',
+  /**
+   * Define what collections you would like multi-tenancy to apply to
+   *
+   * Keyed on the slug of the collection
+   */
+  collections: {
+    pages: {
+      /**
+       * If you want to place the field yourself
+       * read the "How to manually place the tenant field on a collection" section below
+       *
+       * optional, @default true
+       */
+      includeTenantField: true
+      /**
+       * Used to opt out of using the provided baseListFilter
+       *
+       * You can use the exported utility "getTenantFilter" within your own list filter
+       *
+       * optional, @default true
+       */
+      useBaseListFilter: true
+      /**
+       * Used to opt out of the merged access control provided
+       *
+       * You can use the exported utility "getTenantAccess" within your access control functions
+       *
+       * optional, @default true
+       */
+      useTenantAccess: true
+    },
+    /**
+     * Custom configuration for the tenant field placed on every enabled collection
+     */
+    documentTenantField: {
+      // optional, provide access control on the injected tenant field
+      access: {
+        create,
+        read,
+        update,
+      },
+      /**
+       * Name of the field
+       *
+       * optional, @default true
+       */
+      name: 'tenant',
+    },
+    /**
+     * Function that allows you to determine if certain users should have access to all tenants
+     *
+     * optional, @default () => false
+     */
+    userHasAccessToAllTenants: (user) => user.isSuperAdmin === true
+    /**
+     * Options for the array field that gets added to the users collection.
+     *
+     * The field is an array of rows, each row has the associated tenant
+     * and the role of the user for that tenant
+     */
+    userTenantsField: {
+      /**
+       * An array of roles as strings, used for the role option on an array row
+       *
+       * required
+       */
+      roles: ['admin', 'user'],
+      /**
+       * The default role when a row is added to the field
+       *
+       * optional
+       */
+      defaultRole: 'user',
+       // optional, provide access control on the injected tenants array field
+      access: {
+        create,
+        read,
+        update,
+      },
+    }
+  },
+})
+```
+
+### How to manually place the tenant field on a collection
+
+You can import the `tenantField` from the plugin and place it inside of your collection config.
+
+**This field must be top level and can only be nested within a collapsible, row or unnamed tab.**
+
+```ts
+import { tenantField } from '@payloadcms/plugin-multi-tenant/fields'
+
+const PagesCollection = {
+  slug: 'pages',
+  fields: [
+    tenantField({
+      name, // name for the field [required]
+      access, // field access configuration [required]
+      tenantsCollectionSlug, // tenants collection slug [required]
+      userHasAccessToAllTenants, // function to determine if a user has access to all tenants [required]
+    }),
+  ],
+}
+```
+
+### How to configure Collections as Globals for multi-tenant
+
+When using multi-tenant, globals need to actually be configured as collections so the content can be specific per tenant.
+To do that, you can easily convert a global into a collection that functions like a global with the following code:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const NavigationCollection: CollectionConfig = {
+  slug: 'navigation',
+  fields: [
+    // add "global" fields
+  ],
+  admin: {
+    group: 'Globals', // optional
+    components: {
+      views: {
+        edit: {
+          root: {
+            Component: {
+              path: '@payloadcms/plugin-multi-tenant/views#GlobalEditView',
+            },
+          },
+        },
+        list: {
+          Component: {
+            path: '@payloadcms/plugin-multi-tenant/views#GlobalListView',
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+If you wanted to override more of the field, you can do that too by creating the field and then merging it with your overrides:
+
+```ts
+import { tenantField } from '@payloadcms/plugin-multi-tenant/fields'
+
+const pagesTenantField = tenantField({
+  name, // name for the field [required]
+  access, // field access configuration [required]
+  tenantsCollectionSlug, // tenants collection slug [required]
+  userHasAccessToAllTenants, // function to determine if a user has access to all tenants [required]
+})
+
+const PagesCollection = {
+  slug: 'pages',
+  fields: [
+    {
+      ...pagesTenantField,
+      admin: {
+        ...pagesTenantField.admin,
+        group: 'my-custom-group',
+      },
+    },
+  ],
+}
+```
+
+### Customizing access control
+
+In some cases, the access control supplied out of the box may be too strict. For example, if you need _some_ documents to be shared between tenants, you will need to opt out of the supplied access control functionality.
+
+By default this plugin merges your access control result with a constraint based on tenants the user has access to within an _AND_ condition. That would not work for the above scenario.
+
+In the multi-tenant plugin config you can set `useTenantAccess` to false:
+
+```ts
+// File: payload.config.ts
+
+import { buildConfig } from 'payload'
+import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
+import { getTenantAccess } from '@payloadcms/plugin-multi-tenant/utilities'
+import { Config as ConfigTypes } from './payload-types'
+
+// Add the plugin to your payload config
+export default buildConfig({
+  plugins: [
+    multiTenantPlugin({
+      collections: {
+        media: {
+          useTenantAccess: false,
+        },
+      },
+    }),
+  ],
+  collections: [
+    {
+      slug: 'media',
+      fields: [
+        {
+          name: 'isShared',
+          type: 'checkbox',
+          defaultValue: false,
+          // you likely want to set access control on fields like this
+          // to prevent just any user from modifying it
+        },
+      ],
+      access: {
+        read: ({ req, doc }) => {
+          if (!req.user) return false
+
+          const whereConstraint = {
+            or: [
+              {
+                isShared: {
+                  equals: true,
+                },
+              },
+            ],
+          }
+
+          const tenantAccessResult = getTenantAccess({ user: req.user })
+
+          if (tenantAccessResult) {
+            whereConstraint.or.push(tenantAccessResult)
+          }
+
+          return whereConstraint
+        },
+      },
+    },
+  ],
+})
+```
