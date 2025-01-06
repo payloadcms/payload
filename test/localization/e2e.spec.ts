@@ -254,9 +254,9 @@ describe('Localization', () => {
   })
 
   describe('localized relationships', () => {
-    test('ensure relationship field fetches are localised as well', async () => {
+    test('ensure relationship field fetches are localized as well', async () => {
       await changeLocale(page, spanishLocale)
-      await navigateToDoc(page, urlRelationshipLocalized)
+      await navigateToDoc(page, url)
       const selectField = page.locator('#field-children .rs__control')
       await selectField.click()
       await expect(page.locator('#field-children .rs__menu')).toContainText('spanish-relation2')
