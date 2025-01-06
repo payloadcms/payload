@@ -1001,6 +1001,45 @@ describe('List View', () => {
       await expect(page.locator('#heading-id')).toBeHidden()
       await expect(page.locator('.cell-id')).toHaveCount(0)
     })
+
+    test('should sort without resetting column preferences', async () => {
+      await page.goto(postsUrl.list)
+
+      // sort by title
+      await page.locator('#heading-title button.sort-column__asc').click()
+      await page.waitForURL(/sort=title/)
+
+      // enable a column that is _not_ part of this collection's default columns
+      await toggleColumn(page, { columnLabel: 'Status', targetState: 'on' })
+      await page.locator('#heading-status').waitFor({ state: 'visible' })
+
+      const columnAfterSort = page.locator(
+        `.list-controls__columns .column-selector .column-selector__column`,
+        {
+          hasText: exactText('Status'),
+        },
+      )
+
+      await expect(columnAfterSort).toHaveClass('column-selector__column--active')
+      await expect(page.locator('#heading-status')).toBeVisible()
+      await expect(page.locator('.cell-status').first()).toBeVisible()
+
+      // sort by title again in descending order
+      await page.locator('#heading-title button.sort-column__desc').click()
+      await page.waitForURL(/sort=-title/)
+
+      // ensure the column is still visible
+      const columnAfterSecondSort = page.locator(
+        `.list-controls__columns .column-selector .column-selector__column`,
+        {
+          hasText: exactText('Status'),
+        },
+      )
+
+      await expect(columnAfterSecondSort).toHaveClass('column-selector__column--active')
+      await expect(page.locator('#heading-status')).toBeVisible()
+      await expect(page.locator('.cell-status').first()).toBeVisible()
+    })
   })
 
   describe('i18n', () => {
