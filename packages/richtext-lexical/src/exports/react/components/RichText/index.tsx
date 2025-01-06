@@ -16,7 +16,7 @@ import './index.css'
 export type JSXConvertersFunction<
   T extends { [key: string]: any; type?: string } =
     | DefaultNodeTypes
-    | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
+    | SerializedBlockNode<{ blockName?: null | string }>
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
 > = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
 
