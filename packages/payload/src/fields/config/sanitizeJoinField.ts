@@ -47,15 +47,38 @@ export const sanitizeJoinField = ({
       if (!('name' in field) || !field.name) {
         return
       }
+      if (join.field.on === 'localizedTab.category') {
+        debugger
+      }
+
       const currentSegment = pathSegments[currentSegmentIndex]
+      if (join.field.on === 'localizedTab.category') {
+        debugger
+      }
+
       // match field on path segments
       if ('name' in field && field.name === currentSegment) {
+        if (join.field.on === 'localizedTab.category') {
+          debugger
+        }
+
         if ('localized' in field && field.localized) {
           localized = true
+          const fieldIndex = currentSegmentIndex
 
-          join.getLocalizedPath = (locale: string) => {
+          join.getForeignPath = ({ locale }) => {
             return pathSegments.reduce((acc, segment, index) => {
-              return `${acc}${segment}${index === currentSegmentIndex ? `.${locale}` : ''}${index === pathSegments.length - 1 ? '' : '.'}`
+              let result = `${acc}${segment}`
+
+              if (index === fieldIndex) {
+                result = `${result}.${locale}`
+              }
+
+              if (index !== pathSegments.length - 1) {
+                result = `${result}.`
+              }
+
+              return result
             }, '')
           }
         }

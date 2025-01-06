@@ -116,6 +116,22 @@ describe('Joins Field', () => {
         },
         array: [{ category: category.id }],
         localizedArray: [{ category: category.id }],
+        localizedTab: {
+          category: category.id,
+          array: [
+            {
+              category: category.id,
+            },
+          ],
+        },
+        localizedGroup: {
+          category: category.id,
+          array: [
+            {
+              category: category.id,
+            },
+          ],
+        },
         blocks: [{ blockType: 'block', category: category.id }],
       })
     }
@@ -223,6 +239,26 @@ describe('Joins Field', () => {
 
     expect(categoryWithPosts.localizedArrayPosts.docs).toBeDefined()
     expect(categoryWithPosts.localizedArrayPosts.docs).toHaveLength(10)
+  })
+
+  it('should populate joins with localized group relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.localizedGroupPosts.docs).toBeDefined()
+    expect(categoryWithPosts.localizedGroupPosts.docs).toHaveLength(10)
+  })
+
+  it('should populate joins with localized group and array relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.localizedGroupArrayPosts.docs).toBeDefined()
+    expect(categoryWithPosts.localizedGroupArrayPosts.docs).toHaveLength(10)
   })
 
   it('should populate joins with blocks relationships', async () => {

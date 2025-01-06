@@ -151,11 +151,23 @@ export const buildJoinAggregation = async ({
           join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
         const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${localeSuffix}`
 
+        let foreignField: string
+
+        if (join.getForeignPath) {
+          foreignField = `${join.getForeignPath({ locale })}${polymorphicSuffix}`
+        } else {
+          foreignField = `${join.field.on}${polymorphicSuffix}`
+        }
+
+        if (join.field.name === 'localizedArrayPosts') {
+          debugger
+        }
+
         aggregate.push(
           {
             $lookup: {
               as: `${as}.docs`,
-              foreignField: `${join.field.on}${localeSuffix}${polymorphicSuffix}`,
+              foreignField,
               from: adapter.collections[slug].collection.name,
               localField: versions ? 'parent' : '_id',
               pipeline,
