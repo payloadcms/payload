@@ -1003,6 +1003,15 @@ describe('List View', () => {
     })
 
     test('should sort without resetting column preferences', async () => {
+      await payload.delete({
+        collection: 'payload-preferences',
+        where: {
+          key: {
+            equals: `${postsCollectionSlug}.list`,
+          },
+        },
+      })
+
       await page.goto(postsUrl.list)
 
       // sort by title
@@ -1011,7 +1020,7 @@ describe('List View', () => {
 
       // enable a column that is _not_ part of this collection's default columns
       await toggleColumn(page, { columnLabel: 'Status', targetState: 'on' })
-      await page.locator('#heading-status').waitFor({ state: 'visible' })
+      await page.locator('#heading-_status').waitFor({ state: 'visible' })
 
       const columnAfterSort = page.locator(
         `.list-controls__columns .column-selector .column-selector__column`,
@@ -1020,13 +1029,16 @@ describe('List View', () => {
         },
       )
 
-      await expect(columnAfterSort).toHaveClass('column-selector__column--active')
-      await expect(page.locator('#heading-status')).toBeVisible()
-      await expect(page.locator('.cell-status').first()).toBeVisible()
+      await expect(columnAfterSort).toHaveClass(/column-selector__column--active/)
+      await expect(page.locator('#heading-_status')).toBeVisible()
+      await expect(page.locator('.cell-_status').first()).toBeVisible()
 
       // sort by title again in descending order
       await page.locator('#heading-title button.sort-column__desc').click()
       await page.waitForURL(/sort=-title/)
+
+      // allow time for components to re-render
+      await wait(100)
 
       // ensure the column is still visible
       const columnAfterSecondSort = page.locator(
@@ -1036,9 +1048,9 @@ describe('List View', () => {
         },
       )
 
-      await expect(columnAfterSecondSort).toHaveClass('column-selector__column--active')
-      await expect(page.locator('#heading-status')).toBeVisible()
-      await expect(page.locator('.cell-status').first()).toBeVisible()
+      await expect(columnAfterSecondSort).toHaveClass(/column-selector__column--active/)
+      await expect(page.locator('#heading-_status')).toBeVisible()
+      await expect(page.locator('.cell-_status').first()).toBeVisible()
     })
   })
 
