@@ -31,6 +31,7 @@ export type TaskHandlerArgs<
       : never
   job: RunningJob<TWorkflowSlug>
   req: PayloadRequest
+  tasks: RunTaskFunctions
 }
 
 /**
@@ -101,6 +102,7 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
       input: TTaskInput
       job: RunningJob<any>
       req: PayloadRequest
+      tasks: RunTaskFunctions
     }) =>
       | {
           output: TTaskOutput

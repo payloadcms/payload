@@ -286,6 +286,10 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           input,
           job: job as unknown as RunningJob<WorkflowTypes>, // TODO: Type this better
           req,
+          tasks: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob, {
+            taskID,
+            taskSlug,
+          }),
         })
 
         if (runnerOutput.state === 'failed') {
