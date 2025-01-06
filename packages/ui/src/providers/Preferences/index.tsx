@@ -103,7 +103,10 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
           newValue = deepMergeSimple(currentPreference, newValue)
         }
 
+        console.log('STEP 2, prepare pref request', newValue)
+
         if (dequal(newValue, currentPreference)) {
+          console.log('STEP 2B, dequal? yes.')
           return
         }
 
@@ -116,12 +119,17 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         if (newValue === currentPreference) {
           return
         }
+
         pendingUpdate.current[key] = newValue
       }
 
       const updatePreference = async () => {
+        console.log('STEP 3, actually make pref request', newValue)
+
         // compare the value stored in context before sending to eliminate duplicate requests
         if (dequal(pendingUpdate.current[key], preferencesRef.current[key])) {
+          console.log('STEP 3B, dequal? yes.')
+
           return
         }
 
