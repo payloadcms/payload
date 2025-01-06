@@ -719,14 +719,16 @@ export class BasePayload {
       const DEFAULT_LIMIT = 10
 
       const cronJobs = this.config.jobs.autoRun(this)
-      cronJobs.forEach((cronConfig) => {
-        new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
-          await this.jobs.run({
-            limit: cronConfig.limit ?? DEFAULT_LIMIT,
-            queue: cronConfig.queue,
+      await Promise.all(
+        cronJobs.map((cronConfig) => {
+          new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            await this.jobs.run({
+              limit: cronConfig.limit ?? DEFAULT_LIMIT,
+              queue: cronConfig.queue,
+            })
           })
-        })
-      })
+        }),
+      )
     }
 
     return this
