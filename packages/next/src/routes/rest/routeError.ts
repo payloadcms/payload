@@ -1,7 +1,7 @@
 import type { Collection, ErrorResult, PayloadRequest, SanitizedConfig } from 'payload'
 
 import httpStatus from 'http-status'
-import { APIError, formatErrors, getPayload } from 'payload'
+import { APIError, formatErrors, getPayload, logError } from 'payload'
 
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { mergeHeaders } from '../../utilities/mergeHeaders.js'
@@ -40,16 +40,13 @@ export const routeError = async ({
     req,
   })
 
-  const { config, logger } = payload
+  const { config } = payload
 
   let response = formatErrors(err)
 
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR
 
-  const level = payload.config.loggingLevels[err.name] ?? 'error'
-  if (level) {
-    logger[level](level === 'info' ? { msg: err.message } : { err })
-  }
+  logError({ err, payload })
 
   // Internal server errors can contain anything, including potentially sensitive data.
   // Therefore, error details will be hidden from the response unless `config.debug` is `true`

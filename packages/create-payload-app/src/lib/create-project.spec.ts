@@ -5,7 +5,7 @@ import globby from 'globby'
 import * as os from 'node:os'
 import path from 'path'
 
-import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
+import type { CliArgs, DbType, ProjectExample, ProjectTemplate } from '../types.js'
 
 import { createProject } from './create-project.js'
 import { dbReplacements } from './replacements.js'
@@ -44,14 +44,41 @@ describe('createProject', () => {
         name: 'plugin',
         type: 'plugin',
         description: 'Template for creating a Payload plugin',
-        url: 'https://github.com/payloadcms/payload-plugin-template',
+        url: 'https://github.com/payloadcms/payload/templates/plugin',
       }
+
       await createProject({
-        cliArgs: args,
+        cliArgs: { ...args, '--local-template': 'plugin' } as CliArgs,
         packageManager,
         projectDir,
         projectName,
         template,
+      })
+
+      const packageJsonPath = path.resolve(projectDir, 'package.json')
+      const packageJson = fse.readJsonSync(packageJsonPath)
+
+      // Check package name and description
+      expect(packageJson.name).toStrictEqual(projectName)
+    })
+
+    it('creates example', async () => {
+      const projectName = 'custom-server-example'
+      const example: ProjectExample = {
+        name: 'custom-server',
+        url: 'https://github.com/payloadcms/payload/examples/custom-server#main',
+      }
+
+      await createProject({
+        cliArgs: {
+          ...args,
+          '--local-template': undefined,
+          '--local-example': 'custom-server',
+        } as CliArgs,
+        packageManager,
+        projectDir,
+        projectName,
+        example,
       })
 
       const packageJsonPath = path.resolve(projectDir, 'package.json')

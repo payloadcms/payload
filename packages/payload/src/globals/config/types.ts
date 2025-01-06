@@ -160,6 +160,8 @@ export type GlobalConfig = {
   fields: Field[]
   graphQL?:
     | {
+        disableMutations?: true
+        disableQueries?: true
         name?: string
       }
     | false

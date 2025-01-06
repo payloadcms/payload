@@ -3,11 +3,13 @@ import type { SupportedLanguages } from '../types.js'
 import { ar } from '../languages/ar.js'
 import { az } from '../languages/az.js'
 import { bg } from '../languages/bg.js'
+import { ca } from '../languages/ca.js'
 import { cs } from '../languages/cs.js'
 import { da } from '../languages/da.js'
 import { de } from '../languages/de.js'
 import { en } from '../languages/en.js'
 import { es } from '../languages/es.js'
+import { et } from '../languages/et.js'
 import { fa } from '../languages/fa.js'
 import { fr } from '../languages/fr.js'
 import { he } from '../languages/he.js'
@@ -39,11 +41,13 @@ export const translations = {
   ar,
   az,
   bg,
+  ca,
   cs,
   da,
   de,
   en,
   es,
+  et,
   fa,
   fr,
   he,

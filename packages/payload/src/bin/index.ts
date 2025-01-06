@@ -6,7 +6,7 @@ import path from 'path'
 import type { BinScript } from '../config/types.js'
 
 import { findConfig } from '../config/find.js'
-import { getPayload } from '../index.js'
+import payload, { getPayload } from '../index.js'
 import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
@@ -102,15 +102,24 @@ export const bin = async () => {
 
       return
     } else {
-      return await payload.jobs.run({
+      await payload.jobs.run({
         limit,
         queue,
       })
+
+      await payload.db.destroy() // close database connections after running jobs so process can exit cleanly
+
+      return
     }
   }
 
   if (script === 'generate:db-schema') {
-    const payload = await getPayload({ config })
+    // Barebones instance to access database adapter, without connecting to the DB
+    await payload.init({
+      config,
+      disableDBConnect: true,
+      disableOnInit: true,
+    })
 
     if (typeof payload.db.generateSchema !== 'function') {
       payload.logger.error({
@@ -124,6 +133,8 @@ export const bin = async () => {
       log: args.log === 'false' ? false : true,
       prettify: args.prettify === 'false' ? false : true,
     })
+
+    process.exit(0)
   }
 
   console.error(`Unknown script: "${script}".`)
