@@ -653,6 +653,20 @@ export class BasePayload {
       )
     }
 
+    // Warn if user is deploying to Vercel, and any upload collection is missing a storage adapter
+    if (process.env.VERCEL) {
+      const uploadCollWithoutAdapter = this.config.collections.filter(
+        (c) => c.upload && c.upload.adapter === undefined, // Uploads enabled, but no storage adapter provided
+      )
+
+      if (uploadCollWithoutAdapter) {
+        const slugs = uploadCollWithoutAdapter.map((c) => c.slug).join(', ')
+        this.logger.warn(
+          `Collections with uploads enabled require a storage adapter when deploying to Vercel. Collections without storage adapters: ${slugs}. See https://payloadcms.com/docs/upload/storage-adapters for more info.`,
+        )
+      }
+    }
+
     this.sendEmail = this.email['sendEmail']
 
     serverInitTelemetry(this)
