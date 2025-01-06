@@ -301,6 +301,10 @@ export const huTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Az összes {{collections}} újraindexálása folyamatban.',
     remove: 'Törlés',
     reset: 'Visszaállítás',
+    resetPreferences: 'Beállítások visszaállítása',
+    resetPreferencesDescription:
+      'Ez visszaállítja az összes beállítást az alapértelmezett értékekre.',
+    resettingPreferences: 'Beállítások visszaállítása.',
     row: 'Sor',
     rows: 'Sorok',
     save: 'Mentés',

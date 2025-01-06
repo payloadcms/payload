@@ -20,7 +20,7 @@ export const sanitizeJoinField = ({
   if (typeof joins === 'undefined') {
     throw new APIError('Join fields cannot be added to arrays, blocks or globals.')
   }
-  if (!field.maxDepth) {
+  if (typeof field.maxDepth === 'undefined') {
     field.maxDepth = 1
   }
   const join: SanitizedJoin = {

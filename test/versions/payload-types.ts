@@ -157,6 +157,7 @@ export interface DraftPost {
       }[]
     | null;
   relation?: (string | null) | DraftPost;
+  restrictedToUpdate?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -459,6 +460,7 @@ export interface DraftPostsSelect<T extends boolean = true> {
             };
       };
   relation?: T;
+  restrictedToUpdate?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -723,6 +725,7 @@ export interface TaskSchedulePublish {
       value: string | DraftPost;
     } | null;
     global?: 'draft-global' | null;
+    user?: (string | null) | User;
   };
   output?: unknown;
 }

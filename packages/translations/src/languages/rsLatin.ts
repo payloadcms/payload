@@ -299,6 +299,10 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
     remove: 'Ukloni',
     reset: 'Ponovo postavi',
+    resetPreferences: 'Poništi podešavanja',
+    resetPreferencesDescription:
+      'Ovo će poništiti sva vaša podešavanja na podrazumevane vrednosti.',
+    resettingPreferences: 'Poništavanje podešavanja.',
     row: 'Red',
     rows: 'Redovi',
     save: 'Sačuvaj',

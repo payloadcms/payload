@@ -302,6 +302,10 @@ export const trTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',
     remove: 'Kaldır',
     reset: 'Sıfırla',
+    resetPreferences: 'Tercihleri sıfırla',
+    resetPreferencesDescription:
+      'Bu, tüm tercihlerinizin varsayılan ayarlara sıfırlanmasını sağlar.',
+    resettingPreferences: 'Tercihler sıfırlanıyor.',
     row: 'Satır',
     rows: 'Satır',
     save: 'Kaydet',

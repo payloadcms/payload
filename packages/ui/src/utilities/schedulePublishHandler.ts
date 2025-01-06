@@ -11,8 +11,32 @@ export const schedulePublishHandler = async ({
   doc,
   global,
   locale,
-  req: { i18n, payload },
+  req,
 }: SchedulePublishHandlerArgs) => {
+  const { i18n, payload, user } = req
+
+  const incomingUserSlug = user?.collection
+
+  const adminUserSlug = payload.config.admin.user
+
+  if (!incomingUserSlug) {
+    throw new Error('Unauthorized')
+  }
+
+  const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
+
+  // Run the admin access function from the config if it exists
+  if (adminAccessFunction) {
+    const canAccessAdmin = await adminAccessFunction({ req })
+
+    if (!canAccessAdmin) {
+      throw new Error('Unauthorized')
+    }
+    // Match the user collection to the global admin config
+  } else if (adminUserSlug !== incomingUserSlug) {
+    throw new Error('Unauthorized')
+  }
+
   try {
     await payload.jobs.queue({
       input: {
@@ -20,6 +44,7 @@ export const schedulePublishHandler = async ({
         doc,
         global,
         locale,
+        user: user.id,
       },
       task: 'schedulePublish',
       waitUntil: date,

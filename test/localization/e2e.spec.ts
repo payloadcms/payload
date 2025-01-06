@@ -315,7 +315,7 @@ describe('Localization', () => {
       const nestedArrayURL = new AdminUrlUtil(serverURL, nestedToArrayAndBlockCollectionSlug)
       await page.goto(nestedArrayURL.create)
       await changeLocale(page, 'ar')
-      const addArrayRow = page.locator('.array-field__add-row')
+      const addArrayRow = page.locator('#field-topLevelArray .array-field__add-row')
       await addArrayRow.click()
 
       const arrayField = page.locator('#field-topLevelArray__0__localizedText')

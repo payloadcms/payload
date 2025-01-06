@@ -23,6 +23,7 @@ let payload: PayloadTestSDK<Config>
 
 describe('Hooks', () => {
   let url: AdminUrlUtil
+  let beforeChangeURL: AdminUrlUtil
   let page: Page
   let serverURL: string
 
@@ -31,6 +32,7 @@ describe('Hooks', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, 'before-validate')
+    beforeChangeURL = new AdminUrlUtil(serverURL, 'before-change-hooks')
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -57,6 +59,18 @@ describe('Hooks', () => {
     await saveDocAndAssert(page)
 
     await expect(page.locator('#field-title')).toHaveValue('reset in beforeValidate')
+  })
+
+  test('should reflect changes made in beforeChange collection hooks within ui after save', async () => {
+    await page.goto(beforeChangeURL.create)
+    await page.locator('#field-title').fill('should replace value with before change response')
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('#field-title')).toHaveValue('hi from hook')
+    await page.locator('#field-title').fill('helllooooooooo')
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('#field-title')).toHaveValue('hi from hook')
   })
 })
 

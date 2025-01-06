@@ -922,6 +922,22 @@ describe('General', () => {
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
     })
   })
+
+  describe('preferences', () => {
+    test('should successfully reset prefs after clicking reset button', async () => {
+      await page.goto(`${serverURL}/admin/account`)
+      const resetPrefsButton = page.locator('.payload-settings > div > button.btn')
+      await expect(resetPrefsButton).toBeVisible()
+      await resetPrefsButton.click()
+      const confirmModal = page.locator('dialog#confirm-reset-modal')
+      await expect(confirmModal).toBeVisible()
+      const confirmButton = confirmModal.locator('button.btn--style-primary')
+      await expect(confirmButton).toContainText('Confirm')
+      await confirmButton.click()
+      const toast = page.locator('li.payload-toast-item.toast-success')
+      await expect(toast).toBeVisible()
+    })
+  })
 })
 
 async function deleteAllPosts() {

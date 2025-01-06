@@ -217,18 +217,30 @@ export function UploadInput(props: UploadInputProps) {
       })
       if (response.ok) {
         const json = await response.json()
-        const sortedDocs = ids.map((id) =>
+        let sortedDocs = ids.map((id) =>
           json.docs.find((doc) => {
             return String(doc.id) === String(id)
           }),
         )
+
+        if (sortedDocs.includes(undefined) && hasMany) {
+          sortedDocs = sortedDocs.map((doc, index) =>
+            doc
+              ? doc
+              : {
+                  id: ids[index],
+                  filename: `${t('general:untitled')} - ID: ${ids[index]}`,
+                  isPlaceholder: true,
+                },
+          )
+        }
 
         return { ...json, docs: sortedDocs }
       }
 
       return null
     },
-    [code, serverURL, api, i18n.language],
+    [code, serverURL, api, i18n.language, t, hasMany],
   )
 
   const onUploadSuccess = useCallback(
@@ -376,9 +388,11 @@ export function UploadInput(props: UploadInputProps) {
       const { docs } = await populateDocs([docID], collectionSlug)
 
       if (docs[0]) {
+        let updatedDocsToPropogate = []
         setPopulatedDocs((currentDocs) => {
           const existingDocIndex = currentDocs?.findIndex((doc) => {
-            return doc.value.id === docs[0].id && doc.relationTo === collectionSlug
+            const hasExisting = doc.value?.id === docs[0].id || doc.value?.isPlaceholder
+            return hasExisting && doc.relationTo === collectionSlug
           })
           if (existingDocIndex > -1) {
             const updatedDocs = [...currentDocs]
@@ -386,12 +400,17 @@ export function UploadInput(props: UploadInputProps) {
               relationTo: collectionSlug,
               value: docs[0],
             }
+            updatedDocsToPropogate = updatedDocs
             return updatedDocs
           }
         })
+
+        if (updatedDocsToPropogate.length && hasMany) {
+          onChange(updatedDocsToPropogate.map((doc) => doc.value?.id))
+        }
       }
     },
-    [populateDocs],
+    [populateDocs, onChange, hasMany],
   )
 
   // only hasMany can reorder

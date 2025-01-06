@@ -39,13 +39,13 @@ export const MyRelationshipField: Field = {
 
 | Option                 | Description                                                                                                                                                                     |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                          |
-| **`relationTo`** *    | Provide one or many collection `slug`s to be able to assign relationships to.                                                                                                   |
+| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                           |
+| **`relationTo`** *    | Provide one or many collection `slug`s to be able to assign relationships to.                                                                                                    |
 | **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options).                                                                 |
 | **`hasMany`**          | Boolean when, if set to `true`, allows this field to have many relations instead of only one.                                                                                   |
 | **`minRows`**          | A number for the fewest allowed items during validation when a value is present. Used with `hasMany`.                                                                           |
 | **`maxRows`**          | A number for the most allowed items during validation when a value is present. Used with `hasMany`.                                                                             |
-| **`maxDepth`**         | Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](/docs/getting-started/concepts#field-level-max-depth) |
+| **`maxDepth`**         | Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](/docs/queries/depth#max-depth)                        |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                         |
 | **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                    |
 | **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                    |
@@ -87,12 +87,12 @@ export const MyRelationshipField: Field = {
 
 The Relationship Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
 
-| Property                       | Description                                                                                                                              |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Property                       | Description                                                                                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`isSortable`**               | Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop (only works when `hasMany` is set to `true`). |
 | **`allowCreate`**              | Set to `false` if you'd like to disable the ability to create new documents from within the relationship field.                             |
-| **`allowEdit`**              | Set to `false` if you'd like to disable the ability to edit documents from within the relationship field.                             |
-| **`sortOptions`**              | Define a default sorting order for the options within a Relationship field's dropdown. [More](#sortOptions)                                |
+| **`allowEdit`**                | Set to `false` if you'd like to disable the ability to edit documents from within the relationship field.                                   |
+| **`sortOptions`**              | Define a default sorting order for the options within a Relationship field's dropdown. [More](#sort-options)                                |
 
 ### Sort Options
 
@@ -120,15 +120,9 @@ Example:
 
 ```ts
 sortOptions: {
-  "pages"
-:
-  "fieldName1",
-    "posts"
-:
-  "-fieldName2",
-    "categories"
-:
-  "fieldName3"
+  "pages": "fieldName1",
+  "posts": "-fieldName2",
+  "categories": "fieldName3"
 }
 ```
 
@@ -220,9 +214,7 @@ of collection.
 ```ts
 {
   slug: 'example-collection',
-    fields
-:
-  [
+  fields: [
     {
       name: 'owner', // required
       type: 'relationship', // required
@@ -254,9 +246,7 @@ tells Payload which Collections are valid to reference.
 ```ts
 {
   slug: 'example-collection',
-    fields
-:
-  [
+  fields: [
     {
       name: 'owner', // required
       type: 'relationship', // required
@@ -295,9 +285,7 @@ The `hasMany` tells Payload that there may be more than one collection saved to 
 ```ts
 {
   slug: 'example-collection',
-    fields
-:
-  [
+  fields: [
     {
       name: 'owners', // required
       type: 'relationship', // required
@@ -325,9 +313,7 @@ When querying documents, the format does not change for arrays:
 ```ts
 {
   slug: 'example-collection',
-    fields
-:
-  [
+  fields: [
     {
       name: 'owners', // required
       type: 'relationship', // required

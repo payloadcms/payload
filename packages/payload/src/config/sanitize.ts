@@ -222,6 +222,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     configWithDefaults.jobs.tasks.push(
       getSchedulePublishTask({
+        adminUserSlug: config.admin.user,
         collections: schedulePublishCollections,
         globals: schedulePublishGlobals,
       }),
