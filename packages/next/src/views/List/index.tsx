@@ -8,7 +8,7 @@ import type { AdminViewProps, ListQuery, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, renderTable } from '@payloadcms/ui/rsc'
+import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
@@ -74,39 +74,13 @@ export const renderListView = async (
 
   const query = queryFromArgs || queryFromReq
 
-  let listPreferences: ListPreferences
   const preferenceKey = `${collectionSlug}-list`
 
-  try {
-    listPreferences = (await payload
-      .find({
-        collection: 'payload-preferences',
-        depth: 0,
-        limit: 1,
-        req,
-        user,
-        where: {
-          and: [
-            {
-              key: {
-                equals: preferenceKey,
-              },
-            },
-            {
-              'user.relationTo': {
-                equals: user.collection,
-              },
-            },
-            {
-              'user.value': {
-                equals: user?.id,
-              },
-            },
-          ],
-        },
-      })
-      ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
-  } catch (_err) {} // eslint-disable-line no-empty
+  const listPreferences = await upsertPreferences<ListPreferences>({
+    key: `${collectionSlug}-list`,
+    req,
+    value: { limit: isNumber(query?.limit) ? Number(query.limit) : undefined, sort: query?.sort },
+  })
 
   const {
     routes: { admin: adminRoute },
@@ -125,17 +99,11 @@ export const renderListView = async (
       where: (query?.where as Where) || undefined,
     })
 
-    const limit = isNumber(query?.limit)
-      ? Number(query.limit)
-      : listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+    const limit = listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
 
     const sort =
-      query?.sort && typeof query.sort === 'string'
-        ? query.sort
-        : listPreferences?.sort ||
-          (typeof collectionConfig.defaultSort === 'string'
-            ? collectionConfig.defaultSort
-            : undefined)
+      listPreferences?.sort ||
+      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
 
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({

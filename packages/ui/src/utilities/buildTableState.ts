@@ -8,13 +8,14 @@ import type {
 } from 'payload'
 
 import { formatErrors } from 'payload'
+import { isNumber } from 'payload/shared'
 
 import type { Column } from '../elements/Table/index.js'
 import type { ListPreferences } from '../elements/TableColumns/index.js'
 
 import { getClientConfig } from './getClientConfig.js'
 import { renderFilters, renderTable } from './renderTable.js'
-import { updatePreferences } from './updatePreferences.js'
+import { upsertPreferences } from './upsertPreferences.js'
 
 type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
@@ -135,11 +136,14 @@ export const buildTableState = async (
     )
   }
 
-  const newPrefs = await updatePreferences<ListPreferences>({
-    preferencesKey: `${collectionSlug}-list`,
+  console.log(query)
+
+  const listPreferences = await upsertPreferences<ListPreferences>({
+    key: `${collectionSlug}-list`,
     req,
     value: {
       columns,
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       sort: query?.sort,
     },
   })
@@ -182,7 +186,7 @@ export const buildTableState = async (
 
   return {
     data,
-    preferences: newPrefs,
+    preferences: listPreferences,
     renderedFilters,
     state: columnState,
     Table,
