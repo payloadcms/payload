@@ -147,18 +147,15 @@ export const buildJoinAggregation = async ({
           }
         })
       } else {
-        const path =
-          join.field.localized && adapter.payload.config.localization && locale
-            ? join.getLocalizedPath(locale)
-            : join.field.on
-
-        const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${path}`
+        const localeSuffix =
+          join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
+        const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${localeSuffix}`
 
         aggregate.push(
           {
             $lookup: {
               as: `${as}.docs`,
-              foreignField: `${path}${polymorphicSuffix}`,
+              foreignField: `${join.field.on}${localeSuffix}${polymorphicSuffix}`,
               from: adapter.collections[slug].collection.name,
               localField: versions ? 'parent' : '_id',
               pipeline,
