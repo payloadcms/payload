@@ -298,6 +298,10 @@ export const bgTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Преиндексиране на всички {{collections}}.',
     remove: 'Премахни',
     reset: 'Нулиране',
+    resetPreferences: 'Нулиране на предпочитанията',
+    resetPreferencesDescription:
+      'Това ще нулира всички ваши предпочитания до техните настройки по подразбиране.',
+    resettingPreferences: 'Нулиране на предпочитанията.',
     row: 'ред',
     rows: 'Редове',
     save: 'Запази',

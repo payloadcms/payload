@@ -252,10 +252,10 @@ export const canDeleteCustomer: Access = async ({ req, id }) => {
 
 The following arguments are provided to the `delete` function:
 
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
+| Option    | Description                                                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user. |
-| **`id`**  | `id` of document requested to delete.
+| **`id`**  | `id` of document requested to delete.                                                                                                                  |
 
 ### Admin
 
@@ -286,7 +286,7 @@ The following arguments are provided to the `admin` function:
 
 ### Unlock
 
-Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/overview#options).
+Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/overview#config-options).
 
 To add Unlock Access Control to a Collection, use the `unlock` property in the [Collection Config](../configuration/collections):
 

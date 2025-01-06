@@ -262,6 +262,28 @@ describe('Document View', () => {
     })
   })
 
+  describe('breadcrumbs', () => {
+    test('List drawer should not effect underlying breadcrumbs', async () => {
+      await navigateToDoc(page, postsUrl)
+
+      expect(await page.locator('.step-nav.app-header__step-nav a').nth(1).innerText()).toBe(
+        'Posts',
+      )
+
+      await page.locator('#field-upload button.upload__listToggler').click()
+      await expect(page.locator('[id^=list-drawer_1_]')).toBeVisible()
+      await wait(100) // wait for the component to re-render
+
+      await expect(
+        page.locator('.step-nav.app-header__step-nav .step-nav__last'),
+      ).not.toContainText('Uploads')
+
+      expect(await page.locator('.step-nav.app-header__step-nav a').nth(1).innerText()).toBe(
+        'Posts',
+      )
+    })
+  })
+
   describe('custom document views', () => {
     test('collection — should render custom tab view', async () => {
       await page.goto(customViewsURL.create)

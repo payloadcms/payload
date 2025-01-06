@@ -458,6 +458,12 @@ export default buildConfigWithDefaults({
             height: 300,
             width: 300,
           },
+          {
+            name: 'undefinedHeightWithoutEnlargement',
+            width: 4000,
+            height: undefined,
+            withoutEnlargement: undefined,
+          },
         ],
         mimeTypes: [
           'image/png',

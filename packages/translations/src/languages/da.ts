@@ -297,6 +297,10 @@ export const daTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Genindekserer alle {{collections}}.',
     remove: 'Fjern',
     reset: 'Nulstil',
+    resetPreferences: 'Nulstil præferencer',
+    resetPreferencesDescription:
+      'Dette vil nulstille alle dine præferencer til standardindstillingerne.',
+    resettingPreferences: 'Nulstiller præferencer.',
     row: 'Række',
     rows: 'Rækker',
     save: 'Gem',

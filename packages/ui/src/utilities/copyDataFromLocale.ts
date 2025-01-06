@@ -1,3 +1,4 @@
+import ObjectIdImport from 'bson-objectid'
 import {
   type CollectionSlug,
   type Data,
@@ -6,6 +7,9 @@ import {
   type PayloadRequest,
 } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
+
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 export type CopyDataFromLocaleArgs = {
   collectionSlug?: CollectionSlug
@@ -33,10 +37,15 @@ function iterateFields(fields: Field[], fromLocaleData: Data, toLocaleData: Data
             break
           }
 
-          // if the field has a value but is not localized, loop over the data from target
-          if (!field.localized && field.name in toLocaleData) {
+          // if the field has a value - loop over the data from target
+          if (field.name in toLocaleData) {
             toLocaleData[field.name].map((item: Data, index: number) => {
               if (fromLocaleData[field.name]?.[index]) {
+                // Generate new IDs if the field is localized to prevent errors with relational DBs.
+                if (field.localized) {
+                  toLocaleData[field.name][index].id = new ObjectId().toHexString()
+                }
+
                 iterateFields(field.fields, fromLocaleData[field.name][index], item)
               }
             })
@@ -55,18 +64,24 @@ function iterateFields(fields: Field[], fromLocaleData: Data, toLocaleData: Data
             break
           }
 
-          // if the field has a value but is not localized, loop over the data from target
-          if (!field.localized && field.name in toLocaleData) {
+          // if the field has a value - loop over the data from target
+          if (field.name in toLocaleData) {
             toLocaleData[field.name].map((blockData: Data, index: number) => {
               const blockFields = field.blocks.find(
                 ({ slug }) => slug === blockData.blockType,
               )?.fields
+
+              // Generate new IDs if the field is localized to prevent errors with relational DBs.
+              if (field.localized) {
+                toLocaleData[field.name][index].id = new ObjectId().toHexString()
+              }
 
               if (blockFields?.length) {
                 iterateFields(blockFields, fromLocaleData[field.name][index], blockData)
               }
             })
           }
+
           break
 
         case 'checkbox':

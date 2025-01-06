@@ -1179,6 +1179,45 @@ describe('lexicalMain', () => {
     })
   })
 
+  test('make relationship fields update the collection when it is changed in the drawer dropdown', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    await richTextField.locator('.ContentEditable__root').first().click()
+    const lastParagraph = richTextField.locator('p').first()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    await lastParagraph.click()
+    await page.keyboard.type('/Relationship')
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+    await page.keyboard.press('Enter')
+
+    const relationshipInput = page.locator('.drawer__content .rs__input').first()
+    await expect(relationshipInput).toBeVisible()
+    await page.getByRole('heading', { name: 'Lexical Fields' })
+    await relationshipInput.click()
+    const user = await page.getByRole('option', { name: 'User' })
+    await user.click()
+
+    const userListDrawer = page
+      .locator('div')
+      .filter({ hasText: /^User$/ })
+      .first()
+    await expect(userListDrawer).toBeVisible()
+    await page.getByRole('heading', { name: 'Users' })
+    const button = await page.getByLabel('Add new User')
+    await button.click()
+    await page.getByText('Creating new User')
+  })
+
   describe('localization', () => {
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)

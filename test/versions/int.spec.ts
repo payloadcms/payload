@@ -1792,6 +1792,51 @@ describe('Versions', () => {
       expect(retrieved._status).toStrictEqual('published')
     })
 
+    it('should restrict scheduled publish based on user', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'my doc to publish in the future',
+          description: 'hello',
+          restrictedToUpdate: true,
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      const currentDate = new Date()
+
+      const user = (
+        await payload.find({ collection: 'users', where: { email: { equals: devUser.email } } })
+      ).docs[0]
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+          user: user.id,
+        },
+      })
+
+      await wait(4000)
+
+      const res = await payload.jobs.run()
+
+      expect(res.jobStatus[Object.keys(res.jobStatus)[0]].status).toBe('error-reached-max-retries')
+
+      const retrieved = await payload.findByID({
+        collection: draftCollectionSlug,
+        id: draft.id,
+      })
+
+      expect(retrieved._status).toStrictEqual('draft')
+    })
+
     it('should allow collection scheduled unpublish', async () => {
       const published = await payload.create({
         collection: draftCollectionSlug,

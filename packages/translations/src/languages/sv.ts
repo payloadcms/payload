@@ -299,6 +299,10 @@ export const svTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Omindexerar alla {{collections}}.',
     remove: 'Ta bort',
     reset: 'Återställ',
+    resetPreferences: 'Återställ preferenser',
+    resetPreferencesDescription:
+      'Detta kommer att återställa alla dina preferenser till standardinställningarna.',
+    resettingPreferences: 'Återställer preferenser.',
     row: 'Rad',
     rows: 'Rader',
     save: 'Spara',

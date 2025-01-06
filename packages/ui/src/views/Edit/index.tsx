@@ -9,7 +9,7 @@ import type {
 } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
 import type { LockedState } from '../../utilities/buildFormState.js'
@@ -179,13 +179,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     classes.push(`collection-edit--${collectionSlug}`)
   }
 
-  const [schemaPathSegments, setSchemaPathSegments] = useState(() => {
-    if (operation === 'create' && auth && !auth.disableLocalStrategy) {
-      return [`_${entitySlug}`, 'auth']
-    }
-
-    return [entitySlug]
-  })
+  const schemaPathSegments = useMemo(() => [entitySlug], [entitySlug])
 
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
     if (operation === 'create' && auth && !auth.disableLocalStrategy) {
@@ -297,32 +291,32 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       }
     },
     [
-      adminRoute,
-      collectionSlug,
-      depth,
-      docPermissions,
+      reportUpdate,
+      id,
       entitySlug,
+      user,
+      collectionSlug,
+      userSlug,
+      incrementVersionCount,
+      updateSavedDocumentData,
+      onSaveFromContext,
+      isEditing,
+      depth,
       getDocPermissions,
+      globalSlug,
+      autosaveEnabled,
+      refreshCookieAsync,
+      adminRoute,
+      locale,
+      router,
+      resetUploadEdits,
       getDocPreferences,
       getFormState,
-      globalSlug,
-      id,
-      incrementVersionCount,
-      isEditing,
-      isLockingEnabled,
-      locale,
-      onSaveFromContext,
+      docPermissions,
       operation,
-      refreshCookieAsync,
-      reportUpdate,
-      resetUploadEdits,
-      router,
       schemaPathSegments,
+      isLockingEnabled,
       setDocumentIsLocked,
-      updateSavedDocumentData,
-      user,
-      userSlug,
-      autosaveEnabled,
     ],
   )
 
@@ -557,7 +551,6 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
                       operation={operation}
                       readOnly={!hasSavePermission}
                       requirePassword={!id}
-                      setSchemaPathSegments={setSchemaPathSegments}
                       setValidateBeforeSubmit={setValidateBeforeSubmit}
                       useAPIKey={auth.useAPIKey}
                       username={savedDocumentData?.username}

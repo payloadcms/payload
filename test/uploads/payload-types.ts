@@ -748,6 +748,14 @@ export interface Enlarge {
       filesize?: number | null;
       filename?: string | null;
     };
+    undefinedHeightWithoutEnlargement?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
   };
 }
 /**
@@ -2049,6 +2057,16 @@ export interface EnlargeSelect<T extends boolean = true> {
               filename?: T;
             };
         widthLowerHeightLarger?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        undefinedHeightWithoutEnlargement?:
           | T
           | {
               url?: T;
