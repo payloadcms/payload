@@ -100,8 +100,7 @@ You can specify `sortOptions` in two ways:
 
 **As a string:**
 
-Provide a string to define a global default sort field for all relationship field dropdowns across different
-collections. You can prefix the field name with a minus symbol ("-") to sort in descending order.
+Provide a string to define a global default sort field for all relationship field dropdowns across different collections. You can prefix the field name with a minus symbol ("-") to sort in descending order.
 
 Example:
 
@@ -113,8 +112,7 @@ This configuration will sort all relationship field dropdowns by `"fieldName"` i
 
 **As an object :**
 
-Specify an object where keys are collection slugs and values are strings representing the field names to sort by. This
-allows for different sorting fields for each collection's relationship dropdown.
+Specify an object where keys are collection slugs and values are strings representing the field names to sort by. This allows for different sorting fields for each collection's relationship dropdown.
 
 Example:
 
@@ -136,12 +134,9 @@ Note: If `sortOptions` is not defined, the default sorting behavior of the Relat
 
 ## Filtering relationship options
 
-Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both
-for validating input and filtering available relationships in the UI.
+Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.
 
-The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to
-prevent all, or a `Where` query. When using a function, it will be
-called with an argument object with the following properties:
+The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to prevent all, or a `Where` query. When using a function, it will be called with an argument object with the following properties:
 
 | Property      | Description                                                                                           |
 | ------------- | ----------------------------------------------------------------------------------------------------- |
@@ -202,14 +197,11 @@ However, the `relationship` field can be used in conjunction with the `Join` fie
 
 ## How the data is saved
 
-Given the variety of options possible within the `relationship` field type, the shape of the data needed for creating
-and updating these fields can vary. The following sections will describe the variety of data shapes that can arise from
-this field.
+Given the variety of options possible within the `relationship` field type, the shape of the data needed for creating and updating these fields can vary. The following sections will describe the variety of data shapes that can arise from this field.
 
 ### Has One
 
-The most simple pattern of a relationship is to use `hasMany: false` with a `relationTo` that allows for only one type
-of collection.
+The most simple pattern of a relationship is to use `hasMany: false` with a `relationTo` that allows for only one type of collection.
 
 ```ts
 {
@@ -240,8 +232,7 @@ When querying documents in this collection via REST API, you could query as foll
 
 ### Has One - Polymorphic
 
-Also known as **dynamic references**, in this configuration, the `relationTo` field is an array of Collection slugs that
-tells Payload which Collections are valid to reference.
+Also known as **dynamic references**, in this configuration, the `relationTo` field is an array of Collection slugs that tells Payload which Collections are valid to reference.
 
 ```ts
 {
@@ -325,8 +316,7 @@ When querying documents, the format does not change for arrays:
 }
 ```
 
-Relationship fields with `hasMany` set to more than one kind of collections save their data as an array of objects—each
-containing the Collection `slug` as the `relationTo` value, and the related document `id` for the `value`:
+Relationship fields with `hasMany` set to more than one kind of collections save their data as an array of objects—each containing the Collection `slug` as the `relationTo` value, and the related document `id` for the `value`:
 
 ```json
 {
@@ -349,12 +339,9 @@ Querying is done in the same way as the earlier Polymorphic example:
 
 ### Querying and Filtering Polymorphic Relationships
 
-Polymorphic and non-polymorphic relationships must be queried differently because of how the related data is stored and
-may be inconsistent across different collections. Because of this, filtering polymorphic relationship fields from the
-Collection List admin UI is limited to the `id` value.
+Polymorphic and non-polymorphic relationships must be queried differently because of how the related data is stored and may be inconsistent across different collections. Because of this, filtering polymorphic relationship fields from the Collection List admin UI is limited to the `id` value.
 
-For a polymorphic relationship, the response will always be an array of objects. Each object will contain
-the `relationTo` and `value` properties.
+For a polymorphic relationship, the response will always be an array of objects. Each object will contain the `relationTo` and `value` properties.
 
 The data can be queried by the related document ID:
 
@@ -364,8 +351,7 @@ Or by the related document Collection slug:
 
 `?where[field.relationTo][equals]=your-collection-slug`.
 
-However, you **cannot** query on any field values within the related document.
-Since we are referencing multiple collections, the field you are querying on may not exist and break the query.
+However, you **cannot** query on any field values within the related document. Since we are referencing multiple collections, the field you are querying on may not exist and break the query.
 
 <Banner type="warning">
   **Note:**
