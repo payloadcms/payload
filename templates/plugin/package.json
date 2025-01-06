@@ -35,7 +35,7 @@
     "dev": "payload run ./dev/server.ts",
     "dev:generate-importmap": "pnpm dev:payload generate:importmap",
     "dev:generate-types": "pnpm dev:payload generate:types",
-    "dev:payload": "PAYLOAD_CONFIG_PATH=./dev/payload.config.ts payload",
+    "dev:payload": "cross-env PAYLOAD_CONFIG_PATH=./dev/payload.config.ts payload",
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix",
     "prepublishOnly": "pnpm clean && pnpm build",
