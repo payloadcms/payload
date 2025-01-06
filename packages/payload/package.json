@@ -125,7 +125,7 @@
     "cross-env": "7.0.3",
     "esbuild": "0.24.0",
     "graphql-http": "^1.22.0",
-    "react-datepicker": "7.5.0",
+    "react-datepicker": "7.6.0",
     "rimraf": "6.0.1",
     "sharp": "0.32.6"
   },
