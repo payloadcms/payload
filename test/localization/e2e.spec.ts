@@ -445,11 +445,13 @@ async function createAndSaveDoc(page, url, values) {
 }
 
 async function openCopyToLocaleDrawer(page) {
-  const docControls = page.locator('.doc-controls__popup')
+  const docControls = page.locator('.doc-controls__popup button.popup-button')
+  expect(docControls).toBeEnabled()
   await docControls.click()
   const copyButton = page.locator('#copy-locale-data__button')
   await expect(copyButton).toBeVisible()
   await copyButton.click()
+  await expect(page.locator('#copy-locale')).toBeVisible()
   await expect(page.locator('.copy-locale-data__content')).toBeVisible()
 }
 
