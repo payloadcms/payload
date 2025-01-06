@@ -29,8 +29,11 @@ export type CustomPayloadRequestProperties = {
   /**
    * The requested locale if specified
    * Only available for localized collections
+   *
+   * Suppressing warning below as it is a valid use case - won't be an issue if generated types exist
    */
-  locale?: TypedLocale
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  locale?: 'all' | TypedLocale
   /**
    * The payload object
    */
