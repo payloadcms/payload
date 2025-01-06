@@ -1084,8 +1084,6 @@ describe('Queues', () => {
     expect(jobAfterRun.log[1].parent.taskID).toBe('create two docs')
 
     expect(jobAfterRun.log[2].taskID).toBe('create two docs')
-
-    console.log(jobAfterRun)
   })
 
   it('ensure successful sub-tasks are not retried', async () => {

@@ -174,8 +174,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
     ) => {
       const executedAt = new Date()
 
-      console.log('Running task', { parent, taskID })
-
       let inlineRunner: TaskHandler<TaskType> = null
       if (isInline) {
         inlineRunner = task
