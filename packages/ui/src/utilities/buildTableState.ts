@@ -136,8 +136,6 @@ export const buildTableState = async (
     )
   }
 
-  console.log(query)
-
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
     req,

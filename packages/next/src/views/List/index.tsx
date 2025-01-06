@@ -48,12 +48,7 @@ export const renderListView = async (
 
   const {
     collectionConfig,
-    collectionConfig: {
-      slug: collectionSlug,
-      admin: { useAsTitle },
-      defaultSort,
-      fields,
-    },
+    collectionConfig: { slug: collectionSlug },
     locale: fullLocale,
     permissions,
     req,
@@ -93,17 +88,17 @@ export const renderListView = async (
 
     const page = isNumber(query?.page) ? Number(query.page) : 0
 
-    let whereQuery = mergeListSearchAndWhere({
-      collectionConfig,
-      search: typeof query?.search === 'string' ? query.search : undefined,
-      where: (query?.where as Where) || undefined,
-    })
-
     const limit = listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
 
     const sort =
       listPreferences?.sort ||
       (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+    let where = mergeListSearchAndWhere({
+      collectionConfig,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      where: (query?.where as Where) || undefined,
+    })
 
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({
@@ -114,8 +109,8 @@ export const renderListView = async (
       })
 
       if (baseListFilter) {
-        whereQuery = {
-          and: [whereQuery, baseListFilter].filter(Boolean),
+        where = {
+          and: [where, baseListFilter].filter(Boolean),
         }
       }
     }
@@ -133,7 +128,7 @@ export const renderListView = async (
       req,
       sort,
       user,
-      where: whereQuery || {},
+      where: where || {},
     })
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
@@ -148,10 +143,10 @@ export const renderListView = async (
       enableRowSelections,
       i18n: req.i18n,
       payload,
-      useAsTitle,
+      useAsTitle: collectionConfig.admin.useAsTitle,
     })
 
-    const renderedFilters = renderFilters(fields, req.payload.importMap)
+    const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
     const staticDescription =
       typeof collectionConfig.admin.description === 'function'
