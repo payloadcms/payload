@@ -25,6 +25,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     hasPublishedDoc,
     hasPublishPermission,
     setHasPublishedDoc,
+    setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     unpublishedVersionCount,
     uploadStatus,
@@ -122,8 +123,15 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     })
 
     setUnpublishedVersionCount(0)
+    setMostRecentVersionIsAutosaved(false)
     setHasPublishedDoc(true)
-  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount, uploadStatus])
+  }, [
+    setHasPublishedDoc,
+    submit,
+    setUnpublishedVersionCount,
+    uploadStatus,
+    setMostRecentVersionIsAutosaved,
+  ])
 
   const publishSpecificLocale = useCallback(
     (locale) => {
