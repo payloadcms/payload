@@ -54,6 +54,31 @@ export default buildConfigWithDefaults({
             ],
           },
         },
+        {
+          name: 'arrayWithIDs',
+          type: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'blocksWithIDs',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
       ],
       hooks: {
         beforeOperation: [

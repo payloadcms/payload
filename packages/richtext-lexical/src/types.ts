@@ -22,6 +22,10 @@ export type LexicalFieldAdminProps = {
    * Controls if the gutter (padding to the left & gray vertical line) should be hidden. @default false
    */
   hideGutter?: boolean
+  /**
+   * Changes the placeholder text in the editor if no content is present.
+   */
+  placeholder?: string
 }
 
 export type LexicalEditorProps = {

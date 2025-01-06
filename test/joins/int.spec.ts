@@ -1,11 +1,11 @@
-import type { Payload } from 'payload'
+import type { Payload, TypeWithID } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Category, Config, Post, Singular } from './payload-types.js'
+import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
@@ -174,10 +174,7 @@ describe('Joins Field', () => {
       collection: categoriesSlug,
     })
 
-    expect(categoryWithPosts).toStrictEqual({
-      id: categoryWithPosts.id,
-      group: categoryWithPosts.group,
-    })
+    expect(Object.keys(categoryWithPosts)).toStrictEqual(['id', 'group'])
 
     expect(categoryWithPosts.group.relatedPosts.docs).toHaveLength(10)
     expect(categoryWithPosts.group.relatedPosts.docs[0]).toHaveProperty('id')
@@ -977,6 +974,44 @@ describe('Joins Field', () => {
     expect(find.docs).toHaveLength(5)
 
     await payload.delete({ collection: categoriesSlug, where: { name: { equals: 'totalDocs' } } })
+  })
+
+  it('should self join', async () => {
+    const doc_1 = await payload.create({ collection: 'self-joins', data: {} })
+    const doc_2 = await payload.create({ collection: 'self-joins', data: { rel: doc_1 }, depth: 0 })
+
+    const data = await payload.findByID({ collection: 'self-joins', id: doc_1.id, depth: 1 })
+
+    expect((data.joins.docs[0] as TypeWithID).id).toBe(doc_2.id)
+  })
+
+  it('should populate joins on depth 2', async () => {
+    const depthJoin_2 = await payload.create({ collection: 'depth-joins-2', data: {}, depth: 0 })
+    const depthJoin_1 = await payload.create({
+      collection: 'depth-joins-1',
+      data: { rel: depthJoin_2 },
+      depth: 0,
+    })
+
+    const depthJoin_3 = await payload.create({
+      collection: 'depth-joins-3',
+      data: { rel: depthJoin_1 },
+      depth: 0,
+    })
+
+    const data = await payload.findByID({
+      collection: 'depth-joins-2',
+      id: depthJoin_2.id,
+      depth: 2,
+    })
+
+    const joinedDoc = data.joins.docs[0] as DepthJoins1
+
+    expect(joinedDoc.id).toBe(depthJoin_1.id)
+
+    const joinedDoc2 = joinedDoc.joins.docs[0] as DepthJoins3
+
+    expect(joinedDoc2.id).toBe(depthJoin_3.id)
   })
 })
 

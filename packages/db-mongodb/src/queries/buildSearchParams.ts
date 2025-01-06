@@ -1,4 +1,3 @@
-import type { ClientSession, FindOptions } from 'mongodb'
 import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
@@ -16,11 +15,9 @@ type SearchParam = {
   value?: unknown
 }
 
-const subQueryOptions: FindOptions = {
+const subQueryOptions = {
+  lean: true,
   limit: 50,
-  projection: {
-    _id: true,
-  },
 }
 
 /**
@@ -34,7 +31,6 @@ export async function buildSearchParam({
   locale,
   operator,
   payload,
-  session,
   val,
 }: {
   collectionSlug?: string
@@ -44,7 +40,6 @@ export async function buildSearchParam({
   locale?: string
   operator: string
   payload: Payload
-  session?: ClientSession
   val: unknown
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
@@ -139,14 +134,17 @@ export async function buildSearchParam({
               },
             })
 
-            const result = await SubModel.collection
-              .find(subQuery, { session, ...subQueryOptions })
-              .toArray()
+            const result = await SubModel.find(subQuery, subQueryOptions)
 
             const $in: unknown[] = []
 
             result.forEach((doc) => {
-              $in.push(doc._id)
+              const stringID = doc._id.toString()
+              $in.push(stringID)
+
+              if (Types.ObjectId.isValid(stringID)) {
+                $in.push(doc._id)
+              }
             })
 
             if (pathsToQuery.length === 1) {
@@ -164,9 +162,7 @@ export async function buildSearchParam({
           }
 
           const subQuery = priorQueryResult.value
-          const result = await SubModel.collection
-            .find(subQuery, { session, ...subQueryOptions })
-            .toArray()
+          const result = await SubModel.find(subQuery, subQueryOptions)
 
           const $in = result.map((doc) => doc._id)
 

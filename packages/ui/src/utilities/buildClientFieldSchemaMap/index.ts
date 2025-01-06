@@ -44,24 +44,22 @@ export const buildClientFieldSchemaMap = (args: {
     )
 
     if (matchedCollection) {
+      let fieldsToSet = matchedCollection?.fields || []
+
       if (matchedCollection.auth && !matchedCollection.auth.disableLocalStrategy) {
-        // register schema with auth schemaPath
         ;(baseAuthFields[0] as TextFieldClient).label = i18n.t('general:password')
         ;(baseAuthFields[1] as TextFieldClient).label = i18n.t('authentication:confirmPassword')
-
-        clientSchemaMap.set(`_${matchedCollection.slug}.auth`, {
-          fields: [...baseAuthFields, ...matchedCollection.fields],
-        })
+        fieldsToSet = baseAuthFields.concat(fieldsToSet)
       }
 
       clientSchemaMap.set(collectionSlug, {
-        fields: matchedCollection.fields,
+        fields: fieldsToSet,
       })
 
       traverseFields({
         clientSchemaMap,
         config,
-        fields: matchedCollection.fields,
+        fields: fieldsToSet,
         i18n,
         parentIndexPath: '',
         parentSchemaPath: collectionSlug,

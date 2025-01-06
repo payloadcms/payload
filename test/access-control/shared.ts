@@ -18,11 +18,8 @@ export const docLevelAccessSlug = 'doc-level-access'
 export const hiddenFieldsSlug = 'hidden-fields'
 export const hiddenAccessSlug = 'hidden-access'
 export const hiddenAccessCountSlug = 'hidden-access-count'
-
-export const noAdminAccessEmail = 'no-admin-access@payloadcms.com'
-
-export const nonAdminUserEmail = 'non-admin-user@payloadcms.com'
-
-export const nonAdminUserSlug = 'non-admin-user'
-
 export const disabledSlug = 'disabled'
+
+export const nonAdminEmail = 'no-admin-access@payloadcms.com'
+export const publicUserEmail = 'public-user@payloadcms.com'
+export const publicUsersSlug = 'public-users'

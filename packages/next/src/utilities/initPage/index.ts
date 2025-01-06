@@ -110,7 +110,7 @@ export const initPage = async ({
             },
           })
           ?.then((res) => res.docs?.[0]?.value as string)
-      } catch (error) {} // eslint-disable-line no-empty
+      } catch (_err) {} // eslint-disable-line no-empty
     }
 
     locale = findLocaleFromCode(localization, localeCode)
