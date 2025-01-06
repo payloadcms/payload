@@ -32,8 +32,8 @@ import { PublishButton } from '../PublishButton/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { SaveButton } from '../SaveButton/index.js'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
-import './index.scss'
 import { Status } from '../Status/index.js'
+import './index.scss'
 
 const baseClass = 'doc-controls'
 
