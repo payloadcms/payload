@@ -51,6 +51,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       collectionSlug: collectionConfig.slug,
       locale,
       payload,
+      req,
       user,
     })
 
