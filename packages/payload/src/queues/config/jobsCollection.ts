@@ -120,6 +120,21 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
                     type: 'json',
                   },
                   {
+                    name: 'parent',
+                    type: 'group',
+                    fields: [
+                      {
+                        name: 'taskSlug',
+                        type: 'select',
+                        options: [...taskSlugs],
+                      },
+                      {
+                        name: 'taskID',
+                        type: 'text',
+                      },
+                    ],
+                  },
+                  {
                     name: 'state',
                     type: 'radio',
                     options: ['failed', 'succeeded'],

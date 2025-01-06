@@ -1,5 +1,6 @@
 import type { Field } from '../../../fields/config/types.js'
 import type { PayloadRequest, StringKeyOf, TypedCollection, TypedJobs } from '../../../index.js'
+import type { TaskParent } from '../../operations/runJobs/runJob/getRunTaskFunction.js'
 import type {
   RetryConfig,
   RunInlineTaskFunction,
@@ -20,6 +21,10 @@ export type JobLog = {
   id?: string
   input?: any
   output?: any
+  /**
+   * Sub-tasks (tasks that are run within a task) will have a parent task ID
+   */
+  parent?: TaskParent
   state: 'failed' | 'succeeded'
   taskID: string
   taskSlug: string

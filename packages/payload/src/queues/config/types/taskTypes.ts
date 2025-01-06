@@ -20,6 +20,10 @@ export type TaskHandlerArgs<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
   TWorkflowSlug extends keyof TypedJobs['workflows'] = string,
 > = {
+  /**
+   * Use this function to run a sub-task from within another task.
+   */
+  inlineTask: RunInlineTaskFunction
   input: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
     ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['input']
     : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
@@ -92,7 +96,12 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
      */
     retries?: number | RetryConfig | undefined
     // This is the same as TaskHandler, but typed out explicitly in order to improve type inference
-    task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
+    task: (args: {
+      inlineTask: RunInlineTaskFunction
+      input: TTaskInput
+      job: RunningJob<any>
+      req: PayloadRequest
+    }) =>
       | {
           output: TTaskOutput
           state?: 'failed' | 'succeeded'
