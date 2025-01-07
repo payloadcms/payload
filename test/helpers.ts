@@ -52,6 +52,11 @@ const networkConditions = {
     latency: 1000,
     upload: ((10 * 1000 * 1000) / 8) * 0.8,
   },
+  None: {
+    download: 0,
+    latency: -1,
+    upload: -1,
+  },
 }
 
 /**

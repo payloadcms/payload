@@ -30,7 +30,7 @@ import {
   withRequiredLocalizedFields,
 } from './shared.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
-import { wait } from 'payload/shared'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -43,7 +43,7 @@ const dirname = path.dirname(filename)
  * Repeat above for Globals
  */
 
-const { beforeAll, beforeEach, describe } = test
+const { beforeAll, beforeEach, describe, afterAll } = test
 let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
 let urlRelationshipLocalized: AdminUrlUtil
@@ -114,15 +114,13 @@ describe('Localization', () => {
   })
 
   describe('locale change', () => {
-    beforeEach(async () => {
+    test('should disable fields during locale change', async () => {
       await throttleTest({
         page,
         context,
         delay: 'Fast 4G',
       })
-    })
 
-    test('should disable fields during locale change', async () => {
       await page.goto(url.create)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('.localizer >> button').first().click()
@@ -138,6 +136,12 @@ describe('Localization', () => {
       const regexPattern = new RegExp(`locale=${spanishLocale}`)
       await expect(page).toHaveURL(regexPattern)
       await expect(page.locator('#field-title')).toBeEnabled()
+
+      await throttleTest({
+        page,
+        context,
+        delay: 'None',
+      })
     })
   })
 
