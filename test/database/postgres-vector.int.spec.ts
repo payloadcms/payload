@@ -8,7 +8,11 @@ import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const describeToUse = process.env.PAYLOAD_DATABASE.startsWith('postgres') ? describe : describe.skip
+// skip on ci as there db does not have the vector extension
+const describeToUse =
+  process.env.PAYLOAD_DATABASE.startsWith('postgres') && process.env.CI !== 'true'
+    ? describe
+    : describe.skip
 
 describeToUse('postgres vector custom column', () => {
   it('should add a vector column and query it', async () => {
