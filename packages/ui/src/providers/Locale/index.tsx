@@ -14,7 +14,7 @@ const LocaleContext = createContext({} as Locale)
 
 export const LocaleLoadingContext = createContext({
   localeIsLoading: false,
-  setLocaleIsLoading: (_: boolean) => {},
+  setLocaleIsLoading: (_: boolean) => undefined,
 })
 
 export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
