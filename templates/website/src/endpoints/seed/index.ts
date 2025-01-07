@@ -240,12 +240,7 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    data: JSON.parse(
-      JSON.stringify({ ...post1, categories: [technologyCategory.id] })
-        .replace(/"\{\{IMAGE_1\}\}"/g, String(image1ID))
-        .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID))
-        .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
-    ),
+    data: post1(image1Doc, image2Doc, demoAuthor),
   })
 
   const post2Doc = await payload.create({
@@ -254,12 +249,7 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    data: JSON.parse(
-      JSON.stringify({ ...post2, categories: [newsCategory.id] })
-        .replace(/"\{\{IMAGE_1\}\}"/g, String(image2ID))
-        .replace(/"\{\{IMAGE_2\}\}"/g, String(image3ID))
-        .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
-    ),
+    data: post2(image2Doc, image3Doc, demoAuthor),
   })
 
   const post3Doc = await payload.create({
@@ -268,12 +258,7 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    data: JSON.parse(
-      JSON.stringify({ ...post3, categories: [financeCategory.id] })
-        .replace(/"\{\{IMAGE_1\}\}"/g, String(image3ID))
-        .replace(/"\{\{IMAGE_2\}\}"/g, String(image1ID))
-        .replace(/"\{\{AUTHOR\}\}"/g, String(demoAuthorID)),
-    ),
+    data: post3(image3Doc, image1Doc, demoAuthor),
   })
 
   // update each post with related posts
@@ -304,7 +289,7 @@ export const seed = async ({
   const contactForm = await payload.create({
     collection: 'forms',
     depth: 0,
-    data: JSON.parse(JSON.stringify(contactFormData)),
+    data: contactFormData,
   })
 
   let contactFormID: number | string = contactForm.id
@@ -319,21 +304,12 @@ export const seed = async ({
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: JSON.parse(
-        JSON.stringify(home)
-          .replace(/"\{\{IMAGE_1\}\}"/g, String(imageHomeID))
-          .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID)),
-      ),
+      data: home(imageHomeDoc, image2Doc),
     }),
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: JSON.parse(
-        JSON.stringify(contactPageData).replace(
-          /"\{\{CONTACT_FORM_ID\}\}"/g,
-          String(contactFormID),
-        ),
-      ),
+      data: contactPageData(contactForm),
     }),
   ])
 
