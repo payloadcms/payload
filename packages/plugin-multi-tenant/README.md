@@ -11,13 +11,22 @@ A plugin for [Payload](https://github.com/payloadcms/payload) to easily manage m
 ```ts
 multiTenantPlugin({
   /**
-   * Enables/Disables the plugin
+   * Enable debugging:
+   * - shows the relationship field on enabled collection documents
+   *
+   * optional, @default false
    */
-  enabled: true, // optional, default true
+  debug: false,
+  /**
+   * Enables/Disables the plugin
+   *
+   * optional, @default true
+   */
+  enabled: true,
   /**
    * The slug of the tenants collection you added to your config
    *
-   * @default
+   * @default 'tenants'
    */
   tenantsSlug: 'tenants',
   /**
