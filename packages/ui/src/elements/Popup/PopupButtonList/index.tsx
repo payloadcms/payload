@@ -49,39 +49,41 @@ export const Button: React.FC<MenuButtonProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  if (href) {
-    return (
-      <Link
-        className={classes}
-        href={href}
-        id={id}
-        onClick={(e) => {
-          if (onClick) {
-            onClick(e)
-          }
-        }}
-        prefetch={false}
-      >
-        {children}
-      </Link>
-    )
-  }
+  if (!active) {
+    if (href) {
+      return (
+        <Link
+          className={classes}
+          href={href}
+          id={id}
+          onClick={(e) => {
+            if (onClick) {
+              onClick(e)
+            }
+          }}
+          prefetch={false}
+        >
+          {children}
+        </Link>
+      )
+    }
 
-  if (onClick) {
-    return (
-      <button
-        className={classes}
-        id={id}
-        onClick={(e) => {
-          if (onClick) {
-            onClick(e)
-          }
-        }}
-        type="button"
-      >
-        {children}
-      </button>
-    )
+    if (onClick) {
+      return (
+        <button
+          className={classes}
+          id={id}
+          onClick={(e) => {
+            if (onClick) {
+              onClick(e)
+            }
+          }}
+          type="button"
+        >
+          {children}
+        </button>
+      )
+    }
   }
 
   return (

@@ -91,6 +91,27 @@ describe('Localization', () => {
       await page.locator('.localizer >> button').first().click()
       await expect(page.locator('.localizer .popup.popup--active')).toBeVisible()
     })
+
+    test('should disable control for active locale', async () => {
+      await page.goto(url.create)
+      const activeLocale = await page
+        .locator('.localizer .localizer-button__current-label')
+        .textContent()
+      await page.locator('.localizer >> button').first().click()
+
+      const activeOption = await page.locator(
+        `.localizer .popup-button-list__button.popup-button-list__button--selected`,
+        {
+          hasText: activeLocale,
+        },
+      )
+
+      const tagName = await activeOption.evaluate((node) => node.tagName)
+      await expect(tagName).not.toBe('A')
+      await expect(activeOption).not.toHaveAttribute('href')
+      await expect(tagName).not.toBe('BUTTON')
+      await expect(tagName).toBe('DIV')
+    })
   })
 
   describe('locale change', () => {
