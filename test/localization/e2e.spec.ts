@@ -149,25 +149,24 @@ describe('Localization', () => {
       await fillValues({ description, title })
       await saveDocAndAssert(page)
 
-      // await wait(1000)
-      // await changeLocale(page, 'es')
+      await changeLocale(page, 'es')
 
-      // // Localized field should not be populated
-      // await expect
-      //   .poll(() => page.locator('#field-title').inputValue(), {
-      //     timeout: 45000,
-      //   })
-      //   .not.toBe(title)
+      // Localized field should not be populated
+      await expect
+        .poll(() => page.locator('#field-title').inputValue(), {
+          timeout: 45000,
+        })
+        .not.toBe(title)
 
-      // await expect(page.locator('#field-description')).toHaveValue(description)
+      await expect(page.locator('#field-description')).toHaveValue(description)
 
-      // await fillValues({ description, title: spanishTitle })
-      // await saveDocAndAssert(page)
-      // await changeLocale(page, defaultLocale)
+      await fillValues({ description, title: spanishTitle })
+      await saveDocAndAssert(page)
+      await changeLocale(page, defaultLocale)
 
-      // // Expect english title
-      // await expect(page.locator('#field-title')).toHaveValue(title)
-      // await expect(page.locator('#field-description')).toHaveValue(description)
+      // Expect english title
+      await expect(page.locator('#field-title')).toHaveValue(title)
+      await expect(page.locator('#field-description')).toHaveValue(description)
     })
 
     test('create spanish post, add english', async () => {
@@ -289,11 +288,13 @@ describe('Localization', () => {
       const originalID = await page.locator('.id-label').innerText()
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
-      await expect(page.locator('.id-label')).not.toContainText(originalID)
-      await expect(page.locator('#field-title')).toHaveValue(englishTitle)
+
       await expect(page.locator('.payload-toast-container')).toContainText(
         'successfully duplicated',
       )
+
+      await expect(page.locator('.id-label')).not.toContainText(originalID)
+      await expect(page.locator('#field-title')).toHaveValue(englishTitle)
       await expect(page.locator('.id-label')).not.toContainText(originalID)
     })
   })
