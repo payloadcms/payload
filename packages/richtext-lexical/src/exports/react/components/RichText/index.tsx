@@ -83,7 +83,7 @@ export const RichText: React.FC<RichTextProps> = ({
     })
 
   if (disableContainer) {
-    return content
+    return <>{content}</>
   }
 
   return <div className={className ?? 'payload-richtext'}>{content}</div>
