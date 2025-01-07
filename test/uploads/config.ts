@@ -833,7 +833,10 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: mediaWithoutCacheTagsSlug,
       data: {},
-      file: imageFile,
+      file: {
+        ...imageFile,
+        name: `withoutCacheTags-image-${imageFile.name}`,
+      },
     })
 
     const { id: uploadedImageWithoutPreview } = await payload.create({
