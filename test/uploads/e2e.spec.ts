@@ -451,7 +451,7 @@ describe('Uploads', () => {
   })
 
   test('should render adminThumbnail without the additional cache tag', async () => {
-    const pngDoc = (
+    const imageDoc = (
       await payload.find({
         collection: mediaWithoutCacheTagsSlug,
         depth: 0,
@@ -464,7 +464,7 @@ describe('Uploads', () => {
       })
     ).docs[0]
 
-    await page.goto(mediaWithoutCacheTagsSlugURL.edit(pngDoc.id))
+    await page.goto(mediaWithoutCacheTagsSlugURL.edit(imageDoc.id))
 
     const genericUploadImage = page.locator('.file-details .thumbnail img')
 
@@ -481,9 +481,9 @@ describe('Uploads', () => {
   })
 
   test('should render adminThumbnail with the cache tag by default', async () => {
-    const pngDoc = (
+    const imageDoc = (
       await payload.find({
-        collection: mediaSlug,
+        collection: adminThumbnailFunctionSlug,
         depth: 0,
         pagination: false,
         where: {
@@ -494,7 +494,7 @@ describe('Uploads', () => {
       })
     ).docs[0]
 
-    await page.goto(mediaURL.edit(pngDoc.id))
+    await page.goto(adminThumbnailFunctionURL.edit(imageDoc.id))
 
     const genericUploadImage = page.locator('.file-details .thumbnail img')
 
