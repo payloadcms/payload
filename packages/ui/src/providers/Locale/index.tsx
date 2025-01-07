@@ -3,7 +3,7 @@
 import type { Locale } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
@@ -12,12 +12,18 @@ import { usePreferences } from '../Preferences/index.js'
 
 const LocaleContext = createContext({} as Locale)
 
+export const LocaleLoadingContext = createContext({
+  localeIsLoading: false,
+  setLocaleIsLoading: (_: boolean) => {},
+})
+
 export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const {
     config: { localization = false },
   } = useConfig()
 
   const { user } = useAuth()
+
   const defaultLocale =
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
 
@@ -25,19 +31,30 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
   const searchParams = useSearchParams()
   const localeFromParams = searchParams.get('locale')
 
-  const [localeCode, setLocaleCode] = useState<string>(defaultLocale)
-
-  const locale: Locale = React.useMemo(() => {
+  const [locale, setLocale] = React.useState<Locale>(() => {
     if (!localization) {
       // TODO: return null V4
       return {} as Locale
     }
 
     return (
-      findLocaleFromCode(localization, localeFromParams || localeCode) ||
+      findLocaleFromCode(localization, localeFromParams) ||
       findLocaleFromCode(localization, defaultLocale)
     )
-  }, [localeCode, localeFromParams, localization, defaultLocale])
+  })
+
+  const [isLoading, setLocaleIsLoading] = useState(false)
+
+  const prevLocale = useRef<Locale>(locale)
+
+  useEffect(() => {
+    if (locale.code !== prevLocale.current.code) {
+      console.log('locale changed', locale, prevLocale.current)
+      setLocaleIsLoading(false)
+    }
+
+    prevLocale.current = locale
+  }, [locale])
 
   useEffect(() => {
     async function setInitialLocale() {
@@ -45,15 +62,17 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
         if (typeof localeFromParams !== 'string') {
           try {
             const localeToSet = await getPreference<string>('locale')
-            setLocaleCode(localeToSet)
+            setLocale(
+              findLocaleFromCode(localization, localeToSet) ||
+                findLocaleFromCode(localization, defaultLocale),
+            )
           } catch (_) {
-            setLocaleCode(defaultLocale)
+            setLocale(findLocaleFromCode(localization, defaultLocale))
           }
         } else {
-          void setPreference(
-            'locale',
-            findLocaleFromCode(localization, localeFromParams)?.code || defaultLocale,
-          )
+          const newLocale = findLocaleFromCode(localization, localeFromParams) || locale
+          setLocale(newLocale)
+          void setPreference('locale', newLocale)
         }
       }
     }
@@ -61,24 +80,19 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
     void setInitialLocale()
   }, [defaultLocale, getPreference, localization, localeFromParams, setPreference, user])
 
-  return <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>
+  return (
+    <LocaleContext.Provider value={locale}>
+      <LocaleLoadingContext.Provider value={{ localeIsLoading: isLoading, setLocaleIsLoading }}>
+        {children}
+      </LocaleLoadingContext.Provider>
+    </LocaleContext.Provider>
+  )
 }
 
+export const useLocaleLoading = () => useContext(LocaleLoadingContext)
+
 /**
- * @deprecated A hook that returns the current locale object.
- *
- * ---
- *
- * #### 🚨 V4 Breaking Change
- * The `useLocale` return type now reflects `null | Locale` instead of `false | Locale`.
- *
- * **Old (V3):**
- * ```ts
- * const { code } = useLocale();
- * ```
- * **New (V4):**
- * ```ts
- * const locale = useLocale();
- * ```
+ * TODO: V4
+ * The return type of the `useLocale` hook will change in v4. It will return `null | Locale` instead of `false | Locale`.
  */
 export const useLocale = (): Locale => useContext(LocaleContext)

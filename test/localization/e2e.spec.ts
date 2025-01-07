@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
@@ -14,6 +14,7 @@ import {
   initPageConsoleErrorCatch,
   openDocDrawer,
   saveDocAndAssert,
+  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -40,7 +41,7 @@ const dirname = path.dirname(filename)
  * Repeat above for Globals
  */
 
-const { beforeAll, describe } = test
+const { beforeAll, describe, beforeEach } = test
 let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
 let urlRelationshipLocalized: AdminUrlUtil
@@ -54,6 +55,7 @@ let page: Page
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 let richTextURL: AdminUrlUtil
+let context: BrowserContext
 
 describe('Localization', () => {
   beforeAll(async ({ browser }, testInfo) => {
@@ -65,12 +67,38 @@ describe('Localization', () => {
     richTextURL = new AdminUrlUtil(serverURL, richTextSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
 
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  describe('localizer controls', () => {
+    test('should show localizer controls', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
+    })
+  })
+
+  describe('locale change', () => {
+    beforeEach(async () => {
+      await throttleTest({
+        page,
+        context,
+        delay: 'Fast 4G',
+      })
+    })
+
+    test('should disable fields during locale change', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('#field-title')).toBeEnabled()
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-title')).toBeDisabled()
+      await expect(page.locator('.localizer__current-locale')).toContainText('Spanish')
+      await expect(page.locator('#field-title')).toBeEnabled()
+    })
   })
 
   describe('localized text', () => {
