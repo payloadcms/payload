@@ -48,6 +48,10 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
   const prevLocale = useRef<Locale>(locale)
 
   useEffect(() => {
+    // We need to set `isLoading` back to false once the locale is detected to be different
+    // This happens when the user clicks an anchor link which appends the `?locale=` query param
+    // This triggers a client-side navigation, which re-renders the page with the new locale
+    // In Next.js, local state is persisted during this type of navigation because components are not unmounted
     if (locale.code !== prevLocale.current.code) {
       setLocaleIsLoading(false)
     }
@@ -56,13 +60,17 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
   }, [locale])
 
   useEffect(() => {
-    async function setInitialLocale() {
+    async function resetLocale() {
       if (localization && user) {
         if (typeof localeFromParams !== 'string') {
           try {
-            const localeToSet = await getPreference<string>('locale')
+            const localeToSet = await getPreference<{
+              code: string
+              label: string
+            }>('locale')
+
             setLocale(
-              findLocaleFromCode(localization, localeToSet) ||
+              findLocaleFromCode(localization, localeToSet.code) ||
                 findLocaleFromCode(localization, defaultLocale),
             )
           } catch (_) {
@@ -76,8 +84,8 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
       }
     }
 
-    void setInitialLocale()
-  }, [defaultLocale, getPreference, localization, localeFromParams, setPreference, user])
+    void resetLocale()
+  }, [defaultLocale, getPreference, localization, localeFromParams, setPreference, user, locale])
 
   return (
     <LocaleContext.Provider value={locale}>

@@ -94,9 +94,11 @@ describe('Localization', () => {
 
     test('should disable control for active locale', async () => {
       await page.goto(url.create)
+
       const activeLocale = await page
         .locator('.localizer .localizer-button__current-label')
         .textContent()
+
       await page.locator('.localizer >> button').first().click()
 
       const activeOption = await page.locator(
@@ -388,7 +390,6 @@ describe('Localization', () => {
       await changeLocale(page, spanishLocale)
       await createAndSaveDoc(page, url, { title })
       await openCopyToLocaleDrawer(page)
-
       const fromLocaleField = page.locator('#field-fromLocale')
       await expect(fromLocaleField).toContainText('Spanish')
       await page.locator('.drawer-close-button').click()

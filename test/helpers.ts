@@ -280,16 +280,29 @@ export async function closeNav(page: Page): Promise<void> {
 
 export async function changeLocale(page: Page, newLocale: string) {
   await page.locator('.localizer >> button').first().click()
-  await page
-    .locator(`.localizer .popup.popup--active .popup-button-list__button`, {
+
+  const currentlySelectedLocale = await page
+    .locator('.localizer.app-header__localizer .popup-button-list__button--selected')
+    .textContent()
+
+  if (!currentlySelectedLocale.includes(`(${newLocale})`)) {
+    await page
+      .locator(`.localizer .popup.popup--active .popup-button-list__button`, {
+        hasText: newLocale,
+      })
+      .first()
+      .click()
+
+    const regexPattern = new RegExp(`locale=${newLocale}`)
+
+    await expect(page).toHaveURL(regexPattern)
+  }
+
+  await expect(
+    page.locator(`.localizer.app-header__localizer .popup-button-list__button--selected`, {
       hasText: newLocale,
-    })
-    .first()
-    .click()
-
-  const regexPattern = new RegExp(`locale=${newLocale}`)
-
-  await expect(page).toHaveURL(regexPattern)
+    }),
+  ).toBeVisible()
 }
 
 export function exactText(text: string) {
