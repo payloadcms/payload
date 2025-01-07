@@ -396,6 +396,9 @@ describe('Localization', () => {
       await runCopy(page)
       await expect(page.locator('#field-title')).toHaveValue(title)
 
+      const regexPattern = new RegExp(`locale=es`)
+      await expect(page).toHaveURL(regexPattern)
+
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Hungarian')
       await runCopy(page)
