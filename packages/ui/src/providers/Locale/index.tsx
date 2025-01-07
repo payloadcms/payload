@@ -49,7 +49,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 
   useEffect(() => {
     if (locale.code !== prevLocale.current.code) {
-      console.log('locale changed', locale, prevLocale.current)
       setLocaleIsLoading(false)
     }
 
