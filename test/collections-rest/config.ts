@@ -228,6 +228,17 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'drafts',
+      access: openAccess,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      versions: { drafts: true },
+    },
+    {
       slug: errorOnHookSlug,
       access: openAccess,
       fields: [
