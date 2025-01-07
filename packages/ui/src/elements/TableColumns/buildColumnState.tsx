@@ -28,8 +28,6 @@ import type { Column } from '../Table/index.js'
 import {
   RenderCustomComponent,
   RenderDefaultCell,
-  SelectAll,
-  SelectRow,
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
@@ -278,16 +276,6 @@ export const buildColumnState = (args: Args): Column[] => {
 
     return acc
   }, [])
-
-  if (enableRowSelections) {
-    sorted?.unshift({
-      accessor: '_select',
-      active: true,
-      field: null,
-      Heading: <SelectAll />,
-      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
-    })
-  }
 
   if (beforeRows) {
     sorted.unshift(...beforeRows)

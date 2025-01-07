@@ -242,6 +242,57 @@ describe('database', () => {
     })
   })
 
+  describe('Data strictness', () => {
+    it('should not save and leak password, confirm-password from Local API', async () => {
+      const createdUser = await payload.create({
+        collection: 'users',
+        data: {
+          password: 'some-password',
+          // @ts-expect-error
+          'confirm-password': 'some-password',
+          email: 'user1@payloadcms.com',
+        },
+      })
+
+      let keys = Object.keys(createdUser)
+
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+
+      const foundUser = await payload.findByID({ id: createdUser.id, collection: 'users' })
+
+      keys = Object.keys(foundUser)
+
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+    })
+
+    it('should not save and leak password, confirm-password from payload.db', async () => {
+      const createdUser = await payload.db.create({
+        collection: 'users',
+        data: {
+          password: 'some-password',
+          'confirm-password': 'some-password',
+          email: 'user2@payloadcms.com',
+        },
+      })
+
+      let keys = Object.keys(createdUser)
+
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+
+      const foundUser = await payload.db.findOne({
+        collection: 'users',
+        where: { id: createdUser.id },
+      })
+
+      keys = Object.keys(foundUser)
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+    })
+  })
+
   describe('migrations', () => {
     let ranFreshTest = false
 
@@ -901,6 +952,10 @@ describe('database', () => {
   })
 
   describe('drizzle: schema hooks', () => {
+    beforeAll(() => {
+      process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+    })
+
     it('should add tables with hooks', async () => {
       // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'mongoose') {

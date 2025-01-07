@@ -95,6 +95,7 @@ const DocumentInfo: React.FC<
   const [mostRecentVersionIsAutosaved, setMostRecentVersionIsAutosaved] = useState(
     mostRecentVersionIsAutosavedFromProps,
   )
+
   const [versionCount, setVersionCount] = useState(versionCountFromProps)
 
   const [hasPublishedDoc, setHasPublishedDoc] = useState(hasPublishedDocFromProps)
@@ -106,6 +107,11 @@ const DocumentInfo: React.FC<
   const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(currentEditorFromProps)
   const [lastUpdateTime, setLastUpdateTime] = useState<number>(lastUpdateTimeFromProps)
   const [savedDocumentData, setSavedDocumentData] = useState(initialData)
+  const [uploadStatus, setUploadStatus] = useState<'failed' | 'idle' | 'uploading'>('idle')
+
+  const updateUploadStatus = useCallback((status: 'failed' | 'idle' | 'uploading') => {
+    setUploadStatus(status)
+  }, [])
 
   const isInitializing = initialState === undefined || initialData === undefined
 
@@ -329,11 +335,13 @@ const DocumentInfo: React.FC<
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
+    setUploadStatus: updateUploadStatus,
     title: documentTitle,
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
     updateSavedDocumentData,
+    uploadStatus,
     versionCount,
   }
 

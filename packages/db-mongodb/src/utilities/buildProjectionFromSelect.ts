@@ -1,4 +1,4 @@
-import type { Field, FieldAffectingData, FlattenedField, SelectMode, SelectType } from 'payload'
+import type { FieldAffectingData, FlattenedField, SelectMode, SelectType } from 'payload'
 
 import { deepCopyObjectSimple, fieldAffectsData, getSelectMode } from 'payload/shared'
 
@@ -27,11 +27,6 @@ const addFieldToProjection = ({
   } else {
     projection[`${databaseSchemaPath}${field.name}`] = true
   }
-}
-
-const blockTypeField: Field = {
-  name: 'blockType',
-  type: 'text',
 }
 
 const traverseFields = ({
@@ -133,14 +128,6 @@ const traverseFields = ({
             (selectMode === 'include' && blocksSelect[block.slug] === true) ||
             (selectMode === 'exclude' && typeof blocksSelect[block.slug] === 'undefined')
           ) {
-            addFieldToProjection({
-              adapter,
-              databaseSchemaPath: fieldDatabaseSchemaPath,
-              field: blockTypeField,
-              projection,
-              withinLocalizedField: fieldWithinLocalizedField,
-            })
-
             traverseFields({
               adapter,
               databaseSchemaPath: fieldDatabaseSchemaPath,
@@ -166,13 +153,7 @@ const traverseFields = ({
 
           if (blockSelectMode === 'include') {
             blocksSelect[block.slug]['id'] = true
-            addFieldToProjection({
-              adapter,
-              databaseSchemaPath: fieldDatabaseSchemaPath,
-              field: blockTypeField,
-              projection,
-              withinLocalizedField: fieldWithinLocalizedField,
-            })
+            blocksSelect[block.slug]['blockType'] = true
           }
 
           traverseFields({

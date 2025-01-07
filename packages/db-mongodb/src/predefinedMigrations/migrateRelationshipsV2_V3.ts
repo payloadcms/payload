@@ -1,23 +1,23 @@
 import type { ClientSession, Model } from 'mongoose'
-import type { Field, FlattenedField, PayloadRequest } from 'payload'
+import type { Field, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
 import { getSession } from '../utilities/getSession.js'
-import { transform } from '../utilities/transform.js'
+import { sanitizeRelationshipIDs } from '../utilities/sanitizeRelationshipIDs.js'
 
 const migrateModelWithBatching = async ({
-  adapter,
   batchSize,
+  config,
   fields,
   Model,
   session,
 }: {
-  adapter: MongooseAdapter
   batchSize: number
-  fields: FlattenedField[]
+  config: SanitizedConfig
+  fields: Field[]
   Model: Model<any>
   session: ClientSession
 }): Promise<void> => {
@@ -47,7 +47,7 @@ const migrateModelWithBatching = async ({
     }
 
     for (const doc of docs) {
-      transform({ adapter, data: doc, fields, operation: 'update', validateRelationships: false })
+      sanitizeRelationshipIDs({ config, data: doc, fields })
     }
 
     await Model.collection.bulkWrite(
@@ -115,9 +115,9 @@ export async function migrateRelationshipsV2_V3({
     payload.logger.info(`Migrating collection "${collection.slug}"`)
 
     await migrateModelWithBatching({
-      adapter: db,
       batchSize,
-      fields: collection.flattenedFields,
+      config,
+      fields: collection.fields,
       Model: db.collections[collection.slug],
       session,
     })
@@ -128,9 +128,9 @@ export async function migrateRelationshipsV2_V3({
       payload.logger.info(`Migrating collection versions "${collection.slug}"`)
 
       await migrateModelWithBatching({
-        adapter: db,
         batchSize,
-        fields: buildVersionCollectionFields(config, collection, true),
+        config,
+        fields: buildVersionCollectionFields(config, collection),
         Model: db.versions[collection.slug],
         session,
       })
@@ -156,13 +156,7 @@ export async function migrateRelationshipsV2_V3({
 
     // in case if the global doesn't exist in the database yet  (not saved)
     if (doc) {
-      transform({
-        adapter: db,
-        data: doc,
-        fields: global.flattenedFields,
-        operation: 'update',
-        validateRelationships: false,
-      })
+      sanitizeRelationshipIDs({ config, data: doc, fields: global.fields })
 
       await GlobalsModel.collection.updateOne(
         {
@@ -179,9 +173,9 @@ export async function migrateRelationshipsV2_V3({
       payload.logger.info(`Migrating global versions "${global.slug}"`)
 
       await migrateModelWithBatching({
-        adapter: db,
         batchSize,
-        fields: buildVersionGlobalFields(config, global, true),
+        config,
+        fields: buildVersionGlobalFields(config, global),
         Model: db.versions[global.slug],
         session,
       })
