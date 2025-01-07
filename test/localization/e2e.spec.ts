@@ -109,6 +109,7 @@ describe('Localization', () => {
         },
       )
 
+      await expect(activeOption).toBeVisible()
       const tagName = await activeOption.evaluate((node) => node.tagName)
       await expect(tagName).not.toBe('A')
       await expect(activeOption).not.toHaveAttribute('href')

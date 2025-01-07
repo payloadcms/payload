@@ -61,31 +61,25 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 
   useEffect(() => {
     async function resetLocale() {
-      if (localization && user) {
-        if (typeof localeFromParams !== 'string') {
-          try {
-            const localeToSet = await getPreference<{
-              code: string
-              label: string
-            }>('locale')
+      if (localization && user.id) {
+        const localeFromPrefs = await getPreference<Locale['code']>('locale')
 
-            setLocale(
-              findLocaleFromCode(localization, localeToSet.code) ||
-                findLocaleFromCode(localization, defaultLocale),
-            )
-          } catch (_) {
-            setLocale(findLocaleFromCode(localization, defaultLocale))
-          }
-        } else {
-          const newLocale = findLocaleFromCode(localization, localeFromParams) || locale
-          setLocale(newLocale)
-          void setPreference('locale', newLocale)
+        const localeToUse = localeFromParams || localeFromPrefs || defaultLocale
+
+        const newLocale =
+          findLocaleFromCode(localization, localeToUse) ||
+          findLocaleFromCode(localization, defaultLocale)
+
+        setLocale(newLocale)
+
+        if (newLocale.code !== localeFromPrefs) {
+          void setPreference('locale', newLocale.code)
         }
       }
     }
 
     void resetLocale()
-  }, [defaultLocale, getPreference, localization, localeFromParams, setPreference, user, locale])
+  }, [defaultLocale, getPreference, localization, localeFromParams, setPreference, user.id])
 
   return (
     <LocaleContext.Provider value={locale}>
