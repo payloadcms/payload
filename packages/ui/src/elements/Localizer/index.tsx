@@ -2,7 +2,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
@@ -56,8 +56,17 @@ export const Localizer: React.FC<{
                       close()
                     }}
                   >
-                    {localeOptionLabel}
-                    {localeOptionLabel !== localeOption.code && ` (${localeOption.code})`}
+                    {localeOptionLabel !== localeOption.code ? (
+                      <Fragment>
+                        {localeOptionLabel}
+                        &nbsp;
+                        <span className={`${baseClass}__locale-code`}>
+                          {`(${localeOption.code})`}
+                        </span>
+                      </Fragment>
+                    ) : (
+                      <span className={`${baseClass}__locale-code`}>{localeOptionLabel}</span>
+                    )}
                   </PopupList.Button>
                 )
               })}

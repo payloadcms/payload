@@ -279,30 +279,35 @@ export async function closeNav(page: Page): Promise<void> {
 }
 
 export async function changeLocale(page: Page, newLocale: string) {
-  await page.locator('.localizer >> button').first().click()
+  await page.locator('.localizer button.popup-button').first().click()
 
   const currentlySelectedLocale = await page
-    .locator('.localizer.app-header__localizer .popup-button-list__button--selected')
+    .locator(
+      `.localizer .popup.popup--active .popup-button-list__button--selected .localizer__locale-code`,
+    )
     .textContent()
 
-  if (!currentlySelectedLocale.includes(`(${newLocale})`)) {
-    await page
-      .locator(`.localizer .popup.popup--active .popup-button-list__button`, {
-        hasText: newLocale,
-      })
-      .first()
-      .click()
+  if (currentlySelectedLocale !== `(${newLocale})`) {
+    const localeToSelect = page.locator(
+      `.localizer .popup.popup--active .popup-button-list__button .localizer__locale-code`,
+      {
+        hasText: `(${newLocale})`,
+      },
+    )
+
+    await expect(localeToSelect).toBeEnabled()
+    await localeToSelect.click()
 
     const regexPattern = new RegExp(`locale=${newLocale}`)
 
     await expect(page).toHaveURL(regexPattern)
   }
 
-  await expect(
-    page.locator(`.localizer.app-header__localizer .popup-button-list__button--selected`, {
-      hasText: newLocale,
-    }),
-  ).toBeVisible()
+  const popupIsVisible = await page.locator('.localizer .popup--active').isVisible()
+
+  if (popupIsVisible) {
+    await page.click('body', { position: { x: 0, y: 0 } })
+  }
 }
 
 export function exactText(text: string) {

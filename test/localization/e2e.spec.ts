@@ -30,6 +30,7 @@ import {
   withRequiredLocalizedFields,
 } from './shared.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { wait } from 'payload/shared'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -147,11 +148,12 @@ describe('Localization', () => {
   describe('localized text', () => {
     test('create english post, switch to spanish', async () => {
       await page.goto(url.create)
+      await changeLocale(page, defaultLocale)
 
       await fillValues({ description, title })
       await saveDocAndAssert(page)
 
-      // Change back to English
+      await wait(1000)
       await changeLocale(page, 'es')
 
       // Localized field should not be populated
