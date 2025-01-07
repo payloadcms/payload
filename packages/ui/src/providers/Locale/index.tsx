@@ -61,7 +61,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 
   useEffect(() => {
     async function resetLocale() {
-      if (localization && user.id) {
+      if (localization && user?.id) {
         const localeFromPrefs = await getPreference<Locale['code']>('locale')
 
         const localeToUse = localeFromParams || localeFromPrefs || defaultLocale
@@ -79,7 +79,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
     }
 
     void resetLocale()
-  }, [defaultLocale, getPreference, localization, localeFromParams, setPreference, user.id])
+  }, [defaultLocale, getPreference, localization, localeFromParams, setPreference, user?.id])
 
   return (
     <LocaleContext.Provider value={locale}>
