@@ -50,18 +50,16 @@ export const multiTenantPlugin =
       if (collection.slug === tenantsCollectionSlug) {
         return
       } else if (pluginConfig.collections?.[collection.slug]) {
-        if (pluginConfig.collections[collection.slug].includeTenantField !== false) {
-          /**
-           * Add tenant field to enabled collections
-           */
-          collection.fields.push(
-            tenantField({
-              ...pluginConfig.documentTenantField,
-              name: tenantFieldName,
-              tenantsCollectionSlug,
-            }),
-          )
-        }
+        /**
+         * Add tenant field to enabled collections
+         */
+        collection.fields.push(
+          tenantField({
+            ...pluginConfig.documentTenantField,
+            name: tenantFieldName,
+            tenantsCollectionSlug,
+          }),
+        )
 
         if (pluginConfig.collections[collection.slug].useBaseListFilter !== false) {
           /**

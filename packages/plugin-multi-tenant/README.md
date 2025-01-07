@@ -28,13 +28,6 @@ multiTenantPlugin({
   collections: {
     pages: {
       /**
-       * If you want to place the field yourself
-       * read the "How to manually place the tenant field on a collection" section below
-       *
-       * optional, @default true
-       */
-      includeTenantField: true
-      /**
        * Used to opt out of using the provided baseListFilter
        *
        * You can use the exported utility "getTenantFilter" within your own list filter
@@ -104,28 +97,6 @@ multiTenantPlugin({
 })
 ```
 
-### How to manually place the tenant field on a collection
-
-You can import the `tenantField` from the plugin and place it inside of your collection config.
-
-**This field must be top level and can only be nested within a collapsible, row or unnamed tab.**
-
-```ts
-import { tenantField } from '@payloadcms/plugin-multi-tenant/fields'
-
-const PagesCollection = {
-  slug: 'pages',
-  fields: [
-    tenantField({
-      name, // name for the field [required]
-      access, // field access configuration [required]
-      tenantsCollectionSlug, // tenants collection slug [required]
-      userHasAccessToAllTenants, // function to determine if a user has access to all tenants [required]
-    }),
-  ],
-}
-```
-
 ### How to configure Collections as Globals for multi-tenant
 
 When using multi-tenant, globals need to actually be configured as collections so the content can be specific per tenant.
@@ -158,32 +129,6 @@ export const NavigationCollection: CollectionConfig = {
       },
     },
   },
-}
-```
-
-If you wanted to override more of the field, you can do that too by creating the field and then merging it with your overrides:
-
-```ts
-import { tenantField } from '@payloadcms/plugin-multi-tenant/fields'
-
-const pagesTenantField = tenantField({
-  name, // name for the field [required]
-  access, // field access configuration [required]
-  tenantsCollectionSlug, // tenants collection slug [required]
-  userHasAccessToAllTenants, // function to determine if a user has access to all tenants [required]
-})
-
-const PagesCollection = {
-  slug: 'pages',
-  fields: [
-    {
-      ...pagesTenantField,
-      admin: {
-        ...pagesTenantField.admin,
-        group: 'my-custom-group',
-      },
-    },
-  ],
 }
 ```
 

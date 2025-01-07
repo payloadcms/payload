@@ -4,12 +4,6 @@ export type MultiTenantPluginConfig = {
   collections: {
     [collectionSlug: string]: {
       /**
-       * Set to `false` if you want to manually place the tenant field in a collection
-       *
-       * @default true
-       */
-      includeTenantField?: boolean
-      /**
        * Set to `false` if you want to manually apply the baseListFilter
        *
        * @default true
