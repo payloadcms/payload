@@ -1,14 +1,14 @@
 {
   "name": "@payloadcms/plugin-multi-tenant",
   "version": "0.0.1",
-  "description": "Redirects plugin for Payload",
+  "description": "Multi Tenant plugin for Payload",
   "keywords": [
     "payload",
     "cms",
     "plugin",
     "typescript",
     "react",
-    "redirects",
+    "multi-tenant",
     "nextjs"
   ],
   "repository": {
@@ -46,11 +46,6 @@
       "import": "./src/exports/utilites.ts",
       "types": "./src/exports/utilites.ts",
       "default": "./src/exports/utilites.ts"
-    },
-    "./fields": {
-      "import": "./src/exports/fields.ts",
-      "types": "./src/exports/fields.ts",
-      "default": "./src/exports/fields.ts"
     }
   },
   "main": "./src/index.ts",
@@ -102,11 +97,6 @@
         "import": "./dist/exports/utilites.js",
         "types": "./dist/exports/utilites.d.ts",
         "default": "./dist/exports/utilites.js"
-      },
-      "./fields": {
-        "import": "./dist/exports/fields.js",
-        "types": "./dist/exports/fields.d.ts",
-        "default": "./dist/exports/fields.js"
       }
     },
     "main": "./dist/index.js",
