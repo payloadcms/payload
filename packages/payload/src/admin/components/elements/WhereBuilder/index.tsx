@@ -3,26 +3,100 @@ import React, { useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 
+import type { Field } from '../../../../exports/types'
 import type { Where } from '../../../../types'
 import type { Props } from './types'
 
+import { tabHasName } from '../../../../exports/types'
 import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import useThrottledEffect from '../../../hooks/useThrottledEffect'
+import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath'
 import { useSearchParams } from '../../utilities/SearchParams'
 import Button from '../Button'
+import { combineLabel } from '../FieldSelect'
 import Condition from './Condition'
 import fieldTypes from './field-types'
 import './index.scss'
 import reducer from './reducer'
 import { transformWhereQuery } from './transformWhereQuery'
 import validateWhereQuery from './validateWhereQuery'
-
 const baseClass = 'where-builder'
 
-const reduceFields = (fields, i18n) =>
+export type ReduceClientFieldsArgs = {
+  fields: Field[]
+  i18n: any
+  labelPrefix?: string
+  pathPrefix?: string
+}
+
+const reduceFields = (fields, i18n, labelPrefix, pathPrefix) =>
   flattenTopLevelFields(fields).reduce((reduced, field) => {
     let operators = []
+
+    if (field.admin && 'disableListFilter' in field.admin && field.admin?.disableListFilter)
+      return reduced
+
+    if (field.type === 'group' && 'fields' in field) {
+      const translatedLabel = getTranslation(field.label || '', i18n)
+
+      const labelWithPrefix = labelPrefix
+        ? translatedLabel
+          ? labelPrefix + ' > ' + translatedLabel
+          : labelPrefix
+        : translatedLabel
+
+      const pathWithPrefix = field.name
+        ? pathPrefix
+          ? pathPrefix + '.' + field.name
+          : field.name
+        : pathPrefix
+
+      reduced.push(...reduceFields(field.fields, i18n, labelWithPrefix, pathWithPrefix))
+      return reduced
+    }
+
+    if (field.type === 'tab' && 'tabs' in field) {
+      const tabs = field.tabs as Array<any>
+
+      tabs.forEach((tab) => {
+        if (typeof tab.label !== 'boolean') {
+          const localizedTabLabel = getTranslation(tab.label, i18n)
+
+          const labelWithPrefix = labelPrefix
+            ? labelPrefix + ' > ' + localizedTabLabel
+            : localizedTabLabel
+
+          const tabPathPrefix =
+            tabHasName(tab) && tab.name
+              ? pathPrefix
+                ? pathPrefix + '.' + tab.name
+                : tab.name
+              : pathPrefix
+
+          if (typeof localizedTabLabel === 'string') {
+            reduced.push(...reduceFields(tab.fields, i18n, labelWithPrefix, tabPathPrefix))
+          }
+        }
+      })
+      return reduced
+    }
+
+    if ((field.type as string) === 'row' && 'fields' in field) {
+      reduced.push(...reduceFields(field.fields, i18n, labelPrefix, pathPrefix))
+      return reduced
+    }
+
+    if ((field.type as string) === 'collapsible' && 'fields' in field) {
+      const localizedTabLabel = getTranslation(field.label || '', i18n)
+
+      const labelWithPrefix = labelPrefix
+        ? labelPrefix + ' > ' + localizedTabLabel
+        : localizedTabLabel
+
+      reduced.push(...reduceFields(field.fields, i18n, labelWithPrefix, pathPrefix))
+      return reduced
+    }
 
     if (typeof fieldTypes[field.type] === 'object') {
       if (typeof fieldTypes[field.type].operators === 'function') {
@@ -48,9 +122,17 @@ const reduceFields = (fields, i18n) =>
         return acc
       }, [])
 
+      const localizedLabel = getTranslation(field.label || field.name, i18n)
+
+      const formattedLabel = labelPrefix ? combineLabel(labelPrefix, field, i18n) : localizedLabel
+
+      const formattedValue = pathPrefix
+        ? createNestedFieldPath(pathPrefix, field as Field)
+        : field.name
+
       const formattedField = {
-        label: getTranslation(field.label || field.name, i18n),
-        value: field.name,
+        label: formattedLabel,
+        value: formattedValue,
         ...fieldTypes[field.type],
         operators: reducedOperators,
         props: {
@@ -58,10 +140,8 @@ const reduceFields = (fields, i18n) =>
         },
       }
 
-      if (field.admin && 'disableListFilter' in field.admin && field.admin?.disableListFilter)
-        return reduced
-
-      return [...reduced, formattedField]
+      reduced.push(formattedField)
+      return reduced
     }
 
     return reduced
@@ -104,7 +184,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
     return []
   })
 
-  const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
+  const [reducedFields] = useState(() => reduceFields(collection.fields, i18n, null, null))
 
   // This handles updating the search query (URL) when the where conditions change
   useThrottledEffect(
