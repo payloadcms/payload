@@ -103,7 +103,7 @@ export interface Post {
   title: string;
   excerpt?: string | null;
   slug?: string | null;
-  tenant: string | Tenant;
+  tenant?: (string | null) | Tenant;
   updatedAt: string;
   createdAt: string;
 }

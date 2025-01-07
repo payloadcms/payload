@@ -11,7 +11,7 @@ type Args = {
 export const defaultValue =
   ({ userHasAccessToAllTenants }: Args): DefaultValue =>
   ({ req }) => {
-    const selectedTenant = getTenantFromCookie(req)
+    const selectedTenant = getTenantFromCookie(req.headers)
     const userTenantIDs = getUserTenantIDs(req.user as UserWithTenantsField)
     if (
       selectedTenant &&

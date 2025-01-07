@@ -7,7 +7,7 @@ type Args = {
   tenantFieldName: string
 }
 export const getTenantListFilter = ({ req, tenantFieldName }: Args): null | Where => {
-  const selectedTenant = getTenantFromCookie(req)
+  const selectedTenant = getTenantFromCookie(req.headers)
 
   if (selectedTenant) {
     return {

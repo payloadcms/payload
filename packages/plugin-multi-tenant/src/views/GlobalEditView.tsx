@@ -14,7 +14,7 @@ type Props = {
 export const GlobalEditView = async (args: Props) => {
   const { initPageResult, payload, ...rest } = args
   const { slug } = args.initPageResult.collectionConfig
-  const tenant = getTenantFromCookie(initPageResult.req)
+  const tenant = getTenantFromCookie(initPageResult.req.headers)
 
   if (tenant) {
     const { docs } = await payload.find({

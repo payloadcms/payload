@@ -1,53 +1,34 @@
-import type { RelationshipField } from 'payload'
+import { type RelationshipField } from 'payload'
+import { APIError } from 'payload'
 
-import type { MultiTenantPluginConfig, UserWithTenantsField } from '../../types.js'
-
-import { getUserTenantIDs } from '../../utilities/getUserTenantIDs.js'
-import { defaultValue } from './defaultValue.js'
+import type { MultiTenantPluginConfig } from '../../types.js'
 
 type Args = {
   access: MultiTenantPluginConfig['documentTenantField']['access']
   name: string
   tenantsCollectionSlug: MultiTenantPluginConfig['tenantsSlug']
-  userHasAccessToAllTenants: MultiTenantPluginConfig['userHasAccessToAllTenants']
 }
-export const tenantField = ({
-  name,
-  access,
-  tenantsCollectionSlug,
-  userHasAccessToAllTenants,
-}: Args): RelationshipField => ({
+export const tenantField = ({ name, access, tenantsCollectionSlug }: Args): RelationshipField => ({
   name,
   type: 'relationship',
   access,
   admin: {
     components: {
       Field: {
-        path: '@payloadcms/plugin-multi-tenant/rsc#TenantFieldRSC',
-        serverProps: {
-          userHasAccessToAllTenants,
-        },
+        path: '@payloadcms/plugin-multi-tenant/rsc#TenantField',
       },
     },
-    position: 'sidebar',
   },
-  defaultValue: defaultValue({ userHasAccessToAllTenants }),
   hasMany: false,
   hooks: {
-    beforeValidate: [
-      ({ req, value }) => {
+    beforeChange: [
+      ({ value }) => {
         if (!value) {
-          const tenantIDs = getUserTenantIDs(req.user as UserWithTenantsField)
-          if (tenantIDs.length === 1) {
-            return tenantIDs[0]
-          }
+          throw new APIError('You must select a tenant', 400, null, true)
         }
-
-        return value
       },
     ],
   },
   index: true,
   relationTo: tenantsCollectionSlug,
-  required: true,
 })

@@ -5,54 +5,43 @@ import React from 'react'
 
 import type { MultiTenantPluginConfig, Tenant, UserWithTenantsField } from '../../types.js'
 
-import { getUserTenantIDs } from '../../utilities/getUserTenantIDs.js'
-import { TenantSelector } from './index.client.js'
+import { TenantSelectorClient } from './index.client.js'
 
 type Args = {
   tenantsCollectionSlug: MultiTenantPluginConfig['tenantsSlug']
   user?: UserWithTenantsField
-  userHasAccessToAllTenants?: MultiTenantPluginConfig['userHasAccessToAllTenants']
 } & ServerProps
 
-export const TenantSelectorRSC = async ({
-  payload,
-  tenantsCollectionSlug,
-  user,
-  userHasAccessToAllTenants,
-}: Args) => {
-  const userTenants = user ? getUserTenantIDs(user) : []
-  const userHasAccessToAllTenantsFn = userHasAccessToAllTenants(user)
-
-  const { docs } = await payload.find({
+export const TenantSelector = async ({ payload, tenantsCollectionSlug, user }: Args) => {
+  const { docs: userTenants } = await payload.find({
     collection: tenantsCollectionSlug,
     depth: 0,
-    limit: 100,
+    limit: 1000,
+    overrideAccess: false,
     sort: 'name',
-    where: userHasAccessToAllTenantsFn ? {} : { id: { in: userTenants } },
+    user,
   })
 
-  const tenantOptions = docs.map((doc: Tenant) => ({
+  const tenantOptions = userTenants.map((doc: Tenant) => ({
     label: doc.name,
     value: String(doc.id),
   }))
 
-  // If the user only has access to one or less tenants, don't show the selector
-  if (tenantOptions.length <= 1 && !userHasAccessToAllTenantsFn) {
-    return null
-  }
-
+  let cookieToSet: string | undefined
   const cookies = await getCookies()
-  let selectedTenant = cookies.get('payload-tenant')?.value
+  const selectedTenant = tenantOptions.find(
+    (tenant) => tenant.value === cookies.get('payload-tenant')?.value,
+  )?.value
 
-  if (
-    userTenants.length > 0 &&
-    selectedTenant &&
-    !tenantOptions.find((opt) => opt.value === selectedTenant)
-  ) {
-    // Unset the tenant if the user does not have access to cookie tenant
-    cookies.delete('payload-tenant')
-    selectedTenant = null
+  if (!selectedTenant && userTenants.length > 0) {
+    cookieToSet = String(userTenants[0].id)
   }
 
-  return <TenantSelector initialValue={selectedTenant} options={tenantOptions} />
+  return (
+    <TenantSelectorClient
+      cookieToSet={cookieToSet}
+      initialValue={selectedTenant}
+      options={tenantOptions}
+    />
+  )
 }

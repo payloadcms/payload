@@ -59,7 +59,6 @@ export const multiTenantPlugin =
               ...pluginConfig.documentTenantField,
               name: tenantFieldName,
               tenantsCollectionSlug,
-              userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
             }),
           )
         }
@@ -106,10 +105,7 @@ export const multiTenantPlugin =
       clientProps: {
         tenantsCollectionSlug,
       },
-      path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelectorRSC',
-      serverProps: {
-        userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
-      },
+      path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
     })
 
     return incomingConfig
