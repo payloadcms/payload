@@ -1304,6 +1304,7 @@ export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config
 export type {
   RunInlineTaskFunction,
   RunTaskFunction,
+  RunTaskFunctions,
   TaskConfig,
   TaskHandler,
   TaskHandlerArgs,
