@@ -270,6 +270,7 @@ describe('Localization', () => {
       expect(page.locator(drawerToggler)).toBeEnabled()
       await openDocDrawer(page, drawerToggler)
       await expect(page.locator('.doc-drawer__header-text')).toContainText('spanish-relation2')
+      await page.locator('.doc-drawer__close-button').click()
     })
   })
 
