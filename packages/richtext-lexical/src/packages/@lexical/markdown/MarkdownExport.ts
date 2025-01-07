@@ -39,9 +39,9 @@ export function createMarkdownExport(
     // <strong><code>code</code></strong> will be exported as `**Bold Code**`, as the code format will be applied first, and the bold format
     // will be applied second and thus skipped entirely, as the code format will prevent any further formatting.
     .sort((a, b) => {
-      if (a.format[0] === 'code' && b.format[0] !== 'code') {
+      if (a.format.includes('code') && !b.format.includes('code')) {
         return 1
-      } else if (a.format[0] !== 'code' && b.format[0] === 'code') {
+      } else if (!a.format.includes('code') && b.format.includes('code')) {
         return -1
       } else {
         return 0
