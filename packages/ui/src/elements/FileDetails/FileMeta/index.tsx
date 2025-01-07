@@ -30,7 +30,7 @@ export const FileMeta: React.FC<FileMetaProps> = (props) => {
       </div>
       <div className={`${baseClass}__size-type`}>
         {formatFilesize(filesize)}
-        {Number.isFinite(width) && Number.isFinite(height) && (
+        {typeof width === 'number' && typeof height === 'number' && (
           <React.Fragment>
             &nbsp;-&nbsp;
             {width}x{height}
