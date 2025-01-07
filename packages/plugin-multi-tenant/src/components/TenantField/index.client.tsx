@@ -2,11 +2,13 @@
 
 import type { RelationshipFieldClientProps } from 'payload'
 
-import { useField } from '@payloadcms/ui'
+import { RelationshipField, useField } from '@payloadcms/ui'
 import React from 'react'
 
 type Props = {
+  debug?: boolean
   serverValue?: number | string
+  tenantsCollectionSlug: string
 } & RelationshipFieldClientProps
 
 export const TenantFieldClient = (args: Props) => {
@@ -19,6 +21,21 @@ export const TenantFieldClient = (args: Props) => {
       setValue(serverValue)
     }
   }, [serverValue, setValue, value])
+
+  if (args.debug) {
+    return (
+      <RelationshipField
+        field={{
+          name: path,
+          type: 'relationship',
+          label: 'Tenant',
+          relationTo: args.tenantsCollectionSlug,
+          required: true,
+        }}
+        path={path}
+      />
+    )
+  }
 
   return null
 }

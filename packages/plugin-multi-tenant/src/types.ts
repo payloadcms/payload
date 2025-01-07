@@ -18,6 +18,13 @@ export type MultiTenantPluginConfig = {
     }
   }
   /**
+   * Enables debug mode
+   * - Makes the tenant field visible in the admin UI within applicable collections
+   *
+   * @default false
+   */
+  debug?: boolean
+  /**
    * Field configuration for the field added to all tenant enabled collections
    */
   documentTenantField: {

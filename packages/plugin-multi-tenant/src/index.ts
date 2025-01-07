@@ -57,6 +57,7 @@ export const multiTenantPlugin =
           tenantField({
             ...pluginConfig.documentTenantField,
             name: tenantFieldName,
+            debug: pluginConfig.debug,
             tenantsCollectionSlug,
           }),
         )

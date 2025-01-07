@@ -8,14 +8,21 @@ import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 import { getUserTenantIDs } from '../../utilities/getUserTenantIDs.js'
 import { TenantFieldClient } from './index.client.js'
 
+type Props = {
+  debug?: boolean
+  tenantsCollectionSlug: string
+} & RelationshipFieldServerProps
+
 export const TenantField: React.FC = async ({
   clientField,
+  debug,
   path,
   payload,
   readOnly,
   req,
+  tenantsCollectionSlug,
   user,
-}: RelationshipFieldServerProps) => {
+}: Props) => {
   let serverValue: number | string | undefined =
     getTenantFromCookie(req.headers) || getUserTenantIDs(user as UserWithTenantsField)?.[0]
 
@@ -24,7 +31,7 @@ export const TenantField: React.FC = async ({
       // validate that the tenant exists
       const doc = await payload.findByID({
         id: serverValue,
-        collection: 'tenants',
+        collection: tenantsCollectionSlug,
         depth: 0,
       })
       if (!doc) {
@@ -37,10 +44,12 @@ export const TenantField: React.FC = async ({
 
   return (
     <TenantFieldClient
+      debug={debug}
       field={clientField}
       path={path}
       readOnly={readOnly}
       serverValue={serverValue}
+      tenantsCollectionSlug={tenantsCollectionSlug}
     />
   )
 }
