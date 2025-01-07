@@ -6,7 +6,7 @@ order: 30
 title: SEO Plugin
 ---
 
-![npm](https://img.shields.io/npm/v/@payloadcms/plugin-seo)](https://www.npmjs.com/package/@payloadcms/plugin-seo)
+![https://www.npmjs.com/package/@payloadcms/plugin-seo](https://img.shields.io/npm/v/@payloadcms/plugin-seo)
 
 This plugin allows you to easily manage SEO metadata for your application from within your [Admin Panel](../admin/overview). When enabled on your [Collections](../configuration/collections) and [Globals](../configuration/globals), it adds a new `meta` field group containing `title`, `description`, and `image` by default. Your front-end application can then use this data to render meta tags however your application requires. For example, you would inject a `title` tag into the `<head>` of your page using `meta.title` as its content.
 
@@ -130,25 +130,25 @@ A function that allows you to return any meta title, including from the document
 
 All "generate" functions receive the following arguments:
 
-|  Argument  |  Description  |
+|   Argument   |   Description   |
 | --- | --- |
-|  **`collectionConfig`**  |  The configuration of the collection.  |
-|  **`collectionSlug`**  |  The slug of the collection.  |
-|  **`doc`**  |  The data of the current document.  |
-|  **`docPermissions`**  |  The permissions of the document.  |
-|  **`globalConfig`**  |  The configuration of the global.  |
-|  **`globalSlug`**  |  The slug of the global.  |
-|  **`hasPublishPermission`**  |  Whether the user has permission to publish the document.  |
-|  **`hasSavePermission`**  |  Whether the user has permission to save the document.  |
-|  **`id`**  |  The ID of the document.  |
-|  **`initialData`**  |  The initial data of the document.  |
-|  **`initialState`**  |  The initial state of the document.  |
-|  **`locale`**  |  The locale of the document.  |
-|  **`preferencesKey`**   |  The preferences key of the document.  |
-|  **`publishedDoc`**  |  The published document.  |
-|  **`req`**  |  The Payload request object containing `user`, `payload`, `i18n`, etc.  |
-|  **`title`**  |  The title of the document.  |
-|  **`versionsCount`**  |  The number of versions of the document.  |
+|   **`collectionConfig`**   |   The configuration of the collection.   |
+|   **`collectionSlug`**   |   The slug of the collection.   |
+|   **`doc`**   |   The data of the current document.   |
+|   **`docPermissions`**   |   The permissions of the document.   |
+|   **`globalConfig`**   |   The configuration of the global.   |
+|   **`globalSlug`**   |   The slug of the global.   |
+|   **`hasPublishPermission`**   |   Whether the user has permission to publish the document.   |
+|   **`hasSavePermission`**   |   Whether the user has permission to save the document.   |
+|   **`id`**   |   The ID of the document.   |
+|   **`initialData`**   |   The initial data of the document.   |
+|   **`initialState`**   |   The initial state of the document.   |
+|   **`locale`**   |   The locale of the document.   |
+|   **`preferencesKey`**    |   The preferences key of the document.   |
+|   **`publishedDoc`**   |   The published document.   |
+|   **`req`**   |   The Payload request object containing `user`, `payload`, `i18n`, etc.   |
+|   **`title`**   |   The title of the document.   |
+|   **`versionsCount`**   |   The number of versions of the document.   |
 
 ##### `generateDescription`
 
