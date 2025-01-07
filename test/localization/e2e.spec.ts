@@ -79,6 +79,8 @@ describe('Localization', () => {
     test('should show localizer controls', async () => {
       await page.goto(url.create)
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
+      await page.locator('.localizer >> button').first().click()
+      await expect(page.locator('.localizer .popup.popup--active')).toBeVisible()
     })
   })
 
@@ -94,9 +96,18 @@ describe('Localization', () => {
     test('should disable fields during locale change', async () => {
       await page.goto(url.create)
       await expect(page.locator('#field-title')).toBeEnabled()
-      await changeLocale(page, spanishLocale)
+      await page.locator('.localizer >> button').first().click()
+
+      await page
+        .locator(`.localizer .popup.popup--active .popup-button-list__button`, {
+          hasText: spanishLocale,
+        })
+        .first()
+        .click()
+
       await expect(page.locator('#field-title')).toBeDisabled()
-      await expect(page.locator('.localizer__current-locale')).toContainText('Spanish')
+      const regexPattern = new RegExp(`locale=${spanishLocale}`)
+      await expect(page).toHaveURL(regexPattern)
       await expect(page.locator('#field-title')).toBeEnabled()
     })
   })
