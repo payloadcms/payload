@@ -46,11 +46,8 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
    * If an imageCacheTag is provided, append it to the fileSrc
    * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
    */
-  const src = imageCacheTag
-    ? fileSrc.includes('?')
-      ? `${fileSrc}&${imageCacheTag}`
-      : `${fileSrc}?${imageCacheTag}`
-    : fileSrc
+  const queryChar = fileSrc.includes('?') ? '&' : '?'
+  const src = imageCacheTag ? `${fileSrc}${queryChar}${imageCacheTag}` : fileSrc
 
   return (
     <div className={classNames}>
@@ -95,11 +92,8 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
    * If an imageCacheTag is provided, append it to the fileSrc
    * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
    */
-  const src = imageCacheTag
-    ? fileSrc.includes('?')
-      ? `${fileSrc}&${imageCacheTag}`
-      : `${fileSrc}?${imageCacheTag}`
-    : fileSrc
+  const queryChar = fileSrc.includes('?') ? '&' : '?'
+  const src = imageCacheTag ? `${fileSrc}${queryChar}${imageCacheTag}` : fileSrc
 
   return (
     <div className={classNames}>
