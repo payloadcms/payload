@@ -75,7 +75,7 @@ export const renderListView = async (
     key: `${collectionSlug}-list`,
     req,
     value: {
-      depth: query?.depth || 0,
+      depth: query?.depth,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       sort: query?.sort,
     },
