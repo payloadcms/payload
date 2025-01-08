@@ -43,6 +43,8 @@ export const multiTenantPlugin =
     })
     adminUsersCollection.fields.push(userTenantsField(pluginConfig.userTenantsField))
 
+    const globalCollectionSlugs = []
+
     /**
      * Modify collections
      */
@@ -61,6 +63,9 @@ export const multiTenantPlugin =
           return acc
         }, {})
       } else if (pluginConfig.collections?.[collection.slug]) {
+        if (!collection.admin) {
+          collection.admin = {}
+        }
         /**
          * Add tenant field to enabled collections
          */
@@ -70,6 +75,7 @@ export const multiTenantPlugin =
             name: tenantFieldName,
             debug: pluginConfig.debug,
             tenantsCollectionSlug,
+            unique: Boolean(pluginConfig.collections[collection.slug].isGlobal),
           }),
         )
 
@@ -78,7 +84,7 @@ export const multiTenantPlugin =
            * Collection baseListFilter with selected tenant constraint (if selected)
            */
           collection.admin.baseListFilter = withTenantListFilter({
-            baseListFilter: collection.admin.baseListFilter,
+            baseListFilter: collection.admin?.baseListFilter,
             tenantFieldName,
           })
         }
@@ -97,20 +103,37 @@ export const multiTenantPlugin =
             return acc
           }, {})
         }
+
+        if (pluginConfig.collections[collection.slug].isGlobal) {
+          globalCollectionSlugs.push(collection.slug)
+        }
       }
     })
 
-    /**
-     * Add tenant selector to admin UI
-     */
     if (!incomingConfig.admin?.components) {
       incomingConfig.admin.components = {
+        actions: [],
         beforeNavLinks: [],
       }
     }
+    /**
+     * Add global redirect action
+     */
+    if (globalCollectionSlugs.length) {
+      incomingConfig.admin.components.actions.push({
+        path: '@payloadcms/plugin-multi-tenant/rsc#GlobalViewRedirect',
+        serverProps: {
+          globalSlugs: globalCollectionSlugs,
+        },
+      })
+    }
+
     if (!incomingConfig.admin.components.beforeNavLinks) {
       incomingConfig.admin.components.beforeNavLinks = []
     }
+    /**
+     * Add tenant selector to admin UI
+     */
     incomingConfig.admin.components.beforeNavLinks.push({
       clientProps: {
         tenantsCollectionSlug,

@@ -52,6 +52,12 @@ multiTenantPlugin({
        * optional, @default true
        */
       useTenantAccess: true
+      /**
+       * Used to make a collection feel like a global. When navigating to the list view, they will be redirected to the document view.
+       *
+       * optional, @default false
+       */
+      isGlobal: false
     },
     /**
      * Custom configuration for the tenant field placed on every enabled collection
@@ -109,36 +115,16 @@ multiTenantPlugin({
 ### How to configure Collections as Globals for multi-tenant
 
 When using multi-tenant, globals need to actually be configured as collections so the content can be specific per tenant.
-To do that, you can easily convert a global into a collection that functions like a global with the following code:
+To do that, you can mark a collection with `isGlobal` and it will behave like a global and users will not see the list view.
 
 ```ts
-import type { CollectionConfig } from 'payload'
-
-export const NavigationCollection: CollectionConfig = {
-  slug: 'navigation',
-  fields: [
-    // add "global" fields
-  ],
-  admin: {
-    group: 'Globals', // optional
-    components: {
-      views: {
-        edit: {
-          root: {
-            Component: {
-              path: '@payloadcms/plugin-multi-tenant/views#GlobalEditView',
-            },
-          },
-        },
-        list: {
-          Component: {
-            path: '@payloadcms/plugin-multi-tenant/views#GlobalListView',
-          },
-        },
-      },
+multiTenantPlugin({
+  collections: {
+    navigation: {
+      isGlobal: true,
     },
   },
-}
+})
 ```
 
 ### Customizing access control

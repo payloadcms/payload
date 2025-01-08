@@ -9,9 +9,10 @@ import { devUser } from '../credentials.js'
 import { Posts } from './collections/Posts.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users.js'
+import { NavigationGlobalCollection } from './globals/Navigation.js'
 
 export default buildConfigWithDefaults({
-  collections: [Users, Tenants, Posts],
+  collections: [Users, Tenants, Posts, NavigationGlobalCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -39,6 +40,9 @@ export default buildConfigWithDefaults({
       },
       collections: {
         posts: {},
+        'navigation-global': {
+          isGlobal: true,
+        },
       },
     }),
   ],

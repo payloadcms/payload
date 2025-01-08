@@ -4,6 +4,12 @@ export type MultiTenantPluginConfig = {
   collections: {
     [collectionSlug: string]: {
       /**
+       * Set to `true` if you want the collection to behave as a global
+       *
+       * @default false
+       */
+      isGlobal?: boolean
+      /**
        * Set to `false` if you want to manually apply the baseListFilter
        *
        * @default true

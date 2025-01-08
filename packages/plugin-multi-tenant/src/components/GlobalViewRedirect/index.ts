@@ -1,0 +1,29 @@
+import type { CollectionSlug, ServerProps } from 'payload'
+
+import { redirect } from 'next/navigation.js'
+
+import { getGlobalViewRedirect } from '../../utilities/getGlobalViewRedirect.js'
+
+type Args = {
+  collectionSlug: CollectionSlug
+  docID?: number | string
+  globalSlugs: string[]
+  viewType: 'edit' | 'list'
+} & ServerProps
+
+export const GlobalViewRedirect = async (args: Args) => {
+  const collectionSlug = args?.collectionSlug
+
+  if (collectionSlug && args.globalSlugs?.includes(collectionSlug)) {
+    const redirectRoute = await getGlobalViewRedirect({
+      slug: collectionSlug,
+      docID: args.docID,
+      payload: args.payload,
+      view: args.viewType,
+    })
+
+    if (redirectRoute) {
+      redirect(redirectRoute)
+    }
+  }
+}

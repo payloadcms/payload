@@ -10,12 +10,14 @@ type Args = {
   debug?: boolean
   name: string
   tenantsCollectionSlug: MultiTenantPluginConfig['tenantsSlug']
+  unique: boolean
 }
 export const tenantField = ({
   name,
   access,
   debug,
   tenantsCollectionSlug,
+  unique,
 }: Args): RelationshipField => ({
   name,
   type: 'relationship',
@@ -48,4 +50,5 @@ export const tenantField = ({
   },
   index: true,
   relationTo: tenantsCollectionSlug,
+  unique,
 })

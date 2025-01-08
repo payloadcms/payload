@@ -14,6 +14,7 @@ export interface Config {
     users: User;
     tenants: Tenant;
     posts: Post;
+    'navigation-global': NavigationGlobal;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -23,6 +24,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'navigation-global': NavigationGlobalSelect<false> | NavigationGlobalSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -109,6 +111,17 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation-global".
+ */
+export interface NavigationGlobal {
+  id: string;
+  title?: string | null;
+  tenant?: (string | null) | Tenant;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -125,6 +138,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'navigation-global';
+        value: string | NavigationGlobal;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -208,6 +225,16 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   excerpt?: T;
   slug?: T;
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation-global_select".
+ */
+export interface NavigationGlobalSelect<T extends boolean = true> {
+  title?: T;
   tenant?: T;
   updatedAt?: T;
   createdAt?: T;

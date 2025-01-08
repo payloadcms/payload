@@ -56,9 +56,6 @@
       "@payloadcms/plugin-multi-tenant/utilities": [
         "./packages/plugin-multi-tenant/src/exports/utilities.ts"
       ],
-      "@payloadcms/plugin-multi-tenant/views": [
-        "./packages/plugin-multi-tenant/src/exports/views.ts"
-      ],
       "@payloadcms/plugin-multi-tenant": ["./packages/plugin-multi-tenant/src/index.ts"],
       "@payloadcms/next": ["./packages/next/src/exports/*"]
     }
