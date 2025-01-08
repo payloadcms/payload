@@ -18,7 +18,7 @@ type Props = {
   setSelected: (fields: FieldWithPath[]) => void
 }
 
-const combineLabel = (prefix, field, i18n): string =>
+export const combineLabel = (prefix, field, i18n): string =>
   `${prefix === '' ? '' : `${prefix} > `}${getTranslation(field.label || field.name, i18n) || ''}`
 const reduceFields = (
   fields: Field[],
