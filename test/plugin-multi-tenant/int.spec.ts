@@ -36,4 +36,17 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       await payload.db.destroy()
     }
   })
+
+  describe('tenants', () => {
+    it('should create a tenant', async () => {
+      const tenant1 = await payload.create({
+        collection: 'tenants',
+        data: {
+          name: 'tenant1',
+        },
+      })
+
+      expect(tenant1).toHaveProperty('id')
+    })
+  })
 })
