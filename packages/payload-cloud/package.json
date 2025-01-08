@@ -57,7 +57,6 @@
     "ts-jest": "^29.1.0"
   },
   "peerDependencies": {
-    "croner": "9.0.0",
     "payload": "workspace:*"
   },
   "publishConfig": {

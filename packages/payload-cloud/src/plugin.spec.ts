@@ -167,12 +167,8 @@ describe('plugin', () => {
   })
 
   describe('cron jobs', () => {
-    test('should always set global instance identifier, even with no cron jobs or enabled: false', async () => {
-      const plugin = payloadCloudPlugin({
-        cronJobs: {
-          enabled: false,
-        },
-      })
+    test('should always set global instance identifier', async () => {
+      const plugin = payloadCloudPlugin()
       const config = await plugin(createConfig())
 
       const globalInstance = config.globals?.find(
@@ -188,13 +184,6 @@ describe('plugin', () => {
         },
       ]),
         expect(globalInstance?.admin?.hidden).toStrictEqual(true)
-
-      const plugin2 = payloadCloudPlugin()
-      const config2 = await plugin(createConfig())
-      const globalInstance2 = config2.globals?.find(
-        (global) => global.slug === 'payload-cloud-instance',
-      )
-      expect(globalInstance2).toBeDefined()
     })
   })
 })

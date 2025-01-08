@@ -1,7 +1,5 @@
 import type { Config } from 'payload'
 
-import { Cron } from 'croner'
-
 import type { PluginOptions } from './types.js'
 
 import { payloadCloudEmail } from './email.js'
@@ -122,10 +120,8 @@ export const payloadCloudPlugin =
         ],
       },
     ]
-    const newOnInit = async (payload) => {
-      if (config.onInit) {
-        await config.onInit(payload)
-      }
+
+    const newAutoRun = async (payload) => {
       const instance = generateRandomString()
 
       await payload.updateGlobal({
@@ -141,20 +137,12 @@ export const payloadCloudPlugin =
         slug: 'payload-cloud-instance',
       })
 
-      const cronJobs = pluginOptions?.cronJobs?.run ?? [DEFAULT_CRON_JOB]
-      if (cloudInstance.instance === instance) {
-        cronJobs.forEach((cronConfig) => {
-          new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
-            await payload.jobs.run({
-              limit: cronConfig.limit ?? DEFAULT_LIMIT,
-              queue: cronConfig.queue,
-            })
-          })
-        })
-      }
+      return cloudInstance.instance === instance
+        ? ((await config.jobs.autoRun(payload)) ?? [DEFAULT_CRON_JOB])
+        : []
     }
 
-    config.onInit = newOnInit
+    config.jobs.autoRun = newAutoRun
 
     return config
   }

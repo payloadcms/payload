@@ -946,9 +946,6 @@ importers:
       amazon-cognito-identity-js:
         specifier: ^6.1.2
         version: 6.3.12
-      croner:
-        specifier: 9.0.0
-        version: 9.0.0
       nodemailer:
         specifier: 6.9.10
         version: 6.9.10

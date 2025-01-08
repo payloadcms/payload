@@ -53,57 +53,7 @@ export interface PayloadCloudEmailOptions {
   skipVerify?: boolean
 }
 
-export type CronConfig = {
-  /**
-   * The cron schedule for the job.
-   * @default '* * * * *' (every minute).
-   *
-   * @example
-   *     ┌───────────── minute (0 - 59)
-   *     │ ┌───────────── hour (0 - 23)
-   *     │ │ ┌───────────── day of the month (1 - 31)
-   *     │ │ │ ┌───────────── month (1 - 12)
-   *     │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
-   *     │ │ │ │ │
-   *     │ │ │ │ │
-   *  - '0 * * * *' every hour at minute 0
-   *  - '0 0 * * *' daily at midnight
-   *  - '0 0 * * 0' weekly at midnight on Sundays
-   *  - '0 0 1 * *' monthly at midnight on the 1st day of the month
-   *  - '0/5 * * * *' every 5 minutes
-   */
-  cron?: string
-  /**
-   * The limit for the job. This can be overridden by the user. Defaults to 10.
-   */
-  limit?: number
-  /**
-   * The queue name for the job.
-   */
-  queue?: string
-}
-
 export interface PluginOptions {
-  /**
-   * Jobs configuration. By default, there is a single
-   * cron job that runs every minute.
-   */
-  cronJobs?: {
-    /**
-     * Enable the cron jobs defined in the `run` array,
-     * or the default cron job if `run` is not defined.
-     * @default true
-     * @note If you change this in a development environment,
-     * you will need to restart the server for the changes to take effect.
-     */
-    enabled?: boolean
-    /**
-     * Cron jobs configuration. If not defined, a single
-     * cron job is created that runs every minute.
-     */
-    run?: CronConfig[]
-  }
-
   /** Payload Cloud Email
    * @default true
    */
