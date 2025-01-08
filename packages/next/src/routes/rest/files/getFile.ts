@@ -6,6 +6,8 @@ import httpStatus from 'http-status'
 import path from 'path'
 import { APIError } from 'payload'
 
+import type { StreamFileOptions } from '../../../fetchAPI-stream-file/index.js';
+
 import { streamFile } from '../../../fetchAPI-stream-file/index.js'
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { routeError } from '../routeError.js'
@@ -57,22 +59,43 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
     const fileDir = collection.config.upload?.staticDir || collection.config.slug
     const filePath = path.resolve(`${fileDir}/${filename}`)
     const stats = await fsPromises.stat(filePath)
-    const data = streamFile(filePath)
+    const fileSize = stats.size
     const fileTypeResult = (await fileTypeFromFile(filePath)) || getFileTypeFallback(filePath)
+    const range = req.headers.get('range')
+    let status = httpStatus.OK
+    let options: StreamFileOptions | undefined
 
     let headers = new Headers()
     headers.set('Content-Type', fileTypeResult.mime)
-    headers.set('Content-Length', stats.size + '')
+
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-')
+      const start = parseInt(parts[0], 10)
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1
+      const chunkSize = end - start + 1
+
+      headers.set('Content-Range', `bytes ${start}-${end}/${fileSize}`)
+      headers.set('Accept-Ranges', 'bytes')
+      headers.set('Content-Length', `${chunkSize}`)
+
+      options = { end, start }
+      status = httpStatus.PARTIAL_CONTENT
+    } else {
+      headers.set('Content-Length', fileSize + '')
+    }
+
     headers = collection.config.upload?.modifyResponseHeaders
       ? collection.config.upload.modifyResponseHeaders({ headers })
       : headers
+
+    const data = streamFile(filePath, options)
 
     return new Response(data, {
       headers: headersWithCors({
         headers,
         req,
       }),
-      status: httpStatus.OK,
+      status,
     })
   } catch (err) {
     return routeError({
