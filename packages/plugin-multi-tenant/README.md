@@ -14,13 +14,13 @@ multiTenantPlugin({
    * Enable debugging:
    * - shows the relationship field on enabled collection documents
    *
-   * optional, @default false
+   * optional - @default false
    */
   debug: false,
   /**
    * Enables/Disables the plugin
    *
-   * optional, @default true
+   * optional - @default true
    */
   enabled: true,
   /**
@@ -41,7 +41,7 @@ multiTenantPlugin({
        *
        * You can use the exported utility "getTenantFilter" within your own list filter
        *
-       * optional, @default true
+       * optional - @default true
        */
       useBaseListFilter: true
       /**
@@ -49,13 +49,13 @@ multiTenantPlugin({
        *
        * You can use the exported utility "getTenantAccess" within your access control functions
        *
-       * optional, @default true
+       * optional - @default true
        */
       useTenantAccess: true
       /**
        * Used to make a collection feel like a global. When navigating to the list view, they will be redirected to the document view.
        *
-       * optional, @default false
+       * optional - @default false
        */
       isGlobal: false
     },
@@ -63,7 +63,7 @@ multiTenantPlugin({
      * Custom configuration for the tenant field placed on every enabled collection
      */
     documentTenantField: {
-      // optional, provide access control on the injected tenant field
+      // optional - provide access control on the injected tenant field
       access: {
         create,
         read,
@@ -72,41 +72,50 @@ multiTenantPlugin({
       /**
        * Name of the field
        *
-       * optional, @default true
+       * optional - @default true
        */
       name: 'tenant',
     },
     /**
      * Function that allows you to determine if certain users should have access to all tenants
      *
-     * optional, @default () => false
+     * optional - @default () => false
      */
     userHasAccessToAllTenants: (user) => user.isSuperAdmin === true
     /**
      * Options for the array field that gets added to the users collection.
      *
-     * The field is an array of rows, each row has the associated tenant
-     * and the role of the user for that tenant
+     * The field is an array of rows, by default each row has a relationship to a tenant
+     *
+     * optional - @default undefined
      */
     userTenantsField: {
       /**
-       * An array of roles as strings, used for the role option on an array row
+       * Allows you to set access control on the array field
        *
-       * required
+       * optional - @default undefined
        */
-      roles: ['admin', 'user'],
-      /**
-       * The default role when a row is added to the field
-       *
-       * optional
-       */
-      defaultRole: 'user',
-       // optional, provide access control on the injected tenants array field
       access: {
-        create,
-        read,
-        update,
+        create, // optional
+        read, // optional
+        update, // optional
       },
+      /**
+       * If you want to add additional fields to the tenant rows, you can specify them under rowFields
+       *
+       * optional - @default undefined
+       */
+      rowFields: [
+        // Example adding a field onto the array row
+        {
+          name: 'roles',
+          type: 'select',
+          options: [
+            { label: 'Admin', value: 'admin' },
+            { label: 'User', value: 'user' },
+          ],
+        },
+      ],
     }
   },
 })

@@ -1,4 +1,4 @@
-import type { ArrayField, RelationshipField, User } from 'payload'
+import type { ArrayField, Field, RelationshipField, User } from 'payload'
 
 export type MultiTenantPluginConfig = {
   collections: {
@@ -63,10 +63,9 @@ export type MultiTenantPluginConfig = {
   /**
    * Field configuration for the field added to the users collection
    */
-  userTenantsField: {
-    access: ArrayField['access']
-    defaultRole: string
-    roles: string[]
+  userTenantsField?: {
+    access?: ArrayField['access']
+    rowFields?: Field[]
   }
 }
 

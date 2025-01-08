@@ -71,7 +71,7 @@ export interface User {
   tenants?:
     | {
         tenant: string | Tenant;
-        roles: ('admin' | 'user')[];
+        roles?: ('admin' | 'user') | null;
         id?: string | null;
       }[]
     | null;

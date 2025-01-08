@@ -32,8 +32,16 @@ export default buildConfigWithDefaults({
       userHasAccessToAllTenants: (user) => user.roles?.includes('admin'),
       userTenantsField: {
         access: {},
-        defaultRole: 'user',
-        roles: ['admin', 'user'],
+        rowFields: [
+          {
+            name: 'roles',
+            type: 'select',
+            options: [
+              { label: 'Admin', value: 'admin' },
+              { label: 'User', value: 'user' },
+            ],
+          },
+        ],
       },
       documentTenantField: {
         access: {},

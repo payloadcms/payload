@@ -7,7 +7,7 @@ export const userTenantsField = (
 ): ArrayField => ({
   name: 'tenants',
   type: 'array',
-  access: args.access,
+  access: args?.access,
   fields: [
     {
       name: 'tenant',
@@ -18,15 +18,7 @@ export const userTenantsField = (
       required: true,
       saveToJWT: true,
     },
-    {
-      name: 'roles',
-      type: 'select',
-      access: args.access,
-      defaultValue: args?.defaultRole ? [args.defaultRole] : [],
-      hasMany: true,
-      options: args.roles,
-      required: true,
-    },
+    ...(args?.rowFields || []),
   ],
   saveToJWT: true,
 })

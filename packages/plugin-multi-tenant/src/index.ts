@@ -41,7 +41,7 @@ export const multiTenantPlugin =
         return true
       }
     })
-    adminUsersCollection.fields.push(userTenantsField(pluginConfig.userTenantsField))
+    adminUsersCollection.fields.push(userTenantsField(pluginConfig?.userTenantsField || {}))
 
     const globalCollectionSlugs = []
 
