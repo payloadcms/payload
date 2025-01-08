@@ -12,12 +12,16 @@ import { usePreferences } from '../Preferences/index.js'
 
 const LocaleContext = createContext({} as Locale)
 
-export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale: Locale['code'] }> = ({
+  children,
+  locale: localeFromProps,
+}) => {
   const {
     config: { localization = false },
   } = useConfig()
 
   const { user } = useAuth()
+
   const defaultLocale =
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
 
@@ -25,7 +29,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
   const searchParams = useSearchParams()
   const localeFromParams = searchParams.get('locale')
 
-  const [localeCode, setLocaleCode] = useState<string>(defaultLocale)
+  const [localeCode, setLocaleCode] = useState<string>(localeFromProps)
 
   const locale: Locale = React.useMemo(() => {
     if (!localization) {

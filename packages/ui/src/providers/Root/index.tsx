@@ -96,17 +96,15 @@ export const RootProvider: React.FC<Props> = ({
                           <PreferencesProvider>
                             <ThemeProvider theme={theme}>
                               <ParamsProvider>
-                                <LocaleProvider>
-                                  <StepNavProvider>
-                                    <LoadingOverlayProvider>
-                                      <DocumentEventsProvider>
-                                        <NavProvider initialIsOpen={isNavOpen}>
-                                          {children}
-                                        </NavProvider>
-                                      </DocumentEventsProvider>
-                                    </LoadingOverlayProvider>
-                                  </StepNavProvider>
-                                </LocaleProvider>
+                                <StepNavProvider>
+                                  <LoadingOverlayProvider>
+                                    <DocumentEventsProvider>
+                                      <NavProvider initialIsOpen={isNavOpen}>
+                                        {children}
+                                      </NavProvider>
+                                    </DocumentEventsProvider>
+                                  </LoadingOverlayProvider>
+                                </StepNavProvider>
                               </ParamsProvider>
                             </ThemeProvider>
                           </PreferencesProvider>
