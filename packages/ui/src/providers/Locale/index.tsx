@@ -12,7 +12,7 @@ import { usePreferences } from '../Preferences/index.js'
 
 const LocaleContext = createContext({} as Locale)
 
-export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale: Locale['code'] }> = ({
+export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Locale['code'] }> = ({
   children,
   locale: localeFromProps,
 }) => {
