@@ -108,7 +108,6 @@ export const renderListView = async (
         page,
         req,
         sort,
-        depth,
       })
 
       if (baseListFilter) {
