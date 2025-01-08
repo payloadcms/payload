@@ -79,6 +79,7 @@
   ],
   "include": [
     "${configDir}/src",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "./scripts/publishList.ts"
   ]
 }
