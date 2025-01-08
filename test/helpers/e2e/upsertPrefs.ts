@@ -9,10 +9,12 @@ export const upsertPrefs = async <
   payload,
   user,
   value,
+  key,
 }: {
+  key: string
   payload: PayloadTestSDK<TConfig>
   user: TypedUser
-  value: Record<string, any>
+  value: any
 }): Promise<TGeneratedTypes['collections']['payload-preferences']> => {
   let prefs = await payload
     .find({
@@ -21,7 +23,7 @@ export const upsertPrefs = async <
       limit: 1,
       where: {
         and: [
-          { key: { equals: 'text-fields-list' } },
+          { key: { equals: key } },
           { 'user.value': { equals: user.id } },
           { 'user.relationTo': { equals: user.collection } },
         ],
@@ -34,7 +36,7 @@ export const upsertPrefs = async <
       collection: 'payload-preferences',
       depth: 0,
       data: {
-        key: 'text-fields-list',
+        key,
         user: {
           relationTo: user.collection,
           value: user.id,
@@ -43,14 +45,13 @@ export const upsertPrefs = async <
       },
     })
   } else {
+    const newValue = typeof value === 'object' ? { ...(prefs?.value || {}), ...value } : value
+
     prefs = await payload.update({
       collection: 'payload-preferences',
       id: prefs.id,
       data: {
-        value: {
-          ...(prefs?.value ?? {}),
-          ...value,
-        },
+        newValue,
       },
     })
   }
