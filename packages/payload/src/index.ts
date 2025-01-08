@@ -659,10 +659,10 @@ export class BasePayload {
         (c) => c.upload && c.upload.adapter === undefined, // Uploads enabled, but no storage adapter provided
       )
 
-      if (uploadCollWithoutAdapter) {
+      if (uploadCollWithoutAdapter.length) {
         const slugs = uploadCollWithoutAdapter.map((c) => c.slug).join(', ')
         this.logger.warn(
-          `Collections with uploads enabled require a storage adapter when deploying to Vercel. Collections without storage adapters: ${slugs}. See https://payloadcms.com/docs/upload/storage-adapters for more info.`,
+          `Collections with uploads enabled require a storage adapter when deploying to Vercel. Collection(s) without storage adapters: ${slugs}. See https://payloadcms.com/docs/upload/storage-adapters for more info.`,
         )
       }
     }
