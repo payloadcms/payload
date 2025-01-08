@@ -24,6 +24,9 @@ export const Status: React.FC = () => {
     globalSlug,
     hasPublishedDoc,
     incrementVersionCount,
+    setHasPublishedDoc,
+    setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
     unpublishedVersionCount,
   } = useDocumentInfo()
   const { toggleModal } = useModal()
@@ -110,8 +113,14 @@ export const Status: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         resetForm(data)
         toast.success(json.message)
-
         incrementVersionCount()
+        setMostRecentVersionIsAutosaved(false)
+
+        if (action === 'unpublish') {
+          setHasPublishedDoc(false)
+        } else if (action === 'revert') {
+          setUnpublishedVersionCount(0)
+        }
       } else {
         toast.error(t('error:unPublishingDocument'))
       }
@@ -128,17 +137,19 @@ export const Status: React.FC = () => {
     [
       api,
       collectionSlug,
-      incrementVersionCount,
       globalSlug,
-      i18n.language,
       id,
+      i18n.language,
+      incrementVersionCount,
       locale,
       resetForm,
-      revertModalSlug,
       serverURL,
+      setUnpublishedVersionCount,
       t,
       toggleModal,
+      revertModalSlug,
       unPublishModalSlug,
+      setHasPublishedDoc,
     ],
   )
 
