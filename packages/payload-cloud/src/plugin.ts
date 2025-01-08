@@ -1,4 +1,4 @@
-import type { Config } from 'payload'
+import type { Config, Payload } from 'payload'
 
 import type { PluginOptions } from './types.js'
 
@@ -124,11 +124,11 @@ export const payloadCloudPlugin =
       },
     ]
 
-    if (pluginOptions.enableAutoRun === false) {
+    if (pluginOptions?.enableAutoRun === false || !config.jobs) {
       return config
     }
 
-    const newAutoRun = async (payload) => {
+    const newAutoRun = async (payload: Payload) => {
       const instance = generateRandomString()
 
       await payload.updateGlobal({
@@ -147,7 +147,7 @@ export const payloadCloudPlugin =
       if (cloudInstance.instance !== instance) {
         return []
       }
-      if (!config.jobs.autoRun) {
+      if (!config.jobs?.autoRun) {
         return [DEFAULT_CRON_JOB]
       }
       return typeof config.jobs.autoRun === 'function'
