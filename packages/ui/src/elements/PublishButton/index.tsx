@@ -25,6 +25,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     hasPublishedDoc,
     hasPublishPermission,
     setHasPublishedDoc,
+    setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     unpublishedVersionCount,
     uploadStatus,
@@ -63,16 +64,18 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     entityConfig?.versions?.drafts.schedulePublish
 
   const hasNewerVersions = unpublishedVersionCount > 0
+
   const canPublish =
     hasPublishPermission &&
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
+
   const operation = useOperation()
 
-  const forceDisable = operation === 'update' && !modified
+  const disabled = operation === 'update' && !modified
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) {
+    if (disabled) {
       return
     }
 
@@ -99,7 +102,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, localeCode, id, forceDisable])
+  }, [submit, collectionSlug, globalSlug, serverURL, api, localeCode, id, disabled])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -122,8 +125,15 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     })
 
     setUnpublishedVersionCount(0)
+    setMostRecentVersionIsAutosaved(false)
     setHasPublishedDoc(true)
-  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount, uploadStatus])
+  }, [
+    setHasPublishedDoc,
+    submit,
+    setUnpublishedVersionCount,
+    uploadStatus,
+    setMostRecentVersionIsAutosaved,
+  ])
 
   const publishSpecificLocale = useCallback(
     (locale) => {

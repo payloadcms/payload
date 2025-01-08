@@ -81,28 +81,12 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   }, [searchParams, modifySearchParams])
 
   const refineListData = useCallback(
+    // eslint-disable-next-line @typescript-eslint/require-await
     async (query: ListQuery) => {
       let page = 'page' in query ? query.page : currentQuery?.page
 
       if ('where' in query || 'search' in query) {
         page = '1'
-      }
-
-      const updatedPreferences: Record<string, unknown> = {}
-      let updatePreferences = false
-
-      if ('limit' in query) {
-        updatedPreferences.limit = Number(query.limit)
-        updatePreferences = true
-      }
-
-      if ('sort' in query) {
-        updatedPreferences.sort = query.sort
-        updatePreferences = true
-      }
-
-      if (updatePreferences && preferenceKey) {
-        await setPreference(preferenceKey, updatedPreferences, true)
       }
 
       const newQuery: ListQuery = {
@@ -131,13 +115,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       currentQuery?.search,
       currentQuery?.sort,
       currentQuery?.where,
-      preferenceKey,
       defaultLimit,
       defaultSort,
       modifySearchParams,
       onQueryChange,
       onQueryChangeFromProps,
-      setPreference,
       router,
     ],
   )
