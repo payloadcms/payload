@@ -126,6 +126,10 @@ export const payloadCloudPlugin =
       },
     ]
 
+    if (pluginOptions.enableAutoRun === false) {
+      return config
+    }
+
     const newAutoRun = async (payload) => {
       const instance = generateRandomString()
 
