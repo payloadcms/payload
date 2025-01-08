@@ -33,14 +33,16 @@ export const initPage = async ({
 
   const cookies = parseCookies(headers)
 
-  const { permissions, req } = await initReq(payload.config)
+  const { permissions, req: reqInit } = await initReq(payload.config)
+
+  // Create a new instance of req in order to modify properties without mutating the original
+  const req = Object.create(reqInit)
 
   req.query = qs.parse(queryString, {
     depth: 10,
     ignoreQueryPrefix: true,
   })
 
-  // @ts-expect-error eslint-disable @typescript-eslint/ban-ts-comment
   req.url = `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`
 
   const languageOptions = Object.entries(payload.config.i18n.supportedLanguages || {}).reduce(
