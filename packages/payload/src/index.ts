@@ -718,7 +718,10 @@ export class BasePayload {
       const DEFAULT_CRON = '* * * * *'
       const DEFAULT_LIMIT = 10
 
-      const cronJobs = await this.config.jobs.autoRun(this)
+      const cronJobs =
+        typeof this.config.jobs.autoRun === 'function'
+          ? await this.config.jobs.autoRun(this)
+          : this.config.jobs.autoRun
       await Promise.all(
         cronJobs.map((cronConfig) => {
           new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
