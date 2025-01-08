@@ -112,7 +112,7 @@ export const updateDocument = async <
     depth: 0,
     doc: docWithLocales,
     draft: draftArg,
-    fallbackLocale,
+    fallbackLocale: id ? null : fallbackLocale,
     global: null,
     locale,
     overrideAccess: true,
