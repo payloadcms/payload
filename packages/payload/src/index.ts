@@ -63,6 +63,8 @@ import type {
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export type { FieldState } from './admin/forms/Form.js'
+import { Cron } from 'croner'
+
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -711,6 +713,25 @@ export class BasePayload {
       if (typeof this.config.onInit === 'function') {
         await this.config.onInit(this)
       }
+    }
+    if (this.config.jobs.autoRun) {
+      const DEFAULT_CRON = '* * * * *'
+      const DEFAULT_LIMIT = 10
+
+      const cronJobs =
+        typeof this.config.jobs.autoRun === 'function'
+          ? await this.config.jobs.autoRun(this)
+          : this.config.jobs.autoRun
+      await Promise.all(
+        cronJobs.map((cronConfig) => {
+          new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            await this.jobs.run({
+              limit: cronConfig.limit ?? DEFAULT_LIMIT,
+              queue: cronConfig.queue,
+            })
+          })
+        }),
+      )
     }
 
     return this
