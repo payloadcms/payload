@@ -26,7 +26,7 @@ multiTenantPlugin({
   /**
    * The slug of the tenants collection you added to your config
    *
-   * @default 'tenants'
+   * optional - @default 'tenants'
    */
   tenantsSlug: 'tenants',
   /**

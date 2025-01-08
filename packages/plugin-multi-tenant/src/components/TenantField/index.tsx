@@ -37,7 +37,7 @@ export const TenantField: React.FC = async ({
       if (!doc) {
         serverValue = undefined
       }
-    } catch (e) {
+    } catch (_) {
       serverValue = undefined
     }
   }
