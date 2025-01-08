@@ -98,10 +98,8 @@ export const payloadCloudPlugin =
       })
     }
 
-    // We set up cron jobs on init.
-    // We also make sure to only run on one instance using a instance identifier stored in a global.
+    // We make sure to only run cronjobs on one instance using a instance identifier stored in a global.
 
-    // If you modify this defaults, make sure to update the TsDoc in the types file.
     const DEFAULT_CRON = '* * * * *'
     const DEFAULT_LIMIT = 10
     const DEFAULT_CRON_JOB = {
