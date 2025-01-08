@@ -38,8 +38,8 @@ export default buildConfig({
     tasks: [
       // your tasks here
     ],
-    // Optionally the function can receive payload as a parameter and be asynchronous
-    autoRun: () => [
+    // autoRun can optionally be a function that receives payload as an argument
+    autoRun: [
       {
         cron: '0 * * * *', // every hour at minute 0
         limit: 100, // limit jobs to process each run
