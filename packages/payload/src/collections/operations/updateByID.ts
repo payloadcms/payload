@@ -93,7 +93,6 @@ export const updateByIDOperation = async <
       populate,
       publishSpecificLocale,
       req: {
-        fallbackLocale,
         locale,
         payload: { config },
         payload,
@@ -172,7 +171,7 @@ export const updateByIDOperation = async <
       depth,
       docWithLocales,
       draftArg,
-      fallbackLocale,
+      fallbackLocale: null,
       filesToUpload,
       locale,
       overrideAccess,
