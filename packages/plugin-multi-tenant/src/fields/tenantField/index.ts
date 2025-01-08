@@ -3,6 +3,8 @@ import { APIError } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../../types.js'
 
+import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
+
 type Args = {
   access: MultiTenantPluginConfig['documentTenantField']['access']
   debug?: boolean
@@ -33,8 +35,12 @@ export const tenantField = ({
   hasMany: false,
   hooks: {
     beforeChange: [
-      ({ value }) => {
+      ({ req, value }) => {
         if (!value) {
+          const tenantFromCookie = getTenantFromCookie(req.headers)
+          if (tenantFromCookie) {
+            return tenantFromCookie
+          }
           throw new APIError('You must select a tenant', 400, null, true)
         }
       },

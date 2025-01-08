@@ -12,8 +12,9 @@ type Args = {
 export const withTenantAccess =
   ({ accessFunction, userHasAccessToAllTenants }: Args) =>
   async (args: AccessArgs): Promise<AccessResult> => {
-    const constraints = []
     let accessResult: AccessResult
+    const constraints = []
+
     if (typeof accessFunction === 'function') {
       accessResult = await accessFunction(args)
       if (accessResult === false) {

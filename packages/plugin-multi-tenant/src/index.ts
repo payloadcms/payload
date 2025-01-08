@@ -48,7 +48,18 @@ export const multiTenantPlugin =
      */
     incomingConfig.collections.forEach((collection) => {
       if (collection.slug === tenantsCollectionSlug) {
-        return
+        /**
+         * Modify tenants collection
+         */
+        collection.access = Object.keys(collection.access || {}).reduce((acc, key) => {
+          const accessFunction = collection.access[key]
+          acc[key] = withTenantAccess({
+            accessFunction,
+            userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
+          })
+
+          return acc
+        }, {})
       } else if (pluginConfig.collections?.[collection.slug]) {
         /**
          * Add tenant field to enabled collections
