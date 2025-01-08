@@ -80,6 +80,6 @@
   "include": [
     "${configDir}/src",
     ".next/types/**/*.ts",
-    "./scripts/publishList.ts"
+    "./scripts/lib/**/*.ts",
   ]
 }
