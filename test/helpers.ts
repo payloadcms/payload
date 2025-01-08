@@ -283,8 +283,27 @@ export async function closeNav(page: Page): Promise<void> {
   await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
 }
 
+export async function openLocaleSelector(page: Page): Promise<void> {
+  const button = page.locator('.localizer button.popup-button')
+  const popup = page.locator('.localizer .popup.popup--active')
+
+  if (!(await popup.isVisible())) {
+    await button.click()
+    await expect(popup).toBeVisible()
+  }
+}
+
+export async function closeLocaleSelector(page: Page): Promise<void> {
+  const popup = page.locator('.localizer .popup.popup--active')
+
+  if (await popup.isVisible()) {
+    await page.click('body', { position: { x: 0, y: 0 } })
+    await expect(popup).toBeHidden()
+  }
+}
+
 export async function changeLocale(page: Page, newLocale: string) {
-  await page.locator('.localizer button.popup-button').first().click()
+  await openLocaleSelector(page)
 
   const currentlySelectedLocale = await page
     .locator(
@@ -293,12 +312,11 @@ export async function changeLocale(page: Page, newLocale: string) {
     .textContent()
 
   if (currentlySelectedLocale !== `(${newLocale})`) {
-    const localeToSelect = page.locator(
-      `.localizer .popup.popup--active .popup-button-list__button .localizer__locale-code`,
-      {
+    const localeToSelect = page
+      .locator('.localizer .popup.popup--active .popup-button-list__button')
+      .locator('.localizer__locale-code', {
         hasText: `(${newLocale})`,
-      },
-    )
+      })
 
     await expect(localeToSelect).toBeEnabled()
     await localeToSelect.click()
@@ -308,11 +326,7 @@ export async function changeLocale(page: Page, newLocale: string) {
     await expect(page).toHaveURL(regexPattern)
   }
 
-  const popupIsVisible = await page.locator('.localizer .popup--active').isVisible()
-
-  if (popupIsVisible) {
-    await page.click('body', { position: { x: 0, y: 0 } })
-  }
+  await closeLocaleSelector(page)
 }
 
 export function exactText(text: string) {
