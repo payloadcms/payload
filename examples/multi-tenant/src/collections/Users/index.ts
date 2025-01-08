@@ -5,6 +5,7 @@ import { readAccess } from './access/read'
 import { updateAndDeleteAccess } from './access/updateAndDelete'
 import { externalUsersLogin } from './endpoints/externalUsersLogin'
 import { ensureUniqueUsername } from './hooks/ensureUniqueUsername'
+import { tenantUserRole, tenantUserRoles, userRole, userRoles } from './roles'
 // import { setCookieBasedOnDomain } from './hooks/setCookieBasedOnDomain'
 
 const Users: CollectionConfig = {
@@ -24,9 +25,9 @@ const Users: CollectionConfig = {
     {
       name: 'roles',
       type: 'select',
-      defaultValue: ['user'],
+      defaultValue: [userRole.USER],
       hasMany: true,
-      options: ['super-admin', 'user'],
+      options: userRoles,
     },
     {
       name: 'tenants',
@@ -43,9 +44,9 @@ const Users: CollectionConfig = {
         {
           name: 'roles',
           type: 'select',
-          defaultValue: ['tenant-viewer'],
+          defaultValue: [tenantUserRole.TENANT_VIEWER],
           hasMany: true,
-          options: ['tenant-admin', 'tenant-viewer'],
+          options: tenantUserRoles,
           required: true,
         },
       ],

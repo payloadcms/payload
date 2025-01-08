@@ -1,28 +1,28 @@
 'use client'
+
+import { useCallback, useEffect, useState } from 'react'
 import type { Option } from '@payloadcms/ui/elements/ReactSelect'
-import type { OptionObject } from 'payload'
-
-import { getTenantAdminTenantAccessIDs } from '@/utilities/getTenantAccessIDs'
 import { SelectInput, useAuth } from '@payloadcms/ui'
+import type { OptionObject } from 'payload'
 import * as qs from 'qs-esm'
-import React from 'react'
 
-import type { Tenant, User } from '../../payload-types'
+import type { Tenant, User } from '@/payload-types'
+import { getTenantAdminTenantAccessIDs } from '@/utilities/getTenantAccessIDs'
+import { TENANT_COOKIE_NAME } from '@/collections/Tenants/cookie'
+import { userRole } from '@/collections/Users/roles'
+import { extractID } from '@/utilities/extractID'
 
 import './index.scss'
 
 export const TenantSelector = ({ initialCookie }: { initialCookie?: string }) => {
   const { user } = useAuth<User>()
-  const [options, setOptions] = React.useState<OptionObject[]>([])
+  const [options, setOptions] = useState<OptionObject[]>([])
 
-  const isSuperAdmin = user?.roles?.includes('super-admin')
+  const isSuperAdmin = user?.roles?.includes(userRole.SUPER_ADMIN)
   const tenantIDs =
     user?.tenants?.map(({ tenant }) => {
       if (tenant) {
-        if (typeof tenant === 'string') {
-          return tenant
-        }
-        return tenant.id
+        return extractID(tenant)
       }
     }) || []
 
@@ -31,17 +31,17 @@ export const TenantSelector = ({ initialCookie }: { initialCookie?: string }) =>
     document.cookie = name + '=' + (value || '') + expires + '; path=/'
   }
 
-  const handleChange = React.useCallback((option: Option | Option[]) => {
+  const handleChange = useCallback((option: Option | Option[]) => {
     if (!option) {
-      setCookie('payload-tenant', undefined)
+      setCookie(TENANT_COOKIE_NAME, undefined)
       window.location.reload()
     } else if ('value' in option) {
-      setCookie('payload-tenant', option.value as string)
+      setCookie(TENANT_COOKIE_NAME, option.value as string)
       window.location.reload()
     }
   }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchTenants = async () => {
       const adminOfTenants = getTenantAdminTenantAccessIDs(user ?? null)
 
@@ -65,10 +65,13 @@ export const TenantSelector = ({ initialCookie }: { initialCookie?: string }) =>
         credentials: 'include',
       }).then((res) => res.json())
 
-      const optionsToSet = res.docs.map((doc: Tenant) => ({ label: doc.name, value: doc.id }))
+      const optionsToSet = res.docs.map((doc: Tenant) => ({
+        label: doc.name,
+        value: doc.id,
+      }))
 
       if (optionsToSet.length === 1) {
-        setCookie('payload-tenant', optionsToSet[0].value)
+        setCookie(TENANT_COOKIE_NAME, optionsToSet[0].value)
       }
       setOptions(optionsToSet)
     }

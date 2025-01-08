@@ -1,0 +1,15 @@
+**/generated-schema.graphql
+**/payload-types.ts
+.tmp
+**/.git
+**/.hg
+**/.pnp.*
+**/.svn
+**/.yarn/**
+**/build
+**/dist/**
+**/node_modules
+**/temp
+**/docs/**
+tsconfig.json
+pnpm-lock.yaml

@@ -1,11 +1,11 @@
 import type { Payload } from 'payload'
-
+import { type FC } from 'react'
 import { cookies as getCookies, headers as getHeaders } from 'next/headers'
-import React from 'react'
 
 import { TenantFieldComponentClient } from './Field.client'
+import { userRole } from '@/collections/Users/roles'
 
-export const TenantFieldComponent: React.FC<{
+export const TenantFieldComponent: FC<{
   path: string
   payload: Payload
   readOnly: boolean
@@ -17,7 +17,7 @@ export const TenantFieldComponent: React.FC<{
   if (
     user &&
     ((Array.isArray(user.tenants) && user.tenants.length > 1) ||
-      user?.roles?.includes('super-admin'))
+      user?.roles?.includes(userRole.SUPER_ADMIN))
   ) {
     return (
       <TenantFieldComponentClient

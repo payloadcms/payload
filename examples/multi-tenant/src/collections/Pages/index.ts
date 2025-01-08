@@ -28,7 +28,7 @@ export const Pages: CollectionConfig = {
       type: 'text',
       defaultValue: 'home',
       hooks: {
-        beforeValidate: [ensureUniqueSlug],
+        beforeChange: [ensureUniqueSlug],
       },
       index: true,
     },

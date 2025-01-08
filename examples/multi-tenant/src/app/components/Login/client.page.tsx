@@ -1,19 +1,16 @@
 'use client'
-import type { FormEvent } from 'react'
 
+import { useRef, type FormEvent } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import React from 'react'
 
 import './index.scss'
-
-const baseClass = 'loginPage'
 
 type Props = {
   tenantSlug: string
 }
 export const Login = ({ tenantSlug }: Props) => {
-  const usernameRef = React.useRef<HTMLInputElement>(null)
-  const passwordRef = React.useRef<HTMLInputElement>(null)
+  const usernameRef = useRef<HTMLInputElement>(null)
+  const passwordRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const routeParams = useParams()
   const searchParams = useSearchParams()
@@ -55,7 +52,7 @@ export const Login = ({ tenantSlug }: Props) => {
   }
 
   return (
-    <div className={baseClass}>
+    <div className="loginPage">
       <form onSubmit={handleSubmit}>
         <div>
           <label>

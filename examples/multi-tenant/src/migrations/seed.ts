@@ -1,4 +1,5 @@
-import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
+import type { MigrateUpArgs } from '@payloadcms/db-postgres'
+import { tenantUserRole, userRole } from '@/collections/Users/roles'
 
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
   await payload.create({
@@ -6,7 +7,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     data: {
       email: 'demo@payloadcms.com',
       password: 'demo',
-      roles: ['super-admin'],
+      roles: [userRole.SUPER_ADMIN],
     },
   })
 
@@ -47,7 +48,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       password: 'test',
       tenants: [
         {
-          roles: ['tenant-admin'],
+          roles: [tenantUserRole.TENANT_ADMIN],
           tenant: tenant1.id,
         },
         // {
@@ -58,7 +59,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       username: 'tenant1',
     },
   })
-
+  //
   await payload.create({
     collection: 'users',
     data: {
@@ -66,14 +67,14 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       password: 'test',
       tenants: [
         {
-          roles: ['tenant-admin'],
+          roles: [tenantUserRole.TENANT_ADMIN],
           tenant: tenant2.id,
         },
       ],
       username: 'tenant2',
     },
   })
-
+  //
   await payload.create({
     collection: 'users',
     data: {
@@ -81,14 +82,14 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       password: 'test',
       tenants: [
         {
-          roles: ['tenant-admin'],
+          roles: [tenantUserRole.TENANT_ADMIN],
           tenant: tenant3.id,
         },
       ],
       username: 'tenant3',
     },
   })
-
+  //
   await payload.create({
     collection: 'users',
     data: {
@@ -96,22 +97,22 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       password: 'test',
       tenants: [
         {
-          roles: ['tenant-admin'],
+          roles: [tenantUserRole.TENANT_ADMIN],
           tenant: tenant1.id,
         },
         {
-          roles: ['tenant-admin'],
+          roles: [tenantUserRole.TENANT_ADMIN],
           tenant: tenant2.id,
         },
         {
-          roles: ['tenant-admin'],
+          roles: [tenantUserRole.TENANT_ADMIN],
           tenant: tenant3.id,
         },
       ],
       username: 'tenant3',
     },
   })
-
+  //
   await payload.create({
     collection: 'pages',
     data: {
@@ -120,7 +121,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       title: 'Page for Tenant 1',
     },
   })
-
+  //
   await payload.create({
     collection: 'pages',
     data: {
@@ -129,7 +130,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       title: 'Page for Tenant 2',
     },
   })
-
+  //
   await payload.create({
     collection: 'pages',
     data: {
@@ -138,4 +139,8 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       title: 'Page for Tenant 3',
     },
   })
+}
+
+export async function down({}: MigrateUpArgs): Promise<void> {
+  // do nothing as we did not mutate anything
 }

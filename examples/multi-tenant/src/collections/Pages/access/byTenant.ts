@@ -1,15 +1,17 @@
-import type { Access } from 'payload'
+import { parseCookies, type Access } from 'payload'
+import type { Page } from '@/payload-types'
 
-import { parseCookies } from 'payload'
+import { TENANT_COOKIE_NAME } from '@/collections/Tenants/cookie'
+import { getTenantAccessIDs } from '@/utilities/getTenantAccessIDs'
+import { isSuperAdmin } from '@/access/isSuperAdmin'
+import { extractID } from '@/utilities/extractID'
+import { tenantUserRole } from '@/collections/Users/roles'
 
-import { isSuperAdmin } from '../../../access/isSuperAdmin'
-import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
-
-export const filterByTenantRead: Access = (args) => {
+export const filterByTenantRead: Access<Page> = (args) => {
   const req = args.req
   const cookies = parseCookies(req.headers)
   const superAdmin = isSuperAdmin(args)
-  const selectedTenant = cookies.get('payload-tenant')
+  const selectedTenant = cookies.get(TENANT_COOKIE_NAME)
 
   const tenantAccessIDs = getTenantAccessIDs(req.user)
 
@@ -25,7 +27,7 @@ export const filterByTenantRead: Access = (args) => {
       }
     }
 
-    const hasTenantAccess = tenantAccessIDs.some((id) => id === selectedTenant)
+    const hasTenantAccess = tenantAccessIDs.some((id) => String(id) === selectedTenant)
 
     // If NOT super admin,
     // give them access only if they have access to tenant ID set in cookie
@@ -59,7 +61,7 @@ export const filterByTenantRead: Access = (args) => {
   return false
 }
 
-export const canMutatePage: Access = (args) => {
+export const canMutatePage: Access<Page> = (args) => {
   const req = args.req
   const superAdmin = isSuperAdmin(args)
 
@@ -73,7 +75,14 @@ export const canMutatePage: Access = (args) => {
   }
 
   const cookies = parseCookies(req.headers)
-  const selectedTenant = cookies.get('payload-tenant')
+  const selectedTenant = cookies.get(TENANT_COOKIE_NAME)
+
+  if (!selectedTenant) {
+    // No access if no tenant is set and user is not a super admin
+    return false
+  }
+
+  const selectedTenantID = Number.parseInt(selectedTenant, 10)
 
   // tenant admins can add/delete/update
   // pages they have access to
@@ -82,10 +91,13 @@ export const canMutatePage: Access = (args) => {
       if (hasAccess) {
         return true
       }
+
+      const accessRowTenantId = extractID(accessRow.tenant)
+
       if (
         accessRow &&
-        accessRow.tenant === selectedTenant &&
-        accessRow.roles?.includes('tenant-admin')
+        accessRowTenantId === selectedTenantID &&
+        accessRow.roles?.includes(tenantUserRole.TENANT_ADMIN)
       ) {
         return true
       }

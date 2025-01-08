@@ -1,5 +1,14 @@
-build
-dist
+# npm
 node_modules
 package-lock.json
+
+# sensitive secrets
 .env
+
+# compiled output
+.next
+build
+dist
+
+# generated code
+.generated-schema.graphql

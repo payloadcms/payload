@@ -1,19 +1,33 @@
-import type { FieldHook } from 'payload'
+import { ValidationError, type FieldHook } from 'payload'
+import type { Page } from '@/payload-types'
 
-import { ValidationError } from 'payload'
+import { getTenantAccessIDs } from '@/utilities/getTenantAccessIDs'
+import { userRole } from '@/collections/Users/roles'
 
-import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
-
-export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, value }) => {
+export const ensureUniqueSlug: FieldHook<Page> = async ({ data, originalDoc, req, value }) => {
   // if value is unchanged, skip validation
-  if (originalDoc.slug === value) {
+  if (originalDoc?.slug === value) {
     return value
   }
 
   const incomingTenantID = typeof data?.tenant === 'object' ? data.tenant.id : data?.tenant
+
   const currentTenantID =
     typeof originalDoc?.tenant === 'object' ? originalDoc.tenant.id : originalDoc?.tenant
+
   const tenantIDToMatch = incomingTenantID || currentTenantID
+
+  if (!tenantIDToMatch) {
+    // Prevent admins to create pages without assigning a tenant
+    throw new ValidationError({
+      errors: [
+        {
+          message: `The entry with ID "${originalDoc?.id || data?.id || 'unknown'}" is missing a tenant assignment`,
+          path: 'tenant',
+        },
+      ],
+    })
+  }
 
   const findDuplicatePages = await req.payload.find({
     collection: 'pages',
@@ -37,9 +51,9 @@ export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, valu
     const tenantIDs = getTenantAccessIDs(req.user)
     // if the user is an admin or has access to more than 1 tenant
     // provide a more specific error message
-    if (req.user.roles?.includes('super-admin') || tenantIDs.length > 1) {
+    if (req.user.roles?.includes(userRole.SUPER_ADMIN) || tenantIDs.length > 1) {
       const attemptedTenantChange = await req.payload.findByID({
-        id: tenantIDToMatch,
+        id: tenantIDToMatch!,
         collection: 'tenants',
       })
 
