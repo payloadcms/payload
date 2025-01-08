@@ -7,10 +7,10 @@ import type { FieldTypes } from '../../forms/field-types'
 
 import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
+import { useOperation } from '../../utilities/OperationProvider'
 import { Gutter } from '../Gutter'
 import ViewDescription from '../ViewDescription'
 import './index.scss'
-import { useOperation } from '../../utilities/OperationProvider'
 
 const baseClass = 'document-fields'
 
@@ -20,6 +20,7 @@ export const DocumentFields: React.FC<{
   description?: Description
   fieldTypes: FieldTypes
   fields: FieldWithPath[]
+  forceRenderAllFields?: boolean
   forceSidebarWrap?: boolean
   hasSavePermission: boolean
   permissions: CollectionPermission | GlobalPermission
@@ -30,6 +31,7 @@ export const DocumentFields: React.FC<{
     description,
     fieldTypes,
     fields,
+    forceRenderAllFields,
     forceSidebarWrap,
     hasSavePermission,
     permissions,
@@ -41,9 +43,9 @@ export const DocumentFields: React.FC<{
     fieldSchema: fields,
     fieldTypes,
     filter: (field) => field?.admin?.position === 'sidebar',
+    operation,
     permissions: permissions.fields,
     readOnly: !hasSavePermission,
-    operation,
   })
 
   const hasSidebarFields = sidebarFields && sidebarFields.length > 0
@@ -77,6 +79,7 @@ export const DocumentFields: React.FC<{
                 !field.admin.position ||
                 (field.admin.position && field.admin.position !== 'sidebar')
               }
+              forceRenderAllFields={forceRenderAllFields}
               permissions={permissions.fields}
               readOnly={!hasSavePermission}
             />
@@ -90,6 +93,7 @@ export const DocumentFields: React.FC<{
                 <RenderFields
                   fieldTypes={fieldTypes}
                   fields={sidebarFields}
+                  forceRenderAllFields={forceRenderAllFields}
                   permissions={permissions.fields}
                   readOnly={!hasSavePermission}
                 />

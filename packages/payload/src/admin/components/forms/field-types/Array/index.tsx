@@ -32,7 +32,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     admin: { className, components, condition, description, isSortable = true, readOnly },
     fieldTypes,
     fields,
-    forceRender = false,
+    forceRender: forceRenderFromProps = false,
+    forceRenderAllFields,
     indexPath,
     localized,
     maxRows,
@@ -49,6 +50,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const label = props?.label ?? props?.labels?.singular
 
   const CustomRowLabel = components?.RowLabel || undefined
+
+  const forceRender = forceRenderFromProps || forceRenderAllFields
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, removeFieldRow, setModified } = useForm()

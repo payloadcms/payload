@@ -40,6 +40,7 @@ const globalSchema = joi
         }),
       }),
       description: joi.alternatives().try(joi.string(), componentSchema),
+      forceRenderAllFields: joi.boolean(),
       group: joi
         .alternatives()
         .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),

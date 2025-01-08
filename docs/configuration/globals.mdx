@@ -17,7 +17,7 @@ the main Payload config.
 ## Options
 
 | Option             | Description                                                                                                                                                                                                          |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`slug`** \*      | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                                          |
 | **`fields`** \*    | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
 | **`label`**        | Text for the name in the Admin panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                                              |
@@ -30,7 +30,7 @@ the main Payload config.
 | **`graphQL.name`** | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                                             |
 | **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                  |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
-| **`dbName`**       | Custom table or collection name for this global depending on the database adapter. Auto-generated from slug if not defined.
+| **`dbName`**       | Custom table or collection name for this global depending on the database adapter. Auto-generated from slug if not defined.                                                                                          |
 
 _\* An asterisk denotes that a property is required._
 
@@ -72,14 +72,15 @@ in the Public Demo source code on GitHub.
 You can customize the way that the Admin panel behaves on a Global-by-Global basis by defining the `admin` property on a
 Global's config.
 
-| Option        | Description                                                                                                                       |
-|---------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `group`       | Text used as a label for grouping collection and global links together in the navigation.                                         |
-| `hidden`      | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing. |
-| `components`  | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                           |
-| `preview`     | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview).           |
-| `livePreview` | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).          |
-| `hideAPIURL`  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
+| Option                  | Description                                                                                                                                                                                                                                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `group`                 | Text used as a label for grouping collection and global links together in the navigation.                                                                                                                                                                                                                      |
+| `hidden`                | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing.                                                                                                                                                                              |
+| `components`            | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                                                                                                                                                                                                        |
+| `preview`               | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview).                                                                                                                                                                                        |
+| `livePreview`           | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).                                                                                                                                                                                       |
+| `hideAPIURL`            | Hides the "API URL" meta field while editing documents within this collection.                                                                                                                                                                                                                                 |
+| `forceRenderAllFields ` | Forces all fields in the Edit view to render immediately, regardless of scroll position. By default, this is set to `false` to improve performance, as fields are progressively rendered to balance load times. Enabling this option can make it easier to locate fields using browser search (e.g., `CMD+F`). |
 
 ### Preview
 

@@ -318,6 +318,11 @@ export type CollectionAdminOptions = {
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
+   * Forces all fields in the Edit view to render immediately, regardless of scroll position
+   * @default false
+   */
+  forceRenderAllFields?: boolean
+  /**
    * Place collections into a navigational group
    * */
   group?: Record<string, string> | string

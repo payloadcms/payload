@@ -33,7 +33,7 @@ const intersectionObserverOptions = {
  * All this component does is render the field's Field Components, and pass them the props they need to function.
  **/
 const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldTypes, forceRender, margins } = props
+  const { className, fieldTypes, forceRender, forceRenderAllFields, margins } = props
 
   const { i18n, t } = useTranslation('general')
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender))
@@ -105,7 +105,7 @@ const RenderFields: React.FC<Props> = (props) => {
                       readOnly,
                     },
                     fieldTypes,
-                    forceRender,
+                    forceRender: forceRenderAllFields || forceRender,
                     indexPath:
                       'indexPath' in props ? `${props?.indexPath}.${fieldIndex}` : `${fieldIndex}`,
                     path: field.path || (isFieldAffectingData && 'name' in field ? field.name : ''),

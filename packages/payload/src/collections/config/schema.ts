@@ -62,6 +62,7 @@ const collectionSchema = joi.object().keys({
     disableDuplicate: joi.bool(),
     enableRichTextLink: joi.boolean(),
     enableRichTextRelationship: joi.boolean(),
+    forceRenderAllFields: joi.boolean(),
     group: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
     hidden: joi.alternatives().try(joi.boolean(), joi.func()),
     hideAPIURL: joi.bool(),

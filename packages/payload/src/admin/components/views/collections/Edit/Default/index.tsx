@@ -39,7 +39,7 @@ export const DefaultCollectionEdit: React.FC<
     permissions,
   } = props
 
-  const { auth, upload } = collection
+  const { admin: { forceRenderAllFields } = {}, auth, upload } = collection
 
   const [fields] = useState(() => formatFields(collection, isEditing))
 
@@ -92,6 +92,7 @@ export const DefaultCollectionEdit: React.FC<
         }
         fieldTypes={fieldTypes}
         fields={fields}
+        forceRenderAllFields={forceRenderAllFields}
         hasSavePermission={hasSavePermission}
         permissions={permissions}
       />

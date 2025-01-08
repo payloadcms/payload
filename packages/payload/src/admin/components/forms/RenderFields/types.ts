@@ -7,6 +7,7 @@ export type Props = {
   className?: string
   fieldTypes: FieldTypes
   forceRender?: boolean
+  forceRenderAllFields?: boolean
   margins?: 'small' | false
   permissions?:
     | {
