@@ -2,7 +2,6 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
-import { LocaleProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
@@ -49,6 +48,7 @@ export const RootPage = async ({
   } = config
 
   const params = await paramsPromise
+
   const currentRoute = formatAdminURL({
     adminRoute,
     path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
@@ -141,32 +141,30 @@ export const RootPage = async ({
 
   return (
     <Fragment>
-      <LocaleProvider locale={initPageResult?.locale.code}>
-        {!templateType && <Fragment>{RenderedView}</Fragment>}
-        {templateType === 'minimal' && (
-          <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
-        )}
-        {templateType === 'default' && (
-          <DefaultTemplate
-            i18n={initPageResult?.req.i18n}
-            locale={initPageResult?.locale}
-            params={params}
-            payload={initPageResult?.req.payload}
-            permissions={initPageResult?.permissions}
-            searchParams={searchParams}
-            user={initPageResult?.req.user}
-            viewActions={serverProps.viewActions}
-            visibleEntities={{
-              // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
-              // which this caused as soon as initPageResult.visibleEntities is passed in
-              collections: initPageResult?.visibleEntities?.collections,
-              globals: initPageResult?.visibleEntities?.globals,
-            }}
-          >
-            {RenderedView}
-          </DefaultTemplate>
-        )}
-      </LocaleProvider>
+      {!templateType && <Fragment>{RenderedView}</Fragment>}
+      {templateType === 'minimal' && (
+        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
+      )}
+      {templateType === 'default' && (
+        <DefaultTemplate
+          i18n={initPageResult?.req.i18n}
+          locale={initPageResult?.locale}
+          params={params}
+          payload={initPageResult?.req.payload}
+          permissions={initPageResult?.permissions}
+          searchParams={searchParams}
+          user={initPageResult?.req.user}
+          viewActions={serverProps.viewActions}
+          visibleEntities={{
+            // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
+            // which this caused as soon as initPageResult.visibleEntities is passed in
+            collections: initPageResult?.visibleEntities?.collections,
+            globals: initPageResult?.visibleEntities?.globals,
+          }}
+        >
+          {RenderedView}
+        </DefaultTemplate>
+      )}
     </Fragment>
   )
 }
