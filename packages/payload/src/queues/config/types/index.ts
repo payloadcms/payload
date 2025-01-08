@@ -60,7 +60,7 @@ export type JobsConfig = {
    * Queue cron jobs automatically on payload initialization.
    * @remark this property should not be used on serverless platforms like Vercel
    */
-  autoRun?: (payload: Payload) => CronConfig[]
+  autoRun?: (payload: Payload) => CronConfig[] | Promise<CronConfig[]>
   /**
    * Determine whether or not to delete a job after it has successfully completed.
    */
