@@ -20,13 +20,20 @@ export type S3StorageOptions = {
    */
 
   acl?: 'private' | 'public-read'
+
   /**
    * Bucket name to upload files to.
    *
    * Must follow [AWS S3 bucket naming conventions](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html).
    */
-
   bucket: string
+
+  /**
+   * Cache-Control max-age in seconds
+   *
+   * @defaultvalue undefined
+   */
+  cacheControlMaxAge?: number
 
   /**
    * Collection options to apply the S3 adapter to.
@@ -102,7 +109,12 @@ export const s3Storage: S3StoragePlugin =
     })(config)
   }
 
-function s3StorageInternal({ acl, bucket, config = {} }: S3StorageOptions): Adapter {
+function s3StorageInternal({
+  acl,
+  bucket,
+  cacheControlMaxAge,
+  config = {},
+}: S3StorageOptions): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     let storageClient: AWS.S3 | null = null
     const getStorageClient: () => AWS.S3 = () => {
@@ -124,7 +136,12 @@ function s3StorageInternal({ acl, bucket, config = {} }: S3StorageOptions): Adap
         getStorageClient,
         prefix,
       }),
-      staticHandler: getHandler({ bucket, collection, getStorageClient }),
+      staticHandler: getHandler({
+        bucket,
+        cacheControlMaxAge,
+        collection,
+        getStorageClient,
+      }),
     }
   }
 }
