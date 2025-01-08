@@ -37,6 +37,7 @@ export type ServerFunctionHandler = (
 ) => Promise<unknown>
 
 export type ListQuery = {
+  depth?: number
   limit?: string
   page?: string
   /*

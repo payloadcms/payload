@@ -21,6 +21,7 @@ export type ListIndexProps = {
 
 export type ListPreferences = {
   columns: ColumnPreferences
+  depth: number
   limit: number
   sort: string
 }

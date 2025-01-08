@@ -74,7 +74,11 @@ export const renderListView = async (
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
     req,
-    value: { limit: isNumber(query?.limit) ? Number(query.limit) : undefined, sort: query?.sort, depth: query?.depth || 0 },
+    value: {
+      depth: query?.depth || 0,
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      sort: query?.sort,
+    },
   })
 
   const {
@@ -94,7 +98,7 @@ export const renderListView = async (
       listPreferences?.sort ||
       (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
 
-    const depth = listPreferences?.depth || (typeof collectionConfig.defaultDepth === 'number' ? collectionConfig.defaultDepth : 0)
+    const depth = listPreferences?.depth || 0
 
     let where = mergeListSearchAndWhere({
       collectionConfig,
@@ -119,7 +123,7 @@ export const renderListView = async (
 
     const data = await payload.find({
       collection: collectionSlug,
-      depth: depth,
+      depth,
       draft: true,
       fallbackLocale: false,
       includeLockStatus: true,
@@ -207,7 +211,6 @@ export const renderListView = async (
             data={data}
             defaultLimit={limit}
             defaultSort={sort}
-            defaultDepth={depth}
             modifySearchParams={!isInDrawer}
             preferenceKey={preferenceKey}
           >
