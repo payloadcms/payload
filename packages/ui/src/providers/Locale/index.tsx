@@ -26,10 +26,10 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
 
   const { getPreference, setPreference } = usePreferences()
-  const searchParams = useSearchParams()
-  const localeFromParams = searchParams.get('locale')
+  const localeFromParams = useSearchParams().get('locale')
 
-  const [localeCode, setLocaleCode] = useState<string>(localeFromProps)
+  // `localeFromProps` originates from the root layout, which does not have access to search params
+  const [localeCode, setLocaleCode] = useState<string>(localeFromProps || localeFromParams)
 
   const locale: Locale = React.useMemo(() => {
     if (!localization) {

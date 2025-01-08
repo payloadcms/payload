@@ -3,6 +3,7 @@ import type { I18nClient, Language } from '@payloadcms/translations'
 import type {
   ClientConfig,
   LanguageOptions,
+  Locale,
   SanitizedPermissions,
   ServerFunctionClient,
   User,
@@ -41,6 +42,7 @@ type Props = {
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
+  readonly locale?: Locale['code']
   readonly permissions: SanitizedPermissions
   readonly serverFunction: ServerFunctionClient
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
@@ -57,6 +59,7 @@ export const RootProvider: React.FC<Props> = ({
   isNavOpen,
   languageCode,
   languageOptions,
+  locale,
   permissions,
   serverFunction,
   switchLanguageServerAction,
@@ -96,15 +99,17 @@ export const RootProvider: React.FC<Props> = ({
                           <PreferencesProvider>
                             <ThemeProvider theme={theme}>
                               <ParamsProvider>
-                                <StepNavProvider>
-                                  <LoadingOverlayProvider>
-                                    <DocumentEventsProvider>
-                                      <NavProvider initialIsOpen={isNavOpen}>
-                                        {children}
-                                      </NavProvider>
-                                    </DocumentEventsProvider>
-                                  </LoadingOverlayProvider>
-                                </StepNavProvider>
+                                <LocaleProvider locale={locale}>
+                                  <StepNavProvider>
+                                    <LoadingOverlayProvider>
+                                      <DocumentEventsProvider>
+                                        <NavProvider initialIsOpen={isNavOpen}>
+                                          {children}
+                                        </NavProvider>
+                                      </DocumentEventsProvider>
+                                    </LoadingOverlayProvider>
+                                  </StepNavProvider>
+                                </LocaleProvider>
                               </ParamsProvider>
                             </ThemeProvider>
                           </PreferencesProvider>
