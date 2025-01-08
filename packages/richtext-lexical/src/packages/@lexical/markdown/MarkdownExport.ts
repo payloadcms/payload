@@ -33,9 +33,20 @@ export function createMarkdownExport(
 
   // Export only uses text formats that are responsible for single format
   // e.g. it will filter out *** (bold, italic) and instead use separate ** and *
-  const textFormatTransformers = byType.textFormat.filter(
-    (transformer) => transformer.format.length === 1,
-  )
+  const textFormatTransformers = byType.textFormat
+    .filter((transformer) => transformer.format.length === 1)
+    // Make sure all text transformers that contain 'code' in their format are at the end of the array. Otherwise, formatted code like
+    // <strong><code>code</code></strong> will be exported as `**Bold Code**`, as the code format will be applied first, and the bold format
+    // will be applied second and thus skipped entirely, as the code format will prevent any further formatting.
+    .sort((a, b) => {
+      if (a.format.includes('code') && !b.format.includes('code')) {
+        return 1
+      } else if (!a.format.includes('code') && b.format.includes('code')) {
+        return -1
+      } else {
+        return 0
+      }
+    })
 
   return (node) => {
     const output = []

@@ -28,8 +28,6 @@ import type { Column } from '../Table/index.js'
 import {
   RenderCustomComponent,
   RenderDefaultCell,
-  SelectAll,
-  SelectRow,
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'

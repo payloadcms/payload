@@ -49,6 +49,13 @@ export type JobsConfig = {
      */
     run?: RunJobAccess
   }
+  /** Adds information about the parent job to the task log. This is useful for debugging and tracking the flow of tasks.
+   *
+   * In 4.0, this will default to `true`.
+   *
+   * @default false
+   */
+  addParentToTaskLog?: boolean
   /**
    * Queue cron jobs automatically on payload initialization.
    * @remark this property should not be used on serverless platforms like Vercel
