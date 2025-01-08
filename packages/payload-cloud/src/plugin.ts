@@ -11,6 +11,11 @@ import {
 } from './hooks/uploadCache.js'
 import { getStaticHandler } from './staticHandler.js'
 
+export const generateRandomString = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  return Array.from({ length: 24 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+}
+
 export const payloadCloudPlugin =
   (pluginOptions?: PluginOptions) =>
   async (incomingConfig: Config): Promise<Config> => {
@@ -137,9 +142,15 @@ export const payloadCloudPlugin =
         slug: 'payload-cloud-instance',
       })
 
-      return cloudInstance.instance === instance
-        ? ((await config.jobs.autoRun(payload)) ?? [DEFAULT_CRON_JOB])
-        : []
+      if (cloudInstance.instance !== instance) {
+        return []
+      }
+      if (!config.jobs.autoRun) {
+        return [DEFAULT_CRON_JOB]
+      }
+      return typeof config.jobs.autoRun === 'function'
+        ? await config.jobs.autoRun(payload)
+        : config.jobs.autoRun
     }
 
     config.jobs.autoRun = newAutoRun
@@ -153,9 +164,4 @@ function waitRandomTime(): Promise<void> {
   const randomTime = Math.floor(Math.random() * (max - min + 1)) + min
 
   return new Promise((resolve) => setTimeout(resolve, randomTime))
-}
-
-function generateRandomString(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  return Array.from({ length: 24 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
