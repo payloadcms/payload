@@ -79,7 +79,7 @@ export const initPage = async ({
     user,
   })
 
-  req.locale = locale.code
+  req.locale = locale?.code
 
   const visibleEntities: VisibleEntities = {
     collections: collections
