@@ -87,11 +87,11 @@ describe('Localization', () => {
   })
 
   beforeEach(async () => {
-    await throttleTest({
-      page,
-      context,
-      delay: 'Fast 4G',
-    })
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
   })
 
   describe('localizer', async () => {
