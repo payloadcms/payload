@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ColumnPreferences, SanitizedCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ListPreferences, SanitizedCollectionConfig } from 'payload'
 
 import React, { createContext, useCallback, useContext, useEffect } from 'react'
 
@@ -23,10 +23,6 @@ export interface ITableColumns {
 export const TableColumnContext = createContext<ITableColumns>({} as ITableColumns)
 
 export const useTableColumns = (): ITableColumns => useContext(TableColumnContext)
-
-export type ListPreferences = {
-  columns: ColumnPreferences
-}
 
 type Props = {
   readonly children: React.ReactNode
@@ -241,7 +237,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
       if (collectionHasChanged || !listPreferences) {
         const currentPreferences = await getPreference<{
-          columns: ColumnPreferences
+          columns: ListPreferences['columns']
         }>(preferenceKey)
 
         prevCollection.current = collectionSlug

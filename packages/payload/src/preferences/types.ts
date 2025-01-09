@@ -28,10 +28,8 @@ export type DocumentPreferences = {
   fields: FieldsPreferences
 }
 
-export type ColumnPreferences = { accessor: string; active: boolean }[]
-
 export type ListPreferences = {
-  columns?: ColumnPreferences
+  columns?: { accessor: string; active: boolean }[]
   limit?: number
   sort?: string
 }

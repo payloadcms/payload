@@ -1,9 +1,9 @@
 import type {
   ClientCollectionConfig,
   CollectionConfig,
-  ColumnPreferences,
   Field,
   ImportMap,
+  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -63,8 +63,8 @@ export const renderTable = ({
 }: {
   clientCollectionConfig: ClientCollectionConfig
   collectionConfig: SanitizedCollectionConfig
-  columnPreferences: ColumnPreferences
-  columns?: ColumnPreferences
+  columnPreferences: ListPreferences['columns']
+  columns?: ListPreferences['columns']
   customCellProps?: Record<string, any>
   docs: PaginatedDocs['docs']
   drawerSlug?: string

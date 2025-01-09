@@ -2,10 +2,10 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
   ClientField,
-  ColumnPreferences,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
+  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -38,8 +38,8 @@ type Args = {
   beforeRows?: Column[]
   clientCollectionConfig: ClientCollectionConfig
   collectionConfig: SanitizedCollectionConfig
-  columnPreferences: ColumnPreferences
-  columns?: ColumnPreferences
+  columnPreferences: ListPreferences['columns']
+  columns?: ListPreferences['columns']
   customCellProps: DefaultCellComponentProps['customCellProps']
   docs: PaginatedDocs['docs']
   enableRowSelections: boolean
