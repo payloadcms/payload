@@ -799,8 +799,8 @@ export type Config = {
     disable?: boolean
     experimental?: {
       /**
-       * This option will optimize the admin panel in a non-breaking way, until the next major version can fully support the changes.
-       * Examples of this include removing all undefined variables, empty objects, empty arrays, and `null` values from form state and the client config.
+       * This option will optimize the admin panel in a non-breaking way, until the next major version can fully support these changes.
+       * Examples of this include removing all undefined variables, empty objects, empty arrays, and `null` values from form state.
        */
       optimized?: boolean
     }

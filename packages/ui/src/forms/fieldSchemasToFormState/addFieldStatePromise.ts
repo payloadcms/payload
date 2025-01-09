@@ -138,9 +138,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     )
   }
 
-  // @deprecated: the `experimental.optimized` property is used for backwards compatibility
-  // when optimized, properties are only added to fieldState if absolutely necessary
-  // In the next major version, this will be the default behavior
+  /**
+   * @deprecated: the `experimental.optimized` property is used for backwards compatibility.
+   * When optimized, properties are only added to fieldState if absolutely necessary.
+   * In the next major version, this will be the default behavior.
+   */
   const optimized = req.payload.config.admin.experimental?.optimized
 
   const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
@@ -150,7 +152,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const fieldState: FormFieldWithoutComponents = {}
 
   if (optimized) {
-    // TODO: makes this default behavior when `admin.experimental.optimized` is the default behavior, see note above
+    // TODO: remove this block when `admin.experimental.optimized` is the default behavior, see note above.
     if (passesCondition === false) {
       fieldState.passesCondition = false
     }
@@ -223,7 +225,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     } else {
       if (!optimized) {
-        // TODO: makes this default behavior when `admin.experimental.optimized` is the default behavior, see note above
+        // TODO: remove this block when `admin.experimental.optimized` is the default behavior, see note above.
         fieldState.valid = true
       }
     }
@@ -270,7 +272,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               }
 
               if (!optimized) {
-                // TODO: makes this default behavior when `admin.experimental.optimized` is the default behavior, see note above
+                // TODO: remove this block when `admin.experimental.optimized` is the default behavior, see note above.
                 state[idKey].valid = true
               }
 
@@ -413,7 +415,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }
 
                 if (!optimized) {
-                  // TODO: makes this default behavior when `admin.experimental.optimized` is the default behavior, see note above
+                  // TODO: remove this block when `admin.experimental.optimized` is the default behavior, see note above.
                   state[idKey].valid = true
                 }
 
@@ -431,7 +433,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }
 
                 if (!optimized) {
-                  // TODO: makes this default behavior when `admin.experimental.optimized` is the default behavior, see note above
+                  // TODO: remove this block when `admin.experimental.optimized` is the default behavior, see note above.
                   state[fieldKey].valid = true
                 }
 
