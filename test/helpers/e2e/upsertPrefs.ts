@@ -51,7 +51,7 @@ export const upsertPrefs = async <
       collection: 'payload-preferences',
       id: prefs.id,
       data: {
-        newValue,
+        value: newValue,
       },
     })
   }
