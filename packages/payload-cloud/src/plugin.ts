@@ -128,6 +128,8 @@ export const payloadCloudPlugin =
       return config
     }
 
+    const oldAutoRunCopy = config.jobs.autoRun
+
     const newAutoRun = async (payload: Payload) => {
       const instance = generateRandomString()
 
@@ -150,9 +152,8 @@ export const payloadCloudPlugin =
       if (!config.jobs?.autoRun) {
         return [DEFAULT_CRON_JOB]
       }
-      return typeof config.jobs.autoRun === 'function'
-        ? await config.jobs.autoRun(payload)
-        : config.jobs.autoRun
+
+      return typeof oldAutoRunCopy === 'function' ? await oldAutoRunCopy(payload) : oldAutoRunCopy
     }
 
     config.jobs.autoRun = newAutoRun
