@@ -10,6 +10,19 @@ import { createPayloadRequest } from './createPayloadRequest.js'
 import { headersWithCors } from './headersWithCors.js'
 import { routeError } from './routeError.js'
 
+const notFoundResponse = (req: PayloadRequest) => {
+  return Response.json(
+    {},
+    {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
+      status: 200,
+    },
+  )
+}
+
 /**
  * Attaches the Payload REST API to any backend framework that uses Fetch Request/Response
  * like Next.js (app router), Remix, Bun, Hono.
@@ -53,6 +66,10 @@ export const handleEndpoints = async ({
   let req: PayloadRequest
   let collection: Collection
 
+  // This can be used against GET request search params size limit.
+  // Instead you can do POST request with a text body as search params.
+  // We use this interally for relationships querying on the frontend
+  // packages/ui/src/fields/Relationship/index.tsx
   if (
     request.method.toLowerCase() === 'post' &&
     request.headers.get('X-HTTP-Method-Override') === 'GET'
@@ -96,47 +113,50 @@ export const handleEndpoints = async ({
     const pathname = new URL(req.url).pathname
 
     if (!pathname.startsWith(config.routes.api)) {
-      return null
+      return notFoundResponse(req)
     }
 
-    // convert /api/something to /something
+    // /api/posts/route -> /posts/route
     let adjustedPathname = pathname.replace(config.routes.api, '')
 
     let isGlobals = false
+
+    // /globals/header/route -> /header/route
     if (adjustedPathname.startsWith('/globals')) {
       isGlobals = true
       adjustedPathname = adjustedPathname.replace('/globals', '')
     }
 
     const segments = adjustedPathname.split('/')
+    // remove empty string first element
     segments.shift()
+
     const firstParam = segments[0]
 
     let globalConfig: GlobalConfig
 
+    // first param can be a global slug or collection slug, find the relevant config
     if (firstParam) {
-      if (payload.collections[firstParam]) {
+      if (isGlobals) {
+        globalConfig = payload.globals.config.find((each) => each.slug === firstParam)
+      } else if (payload.collections[firstParam]) {
         collection = payload.collections[firstParam]
       }
-    }
-
-    if (isGlobals) {
-      const secondParam = segments[0]
-
-      globalConfig = payload.globals.config.find((each) => each.slug === secondParam)
     }
 
     let endpoints: Endpoint[] | false = config.endpoints
 
     if (collection) {
       endpoints = collection.config.endpoints
-      // convert /posts/something to /something
+      // /posts/route -> /route
       adjustedPathname = adjustedPathname.replace(`/${collection.config.slug}`, '')
     } else if (globalConfig) {
+      // /header/route -> /route
       adjustedPathname = adjustedPathname.replace(`/${globalConfig.slug}`, '')
       endpoints = globalConfig.endpoints
     }
 
+    // sanitize when endpoint.path is '/'
     if (adjustedPathname === '') {
       adjustedPathname = '/'
     }
@@ -156,6 +176,7 @@ export const handleEndpoints = async ({
       )
     }
 
+    // Find the relevant endpoint configuration
     const endpoint = endpoints?.find((endpoint) => {
       if (endpoint.method !== req.method.toLowerCase()) {
         return false
@@ -171,6 +192,7 @@ export const handleEndpoints = async ({
 
       req.routeParams = matchResult.params as Record<string, unknown>
 
+      // Inject to routeParams the slug as well so it can be used later
       if (collection) {
         req.routeParams.collection = collection.config.slug
       } else if (globalConfig) {
@@ -185,18 +207,7 @@ export const handleEndpoints = async ({
     }
 
     if (!handler) {
-      return Response.json(
-        {
-          message: `Route Not Found: "${new URL(req.url).pathname}"`,
-        },
-        {
-          headers: headersWithCors({
-            headers: new Headers(),
-            req,
-          }),
-          status: httpStatus.NOT_FOUND,
-        },
-      )
+      return notFoundResponse(req)
     }
 
     const response = await handler(req)
