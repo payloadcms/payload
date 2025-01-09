@@ -4,8 +4,10 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+import type { Config as ConfigType } from './payload-types.js'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser, regularUser } from '../credentials.js'
 import { Posts } from './collections/Posts.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users.js'
@@ -24,14 +26,46 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+        roles: ['admin'],
+      },
+    })
+
+    const tenant1 = await payload.create({
+      collection: 'tenants',
+      data: {
+        name: 'Blue Dog',
+        slug: 'blue-dog',
+        domain: 'bluedog.com',
+      },
+    })
+
+    await payload.create({
+      collection: 'tenants',
+      data: {
+        name: 'Steel Cat',
+        slug: 'steel-cat',
+        domain: 'steelcat.com',
+      },
+    })
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: regularUser.email,
+        password: regularUser.password,
+        roles: ['user'],
+        tenants: [
+          {
+            tenant: tenant1.id,
+          },
+        ],
       },
     })
   },
   plugins: [
-    multiTenantPlugin({
+    multiTenantPlugin<ConfigType>({
       userHasAccessToAllTenants: (user) => user.roles?.includes('admin'),
-      userTenantsField: {
-        access: {},
+      tenantsArrayField: {
         rowFields: [
           {
             name: 'roles',

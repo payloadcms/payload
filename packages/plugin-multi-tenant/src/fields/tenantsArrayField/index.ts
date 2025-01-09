@@ -2,17 +2,20 @@ import type { ArrayField } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../../types.js'
 
-export const userTenantsField = (
-  args: MultiTenantPluginConfig['userTenantsField'],
+export const tenantsArrayField = (
+  args: Pick<
+    MultiTenantPluginConfig['tenantsArrayField'],
+    'arrayFieldAccess' | 'rowFields' | 'tenantFieldAccess'
+  >,
 ): ArrayField => ({
   name: 'tenants',
   type: 'array',
-  access: args?.access,
+  access: args?.arrayFieldAccess,
   fields: [
     {
       name: 'tenant',
       type: 'relationship',
-      access: args.access,
+      access: args.tenantFieldAccess,
       index: true,
       relationTo: 'tenants',
       required: true,

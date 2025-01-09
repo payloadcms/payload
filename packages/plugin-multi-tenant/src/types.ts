@@ -1,8 +1,8 @@
-import type { ArrayField, Field, RelationshipField, User } from 'payload'
+import type { ArrayField, CollectionSlug, Field, RelationshipField, User } from 'payload'
 
-export type MultiTenantPluginConfig = {
+export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   collections: {
-    [collectionSlug: string]: {
+    [key in CollectionSlug]?: {
       /**
        * Set to `true` if you want the collection to behave as a global
        *
@@ -49,6 +49,25 @@ export type MultiTenantPluginConfig = {
    */
   enabled?: boolean
   /**
+   * Field configuration for the field added to the users collection
+   *
+   * If `includeDefaultField` is `false`, you must include the field on your users collection manually
+   * This is useful if you want to customize the field or place the field in a specific location
+   */
+  tenantsArrayField?:
+    | {
+        arrayFieldAccess?: ArrayField['access']
+        includeDefaultField?: true
+        rowFields?: Field[]
+        tenantFieldAccess?: RelationshipField['access']
+      }
+    | {
+        arrayFieldAccess?: never
+        includeDefaultField?: false
+        rowFields?: never
+        tenantFieldAccess?: never
+      }
+  /**
    * The slug for the tenant collection
    *
    * @default 'tenants'
@@ -59,14 +78,9 @@ export type MultiTenantPluginConfig = {
    *
    * Useful for super-admin type users
    */
-  userHasAccessToAllTenants?: (user: User) => boolean
-  /**
-   * Field configuration for the field added to the users collection
-   */
-  userTenantsField?: {
-    access?: ArrayField['access']
-    rowFields?: Field[]
-  }
+  userHasAccessToAllTenants?: (
+    user: ConfigTypes extends { user } ? ConfigTypes['user'] : User,
+  ) => boolean
 }
 
 export type Tenant<IDType = number | string> = {

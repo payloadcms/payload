@@ -3,7 +3,7 @@ import type { CollectionConfig, Config } from 'payload'
 import type { MultiTenantPluginConfig } from './types.js'
 
 import { tenantField } from './fields/tenantField/index.js'
-import { userTenantsField } from './fields/userTenantsArrayField/index.js'
+import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
 import { withTenantAccess } from './utilities/withTenantAccess.js'
 import { withTenantListFilter } from './utilities/withTenantListFilter.js'
 
@@ -24,7 +24,7 @@ const collectionAccessKeys: AllAccessKeys<
 > = ['create', 'read', 'update', 'delete', 'admin', 'readVersions', 'unlock']
 
 export const multiTenantPlugin =
-  (pluginConfig: MultiTenantPluginConfig) =>
+  <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>
   (incomingConfig: Config): Config => {
     if (pluginConfig.enabled === false) {
       return incomingConfig
@@ -51,7 +51,13 @@ export const multiTenantPlugin =
         return true
       }
     })
-    adminUsersCollection.fields.push(userTenantsField(pluginConfig?.userTenantsField || {}))
+
+    /**
+     * Add tenants array field to users collection
+     */
+    if (pluginConfig?.tenantsArrayField?.includeDefaultField !== false) {
+      adminUsersCollection.fields.push(tenantsArrayField(pluginConfig?.tenantsArrayField || {}))
+    }
 
     const globalCollectionSlugs = []
     let tenantCollection: CollectionConfig | undefined

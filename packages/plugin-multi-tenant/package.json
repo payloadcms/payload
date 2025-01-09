@@ -32,6 +32,11 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./fields": {
+      "import": "./src/exports/fields.ts",
+      "types": "./src/exports/fields.ts",
+      "default": "./src/exports/fields.ts"
+    },
     "./types": {
       "import": "./src/exports/types.ts",
       "types": "./src/exports/types.ts",
@@ -82,6 +87,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./fields": {
+        "import": "./dist/exports/fields.js",
+        "types": "./dist/exports/fields.d.ts",
+        "default": "./dist/exports/fields.js"
       },
       "./types": {
         "import": "./dist/exports/types.js",

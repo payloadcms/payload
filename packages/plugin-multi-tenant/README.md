@@ -89,13 +89,23 @@ multiTenantPlugin({
      *
      * optional - @default undefined
      */
-    userTenantsField: {
+    tenantsArrayField: {
       /**
        * Allows you to set access control on the array field
        *
        * optional - @default undefined
        */
-      access: {
+      arrayFieldAccess: {
+        create, // optional
+        read, // optional
+        update, // optional
+      },
+      /**
+       * Allows you to set access control on the tenant field on each row
+       *
+       * optional - @default undefined
+       */
+      tenantFieldAccess: {
         create, // optional
         read, // optional
         update, // optional
@@ -116,6 +126,12 @@ multiTenantPlugin({
           ],
         },
       ],
+      /**
+       * Optionally omit the field and add it manually to your users collection. Useful when you want to place the field somewhere custom.
+       *
+       * optional - @default true
+       */
+      includeDefaultField: true,
     }
   },
 })
@@ -201,4 +217,35 @@ export default buildConfig({
     },
   ],
 })
+```
+
+### Placing the tenants array field
+
+In your users collection you may want to place the field in a tab or in the sidebar, or customize some of the properties on it.
+
+You can use the `tenantsArrayField.includeDefaultField: false` setting in the plugin config. You will then need to manually add a `tenants` array field in your users collection.
+
+This field cannot be nested inside a named field, ie a group, named-tab or array. It _can_ be nested inside a row, unnamed-tab, collapsible.
+
+To make it easier, this plugin exports the field for you to import and merge in your own properties.
+
+```ts
+import type { CollectionConfig } from 'payload'
+import { tenantsArrayField } from '@payloadcms/plugin-multi-tenant/fields'
+
+const customTenantsArrayField = tenantsArrayField({
+  arrayFieldAccess: {}, // access control for the array field
+  tenantFieldAccess: {}, // access control for the tenants field on the array row
+  rowFields: [], // additional row fields
+})
+
+export const UsersCollection: CollectionConfig = {
+  slug: 'users',
+  fields: [
+    {
+      ...customTenantsArrayField,
+      label: 'Associated Tenants',
+    },
+  ],
+}
 ```
