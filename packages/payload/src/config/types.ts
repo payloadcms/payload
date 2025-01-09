@@ -797,13 +797,19 @@ export type Config = {
      * Note: If you've modified the default paths via `admin.routes`, delete those directories instead.
      */
     disable?: boolean
+    experimental?: {
+      /**
+       * This option will optimize the admin panel in a non-breaking way, until the next major version can fully support the changes.
+       * Examples of this include removing all undefined variables, empty objects, empty arrays, and `null` values from form state and the client config.
+       */
+      optimized?: boolean
+    }
     importMap?: {
       /**
        * Automatically generate component map during development
        * @default true
        */
       autoGenerate?: boolean
-
       /** The base directory for component paths starting with /.
        *
        * By default, this is process.cwd()

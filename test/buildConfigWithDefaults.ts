@@ -153,7 +153,11 @@ export async function buildConfigWithDefaults(
   }
 
   if (!config.admin) {
-    config.admin = {}
+    config.admin = {
+      experimental: {
+        optimized: true,
+      },
+    }
   }
 
   if (config.admin.autoLogin === undefined) {

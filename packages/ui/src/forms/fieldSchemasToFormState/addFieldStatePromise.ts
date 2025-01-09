@@ -138,16 +138,19 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     )
   }
 
+  // @deprecated: the `experimental.optimized` property is used for backwards compatibility
+  // when optimized, properties are only added to fieldState if absolutely necessary
+  // In the next major version, this will be the default behavior
+  const optimized = req.payload.config.admin.experimental?.optimized
+
   const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
 
   let fieldPermissions: SanitizedFieldPermissions = true
 
   const fieldState: FormFieldWithoutComponents = {}
 
-  // @deprecated: the `experimental.optimized` property is used for backwards compatibility
-  // when optimized, properties are only added to fieldState if absolutely necessary
-  // In the next major version, this property will be removed and all associated code
-  if (experimental?.optimized) {
+  if (optimized) {
+    // TODO: makes this default behavior when `admin.experimental.optimized` is the default behavior, see note above
     if (passesCondition === false) {
       fieldState.passesCondition = false
     }
@@ -219,9 +222,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         })
       }
     } else {
-      if (!experimental?.optimized) {
-        // @deprecated: this code block will be removed in the next major version (see note above)
-        // `valid` is only attached to the response if necessary
+      if (!optimized) {
+        // TODO: makes this default behavior when `admin.experimental.optimized` is the default behavior, see note above
         fieldState.valid = true
       }
     }
@@ -267,9 +269,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 value: row.id,
               }
 
-              if (!experimental?.optimized) {
-                // @deprecated: this code block will be removed in the next major version (see note above)
-                // `valid` is only attached to the response if necessary
+              if (!optimized) {
+                // TODO: makes this default behavior when `admin.experimental.optimized` is the default behavior, see note above
                 state[idKey].valid = true
               }
 
@@ -411,9 +412,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.id,
                 }
 
-                if (!experimental?.optimized) {
-                  // @deprecated: this code block will be removed in the next major version (see note above)
-                  // `valid` is only attached to the response if necessary
+                if (!optimized) {
+                  // TODO: makes this default behavior when `admin.experimental.optimized` is the default behavior, see note above
                   state[idKey].valid = true
                 }
 
@@ -430,9 +430,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.blockType,
                 }
 
-                if (!experimental?.optimized) {
-                  // @deprecated: this code block will be removed in the next major version (see note above)
-                  // `valid` is only attached to the response if necessary
+                if (!optimized) {
+                  // TODO: makes this default behavior when `admin.experimental.optimized` is the default behavior, see note above
                   state[fieldKey].valid = true
                 }
 
@@ -449,9 +448,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.blockName,
                 }
 
-                if (!experimental?.optimized) {
-                  // @deprecated: this code block will be removed in the next major version (see note above)
-                  // `valid` is only attached to the response if necessary
+                if (!optimized) {
                   state[blockNameKey].valid = true
                 }
 
@@ -701,13 +698,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         disableFormData: true,
       }
 
-      if (experimental?.optimized) {
+      if (optimized) {
+        // TODO: makes this default behavior when optimized is the default behavior, see note above
         if (passesCondition === false) {
           state[path].passesCondition = false
         }
       } else {
-        // @deprecated: this code block will be removed in the next major version (see note above)
-        // `passesCondition` and `valid` are only attached to the response if necessary
         state[path].passesCondition = passesCondition
         state[path].valid = true
       }
