@@ -770,8 +770,8 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     ```diff
     // collections/Posts.ts
     import type { CollectionConfig } from 'payload'
-    + import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
-    + import { addLocalesToRequest } from '@payloadcms/next/utilities'
+    + import { addDataAndFileToRequest } from 'payload'
+    + import { addLocalesToRequest } from 'payload'
 
     export const PostsCollection: CollectionConfig = {
       slug: 'posts',
