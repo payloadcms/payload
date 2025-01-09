@@ -97,10 +97,9 @@ export const renderField: RenderFieldMethod = ({
    */
   if (fieldConfig.admin) {
     if (
-      (Object.keys(fieldConfig.admin.components).length > 0 ||
+      (Object.keys(fieldConfig.admin.components || {}).length > 0 ||
         ('description' in fieldConfig.admin &&
-          typeof fieldConfig.admin.description === 'function') ||
-        'RowLabel' in fieldConfig.admin.components) &&
+          typeof fieldConfig.admin.description === 'function')) &&
       !fieldState?.customComponents
     ) {
       fieldState.customComponents = {}
