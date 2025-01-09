@@ -113,22 +113,22 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 
-  const incomingEndpoints = [...(config.endpoints ?? [])]
-
-  config.endpoints = []
+  if (!config.endpoints) {
+    config.endpoints = []
+  }
 
   for (const endpoint of authRootEndpoints) {
-    if (!incomingEndpoints.some((each) => each.path === endpoint.path)) {
+    if (
+      !config.endpoints.some(
+        (each) => each.method === endpoint.method && each.path === endpoint.path,
+      )
+    ) {
       config.endpoints.push(endpoint)
     }
   }
 
-  if (!incomingEndpoints.some((each) => each.method === 'options')) {
+  if (!config.endpoints.some((each) => each.method === 'options')) {
     config.endpoints.push(optionsEndpoint)
-  }
-
-  for (const endpoint of incomingEndpoints) {
-    config.endpoints.push(endpoint)
   }
 
   if (config.localization && config.localization.locales?.length > 0) {

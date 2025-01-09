@@ -57,18 +57,18 @@ export const sanitizeCollection = async (
   })
 
   if (sanitized.endpoints !== false) {
-    const incomingEndpoints = [...(sanitized.endpoints ?? [])]
-
-    sanitized.endpoints = []
-
-    for (const endpoint of defaultCollectionEndpoints) {
-      if (!incomingEndpoints.some((each) => each.path === endpoint.path)) {
-        sanitized.endpoints.push(endpoint)
-      }
+    if (!sanitized.endpoints) {
+      sanitized.endpoints = []
     }
 
-    for (const endpoint of incomingEndpoints) {
-      sanitized.endpoints.push(endpoint)
+    for (const endpoint of defaultCollectionEndpoints) {
+      if (
+        !sanitized.endpoints.some(
+          (each) => each.method === endpoint.method && each.path === endpoint.path,
+        )
+      ) {
+        sanitized.endpoints.push(endpoint)
+      }
     }
   }
 
