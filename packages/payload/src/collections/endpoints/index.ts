@@ -42,7 +42,7 @@ export const defaultCollectionEndpoints: Endpoint[] = [
     },
     {
       handler: docAccessHandler,
-      method: 'get',
+      method: 'post',
       path: '/access/:id',
     },
     {

@@ -12,7 +12,7 @@ import { updateHandler } from './update.js'
 export const defaultGlobalEndpoints: Endpoint[] = wrapInternalEndpoints([
   {
     handler: docAccessHandler,
-    method: 'get',
+    method: 'post',
     path: '/access',
   },
   {
