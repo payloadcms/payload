@@ -1,7 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
-import type { InitPageResult, Locale, VisibleEntities } from 'payload'
+import type { InitPageResult, VisibleEntities } from 'payload'
 
-import { findLocaleFromCode } from '@payloadcms/ui/shared'
 import { headers as getHeaders } from 'next/headers.js'
 import { notFound } from 'next/navigation.js'
 import { createLocalReq, getPayload, isEntityHidden, parseCookies } from 'payload'
@@ -9,6 +8,7 @@ import * as qs from 'qs-esm'
 
 import type { Args } from './types.js'
 
+import { getRequestLocale } from '../getRequestLocale.js'
 import { initReq } from '../initReq.js'
 import { getRouteInfo } from './handleAdminPage.js'
 import { handleAuthRedirect } from './handleAuthRedirect.js'
@@ -28,7 +28,6 @@ export const initPage = async ({
   const {
     collections,
     globals,
-    localization,
     routes: { admin: adminRoute },
   } = payload.config
 
@@ -74,52 +73,13 @@ export const initPage = async ({
 
   req.user = user
 
-  const localeParam = searchParams?.locale as string
-  let locale: Locale
+  const locale = await getRequestLocale({
+    localeFromParams: req.query.locale as string,
+    payload,
+    user,
+  })
 
-  if (localization) {
-    const defaultLocaleCode = localization.defaultLocale ? localization.defaultLocale : 'en'
-    let localeCode: string = localeParam
-
-    if (!localeCode) {
-      try {
-        localeCode = await payload
-          .find({
-            collection: 'payload-preferences',
-            depth: 0,
-            limit: 1,
-            user,
-            where: {
-              and: [
-                {
-                  'user.relationTo': {
-                    equals: payload.config.admin.user,
-                  },
-                },
-                {
-                  'user.value': {
-                    equals: user.id,
-                  },
-                },
-                {
-                  key: {
-                    equals: 'locale',
-                  },
-                },
-              ],
-            },
-          })
-          ?.then((res) => res.docs?.[0]?.value as string)
-      } catch (_err) {} // eslint-disable-line no-empty
-    }
-
-    locale = findLocaleFromCode(localization, localeCode)
-
-    if (!locale) {
-      locale = findLocaleFromCode(localization, defaultLocaleCode)
-    }
-    req.locale = locale.code
-  }
+  req.locale = locale?.code
 
   const visibleEntities: VisibleEntities = {
     collections: collections

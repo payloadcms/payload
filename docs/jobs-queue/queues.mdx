@@ -25,7 +25,33 @@ Then, you could configure two different runner strategies:
 
 ## Executing jobs
 
-As mentioned above, you can queue jobs, but the jobs won't run unless a worker picks up your jobs and runs them. This can be done in two ways:
+As mentioned above, you can queue jobs, but the jobs won't run unless a worker picks up your jobs and runs them. This can be done in four ways:
+
+#### Cron jobs
+
+You can use the jobs.autoRun property to configure cron jobs:
+
+```ts
+export default buildConfig({
+  // Other configurations...
+  jobs: {
+    tasks: [
+      // your tasks here
+    ],
+    // autoRun can optionally be a function that receives payload as an argument
+    autoRun: [
+      {
+        cron: '0 * * * *', // every hour at minute 0
+        limit: 100, // limit jobs to process each run
+        queue: 'hourly', // name of the queue
+      },
+      // add as many cron jobs as you want
+    ],
+  },
+})
+```
+
+<Banner type="warning">autoRun is intended for use with a dedicated server that is always running, and should not be used on serverless platforms like Vercel.</Banner>
 
 #### Endpoint
 

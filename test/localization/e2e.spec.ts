@@ -30,6 +30,9 @@ import {
   withRequiredLocalizedFields,
 } from './shared.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
+import { RESTClient } from 'helpers/rest.js'
+import { GeneratedTypes } from 'helpers/sdk/types.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -54,6 +57,7 @@ const description = 'description'
 
 let page: Page
 let payload: PayloadTestSDK<Config>
+let client: RESTClient
 let serverURL: string
 let richTextURL: AdminUrlUtil
 let context: BrowserContext
@@ -73,6 +77,9 @@ describe('Localization', () => {
 
     initPageConsoleErrorCatch(page)
 
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    await client.login()
+
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -84,8 +91,30 @@ describe('Localization', () => {
     // })
   })
 
+  describe('localizer', async () => {
+    test('should not render default locale in locale selector when prefs are not default', async () => {
+      // change prefs to spanish, then load page and check that the localizer label does not say English
+      await upsertPrefs<Config, GeneratedTypes<any>>({
+        payload,
+        user: client.user,
+        key: 'locale',
+        value: 'es',
+      })
+
+      await page.goto(url.list)
+
+      const localeLabel = await page
+        .locator('.localizer.app-header__localizer .localizer-button__current-label')
+        .innerText()
+
+      expect(localeLabel).not.toEqual('English')
+    })
+  })
+
   describe('localized text', () => {
     test('create english post, switch to spanish', async () => {
+      await changeLocale(page, defaultLocale)
+
       await page.goto(url.create)
 
       await fillValues({ description, title })

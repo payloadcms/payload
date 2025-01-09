@@ -8,8 +8,6 @@ import type {
   User,
 } from 'payload'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
-
 export type DefaultListViewProps = {
   collectionSlug: SanitizedCollectionConfig['slug']
   listSearchableFields: SanitizedCollectionConfig['admin']['listSearchableFields']

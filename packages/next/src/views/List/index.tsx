@@ -78,6 +78,7 @@ export const renderListView = async (
       depth: query?.depth,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       sort: query?.sort,
+
     },
   })
 

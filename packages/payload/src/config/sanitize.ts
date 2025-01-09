@@ -12,6 +12,7 @@ import type {
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
+import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
@@ -110,6 +111,14 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
+
+  if (!config.endpoints) {
+    config.endpoints = []
+  }
+
+  for (const endpoint of authRootEndpoints) {
+    config.endpoints.push(endpoint)
+  }
 
   if (config.localization && config.localization.locales?.length > 0) {
     // clone localization config so to not break everything
