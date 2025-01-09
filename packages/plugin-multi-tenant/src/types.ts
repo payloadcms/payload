@@ -76,7 +76,6 @@ export type Tenant<IDType = number | string> = {
 
 export type UserWithTenantsField = {
   tenants: {
-    roles: string[]
     tenant: number | string | Tenant
   }[]
 } & User

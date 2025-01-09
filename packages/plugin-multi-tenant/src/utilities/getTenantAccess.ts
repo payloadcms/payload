@@ -4,16 +4,16 @@ import type { UserWithTenantsField } from '../types.js'
 
 import { getUserTenantIDs } from './getUserTenantIDs.js'
 
-export function getTenantAccess({ user }): null | Where {
-  const userAssignedTenantIDs = getUserTenantIDs(user as UserWithTenantsField)
+type Args = {
+  fieldName: string
+  user: UserWithTenantsField
+}
+export function getTenantAccess({ fieldName, user }: Args): Where {
+  const userAssignedTenantIDs = getUserTenantIDs(user)
 
-  if (userAssignedTenantIDs.length) {
-    return {
-      tenant: {
-        in: userAssignedTenantIDs,
-      },
-    }
+  return {
+    [fieldName]: {
+      in: userAssignedTenantIDs || [],
+    },
   }
-
-  return null
 }

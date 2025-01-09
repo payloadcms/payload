@@ -9,21 +9,27 @@ import { TenantSelectorClient } from './index.client.js'
 
 type Args = {
   tenantsCollectionSlug: MultiTenantPluginConfig['tenantsSlug']
+  useAsTitle: string
   user?: UserWithTenantsField
 } & ServerProps
 
-export const TenantSelector = async ({ payload, tenantsCollectionSlug, user }: Args) => {
+export const TenantSelector = async ({
+  payload,
+  tenantsCollectionSlug,
+  useAsTitle,
+  user,
+}: Args) => {
   const { docs: userTenants } = await payload.find({
     collection: tenantsCollectionSlug,
     depth: 0,
     limit: 1000,
     overrideAccess: false,
-    sort: 'name',
+    sort: useAsTitle,
     user,
   })
 
   const tenantOptions = userTenants.map((doc: Tenant) => ({
-    label: doc.name,
+    label: String(doc[useAsTitle]),
     value: String(doc.id),
   }))
 

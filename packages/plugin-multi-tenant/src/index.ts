@@ -1,4 +1,4 @@
-import type { Config } from 'payload'
+import type { CollectionConfig, Config } from 'payload'
 
 import type { MultiTenantPluginConfig } from './types.js'
 
@@ -12,6 +12,16 @@ const defaults = {
   tenantFieldName: 'tenant',
   userTenantsArrayFieldName: 'tenants',
 }
+
+type AllAccessKeys<T extends readonly string[]> = T[number] extends keyof CollectionConfig['access']
+  ? keyof CollectionConfig['access'] extends T[number]
+    ? T
+    : never
+  : never
+
+const collectionAccessKeys: AllAccessKeys<
+  ['create', 'read', 'update', 'delete', 'admin', 'readVersions', 'unlock']
+> = ['create', 'read', 'update', 'delete', 'admin', 'readVersions', 'unlock']
 
 export const multiTenantPlugin =
   (pluginConfig: MultiTenantPluginConfig) =>
@@ -44,19 +54,21 @@ export const multiTenantPlugin =
     adminUsersCollection.fields.push(userTenantsField(pluginConfig?.userTenantsField || {}))
 
     const globalCollectionSlugs = []
+    let tenantCollection: CollectionConfig | undefined
 
     /**
      * Modify collections
      */
     incomingConfig.collections.forEach((collection) => {
       if (collection.slug === tenantsCollectionSlug) {
+        tenantCollection = collection
         /**
          * Modify tenants collection
          */
-        collection.access = Object.keys(collection.access || {}).reduce((acc, key) => {
-          const accessFunction = collection.access[key]
+        collection.access = collectionAccessKeys.reduce((acc, key) => {
           acc[key] = withTenantAccess({
-            accessFunction,
+            accessFunction: collection?.access?.[key],
+            fieldName: 'id',
             userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
           })
 
@@ -93,10 +105,10 @@ export const multiTenantPlugin =
           /**
            * Collection access functions with user assigned tenant constraints
            */
-          collection.access = Object.keys(collection.access || {}).reduce((acc, key) => {
-            const accessFunction = collection.access[key]
+          collection.access = collectionAccessKeys.reduce((acc, key) => {
             acc[key] = withTenantAccess({
-              accessFunction,
+              accessFunction: collection?.access?.[key],
+              fieldName: tenantFieldName,
               userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
             })
 
@@ -109,6 +121,10 @@ export const multiTenantPlugin =
         }
       }
     })
+
+    if (!tenantCollection) {
+      throw new Error(`Tenants collection not found with slug: ${tenantsCollectionSlug}`)
+    }
 
     if (!incomingConfig.admin?.components) {
       incomingConfig.admin.components = {
@@ -137,6 +153,7 @@ export const multiTenantPlugin =
     incomingConfig.admin.components.beforeNavLinks.push({
       clientProps: {
         tenantsCollectionSlug,
+        useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
       },
       path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
     })
