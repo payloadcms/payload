@@ -118,18 +118,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   for (const endpoint of authRootEndpoints) {
-    if (
-      !config.endpoints.some(
-        (each) => each.method === endpoint.method && each.path === endpoint.path,
-      )
-    ) {
-      config.endpoints.push(endpoint)
-    }
+    config.endpoints.push(endpoint)
   }
 
-  if (!config.endpoints.some((each) => each.method === 'options')) {
-    config.endpoints.push(optionsEndpoint)
-  }
+  config.endpoints.push(optionsEndpoint)
 
   if (config.localization && config.localization.locales?.length > 0) {
     // clone localization config so to not break everything
