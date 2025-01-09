@@ -113,6 +113,8 @@ describe('Localization', () => {
 
   describe('localized text', () => {
     test('create english post, switch to spanish', async () => {
+      await changeLocale(page, defaultLocale)
+
       await page.goto(url.create)
 
       await fillValues({ description, title })
