@@ -8,9 +8,9 @@ import * as qs from 'qs-esm'
 
 import type { Tenant, User } from '@/payload-types'
 import { getTenantAdminTenantAccessIDs } from '@/utilities/getTenantAccessIDs'
+import { extractID } from '@/utilities/extractID'
 import { TENANT_COOKIE_NAME } from '@/collections/Tenants/cookie'
 import { userRole } from '@/collections/Users/roles'
-import { extractID } from '@/utilities/extractID'
 
 import './index.scss'
 
@@ -85,12 +85,14 @@ export const TenantSelector = ({ initialCookie }: { initialCookie?: string }) =>
     return (
       <div className="tenant-selector">
         <SelectInput
+          isClearable={false}
+          isSortable={false}
           label="Select a tenant"
           name="setTenant"
           onChange={handleChange}
           options={options}
           path="setTenant"
-          value={options.find((opt) => opt.value === initialCookie)?.value}
+          value={options.find((opt) => String(opt.value) === String(initialCookie))?.value}
         />
       </div>
     )
