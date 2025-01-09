@@ -78,7 +78,7 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
       validate: (value) => {
         if (value) {
           try {
-            JSON.stringify(value)
+            JSON.parse(JSON.stringify(value))
           } catch {
             return 'Invalid JSON'
           }

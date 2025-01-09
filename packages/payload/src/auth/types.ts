@@ -161,6 +161,10 @@ export type AuthStrategyFunctionArgs = {
   headers: Request['headers']
   isGraphQL?: boolean
   payload: Payload
+  /**
+   * The AuthStrategy name property from the payload config.
+   */
+  strategyName?: string
 }
 
 export type AuthStrategyResult = {
