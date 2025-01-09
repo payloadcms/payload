@@ -66,6 +66,8 @@ export interface Config {
       inlineTaskTest: WorkflowInlineTaskTest;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
+      subTask: WorkflowSubTask;
+      subTaskFails: WorkflowSubTaskFails;
     };
   };
 }
@@ -221,6 +223,21 @@ export interface PayloadJob {
           | number
           | boolean
           | null;
+        parent?: {
+          taskSlug?:
+            | (
+                | 'inline'
+                | 'UpdatePost'
+                | 'UpdatePostStep2'
+                | 'CreateSimple'
+                | 'CreateSimpleRetriesUndefined'
+                | 'CreateSimpleRetries0'
+                | 'CreateSimpleWithDuplicateMessage'
+                | 'ExternalTask'
+              )
+            | null;
+          taskID?: string | null;
+        };
         state: 'failed' | 'succeeded';
         error?:
           | {
@@ -249,6 +266,8 @@ export interface PayloadJob {
         | 'inlineTaskTest'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
+        | 'subTask'
+        | 'subTaskFails'
       )
     | null;
   taskSlug?:
@@ -390,6 +409,12 @@ export interface PayloadJobsSelect<T extends boolean = true> {
         taskID?: T;
         input?: T;
         output?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
         state?: T;
         error?: T;
         id?: T;
@@ -637,6 +662,24 @@ export interface WorkflowExternalWorkflow {
  * via the `definition` "WorkflowRetriesBackoffTest".
  */
 export interface WorkflowRetriesBackoffTest {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSubTask".
+ */
+export interface WorkflowSubTask {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSubTaskFails".
+ */
+export interface WorkflowSubTaskFails {
   input: {
     message: string;
   };

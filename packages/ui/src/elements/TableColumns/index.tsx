@@ -1,16 +1,15 @@
 'use client'
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ListPreferences, SanitizedCollectionConfig } from 'payload'
 
 import React, { createContext, useCallback, useContext, useEffect } from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
-import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 
 export interface ITableColumns {
   columns: Column[]
@@ -24,10 +23,6 @@ export interface ITableColumns {
 export const TableColumnContext = createContext<ITableColumns>({} as ITableColumns)
 
 export const useTableColumns = (): ITableColumns => useContext(TableColumnContext)
-
-export type ListPreferences = {
-  columns: ColumnPreferences
-}
 
 type Props = {
   readonly children: React.ReactNode
@@ -78,11 +73,12 @@ export const TableColumnsProvider: React.FC<Props> = ({
   const { getPreference } = usePreferences()
 
   const [tableColumns, setTableColumns] = React.useState(columnState)
-  const tableStateControllerRef = React.useRef<AbortController>(null)
+  const abortTableStateRef = React.useRef<AbortController>(null)
+  const abortToggleColumnRef = React.useRef<AbortController>(null)
 
   const moveColumn = useCallback(
     async (args: { fromIndex: number; toIndex: number }) => {
-      abortAndIgnore(tableStateControllerRef.current)
+      const controller = handleAbortRef(abortTableStateRef)
 
       const { fromIndex, toIndex } = args
       const withMovedColumn = [...tableColumns]
@@ -90,9 +86,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
       withMovedColumn.splice(toIndex, 0, columnToMove)
 
       setTableColumns(withMovedColumn)
-
-      const controller = new AbortController()
-      tableStateControllerRef.current = controller
 
       const result = await getTableState({
         collectionSlug,
@@ -108,6 +101,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
         setTableColumns(result.state)
         setTable(result.Table)
       }
+
+      abortTableStateRef.current = null
     },
     [
       tableColumns,
@@ -123,7 +118,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const toggleColumn = useCallback(
     async (column: string) => {
-      abortAndIgnore(tableStateControllerRef.current)
+      const controller = handleAbortRef(abortToggleColumnRef)
 
       const { newColumnState, toggledColumns } = tableColumns.reduce<{
         newColumnState: Column[]
@@ -155,9 +150,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
       setTableColumns(newColumnState)
 
-      const controller = new AbortController()
-      tableStateControllerRef.current = controller
-
       const result = await getTableState({
         collectionSlug,
         columns: toggledColumns,
@@ -172,6 +164,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
         setTableColumns(result.state)
         setTable(result.Table)
       }
+
+      abortToggleColumnRef.current = null
     },
     [
       tableColumns,
@@ -243,7 +237,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
       if (collectionHasChanged || !listPreferences) {
         const currentPreferences = await getPreference<{
-          columns: ColumnPreferences
+          columns: ListPreferences['columns']
         }>(preferenceKey)
 
         prevCollection.current = collectionSlug
@@ -281,8 +275,10 @@ export const TableColumnsProvider: React.FC<Props> = ({
   }, [columnState])
 
   useEffect(() => {
+    const abortTableState = abortTableStateRef.current
+
     return () => {
-      abortAndIgnore(tableStateControllerRef.current)
+      abortAndIgnore(abortTableState)
     }
   }, [])
 

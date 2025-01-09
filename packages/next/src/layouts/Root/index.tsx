@@ -5,11 +5,11 @@ import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { getPayload, parseCookies } from 'payload'
+import { getPayload, getRequestLanguage, parseCookies } from 'payload'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
+import { getRequestLocale } from '../../utilities/getRequestLocale.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -92,6 +92,11 @@ export const RootLayout = async ({
     importMap,
   })
 
+  const locale = await getRequestLocale({
+    payload,
+    user,
+  })
+
   return (
     <html
       data-theme={theme}
@@ -110,6 +115,7 @@ export const RootLayout = async ({
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}
+          locale={locale?.code}
           permissions={permissions}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}

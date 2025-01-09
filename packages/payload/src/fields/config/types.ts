@@ -243,6 +243,7 @@ export type FilterOptionsProps<TData = any> = {
    * The collection `slug` to filter against, limited to this field's `relationTo` property.
    */
   relationTo: CollectionSlug
+  req: PayloadRequest
   /**
    * An object containing document data that is scoped to only fields within the same parent of this field.
    */
@@ -1415,6 +1416,13 @@ export type JoinField = {
    * This does not need to be set and will be overridden by the relationship field's localized property.
    */
   localized?: boolean
+  /**
+   * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
+   *
+   * @see https://payloadcms.com/docs/getting-started/concepts#depth
+   *
+   * @default 1
+   */
   maxDepth?: number
   /**
    * A string for the field in the collection being joined to.

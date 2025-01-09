@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
@@ -12,7 +12,9 @@ import {
   changeLocale,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
+  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -23,9 +25,14 @@ import {
   defaultLocale,
   englishTitle,
   localizedPostsSlug,
+  relationshipLocalizedSlug,
   spanishLocale,
   withRequiredLocalizedFields,
 } from './shared.js'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
+import { RESTClient } from 'helpers/rest.js'
+import { GeneratedTypes } from 'helpers/sdk/types.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -38,9 +45,10 @@ const dirname = path.dirname(filename)
  * Repeat above for Globals
  */
 
-const { beforeAll, describe } = test
+const { beforeAll, beforeEach, describe } = test
 let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
+let urlRelationshipLocalized: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -49,8 +57,10 @@ const description = 'description'
 
 let page: Page
 let payload: PayloadTestSDK<Config>
+let client: RESTClient
 let serverURL: string
 let richTextURL: AdminUrlUtil
+let context: BrowserContext
 
 describe('Localization', () => {
   beforeAll(async ({ browser }, testInfo) => {
@@ -58,19 +68,53 @@ describe('Localization', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
+    urlRelationshipLocalized = new AdminUrlUtil(serverURL, relationshipLocalizedSlug)
     richTextURL = new AdminUrlUtil(serverURL, richTextSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
 
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    await client.login()
+
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  beforeEach(async () => {
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+  })
+
+  describe('localizer', async () => {
+    test('should not render default locale in locale selector when prefs are not default', async () => {
+      // change prefs to spanish, then load page and check that the localizer label does not say English
+      await upsertPrefs<Config, GeneratedTypes<any>>({
+        payload,
+        user: client.user,
+        key: 'locale',
+        value: 'es',
+      })
+
+      await page.goto(url.list)
+
+      const localeLabel = await page
+        .locator('.localizer.app-header__localizer .localizer-button__current-label')
+        .innerText()
+
+      expect(localeLabel).not.toEqual('English')
+    })
   })
 
   describe('localized text', () => {
     test('create english post, switch to spanish', async () => {
+      await changeLocale(page, defaultLocale)
+
       await page.goto(url.create)
 
       await fillValues({ description, title })
@@ -239,26 +283,30 @@ describe('Localization', () => {
   })
 
   describe('localized relationships', () => {
-    test('ensure relationship field fetches are localised as well', async () => {
-      await page.goto(url.list)
+    test('ensure relationship field fetches are localized as well', async () => {
       await changeLocale(page, spanishLocale)
-
-      const localisedPost = page.locator('.cell-title a').first()
-      const localisedPostUrl = await localisedPost.getAttribute('href')
-      await page.goto(serverURL + localisedPostUrl)
-      await page.waitForURL(serverURL + localisedPostUrl)
-
+      await navigateToDoc(page, url)
       const selectField = page.locator('#field-children .rs__control')
       await selectField.click()
-
       await expect(page.locator('#field-children .rs__menu')).toContainText('spanish-relation2')
+    })
+
+    test('ensure relationship edit drawers are opened in currently selected locale', async () => {
+      await changeLocale(page, spanishLocale)
+      await navigateToDoc(page, urlRelationshipLocalized)
+      const drawerToggler =
+        '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler'
+      expect(page.locator(drawerToggler)).toBeEnabled()
+      await openDocDrawer(page, drawerToggler)
+      await expect(page.locator('.doc-drawer__header-text')).toContainText('spanish-relation2')
+      await page.locator('.doc-drawer__header-close').click()
     })
   })
 
   describe('copy localized data', () => {
     test('should show Copy To Locale button and drawer', async () => {
       await changeLocale(page, defaultLocale)
-      await createAndSaveDoc(page, url, { description, title })
+      await navigateToDoc(page, url)
       await openCopyToLocaleDrawer(page)
       await expect(page.locator('.copy-locale-data__content')).toBeVisible()
       await page.locator('.drawer-close-button').click()
@@ -266,11 +314,9 @@ describe('Localization', () => {
 
     test('should copy data to correct locale', async () => {
       await createAndSaveDoc(page, url, { title })
-
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
       await runCopy(page)
-
       await expect(page.locator('#field-title')).toHaveValue(title)
     })
 
@@ -294,7 +340,7 @@ describe('Localization', () => {
       const nestedArrayURL = new AdminUrlUtil(serverURL, nestedToArrayAndBlockCollectionSlug)
       await page.goto(nestedArrayURL.create)
       await changeLocale(page, 'ar')
-      const addArrayRow = page.locator('.array-field__add-row')
+      const addArrayRow = page.locator('#field-topLevelArray .array-field__add-row')
       await addArrayRow.click()
 
       const arrayField = page.locator('#field-topLevelArray__0__localizedText')
@@ -379,6 +425,9 @@ describe('Localization', () => {
       await runCopy(page)
       await expect(page.locator('#field-title')).toHaveValue(title)
 
+      const regexPattern = new RegExp(`locale=es`)
+      await expect(page).toHaveURL(regexPattern)
+
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Hungarian')
       await runCopy(page)
@@ -424,11 +473,13 @@ async function createAndSaveDoc(page, url, values) {
 }
 
 async function openCopyToLocaleDrawer(page) {
-  const docControls = page.locator('.doc-controls__popup')
+  const docControls = page.locator('.doc-controls__popup button.popup-button')
+  expect(docControls).toBeEnabled()
   await docControls.click()
   const copyButton = page.locator('#copy-locale-data__button')
   await expect(copyButton).toBeVisible()
   await copyButton.click()
+  await expect(page.locator('#copy-locale')).toBeVisible()
   await expect(page.locator('.copy-locale-data__content')).toBeVisible()
 }
 

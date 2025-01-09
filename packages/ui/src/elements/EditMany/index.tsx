@@ -23,7 +23,7 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import './index.scss'
@@ -156,7 +156,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const router = useRouter()
   const [initialState, setInitialState] = useState<FormState>()
   const hasInitializedState = React.useRef(false)
-  const formStateAbortControllerRef = React.useRef<AbortController>(null)
+  const abortFormStateRef = React.useRef<AbortController>(null)
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
@@ -193,10 +193,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      abortAndIgnore(formStateAbortControllerRef.current)
-
-      const controller = new AbortController()
-      formStateAbortControllerRef.current = controller
+      const controller = handleAbortRef(abortFormStateRef)
 
       const { state } = await getFormState({
         collectionSlug: slug,
@@ -208,14 +205,18 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         signal: controller.signal,
       })
 
+      abortFormStateRef.current = null
+
       return state
     },
     [getFormState, slug, collectionPermissions],
   )
 
   useEffect(() => {
+    const abortFormState = abortFormStateRef.current
+
     return () => {
-      abortAndIgnore(formStateAbortControllerRef.current)
+      abortAndIgnore(abortFormState)
     }
   }, [])
 

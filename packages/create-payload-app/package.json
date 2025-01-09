@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "3.11.0",
+  "version": "3.15.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -49,7 +49,7 @@
   "scripts": {
     "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",

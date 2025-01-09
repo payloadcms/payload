@@ -363,6 +363,38 @@ describe('Relationships', () => {
         expect(docs[0].id).toBe(doc.id)
       })
 
+      it('should allow querying within tabs-blocks-tabs', async () => {
+        const movie = await payload.create({ collection: 'movies', data: { name: 'Pulp Fiction' } })
+
+        const { id } = await payload.create({
+          collection: 'deep-nested',
+          data: {
+            content: {
+              blocks: [
+                {
+                  blockType: 'testBlock',
+                  meta: {
+                    movie: movie.id,
+                  },
+                },
+              ],
+            },
+          },
+        })
+
+        const result = await payload.find({
+          collection: 'deep-nested',
+          where: {
+            'content.blocks.meta.movie': {
+              equals: movie.id,
+            },
+          },
+        })
+
+        expect(result.totalDocs).toBe(1)
+        expect(result.docs[0].id).toBe(id)
+      })
+
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
           const { customIdRelation } = await restClient

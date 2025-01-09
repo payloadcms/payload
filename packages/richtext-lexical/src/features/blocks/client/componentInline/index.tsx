@@ -70,6 +70,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const [editor] = useLexicalComposerContext()
   const { i18n, t } = useTranslation<object, string>()
   const {
+    createdInlineBlock,
     fieldProps: {
       featureClientSchemaMap,
       initialLexicalFormState,
@@ -77,10 +78,12 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       readOnly,
       schemaPath,
     },
+    setCreatedInlineBlock,
     uuid: uuidFromContext,
   } = useEditorConfigContext()
   const { getFormState } = useServerFunctions()
   const editDepth = useEditDepth()
+  const firstTimeDrawer = useRef(false)
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
     initialLexicalFormState?.[formData.id]?.formState,
@@ -115,6 +118,18 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   ][0] as BlocksFieldClient
 
   const clientBlock = blocksField.blocks[0]
+
+  // Open drawer on "mount"
+  useEffect(() => {
+    if (!firstTimeDrawer.current && createdInlineBlock?.getKey() === nodeKey) {
+      // > 2 because they always have "id" and "blockName" fields
+      if (clientBlock.fields.length > 2) {
+        toggleDrawer()
+      }
+      setCreatedInlineBlock?.(undefined)
+      firstTimeDrawer.current = true
+    }
+  }, [clientBlock.fields.length, createdInlineBlock, nodeKey, setCreatedInlineBlock, toggleDrawer])
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
