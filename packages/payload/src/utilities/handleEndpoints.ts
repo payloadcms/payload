@@ -16,7 +16,7 @@ export const handleEndpoints = async ({
 }: {
   config: Promise<SanitizedConfig> | SanitizedConfig
   request: Request
-}) => {
+}): Promise<Response> => {
   let handler: PayloadHandler
   let req: PayloadRequest
   let collection: Collection
