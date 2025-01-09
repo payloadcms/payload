@@ -168,6 +168,13 @@ export const handleEndpoints = async ({
     }
 
     const response = await handler(req)
+
+    if (req.responseHeaders) {
+      for (const [key, value] of req.responseHeaders) {
+        response.headers.append(key, value)
+      }
+    }
+
     return response
   } catch (err) {
     return routeError({

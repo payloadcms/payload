@@ -70,6 +70,6 @@ export const authCollectionEndpoints: Endpoint[] = wrapInternalEndpoints([
   {
     handler: verifyEmailHandler,
     method: 'post',
-    path: '/verify',
+    path: '/verify/:id',
   },
 ])
