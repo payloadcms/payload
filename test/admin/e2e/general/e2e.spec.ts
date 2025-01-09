@@ -957,11 +957,9 @@ describe('General', () => {
       await page.waitForURL(forceRenderCollectionURL.create)
 
       const isMac = process.platform === 'darwin'
-      if (isMac) {
-        await page.keyboard.press('Meta+F') // Cmd + F for macOS
-      } else {
-        await page.keyboard.press('Control+F') // Ctrl + F for Windows/Linux
-      }
+      const searchKey = isMac ? 'Meta+F' : 'Control+F'
+
+      await page.keyboard.press(searchKey)
 
       await page.keyboard.type('Field100')
 
@@ -973,15 +971,13 @@ describe('General', () => {
       await page.waitForURL(noForceRenderCollectionURL.create)
 
       const isMac = process.platform === 'darwin'
-      if (isMac) {
-        await page.keyboard.press('Meta+F') // Cmd + F for macOS
-      } else {
-        await page.keyboard.press('Control+F') // Ctrl + F for Windows/Linux
-      }
+      const searchKey = isMac ? 'Meta+F' : 'Control+F'
+
+      await page.keyboard.press(searchKey)
 
       await page.keyboard.type('Field100')
 
-      await expect(page.locator('label >> text=Field100')).not.toBeVisible()
+      await expect(page.locator('label >> text=Field100')).toBeHidden()
     })
 
     test('should successfully find field in large global edit view document', async () => {
@@ -989,11 +985,9 @@ describe('General', () => {
       await page.waitForURL(forceRenderGlobalURL.global(forceRenderGlobalSlug))
 
       const isMac = process.platform === 'darwin'
-      if (isMac) {
-        await page.keyboard.press('Meta+F') // Cmd + F for macOS
-      } else {
-        await page.keyboard.press('Control+F') // Ctrl + F for Windows/Linux
-      }
+      const searchKey = isMac ? 'Meta+F' : 'Control+F'
+
+      await page.keyboard.press(searchKey)
 
       await page.keyboard.type('Field100')
 
@@ -1005,15 +999,13 @@ describe('General', () => {
       await page.waitForURL(noForceRenderGlobalURL.global(noForceRenderGlobalSlug))
 
       const isMac = process.platform === 'darwin'
-      if (isMac) {
-        await page.keyboard.press('Meta+F') // Cmd + F for macOS
-      } else {
-        await page.keyboard.press('Control+F') // Ctrl + F for Windows/Linux
-      }
+      const searchKey = isMac ? 'Meta+F' : 'Control+F'
+
+      await page.keyboard.press(searchKey)
 
       await page.keyboard.type('Field100')
 
-      await expect(page.locator('label >> text=Field100')).not.toBeVisible()
+      await expect(page.locator('label >> text=Field100')).toBeHidden()
     })
   })
 })
