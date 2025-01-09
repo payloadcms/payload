@@ -39,7 +39,7 @@ export const tenantField = ({
     beforeChange: [
       ({ req, value }) => {
         if (!value) {
-          const tenantFromCookie = getTenantFromCookie(req.headers)
+          const tenantFromCookie = getTenantFromCookie(req.headers, req.payload.db.defaultIDType)
           if (tenantFromCookie) {
             return tenantFromCookie
           }

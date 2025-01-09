@@ -1,7 +1,7 @@
 import { parseCookies } from 'payload'
 
-export function getTenantFromCookie(headers: Headers) {
+export function getTenantFromCookie(headers: Headers, idType: 'number' | 'text') {
   const cookies = parseCookies(headers)
   const selectedTenant = cookies.get('payload-tenant') || null
-  return selectedTenant
+  return selectedTenant ? (idType === 'number' ? parseInt(selectedTenant) : selectedTenant) : null
 }

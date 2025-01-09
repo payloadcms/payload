@@ -17,7 +17,7 @@ export async function getGlobalViewRedirect({
   view,
 }: Args): Promise<string | void> {
   const headers = await getHeaders()
-  const tenant = getTenantFromCookie(headers)
+  const tenant = getTenantFromCookie(headers, payload.db.defaultIDType)
   let redirectRoute
 
   if (tenant) {

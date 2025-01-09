@@ -24,7 +24,8 @@ export const TenantField: React.FC = async ({
   user,
 }: Props) => {
   let serverValue: number | string | undefined =
-    getTenantFromCookie(req.headers) || getUserTenantIDs(user as UserWithTenantsField)?.[0]
+    getTenantFromCookie(req.headers, payload.db.defaultIDType) ||
+    getUserTenantIDs(user as UserWithTenantsField)?.[0]
 
   if (serverValue) {
     try {

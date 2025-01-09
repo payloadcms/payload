@@ -7,7 +7,7 @@ type Args = {
   tenantFieldName: string
 }
 export const getTenantListFilter = ({ req, tenantFieldName }: Args): null | Where => {
-  const selectedTenant = getTenantFromCookie(req.headers)
+  const selectedTenant = getTenantFromCookie(req.headers, req.payload.db.defaultIDType)
 
   if (selectedTenant) {
     return {
