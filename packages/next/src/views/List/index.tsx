@@ -74,7 +74,10 @@ export const renderListView = async (
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
     req,
-    value: { limit: isNumber(query?.limit) ? Number(query.limit) : undefined, sort: query?.sort },
+    value: {
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      sort: query?.sort as string,
+    },
   })
 
   const {

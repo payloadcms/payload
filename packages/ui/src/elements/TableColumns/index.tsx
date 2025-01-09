@@ -1,9 +1,8 @@
 'use client'
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ColumnPreferences, SanitizedCollectionConfig } from 'payload'
 
 import React, { createContext, useCallback, useContext, useEffect } from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
