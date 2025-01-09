@@ -933,6 +933,7 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+export { JWTAuthentication } from './auth/strategies/jwt.js'
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
