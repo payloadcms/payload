@@ -10,6 +10,7 @@ import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
+import { getRequestLocale } from '../../utilities/getRequestLocale.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -92,6 +93,11 @@ export const RootLayout = async ({
     importMap,
   })
 
+  const locale = await getRequestLocale({
+    payload,
+    user,
+  })
+
   return (
     <html
       data-theme={theme}
@@ -110,6 +116,7 @@ export const RootLayout = async ({
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}
+          locale={locale?.code}
           permissions={permissions}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
