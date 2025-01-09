@@ -6,15 +6,13 @@ import { findLocaleFromCode } from '@payloadcms/ui/shared'
 import { getPreferences } from './getPreferences.js'
 
 type GetRequestLocalesArgs = {
-  localeFromParams?: string
   req: PayloadRequest
 }
 
-export async function getRequestLocale({
-  localeFromParams,
-  req,
-}: GetRequestLocalesArgs): Promise<Locale> {
+export async function getRequestLocale({ req }: GetRequestLocalesArgs): Promise<Locale> {
   if (req.payload.config.localization) {
+    const localeFromParams = req.query.locale as string | undefined
+
     if (localeFromParams) {
       await upsertPreferences<Locale['code']>({ key: 'locale', req, value: localeFromParams })
     }
