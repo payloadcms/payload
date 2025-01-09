@@ -45,6 +45,19 @@ export const handleEndpoints = async ({
   try {
     req = await createPayloadRequest({ config: incomingConfig, request })
 
+    if (req.method.toLowerCase() === 'options') {
+      return Response.json(
+        {},
+        {
+          headers: headersWithCors({
+            headers: new Headers(),
+            req,
+          }),
+          status: 200,
+        },
+      )
+    }
+
     const { payload } = req
     const { config } = payload
 
@@ -115,6 +128,7 @@ export const handleEndpoints = async ({
       if (endpoint.method !== req.method.toLowerCase()) {
         return false
       }
+
       const pathMatchFn = match(endpoint.path, { decode: decodeURIComponent })
 
       const matchResult = pathMatchFn(adjustedPathname)

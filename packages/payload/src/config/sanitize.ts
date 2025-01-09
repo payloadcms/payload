@@ -22,7 +22,6 @@ import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { defaults } from './defaults.js'
-import { optionsEndpoint } from './optionsEndpoint.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
@@ -120,8 +119,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   for (const endpoint of authRootEndpoints) {
     config.endpoints.push(endpoint)
   }
-
-  config.endpoints.push(optionsEndpoint)
 
   if (config.localization && config.localization.locales?.length > 0) {
     // clone localization config so to not break everything
