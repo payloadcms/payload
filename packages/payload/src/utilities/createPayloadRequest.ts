@@ -54,8 +54,7 @@ export const createPayloadRequest = async ({
   let locale = searchParams.get('locale')
   let fallbackLocale = fallbackFromRequest
 
-  const overrideHttpMethod = request.headers.get('X-HTTP-Method-Override')
-  const queryToParse = overrideHttpMethod === 'GET' ? await request.text() : urlProperties.search
+  const queryToParse = urlProperties.search
 
   const query = queryToParse
     ? qs.parse(queryToParse, {

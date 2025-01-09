@@ -57,13 +57,18 @@ export const handleEndpoints = async ({
     request.method.toLowerCase() === 'post' &&
     request.headers.get('X-HTTP-Method-Override') === 'GET'
   ) {
+    const search = await request.text()
+
+    const url = `${request.url}?${new URLSearchParams(search).toString()}`
     const response = await handleEndpoints({
       config: incomingConfig,
       onPayloadRequest,
-      request: new Request(request.url, {
-        ...request,
-        body: null,
+      request: new Request(url, {
+        cache: request.cache,
+        credentials: request.credentials,
+        headers: request.headers,
         method: 'GET',
+        signal: request.signal,
       }),
     })
 
