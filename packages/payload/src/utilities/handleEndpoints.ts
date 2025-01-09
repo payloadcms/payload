@@ -87,7 +87,9 @@ export const handleEndpoints = async ({
     // convert /api/something to /something
     let adjustedPathname = pathname.replace(config.routes.api, '')
 
+    let isGlobals = false
     if (adjustedPathname.startsWith('/globals')) {
+      isGlobals = true
       adjustedPathname = adjustedPathname.replace('/globals', '')
     }
 
@@ -101,15 +103,15 @@ export const handleEndpoints = async ({
       if (payload.collections[firstParam]) {
         collection = payload.collections[firstParam]
       }
+    }
 
-      if (firstParam === 'globals') {
-        const secondParam = segments[1]
+    if (isGlobals) {
+      const secondParam = segments[0]
 
-        const foundGlobal = payload.globals.config.find((each) => each.slug === secondParam)
+      const foundGlobal = payload.globals.config.find((each) => each.slug === secondParam)
 
-        if (foundGlobal) {
-          globalConfig = foundGlobal
-        }
+      if (foundGlobal) {
+        globalConfig = foundGlobal
       }
     }
 

@@ -42,7 +42,7 @@ export const defaultGlobalEndpoints: Endpoint[] = wrapInternalEndpoints([
   },
   {
     handler: updateHandler,
-    method: 'patch',
+    method: 'post',
     path: '/',
   },
 ])
