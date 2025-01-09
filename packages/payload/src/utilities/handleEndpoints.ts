@@ -53,11 +53,16 @@ export const handleEndpoints = async ({
   let req: PayloadRequest
   let collection: Collection
 
-  if (request.method === 'post' && request.headers.get('X-HTTP-Method-Override') === 'GET') {
+  if (
+    request.method.toLowerCase() === 'post' &&
+    request.headers.get('X-HTTP-Method-Override') === 'GET'
+  ) {
     const response = await handleEndpoints({
       config: incomingConfig,
       onPayloadRequest,
-      request: new Request(request, {
+      request: new Request(request.url, {
+        ...request,
+        body: null,
         method: 'GET',
       }),
     })

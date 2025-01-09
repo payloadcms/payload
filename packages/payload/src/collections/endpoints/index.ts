@@ -18,6 +18,7 @@ import { updateHandler } from './update.js'
 import { updateByIDHandler } from './updateByID.js'
 
 export const defaultCollectionEndpoints: Endpoint[] = [
+  ...authCollectionEndpoints,
   ...wrapInternalEndpoints([
     {
       handler: countHandler,
@@ -90,5 +91,4 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       path: '/:id',
     },
   ]),
-  ...authCollectionEndpoints,
 ]

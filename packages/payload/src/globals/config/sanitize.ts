@@ -73,11 +73,17 @@ export const sanitizeGlobal = async (
   })
 
   if (global.endpoints !== false) {
-    if (!global.endpoints) {
-      global.endpoints = []
-    }
+    const incomingEndpoints = [...(global.endpoints ?? [])]
+
+    global.endpoints = []
 
     for (const endpoint of defaultGlobalEndpoints) {
+      if (!incomingEndpoints.some((each) => each.path === endpoint.path)) {
+        global.endpoints.push(endpoint)
+      }
+    }
+
+    for (const endpoint of incomingEndpoints) {
       global.endpoints.push(endpoint)
     }
   }

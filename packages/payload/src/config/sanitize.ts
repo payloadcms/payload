@@ -22,6 +22,7 @@ import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { defaults } from './defaults.js'
+import { optionsEndpoint } from './optionsEndpoint.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
@@ -112,11 +113,21 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 
-  if (!config.endpoints) {
-    config.endpoints = []
-  }
+  const incomingEndpoints = [...(config.endpoints ?? [])]
+
+  config.endpoints = []
 
   for (const endpoint of authRootEndpoints) {
+    if (!incomingEndpoints.some((each) => each.path === endpoint.path)) {
+      config.endpoints.push(endpoint)
+    }
+  }
+
+  if (!incomingEndpoints.some((each) => each.method === 'options')) {
+    config.endpoints.push(optionsEndpoint)
+  }
+
+  for (const endpoint of incomingEndpoints) {
     config.endpoints.push(endpoint)
   }
 

@@ -15,7 +15,6 @@ import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
-import { optionsEndpoint } from './optionsEndpoint.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -58,15 +57,19 @@ export const sanitizeCollection = async (
   })
 
   if (sanitized.endpoints !== false) {
-    if (!sanitized.endpoints) {
-      sanitized.endpoints = []
-    }
+    const incomingEndpoints = [...(sanitized.endpoints ?? [])]
+
+    sanitized.endpoints = []
 
     for (const endpoint of defaultCollectionEndpoints) {
-      sanitized.endpoints.push(endpoint)
+      if (!incomingEndpoints.some((each) => each.path === endpoint.path)) {
+        sanitized.endpoints.push(endpoint)
+      }
     }
 
-    sanitized.endpoints.push(optionsEndpoint)
+    for (const endpoint of incomingEndpoints) {
+      sanitized.endpoints.push(endpoint)
+    }
   }
 
   if (sanitized.timestamps !== false) {

@@ -1,6 +1,6 @@
-import type { Endpoint } from '../../config/types.js'
+import type { Endpoint } from './types.js'
 
-import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { headersWithCors } from '../utilities/headersWithCors.js'
 
 export const optionsEndpoint: Endpoint = {
   handler: (req) => {
