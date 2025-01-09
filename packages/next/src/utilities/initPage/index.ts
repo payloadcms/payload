@@ -75,8 +75,7 @@ export const initPage = async ({
 
   const locale = await getRequestLocale({
     localeFromParams: req.query.locale as string,
-    payload,
-    user,
+    req,
   })
 
   req.locale = locale?.code

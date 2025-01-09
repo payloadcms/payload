@@ -12,14 +12,14 @@ import { removeUndefined } from './removeUndefined.js'
  * @param key - The key of the preferences to update
  * @param value - The new value to merge with the existing preferences
  */
-export const upsertPreferences = async <T extends Record<string, any>>({
+export const upsertPreferences = async <T extends Record<string, unknown> | string>({
   key,
   req,
   value: incomingValue,
 }: {
   key: string
   req: PayloadRequest
-  value: Record<string, any>
+  value: T
 }): Promise<T> => {
   const preferencesResult = await req.payload
     .find({
@@ -66,10 +66,14 @@ export const upsertPreferences = async <T extends Record<string, any>>({
       req,
     })
   } else {
-    const mergedPrefs = {
-      ...(preferencesResult?.value || {}), // Shallow merge existing prefs to acquire any missing keys from incoming value
-      ...removeUndefined(incomingValue || {}),
-    }
+    // Strings are valid JSON, i.e. `locale` saved as a string to the locale preferences
+    const mergedPrefs =
+      typeof incomingValue === 'object'
+        ? {
+            ...(preferencesResult?.value || {}), // Shallow merge existing prefs to acquire any missing keys from incoming value
+            ...removeUndefined(incomingValue || {}),
+          }
+        : incomingValue
 
     if (!dequal(mergedPrefs, preferencesResult.value)) {
       newPrefs = await req.payload
