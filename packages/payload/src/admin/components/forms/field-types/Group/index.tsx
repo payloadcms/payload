@@ -26,8 +26,7 @@ const Group: React.FC<Props> = (props) => {
     admin: { className, description, hideGutter = false, readOnly, style, width },
     fieldTypes,
     fields,
-    forceRender: forceRenderFromProps = false,
-    forceRenderAllFields,
+    forceRender = false,
     indexPath,
     label,
     path: pathFromProps,
@@ -45,7 +44,6 @@ const Group: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name
   const isTopLevel = !(withinCollapsible || isWithinGroup || isWithinRow)
-  const forceRender = forceRenderFromProps || forceRenderAllFields
 
   return (
     <div

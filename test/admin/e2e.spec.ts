@@ -35,16 +35,19 @@ import {
   slugPluralLabel,
 } from './shared'
 import {
+  customIdCollectionId,
   customViews2CollectionSlug,
+  forceRenderCollectionSlug,
+  forceRenderGlobalSlug,
   geoCollectionSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
+  noForceRenderCollectionSlug,
+  noForceRenderGlobalSlug,
   postsCollectionSlug,
-  customIdCollectionSlug,
-  customIdCollectionId,
 } from './slugs'
 
 const { beforeAll, beforeEach, describe } = test
@@ -58,12 +61,20 @@ describe('admin', () => {
   let url: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
   let serverURL: string
+  let forceRenderCollectionURL: AdminUrlUtil
+  let forceRenderGlobalURL: AdminUrlUtil
+  let noForceRenderCollectionURL: AdminUrlUtil
+  let noForceRenderGlobalURL: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
     serverURL = (await initPayloadE2E(__dirname)).serverURL
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     url = new AdminUrlUtil(serverURL, postsCollectionSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    forceRenderCollectionURL = new AdminUrlUtil(serverURL, forceRenderCollectionSlug)
+    forceRenderGlobalURL = new AdminUrlUtil(serverURL, forceRenderGlobalSlug)
+    noForceRenderCollectionURL = new AdminUrlUtil(serverURL, noForceRenderCollectionSlug)
+    noForceRenderGlobalURL = new AdminUrlUtil(serverURL, noForceRenderGlobalSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -534,7 +545,7 @@ describe('admin', () => {
     test('should allow custom ID field nested inside an unnamed tab', async () => {
       await page.goto(url.collection('customIdTab') + '/' + customIdCollectionId)
 
-      const idField = await page.locator('#field-id')
+      const idField = page.locator('#field-id')
 
       await expect(idField).toHaveValue(customIdCollectionId)
     })
@@ -542,7 +553,7 @@ describe('admin', () => {
     test('should allow custom ID field nested inside a row', async () => {
       await page.goto(url.collection('customIdRow') + '/' + customIdCollectionId)
 
-      const idField = await page.locator('#field-id')
+      const idField = page.locator('#field-id')
 
       await expect(idField).toHaveValue(customIdCollectionId)
     })
@@ -612,6 +623,64 @@ describe('admin', () => {
       await options.locator('text=English').click()
       await localizorButton.click()
       await expect(secondLocale).toContainText('Spanish (es)')
+    })
+  })
+
+  describe('browser search', () => {
+    test('should successfully find field in large collection edit view document', async () => {
+      await page.goto(forceRenderCollectionURL.create)
+      await page.waitForURL(forceRenderCollectionURL.create)
+
+      const isMac = process.platform === 'darwin'
+      // eslint-disable-next-line playwright/no-conditional-in-test
+      const searchKey = isMac ? 'Meta+F' : 'Control+F'
+      await page.keyboard.press(searchKey)
+
+      await page.keyboard.type('Field100')
+
+      await expect(page.locator('label >> text=Field100')).toBeVisible()
+    })
+
+    test('should not find field in large collection edit view document', async () => {
+      await page.goto(noForceRenderCollectionURL.create)
+      await page.waitForURL(noForceRenderCollectionURL.create)
+
+      const isMac = process.platform === 'darwin'
+      // eslint-disable-next-line playwright/no-conditional-in-test
+      const searchKey = isMac ? 'Meta+F' : 'Control+F'
+      await page.keyboard.press(searchKey)
+
+      await page.keyboard.type('Field100')
+
+      await expect(page.locator('label >> text=Field100')).toBeHidden()
+    })
+
+    test('should successfully find field in large global edit view document', async () => {
+      await page.goto(forceRenderGlobalURL.global(forceRenderGlobalSlug))
+      await page.waitForURL(forceRenderGlobalURL.global(forceRenderGlobalSlug))
+
+      const isMac = process.platform === 'darwin'
+      // eslint-disable-next-line playwright/no-conditional-in-test
+      const searchKey = isMac ? 'Meta+F' : 'Control+F'
+      await page.keyboard.press(searchKey)
+
+      await page.keyboard.type('Field100')
+
+      await expect(page.locator('label >> text=Field100')).toBeVisible()
+    })
+
+    test('should not find field in large global edit view document', async () => {
+      await page.goto(noForceRenderGlobalURL.global(noForceRenderGlobalSlug))
+      await page.waitForURL(noForceRenderGlobalURL.global(noForceRenderGlobalSlug))
+
+      const isMac = process.platform === 'darwin'
+      // eslint-disable-next-line playwright/no-conditional-in-test
+      const searchKey = isMac ? 'Meta+F' : 'Control+F'
+      await page.keyboard.press(searchKey)
+
+      await page.keyboard.type('Field100')
+
+      await expect(page.locator('label >> text=Field100')).toBeHidden()
     })
   })
 
@@ -768,8 +837,8 @@ describe('admin', () => {
         await valueField.fill(id)
 
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
-        const firstId = await page.locator(tableRowLocator).first().locator('.cell-id').innerText()
-        expect(firstId).toEqual(`ID: ${id}`)
+        const firstId = page.locator(tableRowLocator).first().locator('.cell-id')
+        await expect(firstId).toHaveText(`ID: ${id}`)
 
         // Remove filter
         await page.locator('.condition__actions-remove').click()

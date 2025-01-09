@@ -37,8 +37,7 @@ const BlocksField: React.FC<Props> = (props) => {
     admin: { className, condition, description, isSortable = true, readOnly },
     blocks,
     fieldTypes,
-    forceRender: forceRenderFromProps = false,
-    forceRenderAllFields,
+    forceRender = false,
     indexPath,
     label,
     labels: labelsFromProps,
@@ -59,8 +58,6 @@ const BlocksField: React.FC<Props> = (props) => {
   const { localization } = useConfig()
   const drawerSlug = useDrawerSlug('blocks-drawer')
   const submitted = useFormSubmitted()
-
-  const forceRender = forceRenderFromProps || forceRenderAllFields
 
   const labels = {
     plural: t('blocks'),

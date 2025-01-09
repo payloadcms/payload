@@ -9,6 +9,8 @@ export const group2Collection1Slug = 'group-two-collection-ones' as const
 export const group2Collection2Slug = 'group-two-collection-twos' as const
 export const hiddenCollectionSlug = 'hidden-collection' as const
 export const noApiViewCollectionSlug = 'collection-no-api-view' as const
+export const forceRenderCollectionSlug = 'collection-force-render' as const
+export const noForceRenderCollectionSlug = 'collection-no-force-render' as const
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
@@ -30,6 +32,8 @@ export const group1GlobalSlug = 'group-globals-one' as const
 export const group2GlobalSlug = 'group-globals-two' as const
 export const hiddenGlobalSlug = 'hidden-global' as const
 export const noApiViewGlobalSlug = 'global-no-api-view'
+export const forceRenderGlobalSlug = 'global-force-render' as const
+export const noForceRenderGlobalSlug = 'global-no-force-render' as const
 export const globalSlugs = [
   customGlobalViews1GlobalSlug,
   customGlobalViews2GlobalSlug,
