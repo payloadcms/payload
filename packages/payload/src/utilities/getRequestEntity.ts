@@ -2,17 +2,19 @@ import type { Collection } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { APIError } from '../errors/APIError.js'
+
 export const getRequestCollection = (req: PayloadRequest): Collection => {
   const collectionSlug = req.routeParams.collection
 
   if (typeof collectionSlug !== 'string') {
-    throw new Error(`No collection was specified`)
+    throw new APIError(`No collection was specified`, 400)
   }
 
   const collection = req.payload.collections[collectionSlug]
 
   if (!collection) {
-    throw new Error(`Collection with the slug ${collectionSlug} was not found`)
+    throw new APIError(`Collection with the slug ${collectionSlug} was not found`, 404)
   }
 
   return collection
@@ -33,7 +35,7 @@ export const getRequestCollectionWithID = <T extends boolean>(
   const id = req.routeParams.id
 
   if (typeof id !== 'string') {
-    throw new Error(`ID was not specified`)
+    throw new APIError(`ID was not specified`, 400)
   }
 
   if (disableSanitize === true) {
@@ -69,13 +71,13 @@ export const getRequestGlobal = (req: PayloadRequest): SanitizedGlobalConfig => 
   const globalSlug = req.routeParams.global
 
   if (typeof globalSlug !== 'string') {
-    throw new Error(`No global was specified`)
+    throw new APIError(`No global was specified`, 400)
   }
 
   const globalConfig = req.payload.globals.config.find((each) => each.slug === globalSlug)
 
   if (!globalConfig) {
-    throw new Error(`Global with the slug ${globalSlug} was not found`)
+    throw new APIError(`Global with the slug ${globalSlug} was not found`, 404)
   }
 
   return globalConfig

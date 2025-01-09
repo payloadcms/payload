@@ -54,7 +54,7 @@ export const createPayloadRequest = async ({
   let locale = searchParams.get('locale')
   let fallbackLocale = fallbackFromRequest
 
-  const queryToParse = urlProperties.search
+  const { search: queryToParse } = urlProperties
 
   const query = queryToParse
     ? qs.parse(queryToParse, {
