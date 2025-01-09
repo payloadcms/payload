@@ -17,7 +17,10 @@ export const LocaleLoadingContext = createContext({
   setLocaleIsLoading: (_: boolean) => undefined,
 })
 
-export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Locale['code'] }> = ({
+  children,
+  locale: localeFromProps,
+}) => {
   const {
     config: { localization = false },
   } = useConfig()
@@ -28,8 +31,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
 
   const { getPreference, setPreference } = usePreferences()
-  const searchParams = useSearchParams()
-  const localeFromParams = searchParams.get('locale')
+  const localeFromParams = useSearchParams().get('locale')
 
   const [locale, setLocale] = React.useState<Locale>(() => {
     if (!localization) {
@@ -39,6 +41,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 
     return (
       findLocaleFromCode(localization, localeFromParams) ||
+      findLocaleFromCode(localization, localeFromProps) ||
       findLocaleFromCode(localization, defaultLocale)
     )
   })
