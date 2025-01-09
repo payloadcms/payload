@@ -140,6 +140,7 @@ export const multiTenantPlugin =
         path: '@payloadcms/plugin-multi-tenant/rsc#GlobalViewRedirect',
         serverProps: {
           globalSlugs: globalCollectionSlugs,
+          tenantFieldName,
         },
       })
     }

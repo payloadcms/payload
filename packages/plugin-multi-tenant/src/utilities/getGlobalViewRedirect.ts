@@ -8,12 +8,14 @@ type Args = {
   docID?: number | string
   payload: Payload
   slug: string
+  tenantFieldName: string
   view: 'edit' | 'list'
 }
 export async function getGlobalViewRedirect({
   slug,
   docID,
   payload,
+  tenantFieldName,
   view,
 }: Args): Promise<string | void> {
   const headers = await getHeaders()
@@ -27,7 +29,7 @@ export async function getGlobalViewRedirect({
         depth: 0,
         limit: 1,
         where: {
-          tenant: {
+          [tenantFieldName]: {
             equals: tenant,
           },
         },
