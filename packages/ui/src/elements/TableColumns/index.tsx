@@ -26,7 +26,9 @@ export const TableColumnContext = createContext<ITableColumns>({} as ITableColum
 export const useTableColumns = (): ITableColumns => useContext(TableColumnContext)
 
 export type ListPreferences = {
-  columns: ColumnPreferences
+  columns?: ColumnPreferences
+  limit?: number
+  sort?: string
 }
 
 type Props = {

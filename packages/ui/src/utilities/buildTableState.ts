@@ -142,7 +142,7 @@ export const buildTableState = async (
     value: {
       columns,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      sort: query?.sort,
+      sort: query?.sort as string,
     },
   })
 
