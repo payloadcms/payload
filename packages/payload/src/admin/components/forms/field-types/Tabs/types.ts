@@ -5,6 +5,7 @@ import type { TabsField } from '../../../../../fields/config/types'
 export type Props = Omit<TabsField, 'type'> & {
   fieldTypes: FieldTypes
   forceRender?: boolean
+  forceRenderAllFields?: boolean
   indexPath: string
   path?: string
   permissions: FieldPermissions

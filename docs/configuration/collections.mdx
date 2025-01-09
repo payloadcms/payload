@@ -14,7 +14,7 @@ It's often best practice to write your Collections in separate files and then im
 ## Options
 
 | Option            | Description                                                                                                                                                                                                              |
-|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`slug`** \*     | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                          |
 | **`fields`** \*   | Array of field types that will determine the structure and functionality of the data stored within this Collection. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
 | **`labels`**      | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                           |
@@ -70,23 +70,24 @@ Demo source code on GitHub.
 You can customize the way that the Admin panel behaves on a collection-by-collection basis by defining the `admin`
 property on a collection's config.
 
-| Option                       | Description                                                                                                                                                                                           |
-|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `group`                      | Text used as a label for grouping collection and global links together in the navigation.                                                                                                             |
-| `hidden`                     | Set to true or a function, called with the current user, returning true to exclude this collection from navigation and admin routing.                                                                 |
-| `hooks`                      | Admin-specific hooks for this collection. [More](#admin-hooks)                                                                                                                                        |
-| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title.                                                |
-| `description`                | Text or React component to display below the Collection label in the List view to give editors more information.                                                                                      |
-| `defaultColumns`             | Array of field names that correspond to which columns to show by default in this collection's List view.                                                                                              |
-| `disableDuplicate `          | Disables the "Duplicate" button while editing documents within this collection.                                                                                                                       |
-| `hideAPIURL`                 | Hides the "API URL" meta field while editing documents within this collection.                                                                                                                        |
-| `enableRichTextLink`         | The [Rich Text](/docs/fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.         |
-| `enableRichTextRelationship` | The [Rich Text](/docs/fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default. |
-| `preview`                    | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview).                                                                                                |
-| `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).                                                                              |
-| `components`                 | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections)                                                                                       |
-| `listSearchableFields`       | Specify which fields should be searched in the List search view. [More](#list-searchable-fields)                                                                                                      |
-| **`pagination`**             | Set pagination-specific options for this collection. [More](#pagination)                                                                                                                              |
+| Option                       | Description                                                                                                                                                                                                                                                                                                    |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `group`                      | Text used as a label for grouping collection and global links together in the navigation.                                                                                                                                                                                                                      |
+| `hidden`                     | Set to true or a function, called with the current user, returning true to exclude this collection from navigation and admin routing.                                                                                                                                                                          |
+| `hooks`                      | Admin-specific hooks for this collection. [More](#admin-hooks)                                                                                                                                                                                                                                                 |
+| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title.                                                                                                                                                         |
+| `description`                | Text or React component to display below the Collection label in the List view to give editors more information.                                                                                                                                                                                               |
+| `defaultColumns`             | Array of field names that correspond to which columns to show by default in this collection's List view.                                                                                                                                                                                                       |
+| `disableDuplicate `          | Disables the "Duplicate" button while editing documents within this collection.                                                                                                                                                                                                                                |
+| `forceRenderAllFields `      | Forces all fields in the Edit view to render immediately, regardless of scroll position. By default, this is set to `false` to improve performance, as fields are progressively rendered to balance load times. Enabling this option can make it easier to locate fields using browser search (e.g., `CMD+F`). |
+| `hideAPIURL`                 | Hides the "API URL" meta field while editing documents within this collection.                                                                                                                                                                                                                                 |
+| `enableRichTextLink`         | The [Rich Text](/docs/fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                                                                                                                  |
+| `enableRichTextRelationship` | The [Rich Text](/docs/fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                                                                                                          |
+| `preview`                    | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview).                                                                                                                                                                                                         |
+| `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).                                                                                                                                                                                       |
+| `components`                 | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections)                                                                                                                                                                                                |
+| `listSearchableFields`       | Specify which fields should be searched in the List search view. [More](#list-searchable-fields)                                                                                                                                                                                                               |
+| **`pagination`**             | Set pagination-specific options for this collection. [More](#pagination)                                                                                                                                                                                                                                       |
 
 ### Preview
 
@@ -132,7 +133,7 @@ export const Posts: CollectionConfig = {
 Here are a few options that you can specify options for pagination on a collection-by-collection basis:
 
 | Option         | Description                                                                                         |
-|----------------|-----------------------------------------------------------------------------------------------------|
+| -------------- | --------------------------------------------------------------------------------------------------- |
 | `defaultLimit` | Integer that specifies the default per-page limit that should be used. Defaults to 10.              |
 | `limits`       | Provide an array of integers to use as per-page options for admins to choose from in the List view. |
 
@@ -166,8 +167,9 @@ those three fields plus the ID field.
 <Banner type="warning">
   **Note:**
 
-  If you are adding **listSearchableFields**, make sure you index each of these fields
-  so your admin queries can remain performant.
+If you are adding **listSearchableFields**, make sure you index each of these fields
+so your admin queries can remain performant.
+
 </Banner>
 
 ### Admin Hooks

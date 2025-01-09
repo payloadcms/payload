@@ -19,7 +19,7 @@ export const DefaultGlobalEdit: React.FC<
   const { apiURL, data, fieldTypes, global, permissions } = props
   const { i18n } = useTranslation()
 
-  const { admin: { description } = {}, fields, label } = global
+  const { admin: { description, forceRenderAllFields } = {}, fields, label } = global
 
   const hasSavePermission = permissions?.update?.permission
 
@@ -44,6 +44,7 @@ export const DefaultGlobalEdit: React.FC<
         description={description}
         fieldTypes={fieldTypes}
         fields={fields}
+        forceRenderAllFields={forceRenderAllFields}
         hasSavePermission={hasSavePermission}
         permissions={permissions}
       />

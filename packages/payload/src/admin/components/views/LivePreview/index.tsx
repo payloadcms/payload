@@ -122,6 +122,11 @@ const PreviewView: React.FC<
             description={description}
             fieldTypes={fieldTypes}
             fields={fields}
+            forceRenderAllFields={
+              collection?.admin?.forceRenderAllFields ??
+              global?.admin?.forceRenderAllFields ??
+              false
+            }
             forceSidebarWrap
             hasSavePermission={hasSavePermission}
             permissions={permissions}

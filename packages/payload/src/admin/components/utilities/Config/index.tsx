@@ -19,7 +19,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode; config: Sanit
         const resolvedConfig = await incomingConfig
         setConfig(resolvedConfig)
       }
-      awaitConfig()
+      void awaitConfig()
     }
   }, [incomingConfig])
 

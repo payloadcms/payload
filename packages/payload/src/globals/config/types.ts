@@ -139,6 +139,11 @@ export type GlobalAdminOptions = {
    */
   description?: EntityDescription
   /**
+   * Forces all fields in the Edit view to render immediately, regardless of scroll position
+   * @default false
+   */
+  forceRenderAllFields?: boolean
+  /**
    * Place globals into a navigational group
    * */
   group?: Record<string, string> | string

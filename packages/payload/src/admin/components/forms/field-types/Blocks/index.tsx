@@ -37,7 +37,8 @@ const BlocksField: React.FC<Props> = (props) => {
     admin: { className, condition, description, isSortable = true, readOnly },
     blocks,
     fieldTypes,
-    forceRender = false,
+    forceRender: forceRenderFromProps = false,
+    forceRenderAllFields,
     indexPath,
     label,
     labels: labelsFromProps,
@@ -58,6 +59,8 @@ const BlocksField: React.FC<Props> = (props) => {
   const { localization } = useConfig()
   const drawerSlug = useDrawerSlug('blocks-drawer')
   const submitted = useFormSubmitted()
+
+  const forceRender = forceRenderFromProps || forceRenderAllFields
 
   const labels = {
     plural: t('blocks'),
@@ -118,7 +121,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const duplicateRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({ path, rowIndex, type: 'DUPLICATE_ROW' })
+      dispatchFields({ type: 'DUPLICATE_ROW', path, rowIndex })
       setModified(true)
 
       setTimeout(() => {
@@ -138,7 +141,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ moveFromIndex, moveToIndex, path, type: 'MOVE_ROW' })
+      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
       setModified(true)
     },
     [dispatchFields, path, setModified],
@@ -146,14 +149,14 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
-      dispatchFields({ collapsed, path, setDocFieldPreferences, type: 'SET_ALL_ROWS_COLLAPSED' })
+      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', collapsed, path, setDocFieldPreferences })
     },
     [dispatchFields, path, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
     (rowID: string, collapsed: boolean) => {
-      dispatchFields({ collapsed, path, rowID, setDocFieldPreferences, type: 'SET_ROW_COLLAPSED' })
+      dispatchFields({ type: 'SET_ROW_COLLAPSED', collapsed, path, rowID, setDocFieldPreferences })
     },
     [dispatchFields, path, setDocFieldPreferences],
   )
