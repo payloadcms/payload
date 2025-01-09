@@ -42,11 +42,9 @@ const notFoundHandler: PayloadHandler = (req) => {
 
 export const handleEndpoints = async ({
   config: incomingConfig,
-  onPayloadRequest,
   request,
 }: {
   config: Promise<SanitizedConfig> | SanitizedConfig
-  onPayloadRequest?: (req: PayloadRequest) => void
   request: Request
 }) => {
   let handler: PayloadHandler
@@ -62,7 +60,6 @@ export const handleEndpoints = async ({
     const url = `${request.url}?${new URLSearchParams(search).toString()}`
     const response = await handleEndpoints({
       config: incomingConfig,
-      onPayloadRequest,
       request: new Request(url, {
         cache: request.cache,
         credentials: request.credentials,
@@ -77,10 +74,6 @@ export const handleEndpoints = async ({
 
   try {
     req = await createPayloadRequest({ config: incomingConfig, request })
-
-    if (typeof onPayloadRequest === 'function') {
-      onPayloadRequest(req)
-    }
 
     const { payload } = req
     const { config } = payload

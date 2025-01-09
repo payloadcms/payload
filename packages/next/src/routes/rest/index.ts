@@ -2,23 +2,31 @@ import { handleEndpoints, type SanitizedConfig } from 'payload'
 
 import { generateOGImage } from './og/index.js'
 
+let initedOGEndpoint = false
+
 const handlerBuilder =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request): Promise<Response> => {
+    const awaitedConfig = await config
+
+    // Add this endpoint only when using Next.js, still can be overriden.
+    if (
+      initedOGEndpoint === false &&
+      !awaitedConfig.endpoints.some(
+        (endpoint) => endpoint.path === '/og' && endpoint.method === 'get',
+      )
+    ) {
+      awaitedConfig.endpoints.push({
+        handler: generateOGImage,
+        method: 'get',
+        path: '/og',
+      })
+    }
+
+    initedOGEndpoint = true
+
     const response = await handleEndpoints({
       config,
-      // Add this endpoint only when using Next.js, still can be overriden.
-      onPayloadRequest: (req) => {
-        const { endpoints } = req.payload.config
-
-        if (!endpoints.some((endpoint) => endpoint.path === '/og')) {
-          endpoints.push({
-            handler: generateOGImage,
-            method: 'get',
-            path: '/og',
-          })
-        }
-      },
       request,
     })
 
