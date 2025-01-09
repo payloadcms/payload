@@ -48,6 +48,7 @@ export const RootPage = async ({
   } = config
 
   const params = await paramsPromise
+
   const currentRoute = formatAdminURL({
     adminRoute,
     path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,

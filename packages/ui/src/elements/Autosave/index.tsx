@@ -48,6 +48,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     mostRecentVersionIsAutosaved,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
   } = useDocumentInfo()
   const queueRef = useRef([])
   const isProcessingRef = useRef(false)
@@ -177,6 +178,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                       if (!mostRecentVersionIsAutosaved) {
                         incrementVersionCount()
                         setMostRecentVersionIsAutosaved(true)
+                        setUnpublishedVersionCount((prev) => prev + 1)
                       }
                     } else {
                       return res.json()
