@@ -3,10 +3,8 @@ import type { PayloadRequest, SanitizedConfig, SanitizedPermissions, User } from
 
 import { initI18n } from '@payloadcms/translations'
 import { headers as getHeaders } from 'next/headers.js'
-import { createLocalReq, getPayload, parseCookies } from 'payload'
+import { createLocalReq, getPayload, getRequestLanguage, parseCookies } from 'payload'
 import { cache } from 'react'
-
-import { getRequestLanguage } from './getRequestLanguage.js'
 
 type Result = {
   i18n: I18nClient
