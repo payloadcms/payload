@@ -36,7 +36,7 @@ export const getRequestCollectionWithID = <T extends boolean>(
     throw new Error(`ID was not specified`)
   }
 
-  if (disableSanitize !== true) {
+  if (disableSanitize === true) {
     return {
       id,
       collection,
