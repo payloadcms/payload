@@ -9,7 +9,7 @@ import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { defaultGlobalEndpoints } from '../globals/index.js'
+import { defaultGlobalEndpoints } from '../endpoints/index.js'
 
 export const sanitizeGlobal = async (
   config: Config,
