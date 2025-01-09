@@ -245,7 +245,10 @@ export function buildObjectType({
             type: graphqlResult.collections[field.collection].graphQL.whereInputType,
           },
         },
-        extensions: { complexity: 10 },
+        extensions: {
+          complexity:
+            typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        },
         async resolve(parent, args, context: Context) {
           const { collection } = field
           const { limit, sort, where } = args
@@ -255,18 +258,17 @@ export function buildObjectType({
             [field.on]: { equals: parent._id ?? parent.id },
           })
 
-          const results = await req.payload.find({
+          return await req.payload.find({
             collection,
             depth: 0,
             fallbackLocale: req.fallbackLocale,
             limit,
             locale: req.locale,
+            overrideAccess: false,
             req,
             sort,
             where: fullWhere,
           })
-
-          return results
         },
       }
 
@@ -417,7 +419,10 @@ export function buildObjectType({
           forceNullable,
         ),
         args: relationshipArgs,
-        extensions: { complexity: 10 },
+        extensions: {
+          complexity:
+            typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        },
         async resolve(parent, args, context: Context) {
           const value = parent[field.name]
           const locale = args.locale || context.req.locale
@@ -769,7 +774,10 @@ export function buildObjectType({
           forceNullable,
         ),
         args: relationshipArgs,
-        extensions: { complexity: 10 },
+        extensions: {
+          complexity:
+            typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        },
         async resolve(parent, args, context: Context) {
           const value = parent[field.name]
           const locale = args.locale || context.req.locale

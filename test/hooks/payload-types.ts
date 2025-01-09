@@ -11,6 +11,8 @@ export interface Config {
     'hooks-users': HooksUserAuthOperations;
   };
   collections: {
+    'before-change-hooks': BeforeChangeHook;
+    'before-validate': BeforeValidate;
     afterOperation: AfterOperation;
     'context-hooks': ContextHook;
     transforms: Transform;
@@ -26,6 +28,8 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    'before-change-hooks': BeforeChangeHooksSelect<false> | BeforeChangeHooksSelect<true>;
+    'before-validate': BeforeValidateSelect<false> | BeforeValidateSelect<true>;
     afterOperation: AfterOperationSelect<false> | AfterOperationSelect<true>;
     'context-hooks': ContextHooksSelect<false> | ContextHooksSelect<true>;
     transforms: TransformsSelect<false> | TransformsSelect<true>;
@@ -52,9 +56,9 @@ export interface Config {
   user: HooksUser & {
     collection: 'hooks-users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface HooksUserAuthOperations {
@@ -74,6 +78,27 @@ export interface HooksUserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "before-change-hooks".
+ */
+export interface BeforeChangeHook {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "before-validate".
+ */
+export interface BeforeValidate {
+  id: string;
+  title?: string | null;
+  selection?: ('a' | 'b') | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -219,6 +244,14 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'before-change-hooks';
+        value: string | BeforeChangeHook;
+      } | null)
+    | ({
+        relationTo: 'before-validate';
+        value: string | BeforeValidate;
+      } | null)
+    | ({
         relationTo: 'afterOperation';
         value: string | AfterOperation;
       } | null)
@@ -295,6 +328,25 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "before-change-hooks_select".
+ */
+export interface BeforeChangeHooksSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "before-validate_select".
+ */
+export interface BeforeValidateSelect<T extends boolean = true> {
+  title?: T;
+  selection?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

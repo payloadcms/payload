@@ -9,6 +9,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import './index.scss'
+
 import { getClientSideURL } from '@/utilities/getURL'
 
 const baseClass = 'admin-bar'

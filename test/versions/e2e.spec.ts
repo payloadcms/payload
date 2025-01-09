@@ -25,7 +25,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -41,7 +40,6 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
-  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
@@ -71,12 +69,9 @@ const dirname = path.dirname(filename)
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let global: AdminUrlUtil
-let id: string
-
 let context: BrowserContext
 
-describe('versions', () => {
+describe('Versions', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
@@ -84,7 +79,6 @@ describe('versions', () => {
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
-  let global: AdminUrlUtil
   let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -641,8 +635,8 @@ describe('versions', () => {
   describe('Collections - publish specific locale', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, localizedCollectionSlug)
-      global = new AdminUrlUtil(serverURL, localizedGlobalSlug)
     })
+
     test('should show publish individual locale dropdown', async () => {
       await page.goto(url.create)
       const publishOptions = page.locator('.doc-controls__controls .popup')
@@ -732,6 +726,77 @@ describe('versions', () => {
       const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
 
       await expect(publishSpecificLocale).toContainText('English')
+    })
+  })
+
+  describe('Versions diff view', () => {
+    let postID: string
+    let versionID: string
+
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+    })
+
+    beforeEach(async () => {
+      const newPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'new post',
+          description: 'new description',
+        },
+      })
+
+      postID = newPost.id
+
+      await payload.update({
+        collection: draftCollectionSlug,
+        id: postID,
+        draft: true,
+        data: {
+          title: 'draft post',
+          description: 'draft description',
+          blocksField: [
+            {
+              blockName: 'block1',
+              blockType: 'block',
+              text: 'block text',
+            },
+          ],
+        },
+      })
+
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: { equals: postID },
+        },
+      })
+
+      versionID = versions.docs[0].id
+    })
+
+    test('should render diff', async () => {
+      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
+      await page.goto(versionURL)
+      await page.waitForURL(versionURL)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+    })
+
+    test('should render diff for nested fields', async () => {
+      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
+      await page.goto(versionURL)
+      await page.waitForURL(versionURL)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+
+      const blocksDiffLabel = page.locator('.field-diff-label', {
+        hasText: exactText('Blocks Field'),
+      })
+
+      await expect(blocksDiffLabel).toBeVisible()
+      const blocksDiff = blocksDiffLabel.locator('+ .iterable-diff__wrap > .render-field-diffs')
+      await expect(blocksDiff).toBeVisible()
+      const blockTypeDiffLabel = blocksDiff.locator('.render-field-diffs__field').first()
+      await expect(blockTypeDiffLabel).toBeVisible()
     })
   })
 })

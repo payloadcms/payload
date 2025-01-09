@@ -23,6 +23,17 @@ export default buildConfigWithDefaults({
     DeepPostsCollection,
     Pages,
     Points,
+    {
+      slug: 'upload',
+      fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, 'media'),
+      },
+    },
+    {
+      slug: 'rels',
+      fields: [],
+    },
   ],
   globals: [
     {

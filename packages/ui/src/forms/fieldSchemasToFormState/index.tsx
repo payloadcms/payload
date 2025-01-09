@@ -1,5 +1,6 @@
 import type {
   BuildFormStateArgs,
+  ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field,
@@ -16,6 +17,12 @@ import { calculateDefaultValues } from './calculateDefaultValues/index.js'
 import { iterateFields } from './iterateFields.js'
 
 type Args = {
+  /**
+   * The client field schema map is required for field rendering.
+   * If fields should not be rendered (=> `renderFieldFn` is not provided),
+   * then the client field schema map is not required.
+   */
+  clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data?: Data
   experimental?: BuildFormStateArgs['experimental']
@@ -42,12 +49,20 @@ type Args = {
   renderAllFields: boolean
   renderFieldFn?: RenderFieldMethod
   req: PayloadRequest
+
   schemaPath: string
 }
 
 export const fieldSchemasToFormState = async (args: Args): Promise<FormState> => {
+  if (!args.clientFieldSchemaMap && args.renderFieldFn) {
+    console.warn(
+      'clientFieldSchemaMap is not passed to fieldSchemasToFormState - this will reduce performance',
+    )
+  }
+
   const {
     id,
+    clientFieldSchemaMap,
     collectionSlug,
     data = {},
     experimental,
@@ -73,6 +88,7 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormState> =>
       data: dataWithDefaultValues,
       fields,
       locale: req.locale,
+      req,
       siblingData: dataWithDefaultValues,
       user: req.user,
     })
@@ -80,6 +96,7 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormState> =>
     await iterateFields({
       id,
       addErrorPathToParent: null,
+      clientFieldSchemaMap,
       collectionSlug,
       data: dataWithDefaultValues,
       experimental,

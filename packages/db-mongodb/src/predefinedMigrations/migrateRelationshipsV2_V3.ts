@@ -5,8 +5,8 @@ import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
+import { getSession } from '../utilities/getSession.js'
 import { sanitizeRelationshipIDs } from '../utilities/sanitizeRelationshipIDs.js'
-import { withSession } from '../withSession.js'
 
 const migrateModelWithBatching = async ({
   batchSize,
@@ -109,7 +109,7 @@ export async function migrateRelationshipsV2_V3({
   const db = payload.db as MongooseAdapter
   const config = payload.config
 
-  const { session } = await withSession(db, req)
+  const session = await getSession(db, req)
 
   for (const collection of payload.config.collections.filter(hasRelationshipOrUploadField)) {
     payload.logger.info(`Migrating collection "${collection.slug}"`)
@@ -154,15 +154,18 @@ export async function migrateRelationshipsV2_V3({
       { lean: true, session },
     )
 
-    sanitizeRelationshipIDs({ config, data: doc, fields: global.fields })
+    // in case if the global doesn't exist in the database yet  (not saved)
+    if (doc) {
+      sanitizeRelationshipIDs({ config, data: doc, fields: global.fields })
 
-    await GlobalsModel.collection.updateOne(
-      {
-        globalType: global.slug,
-      },
-      { $set: doc },
-      { session },
-    )
+      await GlobalsModel.collection.updateOne(
+        {
+          globalType: global.slug,
+        },
+        { $set: doc },
+        { session },
+      )
+    }
 
     payload.logger.info(`Migrated global "${global.slug}"`)
 

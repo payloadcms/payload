@@ -50,7 +50,7 @@ export const Page: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
+  **Reminder:**
   Each field is an object with at least the `type` property. This matches the field to its corresponding Field Type. [More details](#field-options).
 </Banner>
 
@@ -99,7 +99,7 @@ Here are the available Presentational Fields:
 - [UI](/docs/fields/ui) - blank field for custom UI components
 
 <Banner type="warning">
-  <strong>Tip:</strong>
+  **Tip:**
   Don't see a Field Type that fits your needs? You can build your own using a [Custom Field Component](../admin/fields#field).
 </Banner>
 
@@ -212,6 +212,7 @@ Functions can be written to make use of the following argument properties:
 
 - `user` - the authenticated user object
 - `locale` - the currently selected locale string
+- `req` - the `PayloadRequest` object
 
 Here is an example of a `defaultValue` function:
 
@@ -227,15 +228,15 @@ export const myField: Field = {
   name: 'attribution',
   type: 'text',
   // highlight-start
-  defaultValue: ({ user, locale }) =>
+  defaultValue: ({ user, locale, req }) =>
     `${translation[locale]} ${user.name}`,
   // highlight-end
 }
 ```
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  You can use async `defaultValue` functions to fill fields with data from API requests.
+  **Tip:**
+  You can use async `defaultValue` functions to fill fields with data from API requests or Local API using `req.payload`.
 </Banner>
 
 ### Validation
@@ -377,7 +378,7 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
+  **Reminder:**
   The Custom ID Fields can only be of type [`Number`](./number) or [`Text`](./text).
 
   Custom ID fields with type `text` must not contain `/` or `.` characters.

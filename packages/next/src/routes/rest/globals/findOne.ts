@@ -1,12 +1,10 @@
 import httpStatus from 'http-status'
-import { findOneOperation } from 'payload'
+import { findOneOperation, sanitizePopulateParam, sanitizeSelectParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { GlobalRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
-import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const findOne: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { searchParams } = req
@@ -17,9 +15,9 @@ export const findOne: GlobalRouteHandler = async ({ globalConfig, req }) => {
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
     globalConfig,
-    populate: sanitizePopulate(req.query.populate),
+    populate: sanitizePopulateParam(req.query.populate),
     req,
-    select: sanitizeSelect(req.query.select),
+    select: sanitizeSelectParam(req.query.select),
   })
 
   return Response.json(result, {

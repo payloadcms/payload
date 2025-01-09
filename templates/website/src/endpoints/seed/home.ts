@@ -92,7 +92,7 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
                     format: 0,
                     mode: 'normal',
                     style: '',
-                    text: 'here',
+                    text: 'on our Github',
                     version: 1,
                   },
                 ],

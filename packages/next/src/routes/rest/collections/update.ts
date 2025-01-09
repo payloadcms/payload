@@ -2,14 +2,12 @@ import type { Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
-import { updateOperation } from 'payload'
+import { sanitizePopulateParam, sanitizeSelectParam, updateOperation } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
-import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const update: CollectionRouteHandler = async ({ collection, req }) => {
   const { depth, draft, limit, overrideLock, populate, select, where } = req.query as {
@@ -29,9 +27,9 @@ export const update: CollectionRouteHandler = async ({ collection, req }) => {
     draft: draft === 'true',
     limit: isNumber(limit) ? Number(limit) : undefined,
     overrideLock: Boolean(overrideLock === 'true'),
-    populate: sanitizePopulate(populate),
+    populate: sanitizePopulateParam(populate),
     req,
-    select: sanitizeSelect(select),
+    select: sanitizeSelectParam(select),
     where,
   })
 
@@ -44,7 +42,7 @@ export const update: CollectionRouteHandler = async ({ collection, req }) => {
     const message = req.t('general:updatedCountSuccessfully', {
       count: result.docs.length,
       label: getTranslation(
-        collection.config.labels[result.docs.length > 1 ? 'plural' : 'singular'],
+        collection.config.labels[result.docs.length === 1 ? 'singular' : 'plural'],
         req.i18n,
       ),
     })
@@ -64,7 +62,7 @@ export const update: CollectionRouteHandler = async ({ collection, req }) => {
   const total = result.docs.length + result.errors.length
   const message = req.t('error:unableToUpdateCount', {
     count: result.errors.length,
-    label: getTranslation(collection.config.labels[total > 1 ? 'plural' : 'singular'], req.i18n),
+    label: getTranslation(collection.config.labels[total === 1 ? 'singular' : 'plural'], req.i18n),
     total,
   })
 

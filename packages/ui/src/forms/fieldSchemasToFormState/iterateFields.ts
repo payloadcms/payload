@@ -1,5 +1,6 @@
 import type {
   BuildFormStateArgs,
+  ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field as FieldSchema,
@@ -9,6 +10,8 @@ import type {
   PayloadRequest,
   SanitizedFieldsPermissions,
 } from 'payload'
+
+import { getFieldPaths } from 'payload/shared'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 import type { RenderFieldMethod } from './types.js'
@@ -21,6 +24,7 @@ type Args = {
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
+  clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
   experimental?: BuildFormStateArgs['experimental']
@@ -73,6 +77,7 @@ export const iterateFields = async ({
   id,
   addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
+  clientFieldSchemaMap,
   collectionSlug,
   data,
   experimental,
@@ -102,12 +107,30 @@ export const iterateFields = async ({
 
   fields.forEach((field, fieldIndex) => {
     let passesCondition = true
+
+    const { indexPath, path, schemaPath } = getFieldPaths({
+      field,
+      index: fieldIndex,
+      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentPath,
+      parentSchemaPath,
+    })
+
     if (!skipConditionChecks) {
-      passesCondition = Boolean(
-        (field?.admin?.condition
-          ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
-          : true) && parentPassesCondition,
-      )
+      try {
+        passesCondition = Boolean(
+          (field?.admin?.condition
+            ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
+            : true) && parentPassesCondition,
+        )
+      } catch (err) {
+        passesCondition = false
+
+        req.payload.logger.error({
+          err,
+          msg: `Error evaluating field condition at path: ${path}`,
+        })
+      }
     }
 
     promises.push(
@@ -115,6 +138,7 @@ export const iterateFields = async ({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized,
+        clientFieldSchemaMap,
         collectionSlug,
         data,
         experimental,
@@ -125,6 +149,7 @@ export const iterateFields = async ({
         forceFullValue,
         fullData,
         includeSchema,
+        indexPath,
         omitParents,
         operation,
         parentIndexPath,
@@ -132,11 +157,13 @@ export const iterateFields = async ({
         parentPermissions: permissions,
         parentSchemaPath,
         passesCondition,
+        path,
         preferences,
         previousFormState,
         renderAllFields,
         renderFieldFn,
         req,
+        schemaPath,
         skipConditionChecks,
         skipValidation,
         state,

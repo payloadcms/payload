@@ -1,17 +1,12 @@
 import type { QueryOptions } from 'mongoose'
 
-import {
-  buildVersionGlobalFields,
-  type PayloadRequest,
-  type TypeWithID,
-  type UpdateGlobalVersionArgs,
-} from 'payload'
+import { buildVersionGlobalFields, type TypeWithID, type UpdateGlobalVersionArgs } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: MongooseAdapter,
@@ -20,7 +15,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     global: globalSlug,
     locale,
     options: optionsArgs = {},
-    req = {} as PayloadRequest,
+    req,
     select,
     versionData,
     where,
@@ -28,17 +23,20 @@ export async function updateGlobalVersion<T extends TypeWithID>(
 ) {
   const VersionModel = this.versions[globalSlug]
   const whereToUse = where || { id: { equals: id } }
-  const fields = buildVersionGlobalFields(
-    this.payload.config,
-    this.payload.config.globals.find((global) => global.slug === globalSlug),
-  )
+
+  const currentGlobal = this.payload.config.globals.find((global) => global.slug === globalSlug)
+  const fields = buildVersionGlobalFields(this.payload.config, currentGlobal)
 
   const options: QueryOptions = {
     ...optionsArgs,
-    ...(await withSession(this, req)),
     lean: true,
     new: true,
-    projection: buildProjectionFromSelect({ adapter: this, fields, select }),
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: buildVersionGlobalFields(this.payload.config, currentGlobal, true),
+      select,
+    }),
+    session: await getSession(this, req),
   }
 
   const query = await VersionModel.buildQuery({

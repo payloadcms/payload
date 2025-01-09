@@ -1,13 +1,15 @@
 import type { ClientComponentProps, ClientField, FieldPaths, ServerComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { createClientField, deepCopyObjectSimple, MissingEditorProp } from 'payload'
+import { createClientField, MissingEditorProp } from 'payload'
+import { fieldIsHiddenOrDisabled } from 'payload/shared'
 
 import type { RenderFieldMethod } from './types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- need this to reference already existing bundle. Otherwise, bundle size increases., payload/no-imports-from-exports-dir
-import { FieldDescription } from '../../exports/client/index.js'
+import { FieldDescription, WatchCondition } from '../../exports/client/index.js'
 
 const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
   'Cell',
@@ -18,6 +20,7 @@ const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Fil
 
 export const renderField: RenderFieldMethod = ({
   id,
+  clientFieldSchemaMap,
   collectionSlug,
   data,
   fieldConfig,
@@ -35,17 +38,23 @@ export const renderField: RenderFieldMethod = ({
   schemaPath,
   siblingData,
 }) => {
-  const clientField = createClientField({
-    clientField: deepCopyObjectSimple(fieldConfig) as ClientField,
-    defaultIDType: req.payload.config.db.defaultIDType,
-    field: fieldConfig,
-    i18n: req.i18n,
-    importMap: req.payload.importMap,
-  })
+  const clientField = clientFieldSchemaMap
+    ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
+    : createClientField({
+        defaultIDType: req.payload.config.db.defaultIDType,
+        field: fieldConfig,
+        i18n: req.i18n,
+        importMap: req.payload.importMap,
+      })
+
+  if (fieldIsHiddenOrDisabled(clientField)) {
+    return
+  }
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     field: clientField,
     path,
+    permissions,
     readOnly: typeof permissions === 'boolean' ? !permissions : !permissions?.[operation],
     schemaPath,
   }
@@ -64,6 +73,7 @@ export const renderField: RenderFieldMethod = ({
   const serverProps: ServerComponentProps = {
     id,
     clientField,
+    clientFieldSchemaMap,
     data,
     field: fieldConfig,
     fieldSchemaMap,
@@ -81,15 +91,27 @@ export const renderField: RenderFieldMethod = ({
     user: req.user,
   }
 
+  /**
+   * Only create the `customComponents` object if needed.
+   * This will prevent unnecessary data from being transferred to the client.
+   */
+  if (fieldConfig.admin) {
+    if (
+      (Object.keys(fieldConfig.admin.components).length > 0 ||
+        ('description' in fieldConfig.admin &&
+          typeof fieldConfig.admin.description === 'function') ||
+        'RowLabel' in fieldConfig.admin.components) &&
+      !fieldState?.customComponents
+    ) {
+      fieldState.customComponents = {}
+    }
+  }
+
   switch (fieldConfig.type) {
     // TODO: handle block row labels as well in a similar fashion
     case 'array': {
       fieldState?.rows?.forEach((row, rowIndex) => {
         if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
-          if (!fieldState?.customComponents) {
-            fieldState.customComponents = {}
-          }
-
           if (!fieldState.customComponents.RowLabels) {
             fieldState.customComponents.RowLabels = []
           }
@@ -129,16 +151,16 @@ export const renderField: RenderFieldMethod = ({
         fieldConfig.admin.components = {}
       }
 
-      if (!fieldState?.customComponents) {
-        fieldState.customComponents = {}
-      }
-
-      fieldState.customComponents.Field = RenderServerComponent({
-        clientProps,
-        Component: fieldConfig.editor.FieldComponent,
-        importMap: req.payload.importMap,
-        serverProps,
-      })
+      fieldState.customComponents.Field = (
+        <WatchCondition path={path}>
+          {RenderServerComponent({
+            clientProps,
+            Component: fieldConfig.editor.FieldComponent,
+            importMap: req.payload.importMap,
+            serverProps,
+          })}
+        </WatchCondition>
+      )
 
       break
     }
@@ -152,10 +174,6 @@ export const renderField: RenderFieldMethod = ({
           }
 
           const Component = fieldConfig.admin.components[key]
-
-          if (!fieldState?.customComponents) {
-            fieldState.customComponents = {}
-          }
 
           fieldState.customComponents[key] = RenderServerComponent({
             clientProps,
@@ -175,29 +193,22 @@ export const renderField: RenderFieldMethod = ({
   }
 
   if (fieldConfig.admin) {
-    if ('description' in fieldConfig.admin) {
-      if (typeof fieldConfig.admin?.description === 'function') {
-        if (!fieldState?.customComponents) {
-          fieldState.customComponents = {}
-        }
-
-        fieldState.customComponents.Description = (
-          <FieldDescription
-            description={fieldConfig.admin?.description({
-              t: req.i18n.t,
-            })}
-            path={path}
-          />
-        )
-      }
+    if (
+      'description' in fieldConfig.admin &&
+      typeof fieldConfig.admin?.description === 'function'
+    ) {
+      fieldState.customComponents.Description = (
+        <FieldDescription
+          description={fieldConfig.admin?.description({
+            t: req.i18n.t,
+          })}
+          path={path}
+        />
+      )
     }
 
     if (fieldConfig.admin?.components) {
       if ('afterInput' in fieldConfig.admin.components) {
-        if (!fieldState?.customComponents) {
-          fieldState.customComponents = {}
-        }
-
         fieldState.customComponents.AfterInput = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.afterInput,
@@ -208,10 +219,6 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('beforeInput' in fieldConfig.admin.components) {
-        if (!fieldState?.customComponents) {
-          fieldState.customComponents = {}
-        }
-
         fieldState.customComponents.BeforeInput = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.beforeInput,
@@ -222,10 +229,6 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('Description' in fieldConfig.admin.components) {
-        if (!fieldState?.customComponents) {
-          fieldState.customComponents = {}
-        }
-
         fieldState.customComponents.Description = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.Description,
@@ -236,10 +239,6 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('Error' in fieldConfig.admin.components) {
-        if (!fieldState?.customComponents) {
-          fieldState.customComponents = {}
-        }
-
         fieldState.customComponents.Error = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.Error,
@@ -250,10 +249,6 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('Label' in fieldConfig.admin.components) {
-        if (!fieldState?.customComponents) {
-          fieldState.customComponents = {}
-        }
-
         fieldState.customComponents.Label = RenderServerComponent({
           clientProps,
           Component: fieldConfig.admin.components.Label,
@@ -264,17 +259,17 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('Field' in fieldConfig.admin.components) {
-        if (!fieldState?.customComponents) {
-          fieldState.customComponents = {}
-        }
-
-        fieldState.customComponents.Field = RenderServerComponent({
-          clientProps,
-          Component: fieldConfig.admin.components.Field,
-          importMap: req.payload.importMap,
-          key: 'field.admin.components.Field',
-          serverProps,
-        })
+        fieldState.customComponents.Field = (
+          <WatchCondition path={path}>
+            {RenderServerComponent({
+              clientProps,
+              Component: fieldConfig.admin.components.Field,
+              importMap: req.payload.importMap,
+              key: 'field.admin.components.Field',
+              serverProps,
+            })}
+          </WatchCondition>
+        )
       }
     }
   }

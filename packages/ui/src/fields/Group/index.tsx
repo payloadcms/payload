@@ -40,7 +40,8 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
-  const { customComponents: { Description, Label } = {}, errorPaths } = useField({ path })
+  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, errorPaths } =
+    useField({ path })
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
@@ -70,30 +71,34 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
     >
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
-          <div className={`${baseClass}__header`}>
-            {Boolean(Label || Description || label) && (
-              <header>
-                <RenderCustomComponent
-                  CustomComponent={Label}
-                  Fallback={
-                    <h3 className={`${baseClass}__title`}>
-                      <FieldLabel
-                        label={getTranslation(label, i18n)}
-                        localized={false}
-                        path={path}
-                        required={false}
-                      />
-                    </h3>
-                  }
-                />
-                <RenderCustomComponent
-                  CustomComponent={Description}
-                  Fallback={<FieldDescription description={description} path={path} />}
-                />
-              </header>
-            )}
-            {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-          </div>
+          {Boolean(Label || Description || label || fieldHasErrors) && (
+            <div className={`${baseClass}__header`}>
+              {Boolean(Label || Description || label) && (
+                <header>
+                  <RenderCustomComponent
+                    CustomComponent={Label}
+                    Fallback={
+                      <h3 className={`${baseClass}__title`}>
+                        <FieldLabel
+                          as="span"
+                          label={getTranslation(label, i18n)}
+                          localized={false}
+                          path={path}
+                          required={false}
+                        />
+                      </h3>
+                    }
+                  />
+                  <RenderCustomComponent
+                    CustomComponent={Description}
+                    Fallback={<FieldDescription description={description} path={path} />}
+                  />
+                </header>
+              )}
+              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+            </div>
+          )}
+          {BeforeInput}
           <RenderFields
             fields={fields}
             margins="small"
@@ -105,6 +110,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           />
         </div>
       </GroupProvider>
+      {AfterInput}
     </div>
   )
 }

@@ -8,7 +8,7 @@ import flattenFields from '../../utilities/flattenTopLevelFields.js'
  * Validate useAsTitle for collections.
  */
 export const validateUseAsTitle = (config: CollectionConfig) => {
-  if (config.admin.useAsTitle.includes('.')) {
+  if (config.admin?.useAsTitle?.includes('.')) {
     throw new InvalidConfiguration(
       `"useAsTitle" cannot be a nested field. Please specify a top-level field in the collection "${config.slug}"`,
     )

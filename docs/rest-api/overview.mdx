@@ -50,29 +50,16 @@ Note: Collection slugs must be formatted in kebab-case
             updatedAt: "2023-04-27T11:27:32.419Z",
           },
         },
-        drawerContent: (
-          <>
-            <h6>Additional <code>find</code> query parameters</h6>
-            The <code>find</code> endpoint supports the following additional query parameters:
-            <ul>
-              <li>
-                <a href="/docs/queries/overview#sort">sort</a> - sort by field
-              </li>
-              <li>
-                <a href="/docs/queries/overview">where</a> - pass a where query to constrain returned
-                documents
-              </li>
-              <li>
-                <a href="/docs/queries/pagination#pagination-controls">limit</a> - limit the returned
-                documents to a certain number
-              </li>
-              <li>
-                <a href="/docs/queries/pagination#pagination-controls">page</a> - get a specific page of
-                documents
-              </li>
-            </ul>
-          </>
-        ),
+        drawerContent: `
+#### Additional \`find\` query parameters
+
+The \`find\` endpoint supports the following additional query parameters:
+
+-  [sort](/docs/queries/overview#sort) - sort by field
+-  [where](/docs/queries/overview) - pass a where query to constrain returned documents
+-  [limit](/docs/queries/pagination#pagination-controls) - limit the returned documents to a certain number
+-  [page](/docs/queries/pagination#pagination-controls) - get a specific page of documents
+        `
       },
     },
     {
@@ -501,7 +488,7 @@ Globals cannot be created or deleted, so there are only two REST endpoints opene
 
 ## Preferences
 
-In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/overview#preferences) for data specific to the authenticated user.
+In addition to the dynamically generated endpoints above Payload also has REST endpoints to manage the admin user [preferences](/docs/admin/preferences) for data specific to the authenticated user.
 
 <RestExamples
   data={[
@@ -659,7 +646,7 @@ export const Orders: CollectionConfig = {
 ```
 
 <Banner>
-  <strong>Note:</strong>
+  **Note:**
   **req** will have the **payload** object and can be used inside your endpoint handlers for making calls like req.payload.find() that will make use of [Access Control](../access-control/overview) and [Hooks](../hooks/overview).
 </Banner>
 

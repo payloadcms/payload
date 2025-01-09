@@ -1,5 +1,6 @@
 'use client'
 
+import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
 import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
@@ -55,6 +56,12 @@ const toolbarGroups: ToolbarGroup[] = [
 ]
 
 export const IndentFeatureClient = createClientFeature({
+  plugins: [
+    {
+      Component: TabIndentationPlugin,
+      position: 'normal',
+    },
+  ],
   toolbarFixed: {
     groups: toolbarGroups,
   },

@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import path from 'path'
 import { ValidationError } from 'payload'
@@ -16,6 +16,7 @@ import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
   draftCollectionSlug,
+  draftGlobalSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
 } from './slugs.js'
@@ -484,6 +485,57 @@ describe('Versions', () => {
       })
     })
 
+    it('should restore published version with correct data', async () => {
+      // create a post
+      const originalPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'description',
+          title: 'v1',
+          _status: 'published',
+        },
+      })
+
+      // update the post
+      await payload.update({
+        collection: draftCollectionSlug,
+        draft: true,
+        id: originalPost.id,
+        data: {
+          title: 'v2',
+          _status: 'published',
+        },
+      })
+
+      // get the version id of the original draft
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: {
+            equals: originalPost.id,
+          },
+        },
+      })
+
+      // restore the version
+      const versionToRestore = versions.docs[versions.docs.length - 1]
+      const restoredVersion = await payload.restoreVersion({
+        id: versionToRestore.id,
+        collection: draftCollectionSlug,
+      })
+
+      // get the latest draft
+      const latestDraft = await payload.findByID({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        draft: true,
+      })
+
+      // assert it has the original post content
+      expect(latestDraft.title).toStrictEqual('v1')
+      expect(restoredVersion.title).toStrictEqual('v1')
+    })
+
     describe('Update', () => {
       it('should allow a draft to be patched', async () => {
         const originalTitle = 'Here is a published post'
@@ -829,6 +881,62 @@ describe('Versions', () => {
 
         // correctly retains 2 documents in the actual collection
         expect(docs.totalDocs).toStrictEqual(2)
+      })
+    })
+
+    describe('Race conditions', () => {
+      it('should keep latest true with parallel writes', async () => {
+        const doc = await payload.create({
+          collection: 'draft-posts',
+          data: {
+            description: 'A',
+            title: 'A',
+          },
+        })
+
+        for (let i = 0; i < 200; i++) {
+          payload.logger.info(`try ${i}`)
+          const writeAmount = 3
+
+          const promises = Array.from({ length: writeAmount }, async (_, i) => {
+            return new Promise((resolve) => {
+              // Add latency so updates aren't immediate after each other but still in parallel
+              setTimeout(() => {
+                payload
+                  .update({
+                    id: doc.id,
+                    collection: 'draft-posts',
+                    data: {},
+                    draft: true,
+                  })
+                  .then(resolve)
+                  .catch(resolve)
+              }, i * 5)
+            })
+          })
+
+          await Promise.all(promises)
+
+          const { docs } = await payload.findVersions({
+            collection: 'draft-posts',
+            where: {
+              and: [
+                {
+                  parent: {
+                    equals: doc.id,
+                  },
+                },
+                {
+                  latest: {
+                    equals: true,
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(docs[0]).toBeDefined()
+        }
       })
     })
   })
@@ -1643,6 +1751,197 @@ describe('Versions', () => {
           .then((res) => res.json())
         expect(data.AutosaveGlobal).toEqual({ title: globalGraphQLOriginalTitle })
       })
+    })
+  })
+
+  describe('Scheduled Publish', () => {
+    it('should allow collection scheduled publish', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'my doc to publish in the future',
+          description: 'hello',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+        },
+      })
+
+      await wait(4000)
+
+      await payload.jobs.run()
+
+      const retrieved = await payload.findByID({
+        collection: draftCollectionSlug,
+        id: draft.id,
+      })
+
+      expect(retrieved._status).toStrictEqual('published')
+    })
+
+    it('should restrict scheduled publish based on user', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'my doc to publish in the future',
+          description: 'hello',
+          restrictedToUpdate: true,
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      const currentDate = new Date()
+
+      const user = (
+        await payload.find({ collection: 'users', where: { email: { equals: devUser.email } } })
+      ).docs[0]
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+          user: user.id,
+        },
+      })
+
+      await wait(4000)
+
+      const res = await payload.jobs.run()
+
+      expect(res.jobStatus[Object.keys(res.jobStatus)[0]].status).toBe('error-reached-max-retries')
+
+      const retrieved = await payload.findByID({
+        collection: draftCollectionSlug,
+        id: draft.id,
+      })
+
+      expect(retrieved._status).toStrictEqual('draft')
+    })
+
+    it('should allow collection scheduled unpublish', async () => {
+      const published = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'my doc to publish in the future',
+          description: 'hello',
+          _status: 'published',
+        },
+        draft: true,
+      })
+
+      expect(published._status).toStrictEqual('published')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          type: 'unpublish',
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: published.id,
+          },
+        },
+      })
+
+      await wait(4000)
+
+      await payload.jobs.run()
+
+      const retrieved = await payload.findByID({
+        collection: draftCollectionSlug,
+        id: published.id,
+      })
+
+      expect(retrieved._status).toStrictEqual('draft')
+    })
+
+    it('should allow global scheduled publish', async () => {
+      const draft = await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          _status: 'draft',
+          title: 'i will publish',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          global: draftGlobalSlug,
+        },
+      })
+
+      await wait(4000)
+
+      await payload.jobs.run()
+
+      const retrieved = await payload.findGlobal({
+        slug: draftGlobalSlug,
+      })
+
+      expect(retrieved._status).toStrictEqual('published')
+      expect(retrieved.title).toStrictEqual('i will publish')
+    })
+
+    it('should allow global scheduled unpublish', async () => {
+      const draft = await payload.updateGlobal({
+        slug: draftGlobalSlug,
+        data: {
+          _status: 'published',
+          title: 'i will be a draft',
+        },
+      })
+
+      expect(draft._status).toStrictEqual('published')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          type: 'unpublish',
+          global: draftGlobalSlug,
+        },
+      })
+
+      await wait(4000)
+
+      await payload.jobs.run()
+
+      const retrieved = await payload.findGlobal({
+        slug: draftGlobalSlug,
+      })
+
+      expect(retrieved._status).toStrictEqual('draft')
+      expect(retrieved.title).toStrictEqual('i will be a draft')
     })
   })
 

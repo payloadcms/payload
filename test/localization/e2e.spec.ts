@@ -1,9 +1,8 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -13,17 +12,27 @@ import {
   changeLocale,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
+  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
+import { richTextSlug } from './collections/RichText/index.js'
 import {
+  defaultLocale,
   englishTitle,
   localizedPostsSlug,
+  relationshipLocalizedSlug,
   spanishLocale,
   withRequiredLocalizedFields,
 } from './shared.js'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
+import { RESTClient } from 'helpers/rest.js'
+import { GeneratedTypes } from 'helpers/sdk/types.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -36,11 +45,11 @@ const dirname = path.dirname(filename)
  * Repeat above for Globals
  */
 
-const { beforeAll, describe } = test
+const { beforeAll, beforeEach, describe } = test
 let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
+let urlRelationshipLocalized: AdminUrlUtil
 
-const defaultLocale = 'en'
 const title = 'english title'
 const spanishTitle = 'spanish title'
 const arabicTitle = 'arabic title'
@@ -48,26 +57,64 @@ const description = 'description'
 
 let page: Page
 let payload: PayloadTestSDK<Config>
+let client: RESTClient
 let serverURL: string
+let richTextURL: AdminUrlUtil
+let context: BrowserContext
 
 describe('Localization', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
+    urlRelationshipLocalized = new AdminUrlUtil(serverURL, relationshipLocalizedSlug)
+    richTextURL = new AdminUrlUtil(serverURL, richTextSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
 
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    await client.login()
+
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  beforeEach(async () => {
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+  })
+
+  describe('localizer', async () => {
+    test('should not render default locale in locale selector when prefs are not default', async () => {
+      // change prefs to spanish, then load page and check that the localizer label does not say English
+      await upsertPrefs<Config, GeneratedTypes<any>>({
+        payload,
+        user: client.user,
+        key: 'locale',
+        value: 'es',
+      })
+
+      await page.goto(url.list)
+
+      const localeLabel = await page
+        .locator('.localizer.app-header__localizer .localizer-button__current-label')
+        .innerText()
+
+      expect(localeLabel).not.toEqual('English')
+    })
   })
 
   describe('localized text', () => {
     test('create english post, switch to spanish', async () => {
+      await changeLocale(page, defaultLocale)
+
       await page.goto(url.create)
 
       await fillValues({ description, title })
@@ -236,19 +283,168 @@ describe('Localization', () => {
   })
 
   describe('localized relationships', () => {
-    test('ensure relationship field fetches are localised as well', async () => {
-      await page.goto(url.list)
+    test('ensure relationship field fetches are localized as well', async () => {
       await changeLocale(page, spanishLocale)
-
-      const localisedPost = page.locator('.cell-title a').first()
-      const localisedPostUrl = await localisedPost.getAttribute('href')
-      await page.goto(serverURL + localisedPostUrl)
-      await page.waitForURL(serverURL + localisedPostUrl)
-
+      await navigateToDoc(page, url)
       const selectField = page.locator('#field-children .rs__control')
       await selectField.click()
-
       await expect(page.locator('#field-children .rs__menu')).toContainText('spanish-relation2')
+    })
+
+    test('ensure relationship edit drawers are opened in currently selected locale', async () => {
+      await changeLocale(page, spanishLocale)
+      await navigateToDoc(page, urlRelationshipLocalized)
+      const drawerToggler =
+        '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler'
+      expect(page.locator(drawerToggler)).toBeEnabled()
+      await openDocDrawer(page, drawerToggler)
+      await expect(page.locator('.doc-drawer__header-text')).toContainText('spanish-relation2')
+      await page.locator('.doc-drawer__header-close').click()
+    })
+  })
+
+  describe('copy localized data', () => {
+    test('should show Copy To Locale button and drawer', async () => {
+      await changeLocale(page, defaultLocale)
+      await navigateToDoc(page, url)
+      await openCopyToLocaleDrawer(page)
+      await expect(page.locator('.copy-locale-data__content')).toBeVisible()
+      await page.locator('.drawer-close-button').click()
+    })
+
+    test('should copy data to correct locale', async () => {
+      await createAndSaveDoc(page, url, { title })
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'Spanish')
+      await runCopy(page)
+      await expect(page.locator('#field-title')).toHaveValue(title)
+    })
+
+    test('should copy rich text data to correct locale', async () => {
+      await changeLocale(page, defaultLocale)
+      await page.goto(richTextURL.create)
+      const richTextField = page.locator('#field-richText')
+      const richTextContent = '<p>This is rich text in English</p>'
+      await richTextField.fill(richTextContent)
+      await saveDocAndAssert(page)
+
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'Spanish')
+      await runCopy(page)
+
+      await expect(richTextField).toContainText(richTextContent)
+    })
+
+    test('should copy nested array to locale', async () => {
+      const sampleText = 'Copy this text'
+      const nestedArrayURL = new AdminUrlUtil(serverURL, nestedToArrayAndBlockCollectionSlug)
+      await page.goto(nestedArrayURL.create)
+      await changeLocale(page, 'ar')
+      const addArrayRow = page.locator('#field-topLevelArray .array-field__add-row')
+      await addArrayRow.click()
+
+      const arrayField = page.locator('#field-topLevelArray__0__localizedText')
+      await expect(arrayField).toBeVisible()
+      await arrayField.fill(sampleText)
+      await saveDocAndAssert(page)
+
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'English')
+      await runCopy(page)
+
+      await expect(arrayField).toHaveValue(sampleText)
+    })
+
+    test('should default source locale to current locale', async () => {
+      await changeLocale(page, spanishLocale)
+      await createAndSaveDoc(page, url, { title })
+      await openCopyToLocaleDrawer(page)
+
+      const fromLocaleField = page.locator('#field-fromLocale')
+      await expect(fromLocaleField).toContainText('Spanish')
+      await page.locator('.drawer-close-button').click()
+    })
+
+    test('should not overwrite existing data when overwrite is unchecked', async () => {
+      await changeLocale(page, defaultLocale)
+      await createAndSaveDoc(page, url, { title: englishTitle, description })
+
+      await changeLocale(page, spanishLocale)
+      await fillValues({ title: spanishTitle, description: 'Spanish description' })
+      await saveDocAndAssert(page)
+
+      await changeLocale(page, defaultLocale)
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'Spanish')
+      const overwriteCheckbox = page.locator('#field-overwriteExisting')
+      await expect(overwriteCheckbox).not.toBeChecked()
+      await runCopy(page)
+
+      await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+      await expect(page.locator('#field-description')).toHaveValue('Spanish description')
+    })
+
+    test('should overwrite existing data when overwrite is checked', async () => {
+      await changeLocale(page, defaultLocale)
+      await createAndSaveDoc(page, url, { title: englishTitle, description })
+      await changeLocale(page, spanishLocale)
+      await fillValues({ title: spanishTitle })
+      await saveDocAndAssert(page)
+      await changeLocale(page, defaultLocale)
+
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'Spanish')
+      const overwriteCheckbox = page.locator('#field-overwriteExisting')
+      await overwriteCheckbox.click()
+      await runCopy(page)
+
+      await expect(page.locator('#field-title')).toHaveValue(englishTitle)
+    })
+
+    test('should not include current locale in toLocale options', async () => {
+      await changeLocale(page, defaultLocale)
+      await createAndSaveDoc(page, url, { title })
+      await openCopyToLocaleDrawer(page)
+      const toLocaleDropdown = page.locator('#field-toLocale')
+      await toLocaleDropdown.click()
+
+      const options = await page
+        .locator('.rs__option')
+        .evaluateAll((els) => els.map((el) => el.textContent))
+
+      await expect.poll(() => options).not.toContain('English')
+      await page.locator('.drawer-close-button').click()
+    })
+
+    test('should handle back to back copies', async () => {
+      await changeLocale(page, defaultLocale)
+      await createAndSaveDoc(page, url, { title })
+
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'Spanish')
+      await runCopy(page)
+      await expect(page.locator('#field-title')).toHaveValue(title)
+
+      const regexPattern = new RegExp(`locale=es`)
+      await expect(page).toHaveURL(regexPattern)
+
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'Hungarian')
+      await runCopy(page)
+      await expect(page.locator('#field-title')).toHaveValue(title)
+    })
+
+    test('should throw error if unsaved data', async () => {
+      await createAndSaveDoc(page, url, { title })
+      await fillValues({ title: 'updated' })
+      const docControls = page.locator('.doc-controls__popup')
+      await docControls.click()
+
+      const copyButton = page.locator('#copy-locale-data__button')
+      await expect(copyButton).toBeVisible()
+      await copyButton.click()
+
+      await expect(page.locator('.payload-toast-container')).toContainText('unsaved')
     })
   })
 })
@@ -262,4 +458,34 @@ async function fillValues(data: Partial<LocalizedPost>) {
   if (descVal) {
     await page.locator('#field-description').fill(descVal)
   }
+}
+
+async function runCopy(page) {
+  const copyDrawerClose = page.locator('.copy-locale-data__sub-header button')
+  await expect(copyDrawerClose).toBeVisible()
+  await copyDrawerClose.click()
+}
+
+async function createAndSaveDoc(page, url, values) {
+  await page.goto(url.create)
+  await fillValues(values)
+  await saveDocAndAssert(page)
+}
+
+async function openCopyToLocaleDrawer(page) {
+  const docControls = page.locator('.doc-controls__popup button.popup-button')
+  expect(docControls).toBeEnabled()
+  await docControls.click()
+  const copyButton = page.locator('#copy-locale-data__button')
+  await expect(copyButton).toBeVisible()
+  await copyButton.click()
+  await expect(page.locator('#copy-locale')).toBeVisible()
+  await expect(page.locator('.copy-locale-data__content')).toBeVisible()
+}
+
+async function setToLocale(page, locale) {
+  const toField = page.locator('#field-toLocale')
+  await toField.click({ delay: 100 })
+  const options = page.locator('.rs__option')
+  await options.locator(`text=${locale}`).click()
 }

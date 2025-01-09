@@ -51,6 +51,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       collectionSlug: collectionConfig.slug,
       locale,
       payload,
+      req,
       user,
     })
 
@@ -105,6 +106,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       await getVersions({
         id: user.id,
         collectionConfig,
+        doc: data,
         docPermissions,
         locale: locale?.code,
         payload,
@@ -113,7 +115,15 @@ export const Account: React.FC<AdminViewProps> = async ({
 
     return (
       <DocumentInfoProvider
-        AfterFields={<Settings i18n={i18n} languageOptions={languageOptions} theme={theme} />}
+        AfterFields={
+          <Settings
+            i18n={i18n}
+            languageOptions={languageOptions}
+            payload={payload}
+            theme={theme}
+            user={user}
+          />
+        }
         apiURL={`${serverURL}${api}/${userSlug}${user?.id ? `/${user.id}` : ''}`}
         collectionSlug={userSlug}
         currentEditor={currentEditor}

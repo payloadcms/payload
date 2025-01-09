@@ -784,6 +784,51 @@ describe('lexicalMain', () => {
     })
   })
 
+  // NOTE: It's not worth it right now. Maybe later. See https://github.com/payloadcms/payload/issues/10049
+  test.skip('ensure escape key can be used to move focus away from editor', async () => {
+    await navigateToLexicalFields()
+
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
+
+    const textField = page.locator('#field-title')
+    const addBlockButton = page.locator('.add-block-menu').first()
+
+    // Pressing 'Escape' allows focus to be moved to the previous element
+    await paragraph.click()
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Escape')
+    await page.keyboard.press('Shift+Tab')
+    await expect(textField).toBeFocused()
+
+    // Pressing 'Escape' allows focus to be moved to the next element
+    await paragraph.click()
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Escape')
+    await page.keyboard.press('Tab')
+    await expect(addBlockButton).toBeFocused()
+
+    // Focus is not moved to the previous element if 'Escape' is not pressed
+    await paragraph.click()
+    await page.keyboard.press('Shift+Tab')
+    await expect(textField).not.toBeFocused()
+
+    // Focus is not moved to the next element if 'Escape' is not pressed
+    await paragraph.click()
+    await page.keyboard.press('Tab')
+    await expect(addBlockButton).not.toBeFocused()
+  })
+
   test('creating a link, then clicking in the link drawer, then saving the link, should preserve cursor position and not move cursor to beginning of richtext field', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').first()
@@ -798,7 +843,6 @@ describe('lexicalMain', () => {
     const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
     await paragraph.scrollIntoViewIfNeeded()
     await expect(paragraph).toBeVisible()
-
     /**
      * Type some text
      */
@@ -1066,6 +1110,112 @@ describe('lexicalMain', () => {
     await expect(page.locator('#blocks-row-0 .section-title__input')).toHaveValue('2') // block name
     await expect(page.locator('#blocks-row-1 .LexicalEditorTheme__paragraph')).toContainText('1')
     await expect(page.locator('#blocks-row-1 .section-title__input')).toHaveValue('1') // block name
+  })
+
+  test('ensure blocks can be created from plus button', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    // click contenteditable
+    await richTextField.locator('.ContentEditable__root').first().click()
+
+    const lastParagraph = richTextField.locator('p').first()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    /**
+     * Create new upload node
+     */
+    // type / to open the slash menu
+    await lastParagraph.click()
+    // hover over the last paragraph to make the plus button visible
+    await lastParagraph.hover()
+    await wait(600)
+    //await richTextField.locator('.add-block-menu').first().click()
+    const plusButton = richTextField.locator('.add-block-menu').first()
+
+    // hover over plusButton
+    await plusButton.hover()
+    await wait(100)
+    // click the plus button
+    await plusButton.click()
+
+    await expect(richTextField.locator('.slash-menu-popup')).toBeVisible()
+    // click button with text "Text"
+    await richTextField.locator('.slash-menu-popup button').getByText('My Block').click()
+
+    await expect(richTextField.locator('.lexical-block')).toHaveCount(1)
+    await richTextField.locator('#field-someTextRequired').first().fill('test')
+
+    await saveDocAndAssert(page)
+
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+
+      // @ts-expect-error no need to type this
+      expect(lexicalField?.root?.children[1].fields.someTextRequired).toEqual('test')
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  test('make relationship fields update the collection when it is changed in the drawer dropdown', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    await richTextField.locator('.ContentEditable__root').first().click()
+    const lastParagraph = richTextField.locator('p').first()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    await lastParagraph.click()
+    await page.keyboard.type('/Relationship')
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+    await page.keyboard.press('Enter')
+
+    const relationshipInput = page.locator('.drawer__content .rs__input').first()
+    await expect(relationshipInput).toBeVisible()
+    await page.getByRole('heading', { name: 'Lexical Fields' })
+    await relationshipInput.click()
+    const user = await page.getByRole('option', { name: 'User' })
+    await user.click()
+
+    const userListDrawer = page
+      .locator('div')
+      .filter({ hasText: /^User$/ })
+      .first()
+    await expect(userListDrawer).toBeVisible()
+    await page.getByRole('heading', { name: 'Users' })
+    const button = await page.getByLabel('Add new User')
+    await button.click()
+    await page.getByText('Creating new User')
   })
 
   describe('localization', () => {

@@ -1,4 +1,4 @@
-/** @type {import('eslint').Linter.FlatConfig} */
+/** @type {import('eslint').Linter.Config} */
 export const index = {
   'jest/consistent-test-it': ['error', { fn: 'it' }],
   'jest/expect-expect': 'error',

@@ -1,4 +1,4 @@
-import type { Field, Payload, Where } from 'payload'
+import type { FlattenedField, Payload, Where } from 'payload'
 
 import { parseParams } from './parseParams.js'
 
@@ -11,7 +11,7 @@ export async function buildAndOrConditions({
   where,
 }: {
   collectionSlug?: string
-  fields: Field[]
+  fields: FlattenedField[]
   globalSlug?: string
   locale?: string
   payload: Payload

@@ -2,6 +2,7 @@ import type { SanitizedConfig } from 'payload'
 
 import type {
   FeatureProviderServer,
+  ResolvedServerFeature,
   ResolvedServerFeatureMap,
   ServerFeatureProviderMap,
 } from '../../../features/typesServer.js'
@@ -186,14 +187,21 @@ export async function loadFeatures({
             unSanitizedEditorConfig,
           })
         : featureProvider.feature
-    resolvedFeatures.set(featureProvider.key, {
-      ...feature,
-      dependencies: featureProvider.dependencies!,
-      dependenciesPriority: featureProvider.dependenciesPriority!,
-      dependenciesSoft: featureProvider.dependenciesSoft!,
-      key: featureProvider.key,
-      order: loaded,
-    })
+
+    const resolvedFeature: ResolvedServerFeature<any, any> = feature as ResolvedServerFeature<
+      any,
+      any
+    >
+
+    // All these new properties would be added to the feature, as it's mutated. However, this does not cause any damage and allows
+    // us to prevent an unnecessary spread operation.
+    resolvedFeature.key = featureProvider.key
+    resolvedFeature.order = loaded
+    resolvedFeature.dependencies = featureProvider.dependencies!
+    resolvedFeature.dependenciesPriority = featureProvider.dependenciesPriority!
+    resolvedFeature.dependenciesSoft = featureProvider.dependenciesSoft!
+
+    resolvedFeatures.set(featureProvider.key, resolvedFeature)
 
     loaded++
   }

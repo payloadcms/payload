@@ -25,6 +25,10 @@ import {
 import { formatLivePreviewURL } from './utilities/formatLivePreviewURL.js'
 
 export default buildConfigWithDefaults({
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

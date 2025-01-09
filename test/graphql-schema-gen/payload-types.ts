@@ -50,9 +50,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -229,66 +229,67 @@ export interface PayloadMigration {
 export interface Collection1Select<T extends boolean = true> {
   testing?: T;
   title?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        id?: T;
-      };
+  meta?: T | SharedMetaArraySelect<T>;
   blocks?:
     | T
     | {
-        block1?:
-          | T
-          | {
-              b1title?: T;
-              b1description?: T;
-              id?: T;
-              blockName?: T;
-            };
-        block2?:
-          | T
-          | {
-              b2title?: T;
-              b2description?: T;
-              id?: T;
-              blockName?: T;
-            };
+        block1?: T | SharedMetaBlockSelect<T>;
+        block2?: T | AnotherSharedBlockSelect<T>;
       };
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SharedMetaArray_select".
+ */
+export interface SharedMetaArraySelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  id?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SharedMetaBlock_select".
+ */
+export interface SharedMetaBlockSelect<T extends boolean = true> {
+  b1title?: T;
+  b1description?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AnotherSharedBlock_select".
+ */
+export interface AnotherSharedBlockSelect<T extends boolean = true> {
+  b2title?: T;
+  b2description?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection2_select".
  */
 export interface Collection2Select<T extends boolean = true> {
-  metaArray?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        id?: T;
-      };
-  metaGroup?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-      };
+  metaArray?: T | SharedMetaArraySelect<T>;
+  metaGroup?: T | SharedMetaSelect<T>;
   nestedGroup?:
     | T
     | {
-        meta?:
-          | T
-          | {
-              title?: T;
-              description?: T;
-            };
+        meta?: T | SharedMetaSelect<T>;
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SharedMeta_select".
+ */
+export interface SharedMetaSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

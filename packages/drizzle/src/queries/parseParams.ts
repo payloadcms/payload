@@ -1,5 +1,5 @@
-import type { SQL } from 'drizzle-orm'
-import type { Field, Operator, Where } from 'payload'
+import type { SQL, Table } from 'drizzle-orm'
+import type { FlattenedField, Operator, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
@@ -9,26 +9,31 @@ import { validOperators } from 'payload/shared'
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
+import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type Args = {
   adapter: DrizzleAdapter
-  fields: Field[]
+  aliasTable?: Table
+  fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale: string
   selectFields: Record<string, GenericColumn>
+  selectLocale?: boolean
   tableName: string
   where: Where
 }
 
 export function parseParams({
   adapter,
+  aliasTable,
   fields,
   joins,
   locale,
   selectFields,
+  selectLocale,
   tableName,
   where,
 }: Args): SQL {
@@ -49,10 +54,12 @@ export function parseParams({
         if (Array.isArray(condition)) {
           const builtConditions = buildAndOrConditions({
             adapter,
+            aliasTable,
             fields,
             joins,
             locale,
             selectFields,
+            selectLocale,
             tableName,
             where: condition,
           })
@@ -80,12 +87,14 @@ export function parseParams({
                   table,
                 } = getTableColumnFromPath({
                   adapter,
+                  aliasTable,
                   collectionPath: relationOrPath,
                   fields,
                   joins,
                   locale,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
+                  selectLocale,
                   tableName,
                   value: val,
                 })
@@ -257,12 +266,18 @@ export function parseParams({
                   break
                 }
 
+                const resolvedColumn =
+                  rawColumn ||
+                  (aliasTable && tableName === getNameFromDrizzleTable(table)
+                    ? aliasTable[columnName]
+                    : table[columnName])
+
                 if (queryOperator === 'not_equals' && queryValue !== null) {
                   constraints.push(
                     or(
-                      isNull(rawColumn || table[columnName]),
+                      isNull(resolvedColumn),
                       /* eslint-disable @typescript-eslint/no-explicit-any */
-                      ne<any>(rawColumn || table[columnName], queryValue),
+                      ne<any>(resolvedColumn, queryValue),
                     ),
                   )
                   break
@@ -284,12 +299,12 @@ export function parseParams({
                 }
 
                 if (operator === 'equals' && queryValue === null) {
-                  constraints.push(isNull(rawColumn || table[columnName]))
+                  constraints.push(isNull(resolvedColumn))
                   break
                 }
 
                 if (operator === 'not_equals' && queryValue === null) {
-                  constraints.push(isNotNull(rawColumn || table[columnName]))
+                  constraints.push(isNotNull(resolvedColumn))
                   break
                 }
 
@@ -326,9 +341,7 @@ export function parseParams({
                   break
                 }
 
-                constraints.push(
-                  adapter.operators[queryOperator](rawColumn || table[columnName], queryValue),
-                )
+                constraints.push(adapter.operators[queryOperator](resolvedColumn, queryValue))
               }
             }
           }

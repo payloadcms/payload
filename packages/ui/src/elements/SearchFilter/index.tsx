@@ -44,7 +44,6 @@ export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
   useEffect(() => {
     if (initialParams?.search !== previousSearch.current) {
       shouldUpdateState.current = false
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setSearch(initialParams?.search as string)
       previousSearch.current = initialParams?.search as string
     }

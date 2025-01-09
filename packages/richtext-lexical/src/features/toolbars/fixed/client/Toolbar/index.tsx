@@ -98,8 +98,19 @@ function ToolbarGroupComponent({
       if (label.length > 25) {
         label = label.substring(0, 25) + '...'
       }
-      setDropdownLabel(label)
-      setDropdownIcon(() => item.ChildComponent)
+      if (activeItems.length === 1) {
+        setDropdownLabel(label)
+        setDropdownIcon(() => item.ChildComponent)
+      } else {
+        setDropdownLabel(
+          i18n.t('lexical:general:toolbarItemsActive', { count: activeItems.length }),
+        )
+        if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
+          setDropdownIcon(() => group.ChildComponent!)
+        } else {
+          setDropdownIcon(undefined)
+        }
+      }
     },
     [group, i18n, featureClientSchemaMap, schemaPath],
   )
@@ -115,7 +126,7 @@ function ToolbarGroupComponent({
             Icon={DropdownIcon}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
-            maxActiveItems={1}
+            maxActiveItems={group.maxActiveItems ?? 1}
             onActiveChange={onActiveChange}
           />
         ) : (
@@ -125,7 +136,7 @@ function ToolbarGroupComponent({
             group={group}
             itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
             label={dropdownLabel}
-            maxActiveItems={1}
+            maxActiveItems={group.maxActiveItems ?? 1}
             onActiveChange={onActiveChange}
           />
         )

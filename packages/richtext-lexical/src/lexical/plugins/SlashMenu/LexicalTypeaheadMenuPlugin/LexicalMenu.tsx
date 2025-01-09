@@ -254,26 +254,23 @@ export function LexicalMenu({
     (selectedItem: SlashMenuItem) => {
       close()
 
-      editor.update(
-        () => {
-          const textNodeContainingQuery =
-            resolution.match != null && shouldSplitNodeWithQuery
-              ? $splitNodeContainingQuery(resolution.match)
-              : null
+      editor.update(() => {
+        const textNodeContainingQuery =
+          resolution.match != null && shouldSplitNodeWithQuery
+            ? $splitNodeContainingQuery(resolution.match)
+            : null
 
-          if (textNodeContainingQuery) {
-            textNodeContainingQuery.remove()
-          }
-        },
-        {
-          onUpdate() {
-            selectedItem.onSelect({
-              editor,
-              queryString: resolution.match ? resolution.match.matchingString : '',
-            })
-          },
-        },
-      )
+        if (textNodeContainingQuery) {
+          textNodeContainingQuery.remove()
+        }
+      })
+
+      setTimeout(() => {
+        selectedItem.onSelect({
+          editor,
+          queryString: resolution.match ? resolution.match.matchingString : '',
+        })
+      }, 0)
     },
     [editor, shouldSplitNodeWithQuery, resolution.match, close],
   )

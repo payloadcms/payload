@@ -20,6 +20,8 @@ export interface Config {
     places: Place;
     'fields-persistance': FieldsPersistance;
     'custom-ids': CustomId;
+    'fake-custom-ids': FakeCustomId;
+    'relationships-migration': RelationshipsMigration;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -36,6 +38,8 @@ export interface Config {
     places: PlacesSelect<false> | PlacesSelect<true>;
     'fields-persistance': FieldsPersistanceSelect<false> | FieldsPersistanceSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
+    'fake-custom-ids': FakeCustomIdsSelect<false> | FakeCustomIdsSelect<true>;
+    'relationships-migration': RelationshipsMigrationSelect<false> | RelationshipsMigrationSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -54,9 +58,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -86,6 +90,20 @@ export interface Post {
   title: string;
   hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
+  arrayWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -267,9 +285,40 @@ export interface FieldsPersistance {
  */
 export interface CustomId {
   id: string;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fake-custom-ids".
+ */
+export interface FakeCustomId {
+  id: string;
+  title?: string | null;
+  group?: {
+    id?: string | null;
+  };
+  myTab?: {
+    id?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-migration".
+ */
+export interface RelationshipsMigration {
+  id: string;
+  relationship?: (string | null) | DefaultValue;
+  relationship_2?: {
+    relationTo: 'default-values';
+    value: string | DefaultValue;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -332,6 +381,14 @@ export interface PayloadLockedDocument {
         value: string | CustomId;
       } | null)
     | ({
+        relationTo: 'fake-custom-ids';
+        value: string | FakeCustomId;
+      } | null)
+    | ({
+        relationTo: 'relationships-migration';
+        value: string | RelationshipsMigration;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -385,6 +442,23 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   hasTransaction?: T;
   throwAfterChange?: T;
+  arrayWithIDs?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  blocksWithIDs?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -537,9 +611,39 @@ export interface FieldsPersistanceSelect<T extends boolean = true> {
  */
 export interface CustomIdsSelect<T extends boolean = true> {
   id?: T;
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fake-custom-ids_select".
+ */
+export interface FakeCustomIdsSelect<T extends boolean = true> {
+  title?: T;
+  group?:
+    | T
+    | {
+        id?: T;
+      };
+  myTab?:
+    | T
+    | {
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-migration_select".
+ */
+export interface RelationshipsMigrationSelect<T extends boolean = true> {
+  relationship?: T;
+  relationship_2?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

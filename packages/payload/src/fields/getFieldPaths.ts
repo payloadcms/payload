@@ -1,9 +1,7 @@
-import type { ClientField, Field, TabAsField } from './config/types.js'
-
-import { fieldAffectsData } from './config/types.js'
+import type { ClientField, Field, TabAsField, TabAsFieldClient } from './config/types.js'
 
 type Args = {
-  field: ClientField | Field | TabAsField
+  field: ClientField | Field | TabAsField | TabAsFieldClient
   index: number
   parentIndexPath: string
   parentPath: string

@@ -1,5 +1,6 @@
 import type { Field } from '../../../fields/config/types.js'
 import type { PayloadRequest, StringKeyOf, TypedCollection, TypedJobs } from '../../../index.js'
+import type { TaskParent } from '../../operations/runJobs/runJob/getRunTaskFunction.js'
 import type {
   RetryConfig,
   RunInlineTaskFunction,
@@ -14,8 +15,16 @@ export type JobLog = {
   completedAt: string
   error?: unknown
   executedAt: string
-  input?: any
-  output?: any
+  /**
+   * ID added by the array field when the log is saved in the database
+   */
+  id?: string
+  input?: Record<string, any>
+  output?: Record<string, any>
+  /**
+   * Sub-tasks (tasks that are run within a task) will have a parent task ID
+   */
+  parent?: TaskParent
   state: 'failed' | 'succeeded'
   taskID: string
   taskSlug: string
@@ -87,9 +96,8 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
    * You can either pass a string-based path to the workflow function file, or the workflow function itself.
    *
    * If you are using large dependencies within your workflow control flow, you might prefer to pass the string path
-   * because that will avoid bundling large dependencies in your Next.js app.
-   *
-   *
+   * because that will avoid bundling large dependencies in your Next.js app. Passing a string path is an advanced feature
+   * that may require a sophisticated build pipeline in order to work.
    */
   handler:
     | string
@@ -114,9 +122,14 @@ export type WorkflowConfig<TWorkflowSlugOrInput extends keyof TypedJobs['workflo
    */
   queue?: string
   /**
-   * Specify the number of times that this workflow should be retried if it fails for any reason.
+   * You can define `retries` on the workflow level, which will enforce that the workflow can only fail up to that number of retries. If a task does not have retries specified, it will inherit the retry count as specified on the workflow.
+   *
+   * You can specify `0` as `workflow` retries, which will disregard all `task` retry specifications and fail the entire workflow on any task failure.
+   * You can leave `workflow` retries as undefined, in which case, the workflow will respect what each task dictates as their own retry count.
+   *
+   * @default undefined. By default, workflows retries are defined by their tasks
    */
-  retries?: number | RetryConfig
+  retries?: number | RetryConfig | undefined
   /**
    * Define a slug-based name for this job.
    */

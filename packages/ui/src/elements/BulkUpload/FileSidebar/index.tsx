@@ -4,11 +4,11 @@ import { useModal } from '@faceless-ui/modal'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { isImage } from 'payload/shared'
 import React from 'react'
-import AnimateHeightImport from 'react-animate-height'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { AnimateHeight } from '../../AnimateHeight/index.js'
 import { Button } from '../../Button/index.js'
 import { Drawer } from '../../Drawer/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
@@ -18,11 +18,8 @@ import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import { useBulkUpload } from '../index.js'
 import './index.scss'
-
-const AnimateHeight = (AnimateHeightImport.default ||
-  AnimateHeightImport) as typeof AnimateHeightImport.default
+import { useBulkUpload } from '../index.js'
 
 const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
 
@@ -125,7 +122,7 @@ export function FileSidebar() {
       </div>
 
       <div className={`${baseClass}__animateWrapper`}>
-        <AnimateHeight duration={200} height={!breakpoints.m || showFiles ? 'auto' : 0}>
+        <AnimateHeight height={!breakpoints.m || showFiles ? 'auto' : 0}>
           <div className={`${baseClass}__filesContainer`}>
             {isInitializing && forms.length === 0 && initialFiles.length > 0
               ? Array.from(initialFiles).map((file, index) => (

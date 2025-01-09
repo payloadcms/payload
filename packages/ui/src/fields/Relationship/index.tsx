@@ -27,11 +27,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
-import './index.scss'
 import { findOptionsByValue } from './findOptionsByValue.js'
 import { optionsReducer } from './optionsReducer.js'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
+import './index.scss'
 
 const maxResultsPerRequest = 10
 
@@ -100,7 +100,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   )
 
   const {
-    customComponents: { Description, Error, Label } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     filterOptions,
     initialValue,
     setValue,
@@ -310,7 +310,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
-
   useIgnoredEffect(
     () => {
       const relationMap = createRelationMap({
@@ -448,24 +447,24 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       })
 
       const currentValue = valueRef.current
-      const docId = args.doc.id
+      const docID = args.doc.id
 
       if (hasMany) {
         const unchanged = (currentValue as Option[]).some((option) =>
-          typeof option === 'string' ? option === docId : option.value === docId,
+          typeof option === 'string' ? option === docID : option.value === docID,
         )
 
         const valuesToSet = (currentValue as Option[]).map((option) =>
-          option.value === docId
-            ? { relationTo: args.collectionConfig.slug, value: docId }
+          option.value === docID
+            ? { relationTo: args.collectionConfig.slug, value: docID }
             : option,
         )
 
         setValue(valuesToSet, unchanged)
       } else {
-        const unchanged = currentValue === docId
+        const unchanged = currentValue === docID
 
-        setValue({ relationTo: args.collectionConfig.slug, value: docId }, unchanged)
+        setValue({ relationTo: args.collectionConfig.slug, value: docID }, unchanged)
       }
     },
     [i18n, config, hasMany, setValue],
@@ -603,6 +602,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
         />
+        {BeforeInput}
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
@@ -625,7 +625,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 }
                 return hasMany && Array.isArray(relationTo)
                   ? `${option.relationTo}_${option.value}`
-                  : option.value
+                  : (option.value as string)
               }}
               isLoading={isLoading}
               isMulti={hasMany}
@@ -707,6 +707,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           </div>
         )}
         {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
+        {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}

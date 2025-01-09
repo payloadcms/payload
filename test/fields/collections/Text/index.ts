@@ -18,6 +18,36 @@ const TextFields: CollectionConfig = {
       },
     },
     {
+      name: 'hiddenTextField',
+      type: 'text',
+      hidden: true,
+    },
+    {
+      name: 'adminHiddenTextField',
+      type: 'text',
+      admin: {
+        hidden: true,
+        description: 'This field should be hidden',
+      },
+    },
+    {
+      name: 'disabledTextField',
+      type: 'text',
+      admin: {
+        disabled: true,
+        description: 'This field should be disabled',
+      },
+    },
+    {
+      type: 'row',
+      admin: {
+        components: {
+          Field: './components/CustomField.tsx#CustomField',
+        },
+      },
+      fields: [],
+    },
+    {
       name: 'localizedText',
       type: 'text',
       localized: true,
@@ -122,19 +152,10 @@ const TextFields: CollectionConfig = {
       maxRows: 4,
     },
     {
-      name: 'disableListColumnText',
+      name: 'defaultValueFromReq',
       type: 'text',
-      admin: {
-        disableListColumn: true,
-        disableListFilter: false,
-      },
-    },
-    {
-      name: 'disableListFilterText',
-      type: 'text',
-      admin: {
-        disableListColumn: false,
-        disableListFilter: true,
+      defaultValue: async ({ req }) => {
+        return Promise.resolve(req.context.defaultValue)
       },
     },
     {

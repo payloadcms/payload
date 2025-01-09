@@ -3,6 +3,7 @@ import type { JoinQuery, PayloadRequest } from '../types/index.js'
 
 import executeAccess from '../auth/executeAccess.js'
 import { QueryError } from '../errors/QueryError.js'
+import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import { combineQueries } from './combineQueries.js'
 import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
 
@@ -66,19 +67,20 @@ export const sanitizeJoinQuery = async ({
         joinQuery.where = combineQueries(joinQuery.where, field.where)
       }
 
-      if (typeof accessResult === 'object') {
-        joinQuery.where = combineQueries(joinQuery.where, accessResult)
-      }
-
       promises.push(
         validateQueryPaths({
           collectionConfig: joinCollectionConfig,
           errors,
           overrideAccess,
           req,
-          where: joinQuery.where,
+          // incoming where input, but we shouldn't validate generated from the access control.
+          where: deepCopyObjectSimple(joinQuery.where),
         }),
       )
+
+      if (typeof accessResult === 'object') {
+        joinQuery.where = combineQueries(joinQuery.where, accessResult)
+      }
     }
   }
 

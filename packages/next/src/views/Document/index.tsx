@@ -1,17 +1,11 @@
-import type {
-  AdminViewProps,
-  Data,
-  PayloadComponent,
-  ServerProps,
-  ServerSideEditViewProps,
-} from 'payload'
+import type { AdminViewProps, Data, PayloadComponent, ServerSideEditViewProps } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import { isRedirectError } from 'next/dist/client/components/redirect.js'
 import { notFound, redirect } from 'next/navigation.js'
+import { logError } from 'payload'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -39,11 +33,14 @@ export const renderDocument = async ({
   importMap,
   initialData,
   initPageResult,
+  overrideEntityVisibility,
   params,
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
-}: AdminViewProps): Promise<{
+}: {
+  overrideEntityVisibility?: boolean
+} & AdminViewProps): Promise<{
   data: Data
   Document: React.ReactNode
 }> => {
@@ -90,6 +87,7 @@ export const renderDocument = async ({
       globalSlug,
       locale,
       payload,
+      req,
       user,
     }))
 
@@ -137,6 +135,7 @@ export const renderDocument = async ({
     getVersions({
       id: idFromArgs,
       collectionConfig,
+      doc,
       docPermissions,
       globalConfig,
       locale: locale?.code,
@@ -176,7 +175,10 @@ export const renderDocument = async ({
   }
 
   if (collectionConfig) {
-    if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
+    if (
+      !visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug) &&
+      !overrideEntityVisibility
+    ) {
       throw new Error('not-found')
     }
 
@@ -384,10 +386,11 @@ export const Document: React.FC<AdminViewProps> = async (args) => {
     const { Document: RenderedDocument } = await renderDocument(args)
     return RenderedDocument
   } catch (error) {
-    if (isRedirectError(error)) {
+    if (error?.message === 'NEXT_REDIRECT') {
       throw error
     }
-    args.initPageResult.req.payload.logger.error(error)
+
+    logError({ err: error, payload: args.initPageResult.req.payload })
 
     if (error.message === 'not-found') {
       notFound()

@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.2",
+  "version": "3.15.1",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -75,7 +75,7 @@
     "build:esbuild": "echo skipping esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "clean:cache": "rimraf node_modules/.cache",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
@@ -93,7 +93,7 @@
     "ci-info": "^4.0.0",
     "console-table-printer": "2.12.1",
     "croner": "9.0.0",
-    "dataloader": "2.2.2",
+    "dataloader": "2.2.3",
     "deepmerge": "4.3.1",
     "file-type": "19.3.0",
     "get-tsconfig": "4.8.1",
@@ -119,14 +119,14 @@
     "@types/minimist": "1.2.2",
     "@types/nodemailer": "6.4.14",
     "@types/pluralize": "0.0.33",
-    "@types/react-datepicker": "6.2.0",
     "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.10",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "0.23.1",
+    "esbuild": "0.24.0",
     "graphql-http": "^1.22.0",
-    "rimraf": "3.0.2",
+    "react-datepicker": "7.6.0",
+    "rimraf": "6.0.1",
     "sharp": "0.32.6"
   },
   "peerDependencies": {

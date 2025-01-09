@@ -9,6 +9,8 @@
   &nbsp;
   <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/dw/payload?style=flat-square" /></a>
   &nbsp;
+  <a href="https://github.com/payloadcms/payload/graphs/contributors"><img alt="npm" src="https://img.shields.io/github/contributors-anon/payloadcms/payload?color=yellow&style=flat-square" /></a>
+  &nbsp;
   <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/v/payload?style=flat-square" /></a>
   &nbsp;
   <a href="https://twitter.com/payloadcms"><img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" /></a>
@@ -69,7 +71,7 @@ We're constantly adding more templates to our [Templates Directory](https://gith
 - [Auth out of the box](https://payloadcms.com/docs/authentication/overview)
 - [Versions and drafts](https://payloadcms.com/docs/versions/overview)
 - [Localization](https://payloadcms.com/docs/configuration/localization)
-- [Block-based kayout builder](https://payloadcms.com/docs/fields/blocks)
+- [Block-based layout builder](https://payloadcms.com/docs/fields/blocks)
 - [Customizable React admin](https://payloadcms.com/docs/admin/overview)
 - [Lexical rich text editor](https://payloadcms.com/docs/fields/rich-text)
 - [Conditional field logic](https://payloadcms.com/docs/fields/overview#conditional-logic)
@@ -94,7 +96,11 @@ If you want to add contributions to this repository, please follow the instructi
 
 The [Examples Directory](./examples) is a great resource for learning how to setup Payload in a variety of different ways, but you can also find great examples in our blog and throughout our social media.
 
-If you'd like to run the examples, you can either copy them to a folder outside this repo or run them directly by (1) navigating to the example's subfolder (`cd examples/your-example-folder`) and (2) using the `--ignore-workspace` flag to bypass workspace restrictions (e.g., `pnpm --ignore-workspace install` or `pnpm --ignore-workspace dev`).
+If you'd like to run the examples, you can use `create-payload-app` to create a project from one:
+
+```sh
+npx create-payload-app --example example_name
+```
 
 You can see more examples at:
 

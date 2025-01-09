@@ -30,6 +30,7 @@ const toolbarGroups: ToolbarGroup[] = [
 ]
 
 export const InlineCodeFeatureClient = createClientFeature({
+  enableFormats: ['code'],
   markdownTransformers: [INLINE_CODE],
   toolbarFixed: {
     groups: toolbarGroups,

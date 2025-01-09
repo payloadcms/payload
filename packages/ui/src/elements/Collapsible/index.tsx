@@ -1,16 +1,13 @@
 'use client'
 import React, { useState } from 'react'
-import AnimateHeightImport from 'react-animate-height'
 
 import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types.js'
-
-const AnimateHeight = (AnimateHeightImport.default ||
-  AnimateHeightImport) as typeof AnimateHeightImport.default
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { DragHandleIcon } from '../../icons/DragHandle/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
+import { AnimateHeight } from '../AnimateHeight/index.js'
 import { CollapsibleProvider, useCollapsible } from './provider.js'
 
 const baseClass = 'collapsible'
@@ -114,7 +111,7 @@ export const Collapsible: React.FC<Props> = ({
             </div>
           </div>
         </div>
-        <AnimateHeight duration={200} height={isCollapsed ? 0 : 'auto'}>
+        <AnimateHeight height={isCollapsed ? 0 : 'auto'}>
           <div className={`${baseClass}__content`}>{children}</div>
         </AnimateHeight>
       </CollapsibleProvider>

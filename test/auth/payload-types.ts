@@ -9,11 +9,13 @@
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'partial-disable-locale-strategies': PartialDisableLocaleStrategyAuthOperations;
     'api-keys': ApiKeyAuthOperations;
     'public-users': PublicUserAuthOperations;
   };
   collections: {
     users: User;
+    'partial-disable-locale-strategies': PartialDisableLocaleStrategy;
     'api-keys': ApiKey;
     'public-users': PublicUser;
     relationsCollection: RelationsCollection;
@@ -24,6 +26,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    'partial-disable-locale-strategies': PartialDisableLocaleStrategiesSelect<false> | PartialDisableLocaleStrategiesSelect<true>;
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     relationsCollection: RelationsCollectionSelect<false> | RelationsCollectionSelect<true>;
@@ -41,18 +44,39 @@ export interface Config {
     | (User & {
         collection: 'users';
       })
+    | (PartialDisableLocaleStrategy & {
+        collection: 'partial-disable-locale-strategies';
+      })
     | (ApiKey & {
         collection: 'api-keys';
       })
     | (PublicUser & {
         collection: 'public-users';
       });
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PartialDisableLocaleStrategyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -148,6 +172,23 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partial-disable-locale-strategies".
+ */
+export interface PartialDisableLocaleStrategy {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "api-keys".
  */
 export interface ApiKey {
@@ -200,6 +241,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'partial-disable-locale-strategies';
+        value: string | PartialDisableLocaleStrategy;
+      } | null)
+    | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
       } | null)
@@ -216,6 +261,10 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'users';
         value: string | User;
+      }
+    | {
+        relationTo: 'partial-disable-locale-strategies';
+        value: string | PartialDisableLocaleStrategy;
       }
     | {
         relationTo: 'api-keys';
@@ -238,6 +287,10 @@ export interface PayloadPreference {
     | {
         relationTo: 'users';
         value: string | User;
+      }
+    | {
+        relationTo: 'partial-disable-locale-strategies';
+        value: string | PartialDisableLocaleStrategy;
       }
     | {
         relationTo: 'api-keys';
@@ -304,12 +357,26 @@ export interface UsersSelect<T extends boolean = true> {
   unnamedTabSaveToJWTString?: T;
   unnamedTabSaveToJWTFalse?: T;
   custom?: T;
-  authDebug?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partial-disable-locale-strategies_select".
+ */
+export interface PartialDisableLocaleStrategiesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;

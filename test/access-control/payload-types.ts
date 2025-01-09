@@ -9,11 +9,11 @@
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'non-admin-user': NonAdminUserAuthOperations;
+    'public-users': PublicUserAuthOperations;
   };
   collections: {
     users: User;
-    'non-admin-user': NonAdminUser;
+    'public-users': PublicUser;
     posts: Post;
     unrestricted: Unrestricted;
     'relation-restricted': RelationRestricted;
@@ -28,6 +28,7 @@ export interface Config {
     'hidden-fields': HiddenField;
     'hidden-access': HiddenAccess;
     'hidden-access-count': HiddenAccessCount;
+    'fields-and-top-access': FieldsAndTopAccess;
     disabled: Disabled;
     'rich-text': RichText;
     regression1: Regression1;
@@ -39,7 +40,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
-    'non-admin-user': NonAdminUserSelect<false> | NonAdminUserSelect<true>;
+    'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     unrestricted: UnrestrictedSelect<false> | UnrestrictedSelect<true>;
     'relation-restricted': RelationRestrictedSelect<false> | RelationRestrictedSelect<true>;
@@ -54,6 +55,7 @@ export interface Config {
     'hidden-fields': HiddenFieldsSelect<false> | HiddenFieldsSelect<true>;
     'hidden-access': HiddenAccessSelect<false> | HiddenAccessSelect<true>;
     'hidden-access-count': HiddenAccessCountSelect<false> | HiddenAccessCountSelect<true>;
+    'fields-and-top-access': FieldsAndTopAccessSelect<false> | FieldsAndTopAccessSelect<true>;
     disabled: DisabledSelect<false> | DisabledSelect<true>;
     'rich-text': RichTextSelect<false> | RichTextSelect<true>;
     regression1: Regression1Select<false> | Regression1Select<true>;
@@ -84,8 +86,8 @@ export interface Config {
     | (User & {
         collection: 'users';
       })
-    | (NonAdminUser & {
-        collection: 'non-admin-user';
+    | (PublicUser & {
+        collection: 'public-users';
       });
   jobs: {
     tasks: unknown;
@@ -110,7 +112,7 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface NonAdminUserAuthOperations {
+export interface PublicUserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -148,9 +150,9 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-admin-user".
+ * via the `definition` "public-users".
  */
-export interface NonAdminUser {
+export interface PublicUser {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -333,6 +335,17 @@ export interface HiddenAccessCount {
   hidden?: boolean | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-and-top-access".
+ */
+export interface FieldsAndTopAccess {
+  id: string;
+  secret?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -611,8 +624,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       } | null)
     | ({
         relationTo: 'posts';
@@ -671,6 +684,10 @@ export interface PayloadLockedDocument {
         value: string | HiddenAccessCount;
       } | null)
     | ({
+        relationTo: 'fields-and-top-access';
+        value: string | FieldsAndTopAccess;
+      } | null)
+    | ({
         relationTo: 'disabled';
         value: string | Disabled;
       } | null)
@@ -693,8 +710,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       }
     | {
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       };
   updatedAt: string;
   createdAt: string;
@@ -711,8 +728,8 @@ export interface PayloadPreference {
         value: string | User;
       }
     | {
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       };
   key?: string | null;
   value?:
@@ -756,9 +773,9 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-admin-user_select".
+ * via the `definition` "public-users_select".
  */
-export interface NonAdminUserSelect<T extends boolean = true> {
+export interface PublicUsersSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -929,6 +946,16 @@ export interface HiddenAccessCountSelect<T extends boolean = true> {
   hidden?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-and-top-access_select".
+ */
+export interface FieldsAndTopAccessSelect<T extends boolean = true> {
+  secret?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

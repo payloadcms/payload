@@ -102,7 +102,7 @@ function ToolbarGroupComponent({
             editor={editor}
             group={group}
             Icon={DropdownIcon}
-            maxActiveItems={1}
+            maxActiveItems={group.maxActiveItems ?? 1}
             onActiveChange={onActiveChange}
           />
         ) : (
@@ -110,7 +110,7 @@ function ToolbarGroupComponent({
             anchorElem={anchorElem}
             editor={editor}
             group={group}
-            maxActiveItems={1}
+            maxActiveItems={group.maxActiveItems ?? 1}
             onActiveChange={onActiveChange}
           />
         )

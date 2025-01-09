@@ -28,6 +28,7 @@ type LoginArgs = {
   page: Page
   serverURL: string
 }
+
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
 const networkConditions = {
@@ -64,11 +65,13 @@ export async function ensureCompilationIsDone({
   page,
   serverURL,
   noAutoLogin,
+  readyURL,
 }: {
   customAdminRoutes?: Config['admin']['routes']
   customRoutes?: Config['routes']
   noAutoLogin?: boolean
   page: Page
+  readyURL?: string
   serverURL: string
 }): Promise<void> {
   const {
@@ -82,11 +85,16 @@ export async function ensureCompilationIsDone({
 
   while (attempt <= maxAttempts) {
     try {
-      console.log(`Checking if compilation is done (attempt ${attempt}/${maxAttempts})...`)
+      console.log(
+        `Checking if compilation is done (attempt ${attempt}/${maxAttempts})...`,
+        readyURL ??
+          (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
+      )
 
       await page.goto(adminURL)
       await page.waitForURL(
-        noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL,
+        readyURL ??
+          (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
       )
 
       console.log('Successfully compiled')

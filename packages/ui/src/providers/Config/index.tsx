@@ -1,7 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
 
-import React, { createContext, useCallback, useContext, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 export type ClientConfigContext = {
   config: ClientConfig
@@ -28,6 +28,12 @@ export const ConfigProvider: React.FC<{
   readonly config: ClientConfig
 }> = ({ children, config: configFromProps }) => {
   const [config, setConfig] = useState<ClientConfig>(configFromProps)
+
+  // Need to update local config state if config from props changes, for HMR.
+  // That way, config changes will be updated in the UI immediately without needing a refresh.
+  useEffect(() => {
+    setConfig(configFromProps)
+  }, [configFromProps])
 
   const getEntityConfig = useCallback(
     ({ collectionSlug, globalSlug }: { collectionSlug?: string; globalSlug?: string }) => {

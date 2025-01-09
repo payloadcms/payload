@@ -2,14 +2,12 @@ import type { Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
-import { deleteOperation } from 'payload'
+import { deleteOperation, sanitizePopulateParam, sanitizeSelectParam } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { CollectionRouteHandler } from '../types.js'
 
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
-import { sanitizePopulate } from '../utilities/sanitizePopulate.js'
-import { sanitizeSelect } from '../utilities/sanitizeSelect.js'
 
 export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => {
   const { depth, overrideLock, populate, select, where } = req.query as {
@@ -24,9 +22,9 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     overrideLock: Boolean(overrideLock === 'true'),
-    populate: sanitizePopulate(populate),
+    populate: sanitizePopulateParam(populate),
     req,
-    select: sanitizeSelect(select),
+    select: sanitizeSelectParam(select),
     where,
   })
 
@@ -39,7 +37,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
     const message = req.t('general:deletedCountSuccessfully', {
       count: result.docs.length,
       label: getTranslation(
-        collection.config.labels[result.docs.length > 1 ? 'plural' : 'singular'],
+        collection.config.labels[result.docs.length === 1 ? 'singular' : 'plural'],
         req.i18n,
       ),
     })
@@ -60,7 +58,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
 
   const message = req.t('error:unableToDeleteCount', {
     count: result.errors.length,
-    label: getTranslation(collection.config.labels[total > 1 ? 'plural' : 'singular'], req.i18n),
+    label: getTranslation(collection.config.labels[total === 1 ? 'singular' : 'plural'], req.i18n),
     total,
   })
 

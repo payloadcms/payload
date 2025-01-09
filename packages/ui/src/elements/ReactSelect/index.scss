@@ -6,9 +6,6 @@
   }
 
   .react-select {
-    &:focus-within {
-      z-index: 3;
-    }
     .rs__control {
       @include formInput;
       height: auto;
