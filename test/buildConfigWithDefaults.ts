@@ -158,7 +158,7 @@ export async function buildConfigWithDefaults(
 
   config.admin.experimental = {
     ...(config.admin.experimental || {}),
-    optimized: true,
+    optimizeFormState: true,
   }
 
   if (config.admin.autoLogin === undefined) {

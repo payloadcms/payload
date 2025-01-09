@@ -1,5 +1,4 @@
 import type {
-  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
@@ -27,7 +26,6 @@ type Args = {
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
-  experimental?: BuildFormStateArgs['experimental']
   fields: FieldSchema[]
   fieldSchemaMap: FieldSchemaMap
   filter?: (args: AddFieldStatePromiseArgs) => boolean
@@ -80,7 +78,6 @@ export const iterateFields = async ({
   clientFieldSchemaMap,
   collectionSlug,
   data,
-  experimental,
   fields,
   fieldSchemaMap,
   filter,
@@ -141,7 +138,6 @@ export const iterateFields = async ({
         clientFieldSchemaMap,
         collectionSlug,
         data,
-        experimental,
         field,
         fieldIndex,
         fieldSchemaMap,

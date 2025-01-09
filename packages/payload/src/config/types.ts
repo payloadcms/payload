@@ -799,10 +799,12 @@ export type Config = {
     disable?: boolean
     experimental?: {
       /**
-       * This option will optimize the admin panel in a non-breaking way, until the next major version can fully support these changes.
-       * Examples of this include removing all undefined variables, empty objects, empty arrays, and `null` values from form state.
+       * When `optimizeFormState` is true, properties are only added to fieldState if absolutely necessary.
+       * This is done in a non-breaking way, and will the default behavior in the next major version.
+       * Examples of this include removing all undefined variables, empty objects, empty arrays, and `null` values, etc.
+       * Will also remove any unnecessary properties like `isSidebar`, `valid`, `passesCondition`, etc.
        */
-      optimized?: boolean
+      optimizeFormState?: boolean
     }
     importMap?: {
       /**

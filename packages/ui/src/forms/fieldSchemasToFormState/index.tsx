@@ -1,5 +1,4 @@
 import type {
-  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
@@ -25,7 +24,6 @@ type Args = {
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data?: Data
-  experimental?: BuildFormStateArgs['experimental']
   fields: Field[] | undefined
   /**
    * The field schema map is required for field rendering.
@@ -65,7 +63,6 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormState> =>
     clientFieldSchemaMap,
     collectionSlug,
     data = {},
-    experimental,
     fields,
     fieldSchemaMap,
     operation,
@@ -99,7 +96,6 @@ export const fieldSchemasToFormState = async (args: Args): Promise<FormState> =>
       clientFieldSchemaMap,
       collectionSlug,
       data: dataWithDefaultValues,
-      experimental,
       fields,
       fieldSchemaMap,
       fullData: dataWithDefaultValues,

@@ -1,5 +1,4 @@
 import type {
-  BuildFormStateArgs,
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
@@ -43,7 +42,6 @@ export type AddFieldStatePromiseArgs = {
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
-  experimental?: BuildFormStateArgs['experimental']
   field: Field
   fieldIndex: number
   fieldSchemaMap: FieldSchemaMap
@@ -106,7 +104,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     clientFieldSchemaMap,
     collectionSlug,
     data,
-    experimental,
     field,
     fieldSchemaMap,
     filter,
@@ -139,11 +136,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   }
 
   /**
-   * @deprecated: the `experimental.optimized` property is used for backwards compatibility.
-   * When optimized, properties are only added to fieldState if absolutely necessary.
+   * @deprecated: the `experimental.optimizeFormState` property is used for backwards compatibility.
+   * When `optimizeFormState` is true, properties are only added to fieldState if absolutely necessary.
    * In the next major version, this will be the default behavior.
    */
-  const optimized = req.payload.config.admin.experimental?.optimized
+  const optimizeFormState = req.payload.config.admin.experimental?.optimizeFormState
 
   const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
 
@@ -151,8 +148,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   const fieldState: FormFieldWithoutComponents = {}
 
-  if (optimized) {
-    // TODO: remove this block when `admin.experimental.optimized` is the default behavior, see note above.
+  if (optimizeFormState) {
+    // TODO: remove this block when `admin.experimental.optimizeFormState` is the default behavior, see note above.
     if (passesCondition === false) {
       fieldState.passesCondition = false
     }
@@ -224,8 +221,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         })
       }
     } else {
-      if (!optimized) {
-        // TODO: remove this block when `admin.experimental.optimized` is the default behavior, see note above.
+      if (!optimizeFormState) {
+        // TODO: remove this block when `admin.experimental.optimizeFormState` is the default behavior, see note above.
         fieldState.valid = true
       }
     }
@@ -271,8 +268,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 value: row.id,
               }
 
-              if (!optimized) {
-                // TODO: remove this block when `admin.experimental.optimized` is the default behavior, see note above.
+              if (!optimizeFormState) {
+                // TODO: remove this block when `admin.experimental.optimizeFormState` is the default behavior, see note above.
                 state[idKey].valid = true
               }
 
@@ -291,7 +288,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 clientFieldSchemaMap,
                 collectionSlug,
                 data: row,
-                experimental,
                 fields: field.fields,
                 fieldSchemaMap,
                 filter,
@@ -414,8 +410,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.id,
                 }
 
-                if (!optimized) {
-                  // TODO: remove this block when `admin.experimental.optimized` is the default behavior, see note above.
+                if (!optimizeFormState) {
+                  // TODO: remove this block when `admin.experimental.optimizeFormState` is the default behavior, see note above.
                   state[idKey].valid = true
                 }
 
@@ -432,8 +428,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.blockType,
                 }
 
-                if (!optimized) {
-                  // TODO: remove this block when `admin.experimental.optimized` is the default behavior, see note above.
+                if (!optimizeFormState) {
+                  // TODO: remove this block when `admin.experimental.optimizeFormState` is the default behavior, see note above.
                   state[fieldKey].valid = true
                 }
 
@@ -450,7 +446,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.blockName,
                 }
 
-                if (!optimized) {
+                if (!optimizeFormState) {
                   state[blockNameKey].valid = true
                 }
 
@@ -469,7 +465,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   clientFieldSchemaMap,
                   collectionSlug,
                   data: row,
-                  experimental,
                   fields: block.fields,
                   fieldSchemaMap,
                   filter,
@@ -566,7 +561,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           clientFieldSchemaMap,
           collectionSlug,
           data: data?.[field.name] || {},
-          experimental,
           fields: field.fields,
           fieldSchemaMap,
           filter,
@@ -700,8 +694,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         disableFormData: true,
       }
 
-      if (optimized) {
-        // TODO: makes this default behavior when optimized is the default behavior, see note above
+      if (optimizeFormState) {
+        // TODO: makes this default behavior when optimizeFormState is the default behavior, see note above
         if (passesCondition === false) {
           state[path].passesCondition = false
         }
@@ -719,7 +713,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       clientFieldSchemaMap,
       collectionSlug,
       data,
-      experimental,
       fields: field.fields,
       fieldSchemaMap,
       filter,
@@ -785,7 +778,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         clientFieldSchemaMap,
         collectionSlug,
         data: isNamedTab ? data?.[tab.name] || {} : data,
-        experimental,
         fields: tab.fields,
         fieldSchemaMap,
         filter,
