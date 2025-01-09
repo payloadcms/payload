@@ -16,45 +16,58 @@ export const upsertPrefs = async <
   user: TypedUser
   value: any
 }): Promise<TGeneratedTypes['collections']['payload-preferences']> => {
-  let prefs = await payload
-    .find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      where: {
-        and: [
-          { key: { equals: key } },
-          { 'user.value': { equals: user.id } },
-          { 'user.relationTo': { equals: user.collection } },
-        ],
-      },
-    })
-    ?.then((res) => res.docs?.[0])
-
-  if (!prefs) {
-    prefs = await payload.create({
-      collection: 'payload-preferences',
-      depth: 0,
-      data: {
-        key,
-        user: {
-          relationTo: user.collection,
-          value: user.id,
+  try {
+    let prefs = await payload
+      .find({
+        collection: 'payload-preferences',
+        depth: 0,
+        limit: 1,
+        where: {
+          and: [
+            { key: { equals: key } },
+            { 'user.value': { equals: user.id } },
+            { 'user.relationTo': { equals: user.collection } },
+          ],
         },
-        value,
-      },
-    })
-  } else {
-    const newValue = typeof value === 'object' ? { ...(prefs?.value || {}), ...value } : value
+      })
+      ?.then((res) => res.docs?.[0])
 
-    prefs = await payload.update({
-      collection: 'payload-preferences',
-      id: prefs.id,
-      data: {
-        value: newValue,
-      },
-    })
+    if (!prefs) {
+      prefs = await payload.create({
+        collection: 'payload-preferences',
+        depth: 0,
+        data: {
+          key,
+          user: {
+            relationTo: user.collection,
+            value: user.id,
+          },
+          value,
+        },
+      })
+    } else {
+      const newValue = typeof value === 'object' ? { ...(prefs?.value || {}), ...value } : value
+
+      prefs = await payload.update({
+        collection: 'payload-preferences',
+        id: prefs.id,
+        data: {
+          key,
+          user: {
+            collection: user.collection,
+            value: user.id,
+          },
+          value: newValue,
+        },
+      })
+
+      if (prefs?.status >= 400) {
+        throw new Error(prefs.data?.errors?.[0]?.message)
+      }
+
+      return prefs
+    }
+  } catch (e) {
+    console.error('Error upserting prefs', e)
   }
-
-  return prefs
 }

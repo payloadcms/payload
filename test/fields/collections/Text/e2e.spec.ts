@@ -168,6 +168,7 @@ describe('Text', () => {
     await upsertPrefs<Config, GeneratedTypes<any>>({
       payload,
       user: client.user,
+      key: 'text-fields-list',
       value: {
         columns: [
           {

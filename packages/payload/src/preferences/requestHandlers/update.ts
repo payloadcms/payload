@@ -12,7 +12,7 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
 
   try {
     data = await incomingReq.json()
-  } catch (error) {
+  } catch (_err) {
     data = {}
   }
 
