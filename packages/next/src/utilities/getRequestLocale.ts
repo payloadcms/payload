@@ -16,10 +16,11 @@ export async function getRequestLocale({
   user,
 }: GetRequestLocalesArgs): Promise<Locale> {
   if (payload.config.localization) {
-    const localeFromPrefs = await getPreference<Locale['code']>('locale', payload, user)
-
     return (
-      findLocaleFromCode(payload.config.localization, localeFromParams || localeFromPrefs) ||
+      findLocaleFromCode(
+        payload.config.localization,
+        localeFromParams || (await getPreference<Locale['code']>('locale', payload, user)),
+      ) ||
       findLocaleFromCode(
         payload.config.localization,
         payload.config.localization.defaultLocale || 'en',
