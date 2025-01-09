@@ -10,36 +10,6 @@ import { createPayloadRequest } from './createPayloadRequest.js'
 import { headersWithCors } from './headersWithCors.js'
 import { routeError } from './routeError.js'
 
-const notImplementedHandler: PayloadHandler = (req) => {
-  return Response.json(
-    {
-      message: `Cannot ${req.method.toUpperCase()} ${req.url}`,
-    },
-    {
-      headers: headersWithCors({
-        headers: new Headers(),
-        req,
-      }),
-      status: httpStatus.NOT_IMPLEMENTED,
-    },
-  )
-}
-
-const notFoundHandler: PayloadHandler = (req) => {
-  return Response.json(
-    {
-      message: `Route Not Found: "${new URL(req.url).pathname}"`,
-    },
-    {
-      headers: headersWithCors({
-        headers: new Headers(),
-        req,
-      }),
-      status: httpStatus.NOT_FOUND,
-    },
-  )
-}
-
 export const handleEndpoints = async ({
   config: incomingConfig,
   request,
@@ -108,11 +78,7 @@ export const handleEndpoints = async ({
     if (isGlobals) {
       const secondParam = segments[0]
 
-      const foundGlobal = payload.globals.config.find((each) => each.slug === secondParam)
-
-      if (foundGlobal) {
-        globalConfig = foundGlobal
-      }
+      globalConfig = payload.globals.config.find((each) => each.slug === secondParam)
     }
 
     let endpoints: Endpoint[] | false = config.endpoints
@@ -131,40 +97,60 @@ export const handleEndpoints = async ({
     }
 
     if (endpoints === false) {
-      handler = notImplementedHandler
+      return Response.json(
+        {
+          message: `Cannot ${req.method.toUpperCase()} ${req.url}`,
+        },
+        {
+          headers: headersWithCors({
+            headers: new Headers(),
+            req,
+          }),
+          status: httpStatus.NOT_IMPLEMENTED,
+        },
+      )
     }
 
-    if (endpoints) {
-      const endpoint = endpoints.find((endpoint) => {
-        if (endpoint.method !== req.method.toLowerCase()) {
-          return false
-        }
-        const pathMatchFn = match(endpoint.path, { decode: decodeURIComponent })
-
-        const matchResult = pathMatchFn(adjustedPathname)
-
-        if (!matchResult) {
-          return false
-        }
-
-        req.routeParams = matchResult.params as Record<string, unknown>
-
-        if (collection) {
-          req.routeParams.collection = collection.config.slug
-        } else if (globalConfig) {
-          req.routeParams.global = globalConfig.slug
-        }
-
-        return true
-      })
-
-      if (endpoint) {
-        handler = endpoint.handler
+    const endpoint = endpoints?.find((endpoint) => {
+      if (endpoint.method !== req.method.toLowerCase()) {
+        return false
       }
+      const pathMatchFn = match(endpoint.path, { decode: decodeURIComponent })
+
+      const matchResult = pathMatchFn(adjustedPathname)
+
+      if (!matchResult) {
+        return false
+      }
+
+      req.routeParams = matchResult.params as Record<string, unknown>
+
+      if (collection) {
+        req.routeParams.collection = collection.config.slug
+      } else if (globalConfig) {
+        req.routeParams.global = globalConfig.slug
+      }
+
+      return true
+    })
+
+    if (endpoint) {
+      handler = endpoint.handler
     }
 
     if (!handler) {
-      handler = notFoundHandler
+      return Response.json(
+        {
+          message: `Route Not Found: "${new URL(req.url).pathname}"`,
+        },
+        {
+          headers: headersWithCors({
+            headers: new Headers(),
+            req,
+          }),
+          status: httpStatus.NOT_FOUND,
+        },
+      )
     }
 
     const response = await handler(req)
