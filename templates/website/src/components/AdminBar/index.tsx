@@ -1,7 +1,7 @@
 'use client'
 
-import type { PayloadAdminBarProps } from 'payload-admin-bar'
-
+import type { PayloadAdminBarProps, PayloadMeUser } from 'payload-admin-bar'
+import type { CollectionSlug } from 'payload'
 import { cn } from '@/utilities/cn'
 import { useSelectedLayoutSegments } from 'next/navigation'
 import { PayloadAdminBar } from 'payload-admin-bar'
@@ -14,7 +14,15 @@ import { getClientSideURL } from '@/utilities/getURL'
 
 const baseClass = 'admin-bar'
 
-const collectionLabels = {
+const collectionLabels: Partial<
+  Record<
+    CollectionSlug,
+    {
+      plural: string
+      singular: string
+    }
+  >
+> = {
   pages: {
     plural: 'Pages',
     singular: 'Page',
@@ -36,11 +44,11 @@ export const AdminBar: React.FC<{
 }> = (props) => {
   const { adminBarProps } = props || {}
   const segments = useSelectedLayoutSegments()
-  const [show, setShow] = useState(false)
-  const collection = collectionLabels?.[segments?.[1]] ? segments?.[1] : 'pages'
+  const [show, setShow] = useState<string | undefined>(undefined)
+  const collection = collectionLabels?.[segments?.[1] as CollectionSlug] ? segments?.[1] : 'pages'
   const router = useRouter()
 
-  const onAuthChange = React.useCallback((user) => {
+  const onAuthChange = React.useCallback((user: PayloadMeUser) => {
     setShow(user?.id)
   }, [])
 
@@ -63,8 +71,8 @@ export const AdminBar: React.FC<{
           cmsURL={getClientSideURL()}
           collection={collection}
           collectionLabels={{
-            plural: collectionLabels[collection]?.plural || 'Pages',
-            singular: collectionLabels[collection]?.singular || 'Page',
+            plural: collectionLabels[collection as CollectionSlug]?.plural || 'Pages',
+            singular: collectionLabels[collection as CollectionSlug]?.singular || 'Page',
           }}
           logo={<Title />}
           onAuthChange={onAuthChange}
