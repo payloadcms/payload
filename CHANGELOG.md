@@ -1,3 +1,18 @@
+## [2.31.0](https://github.com/payloadcms/payload/compare/v2.30.4...v2.31.0) (2025-01-09)
+
+
+### Features
+
+* adds `forceRenderAllFields` admin prop to force all fields in edit view to render immediately ([#10464](https://github.com/payloadcms/payload/issues/10464)) ([07ff181](https://github.com/payloadcms/payload/commit/07ff181ccf5e455c97a4afa6d72bcbc173b1a76d))
+* **i18n:** add Slovenian (sl) translation ([#8709](https://github.com/payloadcms/payload/issues/8709)) ([7039b1f](https://github.com/payloadcms/payload/commit/7039b1f82e323358a605f9b2165328403f8da74c))
+* **v2:** allows filtering on group field types from list view ([#10421](https://github.com/payloadcms/payload/issues/10421)) ([f430db8](https://github.com/payloadcms/payload/commit/f430db8bc5853f5a444d8c2ec6626df0af2e41a4))
+
+
+### Bug Fixes
+
+* **graphql:** 500 error when querying hasMany field data that is filtered by access-control ([#6519](https://github.com/payloadcms/payload/issues/6519)) ([4892d96](https://github.com/payloadcms/payload/commit/4892d965157285964fb024516ddcdf56a74cc68e)), closes [#6518](https://github.com/payloadcms/payload/issues/6518)
+* when publishing from a draft, only 10 were published. ([#7906](https://github.com/payloadcms/payload/issues/7906)) ([0cf9678](https://github.com/payloadcms/payload/commit/0cf96785bc47e2d2ef107a139d03058e99c8bb79))
+
 ## [2.30.4](https://github.com/payloadcms/payload/compare/v2.30.3...v2.30.4) (2024-11-11)
 
 
