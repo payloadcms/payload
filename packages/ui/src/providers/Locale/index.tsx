@@ -19,7 +19,12 @@ export const LocaleLoadingContext = createContext({
 
 export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Locale['code'] }> = ({
   children,
-  locale: localeFromProps,
+  /**
+    The `locale` prop originates from the root layout, which does not have access to search params
+    This component uses the `useSearchParams` hook to get the locale from the URL as precedence over this prop
+    This prop does not update as the user navigates the site, because the root layout does not re-render
+  */
+  locale: initialLocaleFromPrefs,
 }) => {
   const {
     config: { localization = false },
@@ -41,7 +46,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
     return (
       findLocaleFromCode(localization, localeFromParams) ||
-      findLocaleFromCode(localization, localeFromProps) ||
+      findLocaleFromCode(localization, initialLocaleFromPrefs) ||
       findLocaleFromCode(localization, defaultLocale)
     )
   })
@@ -65,21 +70,21 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   }, [locale])
 
   useEffect(() => {
+    /**
+     * This effect should only run when `localeFromParams` changes, i.e. when the user clicks an anchor link
+     * The root layout, which sends the initial locale from prefs, will not re-render as the user navigates the site
+     * For this reason, we need to fetch the locale from prefs if the search params clears the `locale` query param
+     */
     async function resetLocale() {
       if (localization && user?.id) {
-        const localeFromPrefs = await getPreference<Locale['code']>('locale')
-
-        const localeToUse = localeFromParams || localeFromPrefs || defaultLocale
+        const localeToUse =
+          localeFromParams || (await getPreference<Locale['code']>('locale')) || defaultLocale
 
         const newLocale =
           findLocaleFromCode(localization, localeToUse) ||
           findLocaleFromCode(localization, defaultLocale)
 
         setLocale(newLocale)
-
-        if (newLocale.code !== localeFromPrefs) {
-          void setPreference('locale', newLocale.code)
-        }
       }
     }
 
@@ -99,6 +104,6 @@ export const useLocaleLoading = () => useContext(LocaleLoadingContext)
 
 /**
  * TODO: V4
- * The return type of the `useLocale` hook will change in v4. It will return `null | Locale` instead of `false | Locale`.
+ * The return type of the `useLocale` hook will change in v4. It will return `null | Locale` instead of `false | {} | Locale`.
  */
 export const useLocale = (): Locale => useContext(LocaleContext)
