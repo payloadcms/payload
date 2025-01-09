@@ -47,6 +47,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       minRows: minRowsProp,
       required,
     },
+    forceRender = false,
     path,
     permissions,
     readOnly,
@@ -280,6 +281,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
+                      forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       isLoading={isLoading}
                       isSortable={isSortable}

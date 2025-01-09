@@ -574,6 +574,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
             Description={Description}
             docPermissions={docPermissions}
             fields={docConfig.fields}
+            forceRenderAllFields={docConfig?.admin?.forceRenderAllFields}
             readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
             schemaPathSegments={schemaPathSegments}
           />

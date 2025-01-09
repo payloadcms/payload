@@ -34,6 +34,10 @@ import {
 import {
   customViews2CollectionSlug,
   disableDuplicateSlug,
+  forceRenderCollectionSlug,
+  noForceRenderCollectionSlug,
+  forceRenderGlobalSlug,
+  noForceRenderGlobalSlug,
   geoCollectionSlug,
   globalSlug,
   notInViewCollectionSlug,
@@ -69,6 +73,10 @@ describe('General', () => {
   let globalURL: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
+  let forceRenderCollectionURL: AdminUrlUtil
+  let forceRenderGlobalURL: AdminUrlUtil
+  let noForceRenderCollectionURL: AdminUrlUtil
+  let noForceRenderGlobalURL: AdminUrlUtil
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
 
@@ -88,6 +96,10 @@ describe('General', () => {
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
+    forceRenderCollectionURL = new AdminUrlUtil(serverURL, forceRenderCollectionSlug)
+    forceRenderGlobalURL = new AdminUrlUtil(serverURL, forceRenderGlobalSlug)
+    noForceRenderCollectionURL = new AdminUrlUtil(serverURL, noForceRenderCollectionSlug)
+    noForceRenderGlobalURL = new AdminUrlUtil(serverURL, noForceRenderGlobalSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -936,6 +948,72 @@ describe('General', () => {
       await confirmButton.click()
       const toast = page.locator('li.payload-toast-item.toast-success')
       await expect(toast).toBeVisible()
+    })
+  })
+
+  describe('browser search', () => {
+    test('should successfully find field in large collection edit view document', async () => {
+      await page.goto(forceRenderCollectionURL.create)
+      await page.waitForURL(forceRenderCollectionURL.create)
+
+      const isMac = process.platform === 'darwin'
+      if (isMac) {
+        await page.keyboard.press('Meta+F') // Cmd + F for macOS
+      } else {
+        await page.keyboard.press('Control+F') // Ctrl + F for Windows/Linux
+      }
+
+      await page.keyboard.type('Field100')
+
+      await expect(page.locator('label >> text=Field100')).toBeVisible()
+    })
+
+    test('should not find field in large collection edit view document', async () => {
+      await page.goto(noForceRenderCollectionURL.create)
+      await page.waitForURL(noForceRenderCollectionURL.create)
+
+      const isMac = process.platform === 'darwin'
+      if (isMac) {
+        await page.keyboard.press('Meta+F') // Cmd + F for macOS
+      } else {
+        await page.keyboard.press('Control+F') // Ctrl + F for Windows/Linux
+      }
+
+      await page.keyboard.type('Field100')
+
+      await expect(page.locator('label >> text=Field100')).not.toBeVisible()
+    })
+
+    test('should successfully find field in large global edit view document', async () => {
+      await page.goto(forceRenderGlobalURL.global(forceRenderGlobalSlug))
+      await page.waitForURL(forceRenderGlobalURL.global(forceRenderGlobalSlug))
+
+      const isMac = process.platform === 'darwin'
+      if (isMac) {
+        await page.keyboard.press('Meta+F') // Cmd + F for macOS
+      } else {
+        await page.keyboard.press('Control+F') // Ctrl + F for Windows/Linux
+      }
+
+      await page.keyboard.type('Field100')
+
+      await expect(page.locator('label >> text=Field100')).toBeVisible()
+    })
+
+    test('should not find field in large global edit view document', async () => {
+      await page.goto(noForceRenderGlobalURL.global(noForceRenderGlobalSlug))
+      await page.waitForURL(noForceRenderGlobalURL.global(noForceRenderGlobalSlug))
+
+      const isMac = process.platform === 'darwin'
+      if (isMac) {
+        await page.keyboard.press('Meta+F') // Cmd + F for macOS
+      } else {
+        await page.keyboard.press('Control+F') // Ctrl + F for Windows/Linux
+      }
+
+      await page.keyboard.type('Field100')
+
+      await expect(page.locator('label >> text=Field100')).not.toBeVisible()
     })
   })
 })

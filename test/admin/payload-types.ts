@@ -24,6 +24,8 @@ export interface Config {
     'group-one-collection-twos': GroupOneCollectionTwo;
     'group-two-collection-ones': GroupTwoCollectionOne;
     'group-two-collection-twos': GroupTwoCollectionTwo;
+    'collection-force-render': CollectionForceRender;
+    'collection-no-force-render': CollectionNoForceRender;
     geo: Geo;
     'disable-duplicate': DisableDuplicate;
     'base-list-filters': BaseListFilter;
@@ -46,6 +48,8 @@ export interface Config {
     'group-one-collection-twos': GroupOneCollectionTwosSelect<false> | GroupOneCollectionTwosSelect<true>;
     'group-two-collection-ones': GroupTwoCollectionOnesSelect<false> | GroupTwoCollectionOnesSelect<true>;
     'group-two-collection-twos': GroupTwoCollectionTwosSelect<false> | GroupTwoCollectionTwosSelect<true>;
+    'collection-force-render': CollectionForceRenderSelect<false> | CollectionForceRenderSelect<true>;
+    'collection-no-force-render': CollectionNoForceRenderSelect<false> | CollectionNoForceRenderSelect<true>;
     geo: GeoSelect<false> | GeoSelect<true>;
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
@@ -57,6 +61,8 @@ export interface Config {
     defaultIDType: string;
   };
   globals: {
+    'global-force-render': GlobalForceRender;
+    'global-no-force-render': GlobalNoForceRender;
     'hidden-global': HiddenGlobal;
     'not-in-view-global': NotInViewGlobal;
     'global-no-api-view': GlobalNoApiView;
@@ -68,6 +74,8 @@ export interface Config {
     settings: Setting;
   };
   globalsSelect: {
+    'global-force-render': GlobalForceRenderSelect<false> | GlobalForceRenderSelect<true>;
+    'global-no-force-render': GlobalNoForceRenderSelect<false> | GlobalNoForceRenderSelect<true>;
     'hidden-global': HiddenGlobalSelect<false> | HiddenGlobalSelect<true>;
     'not-in-view-global': NotInViewGlobalSelect<false> | NotInViewGlobalSelect<true>;
     'global-no-api-view': GlobalNoApiViewSelect<false> | GlobalNoApiViewSelect<true>;
@@ -342,6 +350,304 @@ export interface GroupTwoCollectionTwo {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-force-render".
+ */
+export interface CollectionForceRender {
+  id: string;
+  groupOne?: {
+    field1?: string | null;
+    field2?: string | null;
+    field3?: string | null;
+    field4?: string | null;
+    field5?: string | null;
+  };
+  groupTwo?: {
+    field6?: string | null;
+    field7?: string | null;
+    field8?: string | null;
+    field9?: string | null;
+    field10?: string | null;
+  };
+  groupThree?: {
+    field11?: string | null;
+    field12?: string | null;
+    field13?: string | null;
+    field14?: string | null;
+    field15?: string | null;
+  };
+  groupFour?: {
+    field16?: string | null;
+    field17?: string | null;
+    field18?: string | null;
+    field19?: string | null;
+    field20?: string | null;
+  };
+  groupFive?: {
+    field21?: string | null;
+    field22?: string | null;
+    field23?: string | null;
+    field24?: string | null;
+    field25?: string | null;
+  };
+  groupSix?: {
+    field26?: string | null;
+    field27?: string | null;
+    field28?: string | null;
+    field29?: string | null;
+    field30?: string | null;
+  };
+  groupSeven?: {
+    field31?: string | null;
+    field32?: string | null;
+    field33?: string | null;
+    field34?: string | null;
+    field35?: string | null;
+  };
+  groupEight?: {
+    field36?: string | null;
+    field37?: string | null;
+    field38?: string | null;
+    field39?: string | null;
+    field40?: string | null;
+  };
+  groupNine?: {
+    field41?: string | null;
+    field42?: string | null;
+    field43?: string | null;
+    field44?: string | null;
+    field45?: string | null;
+  };
+  groupTen?: {
+    field46?: string | null;
+    field47?: string | null;
+    field48?: string | null;
+    field49?: string | null;
+    field50?: string | null;
+  };
+  groupEleven?: {
+    field51?: string | null;
+    field52?: string | null;
+    field53?: string | null;
+    field54?: string | null;
+    field55?: string | null;
+  };
+  groupTwelve?: {
+    field56?: string | null;
+    field57?: string | null;
+    field58?: string | null;
+    field59?: string | null;
+    field60?: string | null;
+  };
+  groupThirteen?: {
+    field61?: string | null;
+    field62?: string | null;
+    field63?: string | null;
+    field64?: string | null;
+    field65?: string | null;
+  };
+  groupFourteen?: {
+    field66?: string | null;
+    field67?: string | null;
+    field68?: string | null;
+    field69?: string | null;
+    field70?: string | null;
+  };
+  groupFifteen?: {
+    field71?: string | null;
+    field72?: string | null;
+    field73?: string | null;
+    field74?: string | null;
+    field75?: string | null;
+  };
+  groupSixteen?: {
+    field76?: string | null;
+    field77?: string | null;
+    field78?: string | null;
+    field79?: string | null;
+    field80?: string | null;
+  };
+  groupSeventeen?: {
+    field81?: string | null;
+    field82?: string | null;
+    field83?: string | null;
+    field84?: string | null;
+    field85?: string | null;
+  };
+  groupEighteen?: {
+    field86?: string | null;
+    field87?: string | null;
+    field88?: string | null;
+    field89?: string | null;
+    field90?: string | null;
+  };
+  groupNineteen?: {
+    field91?: string | null;
+    field92?: string | null;
+    field93?: string | null;
+    field94?: string | null;
+    field95?: string | null;
+  };
+  groupTwenty?: {
+    field96?: string | null;
+    field97?: string | null;
+    field98?: string | null;
+    field99?: string | null;
+    field100?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-no-force-render".
+ */
+export interface CollectionNoForceRender {
+  id: string;
+  groupOne?: {
+    field1?: string | null;
+    field2?: string | null;
+    field3?: string | null;
+    field4?: string | null;
+    field5?: string | null;
+  };
+  groupTwo?: {
+    field6?: string | null;
+    field7?: string | null;
+    field8?: string | null;
+    field9?: string | null;
+    field10?: string | null;
+  };
+  groupThree?: {
+    field11?: string | null;
+    field12?: string | null;
+    field13?: string | null;
+    field14?: string | null;
+    field15?: string | null;
+  };
+  groupFour?: {
+    field16?: string | null;
+    field17?: string | null;
+    field18?: string | null;
+    field19?: string | null;
+    field20?: string | null;
+  };
+  groupFive?: {
+    field21?: string | null;
+    field22?: string | null;
+    field23?: string | null;
+    field24?: string | null;
+    field25?: string | null;
+  };
+  groupSix?: {
+    field26?: string | null;
+    field27?: string | null;
+    field28?: string | null;
+    field29?: string | null;
+    field30?: string | null;
+  };
+  groupSeven?: {
+    field31?: string | null;
+    field32?: string | null;
+    field33?: string | null;
+    field34?: string | null;
+    field35?: string | null;
+  };
+  groupEight?: {
+    field36?: string | null;
+    field37?: string | null;
+    field38?: string | null;
+    field39?: string | null;
+    field40?: string | null;
+  };
+  groupNine?: {
+    field41?: string | null;
+    field42?: string | null;
+    field43?: string | null;
+    field44?: string | null;
+    field45?: string | null;
+  };
+  groupTen?: {
+    field46?: string | null;
+    field47?: string | null;
+    field48?: string | null;
+    field49?: string | null;
+    field50?: string | null;
+  };
+  groupEleven?: {
+    field51?: string | null;
+    field52?: string | null;
+    field53?: string | null;
+    field54?: string | null;
+    field55?: string | null;
+  };
+  groupTwelve?: {
+    field56?: string | null;
+    field57?: string | null;
+    field58?: string | null;
+    field59?: string | null;
+    field60?: string | null;
+  };
+  groupThirteen?: {
+    field61?: string | null;
+    field62?: string | null;
+    field63?: string | null;
+    field64?: string | null;
+    field65?: string | null;
+  };
+  groupFourteen?: {
+    field66?: string | null;
+    field67?: string | null;
+    field68?: string | null;
+    field69?: string | null;
+    field70?: string | null;
+  };
+  groupFifteen?: {
+    field71?: string | null;
+    field72?: string | null;
+    field73?: string | null;
+    field74?: string | null;
+    field75?: string | null;
+  };
+  groupSixteen?: {
+    field76?: string | null;
+    field77?: string | null;
+    field78?: string | null;
+    field79?: string | null;
+    field80?: string | null;
+  };
+  groupSeventeen?: {
+    field81?: string | null;
+    field82?: string | null;
+    field83?: string | null;
+    field84?: string | null;
+    field85?: string | null;
+  };
+  groupEighteen?: {
+    field86?: string | null;
+    field87?: string | null;
+    field88?: string | null;
+    field89?: string | null;
+    field90?: string | null;
+  };
+  groupNineteen?: {
+    field91?: string | null;
+    field92?: string | null;
+    field93?: string | null;
+    field94?: string | null;
+    field95?: string | null;
+  };
+  groupTwenty?: {
+    field96?: string | null;
+    field97?: string | null;
+    field98?: string | null;
+    field99?: string | null;
+    field100?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "geo".
  */
 export interface Geo {
@@ -432,6 +738,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'group-two-collection-twos';
         value: string | GroupTwoCollectionTwo;
+      } | null)
+    | ({
+        relationTo: 'collection-force-render';
+        value: string | CollectionForceRender;
+      } | null)
+    | ({
+        relationTo: 'collection-no-force-render';
+        value: string | CollectionNoForceRender;
       } | null)
     | ({
         relationTo: 'geo';
@@ -709,6 +1023,382 @@ export interface GroupTwoCollectionTwosSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-force-render_select".
+ */
+export interface CollectionForceRenderSelect<T extends boolean = true> {
+  groupOne?:
+    | T
+    | {
+        field1?: T;
+        field2?: T;
+        field3?: T;
+        field4?: T;
+        field5?: T;
+      };
+  groupTwo?:
+    | T
+    | {
+        field6?: T;
+        field7?: T;
+        field8?: T;
+        field9?: T;
+        field10?: T;
+      };
+  groupThree?:
+    | T
+    | {
+        field11?: T;
+        field12?: T;
+        field13?: T;
+        field14?: T;
+        field15?: T;
+      };
+  groupFour?:
+    | T
+    | {
+        field16?: T;
+        field17?: T;
+        field18?: T;
+        field19?: T;
+        field20?: T;
+      };
+  groupFive?:
+    | T
+    | {
+        field21?: T;
+        field22?: T;
+        field23?: T;
+        field24?: T;
+        field25?: T;
+      };
+  groupSix?:
+    | T
+    | {
+        field26?: T;
+        field27?: T;
+        field28?: T;
+        field29?: T;
+        field30?: T;
+      };
+  groupSeven?:
+    | T
+    | {
+        field31?: T;
+        field32?: T;
+        field33?: T;
+        field34?: T;
+        field35?: T;
+      };
+  groupEight?:
+    | T
+    | {
+        field36?: T;
+        field37?: T;
+        field38?: T;
+        field39?: T;
+        field40?: T;
+      };
+  groupNine?:
+    | T
+    | {
+        field41?: T;
+        field42?: T;
+        field43?: T;
+        field44?: T;
+        field45?: T;
+      };
+  groupTen?:
+    | T
+    | {
+        field46?: T;
+        field47?: T;
+        field48?: T;
+        field49?: T;
+        field50?: T;
+      };
+  groupEleven?:
+    | T
+    | {
+        field51?: T;
+        field52?: T;
+        field53?: T;
+        field54?: T;
+        field55?: T;
+      };
+  groupTwelve?:
+    | T
+    | {
+        field56?: T;
+        field57?: T;
+        field58?: T;
+        field59?: T;
+        field60?: T;
+      };
+  groupThirteen?:
+    | T
+    | {
+        field61?: T;
+        field62?: T;
+        field63?: T;
+        field64?: T;
+        field65?: T;
+      };
+  groupFourteen?:
+    | T
+    | {
+        field66?: T;
+        field67?: T;
+        field68?: T;
+        field69?: T;
+        field70?: T;
+      };
+  groupFifteen?:
+    | T
+    | {
+        field71?: T;
+        field72?: T;
+        field73?: T;
+        field74?: T;
+        field75?: T;
+      };
+  groupSixteen?:
+    | T
+    | {
+        field76?: T;
+        field77?: T;
+        field78?: T;
+        field79?: T;
+        field80?: T;
+      };
+  groupSeventeen?:
+    | T
+    | {
+        field81?: T;
+        field82?: T;
+        field83?: T;
+        field84?: T;
+        field85?: T;
+      };
+  groupEighteen?:
+    | T
+    | {
+        field86?: T;
+        field87?: T;
+        field88?: T;
+        field89?: T;
+        field90?: T;
+      };
+  groupNineteen?:
+    | T
+    | {
+        field91?: T;
+        field92?: T;
+        field93?: T;
+        field94?: T;
+        field95?: T;
+      };
+  groupTwenty?:
+    | T
+    | {
+        field96?: T;
+        field97?: T;
+        field98?: T;
+        field99?: T;
+        field100?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-no-force-render_select".
+ */
+export interface CollectionNoForceRenderSelect<T extends boolean = true> {
+  groupOne?:
+    | T
+    | {
+        field1?: T;
+        field2?: T;
+        field3?: T;
+        field4?: T;
+        field5?: T;
+      };
+  groupTwo?:
+    | T
+    | {
+        field6?: T;
+        field7?: T;
+        field8?: T;
+        field9?: T;
+        field10?: T;
+      };
+  groupThree?:
+    | T
+    | {
+        field11?: T;
+        field12?: T;
+        field13?: T;
+        field14?: T;
+        field15?: T;
+      };
+  groupFour?:
+    | T
+    | {
+        field16?: T;
+        field17?: T;
+        field18?: T;
+        field19?: T;
+        field20?: T;
+      };
+  groupFive?:
+    | T
+    | {
+        field21?: T;
+        field22?: T;
+        field23?: T;
+        field24?: T;
+        field25?: T;
+      };
+  groupSix?:
+    | T
+    | {
+        field26?: T;
+        field27?: T;
+        field28?: T;
+        field29?: T;
+        field30?: T;
+      };
+  groupSeven?:
+    | T
+    | {
+        field31?: T;
+        field32?: T;
+        field33?: T;
+        field34?: T;
+        field35?: T;
+      };
+  groupEight?:
+    | T
+    | {
+        field36?: T;
+        field37?: T;
+        field38?: T;
+        field39?: T;
+        field40?: T;
+      };
+  groupNine?:
+    | T
+    | {
+        field41?: T;
+        field42?: T;
+        field43?: T;
+        field44?: T;
+        field45?: T;
+      };
+  groupTen?:
+    | T
+    | {
+        field46?: T;
+        field47?: T;
+        field48?: T;
+        field49?: T;
+        field50?: T;
+      };
+  groupEleven?:
+    | T
+    | {
+        field51?: T;
+        field52?: T;
+        field53?: T;
+        field54?: T;
+        field55?: T;
+      };
+  groupTwelve?:
+    | T
+    | {
+        field56?: T;
+        field57?: T;
+        field58?: T;
+        field59?: T;
+        field60?: T;
+      };
+  groupThirteen?:
+    | T
+    | {
+        field61?: T;
+        field62?: T;
+        field63?: T;
+        field64?: T;
+        field65?: T;
+      };
+  groupFourteen?:
+    | T
+    | {
+        field66?: T;
+        field67?: T;
+        field68?: T;
+        field69?: T;
+        field70?: T;
+      };
+  groupFifteen?:
+    | T
+    | {
+        field71?: T;
+        field72?: T;
+        field73?: T;
+        field74?: T;
+        field75?: T;
+      };
+  groupSixteen?:
+    | T
+    | {
+        field76?: T;
+        field77?: T;
+        field78?: T;
+        field79?: T;
+        field80?: T;
+      };
+  groupSeventeen?:
+    | T
+    | {
+        field81?: T;
+        field82?: T;
+        field83?: T;
+        field84?: T;
+        field85?: T;
+      };
+  groupEighteen?:
+    | T
+    | {
+        field86?: T;
+        field87?: T;
+        field88?: T;
+        field89?: T;
+        field90?: T;
+      };
+  groupNineteen?:
+    | T
+    | {
+        field91?: T;
+        field92?: T;
+        field93?: T;
+        field94?: T;
+        field95?: T;
+      };
+  groupTwenty?:
+    | T
+    | {
+        field96?: T;
+        field97?: T;
+        field98?: T;
+        field99?: T;
+        field100?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "geo_select".
  */
 export interface GeoSelect<T extends boolean = true> {
@@ -765,6 +1455,304 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-force-render".
+ */
+export interface GlobalForceRender {
+  id: string;
+  groupOne?: {
+    field1?: string | null;
+    field2?: string | null;
+    field3?: string | null;
+    field4?: string | null;
+    field5?: string | null;
+  };
+  groupTwo?: {
+    field6?: string | null;
+    field7?: string | null;
+    field8?: string | null;
+    field9?: string | null;
+    field10?: string | null;
+  };
+  groupThree?: {
+    field11?: string | null;
+    field12?: string | null;
+    field13?: string | null;
+    field14?: string | null;
+    field15?: string | null;
+  };
+  groupFour?: {
+    field16?: string | null;
+    field17?: string | null;
+    field18?: string | null;
+    field19?: string | null;
+    field20?: string | null;
+  };
+  groupFive?: {
+    field21?: string | null;
+    field22?: string | null;
+    field23?: string | null;
+    field24?: string | null;
+    field25?: string | null;
+  };
+  groupSix?: {
+    field26?: string | null;
+    field27?: string | null;
+    field28?: string | null;
+    field29?: string | null;
+    field30?: string | null;
+  };
+  groupSeven?: {
+    field31?: string | null;
+    field32?: string | null;
+    field33?: string | null;
+    field34?: string | null;
+    field35?: string | null;
+  };
+  groupEight?: {
+    field36?: string | null;
+    field37?: string | null;
+    field38?: string | null;
+    field39?: string | null;
+    field40?: string | null;
+  };
+  groupNine?: {
+    field41?: string | null;
+    field42?: string | null;
+    field43?: string | null;
+    field44?: string | null;
+    field45?: string | null;
+  };
+  groupTen?: {
+    field46?: string | null;
+    field47?: string | null;
+    field48?: string | null;
+    field49?: string | null;
+    field50?: string | null;
+  };
+  groupEleven?: {
+    field51?: string | null;
+    field52?: string | null;
+    field53?: string | null;
+    field54?: string | null;
+    field55?: string | null;
+  };
+  groupTwelve?: {
+    field56?: string | null;
+    field57?: string | null;
+    field58?: string | null;
+    field59?: string | null;
+    field60?: string | null;
+  };
+  groupThirteen?: {
+    field61?: string | null;
+    field62?: string | null;
+    field63?: string | null;
+    field64?: string | null;
+    field65?: string | null;
+  };
+  groupFourteen?: {
+    field66?: string | null;
+    field67?: string | null;
+    field68?: string | null;
+    field69?: string | null;
+    field70?: string | null;
+  };
+  groupFifteen?: {
+    field71?: string | null;
+    field72?: string | null;
+    field73?: string | null;
+    field74?: string | null;
+    field75?: string | null;
+  };
+  groupSixteen?: {
+    field76?: string | null;
+    field77?: string | null;
+    field78?: string | null;
+    field79?: string | null;
+    field80?: string | null;
+  };
+  groupSeventeen?: {
+    field81?: string | null;
+    field82?: string | null;
+    field83?: string | null;
+    field84?: string | null;
+    field85?: string | null;
+  };
+  groupEighteen?: {
+    field86?: string | null;
+    field87?: string | null;
+    field88?: string | null;
+    field89?: string | null;
+    field90?: string | null;
+  };
+  groupNineteen?: {
+    field91?: string | null;
+    field92?: string | null;
+    field93?: string | null;
+    field94?: string | null;
+    field95?: string | null;
+  };
+  groupTwenty?: {
+    field96?: string | null;
+    field97?: string | null;
+    field98?: string | null;
+    field99?: string | null;
+    field100?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-no-force-render".
+ */
+export interface GlobalNoForceRender {
+  id: string;
+  groupOne?: {
+    field1?: string | null;
+    field2?: string | null;
+    field3?: string | null;
+    field4?: string | null;
+    field5?: string | null;
+  };
+  groupTwo?: {
+    field6?: string | null;
+    field7?: string | null;
+    field8?: string | null;
+    field9?: string | null;
+    field10?: string | null;
+  };
+  groupThree?: {
+    field11?: string | null;
+    field12?: string | null;
+    field13?: string | null;
+    field14?: string | null;
+    field15?: string | null;
+  };
+  groupFour?: {
+    field16?: string | null;
+    field17?: string | null;
+    field18?: string | null;
+    field19?: string | null;
+    field20?: string | null;
+  };
+  groupFive?: {
+    field21?: string | null;
+    field22?: string | null;
+    field23?: string | null;
+    field24?: string | null;
+    field25?: string | null;
+  };
+  groupSix?: {
+    field26?: string | null;
+    field27?: string | null;
+    field28?: string | null;
+    field29?: string | null;
+    field30?: string | null;
+  };
+  groupSeven?: {
+    field31?: string | null;
+    field32?: string | null;
+    field33?: string | null;
+    field34?: string | null;
+    field35?: string | null;
+  };
+  groupEight?: {
+    field36?: string | null;
+    field37?: string | null;
+    field38?: string | null;
+    field39?: string | null;
+    field40?: string | null;
+  };
+  groupNine?: {
+    field41?: string | null;
+    field42?: string | null;
+    field43?: string | null;
+    field44?: string | null;
+    field45?: string | null;
+  };
+  groupTen?: {
+    field46?: string | null;
+    field47?: string | null;
+    field48?: string | null;
+    field49?: string | null;
+    field50?: string | null;
+  };
+  groupEleven?: {
+    field51?: string | null;
+    field52?: string | null;
+    field53?: string | null;
+    field54?: string | null;
+    field55?: string | null;
+  };
+  groupTwelve?: {
+    field56?: string | null;
+    field57?: string | null;
+    field58?: string | null;
+    field59?: string | null;
+    field60?: string | null;
+  };
+  groupThirteen?: {
+    field61?: string | null;
+    field62?: string | null;
+    field63?: string | null;
+    field64?: string | null;
+    field65?: string | null;
+  };
+  groupFourteen?: {
+    field66?: string | null;
+    field67?: string | null;
+    field68?: string | null;
+    field69?: string | null;
+    field70?: string | null;
+  };
+  groupFifteen?: {
+    field71?: string | null;
+    field72?: string | null;
+    field73?: string | null;
+    field74?: string | null;
+    field75?: string | null;
+  };
+  groupSixteen?: {
+    field76?: string | null;
+    field77?: string | null;
+    field78?: string | null;
+    field79?: string | null;
+    field80?: string | null;
+  };
+  groupSeventeen?: {
+    field81?: string | null;
+    field82?: string | null;
+    field83?: string | null;
+    field84?: string | null;
+    field85?: string | null;
+  };
+  groupEighteen?: {
+    field86?: string | null;
+    field87?: string | null;
+    field88?: string | null;
+    field89?: string | null;
+    field90?: string | null;
+  };
+  groupNineteen?: {
+    field91?: string | null;
+    field92?: string | null;
+    field93?: string | null;
+    field94?: string | null;
+    field95?: string | null;
+  };
+  groupTwenty?: {
+    field96?: string | null;
+    field97?: string | null;
+    field98?: string | null;
+    field99?: string | null;
+    field100?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -856,6 +1844,384 @@ export interface Setting {
   canAccessProtected?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-force-render_select".
+ */
+export interface GlobalForceRenderSelect<T extends boolean = true> {
+  groupOne?:
+    | T
+    | {
+        field1?: T;
+        field2?: T;
+        field3?: T;
+        field4?: T;
+        field5?: T;
+      };
+  groupTwo?:
+    | T
+    | {
+        field6?: T;
+        field7?: T;
+        field8?: T;
+        field9?: T;
+        field10?: T;
+      };
+  groupThree?:
+    | T
+    | {
+        field11?: T;
+        field12?: T;
+        field13?: T;
+        field14?: T;
+        field15?: T;
+      };
+  groupFour?:
+    | T
+    | {
+        field16?: T;
+        field17?: T;
+        field18?: T;
+        field19?: T;
+        field20?: T;
+      };
+  groupFive?:
+    | T
+    | {
+        field21?: T;
+        field22?: T;
+        field23?: T;
+        field24?: T;
+        field25?: T;
+      };
+  groupSix?:
+    | T
+    | {
+        field26?: T;
+        field27?: T;
+        field28?: T;
+        field29?: T;
+        field30?: T;
+      };
+  groupSeven?:
+    | T
+    | {
+        field31?: T;
+        field32?: T;
+        field33?: T;
+        field34?: T;
+        field35?: T;
+      };
+  groupEight?:
+    | T
+    | {
+        field36?: T;
+        field37?: T;
+        field38?: T;
+        field39?: T;
+        field40?: T;
+      };
+  groupNine?:
+    | T
+    | {
+        field41?: T;
+        field42?: T;
+        field43?: T;
+        field44?: T;
+        field45?: T;
+      };
+  groupTen?:
+    | T
+    | {
+        field46?: T;
+        field47?: T;
+        field48?: T;
+        field49?: T;
+        field50?: T;
+      };
+  groupEleven?:
+    | T
+    | {
+        field51?: T;
+        field52?: T;
+        field53?: T;
+        field54?: T;
+        field55?: T;
+      };
+  groupTwelve?:
+    | T
+    | {
+        field56?: T;
+        field57?: T;
+        field58?: T;
+        field59?: T;
+        field60?: T;
+      };
+  groupThirteen?:
+    | T
+    | {
+        field61?: T;
+        field62?: T;
+        field63?: T;
+        field64?: T;
+        field65?: T;
+      };
+  groupFourteen?:
+    | T
+    | {
+        field66?: T;
+        field67?: T;
+        field68?: T;
+        field69?: T;
+        field70?: T;
+      };
+  groupFifteen?:
+    | T
+    | {
+        field71?: T;
+        field72?: T;
+        field73?: T;
+        field74?: T;
+        field75?: T;
+      };
+  groupSixteen?:
+    | T
+    | {
+        field76?: T;
+        field77?: T;
+        field78?: T;
+        field79?: T;
+        field80?: T;
+      };
+  groupSeventeen?:
+    | T
+    | {
+        field81?: T;
+        field82?: T;
+        field83?: T;
+        field84?: T;
+        field85?: T;
+      };
+  groupEighteen?:
+    | T
+    | {
+        field86?: T;
+        field87?: T;
+        field88?: T;
+        field89?: T;
+        field90?: T;
+      };
+  groupNineteen?:
+    | T
+    | {
+        field91?: T;
+        field92?: T;
+        field93?: T;
+        field94?: T;
+        field95?: T;
+      };
+  groupTwenty?:
+    | T
+    | {
+        field96?: T;
+        field97?: T;
+        field98?: T;
+        field99?: T;
+        field100?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-no-force-render_select".
+ */
+export interface GlobalNoForceRenderSelect<T extends boolean = true> {
+  groupOne?:
+    | T
+    | {
+        field1?: T;
+        field2?: T;
+        field3?: T;
+        field4?: T;
+        field5?: T;
+      };
+  groupTwo?:
+    | T
+    | {
+        field6?: T;
+        field7?: T;
+        field8?: T;
+        field9?: T;
+        field10?: T;
+      };
+  groupThree?:
+    | T
+    | {
+        field11?: T;
+        field12?: T;
+        field13?: T;
+        field14?: T;
+        field15?: T;
+      };
+  groupFour?:
+    | T
+    | {
+        field16?: T;
+        field17?: T;
+        field18?: T;
+        field19?: T;
+        field20?: T;
+      };
+  groupFive?:
+    | T
+    | {
+        field21?: T;
+        field22?: T;
+        field23?: T;
+        field24?: T;
+        field25?: T;
+      };
+  groupSix?:
+    | T
+    | {
+        field26?: T;
+        field27?: T;
+        field28?: T;
+        field29?: T;
+        field30?: T;
+      };
+  groupSeven?:
+    | T
+    | {
+        field31?: T;
+        field32?: T;
+        field33?: T;
+        field34?: T;
+        field35?: T;
+      };
+  groupEight?:
+    | T
+    | {
+        field36?: T;
+        field37?: T;
+        field38?: T;
+        field39?: T;
+        field40?: T;
+      };
+  groupNine?:
+    | T
+    | {
+        field41?: T;
+        field42?: T;
+        field43?: T;
+        field44?: T;
+        field45?: T;
+      };
+  groupTen?:
+    | T
+    | {
+        field46?: T;
+        field47?: T;
+        field48?: T;
+        field49?: T;
+        field50?: T;
+      };
+  groupEleven?:
+    | T
+    | {
+        field51?: T;
+        field52?: T;
+        field53?: T;
+        field54?: T;
+        field55?: T;
+      };
+  groupTwelve?:
+    | T
+    | {
+        field56?: T;
+        field57?: T;
+        field58?: T;
+        field59?: T;
+        field60?: T;
+      };
+  groupThirteen?:
+    | T
+    | {
+        field61?: T;
+        field62?: T;
+        field63?: T;
+        field64?: T;
+        field65?: T;
+      };
+  groupFourteen?:
+    | T
+    | {
+        field66?: T;
+        field67?: T;
+        field68?: T;
+        field69?: T;
+        field70?: T;
+      };
+  groupFifteen?:
+    | T
+    | {
+        field71?: T;
+        field72?: T;
+        field73?: T;
+        field74?: T;
+        field75?: T;
+      };
+  groupSixteen?:
+    | T
+    | {
+        field76?: T;
+        field77?: T;
+        field78?: T;
+        field79?: T;
+        field80?: T;
+      };
+  groupSeventeen?:
+    | T
+    | {
+        field81?: T;
+        field82?: T;
+        field83?: T;
+        field84?: T;
+        field85?: T;
+      };
+  groupEighteen?:
+    | T
+    | {
+        field86?: T;
+        field87?: T;
+        field88?: T;
+        field89?: T;
+        field90?: T;
+      };
+  groupNineteen?:
+    | T
+    | {
+        field91?: T;
+        field92?: T;
+        field93?: T;
+        field94?: T;
+        field95?: T;
+      };
+  groupTwenty?:
+    | T
+    | {
+        field96?: T;
+        field97?: T;
+        field98?: T;
+        field99?: T;
+        field100?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

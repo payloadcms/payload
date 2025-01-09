@@ -27,6 +27,7 @@ type BlocksFieldProps = {
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   fields: ClientField[]
+  forceRender?: boolean
   hasMaxRows?: boolean
   isLoading?: boolean
   isSortable?: boolean
@@ -53,6 +54,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   duplicateRow,
   errorCount,
   fields,
+  forceRender,
   hasMaxRows,
   isLoading: isLoadingFromProps,
   isSortable,
@@ -170,6 +172,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
           <RenderFields
             className={`${baseClass}__fields`}
             fields={fields}
+            forceRender={forceRender}
             margins="small"
             parentIndexPath=""
             parentPath={path}
