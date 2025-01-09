@@ -9,6 +9,7 @@ import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import { defaultGlobalEndpoints } from '../endpoints/index.js'
 
 export const sanitizeGlobal = async (
   config: Config,
@@ -70,6 +71,16 @@ export const sanitizeGlobal = async (
     richTextSanitizationPromises,
     validRelationships,
   })
+
+  if (global.endpoints !== false) {
+    if (!global.endpoints) {
+      global.endpoints = []
+    }
+
+    for (const endpoint of defaultGlobalEndpoints) {
+      global.endpoints.push(endpoint)
+    }
+  }
 
   if (global.versions) {
     if (global.versions === true) {

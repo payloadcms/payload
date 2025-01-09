@@ -813,6 +813,9 @@ importers:
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
+      busboy:
+        specifier: ^1.6.0
+        version: 1.6.0
       ci-info:
         specifier: ^4.0.0
         version: 4.0.0
@@ -852,6 +855,9 @@ importers:
       minimist:
         specifier: 1.2.8
         version: 1.2.8
+      path-to-regexp:
+        specifier: 6.2.1
+        version: 6.2.1
       pino:
         specifier: 9.5.0
         version: 9.5.0
@@ -861,6 +867,9 @@ importers:
       pluralize:
         specifier: 8.0.0
         version: 8.0.0
+      qs-esm:
+        specifier: 7.0.2
+        version: 7.0.2
       sanitize-filename:
         specifier: 1.6.3
         version: 1.6.3
@@ -8559,6 +8568,9 @@ packages:
   path-scurry@2.0.0:
     resolution: {integrity: sha512-ypGJsmGtdXUOeM5u93TyeIEfEhM6s+ljAhrk5vAvSx8uyY/02OvrZnA0YNGUrPXfpJMgI1ODd3nwz8Npx4O4cg==}
     engines: {node: 20 || >=22}
+
+  path-to-regexp@6.2.1:
+    resolution: {integrity: sha512-JLyh7xT1kizaEvcaXOQwOc2/Yhw6KZOvPf1S8401UyLk86CU79LN3vl7ztXGm/pZ+YjoyAJ4rxmHwbkBXJX+yw==}
 
   path-to-regexp@6.3.0:
     resolution: {integrity: sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==}
@@ -18693,6 +18705,8 @@ snapshots:
     dependencies:
       lru-cache: 11.0.2
       minipass: 7.1.2
+
+  path-to-regexp@6.2.1: {}
 
   path-to-regexp@6.3.0: {}
 
