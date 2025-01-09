@@ -17,6 +17,17 @@ export const LocaleLoadingContext = createContext({
   setLocaleIsLoading: (_: boolean) => undefined,
 })
 
+const fetchPreferences = async <T extends Record<string, unknown> | string>(
+  key: string,
+): Promise<{ id: string; value: T }> =>
+  await fetch(`/api/payload-preferences/${key}`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'GET',
+  })?.then((res) => res.json() as Promise<{ id: string; value: T }>)
+
 export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Locale['code'] }> = ({
   children,
   /**
@@ -78,7 +89,9 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     async function resetLocale() {
       if (localization && user?.id) {
         const localeToUse =
-          localeFromParams || (await getPreference<Locale['code']>('locale')) || defaultLocale
+          localeFromParams ||
+          (await fetchPreferences<Locale['code']>('locale')?.then((res) => res.value)) ||
+          defaultLocale
 
         const newLocale =
           findLocaleFromCode(localization, localeToUse) ||
@@ -89,7 +102,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     }
 
     void resetLocale()
-  }, [defaultLocale, getPreference, localization, localeFromParams, setPreference, user?.id])
+  }, [defaultLocale, getPreference, localization, localeFromParams, user?.id])
 
   return (
     <LocaleContext.Provider value={locale}>
