@@ -1,9 +1,8 @@
 'use client'
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ListPreferences, SanitizedCollectionConfig } from 'payload'
 
 import React, { createContext, useCallback, useContext, useEffect } from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
@@ -24,12 +23,6 @@ export interface ITableColumns {
 export const TableColumnContext = createContext<ITableColumns>({} as ITableColumns)
 
 export const useTableColumns = (): ITableColumns => useContext(TableColumnContext)
-
-export type ListPreferences = {
-  columns?: ColumnPreferences
-  limit?: number
-  sort?: string
-}
 
 type Props = {
   readonly children: React.ReactNode
@@ -244,7 +237,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
       if (collectionHasChanged || !listPreferences) {
         const currentPreferences = await getPreference<{
-          columns: ColumnPreferences
+          columns: ListPreferences['columns']
         }>(preferenceKey)
 
         prevCollection.current = collectionSlug

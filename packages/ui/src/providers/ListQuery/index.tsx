@@ -6,13 +6,9 @@ import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
-import type { Column } from '../../elements/Table/index.js'
-
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { usePreferences } from '../Preferences/index.js'
-
-export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
 type ContextHandlers = {
   handlePageChange?: (page: number) => Promise<void>

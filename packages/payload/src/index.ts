@@ -1318,6 +1318,7 @@ export type {
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
+  ListPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
   TabsPreferences,
