@@ -14,19 +14,7 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [
-    PostsCollection,
-    MediaCollection,
-    {
-      slug: 'tags',
-      fields: [
-        {
-          name: 'value',
-          type: 'text',
-        },
-      ],
-    },
-  ],
+  collections: [PostsCollection, MediaCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -53,22 +41,6 @@ export default buildConfigWithDefaults({
       where: {},
     })
 
-    // delete all tags
-    await payload.delete({
-      collection: 'tags',
-      where: {},
-    })
-
-    // Create 12000 tags
-    const tagPromises = Array.from({ length: 12000 }, (_, index) => {
-      return payload.create({
-        collection: 'tags',
-        data: {
-          value: `Tag ${index + 1}`,
-        },
-      })
-    })
-
     // Create dev user
     await payload.create({
       collection: 'users',
@@ -78,19 +50,20 @@ export default buildConfigWithDefaults({
       },
     })
 
-    // Create 1500 users
-    const userPromises = Array.from({ length: 1500 }, (_, index) => {
+    // Create 100 users
+    const userPromises = Array.from({ length: 100 }, (_, i) => {
+      const index = (i + 1).toString().padStart(3, '0')
       return payload.create({
         collection: 'users',
         data: {
-          id: (index + 1).toString(),
-          email: `user${index + 1}@example.com`,
+          id: index,
+          email: `user${index}@example.com`,
           password: 'password',
         },
       })
     })
 
-    await Promise.all([...tagPromises, ...userPromises])
+    await Promise.all([...userPromises])
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

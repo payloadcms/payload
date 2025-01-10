@@ -14,12 +14,6 @@ export const MediaCollection: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
     },
-    {
-      name: 'test',
-      label: 'Next editor',
-      type: 'relationship',
-      relationTo: 'tags',
-    },
   ],
   upload: {
     crop: true,
