@@ -1,3 +1,10 @@
+## [2.32.0](https://github.com/payloadcms/payload/compare/v2.31.0...v2.32.0) (2025-01-10)
+
+
+### Features
+
+* export CheckboxInput ([#10489](https://github.com/payloadcms/payload/issues/10489)) ([2e35255](https://github.com/payloadcms/payload/commit/2e352552d1905217acdc52f5c4a6255eb24b247c))
+
 ## [2.31.0](https://github.com/payloadcms/payload/compare/v2.30.4...v2.31.0) (2025-01-09)
 
 
