@@ -126,21 +126,27 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const blocksField: BlocksFieldClient = clientSchemaMap[
     componentMapRenderedBlockPath
-  ][0] as BlocksFieldClient
+  ]?.[0] as BlocksFieldClient
 
-  const clientBlock = blocksField.blocks[0]
+  const clientBlock = blocksField?.blocks?.[0]
 
   // Open drawer on "mount"
   useEffect(() => {
     if (!firstTimeDrawer.current && createdInlineBlock?.getKey() === nodeKey) {
       // > 2 because they always have "id" and "blockName" fields
-      if (clientBlock.fields.length > 2) {
+      if (clientBlock?.fields?.length > 2) {
         toggleDrawer()
       }
       setCreatedInlineBlock?.(undefined)
       firstTimeDrawer.current = true
     }
-  }, [clientBlock.fields.length, createdInlineBlock, nodeKey, setCreatedInlineBlock, toggleDrawer])
+  }, [
+    clientBlock?.fields?.length,
+    createdInlineBlock,
+    nodeKey,
+    setCreatedInlineBlock,
+    toggleDrawer,
+  ])
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
@@ -199,7 +205,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
 
   const blockDisplayName = clientBlock?.labels?.singular
-    ? getTranslation(clientBlock.labels.singular, i18n)
+    ? getTranslation(clientBlock?.labels.singular, i18n)
     : clientBlock?.slug
 
   const onChangeAbortControllerRef = useRef(new AbortController())
@@ -355,12 +361,13 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const InlineBlockContainer = useMemo(
     () =>
-      ({ children }: { children: React.ReactNode }) => (
+      ({ children, className }: { children: React.ReactNode; className?: string }) => (
         <div
           className={[
             baseClass,
             baseClass + '-' + formData.blockType,
             isSelected && `${baseClass}--selected`,
+            className,
           ]
             .filter(Boolean)
             .join(' ')}
@@ -376,9 +383,24 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     if (CustomLabel) {
       return () => CustomLabel
     } else {
-      return () => <div>{getTranslation(clientBlock.labels!.singular, i18n)}</div>
+      return () => (
+        <div>{clientBlock?.labels ? getTranslation(clientBlock?.labels.singular, i18n) : ''}</div>
+      )
     }
-  }, [CustomLabel, clientBlock.labels, i18n])
+  }, [CustomLabel, clientBlock?.labels, i18n])
+
+  if (!clientBlock) {
+    return (
+      <InlineBlockContainer className={`${baseClass}-not-found`}>
+        <span>Error: Block '{formData.blockType}' not found</span>
+        {editor.isEditable() ? (
+          <div className={`${baseClass}__actions`}>
+            <RemoveButton />
+          </div>
+        ) : null}
+      </InlineBlockContainer>
+    )
+  }
 
   return (
     <Form
@@ -389,7 +411,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         },
       ]}
       disableValidationOnSubmit
-      fields={clientBlock.fields}
+      fields={clientBlock?.fields}
       initialState={initialState || {}}
       onChange={[onChange]}
       onSubmit={(formState) => {
@@ -409,7 +431,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           {initialState ? (
             <>
               <RenderFields
-                fields={clientBlock.fields}
+                fields={clientBlock?.fields}
                 forceRender
                 parentIndexPath=""
                 parentPath="" // See Blocks feature path for details as for why this is empty

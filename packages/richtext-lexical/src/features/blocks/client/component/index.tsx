@@ -174,11 +174,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap[
+  const blocksField: BlocksFieldClient | undefined = clientSchemaMap[
     componentMapRenderedBlockPath
-  ][0] as BlocksFieldClient
+  ]?.[0] as BlocksFieldClient
 
-  const clientBlock = blocksField.blocks[0]
+  const clientBlock = blocksField?.blocks?.[0]
 
   const { i18n, t } = useTranslation<object, string>()
 
@@ -352,6 +352,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     () =>
       ({
         children,
+        disableBlockName,
         editButton,
         errorCount,
         fieldHasErrors,
@@ -359,6 +360,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         removeButton,
       }: {
         children?: React.ReactNode
+        disableBlockName?: boolean
         editButton?: boolean
         errorCount?: number
         fieldHasErrors?: boolean
@@ -385,12 +387,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
                       className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                       pillStyle="white"
                     >
-                      {blockDisplayName}
+                      {blockDisplayName ?? formData?.blockType}
                     </Pill>
-                    <SectionTitle
-                      path="blockName"
-                      readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
-                    />
+                    {!disableBlockName && (
+                      <SectionTitle
+                        path="blockName"
+                        readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
+                      />
+                    )}
+
                     {fieldHasErrors && (
                       <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
                     )}
@@ -444,7 +449,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           {initialState ? (
             <>
               <RenderFields
-                fields={clientBlock.fields}
+                fields={clientBlock?.fields}
                 forceRender
                 parentIndexPath=""
                 parentPath="" // See Blocks feature path for details as for why this is empty
@@ -463,7 +468,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       drawerSlug,
       blockDisplayName,
       t,
-      clientBlock.fields,
+      clientBlock?.fields,
       schemaFieldsPath,
       permissions,
       // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
@@ -483,7 +488,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
             return await onChange({ formState, submit: true })
           },
         ]}
-        fields={clientBlock.fields}
+        fields={clientBlock?.fields}
         initialState={initialState}
         onChange={[onChange]}
         onSubmit={(formState) => {
@@ -508,7 +513,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           CustomBlock={CustomBlock}
           EditButton={EditButton}
           errorCount={errorCount}
-          formSchema={clientBlock.fields}
+          formSchema={clientBlock?.fields}
           initialState={initialState}
           nodeKey={nodeKey}
           RemoveButton={RemoveButton}
@@ -524,13 +529,23 @@ export const BlockComponent: React.FC<Props> = (props) => {
     editor,
     errorCount,
     toggleDrawer,
-    clientBlock.fields,
+    clientBlock?.fields,
     // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
     initialState,
     nodeKey,
     onChange,
     submitted,
   ])
+
+  if (!clientBlock) {
+    return (
+      <BlockCollapsible disableBlockName={true} fieldHasErrors={true}>
+        <div className="lexical-block-not-found">
+          Error: Block '{formData.blockType}' not found in the config but exists in the lexical data
+        </div>
+      </BlockCollapsible>
+    )
+  }
 
   return Block
 }
