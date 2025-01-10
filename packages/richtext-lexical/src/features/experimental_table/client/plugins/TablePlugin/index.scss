@@ -77,7 +77,7 @@
       right: 0;
       bottom: 0;
       top: 0;
-      background-color: highlight;
+      background-color: var(--color-success-250);
       mix-blend-mode: multiply;
       content: '';
       pointer-events: none;
@@ -171,6 +171,11 @@
     .LexicalEditorTheme {
       &__tableCellHeader {
         background-color: var(--theme-elevation-50);
+      }
+
+      &__tableCellSelected::after {
+        background-color: var(--color-success-700);
+        mix-blend-mode: screen;
       }
 
       &__tableAddColumns:after,
