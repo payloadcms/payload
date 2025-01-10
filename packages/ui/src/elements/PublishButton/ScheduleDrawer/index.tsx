@@ -157,8 +157,6 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     deleteHandlerRef.current = deleteHandler
   }, [deleteHandler])
 
-  // deleteHandlerRef.current = deleteHandler
-
   const handleSave = React.useCallback(async () => {
     if (!date) {
       return toast.error(t('general:noDateSelected'))
