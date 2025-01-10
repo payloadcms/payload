@@ -61,8 +61,10 @@ multiTenantPlugin({
     },
     /**
      * Custom configuration for the tenant field placed on every enabled collection
+     *
+     * optional - @default undefined
      */
-    documentTenantField: {
+    tenantField: {
       // optional - provide access control on the injected tenant field
       access: {
         create,

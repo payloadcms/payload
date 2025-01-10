@@ -33,21 +33,14 @@ export const TenantSelector = async ({
     value: String(doc.id),
   }))
 
-  let cookieToSet: string | undefined
   const cookies = await getCookies()
-  const selectedTenant = tenantOptions.find(
+  let selectedTenant = tenantOptions.find(
     (tenant) => tenant.value === cookies.get('payload-tenant')?.value,
   )?.value
 
   if (!selectedTenant && userTenants.length > 0) {
-    cookieToSet = String(userTenants[0].id)
+    selectedTenant = String(userTenants[0].id)
   }
 
-  return (
-    <TenantSelectorClient
-      cookieToSet={cookieToSet}
-      initialValue={selectedTenant}
-      options={tenantOptions}
-    />
-  )
+  return <TenantSelectorClient initialValue={selectedTenant} options={tenantOptions} />
 }

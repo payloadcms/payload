@@ -5,35 +5,51 @@ import type { RelationshipFieldClientProps } from 'payload'
 import { RelationshipField, useField } from '@payloadcms/ui'
 import React from 'react'
 
+import './index.scss'
+import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.js'
+
+const baseClass = 'tenantField'
+
 type Props = {
   debug?: boolean
-  serverValue?: number | string
-  tenantsCollectionSlug: string
+  unique?: boolean
 } & RelationshipFieldClientProps
 
-export const TenantFieldClient = (args: Props) => {
-  const { path, serverValue } = args
-
-  const { setValue, value } = useField({ path })
+export const TenantField = (args: Props) => {
+  const { debug, path, unique } = args
+  const { setValue, value } = useField<number | string>({ path })
+  const { selectedTenantID, setRefreshOnChange, setTenant } = useTenantSelection()
 
   React.useEffect(() => {
-    if (serverValue && value !== serverValue) {
-      setValue(serverValue)
+    if (!selectedTenantID && value) {
+      // Initialize the tenant selector with the field value
+      setTenant(value, 'document')
+    } else if ((!value || value !== selectedTenantID) && selectedTenantID) {
+      // Update the field value when the tenant is changed
+      setValue(selectedTenantID)
     }
-  }, [serverValue, setValue, value])
+  }, [value, selectedTenantID, setTenant, setValue])
 
-  if (args.debug) {
+  React.useEffect(() => {
+    if (!unique) {
+      setRefreshOnChange(false)
+    }
+
+    return () => {
+      if (!unique) {
+        setRefreshOnChange(true)
+      }
+    }
+  }, [setRefreshOnChange, unique])
+
+  if (debug) {
     return (
-      <RelationshipField
-        field={{
-          name: path,
-          type: 'relationship',
-          label: 'Tenant',
-          relationTo: args.tenantsCollectionSlug,
-          required: true,
-        }}
-        path={path}
-      />
+      <div className={baseClass}>
+        <div className={`${baseClass}__wrapper`}>
+          <RelationshipField {...args} />
+        </div>
+        <div className={`${baseClass}__hr`} />
+      </div>
     )
   }
 

@@ -6,15 +6,16 @@ import type { MultiTenantPluginConfig } from '../../types.js'
 import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 
 type Args = {
-  access: MultiTenantPluginConfig['documentTenantField']['access']
+  access?: MultiTenantPluginConfig['tenantField']['access']
   debug?: boolean
   name: string
   tenantsCollectionSlug: MultiTenantPluginConfig['tenantsSlug']
   unique: boolean
+  userHasAccessToAllTenants: MultiTenantPluginConfig['userHasAccessToAllTenants']
 }
 export const tenantField = ({
   name,
-  access,
+  access = undefined,
   debug,
   tenantsCollectionSlug,
   unique,
@@ -23,16 +24,19 @@ export const tenantField = ({
   type: 'relationship',
   access,
   admin: {
+    allowCreate: false,
+    allowEdit: false,
     components: {
       Field: {
         clientProps: {
           debug,
-          tenantsCollectionSlug,
+          unique,
         },
-        path: '@payloadcms/plugin-multi-tenant/rsc#TenantField',
+        path: '@payloadcms/plugin-multi-tenant/client#TenantField',
       },
     },
-    position: debug ? 'sidebar' : undefined,
+    disableListColumn: true,
+    disableListFilter: true,
   },
   hasMany: false,
   hooks: {
@@ -49,6 +53,7 @@ export const tenantField = ({
     ],
   },
   index: true,
+  label: 'Assigned Tenant',
   relationTo: tenantsCollectionSlug,
   unique,
 })

@@ -39,7 +39,7 @@ export const multiTenantPlugin =
         : () => false
     const tenantsCollectionSlug = (pluginConfig.tenantsSlug =
       pluginConfig.tenantsSlug || defaults.tenantCollectionSlug)
-    const tenantFieldName = pluginConfig.documentTenantField.name || defaults.tenantFieldName
+    const tenantFieldName = pluginConfig?.tenantField?.name || defaults.tenantFieldName
 
     /**
      * Add tenants array field to users collection
@@ -50,6 +50,33 @@ export const multiTenantPlugin =
       } else if (auth) {
         return true
       }
+    })
+
+    /**
+     * Add defaults for admin properties
+     */
+    if (!incomingConfig.admin?.components) {
+      incomingConfig.admin.components = {
+        actions: [],
+        beforeNavLinks: [],
+        providers: [],
+      }
+    }
+    if (!incomingConfig.admin.components?.providers) {
+      incomingConfig.admin.components.providers = []
+    }
+    if (!incomingConfig.admin.components?.actions) {
+      incomingConfig.admin.components.actions = []
+    }
+    if (!incomingConfig.admin.components?.beforeNavLinks) {
+      incomingConfig.admin.components.beforeNavLinks = []
+    }
+
+    /**
+     * Add TenantSelectionProvider to admin providers
+     */
+    incomingConfig.admin.components.providers.push({
+      path: '@payloadcms/plugin-multi-tenant/client#TenantSelectionProvider',
     })
 
     /**
@@ -87,13 +114,16 @@ export const multiTenantPlugin =
         /**
          * Add tenant field to enabled collections
          */
-        collection.fields.push(
+        collection.fields.splice(
+          0,
+          0,
           tenantField({
-            ...pluginConfig.documentTenantField,
+            ...(pluginConfig?.tenantField || {}),
             name: tenantFieldName,
             debug: pluginConfig.debug,
             tenantsCollectionSlug,
             unique: Boolean(pluginConfig.collections[collection.slug].isGlobal),
+            userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
           }),
         )
 
@@ -132,12 +162,6 @@ export const multiTenantPlugin =
       throw new Error(`Tenants collection not found with slug: ${tenantsCollectionSlug}`)
     }
 
-    if (!incomingConfig.admin?.components) {
-      incomingConfig.admin.components = {
-        actions: [],
-        beforeNavLinks: [],
-      }
-    }
     /**
      * Add global redirect action
      */
@@ -151,9 +175,6 @@ export const multiTenantPlugin =
       })
     }
 
-    if (!incomingConfig.admin.components.beforeNavLinks) {
-      incomingConfig.admin.components.beforeNavLinks = []
-    }
     /**
      * Add tenant selector to admin UI
      */

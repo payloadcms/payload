@@ -31,10 +31,16 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   debug?: boolean
   /**
+   * Enables the multi-tenant plugin
+   *
+   * @default true
+   */
+  enabled?: boolean
+  /**
    * Field configuration for the field added to all tenant enabled collections
    */
-  documentTenantField: {
-    access: RelationshipField['access']
+  tenantField?: {
+    access?: RelationshipField['access']
     /**
      * The name of the field added to all tenant enabled collections
      *
@@ -42,12 +48,6 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
      */
     name?: string
   }
-  /**
-   * Enables the multi-tenant plugin
-   *
-   * @default true
-   */
-  enabled?: boolean
   /**
    * Field configuration for the field added to the users collection
    *

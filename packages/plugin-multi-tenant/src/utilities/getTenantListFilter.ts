@@ -9,14 +9,9 @@ type Args = {
 export const getTenantListFilter = ({ req, tenantFieldName }: Args): null | Where => {
   const selectedTenant = getTenantFromCookie(req.headers, req.payload.db.defaultIDType)
 
-  if (selectedTenant) {
-    return {
-      [tenantFieldName]: {
-        equals: selectedTenant,
-      },
-    }
+  return {
+    [tenantFieldName]: {
+      equals: selectedTenant,
+    },
   }
-
-  // Access control will take it from here
-  return null
 }
