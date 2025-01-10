@@ -6,12 +6,14 @@ import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
+  $getTableAndElementByKey,
   $getTableColumnIndexFromTableCellNode,
   $getTableRowIndexFromTableCellNode,
   $insertTableColumn__EXPERIMENTAL,
   $insertTableRow__EXPERIMENTAL,
   $isTableCellNode,
   $isTableNode,
+  getTableElement,
   TableNode,
 } from '@lexical/table'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
@@ -68,8 +70,7 @@ function TableHoverActionsContainer({
             return
           }
 
-          tableDOMElement = editor.getElementByKey(table?.getKey())
-
+          tableDOMElement = getTableElement(table, editor.getElementByKey(table.getKey()))
           if (tableDOMElement) {
             const rowCount = table.getChildrenSize()
             const colCount =
@@ -154,37 +155,37 @@ function TableHoverActionsContainer({
       editor.registerMutationListener(
         TableNode,
         (mutations) => {
-          editor.getEditorState().read(() => {
-            for (const [key, type] of mutations) {
-              const tableDOMElement = editor.getElementByKey(key)
-
-              switch (type) {
-                case 'created':
-                  tableSetRef.current.add(key)
-                  setShouldListenMouseMove(tableSetRef.current.size > 0)
-                  if (tableDOMElement) {
-                    tableResizeObserver.observe(tableDOMElement)
+          editor.getEditorState().read(
+            () => {
+              let resetObserver = false
+              for (const [key, type] of mutations) {
+                switch (type) {
+                  case 'created': {
+                    tableSetRef.current.add(key)
+                    resetObserver = true
+                    break
                   }
-                  break
-
-                case 'destroyed':
-                  tableSetRef.current.delete(key)
-                  setShouldListenMouseMove(tableSetRef.current.size > 0)
-                  // Reset resize observers
-                  tableResizeObserver.disconnect()
-                  tableSetRef.current.forEach((tableKey: NodeKey) => {
-                    const tableElement = editor.getElementByKey(tableKey)
-                    if (tableElement) {
-                      tableResizeObserver.observe(tableElement)
-                    }
-                  })
-                  break
-
-                default:
-                  break
+                  case 'destroyed': {
+                    tableSetRef.current.delete(key)
+                    resetObserver = true
+                    break
+                  }
+                  default:
+                    break
+                }
               }
-            }
-          })
+              if (resetObserver) {
+                // Reset resize observers
+                tableResizeObserver.disconnect()
+                for (const tableKey of tableSetRef.current) {
+                  const { tableElement } = $getTableAndElementByKey(tableKey)
+                  tableResizeObserver.observe(tableElement)
+                }
+                setShouldListenMouseMove(tableSetRef.current.size > 0)
+              }
+            },
+            { editor },
+          )
         },
         { skipInitialization: false },
       ),
