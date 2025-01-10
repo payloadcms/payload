@@ -33,14 +33,23 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   __cacheBuster: number
   __fields: InlineBlockFields
 
-  constructor({ fields, key }: { fields: InlineBlockFields; key?: NodeKey }) {
+  constructor({
+    cacheBuster,
+    fields,
+    key,
+  }: {
+    cacheBuster?: number
+    fields: InlineBlockFields
+    key?: NodeKey
+  }) {
     super(key)
     this.__fields = fields
-    this.__cacheBuster = 0
+    this.__cacheBuster = cacheBuster || 0
   }
 
   static clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
     return new this({
+      cacheBuster: node.__cacheBuster,
       fields: node.__fields,
       key: node.__key,
     })
