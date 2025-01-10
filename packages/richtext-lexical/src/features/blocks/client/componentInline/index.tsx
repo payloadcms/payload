@@ -46,6 +46,12 @@ import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalD
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
 type Props = {
+  /**
+   * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
+   * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
+   * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
+   */
+  readonly cacheBuster: number
   readonly formData: InlineBlockFields
   readonly nodeKey: string
 }
@@ -66,7 +72,8 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
 export const useInlineBlockComponentContext = () => React.useContext(InlineBlockComponentContext)
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
-  const { formData, nodeKey } = props
+  const { cacheBuster, formData, nodeKey } = props
+
   const [editor] = useLexicalComposerContext()
   const { i18n, t } = useTranslation<object, string>()
   const {
@@ -88,6 +95,10 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
     initialLexicalFormState?.[formData.id]?.formState,
   )
+
+  useEffect(() => {
+    setInitialState(false)
+  }, [cacheBuster])
 
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
@@ -297,7 +308,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       editor.update(() => {
         const node = $getNodeByKey(nodeKey)
         if (node && $isInlineBlockNode(node)) {
-          node.setFields(newData)
+          node.setFields(newData, true)
         }
       })
     },

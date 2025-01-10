@@ -30,15 +30,26 @@ export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObje
 >
 
 export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactElement> {
+  __cacheBuster: number
   __fields: InlineBlockFields
 
-  constructor({ fields, key }: { fields: InlineBlockFields; key?: NodeKey }) {
+  constructor({
+    cacheBuster,
+    fields,
+    key,
+  }: {
+    cacheBuster?: number
+    fields: InlineBlockFields
+    key?: NodeKey
+  }) {
     super(key)
     this.__fields = fields
+    this.__cacheBuster = cacheBuster || 0
   }
 
   static clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
     return new this({
+      cacheBuster: node.__cacheBuster,
       fields: node.__fields,
       key: node.__key,
     })
@@ -92,6 +103,10 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     }
   }
 
+  getCacheBuster(): number {
+    return this.getLatest().__cacheBuster
+  }
+
   getFields(): InlineBlockFields {
     return this.getLatest().__fields
   }
@@ -104,9 +119,12 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return true
   }
 
-  setFields(fields: InlineBlockFields): void {
+  setFields(fields: InlineBlockFields, preventFormStateUpdate?: boolean): void {
     const writable = this.getWritable()
     writable.__fields = fields
+    if (!preventFormStateUpdate) {
+      writable.__cacheBuster++
+    }
   }
 
   updateDOM(): boolean {
