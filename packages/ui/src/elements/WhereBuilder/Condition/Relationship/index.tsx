@@ -16,7 +16,7 @@ import optionsReducer from './optionsReducer.js'
 
 const baseClass = 'condition-value-relationship'
 
-const maxResultsPerRequest = 30
+const maxResultsPerRequest = 50
 
 export const RelationshipField: React.FC<Props> = (props) => {
   const {
@@ -68,6 +68,9 @@ export const RelationshipField: React.FC<Props> = (props) => {
         const query = {
           depth: 0,
           limit: maxResultsPerRequest,
+          select: {
+            [fieldToSearch]: true,
+          },
           where: {
             and: [],
           },
@@ -76,7 +79,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
         if (debouncedSearch) {
           query.where.and.push({
             [fieldToSearch]: {
-              contains: debouncedSearch,
+              like: debouncedSearch,
             },
           })
         }
