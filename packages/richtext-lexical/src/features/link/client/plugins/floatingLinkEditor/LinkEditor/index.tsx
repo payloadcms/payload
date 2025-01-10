@@ -41,6 +41,12 @@ import { $isAutoLinkNode } from '../../../../nodes/AutoLinkNode.js'
 import { $createLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
 
+function preventDefault(
+  event: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLElement>,
+): void {
+  event.preventDefault()
+}
+
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
   const [editor] = useLexicalComposerContext()
   // TO-DO: There are several states that should not be state, because they
@@ -350,12 +356,11 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               <button
                 aria-label="Edit link"
                 className="link-edit"
-                onClick={() => {
+                onClick={(event) => {
+                  event.preventDefault()
                   toggleDrawer()
                 }}
-                onMouseDown={(event) => {
-                  event.preventDefault()
-                }}
+                onMouseDown={preventDefault}
                 tabIndex={0}
                 type="button"
               >
@@ -368,9 +373,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
                   onClick={() => {
                     editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
                   }}
-                  onMouseDown={(event) => {
-                    event.preventDefault()
-                  }}
+                  onMouseDown={preventDefault}
                   tabIndex={0}
                   type="button"
                 >
