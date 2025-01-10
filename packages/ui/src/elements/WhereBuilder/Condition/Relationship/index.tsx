@@ -16,7 +16,7 @@ import optionsReducer from './optionsReducer.js'
 
 const baseClass = 'condition-value-relationship'
 
-const maxResultsPerRequest = 100
+const maxResultsPerRequest = 30
 
 export const RelationshipField: React.FC<Props> = (props) => {
   const {
@@ -39,7 +39,6 @@ export const RelationshipField: React.FC<Props> = (props) => {
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
   const [search, setSearch] = useState('')
   const [errorLoading, setErrorLoading] = useState('')
-  const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
   const { i18n, t } = useTranslation()
 
@@ -108,8 +107,6 @@ export const RelationshipField: React.FC<Props> = (props) => {
           }
         }
       }
-
-      setHasLoadedFirstOptions(true)
     },
     [setOptions, api, collections, debouncedSearch, i18n.language, serverURL, t],
   )
@@ -171,28 +168,6 @@ export const RelationshipField: React.FC<Props> = (props) => {
     return undefined
   }, [hasMany, hasMultipleRelations, value, options])
 
-  const addOptionByID = useCallback(
-    async (id, relation) => {
-      if (!errorLoading && id !== 'null' && id && relation) {
-        const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          setOptions({ docs: [data] }, relation)
-        } else {
-          // eslint-disable-next-line no-console
-          console.error(t('error:loadingDocument', { id }))
-        }
-      }
-    },
-    [i18n, setOptions, api, errorLoading, serverURL, t],
-  )
-
   /**
    * 1. Trigger initial relationship options fetch
    * 2. When search changes, loadRelationOptions will
@@ -222,47 +197,6 @@ export const RelationshipField: React.FC<Props> = (props) => {
       })
     }
   }, [i18n, loadRelationOptions, relationTo])
-
-  /**
-   * Load any options that were not returned
-   * in the first 10 of each relation fetch
-   */
-  useEffect(() => {
-    if (value && hasLoadedFirstOptions) {
-      if (hasMany) {
-        const matchedOptions = findOptionsByValue()
-
-        ;((matchedOptions as Option[]) || []).forEach((option, i) => {
-          if (!option) {
-            if (hasMultipleRelations) {
-              void addOptionByID(value[i].value, value[i].relationTo)
-            } else {
-              void addOptionByID(value[i], relationTo)
-            }
-          }
-        })
-      } else {
-        const matchedOption = findOptionsByValue()
-
-        if (!matchedOption) {
-          if (hasMultipleRelations) {
-            const valueWithRelation = value as ValueWithRelation
-            void addOptionByID(valueWithRelation.value, valueWithRelation.relationTo)
-          } else {
-            void addOptionByID(value, relationTo)
-          }
-        }
-      }
-    }
-  }, [
-    addOptionByID,
-    findOptionsByValue,
-    hasMany,
-    hasMultipleRelations,
-    relationTo,
-    value,
-    hasLoadedFirstOptions,
-  ])
 
   const classes = ['field-type', baseClass, errorLoading && 'error-loading']
     .filter(Boolean)
