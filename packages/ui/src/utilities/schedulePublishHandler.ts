@@ -44,7 +44,7 @@ export const schedulePublishHandler = async ({
 
   try {
     if (deleteID) {
-      await payload.db.deleteOne({
+      await payload.delete({
         collection: 'payload-jobs',
         req,
         where: { id: { equals: deleteID } },
