@@ -100,12 +100,30 @@ export const LinkFeature = createServerFeature<
       (field) => !('name' in field) || field.name !== 'text',
     )
 
+    const linkTypeField = sanitizedFields.find(
+      (field) => 'name' in field && field.name === 'linkType',
+    )
+    const defaultLinkType = linkTypeField
+      ? 'defaultValue' in linkTypeField && typeof linkTypeField.defaultValue === 'string'
+        ? linkTypeField.defaultValue
+        : 'custom'
+      : undefined
+
+    const linkURLField = sanitizedFields.find((field) => 'name' in field && field.name === 'url')
+    const defaultLinkURL = linkURLField
+      ? 'defaultValue' in linkURLField && typeof linkURLField.defaultValue === 'string'
+        ? linkURLField.defaultValue
+        : 'https://'
+      : undefined
+
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#LinkFeatureClient',
       clientFeatureProps: {
+        defaultLinkType,
+        defaultLinkURL,
         disabledCollections: props.disabledCollections,
         enabledCollections: props.enabledCollections,
-      } as ExclusiveLinkCollectionsProps,
+      } as ClientProps,
       generateSchemaMap: () => {
         if (!sanitizedFields || !Array.isArray(sanitizedFields) || sanitizedFields.length === 0) {
           return null
