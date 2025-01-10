@@ -31,6 +31,7 @@ export { default as Submit } from '../../admin/components/forms/Submit'
 export { default as FormSubmit } from '../../admin/components/forms/Submit'
 export { fieldTypes } from '../../admin/components/forms/field-types'
 export { default as Checkbox } from '../../admin/components/forms/field-types/Checkbox'
+export { CheckboxInput } from '../../admin/components/forms/field-types/Checkbox/Input'
 
 export { default as Collapsible } from '../../admin/components/forms/field-types/Collapsible'
 export { default as Date } from '../../admin/components/forms/field-types/DateTime'
