@@ -39,13 +39,18 @@ import './index.scss'
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 type Props = {
-  readonly children?: React.ReactNode
+  /**
+   * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
+   * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
+   * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
+   */
+  readonly cacheBuster: number
   readonly formData: BlockFields
   readonly nodeKey: string
 }
 
 export const BlockComponent: React.FC<Props> = (props) => {
-  const { formData, nodeKey } = props
+  const { cacheBuster, formData, nodeKey } = props
   const submitted = useFormSubmitted()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const {
@@ -91,6 +96,10 @@ export const BlockComponent: React.FC<Props> = (props) => {
         }
       : false,
   )
+
+  useEffect(() => {
+    setInitialState(false)
+  }, [cacheBuster])
 
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
@@ -214,7 +223,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           if (node && $isBlockNode(node)) {
             const newData = newFormStateData
             newData.blockType = formData.blockType
-            node.setFields(newData)
+            node.setFields(newData, true)
           }
         })
       }, 0)
@@ -484,7 +493,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           editor.update(() => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isBlockNode(node)) {
-              node.setFields(newData)
+              node.setFields(newData, true)
             }
           })
           toggleDrawer()

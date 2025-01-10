@@ -35,7 +35,13 @@ export class BlockNode extends ServerBlockNode {
   }
 
   decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
-    return <BlockComponent formData={this.getFields()} nodeKey={this.getKey()} />
+    return (
+      <BlockComponent
+        cacheBuster={this.getCacheBuster()}
+        formData={this.getFields()}
+        nodeKey={this.getKey()}
+      />
+    )
   }
 
   exportJSON(): SerializedBlockNode {
