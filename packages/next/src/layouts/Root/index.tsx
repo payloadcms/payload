@@ -54,7 +54,7 @@ export const RootLayout = async ({
 
   const payload = await getPayload({ config, importMap })
 
-  const { i18n, permissions, user } = await initReq(config)
+  const { i18n, permissions, req, user } = await initReq(config)
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
@@ -92,9 +92,10 @@ export const RootLayout = async ({
     importMap,
   })
 
+  req.user = user
+
   const locale = await getRequestLocale({
-    payload,
-    user,
+    req,
   })
 
   return (
