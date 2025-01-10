@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, PaginatedDocs, Where } from 'payload'
+import type { ClientCollectionConfig, PaginatedDocs } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
@@ -16,7 +16,7 @@ import optionsReducer from './optionsReducer.js'
 
 const baseClass = 'condition-value-relationship'
 
-const maxResultsPerRequest = 10
+const maxResultsPerRequest = 100
 
 export const RelationshipField: React.FC<Props> = (props) => {
   const {
@@ -42,20 +42,11 @@ export const RelationshipField: React.FC<Props> = (props) => {
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
   const { i18n, t } = useTranslation()
-  const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
-  const initialRelationMap = () => {
-    const map: Map<string, number> = new Map()
-    relationSlugs.forEach((relation) => {
-      map.set(relation, 1)
-    })
-    return map
-  }
-  const nextPageByRelationshipRef = React.useRef<Map<string, number>>(initialRelationMap())
-  const partiallyLoadedRelationshipSlugs = React.useRef<string[]>(relationSlugs)
 
-  const addOptions = useCallback(
+  const setOptions = useCallback(
     (data, relation) => {
       const collection = getEntityConfig({ collectionSlug: relation }) as ClientCollectionConfig
+      dispatchOptions({ type: 'CLEAR', i18n, required: false })
       dispatchOptions({ type: 'ADD', collection, data, hasMultipleRelations, i18n, relation })
     },
     [hasMultipleRelations, i18n, getEntityConfig],
@@ -69,17 +60,15 @@ export const RelationshipField: React.FC<Props> = (props) => {
       abortController: AbortController
       relationSlug: string
     }) => {
-      if (relationSlug && partiallyLoadedRelationshipSlugs.current.includes(relationSlug)) {
+      if (relationSlug) {
         const collection = getEntityConfig({
           collectionSlug: relationSlug,
         }) as ClientCollectionConfig
         const fieldToSearch = collection?.admin?.useAsTitle || 'id'
-        const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
         const query = {
           depth: 0,
           limit: maxResultsPerRequest,
-          page: pageIndex,
           where: {
             and: [],
           },
@@ -108,18 +97,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
           if (response.ok) {
             const data: PaginatedDocs = await response.json()
             if (data.docs.length > 0) {
-              addOptions(data, relationSlug)
-
-              if (!debouncedSearch) {
-                if (data.nextPage) {
-                  nextPageByRelationshipRef.current.set(relationSlug, data.nextPage)
-                } else {
-                  partiallyLoadedRelationshipSlugs.current =
-                    partiallyLoadedRelationshipSlugs.current.filter(
-                      (partiallyLoadedRelation) => partiallyLoadedRelation !== relationSlug,
-                    )
-                }
-              }
+              setOptions(data, relationSlug)
             }
           } else {
             setErrorLoading(t('error:unspecific'))
@@ -133,18 +111,8 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
       setHasLoadedFirstOptions(true)
     },
-    [addOptions, api, collections, debouncedSearch, i18n.language, serverURL, t],
+    [setOptions, api, collections, debouncedSearch, i18n.language, serverURL, t],
   )
-
-  const loadMoreOptions = React.useCallback(() => {
-    if (partiallyLoadedRelationshipSlugs.current.length > 0) {
-      const abortController = new AbortController()
-      void loadRelationOptions({
-        abortController,
-        relationSlug: partiallyLoadedRelationshipSlugs.current[0],
-      })
-    }
-  }, [loadRelationOptions])
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -215,14 +183,14 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
         if (response.ok) {
           const data = await response.json()
-          addOptions({ docs: [data] }, relation)
+          setOptions({ docs: [data] }, relation)
         } else {
           // eslint-disable-next-line no-console
           console.error(t('error:loadingDocument', { id }))
         }
       }
     },
-    [i18n, addOptions, api, errorLoading, serverURL, t],
+    [i18n, setOptions, api, errorLoading, serverURL, t],
   )
 
   /**
@@ -339,7 +307,6 @@ export const RelationshipField: React.FC<Props> = (props) => {
             }
           }}
           onInputChange={setSearch}
-          onMenuScrollToBottom={loadMoreOptions}
           options={options}
           placeholder={t('general:selectValue')}
           value={valueToRender}
