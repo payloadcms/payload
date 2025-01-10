@@ -208,15 +208,6 @@ export const RelationshipField: React.FC<Props> = (props) => {
     return undefined
   }, [hasMany, hasMultipleRelations, value, options])
 
-  const handleInputChange = useCallback(
-    (newSearch) => {
-      if (search !== newSearch) {
-        setSearch(newSearch)
-      }
-    },
-    [search],
-  )
-
   const addOptionByID = useCallback(
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
@@ -352,7 +343,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
               onChange(selected?.value)
             }
           }}
-          onInputChange={handleInputChange}
+          onInputChange={setSearch}
           onMenuScrollToBottom={loadMoreOptions}
           options={options}
           placeholder={t('general:selectValue')}
