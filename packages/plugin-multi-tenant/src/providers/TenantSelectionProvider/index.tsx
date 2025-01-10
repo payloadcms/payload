@@ -3,14 +3,20 @@
 import { useRouter } from 'next/navigation.js'
 import React, { createContext } from 'react'
 
+import { SELECT_ALL } from '../../constants.js'
+
 type ContextType = {
+  options: { label: string; value: string }[]
   selectedTenantID: number | string | undefined
+  setOptions?: (options: { label: string; value: string }[]) => void
   setRefreshOnChange?: (refresh: boolean) => void
   setTenant: (id: number | string, from: 'cookie' | 'document', refresh?: boolean) => void
 }
 
 const Context = createContext<ContextType>({
+  options: [],
   selectedTenantID: undefined,
+  setOptions: () => null,
   setRefreshOnChange: () => null,
   setTenant: () => null,
 })
@@ -23,6 +29,7 @@ export const TenantSelectionProvider = ({ children }) => {
     undefined,
   )
   const [refreshOnChange, setRefreshOnChange] = React.useState<boolean>(true)
+  const [options, setOptions] = React.useState<{ label: string; value: string }[]>([])
 
   const router = useRouter()
 
@@ -36,9 +43,14 @@ export const TenantSelectionProvider = ({ children }) => {
       if (from === 'cookie' && tenantSelectionFrom === 'document') {
         return
       }
-      setSelectedTenantID(id)
       setTenantSelectionFrom(from)
-      setCookie(String(id))
+      if (id) {
+        setSelectedTenantID(id)
+        setCookie(String(id))
+      } else {
+        setSelectedTenantID(SELECT_ALL)
+        setCookie(SELECT_ALL)
+      }
       if (refresh && refreshOnChange) {
         router.refresh()
       }
@@ -54,7 +66,9 @@ export const TenantSelectionProvider = ({ children }) => {
   )
 
   return (
-    <Context.Provider value={{ selectedTenantID, setRefreshOnChange, setTenant }}>
+    <Context.Provider
+      value={{ options, selectedTenantID, setOptions, setRefreshOnChange, setTenant }}
+    >
       {children}
     </Context.Provider>
   )

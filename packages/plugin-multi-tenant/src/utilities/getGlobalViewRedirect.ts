@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 import { headers as getHeaders } from 'next/headers.js'
 
+import { SELECT_ALL } from '../constants.js'
 import { getTenantFromCookie } from './getTenantFromCookie.js'
 
 type Args = {
@@ -28,11 +29,14 @@ export async function getGlobalViewRedirect({
         collection: slug,
         depth: 0,
         limit: 1,
-        where: {
-          [tenantFieldName]: {
-            equals: tenant,
-          },
-        },
+        where:
+          tenant === SELECT_ALL
+            ? {}
+            : {
+                [tenantFieldName]: {
+                  equals: tenant,
+                },
+              },
       })
 
       const tenantDocID = docs?.[0]?.id

@@ -4,8 +4,9 @@ import type { ReactSelectOption } from '@payloadcms/ui'
 import { SelectInput } from '@payloadcms/ui'
 import React from 'react'
 
-import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.js'
+import { SELECT_ALL } from '../../constants.js'
 import './index.scss'
+import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.js'
 
 export const TenantSelectorClient = ({
   initialValue,
@@ -17,12 +18,14 @@ export const TenantSelectorClient = ({
     value: string
   }[]
 }) => {
-  const { selectedTenantID, setTenant } = useTenantSelection()
+  const { selectedTenantID, setOptions, setTenant } = useTenantSelection()
 
   const handleChange = React.useCallback(
     (option: ReactSelectOption | ReactSelectOption[]) => {
-      if ('value' in option) {
+      if (option && 'value' in option) {
         setTenant(option.value as string, 'document', true)
+      } else {
+        setTenant(undefined, 'document', true)
       }
     },
     [setTenant],
@@ -35,6 +38,10 @@ export const TenantSelectorClient = ({
     }
   }, [initialValue, setTenant, selectedTenantID])
 
+  React.useEffect(() => {
+    setOptions(options)
+  }, [options, setOptions])
+
   if (options.length <= 1) {
     return null
   }
@@ -42,14 +49,20 @@ export const TenantSelectorClient = ({
   return (
     <div className="tenant-selector">
       <SelectInput
-        isClearable={false}
+        // isClearable={false}
         label="Tenant"
         name="setTenant"
         onChange={handleChange}
         options={options}
         path="setTenant"
         // readOnly={!value}
-        value={selectedTenantID ? String(selectedTenantID) : undefined}
+        value={
+          selectedTenantID
+            ? selectedTenantID === SELECT_ALL
+              ? undefined
+              : String(selectedTenantID)
+            : undefined
+        }
       />
     </div>
   )

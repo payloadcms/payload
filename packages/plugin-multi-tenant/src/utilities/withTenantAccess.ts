@@ -13,16 +13,15 @@ type Args = {
 export const withTenantAccess =
   ({ accessFunction, fieldName, userHasAccessToAllTenants }: Args) =>
   async (args: AccessArgs): Promise<AccessResult> => {
-    let accessResult: AccessResult = true
     const constraints = []
+    const accessFn =
+      typeof accessFunction === 'function' ? accessFunction : ({ req }) => Boolean(req.user)
+    const accessResult: AccessResult = await accessFn(args)
 
-    if (typeof accessFunction === 'function') {
-      accessResult = await accessFunction(args)
-      if (accessResult === false) {
-        return false
-      } else if (accessResult && typeof accessResult === 'object') {
-        constraints.push(accessResult)
-      }
+    if (accessResult === false) {
+      return false
+    } else if (accessResult && typeof accessResult === 'object') {
+      constraints.push(accessResult)
     }
 
     if (args.req.user && !userHasAccessToAllTenants(args.req.user)) {

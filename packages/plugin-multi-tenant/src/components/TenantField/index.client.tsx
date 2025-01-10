@@ -6,6 +6,7 @@ import { RelationshipField, useField } from '@payloadcms/ui'
 import React from 'react'
 
 import './index.scss'
+import { SELECT_ALL } from '../../constants.js'
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.js'
 
 const baseClass = 'tenantField'
@@ -18,17 +19,19 @@ type Props = {
 export const TenantField = (args: Props) => {
   const { debug, path, unique } = args
   const { setValue, value } = useField<number | string>({ path })
-  const { selectedTenantID, setRefreshOnChange, setTenant } = useTenantSelection()
+  const { options, selectedTenantID, setRefreshOnChange, setTenant } = useTenantSelection()
 
   React.useEffect(() => {
     if (!selectedTenantID && value) {
       // Initialize the tenant selector with the field value
       setTenant(value, 'document')
+    } else if (selectedTenantID && selectedTenantID === SELECT_ALL) {
+      setTenant(options?.[0].value, 'document')
     } else if ((!value || value !== selectedTenantID) && selectedTenantID) {
       // Update the field value when the tenant is changed
       setValue(selectedTenantID)
     }
-  }, [value, selectedTenantID, setTenant, setValue])
+  }, [value, selectedTenantID, setTenant, setValue, options])
 
   React.useEffect(() => {
     if (!unique) {
