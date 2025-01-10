@@ -1,4 +1,3 @@
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -25,23 +24,7 @@ export default buildConfigWithDefaults({
     // ...add more globals here
     MenuGlobal,
   ],
-  db: mongooseAdapter({
-    url: 'mongodb://127.0.0.1/payloadtests',
-    connectOptions: {
-      dbName: 'payload-1',
-      useFacet: false, // not supported in DocumentDB
-    },
-    disableIndexHints: true, // not supported in DocumentDB
-    autoPluralization: false,
-  }),
   onInit: async (payload) => {
-    // delete all users
-    await payload.delete({
-      collection: 'users',
-      where: {},
-    })
-
-    // Create dev user
     await payload.create({
       collection: 'users',
       data: {
@@ -50,20 +33,12 @@ export default buildConfigWithDefaults({
       },
     })
 
-    // Create 100 users
-    const userPromises = Array.from({ length: 100 }, (_, i) => {
-      const index = (i + 1).toString().padStart(3, '0')
-      return payload.create({
-        collection: 'users',
-        data: {
-          id: index,
-          email: `user${index}@example.com`,
-          password: 'password',
-        },
-      })
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'example post',
+      },
     })
-
-    await Promise.all([...userPromises])
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

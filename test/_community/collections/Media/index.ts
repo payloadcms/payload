@@ -8,13 +8,7 @@ export const MediaCollection: CollectionConfig = {
     create: () => true,
     read: () => true,
   },
-  fields: [
-    {
-      name: 'user',
-      type: 'relationship',
-      relationTo: 'users',
-    },
-  ],
+  fields: [],
   upload: {
     crop: true,
     focalPoint: true,
