@@ -28,7 +28,7 @@ const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/
 const TAG_START_REGEX = /^[ \t]*<[a-z_][\w-]*(?:\s[^<>]*)?\/?>/i
 const TAG_END_REGEX = /^[ \t]*<\/[a-z_][\w-]*\s*>/i
 
-export function normalizeMarkdown(input: string, shouldMergeAdjacentLines = false): string {
+export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boolean): string {
   const lines = input.split('\n')
   let inCodeBlock = false
   const sanitizedLines: string[] = []
@@ -102,7 +102,7 @@ export function $convertFromMarkdownString(
   transformers: Array<Transformer> = TRANSFORMERS,
   node?: ElementNode,
   shouldPreserveNewLines = false,
-  shouldMergeAdjacentLines = true, // Changed from false to true here
+  shouldMergeAdjacentLines = true,
 ): void {
   const sanitizedMarkdown = shouldPreserveNewLines
     ? markdown

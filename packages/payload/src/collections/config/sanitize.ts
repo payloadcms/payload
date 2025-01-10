@@ -13,6 +13,7 @@ import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { validateUseAsTitle } from './useAsTitle.js'
@@ -54,6 +55,16 @@ export const sanitizeCollection = async (
     richTextSanitizationPromises,
     validRelationships,
   })
+
+  if (sanitized.endpoints !== false) {
+    if (!sanitized.endpoints) {
+      sanitized.endpoints = []
+    }
+
+    for (const endpoint of defaultCollectionEndpoints) {
+      sanitized.endpoints.push(endpoint)
+    }
+  }
 
   if (sanitized.timestamps !== false) {
     // add default timestamps fields only as needed

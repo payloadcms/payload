@@ -8,7 +8,15 @@ import type {
 } from 'payload'
 
 import * as qs from 'qs-esm'
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
@@ -16,7 +24,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { useConfig } from '../Config/index.js'
-import { useLocale } from '../Locale/index.js'
+import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
@@ -113,10 +121,14 @@ const DocumentInfo: React.FC<
     setUploadStatus(status)
   }, [])
 
-  const isInitializing = initialState === undefined || initialData === undefined
-
   const { getPreference, setPreference } = usePreferences()
   const { code: locale } = useLocale()
+  const { localeIsLoading } = useLocaleLoading()
+
+  const isInitializing = useMemo(
+    () => initialState === undefined || initialData === undefined || localeIsLoading,
+    [initialData, initialState, localeIsLoading],
+  )
 
   const baseURL = `${serverURL}${api}`
   let slug: string
