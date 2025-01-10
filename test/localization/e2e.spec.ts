@@ -120,63 +120,6 @@ describe('Localization', () => {
       await expect(tagName).not.toBe('BUTTON')
       await expect(tagName).toBe('DIV')
     })
-
-    test('should not render default locale in locale selector when prefs are not default', async () => {
-      // change prefs to spanish, then load page and check that the localizer label does not say English
-      await upsertPrefs<Config, GeneratedTypes<any>>({
-        payload,
-        user: client.user,
-        key: 'locale',
-        value: 'es',
-      })
-
-      await page.goto(url.list)
-
-      const localeLabel = await page
-        .locator('.localizer.app-header__localizer .localizer-button__current-label')
-        .innerText()
-
-      expect(localeLabel).not.toEqual('English')
-    })
-  })
-
-  describe('locale change', () => {
-    afterEach(async () => {
-      await throttleTest({
-        page,
-        context,
-        delay: 'None',
-      })
-    })
-
-    test('should disable fields during locale change', async () => {
-      await changeLocale(page, defaultLocale)
-      await page.goto(url.create)
-      await expect(page.locator('#field-title')).toBeEnabled()
-
-      // only throttle test after initial load to avoid timeouts
-      await throttleTest({
-        page,
-        context,
-        delay: 'Fast 4G',
-      })
-
-      await openLocaleSelector(page)
-
-      const localeToSelect = page
-        .locator('.localizer .popup.popup--active .popup-button-list__button')
-        .locator('.localizer__locale-code', {
-          hasText: `(${spanishLocale})`,
-        })
-
-      await localeToSelect.click()
-      await expect(page.locator('#field-title')).toBeDisabled()
-
-      const regexPattern = new RegExp(`locale=${spanishLocale}`)
-      await expect(page).toHaveURL(regexPattern)
-      await expect(page.locator('#field-title')).toBeEnabled()
-      await closeLocaleSelector(page)
-    })
   })
 
   describe('localized text', () => {
@@ -334,15 +277,31 @@ describe('Localization', () => {
   })
 
   describe('locale preference', () => {
-    test('ensure preference is used when query param is not', async () => {
+    test('should set preference on locale change and use preference no locale param is present', async () => {
       await page.goto(url.create)
       await changeLocale(page, spanishLocale)
       await expect(page.locator('#field-title')).toBeEmpty()
       await fillValues({ title: spanishTitle })
       await saveDocAndAssert(page)
-      await page.goto(url.admin)
       await page.goto(url.list)
       await expect(page.locator('.row-1 .cell-title')).toContainText(spanishTitle)
+    })
+
+    test('should not render default locale in locale selector when prefs are not default', async () => {
+      await upsertPrefs<Config, GeneratedTypes<any>>({
+        payload,
+        user: client.user,
+        key: 'locale',
+        value: 'es',
+      })
+
+      await page.goto(url.list)
+
+      const localeLabel = await page
+        .locator('.localizer.app-header__localizer .localizer-button__current-label')
+        .innerText()
+
+      expect(localeLabel).not.toEqual('English')
     })
   })
 
@@ -381,6 +340,7 @@ describe('Localization', () => {
       await setToLocale(page, 'Spanish')
       await runCopy(page)
       await expect(page.locator('#field-title')).toHaveValue(title)
+      await changeLocale(page, defaultLocale)
     })
 
     test('should copy rich text data to correct locale', async () => {
@@ -453,14 +413,13 @@ describe('Localization', () => {
       await fillValues({ title: spanishTitle })
       await saveDocAndAssert(page)
       await changeLocale(page, defaultLocale)
-
       await openCopyToLocaleDrawer(page)
       await setToLocale(page, 'Spanish')
       const overwriteCheckbox = page.locator('#field-overwriteExisting')
       await overwriteCheckbox.click()
       await runCopy(page)
-
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
+      await changeLocale(page, defaultLocale)
     })
 
     test('should not include current locale in toLocale options', async () => {
@@ -507,6 +466,46 @@ describe('Localization', () => {
       await copyButton.click()
 
       await expect(page.locator('.payload-toast-container')).toContainText('unsaved')
+    })
+  })
+
+  describe('locale change', () => {
+    test('should disable fields during locale change', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, defaultLocale)
+      await expect(page.locator('#field-title')).toBeEnabled()
+
+      await openLocaleSelector(page)
+
+      const localeToSelect = page
+        .locator('.localizer .popup.popup--active .popup-button-list__button')
+        .locator('.localizer__locale-code', {
+          hasText: `${spanishLocale}`,
+        })
+
+      // only throttle test after initial load to avoid timeouts
+      const cdpSession = await throttleTest({
+        page: page,
+        context,
+        delay: 'Fast 4G',
+      })
+
+      await localeToSelect.click()
+      await expect(page.locator('#field-title')).toBeDisabled()
+
+      const regexPattern = new RegExp(`locale=${spanishLocale}`)
+      await expect(page).toHaveURL(regexPattern)
+      await expect(page.locator('#field-title')).toBeEnabled()
+      await closeLocaleSelector(page)
+
+      await cdpSession.send('Network.emulateNetworkConditions', {
+        offline: false,
+        latency: 0,
+        downloadThroughput: -1,
+        uploadThroughput: -1,
+      })
+
+      await cdpSession.detach()
     })
   })
 })

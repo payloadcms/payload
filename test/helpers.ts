@@ -1,4 +1,10 @@
-import type { BrowserContext, ChromiumBrowserContext, Locator, Page } from '@playwright/test'
+import type {
+  BrowserContext,
+  CDPSession,
+  ChromiumBrowserContext,
+  Locator,
+  Page,
+} from '@playwright/test'
 import type { Config } from 'payload'
 
 import { formatAdminURL } from '@payloadcms/ui/shared'
@@ -139,7 +145,7 @@ export async function throttleTest({
   context: BrowserContext
   delay: keyof typeof networkConditions
   page: Page
-}) {
+}): Promise<CDPSession> {
   const cdpSession = await context.newCDPSession(page)
 
   await cdpSession.send('Network.emulateNetworkConditions', {
@@ -156,6 +162,8 @@ export async function throttleTest({
 
   const client = await (page.context() as ChromiumBrowserContext).newCDPSession(page)
   await client.send('Emulation.setCPUThrottlingRate', { rate: 8 }) // 8x slowdown
+
+  return client
 }
 
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
