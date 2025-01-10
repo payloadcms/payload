@@ -5,11 +5,10 @@ import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { getPayload, parseCookies } from 'payload'
+import { getPayload, getRequestLanguage, parseCookies } from 'payload'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { getRequestLocale } from '../../utilities/getRequestLocale.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -55,7 +54,7 @@ export const RootLayout = async ({
 
   const payload = await getPayload({ config, importMap })
 
-  const { i18n, permissions, user } = await initReq(config)
+  const { i18n, permissions, req, user } = await initReq(config)
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
@@ -93,9 +92,10 @@ export const RootLayout = async ({
     importMap,
   })
 
+  req.user = user
+
   const locale = await getRequestLocale({
-    payload,
-    user,
+    req,
   })
 
   return (

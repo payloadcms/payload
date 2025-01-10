@@ -3,6 +3,7 @@ import type {
   ClientCollectionConfig,
   ClientConfig,
   ErrorResult,
+  ListPreferences,
   PaginatedDocs,
   SanitizedCollectionConfig,
 } from 'payload'
@@ -11,7 +12,6 @@ import { formatErrors } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { Column } from '../elements/Table/index.js'
-import type { ListPreferences } from '../elements/TableColumns/index.js'
 
 import { getClientConfig } from './getClientConfig.js'
 import { renderFilters, renderTable } from './renderTable.js'
@@ -142,7 +142,7 @@ export const buildTableState = async (
     value: {
       columns,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      sort: query?.sort,
+      sort: query?.sort as string,
     },
   })
 
