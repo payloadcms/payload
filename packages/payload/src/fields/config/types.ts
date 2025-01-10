@@ -219,7 +219,9 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
   /** The `payload` object to interface with the payload API */
   req: PayloadRequest
   /**
-   * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
+   * Similar to `data`, but scoped to only fields within the same parent of this field.
+   * For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
+   * On top-level fields, `siblingData` is the same as `data`.
    */
   siblingData?: Partial<TSiblingData>
 }) => boolean | Promise<boolean>

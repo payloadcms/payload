@@ -159,7 +159,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
-      hasPermission = await field.access.read({ doc: fullData, req, siblingData: data })
+      hasPermission = await field.access.read({ id, doc: fullData, req, siblingData: data })
     } else {
       hasPermission = true
     }
