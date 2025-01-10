@@ -42,7 +42,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   duplicateRow,
   fieldTypes,
   fields,
-  forceRender = false,
+  forceRender,
   hasMaxRows,
   indexPath,
   isSortable,

@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload/dist/collections/config/types'
 
-import { customIdCollectionSlug } from '../slugs'
-
 export const CustomIdTab: CollectionConfig = {
   slug: 'customIdTab',
   labels: {

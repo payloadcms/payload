@@ -1,17 +1,19 @@
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { CustomIdRow } from './collections/CustomIdRow'
+import { CustomIdTab } from './collections/CustomIdTab'
 import { CustomViews1 } from './collections/CustomViews1'
 import { CustomViews2 } from './collections/CustomViews2'
+import { CollectionForceRender } from './collections/ForceRender'
 import { Geo } from './collections/Geo'
 import { CollectionGroup1A } from './collections/Group1A'
 import { CollectionGroup1B } from './collections/Group1B'
 import { CollectionGroup2A } from './collections/Group2A'
 import { CollectionGroup2B } from './collections/Group2B'
 import { CollectionHidden } from './collections/Hidden'
-import { CustomIdTab } from './collections/CustomIdTab'
-import { CustomIdRow } from './collections/CustomIdRow'
 import { CollectionNoApiView } from './collections/NoApiView'
+import { CollectionNoForceRender } from './collections/NoForceRender'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
 import AdminButton from './components/AdminButton'
@@ -25,11 +27,13 @@ import CustomView from './components/views/CustomView'
 import CustomNestedView from './components/views/CustomViewNested'
 import { CustomGlobalViews1 } from './globals/CustomViews1'
 import { CustomGlobalViews2 } from './globals/CustomViews2'
+import { GlobalForceRender } from './globals/ForceRender'
 import { Global } from './globals/Global'
 import { GlobalGroup1A } from './globals/Group1A'
 import { GlobalGroup1B } from './globals/Group1B'
 import { GlobalHidden } from './globals/Hidden'
 import { GlobalNoApiView } from './globals/NoApiView'
+import { GlobalNoForceRender } from './globals/NoForceRender'
 import { clearAndSeedEverything } from './seed'
 import { customNestedViewPath, customViewPath } from './shared'
 
@@ -120,6 +124,8 @@ export default buildConfigWithDefaults({
     Geo,
     CustomIdTab,
     CustomIdRow,
+    CollectionForceRender,
+    CollectionNoForceRender,
   ],
   globals: [
     GlobalHidden,
@@ -129,6 +135,8 @@ export default buildConfigWithDefaults({
     CustomGlobalViews2,
     GlobalGroup1A,
     GlobalGroup1B,
+    GlobalForceRender,
+    GlobalNoForceRender,
   ],
   onInit: async (payload) => {
     await clearAndSeedEverything(payload)

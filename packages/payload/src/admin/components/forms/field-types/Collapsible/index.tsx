@@ -24,6 +24,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
     admin: { className, description, initCollapsed, readOnly },
     fieldTypes,
     fields,
+    forceRender = false,
     indexPath,
     label,
     path,
@@ -125,7 +126,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
             path: createNestedFieldPath(path, field),
           }))}
           fieldTypes={fieldTypes}
-          forceRender
+          forceRender={forceRender}
           indexPath={indexPath}
           margins="small"
           permissions={permissions}

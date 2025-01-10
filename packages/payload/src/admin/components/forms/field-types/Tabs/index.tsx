@@ -72,8 +72,7 @@ const TabsField: React.FC<Props> = (props) => {
   const {
     admin: { className, readOnly },
     fieldTypes,
-    forceRender: forceRenderFromProps = false,
-    forceRenderAllFields,
+    forceRender = false,
     indexPath,
     path,
     permissions,
@@ -87,7 +86,6 @@ const TabsField: React.FC<Props> = (props) => {
   const { withinCollapsible } = useCollapsible()
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
   const tabsPrefKey = `tabs-${indexPath}`
-  const forceRender = forceRenderFromProps || forceRenderAllFields
 
   useEffect(() => {
     if (preferencesKey) {

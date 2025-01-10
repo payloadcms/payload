@@ -16,14 +16,11 @@ const Row: React.FC<Props> = (props) => {
     admin: { className, readOnly },
     fieldTypes,
     fields,
-    forceRender: forceRenderFromProps = false,
-    forceRenderAllFields,
+    forceRender = false,
     indexPath,
     path,
     permissions,
   } = props
-
-  const forceRender = forceRenderFromProps || forceRenderAllFields
 
   return (
     <RowProvider>
