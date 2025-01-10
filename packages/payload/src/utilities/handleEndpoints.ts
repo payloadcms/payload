@@ -12,13 +12,15 @@ import { routeError } from './routeError.js'
 
 const notFoundResponse = (req: PayloadRequest) => {
   return Response.json(
-    {},
+    {
+      message: `Route not found "${new URL(req.url).pathname}"`,
+    },
     {
       headers: headersWithCors({
         headers: new Headers(),
         req,
       }),
-      status: 200,
+      status: httpStatus.NOT_FOUND,
     },
   )
 }

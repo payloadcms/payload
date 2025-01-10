@@ -43,7 +43,7 @@ export const defaultCollectionEndpoints: Endpoint[] = [
     {
       handler: docAccessHandler,
       method: 'post',
-      path: '/access/:id',
+      path: '/access/:id?',
     },
     {
       handler: duplicateHandler,
