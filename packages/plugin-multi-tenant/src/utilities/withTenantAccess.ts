@@ -24,7 +24,8 @@ export const withTenantAccess =
         constraints.push(accessResult)
       }
     }
-    if (!userHasAccessToAllTenants(args.req.user)) {
+
+    if (args.req.user && !userHasAccessToAllTenants(args.req.user)) {
       constraints.push(
         getTenantAccess({
           fieldName,
