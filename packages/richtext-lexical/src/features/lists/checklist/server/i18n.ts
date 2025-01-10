@@ -25,6 +25,9 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Lista de comprobación',
   },
+  et: {
+    label: '',
+  },
   fa: {
     label: 'لیست بررسی',
   },
@@ -78,6 +81,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sk: {
     label: 'Kontrolný zoznam',
+  },
+  sl: {
+    label: 'Nimekiri',
   },
   sv: {
     label: 'Kontrollista',

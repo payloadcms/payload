@@ -172,8 +172,11 @@ export type TextMatchTransformer = Readonly<{
   regExp: RegExp
   /**
    * Determines how the matched markdown text should be transformed into a node during the markdown import process
+   *
+   * @returns nothing, or a TextNode that may be a child of the new node that is created.
+   * If a TextNode is returned, text format matching will be applied to it (e.g. bold, italic, etc.)
    */
-  replace?: (node: TextNode, match: RegExpMatchArray) => void
+  replace?: (node: TextNode, match: RegExpMatchArray) => TextNode | void
   /**
    * Single character that allows the transformer to trigger when typed in the editor. This does not affect markdown imports outside of the markdown shortcut plugin.
    * If the trigger is matched, the `regExp` will be used to match the text in the second step.

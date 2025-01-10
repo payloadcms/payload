@@ -55,12 +55,6 @@ const RelationshipButtonComponent: React.FC<Props> = ({ enabledCollectionSlugs }
     [editor, closeDrawer],
   )
 
-  useEffect(() => {
-    // always reset back to first option
-    // TODO: this is not working, see the ListDrawer component
-    setSelectedCollectionSlug(enabledCollectionSlugs[0])
-  }, [isDrawerOpen, enabledCollectionSlugs])
-
   return (
     <Fragment>
       <ListDrawerToggler>

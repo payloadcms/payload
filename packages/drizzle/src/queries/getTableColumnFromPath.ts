@@ -358,7 +358,7 @@ export const getTableColumnFromPath = ({
         const newCollectionPath = pathSegments.slice(1).join('.')
 
         if (Array.isArray(field.relationTo) || field.hasMany) {
-          let relationshipFields
+          let relationshipFields: FlattenedField[]
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
           const {
             newAliasTable: aliasRelationshipTable,
@@ -405,7 +405,7 @@ export const getTableColumnFromPath = ({
             newTableName = adapter.tableNameMap.get(toSnakeCase(relationshipConfig.slug))
 
             // parent to relationship join table
-            relationshipFields = relationshipConfig.fields
+            relationshipFields = relationshipConfig.flattenedFields
             ;({ newAliasTable } = getTableAlias({ adapter, tableName: newTableName }))
 
             joins.push({

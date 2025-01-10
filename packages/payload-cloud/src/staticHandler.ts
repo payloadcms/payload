@@ -68,6 +68,27 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         status: 200,
       })
     } catch (err: unknown) {
+      /**
+       * If object key does not found, the getObject function attempts a ListBucket operation.
+       * Because of permissions, this will throw very specific error that we can catch and handle.
+       */
+      if (
+        err instanceof Error &&
+        err.name === 'AccessDenied' &&
+        err.message?.includes('s3:ListBucket') &&
+        'type' in err &&
+        err.type === 'S3ServiceException'
+      ) {
+        req.payload.logger.error({
+          collectionSlug: collection.slug,
+          err,
+          msg: `Requested file not found in cloud storage: ${params.filename}`,
+          params,
+          requestedKey: key,
+        })
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
+
       req.payload.logger.error({
         collectionSlug: collection.slug,
         err,

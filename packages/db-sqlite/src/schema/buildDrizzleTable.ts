@@ -59,9 +59,8 @@ export const buildDrizzleTable: BuildDrizzleTable = ({ adapter, locales, rawTabl
         break
       }
 
-      // Not used yet in SQLite but ready here.
       case 'uuid': {
-        let builder = text(column.name)
+        let builder = text(column.name, { length: 36 })
 
         if (column.defaultRandom) {
           builder = builder.$defaultFn(() => uuidv4())
@@ -88,7 +87,13 @@ export const buildDrizzleTable: BuildDrizzleTable = ({ adapter, locales, rawTabl
     }
 
     if (column.primaryKey) {
-      columns[key].primaryKey()
+      let args: Record<string, unknown> | undefined = undefined
+
+      if (column.type === 'integer' && column.autoIncrement) {
+        args = { autoIncrement: true }
+      }
+
+      columns[key].primaryKey(args)
     }
 
     if (column.notNull) {

@@ -24,7 +24,7 @@ describe('Custom GraphQL', () => {
     }
   })
 
-  if (!['sqlite'].includes(process.env.PAYLOAD_DATABASE || '')) {
+  if (!['sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE || '')) {
     describe('Isolated Transaction ID', () => {
       it('should isolate transaction IDs between queries in the same request', async () => {
         const query = `query {

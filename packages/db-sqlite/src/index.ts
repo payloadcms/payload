@@ -11,6 +11,7 @@ import {
   create,
   createGlobal,
   createGlobalVersion,
+  createSchemaGenerator,
   createVersion,
   deleteMany,
   deleteOne,
@@ -42,6 +43,7 @@ import { fileURLToPath } from 'url'
 
 import type { Args, SQLiteAdapter } from './types.js'
 
+import { columnToCodeConverter } from './columnToCodeConverter.js'
 import { connect } from './connect.js'
 import { countDistinct } from './countDistinct.js'
 import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal.js'
@@ -61,8 +63,8 @@ export { sql } from 'drizzle-orm'
 const filename = fileURLToPath(import.meta.url)
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
-  const postgresIDType = args.idType || 'serial'
-  const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+  const sqliteIDType = args.idType || 'number'
+  const payloadIDType = sqliteIDType === 'uuid' ? 'text' : 'number'
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
@@ -84,6 +86,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
     return createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
       afterSchemaInit: args.afterSchemaInit ?? [],
+      autoIncrement: args.autoIncrement ?? false,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       client: undefined,
       clientConfig: args.client,
@@ -93,7 +96,13 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
         json: true,
       },
       fieldConstraints: {},
-      idType: postgresIDType,
+      generateSchema: createSchemaGenerator({
+        columnToCodeConverter,
+        corePackageSuffix: 'sqlite-core',
+        defaultOutputFile: args.generateSchemaOutputFile,
+        tableImport: 'sqliteTable',
+      }),
+      idType: sqliteIDType,
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,

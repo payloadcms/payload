@@ -471,6 +471,12 @@ export interface Nested {
         id?: string | null;
       }[]
     | null;
+  topLevelArrayLocalized?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1049,6 +1055,12 @@ export interface NestedSelect<T extends boolean = true> {
     | {
         localizedText?: T;
         notLocalizedText?: T;
+        id?: T;
+      };
+  topLevelArrayLocalized?:
+    | T
+    | {
+        text?: T;
         id?: T;
       };
   updatedAt?: T;

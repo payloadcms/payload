@@ -789,7 +789,13 @@ export type Config = {
      * dependency is 'component'
      */
     dependencies?: AdminDependencies
-    /** If set to true, the entire Admin panel will be disabled. */
+    /**
+     * @deprecated
+     * This option is deprecated and will be removed in the next major version.
+     * To disable the admin panel itself, delete your `/app/(payload)/admin` directory.
+     * To disable all REST API and GraphQL endpoints, delete your `/app/(payload)/api` directory.
+     * Note: If you've modified the default paths via `admin.routes`, delete those directories instead.
+     */
     disable?: boolean
     importMap?: {
       /**

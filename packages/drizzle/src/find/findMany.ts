@@ -1,4 +1,4 @@
-import type { FindArgs, FlattenedField, PayloadRequest, TypeWithID } from 'payload'
+import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 
 import { inArray } from 'drizzle-orm'
 
@@ -8,10 +8,12 @@ import type { ChainedMethods } from './chainMethods.js'
 import buildQuery from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
+import { getTransaction } from '../utilities/getTransaction.js'
 import { buildFindManyArgs } from './buildFindManyArgs.js'
 
 type Args = {
   adapter: DrizzleAdapter
+  collectionSlug?: string
   fields: FlattenedField[]
   tableName: string
   versions?: boolean
@@ -19,13 +21,14 @@ type Args = {
 
 export const findMany = async function find({
   adapter,
+  collectionSlug,
   fields,
   joins: joinQuery,
   limit: limitArg,
   locale,
   page = 1,
   pagination,
-  req = {} as PayloadRequest,
+  req,
   select,
   skip,
   sort,
@@ -33,7 +36,7 @@ export const findMany = async function find({
   versions,
   where: whereArg,
 }: Args) {
-  const db = adapter.sessions[await req.transactionID]?.db || adapter.drizzle
+  const db = await getTransaction(adapter, req)
   let limit = limitArg
   let totalDocs: number
   let totalPages: number
@@ -69,6 +72,7 @@ export const findMany = async function find({
 
   const findManyArgs = buildFindManyArgs({
     adapter,
+    collectionSlug,
     depth: 0,
     fields,
     joinQuery,

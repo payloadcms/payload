@@ -1,5 +1,5 @@
 import type { PaginateOptions } from 'mongoose'
-import type { Find, PayloadRequest } from 'payload'
+import type { Find } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
 
@@ -8,8 +8,8 @@ import type { MongooseAdapter } from './index.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
@@ -21,7 +21,7 @@ export const find: Find = async function find(
     page,
     pagination,
     projection,
-    req = {} as PayloadRequest,
+    req,
     select,
     sort: sortArg,
     where,
@@ -29,7 +29,8 @@ export const find: Find = async function find(
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = await withSession(this, req)
+
+  const session = await getSession(this, req)
 
   let hasNearConstraint = false
 
@@ -60,7 +61,9 @@ export const find: Find = async function find(
   const paginationOptions: PaginateOptions = {
     lean: true,
     leanWithId: true,
-    options,
+    options: {
+      session,
+    },
     page,
     pagination,
     projection,
@@ -92,8 +95,8 @@ export const find: Find = async function find(
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
-          ...options,
           hint: { _id: 1 },
+          session,
         }),
       )
     }
