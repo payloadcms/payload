@@ -93,7 +93,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
         if (debouncedSearch) {
           query.where.and.push({
             [fieldToSearch]: {
-              like: debouncedSearch,
+              contains: debouncedSearch,
             },
           })
         }
