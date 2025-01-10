@@ -76,12 +76,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
         const fieldToSearch = collection?.admin?.useAsTitle || 'id'
         const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
-        const query: {
-          depth?: number
-          limit?: number
-          page?: number
-          where: Where
-        } = {
+        const query = {
           depth: 0,
           limit: maxResultsPerRequest,
           page: pageIndex,
