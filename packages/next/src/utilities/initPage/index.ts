@@ -1,9 +1,8 @@
-import type { I18n } from '@payloadcms/translations'
 import type { InitPageResult, VisibleEntities } from 'payload'
 
 import { headers as getHeaders } from 'next/headers.js'
 import { notFound } from 'next/navigation.js'
-import { createLocalReq, getPayload, isEntityHidden, parseCookies } from 'payload'
+import { getPayload, isEntityHidden, parseCookies } from 'payload'
 import * as qs from 'qs-esm'
 
 import type { Args } from './types.js'
@@ -33,29 +32,17 @@ export const initPage = async ({
 
   const cookies = parseCookies(headers)
 
-  const { i18n, permissions, user } = await initReq(payload.config)
-
-  // Ideally, we should not need to recreate the req, because
-  // we can get it from the above initReq.
-
-  // We just need to -overwrite- the url and query of the req
-  // we get above. Clone the req? We'll look into that eventually.
-  const req = await createLocalReq(
-    {
-      fallbackLocale: false,
-      req: {
-        headers,
-        host: headers.get('host'),
-        i18n: i18n as I18n,
-        query: qs.parse(queryString, {
-          depth: 10,
-          ignoreQueryPrefix: true,
-        }),
-        url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
-      },
+  const { permissions, req } = await initReq(payload.config, {
+    fallbackLocale: false,
+    req: {
+      headers,
+      query: qs.parse(queryString, {
+        depth: 10,
+        ignoreQueryPrefix: true,
+      }),
+      url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
     },
-    payload,
-  )
+  })
 
   const languageOptions = Object.entries(payload.config.i18n.supportedLanguages || {}).reduce(
     (acc, [language, languageConfig]) => {
@@ -71,8 +58,6 @@ export const initPage = async ({
     [],
   )
 
-  req.user = user
-
   const locale = await getRequestLocale({
     req,
   })
@@ -81,10 +66,14 @@ export const initPage = async ({
 
   const visibleEntities: VisibleEntities = {
     collections: collections
-      .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
+      .map(({ slug, admin: { hidden } }) =>
+        !isEntityHidden({ hidden, user: req.user }) ? slug : null,
+      )
       .filter(Boolean),
     globals: globals
-      .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
+      .map(({ slug, admin: { hidden } }) =>
+        !isEntityHidden({ hidden, user: req.user }) ? slug : null,
+      )
       .filter(Boolean),
   }
 
@@ -99,7 +88,7 @@ export const initPage = async ({
       config: payload.config,
       route,
       searchParams,
-      user,
+      user: req.user,
     })
   }
 
@@ -125,7 +114,7 @@ export const initPage = async ({
     permissions,
     redirectTo,
     req,
-    translations: i18n.translations,
+    translations: req.i18n.translations,
     visibleEntities,
   }
 }
