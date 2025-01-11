@@ -34,9 +34,7 @@ export const initPage = async ({
   const cookies = parseCookies(headers)
 
   const { permissions, req } = await initReq(payload.config, {
-    options: {
-      fallbackLocale: false,
-    },
+    fallbackLocale: false,
     req: {
       headers,
       query: qs.parse(queryString, {

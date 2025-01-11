@@ -15,10 +15,7 @@ type Result = {
 
 export const initReq = cache(async function (
   configPromise: Promise<SanitizedConfig> | SanitizedConfig,
-  overrides: {
-    options?: Record<string, unknown>
-    req?: Record<string, unknown>
-  },
+  overrides?: Parameters<typeof createLocalReq>[0],
 ): Promise<Result> {
   const config = await configPromise
   const payload = await getPayload({ config })
@@ -40,6 +37,8 @@ export const initReq = cache(async function (
 
   const { permissions, user } = await payload.auth({ headers })
 
+  const { req: reqOverrides, ...optionsOverrides } = overrides || {}
+
   const req = await createLocalReq(
     {
       req: {
@@ -48,9 +47,9 @@ export const initReq = cache(async function (
         i18n: i18n as I18n,
         url: `${payload.config.serverURL}`,
         user,
-        ...(overrides?.req || {}),
+        ...(reqOverrides || {}),
       },
-      ...(overrides?.options || {}),
+      ...(optionsOverrides || {}),
     },
     payload,
   )
