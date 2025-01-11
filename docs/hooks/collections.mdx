@@ -91,9 +91,9 @@ The following arguments are provided to the `beforeOperation` hook:
 
 ### beforeValidate
 
-Runs before the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated server-side.
+Runs during the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated server-side.
 
-Please do note that this does not run before the client-side validation. If you added a `validate` function, this would be the lifecycle:
+Please do note that this does not run before client-side validation. If you render a custom field component in your front-end and provide it with a `validate` function, the order that validations will run in is:
 
 1. `validate` runs on the client
 2. if successful, `beforeValidate` runs on the server

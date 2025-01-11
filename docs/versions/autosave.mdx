@@ -69,7 +69,7 @@ When `autosave` is enabled, all `update` operations within Payload expose a new 
 If we created a new version for each autosave, you'd quickly find a ton of autosaves that clutter up your `_versions` collection within the database. That would be messy quick because `autosave` is typically set to save a document at ~800ms intervals.
 
 <Banner type="success">
-  Instead of creating a new version each time a document is autosaved, Payload smartly only creates{' '}
+  Instead of creating a new version each time a document is autosaved, Payload smartly only creates 
   **one** autosave version, and then updates that specific version with each autosave
   performed. This makes sure that your versions remain nice and tidy.
 </Banner>

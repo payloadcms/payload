@@ -32,7 +32,13 @@ export class InlineBlockNode extends ServerInlineBlockNode {
   }
 
   decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
-    return <InlineBlockComponent formData={this.getFields()} nodeKey={this.getKey()} />
+    return (
+      <InlineBlockComponent
+        cacheBuster={this.getCacheBuster()}
+        formData={this.getFields()}
+        nodeKey={this.getKey()}
+      />
+    )
   }
 
   exportJSON(): SerializedInlineBlockNode {

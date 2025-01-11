@@ -522,6 +522,12 @@ export interface Tab {
   id: string;
   tabLocalized?: {
     title?: string | null;
+    array?:
+      | {
+          title?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   tab?: {
     title?: string | null;
@@ -1119,6 +1125,12 @@ export interface TabsSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
+        array?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+            };
       };
   tab?:
     | T

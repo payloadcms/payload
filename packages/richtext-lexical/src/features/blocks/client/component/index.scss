@@ -6,6 +6,11 @@
     z-index: 1;
   }
 
+  .lexical-block-not-found {
+    color: var(--theme-error-500);
+    font-size: 1.1rem;
+  }
+
   .lexical-block {
     display: flex;
     flex-direction: column;

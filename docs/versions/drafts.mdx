@@ -123,12 +123,12 @@ export const Pages: CollectionConfig = {
   **Note regarding adding versions to an existing collection**
 
   If you already have a collection with documents, and you *opt in* to draft functionality
-  after you have already created existing documents, all of your old documents{' '}
-  *will not have a _status field* until you resave them. For this reason, if you are{' '}
+  after you have already created existing documents, all of your old documents
+  *will not have a `_status` field* until you resave them. For this reason, if you are
   *adding* versions into an existing collection, you might want to write your Access Control
-  function to allow for users to read both documents where{' '}
-  **status is equal to "published"** as well as where{' '}
-  **status does not exis**.
+  function to allow for users to read both documents where
+  **`_status` is equal to `"published"`** as well as where
+  **`_status` does not exist**.
 </Banner>
 
 Here is an example for how to write an [Access Control](../access-control/overview) function that grants access to both documents where `_status` is equal to "published" and where `_status` does not exist:
