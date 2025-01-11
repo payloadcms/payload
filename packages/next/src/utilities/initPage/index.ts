@@ -33,17 +33,19 @@ export const initPage = async ({
 
   const cookies = parseCookies(headers)
 
-  const { permissions, req: reqInit } = await initReq(payload.config)
-
-  // Create a new instance of req in order to modify properties without mutating the original
-  const req = Object.create(reqInit)
-
-  req.query = qs.parse(queryString, {
-    depth: 10,
-    ignoreQueryPrefix: true,
+  const { permissions, req } = await initReq(payload.config, {
+    options: {
+      fallbackLocale: false,
+    },
+    req: {
+      headers,
+      query: qs.parse(queryString, {
+        depth: 10,
+        ignoreQueryPrefix: true,
+      }),
+      url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
+    },
   })
-
-  req.url = `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`
 
   const languageOptions = Object.entries(payload.config.i18n.supportedLanguages || {}).reduce(
     (acc, [language, languageConfig]) => {

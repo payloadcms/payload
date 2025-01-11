@@ -15,6 +15,10 @@ type Result = {
 
 export const initReq = cache(async function (
   configPromise: Promise<SanitizedConfig> | SanitizedConfig,
+  overrides: {
+    options?: Record<string, unknown>
+    req?: Record<string, unknown>
+  },
 ): Promise<Result> {
   const config = await configPromise
   const payload = await getPayload({ config })
@@ -44,7 +48,9 @@ export const initReq = cache(async function (
         i18n: i18n as I18n,
         url: `${payload.config.serverURL}`,
         user,
+        ...(overrides?.req || {}),
       },
+      ...(overrides?.options || {}),
     },
     payload,
   )
