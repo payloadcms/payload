@@ -11,6 +11,14 @@ import { File } from '../../graphics/File/index.js'
 import { useIntersect } from '../../hooks/useIntersect.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
+const getImageSrc = (url: string, tag?: string) => {
+  if (!url) return ''
+  if (!tag) return url
+
+  const hasQueryParams = url.includes('?')
+  return hasQueryParams ? `${url}&${tag}` : `${url}?${tag}`
+}
+
 export type ThumbnailProps = {
   className?: string
   collectionSlug?: string
@@ -49,7 +57,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
       {fileExists && (
         <img
           alt={filename as string}
-          src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`}
+          src={getImageSrc(fileSrc, imageCacheTag)}
         />
       )}
       {fileExists === false && <File />}
@@ -91,7 +99,10 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
       {fileExists && (
-        <img alt={alt || filename} src={`${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`} />
+        <img 
+          alt={alt || filename} 
+          src={getImageSrc(fileSrc, imageCacheTag)}
+        />
       )}
       {fileExists === false && <File />}
     </div>
