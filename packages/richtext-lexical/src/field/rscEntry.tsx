@@ -7,6 +7,7 @@ import type {
   ServerComponentProps,
 } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { renderField } from '@payloadcms/ui/forms/renderField'
 import React from 'react'
 
@@ -64,8 +65,16 @@ export const RscEntryLexicalField: React.FC<
     })
   }
 
+  const placeholderFromArgs = args.admin?.placeholder
+  const placeholder = placeholderFromArgs
+    ? getTranslation(placeholderFromArgs, args.i18n)
+    : undefined
+
   const props: LexicalRichTextFieldProps = {
-    admin: args.admin,
+    admin: {
+      hideGutter: args.admin?.hideGutter,
+      placeholder,
+    },
     clientFeatures,
     featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
