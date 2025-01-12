@@ -26,6 +26,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'endpoints'
   | 'graphQL'
   | 'hooks'
+  | 'i18n'
   | 'jobs'
   | 'logger'
   | 'onInit'
@@ -44,6 +45,9 @@ export type ClientConfig = {
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
+  /**
+   * @deprecated - will be removed in 4.0. Use the `useLocalization` hook instead.
+   */
   i18n?: Omit<SanitizedConfig['i18n'], 'supportedLanguages'>
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
@@ -59,6 +63,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'secret',
   'hooks',
   'bin',
+  'i18n',
   'typescript',
   'cors',
   'csrf',
