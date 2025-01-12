@@ -98,7 +98,7 @@ export type FeatureClientSchemaMap = {
 }
 
 export type LexicalRichTextFieldProps = {
-  admin: LexicalFieldAdminClientProps
+  admin?: LexicalFieldAdminClientProps
   // clientFeatures is added through the rsc field
   clientFeatures: {
     [featureKey: string]: {

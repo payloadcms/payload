@@ -12,7 +12,11 @@ import { renderField } from '@payloadcms/ui/forms/renderField'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
-import type { LexicalFieldAdminProps, LexicalRichTextFieldProps } from '../types.js'
+import type {
+  LexicalFieldAdminClientProps,
+  LexicalFieldAdminProps,
+  LexicalRichTextFieldProps,
+} from '../types.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { RichTextField } from '../exports/client/index.js'
@@ -70,11 +74,15 @@ export const RscEntryLexicalField: React.FC<
     ? getTranslation(placeholderFromArgs, args.i18n)
     : undefined
 
+  const admin: LexicalFieldAdminClientProps = {}
+  if (placeholder) {
+    admin.placeholder = placeholder
+  }
+  if (args.admin?.hideGutter) {
+    admin.hideGutter = true
+  }
+
   const props: LexicalRichTextFieldProps = {
-    admin: {
-      hideGutter: args.admin?.hideGutter,
-      placeholder,
-    },
     clientFeatures,
     featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
@@ -86,6 +94,9 @@ export const RscEntryLexicalField: React.FC<
     readOnly: args.readOnly,
     renderedBlocks: args.renderedBlocks,
     schemaPath,
+  }
+  if (Object.keys(admin).length) {
+    props.admin = admin
   }
 
   for (const key in props) {
