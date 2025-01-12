@@ -122,12 +122,6 @@ export const createClientConfig = ({
           importMap,
         })
         break
-      case 'i18n':
-        clientConfig.i18n = {
-          fallbackLanguage: config.i18n.fallbackLanguage,
-          translations: config.i18n.translations,
-        }
-        break
       case 'localization':
         if (typeof config.localization === 'object' && config.localization) {
           clientConfig.localization = {}
