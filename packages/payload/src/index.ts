@@ -707,14 +707,20 @@ export class BasePayload {
       })
     }
 
-    if (!options.disableOnInit) {
-      if (typeof options.onInit === 'function') {
-        await options.onInit(this)
+    try {
+      if (!options.disableOnInit) {
+        if (typeof options.onInit === 'function') {
+          await options.onInit(this)
+        }
+        if (typeof this.config.onInit === 'function') {
+          await this.config.onInit(this)
+        }
       }
-      if (typeof this.config.onInit === 'function') {
-        await this.config.onInit(this)
-      }
+    } catch (error) {
+      this.logger.error({ err: error }, 'Error running onInit function')
+      throw error
     }
+
     if (this.config.jobs.autoRun && !isNextBuild()) {
       const DEFAULT_CRON = '* * * * *'
       const DEFAULT_LIMIT = 10
