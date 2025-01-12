@@ -2,11 +2,13 @@ import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 
 import type {
   ClientField,
   DefaultCellComponentProps,
+  LabelFunction,
   RichTextAdapter,
   RichTextFieldClient,
   RichTextFieldClientProps,
   SanitizedConfig,
   ServerFieldBase,
+  StaticLabel,
 } from 'payload'
 
 import type {
@@ -25,8 +27,12 @@ export type LexicalFieldAdminProps = {
   /**
    * Changes the placeholder text in the editor if no content is present.
    */
-  placeholder?: string
+  placeholder?: LabelFunction | StaticLabel
 }
+
+export type LexicalFieldAdminClientProps = {
+  placeholder?: string
+} & Omit<LexicalFieldAdminProps, 'placeholder'>
 
 export type LexicalEditorProps = {
   admin?: LexicalFieldAdminProps
@@ -92,7 +98,7 @@ export type FeatureClientSchemaMap = {
 }
 
 export type LexicalRichTextFieldProps = {
-  admin: LexicalFieldAdminProps
+  admin?: LexicalFieldAdminClientProps
   // clientFeatures is added through the rsc field
   clientFeatures: {
     [featureKey: string]: {
