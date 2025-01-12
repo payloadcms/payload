@@ -581,9 +581,9 @@ export class BasePayload {
       config: this.config.globals,
     }
 
-    this.config.collections.forEach((collection) => {
+    for (const collection of this.config.collections) {
       let customIDType = undefined
-      const findCustomID: TraverseFieldsCallback = ({ field, next }) => {
+      const findCustomID: TraverseFieldsCallback = ({ field }) => {
         if (
           ['array', 'blocks', 'group'].includes(field.type) ||
           (field.type === 'tab' && 'name' in field)
@@ -607,7 +607,7 @@ export class BasePayload {
         config: collection,
         customIDType,
       }
-    })
+    }
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
