@@ -36,6 +36,7 @@ import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
 import { RESTClient } from 'helpers/rest.js'
 import { GeneratedTypes } from 'helpers/sdk/types.js'
+import { wait } from 'payload/shared'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -52,6 +53,7 @@ const { beforeAll, beforeEach, describe, afterEach } = test
 let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
 let urlRelationshipLocalized: AdminUrlUtil
+let urlCannotCreateDefaultLocale: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -74,6 +76,7 @@ describe('Localization', () => {
     urlRelationshipLocalized = new AdminUrlUtil(serverURL, relationshipLocalizedSlug)
     richTextURL = new AdminUrlUtil(serverURL, richTextSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
+    urlCannotCreateDefaultLocale = new AdminUrlUtil(serverURL, 'cannot-create-default-locale')
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -119,6 +122,29 @@ describe('Localization', () => {
       await expect(activeOption).not.toHaveAttribute('href')
       await expect(tagName).not.toBe('BUTTON')
       await expect(tagName).toBe('DIV')
+    })
+  })
+
+  describe('access control', () => {
+    test('should have req.locale within access control', async () => {
+      await changeLocale(page, defaultLocale)
+      await page.goto(urlCannotCreateDefaultLocale.list)
+
+      const createNewButtonLocator =
+        '.collection-list a[href="/admin/collections/cannot-create-default-locale/create"]'
+
+      await expect(page.locator(createNewButtonLocator)).not.toBeVisible()
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator(createNewButtonLocator).first()).toBeVisible()
+      await page.goto(urlCannotCreateDefaultLocale.create)
+      await expect(page.locator('#field-name')).toBeVisible()
+      await changeLocale(page, defaultLocale)
+
+      await expect(
+        page.locator('h1', {
+          hasText: 'Unauthorized',
+        }),
+      ).toBeVisible()
     })
   })
 
