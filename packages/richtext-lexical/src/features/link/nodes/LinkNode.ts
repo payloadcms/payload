@@ -266,13 +266,17 @@ export function $isLinkNode(node: LexicalNode | null | undefined): node is LinkN
 export const TOGGLE_LINK_COMMAND: LexicalCommand<LinkPayload | null> =
   createCommand('TOGGLE_LINK_COMMAND')
 
-export function $toggleLink(payload: { fields: LinkFields } & LinkPayload): void {
+export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | null): void {
   const selection = $getSelection()
 
-  if (!$isRangeSelection(selection) && !payload.selectedNodes?.length) {
+  if (!$isRangeSelection(selection) && (payload === null || !payload.selectedNodes?.length)) {
     return
   }
-  const nodes = $isRangeSelection(selection) ? selection.extract() : payload.selectedNodes
+  const nodes = $isRangeSelection(selection)
+    ? selection.extract()
+    : payload === null
+      ? []
+      : payload.selectedNodes
 
   if (payload === null) {
     // Remove LinkNodes
@@ -289,92 +293,93 @@ export function $toggleLink(payload: { fields: LinkFields } & LinkPayload): void
         parent.remove()
       }
     })
-  } else {
-    // Add or merge LinkNodes
-    if (nodes?.length === 1) {
-      const firstNode = nodes[0]
-      // if the first node is a LinkNode or if its
-      // parent is a LinkNode, we update the URL, target and rel.
-      const linkNode: LinkNode | null = $isLinkNode(firstNode)
-        ? firstNode
-        : $getLinkAncestor(firstNode)
-      if (linkNode !== null) {
-        linkNode.setFields(payload.fields)
 
-        if (payload.text != null && payload.text !== linkNode.getTextContent()) {
-          // remove all children and add child with new textcontent:
-          linkNode.append($createTextNode(payload.text))
-          linkNode.getChildren().forEach((child) => {
-            if (child !== linkNode.getLastChild()) {
-              child.remove()
-            }
-          })
+    return
+  }
+  // Add or merge LinkNodes
+  if (nodes?.length === 1) {
+    const firstNode = nodes[0]
+    // if the first node is a LinkNode or if its
+    // parent is a LinkNode, we update the URL, target and rel.
+    const linkNode: LinkNode | null = $isLinkNode(firstNode)
+      ? firstNode
+      : $getLinkAncestor(firstNode)
+    if (linkNode !== null) {
+      linkNode.setFields(payload.fields)
+
+      if (payload.text != null && payload.text !== linkNode.getTextContent()) {
+        // remove all children and add child with new textcontent:
+        linkNode.append($createTextNode(payload.text))
+        linkNode.getChildren().forEach((child) => {
+          if (child !== linkNode.getLastChild()) {
+            child.remove()
+          }
+        })
+      }
+      return
+    }
+  }
+
+  let prevParent: ElementNodeType | LinkNode | null = null
+  let linkNode: LinkNode | null = null
+
+  nodes?.forEach((node) => {
+    const parent = node.getParent()
+
+    if (parent === linkNode || parent === null || ($isElementNode(node) && !node.isInline())) {
+      return
+    }
+
+    if ($isLinkNode(parent)) {
+      linkNode = parent
+      parent.setFields(payload.fields)
+      if (payload.text != null && payload.text !== parent.getTextContent()) {
+        // remove all children and add child with new textcontent:
+        parent.append($createTextNode(payload.text))
+        parent.getChildren().forEach((child) => {
+          if (child !== parent.getLastChild()) {
+            child.remove()
+          }
+        })
+      }
+      return
+    }
+
+    if (!parent.is(prevParent)) {
+      prevParent = parent
+      linkNode = $createLinkNode({ fields: payload.fields })
+
+      if ($isLinkNode(parent)) {
+        if (node.getPreviousSibling() === null) {
+          parent.insertBefore(linkNode)
+        } else {
+          parent.insertAfter(linkNode)
         }
-        return
+      } else {
+        node.insertBefore(linkNode)
       }
     }
 
-    let prevParent: ElementNodeType | LinkNode | null = null
-    let linkNode: LinkNode | null = null
-
-    nodes?.forEach((node) => {
-      const parent = node.getParent()
-
-      if (parent === linkNode || parent === null || ($isElementNode(node) && !node.isInline())) {
+    if ($isLinkNode(node)) {
+      if (node.is(linkNode)) {
         return
       }
-
-      if ($isLinkNode(parent)) {
-        linkNode = parent
-        parent.setFields(payload.fields)
-        if (payload.text != null && payload.text !== parent.getTextContent()) {
-          // remove all children and add child with new textcontent:
-          parent.append($createTextNode(payload.text))
-          parent.getChildren().forEach((child) => {
-            if (child !== parent.getLastChild()) {
-              child.remove()
-            }
-          })
-        }
-        return
-      }
-
-      if (!parent.is(prevParent)) {
-        prevParent = parent
-        linkNode = $createLinkNode({ fields: payload.fields })
-
-        if ($isLinkNode(parent)) {
-          if (node.getPreviousSibling() === null) {
-            parent.insertBefore(linkNode)
-          } else {
-            parent.insertAfter(linkNode)
-          }
-        } else {
-          node.insertBefore(linkNode)
-        }
-      }
-
-      if ($isLinkNode(node)) {
-        if (node.is(linkNode)) {
-          return
-        }
-        if (linkNode !== null) {
-          const children = node.getChildren()
-
-          for (let i = 0; i < children.length; i += 1) {
-            linkNode.append(children[i])
-          }
-        }
-
-        node.remove()
-        return
-      }
-
       if (linkNode !== null) {
-        linkNode.append(node)
+        const children = node.getChildren()
+
+        for (let i = 0; i < children.length; i += 1) {
+          linkNode.append(children[i])
+        }
       }
-    })
-  }
+
+      node.remove()
+      return
+    }
+
+    if (linkNode !== null) {
+      linkNode.append(node)
+    }
+  })
 }
 
 function $getLinkAncestor(node: LexicalNode): LinkNode | null {
