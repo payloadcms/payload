@@ -98,6 +98,7 @@ export const renderField: RenderFieldMethod = ({
   if (fieldConfig.admin) {
     if (
       (Object.keys(fieldConfig.admin.components || {}).length > 0 ||
+        fieldConfig.type === 'richText' ||
         ('description' in fieldConfig.admin &&
           typeof fieldConfig.admin.description === 'function')) &&
       !fieldState?.customComponents
@@ -105,7 +106,6 @@ export const renderField: RenderFieldMethod = ({
       fieldState.customComponents = {}
     }
   }
-
   switch (fieldConfig.type) {
     // TODO: handle block row labels as well in a similar fashion
     case 'array': {
