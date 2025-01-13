@@ -165,7 +165,7 @@ export const buildColumnState = (args: Args): Column[] => {
         : undefined
 
     const CustomLabel = CustomLabelToRender
-      ? RenderServerComponent({ Component: CustomLabelToRender, importMap: payload.importMap })
+      ? RenderServerComponent({ Component: CustomLabelToRender, importMap: payload.importMap, clientProps: { field } })
       : undefined
 
     const fieldAffectsDataSubFields =
