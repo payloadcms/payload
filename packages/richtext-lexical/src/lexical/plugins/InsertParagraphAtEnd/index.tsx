@@ -2,6 +2,7 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $createParagraphNode, $getRoot } from 'lexical'
+import React from 'react'
 
 import './index.scss'
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
