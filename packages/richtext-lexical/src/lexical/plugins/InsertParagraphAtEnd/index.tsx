@@ -20,8 +20,9 @@ export const InsertParagraphAtEndPlugin: React.FC = () => {
 
   const onClick = () => {
     editor.update(() => {
-      const pNode = $createParagraphNode()
-      $getRoot().append(pNode)
+      const paragraphNode = $createParagraphNode()
+      $getRoot().append(paragraphNode)
+      paragraphNode.select()
     })
   }
 
