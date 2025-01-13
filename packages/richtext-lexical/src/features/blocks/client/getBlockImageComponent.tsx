@@ -7,5 +7,12 @@ export function getBlockImageComponent(imageURL?: string, imageAltText?: string)
     return BlockIcon
   }
 
-  return () => <img alt={imageAltText ?? 'Block Image'} src={imageURL} />
+  return () => (
+    <img
+      alt={imageAltText ?? 'Block Image'}
+      className="lexical-block-custom-image"
+      src={imageURL}
+      style={{ maxHeight: 20, maxWidth: 20 }}
+    />
+  )
 }
