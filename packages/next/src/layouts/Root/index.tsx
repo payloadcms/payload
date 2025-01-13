@@ -54,7 +54,7 @@ export const RootLayout = async ({
 
   const payload = await getPayload({ config, importMap })
 
-  const { i18n, permissions, req, user } = await initReq(config)
+  const { permissions, req } = await initReq(config)
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
@@ -84,15 +84,13 @@ export const RootLayout = async ({
     })
   }
 
-  const navPrefs = await getNavPrefs({ payload, user })
+  const navPrefs = await getNavPrefs({ payload, user: req.user })
 
   const clientConfig = getClientConfig({
     config,
-    i18n,
+    i18n: req.i18n,
     importMap,
   })
-
-  req.user = user
 
   const locale = await getRequestLocale({
     req,
@@ -111,7 +109,7 @@ export const RootLayout = async ({
       <body>
         <RootProvider
           config={clientConfig}
-          dateFNSKey={i18n.dateFNSKey}
+          dateFNSKey={req.i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
@@ -121,8 +119,8 @@ export const RootLayout = async ({
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
-          translations={i18n.translations}
-          user={user}
+          translations={req.i18n.translations}
+          user={req.user}
         >
           {Array.isArray(config.admin?.components?.providers) &&
           config.admin?.components?.providers.length > 0 ? (
@@ -130,10 +128,10 @@ export const RootLayout = async ({
               importMap={payload.importMap}
               providers={config.admin?.components?.providers}
               serverProps={{
-                i18n,
+                i18n: req.i18n,
                 payload,
                 permissions,
-                user,
+                user: req.user,
               }}
             >
               {children}

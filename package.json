@@ -52,6 +52,7 @@
     "clean": "turbo clean",
     "clean:all": "node ./scripts/delete-recursively.js '@node_modules' 'media/*' '**/dist/' '**/.cache/*' '**/.next/*' '**/.turbo/*' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'",
     "clean:build": "node ./scripts/delete-recursively.js 'media/' '**/dist/' '**/.cache/' '**/.next/' '**/.turbo/' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'",
+    "clean:build:allowtgz": "node ./scripts/delete-recursively.js 'media/' '**/dist/' '**/.cache/' '**/.next/' '**/.turbo/' '**/tsconfig.tsbuildinfo' '**/meta_*.json'",
     "clean:cache": "node ./scripts/delete-recursively.js node_modules/.cache! packages/payload/node_modules/.cache! .next/*",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/dev.ts",
     "dev:generate-db-schema": "pnpm runts ./test/generateDatabaseSchema.ts",
