@@ -58,9 +58,11 @@ const notFoundResponse = (req: PayloadRequest) => {
  * ```
  */
 export const handleEndpoints = async ({
+  basePath = '',
   config: incomingConfig,
   request,
 }: {
+  basePath?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
   request: Request
 }): Promise<Response> => {
@@ -112,7 +114,7 @@ export const handleEndpoints = async ({
     const { payload } = req
     const { config } = payload
 
-    const pathname = new URL(req.url).pathname
+    const pathname = `${basePath}${new URL(req.url).pathname}`
 
     if (!pathname.startsWith(config.routes.api)) {
       return notFoundResponse(req)

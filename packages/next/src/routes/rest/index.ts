@@ -26,6 +26,7 @@ const handlerBuilder =
     initedOGEndpoint = true
 
     const response = await handleEndpoints({
+      basePath: process.env.NEXT_BASE_PATH,
       config,
       request,
     })
