@@ -191,8 +191,8 @@ const UNORDERED_LIST_REGEX = /^(\s*)[-*+]\s/
 const CHECK_LIST_REGEX = /^(\s*)(?:-\s)?\s?(\[(\s|x)?\])\s/i
 const HEADING_REGEX = /^(#{1,6})\s/
 const QUOTE_REGEX = /^>\s/
-// Match start of ``` or escaped \`\`\` code blocks
-const CODE_START_OR_END_REGEX = /^[ \t]*(\\`\\`\\`|```)(\w+)?/
+const CODE_START_REGEX = /^[ \t]*(\\`\\`\\`|```)(\w+)?/
+const CODE_END_REGEX = /[ \t]*(\\`\\`\\`|```)$/
 const CODE_SINGLE_LINE_REGEX = /^[ \t]*```[^`]+(?:(?:`{1,2}|`{4,})[^`]+)*```(?:[^`]|$)/
 const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/
 const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/
@@ -440,6 +440,7 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boole
   const lines = input.split('\n')
   let inCodeBlock = false
   const sanitizedLines: string[] = []
+  let nestedDeepCodeBlock = 0
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
@@ -451,9 +452,24 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boole
       continue
     }
 
+    if (CODE_END_REGEX.test(line)) {
+      if (nestedDeepCodeBlock === 0) {
+        inCodeBlock = true
+      }
+      if (nestedDeepCodeBlock === 1) {
+        inCodeBlock = false
+      }
+      if (nestedDeepCodeBlock > 0) {
+        nestedDeepCodeBlock--
+      }
+      sanitizedLines.push(line)
+      continue
+    }
+
     // Toggle inCodeBlock state when encountering start or end of a code block
-    if (CODE_START_OR_END_REGEX.test(line)) {
-      inCodeBlock = !inCodeBlock
+    if (CODE_START_REGEX.test(line)) {
+      inCodeBlock = true
+      nestedDeepCodeBlock++
       sanitizedLines.push(line)
       continue
     }
@@ -482,7 +498,8 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boole
       TAG_START_REGEX.test(line) ||
       TAG_END_REGEX.test(line) ||
       TAG_START_REGEX.test(lastLine) ||
-      TAG_END_REGEX.test(lastLine)
+      TAG_END_REGEX.test(lastLine) ||
+      CODE_END_REGEX.test(lastLine)
     ) {
       sanitizedLines.push(line)
     } else {
