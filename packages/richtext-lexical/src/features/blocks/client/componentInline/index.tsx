@@ -46,6 +46,12 @@ import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalD
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
 type Props = {
+  /**
+   * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
+   * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
+   * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
+   */
+  readonly cacheBuster: number
   readonly formData: InlineBlockFields
   readonly nodeKey: string
 }
@@ -66,10 +72,12 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
 export const useInlineBlockComponentContext = () => React.useContext(InlineBlockComponentContext)
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
-  const { formData, nodeKey } = props
+  const { cacheBuster, formData, nodeKey } = props
+
   const [editor] = useLexicalComposerContext()
   const { i18n, t } = useTranslation<object, string>()
   const {
+    createdInlineBlock,
     fieldProps: {
       featureClientSchemaMap,
       initialLexicalFormState,
@@ -77,14 +85,20 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       readOnly,
       schemaPath,
     },
+    setCreatedInlineBlock,
     uuid: uuidFromContext,
   } = useEditorConfigContext()
   const { getFormState } = useServerFunctions()
   const editDepth = useEditDepth()
+  const firstTimeDrawer = useRef(false)
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
     initialLexicalFormState?.[formData.id]?.formState,
   )
+
+  useEffect(() => {
+    setInitialState(false)
+  }, [cacheBuster])
 
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
@@ -112,9 +126,27 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const blocksField: BlocksFieldClient = clientSchemaMap[
     componentMapRenderedBlockPath
-  ][0] as BlocksFieldClient
+  ]?.[0] as BlocksFieldClient
 
-  const clientBlock = blocksField.blocks[0]
+  const clientBlock = blocksField?.blocks?.[0]
+
+  // Open drawer on "mount"
+  useEffect(() => {
+    if (!firstTimeDrawer.current && createdInlineBlock?.getKey() === nodeKey) {
+      // > 2 because they always have "id" and "blockName" fields
+      if (clientBlock?.fields?.length > 2) {
+        toggleDrawer()
+      }
+      setCreatedInlineBlock?.(undefined)
+      firstTimeDrawer.current = true
+    }
+  }, [
+    clientBlock?.fields?.length,
+    createdInlineBlock,
+    nodeKey,
+    setCreatedInlineBlock,
+    toggleDrawer,
+  ])
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
@@ -173,7 +205,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
 
   const blockDisplayName = clientBlock?.labels?.singular
-    ? getTranslation(clientBlock.labels.singular, i18n)
+    ? getTranslation(clientBlock?.labels.singular, i18n)
     : clientBlock?.slug
 
   const onChangeAbortControllerRef = useRef(new AbortController())
@@ -282,7 +314,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       editor.update(() => {
         const node = $getNodeByKey(nodeKey)
         if (node && $isInlineBlockNode(node)) {
-          node.setFields(newData)
+          node.setFields(newData, true)
         }
       })
     },
@@ -329,12 +361,13 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const InlineBlockContainer = useMemo(
     () =>
-      ({ children }: { children: React.ReactNode }) => (
+      ({ children, className }: { children: React.ReactNode; className?: string }) => (
         <div
           className={[
             baseClass,
             baseClass + '-' + formData.blockType,
             isSelected && `${baseClass}--selected`,
+            className,
           ]
             .filter(Boolean)
             .join(' ')}
@@ -350,9 +383,24 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     if (CustomLabel) {
       return () => CustomLabel
     } else {
-      return () => <div>{getTranslation(clientBlock.labels!.singular, i18n)}</div>
+      return () => (
+        <div>{clientBlock?.labels ? getTranslation(clientBlock?.labels.singular, i18n) : ''}</div>
+      )
     }
-  }, [CustomLabel, clientBlock.labels, i18n])
+  }, [CustomLabel, clientBlock?.labels, i18n])
+
+  if (!clientBlock) {
+    return (
+      <InlineBlockContainer className={`${baseClass}-not-found`}>
+        <span>Error: Block '{formData.blockType}' not found</span>
+        {editor.isEditable() ? (
+          <div className={`${baseClass}__actions`}>
+            <RemoveButton />
+          </div>
+        ) : null}
+      </InlineBlockContainer>
+    )
+  }
 
   return (
     <Form
@@ -363,7 +411,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         },
       ]}
       disableValidationOnSubmit
-      fields={clientBlock.fields}
+      fields={clientBlock?.fields}
       initialState={initialState || {}}
       onChange={[onChange]}
       onSubmit={(formState) => {
@@ -383,7 +431,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           {initialState ? (
             <>
               <RenderFields
-                fields={clientBlock.fields}
+                fields={clientBlock?.fields}
                 forceRender
                 parentIndexPath=""
                 parentPath="" // See Blocks feature path for details as for why this is empty

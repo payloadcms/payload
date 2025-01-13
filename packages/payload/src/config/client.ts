@@ -92,7 +92,6 @@ export const createClientConfig = ({
           avatar: config.admin.avatar,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,
-          disable: config.admin.disable,
           importMap: config.admin.importMap,
           meta: config.admin.meta,
           routes: config.admin.routes,

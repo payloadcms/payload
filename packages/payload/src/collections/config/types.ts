@@ -329,15 +329,18 @@ export type CollectionAdminOptions = {
    */
   defaultColumns?: string[]
   /**
-   * Custom description for collection
+   * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
-   * Place collections into a navigational group
-   * */
-  group?: Record<string, string> | string
+   * Specify a navigational group for collections in the admin sidebar.
+   * - Provide a string to place the entity in a custom group.
+   * - Provide a record to define localized group names.
+   * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
+   */
+  group?: false | Record<string, string> | string
   /**
    * Exclude the collection from the admin nav and routes
    */
@@ -421,6 +424,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   graphQL?:
     | {
+        disableMutations?: true
+        disableQueries?: true
         pluralName?: string
         singularName?: string
       }

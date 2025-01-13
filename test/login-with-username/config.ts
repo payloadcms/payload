@@ -32,6 +32,19 @@ export const LoginWithUsernameConfig = buildConfigWithDefaults({
       },
       fields: [],
     },
+    {
+      slug: 'require-email',
+      auth: {
+        loginWithUsername: {
+          requireEmail: true,
+          allowEmailLogin: false,
+        },
+      },
+      fields: [],
+      admin: {
+        useAsTitle: 'email',
+      },
+    },
   ],
 })
 

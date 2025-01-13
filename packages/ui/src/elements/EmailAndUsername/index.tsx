@@ -23,7 +23,7 @@ type RenderEmailAndUsernameFieldsProps = {
 }
 
 export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps) {
-  const { className, loginWithUsername, t } = props
+  const { className, loginWithUsername, readOnly, t } = props
 
   const showEmailField =
     !loginWithUsername || loginWithUsername?.requireEmail || loginWithUsername?.allowEmailLogin
@@ -43,6 +43,7 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
             required: !loginWithUsername || (loginWithUsername && loginWithUsername.requireEmail),
           }}
           path="email"
+          readOnly={readOnly}
           schemaPath="email"
           validate={email}
         />
@@ -55,6 +56,7 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
             required: loginWithUsername && loginWithUsername.requireUsername,
           }}
           path="username"
+          readOnly={readOnly}
           schemaPath="username"
           validate={username}
         />

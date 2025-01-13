@@ -32,7 +32,7 @@ const config = withBundleAnalyzer(
       return [
         {
           destination: '/admin',
-          permanent: true,
+          permanent: false,
           source: '/',
         },
       ]

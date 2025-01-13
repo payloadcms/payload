@@ -1,14 +1,15 @@
-import type { CreateGlobal, PayloadRequest } from 'payload'
+import type { CreateOptions } from 'mongoose'
+import type { CreateGlobal } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getSession } from './utilities/getSession.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: MongooseAdapter,
-  { slug, data, req = {} as PayloadRequest },
+  { slug, data, req },
 ) {
   const Model = this.globals
 
@@ -21,7 +22,9 @@ export const createGlobal: CreateGlobal = async function createGlobal(
     fields: this.payload.config.globals.find((globalConfig) => globalConfig.slug === slug).fields,
   })
 
-  const options = await withSession(this, req)
+  const options: CreateOptions = {
+    session: await getSession(this, req),
+  }
 
   let [result] = (await Model.create([global], options)) as any
 

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, FormState } from 'payload'
+import type { ClientCollectionConfig, FieldWithPathClient, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -23,7 +23,7 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import './index.scss'
@@ -36,10 +36,25 @@ export type EditManyProps = {
   readonly collection: ClientCollectionConfig
 }
 
+const sanitizeUnselectedFields = (formState: FormState, selected: FieldWithPathClient[]) => {
+  const filteredData = selected.reduce((acc, field) => {
+    const foundState = formState?.[field.path]
+
+    if (foundState) {
+      acc[field.path] = formState?.[field.path]?.value
+    }
+
+    return acc
+  }, {} as FormData)
+
+  return filteredData
+}
+
 const Submit: React.FC<{
   readonly action: string
   readonly disabled: boolean
-}> = ({ action, disabled }) => {
+  readonly selected?: FieldWithPathClient[]
+}> = ({ action, disabled, selected }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -47,9 +62,10 @@ const Submit: React.FC<{
     void submit({
       action,
       method: 'PATCH',
+      overrides: (formState) => sanitizeUnselectedFields(formState, selected),
       skipValidation: true,
     })
-  }, [action, submit])
+  }, [action, submit, selected])
 
   return (
     <FormSubmit className={`${baseClass}__save`} disabled={disabled} onClick={save}>
@@ -58,7 +74,11 @@ const Submit: React.FC<{
   )
 }
 
-const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+const PublishButton: React.FC<{
+  action: string
+  disabled: boolean
+  selected?: FieldWithPathClient[]
+}> = ({ action, disabled, selected }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -66,12 +86,13 @@ const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action
     void submit({
       action,
       method: 'PATCH',
-      overrides: {
+      overrides: (formState) => ({
+        ...sanitizeUnselectedFields(formState, selected),
         _status: 'published',
-      },
+      }),
       skipValidation: true,
     })
-  }, [action, submit])
+  }, [action, submit, selected])
 
   return (
     <FormSubmit className={`${baseClass}__publish`} disabled={disabled} onClick={save}>
@@ -80,7 +101,11 @@ const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action
   )
 }
 
-const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
+const SaveDraftButton: React.FC<{
+  action: string
+  disabled: boolean
+  selected?: FieldWithPathClient[]
+}> = ({ action, disabled, selected }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -88,12 +113,13 @@ const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ acti
     void submit({
       action,
       method: 'PATCH',
-      overrides: {
+      overrides: (formState) => ({
+        ...sanitizeUnselectedFields(formState, selected),
         _status: 'draft',
-      },
+      }),
       skipValidation: true,
     })
-  }, [action, submit])
+  }, [action, submit, selected])
 
   return (
     <FormSubmit
@@ -125,12 +151,12 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
-  const [selected, setSelected] = useState([])
+  const [selected, setSelected] = useState<FieldWithPathClient[]>([])
   const searchParams = useSearchParams()
   const router = useRouter()
   const [initialState, setInitialState] = useState<FormState>()
   const hasInitializedState = React.useRef(false)
-  const formStateAbortControllerRef = React.useRef<AbortController>(null)
+  const abortFormStateRef = React.useRef<AbortController>(null)
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
@@ -167,10 +193,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      abortAndIgnore(formStateAbortControllerRef.current)
-
-      const controller = new AbortController()
-      formStateAbortControllerRef.current = controller
+      const controller = handleAbortRef(abortFormStateRef)
 
       const { state } = await getFormState({
         collectionSlug: slug,
@@ -182,14 +205,18 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         signal: controller.signal,
       })
 
+      abortFormStateRef.current = null
+
       return state
     },
-    [slug, getFormState, collectionPermissions],
+    [getFormState, slug, collectionPermissions],
   )
 
   useEffect(() => {
+    const abortFormState = abortFormStateRef.current
+
     return () => {
-      abortAndIgnore(formStateAbortControllerRef.current)
+      abortAndIgnore(abortFormState)
     }
   }, [])
 
@@ -289,16 +316,19 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                               <SaveDraftButton
                                 action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
                                 disabled={selected.length === 0}
+                                selected={selected}
                               />
                               <PublishButton
                                 action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
                                 disabled={selected.length === 0}
+                                selected={selected}
                               />
                             </React.Fragment>
                           ) : (
                             <Submit
                               action={`${serverURL}${apiRoute}/${slug}${queryString}`}
                               disabled={selected.length === 0}
+                              selected={selected}
                             />
                           )}
                         </div>

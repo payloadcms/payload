@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -50,7 +51,7 @@ const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 
-describe('fields - relationship', () => {
+describe('Relationship Field', () => {
   let url: AdminUrlUtil
   let versionedRelationshipFieldURL: AdminUrlUtil
   let page: Page
@@ -485,8 +486,7 @@ describe('fields - relationship', () => {
     await page.goto(versionedRelationshipFieldURL.list)
 
     await page.locator('.list-controls__toggle-columns').click()
-    await page.locator('.list-controls__toggle-where').click()
-    await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const conditionField = page.locator('.condition__field')

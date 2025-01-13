@@ -36,21 +36,33 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
     },
   ]
 
-  let url =
+  const url =
     typeof livePreviewConfig?.url === 'function'
       ? await livePreviewConfig.url({
           collectionConfig,
           data: doc,
           globalConfig,
           locale,
+          req,
+          /**
+           * @deprecated
+           * Use `req.payload` instead. This will be removed in the next major version.
+           */
           payload: initPageResult.req.payload,
         })
       : livePreviewConfig?.url
 
-  // Support relative URLs by prepending the origin, if necessary
-  if (url && url.startsWith('/')) {
-    url = `${initPageResult.req.protocol}//${initPageResult.req.host}${url}`
-  }
-
-  return <LivePreviewClient breakpoints={breakpoints} initialData={doc} url={url} />
+  return (
+    <LivePreviewClient
+      breakpoints={breakpoints}
+      Description={props.Description}
+      initialData={doc}
+      PreviewButton={props.PreviewButton}
+      PublishButton={props.PublishButton}
+      SaveButton={props.SaveButton}
+      SaveDraftButton={props.SaveDraftButton}
+      Upload={props.Upload}
+      url={url}
+    />
+  )
 }

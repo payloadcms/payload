@@ -6,7 +6,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config, Media, Relation } from './payload-types.js'
+import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -55,7 +55,7 @@ let withOnlyJPEGMetadataURL: AdminUrlUtil
 let relationPreviewURL: AdminUrlUtil
 let customFileNameURL: AdminUrlUtil
 
-describe('uploads', () => {
+describe('Uploads', () => {
   let page: Page
 
   beforeAll(async ({ browser }, testInfo) => {

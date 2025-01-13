@@ -15,7 +15,7 @@ type BaseArgs = {
   ignoreResult?: boolean
   joinQuery?: JoinQuery
   path?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   tableName: string
 }
 

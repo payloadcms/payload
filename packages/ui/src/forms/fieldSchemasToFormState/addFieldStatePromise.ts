@@ -19,6 +19,7 @@ import {
   fieldHasSubFields,
   fieldIsHiddenOrDisabled,
   fieldIsID,
+  fieldIsLocalized,
   fieldIsSidebar,
   getFieldPaths,
   tabHasName,
@@ -58,6 +59,7 @@ export type AddFieldStatePromiseArgs = {
    * Whether the field schema should be included in the state
    */
   includeSchema?: boolean
+  indexPath: string
   /**
    * Whether to omit parent fields in the state. @default false
    */
@@ -68,6 +70,7 @@ export type AddFieldStatePromiseArgs = {
   parentPermissions: SanitizedFieldsPermissions
   parentSchemaPath: string
   passesCondition: boolean
+  path: string
   preferences: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
@@ -77,6 +80,7 @@ export type AddFieldStatePromiseArgs = {
    * just create your own req and pass in the locale and the user
    */
   req: PayloadRequest
+  schemaPath: string
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -101,24 +105,25 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     collectionSlug,
     data,
     field,
-    fieldIndex,
     fieldSchemaMap,
     filter,
     forceFullValue = false,
     fullData,
     includeSchema = false,
+    indexPath,
     omitParents = false,
     operation,
-    parentIndexPath,
     parentPath,
     parentPermissions,
     parentSchemaPath,
     passesCondition,
+    path,
     preferences,
     previousFormState,
     renderAllFields,
     renderFieldFn,
     req,
+    schemaPath,
     skipConditionChecks = false,
     skipValidation = false,
     state,
@@ -130,17 +135,19 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     )
   }
 
-  const { indexPath, path, schemaPath } = getFieldPaths({
-    field,
-    index: fieldIndex,
-    parentIndexPath: 'name' in field ? '' : parentIndexPath,
-    parentPath,
-    parentSchemaPath,
-  })
-
   const requiresRender = renderAllFields || previousFormState?.[path]?.requiresRender
 
   let fieldPermissions: SanitizedFieldPermissions = true
+
+  const fieldState: FormFieldWithoutComponents = {
+    errorPaths: [],
+    fieldSchema: includeSchema ? field : undefined,
+    initialValue: undefined,
+    isSidebar: fieldIsSidebar(field),
+    passesCondition,
+    valid: true,
+    value: undefined,
+  }
 
   if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field)) {
     fieldPermissions =
@@ -163,16 +170,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const validate = field.validate
 
-    const fieldState: FormFieldWithoutComponents = {
-      errorPaths: [],
-      fieldSchema: includeSchema ? field : undefined,
-      initialValue: undefined,
-      isSidebar: fieldIsSidebar(field),
-      passesCondition,
-      valid: true,
-      value: undefined,
-    }
-
     let validationResult: string | true = true
 
     if (typeof validate === 'function' && !skipValidation && passesCondition) {
@@ -186,20 +183,29 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
       }
 
-      validationResult = await validate(
-        data?.[field.name] as never,
-        {
-          ...field,
-          id,
-          collectionSlug,
-          data: fullData,
-          jsonError,
-          operation,
-          preferences,
-          req,
-          siblingData: data,
-        } as any,
-      )
+      try {
+        validationResult = await validate(
+          data?.[field.name] as never,
+          {
+            ...field,
+            id,
+            collectionSlug,
+            data: fullData,
+            jsonError,
+            operation,
+            preferences,
+            req,
+            siblingData: data,
+          } as any,
+        )
+      } catch (err) {
+        validationResult = `Error validating field at path: ${path}`
+
+        req.payload.logger.error({
+          err,
+          msg: validationResult,
+        })
+      }
     }
 
     const addErrorPathToParent = (errorPath: string) => {
@@ -531,6 +537,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               id,
               data: fullData,
               relationTo: field.relationTo,
+              req,
               siblingData: data,
               user: req.user,
             })
@@ -626,7 +633,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       id,
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
-      anyParentLocalized: field.localized || anyParentLocalized,
+      anyParentLocalized: fieldIsLocalized(field) || anyParentLocalized,
       clientFieldSchemaMap,
       collectionSlug,
       data,
@@ -672,7 +679,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       })
 
       let childPermissions: SanitizedFieldsPermissions = undefined
-      if (tabHasName(tab)) {
+
+      if (isNamedTab) {
         if (parentPermissions === true) {
           childPermissions = true
         } else {
@@ -721,16 +729,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     await Promise.all(promises)
   } else if (field.type === 'ui') {
     if (!filter || filter(args)) {
-      state[path] = {
-        disableFormData: true,
-        errorPaths: [],
-        fieldSchema: includeSchema ? field : undefined,
-        initialValue: undefined,
-        isSidebar: fieldIsSidebar(field),
-        passesCondition,
-        valid: true,
-        value: undefined,
-      }
+      state[path] = fieldState
+      state[path].disableFormData = true
     }
   }
 

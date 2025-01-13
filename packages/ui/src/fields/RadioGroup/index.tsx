@@ -138,4 +138,4 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   )
 }
 
-export const RadioGroupField = withCondition(RadioGroupFieldComponent)
+export const RadioGroupField: any = withCondition(RadioGroupFieldComponent)
