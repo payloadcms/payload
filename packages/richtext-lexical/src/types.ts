@@ -25,6 +25,10 @@ export type LexicalFieldAdminProps = {
    */
   hideGutter?: boolean
   /**
+   * Controls if the insert paragraph at the end button should be hidden. @default false
+   */
+  hideInsertParagraphAtEnd?: boolean
+  /**
    * Changes the placeholder text in the editor if no content is present.
    */
   placeholder?: LabelFunction | StaticLabel
