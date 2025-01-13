@@ -59,6 +59,9 @@
       "@payloadcms/plugin-multi-tenant/fields": [
         "./packages/plugin-multi-tenant/src/exports/fields.ts"
       ],
+      "@payloadcms/plugin-multi-tenant/client": [
+        "./packages/plugin-multi-tenant/src/exports/client.ts"
+      ],
       "@payloadcms/plugin-multi-tenant": ["./packages/plugin-multi-tenant/src/index.ts"],
       "@payloadcms/next": ["./packages/next/src/exports/*"]
     }

@@ -93,6 +93,8 @@ export interface User {
 export interface Tenant {
   id: string;
   name: string;
+  slug: string;
+  domain: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -102,10 +104,10 @@ export interface Tenant {
  */
 export interface Post {
   id: string;
+  tenant?: (string | null) | Tenant;
   title: string;
   excerpt?: string | null;
   slug?: string | null;
-  tenant?: (string | null) | Tenant;
   updatedAt: string;
   createdAt: string;
 }
@@ -115,8 +117,8 @@ export interface Post {
  */
 export interface NavigationGlobal {
   id: string;
-  title?: string | null;
   tenant?: (string | null) | Tenant;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -214,6 +216,8 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface TenantsSelect<T extends boolean = true> {
   name?: T;
+  slug?: T;
+  domain?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -222,10 +226,10 @@ export interface TenantsSelect<T extends boolean = true> {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   excerpt?: T;
   slug?: T;
-  tenant?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -234,8 +238,8 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "navigation-global_select".
  */
 export interface NavigationGlobalSelect<T extends boolean = true> {
-  title?: T;
   tenant?: T;
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -77,7 +77,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-      documentTenantField: {
+      tenantField: {
         access: {},
       },
       collections: {
