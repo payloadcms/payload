@@ -10,6 +10,7 @@ import type {
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
+  ServerComponentProps,
   StaticLabel,
 } from 'payload'
 
@@ -170,11 +171,23 @@ export const buildColumnState = (args: Args): Column[] => {
       field,
     }
 
+    const serverProps: Pick<
+      ServerComponentProps,
+      'clientField' | 'collectionSlug' | 'field' | 'i18n' | 'payload'
+    > = {
+      clientField: field,
+      collectionSlug: collectionConfig.slug,
+      field: _field,
+      i18n,
+      payload,
+    }
+
     const CustomLabel = CustomLabelToRender
       ? RenderServerComponent({
           clientProps,
           Component: CustomLabelToRender,
           importMap: payload.importMap,
+          serverProps,
         })
       : undefined
 
@@ -199,12 +212,6 @@ export const buildColumnState = (args: Args): Column[] => {
       customCellProps,
       field,
       rowData: undefined,
-    }
-
-    const serverProps: Pick<DefaultServerCellComponentProps, 'field' | 'i18n' | 'payload'> = {
-      field: _field,
-      i18n,
-      payload,
     }
 
     const column: Column = {
