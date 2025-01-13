@@ -185,7 +185,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
       setUploadStatus('uploading')
       try {
         // Make a request to the Payload 'paste-url' endpoint
-        const pasteURL = `/${collectionSlug}/${id ? `${id}/` : ''}paste-url?src=${encodeURIComponent(fileUrl)}`
+        const pasteURL = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
         const response = await fetch(`${serverURL}${api}${pasteURL}`)
 
         if (!response.ok) {

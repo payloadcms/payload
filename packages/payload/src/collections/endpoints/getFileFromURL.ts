@@ -1,25 +1,19 @@
-import type { Collection, TypeWithID } from '../collections/config/types.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadHandler } from '../../config/types.js'
 
-import executeAccess from '../auth/executeAccess.js'
-import { APIError } from '../errors/APIError.js'
-import { Forbidden } from '../errors/Forbidden.js'
+import executeAccess from '../../auth/executeAccess.js'
+import { APIError } from '../../errors/APIError.js'
+import { Forbidden } from '../../errors/Forbidden.js'
+import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 
 // If doc id is provided, it means we are updating the doc
-// /:collectionSlug/:doc-id/paste-url/:fileUrl
+// /:collectionSlug/paste-url/:doc-id?src=:fileUrl
 
 // If doc id is not provided, it means we are creating a new doc
-// /:collectionSlug/paste-url/:fileUrl
+// /:collectionSlug/paste-url?src=:fileUrl
 
-export const getFileFromURL = async ({
-  id,
-  collection,
-  req,
-}: {
-  collection?: Collection
-  id?: number | string
-  req: PayloadRequest
-}): Promise<Response | TypeWithID> => {
+export const getFileFromURLHandler: PayloadHandler = async (req) => {
+  const { id, collection } = getRequestCollectionWithID(req, { optionalID: true })
+
   if (!req.user) {
     throw new Forbidden(req.t)
   }
