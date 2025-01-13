@@ -14,6 +14,9 @@ importers:
       '@payloadcms/next':
         specifier: latest
         version: 3.0.2(@types/react@19.0.1)(graphql@16.9.0)(monaco-editor@0.52.0)(next@15.0.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(sass@1.77.4))(payload@3.0.2(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2)
+      '@payloadcms/plugin-multi-tenant':
+        specifier: file:payloadcms-plugin-multi-tenant-3.15.1.tgz
+        version: file:payloadcms-plugin-multi-tenant-3.15.1.tgz(@payloadcms/ui@3.0.2(@types/react@19.0.1)(monaco-editor@0.52.0)(next@15.0.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(sass@1.77.4))(payload@3.0.2(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2))(next@15.0.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(sass@1.77.4))(payload@3.0.2(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2))
       '@payloadcms/richtext-lexical':
         specifier: latest
         version: 3.0.2(6qerb26rs4bgoavayjhmleobf4)
@@ -707,6 +710,14 @@ packages:
       graphql: ^16.8.1
       next: ^15.0.0
       payload: 3.0.2
+
+  '@payloadcms/plugin-multi-tenant@file:payloadcms-plugin-multi-tenant-3.15.1.tgz':
+    resolution: {integrity: sha512-bRuvmbrCLQr9ZL1jL4KLz+Zuv6vC4WTGKXcFkhdZoFY5tP80t78WUsxJP71FM1d1U+udJGvEA5K2bMJc9tQWOA==, tarball: file:payloadcms-plugin-multi-tenant-3.15.1.tgz}
+    version: 3.15.1
+    peerDependencies:
+      '@payloadcms/ui': 3.15.1
+      next: ^15.0.3
+      payload: 3.15.1
 
   '@payloadcms/richtext-lexical@3.0.2':
     resolution: {integrity: sha512-NHxnIi8qIa5ug3JQ/oX4je+94FLGhofmP02RL7BoyknNIw8Jv0zZY4NJCgrUBpmRw4CVxCc+dikMY+5243B9vA==}
@@ -3605,6 +3616,12 @@ snapshots:
       - react-dom
       - supports-color
       - typescript
+
+  '@payloadcms/plugin-multi-tenant@file:payloadcms-plugin-multi-tenant-3.15.1.tgz(@payloadcms/ui@3.0.2(@types/react@19.0.1)(monaco-editor@0.52.0)(next@15.0.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(sass@1.77.4))(payload@3.0.2(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2))(next@15.0.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(sass@1.77.4))(payload@3.0.2(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2))':
+    dependencies:
+      '@payloadcms/ui': 3.0.2(@types/react@19.0.1)(monaco-editor@0.52.0)(next@15.0.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(sass@1.77.4))(payload@3.0.2(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2)
+      next: 15.0.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(sass@1.77.4)
+      payload: 3.0.2(graphql@16.9.0)(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.5.2)
 
   '@payloadcms/richtext-lexical@3.0.2(6qerb26rs4bgoavayjhmleobf4)':
     dependencies:
