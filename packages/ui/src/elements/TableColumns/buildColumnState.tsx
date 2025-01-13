@@ -1,6 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
+  ClientComponentProps,
   ClientField,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
@@ -164,8 +165,17 @@ export const buildColumnState = (args: Args): Column[] => {
         ? _field.admin.components.Label
         : undefined
 
+    // TODO: customComponent will be optional in v4
+    const clientProps: Omit<ClientComponentProps, 'customComponents'> = {
+      field,
+    }
+
     const CustomLabel = CustomLabelToRender
-      ? RenderServerComponent({ Component: CustomLabelToRender, importMap: payload.importMap })
+      ? RenderServerComponent({
+          clientProps,
+          Component: CustomLabelToRender,
+          importMap: payload.importMap,
+        })
       : undefined
 
     const fieldAffectsDataSubFields =
