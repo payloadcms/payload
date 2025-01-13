@@ -2040,7 +2040,7 @@ describe('Versions', () => {
             collection: 'payload-jobs',
             where: {
               'input.doc.value': {
-                equals: String(draftDoc.id),
+                equals: draftDoc.id,
               },
             },
           })
@@ -2073,7 +2073,7 @@ describe('Versions', () => {
             collection: 'payload-jobs',
             where: {
               'input.doc.value': {
-                equals: String(draftDoc.id),
+                equals: draftDoc.id,
               },
             },
           })
