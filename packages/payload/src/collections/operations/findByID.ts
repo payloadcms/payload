@@ -162,7 +162,7 @@ export const findByIDOperation = async <
 
         const lockedDocument = await req.payload.find({
           collection: 'payload-locked-documents',
-          depth: 1,
+          depth: 0,
           limit: 1,
           overrideAccess: false,
           pagination: false,
