@@ -209,6 +209,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
   }, [hasMany, hasMultipleRelations, value, options])
 
   const handleInputChange = (input: string) => {
+    dispatchOptions({ type: 'CLEAR', i18n, required: false })
     const relationSlug = partiallyLoadedRelationshipSlugs.current[0]
     nextPageByRelationshipRef.current.set(relationSlug, 1)
     setSearch(input)
