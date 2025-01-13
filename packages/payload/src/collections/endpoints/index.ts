@@ -47,6 +47,11 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       path: '/access/:id?',
     },
     {
+      handler: getFileFromURLHandler,
+      method: 'get',
+      path: '/paste-url/:id?',
+    },
+    {
       handler: duplicateHandler,
       method: 'post',
       path: '/:id/duplicate',
@@ -65,11 +70,6 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: findVersionByIDHandler,
       method: 'get',
       path: '/versions/:id',
-    },
-    {
-      handler: getFileFromURLHandler,
-      method: 'get',
-      path: '/paste-url/:id?',
     },
     {
       handler: getFileHandler,
