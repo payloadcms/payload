@@ -196,7 +196,7 @@ export const findOperation = async <
 
         const lockedDocuments = await payload.find({
           collection: 'payload-locked-documents',
-          depth: 1,
+          depth: 0,
           limit: sanitizedLimit,
           overrideAccess: false,
           pagination: false,
