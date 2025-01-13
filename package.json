@@ -150,7 +150,7 @@
     "jest-environment-jsdom": "29.7.0",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
-    "mongodb-memory-server": "^9.0",
+    "mongodb-memory-server": "^10",
     "next": "15.1.3",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
