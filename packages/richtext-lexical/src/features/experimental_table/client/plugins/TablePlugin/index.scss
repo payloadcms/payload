@@ -90,7 +90,7 @@
     &__tableAddColumns,
     &__tableAddRows {
       position: absolute;
-      background-color: var(--theme-elevation-100);
+      background-color: var(--theme-elevation-50);
       animation: table-controls 0.2s ease;
       border: 0;
       cursor: pointer;
@@ -100,17 +100,18 @@
 
     &__tableAddColumns:after,
     &__tableAddRows:after {
-      background-image: url(../../../../../lexical/ui/icons/Add/index.svg);
-      background-position: center;
-      background-repeat: no-repeat;
-      display: block;
-      content: ' ';
+      display: flex;
+      content: '+';
+      font-size: 1.5rem;
+      border-radius: $style-radius-s;
+      justify-content: center;
+      align-items: center;
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      opacity: 0.4;
+      color: var(--theme-elevation-500);
     }
 
     &__tableAddColumns:hover,
@@ -176,11 +177,6 @@
       &__tableCellSelected::after {
         background-color: var(--color-success-700);
         mix-blend-mode: screen;
-      }
-
-      &__tableAddColumns:after,
-      &__tableAddRows:after {
-        background-image: url(../../../../../lexical/ui/icons/Add/light.svg);
       }
     }
   }

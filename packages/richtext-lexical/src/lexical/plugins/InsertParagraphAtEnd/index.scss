@@ -21,7 +21,8 @@
       transition: background-color 0.1s ease-in-out;
       display: flex;
       justify-content: center;
-      border-radius: $style-radius-m;
+      border-radius: $style-radius-s;
+      color: var(--theme-elevation-500);
 
       span {
         display: none;
