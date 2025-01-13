@@ -1,6 +1,7 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
+import { APIError } from 'payload'
 import { isImage } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -190,7 +191,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.error || 'Failed to fetch the file from the server')
+          throw new APIError(errorData.error || 'Failed to fetch the file from the server')
         }
 
         const blob = await response.blob()
