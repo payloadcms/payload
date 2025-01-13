@@ -367,18 +367,6 @@ jobs:
         if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
 
-      - name: E2E Tests
-        uses: nick-fields/retry@v3
-        with:
-          retry_on: any
-          max_attempts: 5
-          timeout_minutes: 20
-          command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
-          on_retry_command: pnpm clean:build:allowtgz && pnpm install --no-frozen-lockfile && pnpm build:all
-        env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
-          NEXT_TELEMETRY_DISABLED: 1
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:
