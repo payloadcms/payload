@@ -459,7 +459,7 @@ export type RenderedField = {
    * Please use `fieldIsSidebar(field)` from `payload` instead
    * Or check `field.admin.position === 'sidebar'` directly.
    **/
-  isSidebar?: boolean
+  isSidebar: boolean
   path: string
   schemaPath: string
   type: FieldTypes

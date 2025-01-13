@@ -1,5 +1,5 @@
 'use client'
-import type { FormField, FormState, Row } from 'payload'
+import type { FormField, FormFieldWithoutComponents, FormState, Row } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support

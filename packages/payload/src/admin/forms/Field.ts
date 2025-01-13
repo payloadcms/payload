@@ -18,7 +18,10 @@ import type {
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type ClientComponentProps = {
-  customComponents?: FormField['customComponents']
+  /**
+   * TODO: make the `customComponents` property optional in v4
+   */
+  customComponents: FormField['customComponents']
   field: ClientBlock | ClientField | ClientTab
   forceRender?: boolean
   permissions?: SanitizedFieldPermissions

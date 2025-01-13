@@ -45,7 +45,10 @@ export type FieldState = {
    */
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
-  initialValue?: unknown
+  /**
+   * TODO: make the `initialValue` property optional in v4
+   */
+  initialValue: unknown
   /**
    * @deprecated
    * This is a legacy property that is no longer used.
@@ -56,9 +59,15 @@ export type FieldState = {
   passesCondition?: boolean
   requiresRender?: boolean
   rows?: Row[]
-  valid?: boolean
+  /**
+   * TODO: make the `valid` property optional in v4
+   */
+  valid: boolean
   validate?: Validate
-  value?: unknown
+  /**
+   * TODO: make the `value` property optional in v4
+   */
+  value: unknown
 }
 
 export type FieldStateWithoutComponents = Omit<FieldState, 'customComponents'>
