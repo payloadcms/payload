@@ -593,6 +593,61 @@ describe('Versions', () => {
         expect(draftPost.title.es).toBe(spanishTitle)
       })
 
+      it('should have correct updatedAt timestamps when saving drafts', async () => {
+        const created = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'desc',
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.update({
+          id: created.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
+      })
+
+      it('should have correct updatedAt timestamps when saving drafts with autosave', async () => {
+        const created = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'desc',
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.update({
+          id: created.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+          autosave: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
+      })
+
       it('should validate when publishing with the draft arg', async () => {
         // no title (not valid for publishing)
         const doc = await payload.create({

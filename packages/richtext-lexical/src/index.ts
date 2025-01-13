@@ -1010,14 +1010,15 @@ export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 
 export type * from './nodeTypes.js'
 
-export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
+export { $convertFromMarkdownString } from './packages/@lexical/markdown/index.js'
 
+export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
+
 export { createServerFeature } from './utilities/createServerFeature.js'
 
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
-
 export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
 export {
   extractFrontmatter,
@@ -1025,5 +1026,4 @@ export {
   objectToFrontmatter,
   propsToJSXString,
 } from './utilities/jsx/jsx.js'
-export { $convertFromMarkdownString } from './utilities/jsx/lexicalMarkdownCopy.js'
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
