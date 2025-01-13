@@ -8,7 +8,7 @@ import { Gutter } from './_components/Gutter'
 import { HydrateClientUser } from './_components/HydrateClientUser'
 
 export default async function HomePage() {
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const payload = await getPayload({ config })
   const { permissions, user } = await payload.auth({ headers })
 

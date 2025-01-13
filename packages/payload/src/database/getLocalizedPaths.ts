@@ -45,13 +45,32 @@ export function getLocalizedPaths({
 
       let fieldsToSearch: FlattenedField[]
 
-      if (lastIncompletePath?.field && 'flattenedFields' in lastIncompletePath.field) {
-        fieldsToSearch = lastIncompletePath.field.flattenedFields
+      let matchedField: FlattenedField
+
+      if (lastIncompletePath?.field?.type === 'blocks') {
+        if (segment === 'blockType') {
+          matchedField = {
+            name: 'blockType',
+            type: 'text',
+          }
+        } else {
+          for (const block of lastIncompletePath.field.blocks) {
+            matchedField = block.flattenedFields.find((field) => field.name === segment)
+            if (matchedField) {
+              break
+            }
+          }
+        }
       } else {
-        fieldsToSearch = lastIncompletePath.fields
+        if (lastIncompletePath?.field && 'flattenedFields' in lastIncompletePath.field) {
+          fieldsToSearch = lastIncompletePath.field.flattenedFields
+        } else {
+          fieldsToSearch = lastIncompletePath.fields
+        }
+
+        matchedField = fieldsToSearch.find((field) => field.name === segment)
       }
 
-      const matchedField = fieldsToSearch.find((field) => field.name === segment)
       lastIncompletePath.field = matchedField
 
       if (currentPath === 'globalType' && globalSlug) {
@@ -94,7 +113,6 @@ export function getLocalizedPaths({
         }
 
         switch (matchedField.type) {
-          case 'blocks':
           case 'json':
           case 'richText': {
             const upcomingSegments = pathSegments.slice(i + 1).join('.')

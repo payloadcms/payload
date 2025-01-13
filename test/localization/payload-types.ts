@@ -471,6 +471,12 @@ export interface Nested {
         id?: string | null;
       }[]
     | null;
+  topLevelArrayLocalized?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -516,6 +522,12 @@ export interface Tab {
   id: string;
   tabLocalized?: {
     title?: string | null;
+    array?:
+      | {
+          title?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   tab?: {
     title?: string | null;
@@ -1051,6 +1063,12 @@ export interface NestedSelect<T extends boolean = true> {
         notLocalizedText?: T;
         id?: T;
       };
+  topLevelArrayLocalized?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1107,6 +1125,12 @@ export interface TabsSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
+        array?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+            };
       };
   tab?:
     | T

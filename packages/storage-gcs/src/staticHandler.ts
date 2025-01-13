@@ -19,6 +19,20 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
 
       const [metadata] = await file.getMetadata()
 
+      const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
+      const objectEtag = metadata.etag
+
+      if (etagFromHeaders && etagFromHeaders === objectEtag) {
+        return new Response(null, {
+          headers: new Headers({
+            'Content-Length': String(metadata.size),
+            'Content-Type': String(metadata.contentType),
+            ETag: String(metadata.etag),
+          }),
+          status: 304,
+        })
+      }
+
       // Manually create a ReadableStream for the web from a Node.js stream.
       const readableStream = new ReadableStream({
         start(controller) {

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.5.0",
+  "version": "3.16.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -53,6 +53,11 @@
       "types": "./src/utilities/buildTableState.ts",
       "default": "./src/utilities/buildTableState.ts"
     },
+    "./utilities/schedulePublishHandler": {
+      "import": "./src/utilities/schedulePublishHandler.ts",
+      "types": "./src/utilities/schedulePublishHandler.ts",
+      "default": "./src/utilities/schedulePublishHandler.ts"
+    },
     "./utilities/getClientConfig": {
       "import": "./src/utilities/getClientConfig.ts",
       "types": "./src/utilities/getClientConfig.ts",
@@ -94,7 +99,7 @@
     "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -115,9 +120,9 @@
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
     "qs-esm": "7.0.2",
-    "react-datepicker": "7.5.0",
+    "react-datepicker": "7.6.0",
     "react-image-crop": "10.1.8",
-    "react-select": "5.8.3",
+    "react-select": "5.9.0",
     "scheduler": "0.25.0",
     "sonner": "^1.7.0",
     "ts-essentials": "10.0.3",

@@ -15,7 +15,7 @@ import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.describe('Form Builder', () => {
+test.describe('Form Builder Plugin', () => {
   let page: Page
   let formsUrl: AdminUrlUtil
   let submissionsUrl: AdminUrlUtil

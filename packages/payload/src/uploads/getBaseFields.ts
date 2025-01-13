@@ -12,7 +12,7 @@ type GenerateURLArgs = {
 }
 const generateURL = ({ collectionSlug, config, filename }: GenerateURLArgs) => {
   if (filename) {
-    return `${config.serverURL || ''}${config.routes.api || ''}/${collectionSlug}/file/${filename}`
+    return `${config.serverURL || ''}${config.routes.api || ''}/${collectionSlug}/file/${encodeURIComponent(filename)}`
   }
   return undefined
 }
@@ -170,6 +170,8 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           name,
           type: 'number',
           admin: {
+            disableListColumn: true,
+            disableListFilter: true,
             hidden: true,
           },
         }

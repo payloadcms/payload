@@ -5,11 +5,11 @@ import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
-import { getPayload, parseCookies } from 'payload'
+import { getPayload, getRequestLanguage, parseCookies } from 'payload'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
+import { getRequestLocale } from '../../utilities/getRequestLocale.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -54,7 +54,7 @@ export const RootLayout = async ({
 
   const payload = await getPayload({ config, importMap })
 
-  const { i18n, permissions, user } = await initReq(config)
+  const { permissions, req } = await initReq(config)
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
@@ -84,33 +84,43 @@ export const RootLayout = async ({
     })
   }
 
-  const navPrefs = await getNavPrefs({ payload, user })
+  const navPrefs = await getNavPrefs({ payload, user: req.user })
 
   const clientConfig = getClientConfig({
     config,
-    i18n,
+    i18n: req.i18n,
     importMap,
   })
 
+  const locale = await getRequestLocale({
+    req,
+  })
+
   return (
-    <html data-theme={theme} dir={dir} lang={languageCode}>
+    <html
+      data-theme={theme}
+      dir={dir}
+      lang={languageCode}
+      suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
+    >
       <head>
         <style>{`@layer payload-default, payload;`}</style>
       </head>
       <body>
         <RootProvider
           config={clientConfig}
-          dateFNSKey={i18n.dateFNSKey}
+          dateFNSKey={req.i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}
+          locale={locale?.code}
           permissions={permissions}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
-          translations={i18n.translations}
-          user={user}
+          translations={req.i18n.translations}
+          user={req.user}
         >
           {Array.isArray(config.admin?.components?.providers) &&
           config.admin?.components?.providers.length > 0 ? (
@@ -118,10 +128,10 @@ export const RootLayout = async ({
               importMap={payload.importMap}
               providers={config.admin?.components?.providers}
               serverProps={{
-                i18n,
+                i18n: req.i18n,
                 payload,
                 permissions,
-                user,
+                user: req.user,
               }}
             >
               {children}

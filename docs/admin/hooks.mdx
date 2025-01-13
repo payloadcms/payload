@@ -9,7 +9,7 @@ keywords: admin, components, custom, documentation, Content Management System, c
 Payload provides a variety of powerful [React Hooks](https://react.dev/reference/react-dom/hooks) that can be used within your own [Custom Components](./components), such as [Custom Fields](./fields). With them, you can interface with Payload itself to build just about any type of complex customization you can think of.
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
+  **Reminder:**
   All Custom Components are [React Server Components](https://react.dev/reference/rsc/server-components) by default. Hooks, on the other hand, are only available in client-side environments. To use hooks, [ensure your component is a client component](./components#client-components).
 </Banner>
 
@@ -78,7 +78,7 @@ type FieldType<T> = {
 There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields' form states from anywhere within a form.
 
 <Banner type="success">
-  <strong>This hook is great for retrieving only certain fields from form state</strong> because it
+  **This hook is great for retrieving only certain fields from form state** because it
   ensures that it will only cause a rerender when the items that you ask for change.
 </Banner>
 
@@ -150,15 +150,15 @@ You can send the following actions to the `dispatchFields` function.
 | **`REPLACE_STATE`**    | Completely replaces form state                                             |
 | **`UPDATE`**           | Update any property of a specific field's state                            |
 
-To see types for each action supported within the `dispatchFields` hook, check out the Form types [here](https://github.com/payloadcms/payload/blob/main/packages/payload/src/admin/components/forms/Form/types.ts).
+To see types for each action supported within the `dispatchFields` hook, check out the Form types [here](https://github.com/payloadcms/payload/blob/main/packages/ui/src/forms/Form/types.ts).
 
 ## useForm
 
 The `useForm` hook can be used to interact with the form itself, and sends back many methods that can be used to reactively fetch form state without causing rerenders within your components each time a field is changed. This is useful if you have action-based callbacks that your components fire, and need to interact with form state _based on a user action_.
 
 <Banner type="warning">
-  <strong>Warning:</strong>
-  <br />
+  **Warning:**
+
   This hook is optimized to avoid causing rerenders when fields change, and as such, its `fields`
   property will be out of date. You should only leverage this hook if you need to perform actions
   against the form in response to your users' actions. Do not rely on its returned "fields" as being
@@ -176,7 +176,7 @@ The `useForm` hook returns an object with the following properties:
   rows={[
     [
       {
-        value: <strong><code>fields</code></strong>,
+        value: "**`fields`**",
       },
       {
         value: "Deprecated. This property cannot be relied on as up-to-date.",
@@ -187,7 +187,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>submit</code></strong>,
+        value: "**`submit`**",
       },
       {
         value: "Method to trigger the form to submit",
@@ -198,7 +198,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>dispatchFields</code></strong>,
+        value: "**`dispatchFields`**",
       },
       {
         value: "Dispatch actions to the form field state",
@@ -209,7 +209,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>validateForm</code></strong>,
+        value: "**`validateForm`**",
       },
       {
         value: "Trigger a validation of the form state",
@@ -220,10 +220,10 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>createFormData</code></strong>,
+        value: "**`createFormData`**",
       },
       {
-        value: <>Create a <code>multipart/form-data</code> object from the current form's state</>,
+        value: "Create a `multipart/form-data` object from the current form's state",
       },
       {
         value: ''
@@ -231,7 +231,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>disabled</code></strong>,
+        value: "**`disabled`**",
       },
       {
         value: "Boolean denoting whether or not the form is disabled",
@@ -242,7 +242,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>getFields</code></strong>,
+        value: "**`getFields`**",
       },
       {
         value: 'Gets all fields from state',
@@ -253,7 +253,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>getField</code></strong>,
+        value: "**`getField`**",
       },
       {
         value: 'Gets a single field from state by path',
@@ -264,7 +264,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>getData</code></strong>,
+        value: "**`getData`**",
       },
       {
         value: 'Returns the data stored in the form',
@@ -275,7 +275,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>getSiblingData</code></strong>,
+        value: "**`getSiblingData`**",
       },
       {
         value: 'Returns form sibling data for the given field path',
@@ -286,21 +286,10 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>setModified</code></strong>,
+        value: "**`setModified`**",
       },
       {
-        value: <>Set the form\'s <code>modified</code> state</>,
-      },
-      {
-        value: '',
-      },
-    ],
-    [
-      {
-        value: <strong><code>setProcessing</code></strong>,
-      },
-      {
-        value: <>Set the form\'s <code>processing</code> state</>,
+        value: "Set the form\'s `modified` state",
       },
       {
         value: '',
@@ -308,10 +297,10 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>setSubmitted</code></strong>,
+        value: "**`setProcessing`**",
       },
       {
-        value: <>Set the form\'s <code>submitted</code> state</>,
+        value: "Set the form\'s `processing` state",
       },
       {
         value: '',
@@ -319,7 +308,18 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>formRef</code></strong>,
+        value: "**`setSubmitted`**",
+      },
+      {
+        value: "Set the form\'s `submitted` state",
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: "**`formRef`**",
       },
       {
         value: 'The ref from the form HTML element',
@@ -330,7 +330,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>reset</code></strong>,
+        value: "**`reset`**",
       },
       {
         value: 'Method to reset the form to its initial state',
@@ -341,7 +341,7 @@ The `useForm` hook returns an object with the following properties:
     ],
     [
       {
-        value: <strong><code>addFieldRow</code></strong>,
+        value: "**`addFieldRow`**",
       },
       {
         value: "Method to add a row on an array or block field",
@@ -350,8 +350,7 @@ The `useForm` hook returns an object with the following properties:
         drawerTitle: 'addFieldRow',
         drawerDescription: 'A useful method to programmatically add a row to an array or block field.',
         drawerSlug: 'addFieldRow',
-        drawerContent: (
-<>
+        drawerContent: `
   <TableWithDrawers
     columns={[
       'Prop',
@@ -360,7 +359,7 @@ The `useForm` hook returns an object with the following properties:
     rows={[
       [
         {
-          value: <strong><code>path</code></strong>,
+          value: "**\\\`path\\\`**",
         },
         {
           value: "The path to the array or block field",
@@ -368,7 +367,7 @@ The `useForm` hook returns an object with the following properties:
       ],
       [
         {
-          value: <strong><code>rowIndex</code></strong>,
+          value: "**\\\`rowIndex\\\`**",
         },
         {
           value: "The index of the row to add. If omitted, the row will be added to the end of the array.",
@@ -376,7 +375,7 @@ The `useForm` hook returns an object with the following properties:
       ],
       [
         {
-          value: <strong><code>data</code></strong>,
+          value: "**\\\`data\\\`**",
         },
         {
           value: "The data to add to the row",
@@ -385,14 +384,9 @@ The `useForm` hook returns an object with the following properties:
     ]}
   />
 
-{' '}
 
-<br />
-
-{' '}
-
-<pre>
-  {`import { useForm } from "payload/components/forms";
+\`\`\`tsx
+import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { addFieldRow } = useForm()
@@ -415,12 +409,13 @@ export const CustomArrayManager = () => {
       Add Row
     </button>
   )
-}`}
-</pre>
+}
+\`\`\`
 
-  <p>An example config to go along with the Custom Component</p>
-  <pre>
-{`const ExampleCollection = {
+An example config to go along with the Custom Component
+
+\`\`\`tsx
+const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -443,15 +438,14 @@ export const CustomArrayManager = () => {
       },
     },
   ],
-}`}
-  </pre>
-</>
-        )
+}
+\`\`\`
+`
       }
     ],
     [
       {
-        value: <strong><code>removeFieldRow</code></strong>,
+        value: "**`removeFieldRow`**",
       },
       {
         value: "Method to remove a row from an array or block field",
@@ -460,8 +454,7 @@ export const CustomArrayManager = () => {
         drawerTitle: 'removeFieldRow',
         drawerDescription: 'A useful method to programmatically remove a row from an array or block field.',
         drawerSlug: 'removeFieldRow',
-        drawerContent: (
-<>
+        drawerContent:  `
   <TableWithDrawers
     columns={[
       'Prop',
@@ -470,7 +463,7 @@ export const CustomArrayManager = () => {
     rows={[
       [
         {
-          value: <strong><code>path</code></strong>,
+          value: "**\\\`path\\\`**",
         },
         {
           value: "The path to the array or block field",
@@ -478,7 +471,7 @@ export const CustomArrayManager = () => {
       ],
       [
         {
-          value: <strong><code>rowIndex</code></strong>,
+          value: "**\\\`rowIndex\\\`**",
         },
         {
           value: "The index of the row to remove",
@@ -487,14 +480,10 @@ export const CustomArrayManager = () => {
     ]}
   />
 
-{' '}
 
-<br />
 
-{' '}
-
-<pre>
-  {`import { useForm } from "payload/components/forms";
+\`\`\`tsx
+import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { removeFieldRow } = useForm()
@@ -512,12 +501,13 @@ export const CustomArrayManager = () => {
       Remove Row
     </button>
   )
-}`}
-</pre>
+}
+\`\`\`
 
-  <p>An example config to go along with the Custom Component</p>
-  <pre>
-{`const ExampleCollection = {
+An example config to go along with the Custom Component
+
+\`\`\`tsx
+const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -540,15 +530,14 @@ export const CustomArrayManager = () => {
       },
     },
   ],
-}`}
-  </pre>
-</>
-        )
+}
+\`\`\`
+`
       }
     ],
     [
       {
-        value: <strong><code>replaceFieldRow</code></strong>,
+        value: "**`replaceFieldRow`**",
       },
       {
         value: "Method to replace a row from an array or block field",
@@ -557,8 +546,7 @@ export const CustomArrayManager = () => {
         drawerTitle: 'replaceFieldRow',
         drawerDescription: 'A useful method to programmatically replace a row from an array or block field.',
         drawerSlug: 'replaceFieldRow',
-        drawerContent: (
-<>
+        drawerContent:  `
   <TableWithDrawers
     columns={[
       'Prop',
@@ -567,7 +555,7 @@ export const CustomArrayManager = () => {
     rows={[
       [
         {
-          value: <strong><code>path</code></strong>,
+          value: "**\\\`path\\\`**",
         },
         {
           value: "The path to the array or block field",
@@ -575,7 +563,7 @@ export const CustomArrayManager = () => {
       ],
       [
         {
-          value: <strong><code>rowIndex</code></strong>,
+          value: "**\\\`rowIndex\\\`**",
         },
         {
           value: "The index of the row to replace",
@@ -583,7 +571,7 @@ export const CustomArrayManager = () => {
       ],
       [
         {
-          value: <strong><code>data</code></strong>,
+         value: "**\\\`data\\\`**",
         },
         {
           value: "The data to replace within the row",
@@ -592,14 +580,11 @@ export const CustomArrayManager = () => {
     ]}
   />
 
-{' '}
 
-<br />
 
-{' '}
 
-<pre>
-  {`import { useForm } from "payload/components/forms";
+\`\`\`tsx
+import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { replaceFieldRow } = useForm()
@@ -622,12 +607,13 @@ export const CustomArrayManager = () => {
       Replace Row
     </button>
   )
-}`}
-</pre>
+}
+\`\`\`
 
-  <p>An example config to go along with the Custom Component</p>
-  <pre>
-{`const ExampleCollection = {
+An example config to go along with the Custom Component
+
+\`\`\`tsx
+const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -650,10 +636,9 @@ export const CustomArrayManager = () => {
       },
     },
   ],
-}`}
-  </pre>
-</>
-        )
+}
+\`\`\`
+`
       }
     ],
   ]}
@@ -694,20 +679,25 @@ const CustomComponent: React.FC = () => {
 
 ## useDocumentInfo
 
-The `useDocumentInfo` hook provides lots of information about the document currently being edited, including the following:
+The `useDocumentInfo` hook provides information about the current document being edited, including the following:
 
 | Property                  | Description                                                                                                        |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **`collection`**          | If the doc is a collection, its Collection Config will be returned                                                 |
-| **`global`**              | If the doc is a global, its Global Config will be returned                                                         |
+| **`currentEditor`**       | The user currently editing the document.                                                                             |
+| **`docConfig`**              | Either the Collection or Global config of the document, depending on what is being edited.                         |
+| **`documentIsLocked`**    | Whether the document is currently locked by another user.                                                          |
 | **`id`**                  | If the doc is a collection, its ID will be returned                                                                |
-| **`preferencesKey`**      | The `preferences` key to use when interacting with document-level user preferences                                 |
-| **`versions`**            | Versions of the current doc                                                                                        |
-| **`unpublishedVersions`** | Unpublished versions of the current doc                                                                            |
-| **`publishedDoc`**        | The currently published version of the doc being edited                                                            |
-| **`getVersions`**         | Method to trigger the retrieval of document versions                                                               |
-| **`docPermissions`**      | The current documents permissions. Collection document permissions fallback when no id is present (i.e. on create) |
-| **`getDocPermissions`**   | Method to trigger the retrieval of document level permissions                                                      |
+| **`getDocPermissions`**   | Method to retrieve document-level user preferences.                                                 |
+| **`getDocPreferences`**   | Method to retrieve document-level user preferences.                                                 |
+| **`hasPublishedDoc`**     | Whether the document has a published version.                                                                      |
+| **`incrementVersionCount`** | Method to increment the version count of the document.                                                           |
+| **`preferencesKey`**      | The `preferences` key to use when interacting with document-level user preferences.                                 |
+| **`versions`**            | Versions of the current doc.                                                                                        |
+| **`unpublishedVersions`** | Unpublished versions of the current doc.                                                                            |
+| **`publishedDoc`**        | The currently published version of the doc being edited.                                                            |
+| **`getVersions`**         | Method to retrieve document versions.                                                               |
+| **`docPermissions`**      | The current documents permissions. Collection document permissions fallback when no id is present (i.e. on create). |
+| **`versionCount`**        | The current version count of the document.                                                                          |
 
 **Example:**
 
@@ -732,6 +722,37 @@ const LinkFromCategoryToPosts: React.FC = () => {
   )
 }
 ```
+
+## useListQuery
+
+The `useListQuery` hook is used to subscribe to the data, current query, and other properties used within the List View. You can use this hook within any Custom Component rendered within the List View.
+
+```tsx
+'use client'
+import { useListQuery } from '@payloadcms/ui'
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const { data, query } = useListQuery()
+  // highlight-end
+
+  // ...
+}
+```
+
+The `useListQuery` hook returns an object with the following properties:
+
+| Property          | Description                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| **`data`**        | The data that is being displayed in the List View.                                           |
+| **`defaultLimit`**| The default limit of items to display in the List View.                                      |
+| **`defaultSort`** | The default sort order of items in the List View.                                             |
+| **`handlePageChange`** | A method to handle page changes in the List View.                                         |
+| **`handlePerPageChange`** | A method to handle per page changes in the List View.                                   |
+| **`handleSearchChange`** | A method to handle search changes in the List View.                                     |
+| **`handleSortChange`** | A method to handle sort changes in the List View.                                         |
+| **`handleWhereChange`** | A method to handle where changes in the List View.                                       |
+| **`query`**       | The current query that is being used to fetch the data in the List View.                             |
 
 ## useLocale
 

@@ -29,8 +29,11 @@ export type CustomPayloadRequestProperties = {
   /**
    * The requested locale if specified
    * Only available for localized collections
+   *
+   * Suppressing warning below as it is a valid use case - won't be an issue if generated types exist
    */
-  locale?: TypedLocale
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  locale?: 'all' | TypedLocale
   /**
    * The payload object
    */
@@ -62,6 +65,7 @@ export type CustomPayloadRequestProperties = {
   transactionID?: number | Promise<number | string> | string
   /**
    * Used to ensure consistency when multiple operations try to create a transaction concurrently on the same request
+   * @deprecated This is not used anywhere, instead `transactionID` is used for the above. Will be removed in next major version.
    */
   transactionIDPromise?: Promise<void>
   /** The signed-in user */
@@ -120,6 +124,15 @@ export type Where = {
 }
 
 export type Sort = Array<string> | string
+
+type SerializableValue = boolean | number | object | string
+export type DefaultValue =
+  | ((args: {
+      locale?: TypedLocale
+      req: PayloadRequest
+      user: PayloadRequest['user']
+    }) => SerializableValue)
+  | SerializableValue
 
 /**
  * Applies pagination for join fields for including collection relationships

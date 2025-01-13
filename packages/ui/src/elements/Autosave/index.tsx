@@ -3,7 +3,7 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { versionDefaults } from 'payload/shared'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import {
@@ -48,14 +48,18 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     mostRecentVersionIsAutosaved,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
   } = useDocumentInfo()
+  const queueRef = useRef([])
+  const isProcessingRef = useRef(false)
+
   const { reportUpdate } = useDocumentEvents()
   const { dispatchFields, setSubmitted } = useForm()
   const submitted = useFormSubmitted()
   const versionsConfig = docConfig?.versions
 
   const [fields] = useAllFormFields()
-  const formModified = useFormModified()
+  const modified = useFormModified()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
 
@@ -66,7 +70,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const [saving, setSaving] = useState(false)
   const debouncedFields = useDebounce(fields, interval)
-  const modified = useDebounce(formModified, interval)
   const fieldRef = useRef(fields)
   const modifiedRef = useRef(modified)
   const localeRef = useRef(locale)
@@ -88,6 +91,25 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   // can always retrieve the most to date locale
   localeRef.current = locale
 
+  const processQueue = React.useCallback(async () => {
+    if (isProcessingRef.current || queueRef.current.length === 0) {
+      return
+    }
+
+    isProcessingRef.current = true
+    const latestAction = queueRef.current[queueRef.current.length - 1]
+    queueRef.current = []
+
+    try {
+      await latestAction()
+    } finally {
+      isProcessingRef.current = false
+      if (queueRef.current.length > 0) {
+        await processQueue()
+      }
+    }
+  }, [])
+
   // When debounced fields change, autosave
   useIgnoredEffect(
     () => {
@@ -97,7 +119,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       let startTimestamp = undefined
       let endTimestamp = undefined
 
-      const autosave = () => {
+      const autosave = async () => {
         if (modified) {
           startTimestamp = new Date().getTime()
 
@@ -129,7 +151,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                 submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
               if (!skipSubmission) {
-                void fetch(url, {
+                await fetch(url, {
                   body: JSON.stringify(data),
                   credentials: 'include',
                   headers: {
@@ -156,6 +178,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                       if (!mostRecentVersionIsAutosaved) {
                         incrementVersionCount()
                         setMostRecentVersionIsAutosaved(true)
+                        setUnpublishedVersionCount((prev) => prev + 1)
                       }
                     } else {
                       return res.json()
@@ -229,7 +252,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
         }
       }
 
-      void autosave()
+      queueRef.current.push(autosave)
+      void processQueue()
 
       return () => {
         if (autosaveTimeout) {

@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { slugPluralLabel, slugSingularLabel } from '../shared.js'
-import { postsCollectionSlug } from '../slugs.js'
+import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 
 export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
@@ -49,6 +49,10 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+    },
+    pagination: {
+      defaultLimit: 5,
+      limits: [5, 10, 15],
     },
     meta: {
       description: 'This is a custom meta description for posts',
@@ -104,14 +108,62 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
+      name: 'arrayOfFields',
+      type: 'array',
+      admin: {
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: 'optional',
+          type: 'text',
+        },
+        {
+          name: 'innerArrayOfFields',
+          type: 'array',
+          fields: [
+            {
+              name: 'innerOptional',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [
+        {
+          name: 'defaultValueField',
+          type: 'text',
+          defaultValue: 'testing',
+        },
         {
           name: 'title',
           type: 'text',
         },
       ],
+    },
+    {
+      name: 'someBlock',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'textBlock',
+          fields: [
+            {
+              name: 'textFieldForBlock',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'defaultValueField',
+      type: 'text',
+      defaultValue: 'testing',
     },
     {
       name: 'relationship',
@@ -128,6 +180,37 @@ export const Posts: CollectionConfig = {
         components: {
           Cell: '/components/CustomCell/index.js#CustomCell',
         },
+      },
+    },
+    {
+      name: 'upload',
+      type: 'upload',
+      relationTo: uploadCollectionSlug,
+    },
+    {
+      name: 'hiddenField',
+      type: 'text',
+      hidden: true,
+    },
+    {
+      name: 'adminHiddenField',
+      type: 'text',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'disableListColumnText',
+      type: 'text',
+      admin: {
+        disableListColumn: true,
+      },
+    },
+    {
+      name: 'disableListFilterText',
+      type: 'text',
+      admin: {
+        disableListFilter: true,
       },
     },
     {

@@ -925,4 +925,206 @@ describe('Queues', () => {
     expect(allSimples.totalDocs).toBe(1)
     expect(allSimples.docs[0].title).toBe('externalWorkflow')
   })
+
+  it('ensure payload.jobs.runByID works and only runs the specified job', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    let lastJobID: string = null
+    for (let i = 0; i < 3; i++) {
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+      lastJobID = job.id
+    }
+
+    await payload.jobs.runByID({
+      id: lastJobID,
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task')
+
+    const allCompletedJobs = await payload.find({
+      collection: 'payload-jobs',
+      limit: 100,
+      where: {
+        completedAt: {
+          exists: true,
+        },
+      },
+    })
+
+    expect(allCompletedJobs.totalDocs).toBe(1)
+    expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
+  })
+
+  it('ensure where query for id in payload.jobs.run works and only runs the specified job', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    let lastJobID: string = null
+    for (let i = 0; i < 3; i++) {
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'from single task',
+        },
+      })
+      lastJobID = job.id
+    }
+
+    await payload.jobs.run({
+      where: {
+        id: {
+          equals: lastJobID,
+        },
+      },
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task')
+
+    const allCompletedJobs = await payload.find({
+      collection: 'payload-jobs',
+      limit: 100,
+      where: {
+        completedAt: {
+          exists: true,
+        },
+      },
+    })
+
+    expect(allCompletedJobs.totalDocs).toBe(1)
+    expect(allCompletedJobs.docs[0].id).toBe(lastJobID)
+  })
+
+  it('ensure where query for input data in payload.jobs.run works and only runs the specified job', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    for (let i = 0; i < 3; i++) {
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: `from single task ${i}`,
+        },
+      })
+    }
+
+    await payload.jobs.run({
+      where: {
+        'input.message': {
+          equals: 'from single task 2',
+        },
+      },
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('from single task 2')
+
+    const allCompletedJobs = await payload.find({
+      collection: 'payload-jobs',
+      limit: 100,
+      where: {
+        completedAt: {
+          exists: true,
+        },
+      },
+    })
+
+    expect(allCompletedJobs.totalDocs).toBe(1)
+    expect((allCompletedJobs.docs[0].input as any).message).toBe('from single task 2')
+  })
+
+  it('can run sub-tasks', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const job = await payload.jobs.queue({
+      workflow: 'subTask',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    await payload.jobs.run()
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(2)
+    expect(allSimples.docs[0].title).toBe('hello!')
+    expect(allSimples.docs[1].title).toBe('hello!')
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.log[0].taskID).toBe('create doc 1')
+    //expect(jobAfterRun.log[0].parent.taskID).toBe('create two docs')
+    // jobAfterRun.log[0].parent should not exist
+    expect(jobAfterRun.log[0].parent).toBeUndefined()
+
+    expect(jobAfterRun.log[1].taskID).toBe('create doc 2')
+    //expect(jobAfterRun.log[1].parent.taskID).toBe('create two docs')
+    expect(jobAfterRun.log[1].parent).toBeUndefined()
+
+    expect(jobAfterRun.log[2].taskID).toBe('create two docs')
+  })
+
+  it('ensure successful sub-tasks are not retried', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'subTaskFails',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('hello!')
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error
+    expect(jobAfterRun.input.amountTask2Retried).toBe(3)
+    // @ts-expect-error
+    expect(jobAfterRun.input.amountTask1Retried).toBe(0)
+  })
 })

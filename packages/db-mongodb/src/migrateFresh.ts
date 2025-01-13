@@ -45,7 +45,7 @@ export async function migrateFresh(
     msg: `Found ${migrationFiles.length} migration files.`,
   })
 
-  const req = { payload } as PayloadRequest
+  const req = { payload }
 
   // Run all migrate up
   for (const migration of migrationFiles) {

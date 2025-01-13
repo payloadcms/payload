@@ -1,7 +1,7 @@
 import type { Where } from '../../types/index.js'
 import type { PreferenceUpdateRequest } from '../types.js'
 
-import { UnauthorizedError } from '../../errors/UnathorizedError.js'
+import { UnauthorizedError } from '../../errors/UnauthorizedError.js'
 
 export async function update(args: PreferenceUpdateRequest) {
   const {

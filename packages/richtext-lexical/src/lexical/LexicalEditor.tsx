@@ -23,9 +23,10 @@ import { LexicalContentEditable } from './ui/ContentEditable.js'
 export const LexicalEditor: React.FC<
   {
     editorContainerRef: React.RefObject<HTMLDivElement | null>
+    isSmallWidthViewport: boolean
   } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
 > = (props) => {
-  const { editorConfig, editorContainerRef, onChange } = props
+  const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange } = props
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
 
@@ -78,24 +79,6 @@ export const LexicalEditor: React.FC<
     }
   }, [editor, editorConfigContext])
 
-  const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
-
-  useEffect(() => {
-    const updateViewPortWidth = () => {
-      const isNextSmallWidthViewport = window.matchMedia('(max-width: 768px)').matches
-
-      if (isNextSmallWidthViewport !== isSmallWidthViewport) {
-        setIsSmallWidthViewport(isNextSmallWidthViewport)
-      }
-    }
-    updateViewPortWidth()
-    window.addEventListener('resize', updateViewPortWidth)
-
-    return () => {
-      window.removeEventListener('resize', updateViewPortWidth)
-    }
-  }, [isSmallWidthViewport])
-
   return (
     <React.Fragment>
       {editorConfig.features.plugins?.map((plugin) => {
@@ -114,8 +97,8 @@ export const LexicalEditor: React.FC<
         <RichTextPlugin
           contentEditable={
             <div className="editor-scroller">
-              <div className="editor" ref={onRef} tabIndex={-1}>
-                <LexicalContentEditable />
+              <div className="editor" ref={onRef}>
+                <LexicalContentEditable editorConfig={editorConfig} />
               </div>
             </div>
           }

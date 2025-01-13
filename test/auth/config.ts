@@ -10,6 +10,7 @@ import {
   apiKeysSlug,
   namedSaveToJWTValue,
   partialDisableLocaleStrategiesSlug,
+  publicUsersSlug,
   saveToJWTKey,
   slug,
 } from './shared.js'
@@ -44,6 +45,9 @@ export default buildConfigWithDefaults({
         tokenExpiration: 7200, // 2 hours
         useAPIKey: true,
         verify: false,
+        forgotPassword: {
+          expiration: 300000, // 5 minutes
+        },
       },
       fields: [
         {
@@ -206,7 +210,7 @@ export default buildConfigWithDefaults({
           if (!user) {
             return false
           }
-          if (user?.collection === 'api-keys') {
+          if (user?.collection === apiKeysSlug) {
             return {
               id: {
                 equals: user.id,
@@ -227,7 +231,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'public-users',
+      slug: publicUsersSlug,
       auth: {
         verify: true,
       },
@@ -260,7 +264,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
-      collection: 'api-keys',
+      collection: apiKeysSlug,
       data: {
         apiKey: uuid(),
         enableAPIKey: true,
@@ -268,7 +272,7 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
-      collection: 'api-keys',
+      collection: apiKeysSlug,
       data: {
         apiKey: uuid(),
         enableAPIKey: true,
