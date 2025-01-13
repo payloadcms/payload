@@ -45,6 +45,11 @@
       "types": "./src/exports/server/migrate.ts",
       "default": "./src/exports/server/migrate.ts"
     },
+    "./types": {
+      "import": "./src/types.ts",
+      "types": "./src/types.ts",
+      "default": "./src/types.ts"
+    },
     "./lexical": {
       "import": "./src/lexical-proxy/lexical.ts",
       "types": "./src/lexical-proxy/lexical.ts",
@@ -440,6 +445,11 @@
         "import": "./dist/exports/server/migrate.js",
         "types": "./dist/exports/server/migrate.d.ts",
         "default": "./dist/exports/server/migrate.js"
+      },
+      "./types": {
+        "import": "./src/types.ts",
+        "types": "./src/types.ts",
+        "default": "./src/types.ts"
       },
       "./lexical": {
         "import": "./dist/lexical-proxy/lexical.js",
