@@ -136,9 +136,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   }
 
   /**
-   * @deprecated: the `experimental.optimizeFormState` property is used for backwards compatibility.
+   * @deprecated
+   * The `admin.experimental.optimizeFormState` property is used for backwards compatibility.
    * When `optimizeFormState` is true, properties are only added to fieldState if absolutely necessary.
-   * In the next major version, this will be the default behavior.
+   * In v4, this property will be removed and will become the default behavior.
    */
   const optimizeFormState = req.payload.config.admin.experimental?.optimizeFormState
 
@@ -146,10 +147,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   let fieldPermissions: SanitizedFieldPermissions = true
 
-  const fieldState = {} as FormFieldWithoutComponents // TODO: remove this type cast when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
+  // Remove this type cast when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
+  const fieldState = {} as FormFieldWithoutComponents
 
+  // Remove this if statement `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
   if (optimizeFormState) {
-    // TODO: make this default behavior when optimizeFormState is the default behavior, see note above
     if (passesCondition === false) {
       fieldState.passesCondition = false
     }
@@ -221,8 +223,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         })
       }
     } else {
+      // TODO: remove this block when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
       if (!optimizeFormState) {
-        // TODO: remove this block when `admin.experimental.optimizeFormState` is the default behavior, see note above.
         fieldState.valid = true
       }
     }
@@ -268,8 +270,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 value: row.id,
               } as FormFieldWithoutComponents // TODO: remove this type cast when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
 
+              // TODO: remove this if statement when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
               if (!optimizeFormState) {
-                // TODO: remove this block when `admin.experimental.optimizeFormState` is the default behavior, see note above.
                 state[idKey].valid = true
               }
 
@@ -410,8 +412,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.id,
                 } as FormFieldWithoutComponents // TODO: remove this type cast when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
 
+                // TODO: remove this if statement when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
                 if (!optimizeFormState) {
-                  // TODO: remove this block when `admin.experimental.optimizeFormState` is the default behavior, see note above.
                   state[idKey].valid = true
                 }
 
@@ -428,8 +430,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.blockType,
                 } as FormFieldWithoutComponents // TODO: remove this type cast when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
 
+                // TODO: remove this if statement when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
                 if (!optimizeFormState) {
-                  // TODO: remove this block when `admin.experimental.optimizeFormState` is the default behavior, see note above.
                   state[fieldKey].valid = true
                 }
 
@@ -692,10 +694,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (!filter || filter(args)) {
       state[path] = {
         disableFormData: true,
-      } as FormFieldWithoutComponents // TODO: remove this type cast when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
+      } as FormFieldWithoutComponents // Remove this type cast when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
 
+      // Remove this if statement when `admin.experimental.optimizeFormState` is the default behavior in v4, see note above.
       if (optimizeFormState) {
-        // TODO: make this default behavior when optimizeFormState is the default behavior, see note above
         if (passesCondition === false) {
           state[path].passesCondition = false
         }

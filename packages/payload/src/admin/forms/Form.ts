@@ -46,26 +46,29 @@ export type FieldState = {
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
   /**
-   * TODO: make the `initialValue` property optional in v4
+   * @todo
+   * This property will become optional in v4 when the `admin.experimental.optimizeFormState` flag is the default behavior.
    */
   initialValue: unknown
   /**
    * @deprecated
-   * This is a legacy property that is no longer used.
-   * Please use `fieldIsSidebar(field)` from `payload` instead
+   * This is a legacy property that will be removed in v4.
+   * Please use `fieldIsSidebar(field)` from `payload` instead.
    * Or check `field.admin.position === 'sidebar'` directly.
-   **/
+   */
   isSidebar?: boolean
   passesCondition?: boolean
   requiresRender?: boolean
   rows?: Row[]
   /**
-   * TODO: make the `valid` property optional in v4
+   * @todo
+   * This property will become optional in v4 when the `admin.experimental.optimizeFormState` flag is the default behavior.
    */
   valid: boolean
   validate?: Validate
   /**
-   * TODO: make the `value` property optional in v4
+   * @todo
+   * This property will become optional in v4 when the `admin.experimental.optimizeFormState` flag is the default behavior.
    */
   value: unknown
 }

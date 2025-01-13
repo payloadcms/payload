@@ -791,7 +791,7 @@ export type Config = {
     dependencies?: AdminDependencies
     /**
      * @deprecated
-     * This option is deprecated and will be removed in the next major version.
+     * This option is deprecated and will be removed in v4.
      * To disable the admin panel itself, delete your `/app/(payload)/admin` directory.
      * To disable all REST API and GraphQL endpoints, delete your `/app/(payload)/api` directory.
      * Note: If you've modified the default paths via `admin.routes`, delete those directories instead.
@@ -800,7 +800,7 @@ export type Config = {
     experimental?: {
       /**
        * When `optimizeFormState` is true, properties are only added to fieldState if absolutely necessary.
-       * This is done in a non-breaking way, and will the default behavior in the next major version.
+       * This is done in a non-breaking way, and will the default behavior in v4.
        * Examples of this include removing all undefined variables, empty objects, empty arrays, and `null` values, etc.
        * Will also remove any unnecessary properties like `isSidebar`, `valid`, `passesCondition`, etc.
        */

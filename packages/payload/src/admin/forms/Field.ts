@@ -19,7 +19,8 @@ export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type ClientComponentProps = {
   /**
-   * TODO: make the `customComponents` property optional in v4
+   * @todo
+   * This property will become optional in v4 when the `admin.experimental.optimizeFormState` flag is the default behavior.
    */
   customComponents: FormField['customComponents']
   field: ClientBlock | ClientField | ClientTab
