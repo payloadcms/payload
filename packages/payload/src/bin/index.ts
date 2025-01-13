@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Cron } from 'croner'
 import minimist from 'minimist'
 import { pathToFileURL } from 'node:url'
@@ -11,7 +12,18 @@ import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
 import { loadEnv } from './loadEnv.js'
-import { migrate } from './migrate.js'
+import { migrate, availableCommands as migrateCommands } from './migrate.js'
+
+// Note: this does not account for any user bin scripts
+const availableScripts = [
+  'generate:db-schema',
+  'generate:importmap',
+  'generate:types',
+  'info',
+  'jobs:run',
+  'run',
+  ...migrateCommands,
+] as const
 
 export const bin = async () => {
   loadEnv()
@@ -137,6 +149,8 @@ export const bin = async () => {
     process.exit(0)
   }
 
-  console.error(`Unknown script: "${script}".`)
+  console.error(script ? `Unknown command: "${script}"` : 'Please provide a command to run')
+  console.log(`\nAvailable commands:\n${availableScripts.map((c) => `  - ${c}`).join('\n')}`)
+
   process.exit(1)
 }
