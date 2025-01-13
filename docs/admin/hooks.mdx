@@ -397,12 +397,17 @@ export const CustomArrayManager = () => {
       onClick={() => {
         addFieldRow({
           path: "arrayField",
-          rowIndex: 0,
-          data: {
-            textField: "text",
-            // blockType: "yourBlockSlug",
-            // ^ if managing a block array, you need to specify the block type
+          schemaPath: "arrayField",
+          rowIndex: 0, // optionally specify the index to add the row at
+          subFieldState: {
+            textField: {
+              initialValue: 'New row text',
+              valid: true,
+              value: 'New row text',
+            },
           },
+          // blockType: "yourBlockSlug",
+          // ^ if managing a block array, you need to specify the block type
         })
       }}
     >
@@ -595,12 +600,17 @@ export const CustomArrayManager = () => {
       onClick={() => {
         replaceFieldRow({
           path: "arrayField",
-          rowIndex: 0,
-          data: {
-            textField: "updated text",
-            // blockType: "yourBlockSlug",
-            // ^ if managing a block array, you need to specify the block type
+          schemaPath: "arrayField",
+          rowIndex: 0, // optionally specify the index to add the row at
+          subFieldState: {
+            textField: {
+              initialValue: 'Updated text',
+              valid: true,
+              value: 'Upddated text',
+            },
           },
+          // blockType: "yourBlockSlug",
+          // ^ if managing a block array, you need to specify the block type
         })
       }}
     >
