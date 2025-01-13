@@ -7,7 +7,6 @@ import * as qs from 'qs-esm'
 
 import type { Args } from './types.js'
 
-import { getRequestLocale } from '../getRequestLocale.js'
 import { initReq } from '../initReq.js'
 import { getRouteInfo } from './handleAdminPage.js'
 import { handleAuthRedirect } from './handleAuthRedirect.js'
@@ -32,7 +31,7 @@ export const initPage = async ({
 
   const cookies = parseCookies(headers)
 
-  const { permissions, req } = await initReq(payload.config, {
+  const { locale, permissions, req } = await initReq(payload.config, {
     fallbackLocale: false,
     req: {
       headers,
@@ -57,12 +56,6 @@ export const initPage = async ({
     },
     [],
   )
-
-  const locale = await getRequestLocale({
-    req,
-  })
-
-  req.locale = locale?.code
 
   const visibleEntities: VisibleEntities = {
     collections: collections
