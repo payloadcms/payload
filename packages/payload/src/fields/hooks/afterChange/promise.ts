@@ -165,7 +165,6 @@ export const promise = async ({
     }
 
     case 'collapsible':
-
     case 'row': {
       await traverseFields({
         collection,
@@ -253,9 +252,9 @@ export const promise = async ({
       let tabPreviousSiblingDoc = siblingDoc
 
       if (tabHasName(field)) {
-        tabSiblingData = siblingData[field.name] as JsonObject
-        tabSiblingDoc = siblingDoc[field.name] as JsonObject
-        tabPreviousSiblingDoc = previousDoc[field.name] as JsonObject
+        tabSiblingData = (siblingData[field.name] as JsonObject) ?? {}
+        tabSiblingDoc = (siblingDoc[field.name] as JsonObject) ?? {}
+        tabPreviousSiblingDoc = (previousDoc[field.name] as JsonObject) ?? {}
       }
 
       await traverseFields({

@@ -4,13 +4,14 @@ import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
 import httpStatus from 'http-status'
-import { logError } from 'payload'
-
-import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest.js'
-import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
-import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
-import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { mergeHeaders } from '../../utilities/mergeHeaders.js'
+import {
+  addDataAndFileToRequest,
+  addLocalesToRequestFromData,
+  createPayloadRequest,
+  headersWithCors,
+  logError,
+  mergeHeaders,
+} from 'payload'
 
 const handleError = async ({
   err,

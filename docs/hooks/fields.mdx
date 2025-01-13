@@ -80,7 +80,13 @@ The following arguments are provided to all Field Hooks:
 
 ### beforeValidate
 
-Runs before the `update` operation. This hook allows you to pre-process or format field data before it undergoes validation.
+Runs during the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated server-side.
+
+Please do note that this does not run before client-side validation. If you render a custom field component in your front-end and provide it with a `validate` function, the order that validations will run in is:
+
+1. `validate` runs on the client
+2. if successful, `beforeValidate` runs on the server
+3. `validate` runs on the server
 
 ```ts
 import type { Field } from 'payload'
