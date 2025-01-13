@@ -35,11 +35,19 @@
       cursor: pointer;
 
       .insert-paragraph-at-end-inside {
-        background-color: var(--theme-elevation-50);
+        background-color: var(--theme-elevation-100);
 
         span {
           display: flex;
         }
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .insert-paragraph-at-end:hover {
+      .insert-paragraph-at-end-inside {
+        background-color: var(--theme-elevation-50);
       }
     }
   }
