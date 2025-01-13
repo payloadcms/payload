@@ -50,9 +50,9 @@ export default buildConfigWithDefaults({
       },
     })
 
-    // Create 100 users
-    const userPromises = Array.from({ length: 100 }, (_, i) => {
-      const index = (i + 1).toString().padStart(3, '0')
+    // Create 1000 users
+    const userPromises = Array.from({ length: 1000 }, (_, i) => {
+      const index = (i + 1).toString().padStart(4, '0')
       return payload.create({
         collection: 'users',
         data: {
