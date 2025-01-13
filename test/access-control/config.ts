@@ -147,32 +147,6 @@ export default buildConfigWithDefaults(
         ],
       },
       {
-        slug: localizedSlug,
-        access: {
-          update: ({ locale }) => {
-            if (locale === 'en') {
-              return true
-            }
-            return false
-          },
-        },
-        fields: [
-          {
-            name: 'title',
-            type: 'text',
-            localized: true,
-          },
-          {
-            name: 'noAccess',
-            type: 'text',
-            localized: true,
-            access: {
-              read: () => true,
-            },
-          },
-        ],
-      },
-      {
         slug,
         access: {
           ...openAccess,
