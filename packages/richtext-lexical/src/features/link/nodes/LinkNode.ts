@@ -35,10 +35,8 @@ export class LinkNode extends ElementNode {
   constructor({
     id,
     fields = {
-      doc: null,
       linkType: 'custom',
       newTab: false,
-      url: '',
     },
     key,
   }: {
@@ -127,10 +125,18 @@ export class LinkNode extends ElementNode {
   }
 
   exportJSON(): SerializedLinkNode {
+    const fields = this.getFields()
+
+    if (fields?.linkType === 'internal') {
+      delete fields.url
+    } else if (fields?.linkType === 'custom') {
+      delete fields.doc
+    }
+
     const returnObject: SerializedLinkNode = {
       ...super.exportJSON(),
       type: 'link',
-      fields: this.getFields(),
+      fields,
       version: 3,
     }
     const id = this.getID()
