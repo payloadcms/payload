@@ -5,7 +5,6 @@ import type {
   Field,
   FieldSchemaMap,
   FieldState,
-  FormFieldWithoutComponents,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
@@ -21,7 +20,6 @@ import {
   fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsLocalized,
-  fieldIsSidebar,
   getFieldPaths,
   tabHasName,
 } from 'payload/shared'
@@ -160,7 +158,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
-      hasPermission = await field.access.read({ doc: fullData, req, siblingData: data })
+      hasPermission = await field.access.read({ id, data: fullData, req, siblingData: data })
     } else {
       hasPermission = true
     }
