@@ -11,6 +11,7 @@ import { duplicateHandler } from './duplicate.js'
 import { findHandler } from './find.js'
 import { findByIDHandler } from './findByID.js'
 import { findVersionByIDHandler } from './findVersionByID.js'
+import { findVersionsHandler } from './findVersions.js'
 import { getFileHandler } from './getFile.js'
 import { getFileFromURLHandler } from './getFileFromURL.js'
 import { previewHandler } from './preview.js'
@@ -50,6 +51,11 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: getFileFromURLHandler,
       method: 'get',
       path: '/paste-url/:id?',
+    },
+    {
+      handler: findVersionsHandler,
+      method: 'get',
+      path: '/versions',
     },
     {
       handler: duplicateHandler,
