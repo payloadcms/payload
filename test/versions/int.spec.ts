@@ -1436,6 +1436,20 @@ describe('Versions', () => {
     })
   })
 
+  describe('Collections - REST', () => {
+    it('sholud query versions', async () => {
+      const response = await restClient.GET(`/${collection}/versions`)
+      expect(response.status).toBe(200)
+      const json = await response.json()
+      expect(json.docs[0].parent).toBe(collectionLocalPostID)
+
+      const responseByID = await restClient.GET(`/${collection}/versions/${json.docs[0].id}`)
+      expect(responseByID.status).toBe(200)
+      const jsonByID = await responseByID.json()
+      expect(jsonByID.parent).toBe(collectionLocalPostID)
+    })
+  })
+
   describe('Globals - Local', () => {
     beforeEach(async () => {
       const title2 = 'Here is an updated global title in EN'
