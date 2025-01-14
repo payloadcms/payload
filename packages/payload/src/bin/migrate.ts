@@ -14,7 +14,7 @@ const prettySyncLogger = {
   loggerOptions: {},
 }
 
-const availableCommands = [
+export const availableCommands = [
   'migrate',
   'migrate:create',
   'migrate:down',
