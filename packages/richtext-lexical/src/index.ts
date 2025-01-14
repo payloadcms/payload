@@ -869,6 +869,8 @@ export {
 export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
 export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
 
+export { TabHTMLConverter } from './features/converters/html/converter/converters/tab.js'
+
 export { TextHTMLConverter } from './features/converters/html/converter/converters/text.js'
 export { defaultHTMLConverters } from './features/converters/html/converter/defaultConverters.js'
 export {
