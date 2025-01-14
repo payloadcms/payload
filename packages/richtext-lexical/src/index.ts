@@ -32,6 +32,8 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
 
+export const lexicalTargetVersion = '0.21.0'
+
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   if (
     process.env.NODE_ENV !== 'production' &&
@@ -54,7 +56,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             '@lexical/selection',
             '@lexical/utils',
           ],
-          targetVersion: '0.21.0',
+          targetVersion: lexicalTargetVersion,
         },
       ],
     })
