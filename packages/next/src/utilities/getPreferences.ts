@@ -2,7 +2,7 @@ import type { Payload, User } from 'payload'
 
 import { cache } from 'react'
 
-export const getPreference = cache(
+export const getPreferences = cache(
   async <T>(key: string, payload: Payload, user: User): Promise<T> => {
     let result: T = null
 

@@ -5,6 +5,7 @@ import type { Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
 
@@ -61,6 +62,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
   const modalTitle = t('general:schedulePublishFor', { title })
   const [upcoming, setUpcoming] = React.useState<UpcomingEvent[]>()
   const [upcomingColumns, setUpcomingColumns] = React.useState<Column[]>()
+  const deleteHandlerRef = React.useRef<((id: number | string) => Promise<void>) | null>(() => null)
 
   const localeOptions = React.useMemo(() => {
     if (localization) {
@@ -78,7 +80,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
   }, [localization, i18n])
 
   const fetchUpcoming = React.useCallback(async () => {
-    const params: { sort: string; where: Where } = {
+    const query: { sort: string; where: Where } = {
       sort: 'waitUntil',
       where: {
         and: [
@@ -97,13 +99,12 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     }
 
     if (collectionSlug) {
-      params.where.and.push({
+      query.where.and.push({
         'input.doc.value': {
-          equals: id,
+          equals: String(id),
         },
       })
-
-      params.where.and.push({
+      query.where.and.push({
         'input.doc.relationTo': {
           equals: collectionSlug,
         },
@@ -111,7 +112,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     }
 
     if (globalSlug) {
-      params.where.and.push({
+      query.where.and.push({
         'input.global': {
           equals: globalSlug,
         },
@@ -119,12 +120,49 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     }
 
     const { docs } = await requests
-      .get(`${serverURL}${api}/payload-jobs`, { params })
+      .post(`${serverURL}${api}/payload-jobs`, {
+        body: qs.stringify(query),
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-HTTP-Method-Override': 'GET',
+        },
+      })
       .then((res) => res.json())
 
-    setUpcomingColumns(buildUpcomingColumns({ dateFormat, docs, i18n, localization, t }))
+    setUpcomingColumns(
+      buildUpcomingColumns({
+        dateFormat,
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        deleteHandler: deleteHandlerRef.current,
+        docs,
+        i18n,
+        localization,
+        t,
+      }),
+    )
     setUpcoming(docs)
-  }, [api, collectionSlug, dateFormat, globalSlug, i18n, id, serverURL, t, localization])
+  }, [collectionSlug, globalSlug, serverURL, api, dateFormat, id, t, i18n, localization])
+
+  const deleteHandler = React.useCallback(
+    async (id: number | string) => {
+      try {
+        await schedulePublish({
+          deleteID: id,
+        })
+        await fetchUpcoming()
+        toast.success(t('general:deletedSuccessfully'))
+      } catch (err) {
+        console.error(err)
+        toast.error(err.message)
+      }
+    },
+    [fetchUpcoming, schedulePublish, t],
+  )
+
+  React.useEffect(() => {
+    deleteHandlerRef.current = deleteHandler
+  }, [deleteHandler])
 
   const handleSave = React.useCallback(async () => {
     if (!date) {
@@ -146,7 +184,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
         doc: collectionSlug
           ? {
               relationTo: collectionSlug,
-              value: id,
+              value: String(id),
             }
           : undefined,
         global: globalSlug || undefined,

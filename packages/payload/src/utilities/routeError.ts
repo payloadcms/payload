@@ -22,7 +22,7 @@ export const routeError = async ({
   err: APIError
   req: PayloadRequest | Request
 }) => {
-  let payload = 'payload' in incomingReq && incomingReq?.payload
+  let payload = incomingReq && 'payload' in incomingReq && incomingReq?.payload
 
   if (!payload) {
     try {

@@ -174,8 +174,6 @@ describe('Lexical MDX', () => {
           ? (sanitizedInputAfterConvertFromEditorJSON ?? sanitizedInput).replace(/\s/g, '')
           : (sanitizedInputAfterConvertFromEditorJSON ?? sanitizedInput)
 
-        console.log('resultNoSpace', resultNoSpace)
-        console.log('inputNoSpace', inputNoSpace)
         expect(resultNoSpace).toBe(inputNoSpace)
       })
     }

@@ -24,8 +24,10 @@ export const getRequestCollectionWithID = <T extends boolean>(
   req: PayloadRequest,
   {
     disableSanitize,
+    optionalID,
   }: {
     disableSanitize?: T
+    optionalID?: boolean
   } = {},
 ): {
   collection: Collection
@@ -35,6 +37,13 @@ export const getRequestCollectionWithID = <T extends boolean>(
   const id = req.routeParams.id
 
   if (typeof id !== 'string') {
+    if (optionalID) {
+      return {
+        id: undefined,
+        collection,
+      }
+    }
+
     throw new APIError(`ID was not specified`, 400)
   }
 

@@ -32,6 +32,7 @@ import {
   TextBlock,
   UploadAndRichTextBlock,
 } from './blocks.js'
+import { ModifyInlineBlockFeature } from './ModifyInlineBlockFeature/feature.server.js'
 
 const editorConfig: ServerEditorConfig = {
   features: [
@@ -69,6 +70,7 @@ const editorConfig: ServerEditorConfig = {
         },
       },
     }),
+    ModifyInlineBlockFeature(),
     BlocksFeature({
       blocks: [
         RichTextBlock,
