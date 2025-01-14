@@ -8,13 +8,14 @@ import type { Config as ConfigType } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser, regularUser } from '../credentials.js'
+import { LinksCollection } from './collections/Links.js'
 import { Posts } from './collections/Posts.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users.js'
 import { NavigationGlobalCollection } from './globals/Navigation.js'
 
 export default buildConfigWithDefaults({
-  collections: [Users, Tenants, Posts, NavigationGlobalCollection],
+  collections: [Users, Tenants, Posts, LinksCollection, NavigationGlobalCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -82,6 +83,7 @@ export default buildConfigWithDefaults({
       },
       collections: {
         posts: {},
+        links: {},
         'navigation-global': {
           isGlobal: true,
         },

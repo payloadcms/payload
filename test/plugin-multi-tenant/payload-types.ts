@@ -14,6 +14,7 @@ export interface Config {
     users: User;
     tenants: Tenant;
     posts: Post;
+    links: Link;
     'navigation-global': NavigationGlobal;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -24,6 +25,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    links: LinksSelect<false> | LinksSelect<true>;
     'navigation-global': NavigationGlobalSelect<false> | NavigationGlobalSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -108,6 +110,19 @@ export interface Post {
   title: string;
   excerpt?: string | null;
   slug?: string | null;
+  relatedLinks?: (string | null) | Link;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "links".
+ */
+export interface Link {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  title?: string | null;
+  url?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -140,6 +155,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'links';
+        value: string | Link;
       } | null)
     | ({
         relationTo: 'navigation-global';
@@ -230,6 +249,18 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   excerpt?: T;
   slug?: T;
+  relatedLinks?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "links_select".
+ */
+export interface LinksSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  url?: T;
   updatedAt?: T;
   createdAt?: T;
 }

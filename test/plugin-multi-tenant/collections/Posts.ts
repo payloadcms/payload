@@ -28,5 +28,10 @@ export const Posts: CollectionConfig = {
       name: 'slug',
       localized: true,
     },
+    {
+      name: 'relatedLinks',
+      relationTo: 'links',
+      type: 'relationship',
+    },
   ],
 }
