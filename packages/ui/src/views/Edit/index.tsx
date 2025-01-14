@@ -286,6 +286,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
+          skipValidation: true,
         })
 
         // Unlock the document after save

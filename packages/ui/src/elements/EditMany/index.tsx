@@ -177,6 +177,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
           operation: 'update',
           schemaPath: slug,
           signal: controller.signal,
+          skipValidation: true,
         })
 
         setInitialState(result)
@@ -192,7 +193,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortFormStateRef)
 
       const { state } = await getFormState({
@@ -203,6 +204,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         operation: 'update',
         schemaPath: slug,
         signal: controller.signal,
+        skipValidation: !submitted,
       })
 
       abortFormStateRef.current = null

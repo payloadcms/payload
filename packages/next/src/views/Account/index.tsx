@@ -88,6 +88,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       renderAllFields: true,
       req,
       schemaPath: collectionConfig.slug,
+      skipValidation: true,
     })
 
     // Fetch document lock state

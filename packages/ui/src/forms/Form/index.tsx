@@ -504,6 +504,7 @@ export const Form: React.FC<FormProps> = (props) => {
         renderAllFields: true,
         schemaPath: collectionSlug ? collectionSlug : globalSlug,
         signal: controller.signal,
+        skipValidation: true,
       })
 
       contextRef.current = { ...initContextState } as FormContextType

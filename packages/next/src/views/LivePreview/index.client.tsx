@@ -225,6 +225,7 @@ const PreviewView: React.FC<Props> = ({
           returnLockStatus: false,
           schemaPath: entitySlug,
           signal: controller.signal,
+          skipValidation: true,
         })
 
         // Unlock the document after save
@@ -267,7 +268,7 @@ const PreviewView: React.FC<Props> = ({
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const currentTime = Date.now()
@@ -292,6 +293,7 @@ const PreviewView: React.FC<Props> = ({
         returnLockStatus: isLockingEnabled ? true : false,
         schemaPath,
         signal: controller.signal,
+        skipValidation: !submitted,
         updateLastEdited,
       })
 
