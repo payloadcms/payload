@@ -4,6 +4,7 @@ import type { MultiTenantPluginConfig } from './types.js'
 
 import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
+import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
 import { withTenantAccess } from './utilities/withTenantAccess.js'
 import { withTenantListFilter } from './utilities/withTenantListFilter.js'
 
@@ -86,8 +87,20 @@ export const multiTenantPlugin =
       adminUsersCollection.fields.push(tenantsArrayField(pluginConfig?.tenantsArrayField || {}))
     }
 
-    const globalCollectionSlugs = []
     let tenantCollection: CollectionConfig | undefined
+
+    const [collectionSlugs, globalCollectionSlugs] = Object.keys(pluginConfig.collections).reduce(
+      (acc, slug) => {
+        if (pluginConfig.collections[slug].isGlobal) {
+          acc[1].push(slug)
+        } else {
+          acc[0].push(slug)
+        }
+
+        return acc
+      },
+      [[], []],
+    )
 
     /**
      * Modify collections
@@ -111,6 +124,9 @@ export const multiTenantPlugin =
         if (!collection.admin) {
           collection.admin = {}
         }
+
+        addFilterOptionsToFields(collection.fields, collectionSlugs)
+
         /**
          * Add tenant field to enabled collections
          */
@@ -150,10 +166,6 @@ export const multiTenantPlugin =
 
             return acc
           }, {})
-        }
-
-        if (pluginConfig.collections[collection.slug].isGlobal) {
-          globalCollectionSlugs.push(collection.slug)
         }
       }
     })

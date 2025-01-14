@@ -52,10 +52,10 @@
       "types": "./src/exports/client.ts",
       "default": "./src/exports/client.ts"
     },
-    "./utilites": {
-      "import": "./src/exports/utilites.ts",
-      "types": "./src/exports/utilites.ts",
-      "default": "./src/exports/utilites.ts"
+    "./utilities": {
+      "import": "./src/exports/utilities.ts",
+      "types": "./src/exports/utilities.ts",
+      "default": "./src/exports/utilities.ts"
     }
   },
   "main": "./src/index.ts",
@@ -113,10 +113,10 @@
         "types": "./dist/exports/client.d.ts",
         "default": "./dist/exports/client.js"
       },
-      "./utilites": {
-        "import": "./dist/exports/utilites.js",
-        "types": "./dist/exports/utilites.d.ts",
-        "default": "./dist/exports/utilites.js"
+      "./utilities": {
+        "import": "./dist/exports/utilities.js",
+        "types": "./dist/exports/utilities.d.ts",
+        "default": "./dist/exports/utilities.js"
       }
     },
     "main": "./dist/index.js",
