@@ -1,8 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "strict": true,
-
     /* TODO: remove the following lines */
     "noUncheckedIndexedAccess": false,
     "noImplicitOverride": false
