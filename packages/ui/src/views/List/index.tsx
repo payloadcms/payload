@@ -170,7 +170,7 @@ const ListWithContext: React.FC<ListViewClientProps> = (props) => {
         },
       ])
     }
-  }, [setStepNav, labels, editDepth])
+  }, [setStepNav, labels, drawerDepth])
 
   return (
     <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
@@ -212,7 +212,7 @@ const ListWithContext: React.FC<ListViewClientProps> = (props) => {
           {BeforeListTable}
           {data.docs.length > 0 && (
             <RelationshipProvider>
-              {editDepth === 0 ? Table : TableFromContext}
+              {drawerDepth === 0 ? Table : TableFromContext}
             </RelationshipProvider>
           )}
           {data.docs.length === 0 && (
