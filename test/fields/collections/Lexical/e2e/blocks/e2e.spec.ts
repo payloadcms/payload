@@ -1233,9 +1233,9 @@ describe('lexicalBlocks', () => {
               },
             })
           ).docs[0] as never
-          await expect(inlineBlock.fields.blockType).toBe('AvatarGroup')
-          await expect(inlineBlock.fields.avatars?.length).toBe(1)
-          await expect(inlineBlock.fields.avatars[0].image).toBe(uploadDoc.id)
+          expect(inlineBlock.fields.blockType).toBe('AvatarGroup')
+          expect(inlineBlock.fields.avatars?.length).toBe(1)
+          expect(inlineBlock.fields.avatars[0].image).toBe(uploadDoc.id)
         },
       })
 
@@ -1259,10 +1259,10 @@ describe('lexicalBlocks', () => {
               },
             })
           ).docs[0] as never
-          await expect(inlineBlock.fields.blockType).toBe('AvatarGroup')
-          await expect(inlineBlock.fields.avatars?.length).toBe(1)
-          await expect(inlineBlock.fields.avatars[0].image.id).toBe(uploadDoc.id)
-          await expect(inlineBlock.fields.avatars[0].image.text).toBe(uploadDoc.text)
+          expect(inlineBlock.fields.blockType).toBe('AvatarGroup')
+          expect(inlineBlock.fields.avatars?.length).toBe(1)
+          expect(inlineBlock.fields.avatars[0].image.id).toBe(uploadDoc.id)
+          expect(inlineBlock.fields.avatars[0].image.text).toBe(uploadDoc.text)
         },
       })
     })
