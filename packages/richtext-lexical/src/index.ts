@@ -54,7 +54,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             '@lexical/selection',
             '@lexical/utils',
           ],
-          targetVersion: '0.20.0',
+          targetVersion: '0.21.0',
         },
       ],
     })
