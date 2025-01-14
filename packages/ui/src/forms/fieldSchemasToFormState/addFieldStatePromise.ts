@@ -183,7 +183,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       try {
-        req.payload.logger.info('RUNNING VALIDATIONS')
         validationResult = await validate(
           data?.[field.name] as never,
           {
