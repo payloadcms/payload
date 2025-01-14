@@ -1,30 +1,7 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": true,
-    "rootDir": ".",
-    "baseUrl": ".",
-    "target": "esnext",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "allowJs": true,
-    "checkJs": false,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "jsx": "preserve",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "types": ["jest", "node", "@types/jest"],
-    // "incremental": true,
-    "isolatedModules": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@payload-config": ["./_community/config.ts"]
-    }
+    "incremental": false
   },
   "exclude": ["dist", "build", "temp", "node_modules"],
   "include": [
