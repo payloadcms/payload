@@ -9,6 +9,17 @@ export const Uploads1: CollectionConfig = {
   slug: 'uploads-1',
   upload: {
     staticDir: path.resolve(dirname, 'uploads'),
+    pasteURL: {
+      allowList: [
+        {
+          protocol: 'https',
+          hostname: 'payloadcms.com',
+          pathname: '/images/*',
+          port: '',
+          search: '',
+        },
+      ],
+    },
   },
   fields: [
     {

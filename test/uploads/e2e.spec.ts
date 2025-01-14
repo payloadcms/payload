@@ -58,6 +58,8 @@ let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
 let relationPreviewURL: AdminUrlUtil
 let customFileNameURL: AdminUrlUtil
+let uploadsOne: AdminUrlUtil
+let uploadsTwo: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -83,6 +85,8 @@ describe('Uploads', () => {
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
     relationPreviewURL = new AdminUrlUtil(serverURL, relationPreviewSlug)
     customFileNameURL = new AdminUrlUtil(serverURL, customFileNameMediaSlug)
+    uploadsOne = new AdminUrlUtil(serverURL, 'uploads-1')
+    uploadsTwo = new AdminUrlUtil(serverURL, 'uploads-2')
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -172,6 +176,83 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('image.png')
 
     await saveDocAndAssert(page)
+  })
+
+  test('should remove remote URL button if pasteURL is false', async () => {
+    // pasteURL option is set to false in the media collection
+    await page.goto(mediaURL.create)
+
+    const pasteURLButton = page.locator('.file-field__upload button', {
+      hasText: 'Paste URL',
+    })
+    await expect(pasteURLButton).toBeHidden()
+  })
+
+  test('should fetch remote url server side if pasteURL.allowList is defined', async () => {
+    // allowList only includes the payloadcms.com domain
+    await page.goto(uploadsOne.create)
+
+    const pasteURLButton = page.locator('.file-field__upload button', {
+      hasText: 'Paste URL',
+    })
+    await pasteURLButton.click()
+
+    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+
+    const encodedImageURL = encodeURIComponent(remoteImage)
+    const pasteUrlEndpoint = `http://localhost:3000/api/uploads-1/paste-url?src=${encodedImageURL}`
+
+    const inputField = page.locator('.file-field__upload .file-field__remote-file')
+    await inputField.fill(remoteImage)
+
+    const addFileButton = page.locator('.file-field__add-file')
+    await addFileButton.click()
+
+    // Intercept the 'paste-url' upload request
+    await page.route(
+      pasteUrlEndpoint,
+      (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
+    )
+
+    await expect(page.locator('.file-field .file-field__filename')).toHaveValue('og-image.jpg')
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
+      'src',
+      /\/api\/uploads-1\/file\/og-image(-\d+)?\.jpg(\?.*)?$/,
+    )
+  })
+
+  test('should fail to fetch remote url server side if the pasteURL.allowList domains do not match', async () => {
+    // allowList is defined and only includes the some-example-website.com domain
+    await page.goto(uploadsTwo.create)
+
+    const pasteURLButton = page.locator('.file-field__upload button', {
+      hasText: 'Paste URL',
+    })
+    await pasteURLButton.click()
+
+    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+
+    const encodedImageURL = encodeURIComponent(remoteImage)
+    const pasteUrlEndpoint = `http://localhost:3000/api/uploads-1/paste-url?src=${encodedImageURL}`
+
+    const inputField = page.locator('.file-field__upload .file-field__remote-file')
+    await inputField.fill(remoteImage)
+
+    // Intercept the 'paste-url' upload request
+    await page.route(
+      pasteUrlEndpoint,
+      (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
+    )
+
+    const addFileButton = page.locator('.file-field__add-file')
+    await addFileButton.click()
+
+    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+      'The provided URL is not allowed.',
+    )
   })
 
   test('should properly create IOS file upload', async () => {

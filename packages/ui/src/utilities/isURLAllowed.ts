@@ -14,6 +14,17 @@ export const isUrlAllowed = (url: string, allowList: AllowList): boolean => {
         if (key === 'protocol') {
           return parsedUrl.protocol === `${value}:`
         }
+
+        if (key === 'pathname') {
+          // Convert wildcards to a regex
+          const regexPattern = value
+            .replace(/\*\*/g, '.*') // Match any path
+            .replace(/\*/g, '[^/]*') // Match any part of a path segment
+          const regex = new RegExp(`^${regexPattern}$`)
+          return regex.test(parsedUrl.pathname)
+        }
+
+        // Default comparison for all other properties (hostname, port, search)
         return parsedUrl[key as keyof URL] === value
       })
     })
