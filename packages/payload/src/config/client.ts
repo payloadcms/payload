@@ -46,7 +46,7 @@ export type ClientConfig = {
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
   /**
-   * @deprecated - will be removed in 4.0. Use the `useLocalization` hook instead.
+   * @deprecated - will be removed in 4.0. Use the `useLocale` hook instead.
    */
   i18n?: Omit<SanitizedConfig['i18n'], 'supportedLanguages'>
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>

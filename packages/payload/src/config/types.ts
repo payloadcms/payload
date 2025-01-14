@@ -801,7 +801,11 @@ export type Config = {
       /**
        * This removes the clientConfig.i18n property from the client config, reducing the amount of data sent to the client.
        *
-       * This will be enabled by default in 4.0, as the `useLocalization` hook will be the recommended way to access i18n data.
+       * This will be enabled by default in 4.0, as the `useLocale` hook will be the recommended way to access i18n data.
+       *
+       * @example const { i18n } = useTranslation()
+       *
+       * @todo Remove in 4.0
        */
       removeClientConfigI18n?: boolean
     }
