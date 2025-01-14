@@ -45,32 +45,13 @@ export type FieldState = {
    */
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
-  /**
-   * @todo
-   * This property will become optional in v4 when the `admin.experimental.optimizeFormState` flag is the default behavior.
-   */
-  initialValue: unknown
-  /**
-   * @deprecated
-   * This is a legacy property that will be removed in v4.
-   * Please use `fieldIsSidebar(field)` from `payload` instead.
-   * Or check `field.admin.position === 'sidebar'` directly.
-   */
-  isSidebar?: boolean
+  initialValue?: unknown
   passesCondition?: boolean
   requiresRender?: boolean
   rows?: Row[]
-  /**
-   * @todo
-   * This property will become optional in v4 when the `admin.experimental.optimizeFormState` flag is the default behavior.
-   */
-  valid: boolean
+  valid?: boolean
   validate?: Validate
-  /**
-   * @todo
-   * This property will become optional in v4 when the `admin.experimental.optimizeFormState` flag is the default behavior.
-   */
-  value: unknown
+  value?: unknown
 }
 
 export type FieldStateWithoutComponents = Omit<FieldState, 'customComponents'>

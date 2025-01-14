@@ -797,15 +797,6 @@ export type Config = {
      * Note: If you've modified the default paths via `admin.routes`, delete those directories instead.
      */
     disable?: boolean
-    experimental?: {
-      /**
-       * When `optimizeFormState` is true, properties are only added to fieldState if absolutely necessary.
-       * This is done in a non-breaking way, and will the default behavior in v4.
-       * Examples of this include removing all undefined variables, empty objects, empty arrays, and `null` values, etc.
-       * Will also remove any unnecessary properties like `isSidebar`, `valid`, `passesCondition`, etc.
-       */
-      optimizeFormState?: boolean
-    }
     importMap?: {
       /**
        * Automatically generate component map during development

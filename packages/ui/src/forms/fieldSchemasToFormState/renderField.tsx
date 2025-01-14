@@ -57,7 +57,7 @@ export const renderField: RenderFieldMethod = ({
     permissions,
     readOnly: typeof permissions === 'boolean' ? !permissions : !permissions?.[operation],
     schemaPath,
-  } as ClientComponentProps & Partial<FieldPaths> // TODO: remove this type case when `admin.experimental.optimizeFormState` is the default behavior in v4
+  }
 
   if (fieldState?.customComponents) {
     clientProps.customComponents = fieldState.customComponents
