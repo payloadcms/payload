@@ -15,9 +15,7 @@ type FolderItemsProps = {
 } & ServerProps
 export const Folders = async (args: FolderItemsProps) => {
   const parentFolderID =
-    args.searchParams?.folderID && typeof args.searchParams.folderID === 'string'
-      ? args.searchParams.folderID
-      : null
+    typeof args.searchParams?.folderID === 'string' ? args.searchParams.folderID : null
 
   let breadcrumbs = []
   let subfolders = []

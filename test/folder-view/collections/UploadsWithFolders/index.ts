@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-export const FolderUploads: CollectionConfig = {
+export const UploadsWithFolders: CollectionConfig = {
   slug: 'media',
   upload: true,
   admin: {

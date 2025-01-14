@@ -2,6 +2,7 @@
 
 .folderCard {
   > button {
+    @include btn-reset;
     display: flex;
     align-items: center;
     gap: var(--base);

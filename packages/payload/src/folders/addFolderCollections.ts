@@ -8,7 +8,7 @@ export function addFolderCollections(config: Config): void {
   const folderCollections = []
   for (let i = 0; i < config.collections.length; i++) {
     const c = config.collections[i]
-    if (c.admin.enableFolders) {
+    if (c.admin?.enableFolders) {
       c.admin.enableFolders = {
         debug: typeof c.admin.enableFolders === 'boolean' ? false : c.admin.enableFolders.debug,
       }

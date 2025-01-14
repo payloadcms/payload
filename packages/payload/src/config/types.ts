@@ -1145,7 +1145,9 @@ export type SanitizedConfig = {
   'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 >
 
-export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
+export type EditConfig = {
+  actions?: CustomComponent[]
+} & (EditConfigWithoutRoot | EditConfigWithRoot)
 
 export type EditConfigWithRoot = {
   api?: never

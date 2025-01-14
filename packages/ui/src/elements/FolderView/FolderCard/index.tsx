@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
@@ -10,10 +11,13 @@ import { useFolderAndDocumentSelections } from '../../../providers/FolderAndDocu
 import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { parseSearchParams } from '../../../utilities/parseSearchParams.js'
+import { useDrawerDepth } from '../../Drawer/index.js'
+import { useListDrawerContext } from '../../ListDrawer/Provider.js'
 import { Popup, PopupList } from '../../Popup/index.js'
+import './index.scss'
+import { useTableColumns } from '../../TableColumns/index.js'
 import { FolderFileCard } from '../FolderFileCard/index.js'
 import { strings } from '../strings.js'
-import './index.scss'
 
 const baseClass = 'folderCard'
 
@@ -33,13 +37,14 @@ export function FolderCard({
   onMoveTrigger,
   onRenameTrigger,
 }: Props) {
-  const { deleteFolders } = useFolder()
+  const { deleteFolders, setFolderID } = useFolder()
   const { t } = useTranslation()
   const { isSelecting, selectedFolders, toggleSelection } = useFolderAndDocumentSelections()
   const [isDeleting, setIsDeleting] = React.useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
-
+  const drawerDepth = useDrawerDepth()
+  const { rebuildTableState } = useTableColumns()
   const isSelected = selectedFolders.has(id)
 
   const deleteAction = React.useCallback(async () => {
@@ -66,7 +71,6 @@ export function FolderCard({
         </React.Fragment>
       }
       className={`${baseClass} ${className || ''}`}
-      // href={`${stringifyParams({ params: { folderID: String(id) } })}`}
       isDeleting={isDeleting}
       isSelected={isSelected}
       isSelecting={isSelecting}
@@ -74,15 +78,27 @@ export function FolderCard({
         if (isSelecting) {
           toggleSelection({ id, type: 'folder' })
         } else {
-          void router.push(
-            qs.stringify(
-              {
-                ...parseSearchParams(searchParams),
-                folderID: id,
+          // navigating to selected folder
+          if (drawerDepth === 1) {
+            // not in a drawer, use the router and the server will re-render the page
+            void router.push(
+              qs.stringify(
+                {
+                  ...parseSearchParams(searchParams),
+                  folderID: id,
+                },
+                { addQueryPrefix: true },
+              ),
+            )
+          } else {
+            // in a drawer
+            void rebuildTableState({
+              query: {
+                folderID: isNumber(id) ? String(id) : id,
               },
-              { addQueryPrefix: true },
-            ),
-          )
+            })
+            void setFolderID({ folderID: id })
+          }
         }
       }}
     >

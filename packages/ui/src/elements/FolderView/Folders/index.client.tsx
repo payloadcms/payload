@@ -33,9 +33,17 @@ type Props = {
 }
 export function Subfolders({ collectionSlug }: Props) {
   const { setViewType, viewType } = useFolderListSettings()
-  const { docs, moveToDrawerSlug, setFolderID, setMoveToDocIDs, setMoveToFolderIDs, subfolders } =
-    useFolder()
-  const { openModal } = useModal()
+  const {
+    docs,
+    folderCollectionSlug,
+    moveToDrawerSlug,
+    renameFolder,
+    setFolderID,
+    setMoveToDocIDs,
+    setMoveToFolderIDs,
+    subfolders,
+  } = useFolder()
+  const { closeModal, openModal } = useModal()
   const router = useRouter()
   const searchParams = useSearchParams()
   const depth = useEditDepth()
@@ -43,8 +51,22 @@ export function Subfolders({ collectionSlug }: Props) {
   const [activeSubfolderName, setActiveSubfolderName] = React.useState<null | string>(null)
   const [activeSubfolderID, setActiveSubfolderID] = React.useState<null | number | string>(null)
 
+  const onFolderRenameSuccess = React.useCallback(
+    async (res, successToast, errorToast) => {
+      if (res.status < 400) {
+        const { doc } = await res.json()
+        successToast('yay')
+        renameFolder(doc)
+        closeModal(editFolderSlug)
+      } else {
+        errorToast('nay')
+      }
+    },
+    [closeModal, renameFolder],
+  )
+
   return (
-    <div>
+    <>
       <div className={`${baseClass}__breadcrumbSection`}>
         <FolderBreadcrumbs
           onClick={({ folderID }) => {
@@ -81,59 +103,60 @@ export function Subfolders({ collectionSlug }: Props) {
         </div>
       </div>
 
-      {viewType === 'grid' && (
+      {viewType === 'grid' && subfolders && subfolders.length > 0 && (
         <div className={`${baseClass}__gridView`}>
-          {subfolders && subfolders.length > 0 && (
-            <div className={`${baseClass}__grid`}>
-              {subfolders?.map((subfolder) => {
-                return (
-                  <FolderCard
-                    className={`${baseClass}__gridCard`}
-                    id={subfolder.id}
-                    itemCount={subfolder.subfolderCount + subfolder.fileCount}
-                    key={subfolder.id}
-                    name={subfolder.name}
-                    onMoveTrigger={() => {
-                      setMoveToFolderIDs([subfolder.id])
-                      openModal(moveToDrawerSlug)
-                    }}
-                    onRenameTrigger={() => {
-                      setActiveSubfolderName(subfolder.name)
-                      setActiveSubfolderID(subfolder.id)
-                      openModal(editFolderSlug)
-                    }}
-                  />
-                )
-              })}
+          <div className={`${baseClass}__grid`}>
+            {subfolders?.map((subfolder) => {
+              return (
+                <FolderCard
+                  className={`${baseClass}__gridCard`}
+                  id={subfolder.id}
+                  itemCount={subfolder.subfolderCount + subfolder.fileCount}
+                  key={subfolder.id}
+                  name={subfolder.name}
+                  onMoveTrigger={() => {
+                    setMoveToFolderIDs([subfolder.id])
+                    openModal(moveToDrawerSlug)
+                  }}
+                  onRenameTrigger={() => {
+                    setActiveSubfolderName(subfolder.name)
+                    setActiveSubfolderID(subfolder.id)
+                    openModal(editFolderSlug)
+                  }}
+                />
+              )
+            })}
 
-              <EditFolderNameDrawer
-                activeSubfolderName={activeSubfolderName}
-                selectedFolderID={activeSubfolderID}
-              />
-            </div>
-          )}
+            <EditFolderNameDrawer
+              activeSubfolderName={activeSubfolderName}
+              folderCollectionSlug={folderCollectionSlug}
+              onFolderRenameSuccess={onFolderRenameSuccess}
+              selectedFolderID={activeSubfolderID}
+            />
+          </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
 
-function EditFolderNameDrawer({ activeSubfolderName, selectedFolderID }) {
+function EditFolderNameDrawer({
+  activeSubfolderName,
+  folderCollectionSlug,
+  onFolderRenameSuccess,
+  selectedFolderID,
+}) {
   const { t } = useTranslation()
   const { config } = useConfig()
   const { routes, serverURL } = config
   const { closeModal } = useModal()
 
-  const onSuccess = (res, successToast, errorToast) => {
-    closeModal(editFolderSlug)
-  }
-
   return (
     <EditDepthProvider>
       <Drawer gutter={false} Header={null} slug={editFolderSlug}>
         <Form
-          action={`${serverURL}${routes.api}/${selectedFolderID}`}
-          handleResponse={onSuccess}
+          action={`${serverURL}${routes.api}/${folderCollectionSlug}/${selectedFolderID}`}
+          handleResponse={onFolderRenameSuccess}
           initialState={{
             name: {
               initialValue: activeSubfolderName,

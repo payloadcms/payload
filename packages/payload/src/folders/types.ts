@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { CollectionSlug, PaginatedDocs, SanitizedCollectionConfig } from '../index.js'
+import type { CollectionSlug, SanitizedCollectionConfig } from '../index.js'
 
 export type FolderInterface = {
   name: string
@@ -29,8 +29,7 @@ export type FolderEnabledColection = {
   slug: CollectionSlug
 } & SanitizedCollectionConfig
 
-export type FolderAndDocumentsResult = {
+export type BreadcrumbsAndSubfolders = {
   breadcrumbs: Breadcrumb[]
-  data?: PaginatedDocs
   subfolders: Subfolder[]
 }

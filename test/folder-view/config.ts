@@ -4,7 +4,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { FolderUploads } from './collections/UploadFolders/index.js'
+import { Posts } from './collections/Posts/index.js'
+import { UploadsWithFolders } from './collections/UploadsWithFolders/index.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -12,7 +13,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [FolderUploads],
+  collections: [UploadsWithFolders, Posts],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

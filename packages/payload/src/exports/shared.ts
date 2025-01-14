@@ -38,7 +38,7 @@ export { getFieldPaths } from '../fields/getFieldPaths.js'
 export * from '../fields/validations.js'
 export type {
   Breadcrumb,
-  FolderAndDocumentsResult,
+  BreadcrumbsAndSubfolders as FolderAndDocumentsResult,
   FolderEnabledColection,
   FolderInterface,
   Subfolder,

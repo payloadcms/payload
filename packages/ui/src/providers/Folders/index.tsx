@@ -6,7 +6,10 @@ import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React from 'react'
 
+import type { FolderInterface } from '../../elements/FolderView/types.js'
+
 import { MoveToFolderDrawer } from '../../elements/FolderView/MoveToFolderDrawer/index.js'
+import { useTableColumns } from '../../elements/TableColumns/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
 import { useEditDepth } from '../EditDepth/index.js'
@@ -35,6 +38,7 @@ type FolderContextValue = {
   moveToDrawerSlug?: string
   moveToFolderIDs?: (number | string)[]
   populateFolderData: (args: { folderID: number | string }) => Promise<void>
+  renameFolder: (args: FolderInterface) => void
   setFolderID: (args: { folderID: number | string }) => Promise<void>
   setMoveToDocIDs: (args: (number | string)[]) => void
   setMoveToFolderIDs: (args: (number | string)[]) => void
@@ -54,6 +58,7 @@ const Context = React.createContext<FolderContextValue>({
   moveToDrawerSlug: '',
   moveToFolderIDs: [],
   populateFolderData: () => Promise.resolve(undefined),
+  renameFolder: () => {},
   setFolderID: () => Promise.resolve(undefined),
   setMoveToDocIDs: () => {},
   setMoveToFolderIDs: () => {},
@@ -83,11 +88,9 @@ export function FolderProvider({
   const { routes, serverURL } = config
   const { clearSelections, selectedDocs, selectedFolders } = useFolderAndDocumentSelections()
   const searchParams = useSearchParams()
-  const currentEditDepth = useEditDepth()
+  const editDepth = useEditDepth()
+  const { rebuildTableState } = useTableColumns()
   const { closeModal } = useModal()
-
-  const folderIDFromParams = searchParams.get('folderID')
-  const folderIDParamRef = React.useRef(folderIDFromParams)
 
   const [activeFolderID, setActiveFolderID] = React.useState<FolderContextValue['folderID']>(
     initialData?.folderID,
@@ -100,45 +103,59 @@ export function FolderProvider({
   const [moveToFolderIDs, setMoveToFolderIDs] = React.useState<(number | string)[]>([])
   const [moveToDocIDs, setMoveToDocIDs] = React.useState<(number | string)[]>([])
 
+  const folderIDFromParams = searchParams.get('folderID') || ''
+  const folderIDParamRef = React.useRef(folderIDFromParams || '')
+
   const populateFolderData = React.useCallback(
     async ({ folderID: folderToPopulate }) => {
-      const queryParams = qs.stringify(
-        {
-          ...parseSearchParams(searchParams),
-          folderID: folderToPopulate,
-        },
-        { addQueryPrefix: true },
-      )
-      const folderDataReq = await fetch(
-        `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${queryParams}`,
-        {
-          credentials: 'include',
-          headers: {
-            'content-type': 'application/json',
+      if (editDepth > 0) {
+        // when in a drawer, you cannot rely on the server rendered data
+        const queryParams = qs.stringify(
+          {
+            ...parseSearchParams(searchParams),
+            folderID: folderToPopulate,
           },
-        },
-      )
+          { addQueryPrefix: true },
+        )
+        const folderDataReq = await fetch(
+          `${serverURL}${routes.api}/${folderCollectionSlug}/populate-folder-data${queryParams}`,
+          {
+            credentials: 'include',
+            headers: {
+              'content-type': 'application/json',
+            },
+          },
+        )
 
-      if (folderDataReq.status === 200) {
-        const folderDataRes: FolderAndDocumentsResult = await folderDataReq.json()
-        if (folderDataRes.breadcrumbs) {
-          setFolderBreadcrumbs(folderDataRes.breadcrumbs)
-        }
+        if (folderDataReq.status === 200) {
+          const folderDataRes: FolderAndDocumentsResult = await folderDataReq.json()
+          if (folderDataRes.breadcrumbs) {
+            setFolderBreadcrumbs(folderDataRes.breadcrumbs)
+          }
 
-        if (folderDataRes.subfolders) {
-          setSubfolders(folderDataRes.subfolders)
-        }
-
-        if (folderDataRes.data) {
-          setDocs(folderDataRes.data.docs)
+          if (folderDataRes.subfolders) {
+            setSubfolders(folderDataRes.subfolders)
+          }
+          await rebuildTableState({ query: { folderID: folderToPopulate } })
+        } else {
+          setFolderBreadcrumbs([])
+          setSubfolders([])
+          await rebuildTableState()
         }
       } else {
-        setFolderBreadcrumbs([])
-        setSubfolders([])
-        setDocs([])
+        setFolderBreadcrumbs(initialData.breadcrumbs || [])
+        setSubfolders(initialData.subfolders || [])
       }
     },
-    [folderCollectionSlug, routes.api, serverURL, searchParams],
+    [
+      folderCollectionSlug,
+      routes.api,
+      serverURL,
+      searchParams,
+      rebuildTableState,
+      editDepth,
+      initialData,
+    ],
   )
 
   const setNewActiveFolderID: FolderContextValue['setFolderID'] = React.useCallback(
@@ -300,12 +317,29 @@ export function FolderProvider({
     ],
   )
 
+  const renameFolder: FolderContextValue['renameFolder'] = React.useCallback(
+    (updatedFolderDocument) => {
+      setSubfolders((prevFolders) =>
+        prevFolders.map((folder) => {
+          if (folder.id === updatedFolderDocument.id) {
+            return {
+              ...folder,
+              name: updatedFolderDocument.name,
+            }
+          }
+          return folder
+        }),
+      )
+    },
+    [],
+  )
+
   // update folderID when url param changes
   // we should not be updating it when inside a drawer
   React.useEffect(() => {
     if (folderIDParamRef.current !== folderIDFromParams) {
-      void setNewActiveFolderID({ folderID: folderIDFromParams })
       folderIDParamRef.current = folderIDFromParams
+      void setNewActiveFolderID({ folderID: folderIDFromParams })
     }
   }, [folderIDFromParams, setNewActiveFolderID])
 
@@ -321,9 +355,10 @@ export function FolderProvider({
         folderID: activeFolderID,
         moveFoldersAndDocs,
         moveToDocIDs,
-        moveToDrawerSlug: `${moveToDrawerSlug}-${currentEditDepth}`,
+        moveToDrawerSlug: `${moveToDrawerSlug}-${editDepth}`,
         moveToFolderIDs,
         populateFolderData,
+        renameFolder,
         setFolderID: setNewActiveFolderID,
         setMoveToDocIDs,
         setMoveToFolderIDs,

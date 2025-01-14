@@ -2,10 +2,10 @@ import type { I18n } from '@payloadcms/translations'
 
 import { getTranslation } from '@payloadcms/translations'
 
-import type { CollectionSlug, PaginatedDocs, Payload, User, Where } from '../../index.js'
+import type { CollectionSlug, PaginatedDocs, Payload, User } from '../../index.js'
 import type {
   Breadcrumb,
-  FolderAndDocumentsResult,
+  BreadcrumbsAndSubfolders,
   FolderEnabledColection,
   FolderInterface,
   Subfolder,
@@ -88,63 +88,20 @@ async function getSubFolders({
   return subfolders
 }
 
-type DataArgs = {
-  collectionConfig: FolderEnabledColection
-  fileCollectionSlug: CollectionSlug
-  folderID: number | string
-  i18n: I18n
-  limit?: number
-  locale?: string
-  payload: Payload
-  sort?: string
-  user: User
-  where?: Where
-}
-export async function populateFolderData({
-  fileCollectionSlug,
-  folderID,
-  limit = 100,
-  payload,
-  sort = 'name',
-  user,
-  where,
-}: DataArgs): Promise<PaginatedDocs> {
-  const fileWhere = createFolderConstraint({ folderID })
-
-  const data = await payload.find({
-    collection: fileCollectionSlug,
-    depth: 0,
-    draft: true,
-    fallbackLocale: null,
-    limit,
-    locale: 'all',
-    overrideAccess: false,
-    sort,
-    user,
-    where: {
-      and: [fileWhere, where || {}],
-    },
-  })
-
-  return data
-}
-
 type Args = {
   collectionConfig: FolderEnabledColection
   folderID: number | string
   i18n: I18n
   payload: Payload
   user: User
-  withDocs?: boolean
 }
-export async function populateFolderAndData({
+export async function getBreadcrumbsAndSubFolders({
   collectionConfig,
   folderID,
   i18n,
   payload,
   user,
-  withDocs = false,
-}: Args): Promise<FolderAndDocumentsResult> {
+}: Args): Promise<BreadcrumbsAndSubfolders> {
   const collectionSlug = collectionConfig.slug
   const folderCollectionSlug = collectionConfig.admin.custom.folderCollectionSlug
   let breadcrumbs: Breadcrumb[] = []
@@ -171,22 +128,8 @@ export async function populateFolderAndData({
     name: typeof collectionLabel === 'string' ? collectionLabel : collectionSlug,
   })
 
-  let data: PaginatedDocs | undefined
-
-  if (withDocs) {
-    data = await populateFolderData({
-      collectionConfig,
-      fileCollectionSlug: collectionSlug,
-      folderID,
-      i18n,
-      payload,
-      user,
-    })
-  }
-
   return {
     breadcrumbs,
-    data,
     subfolders: await getSubFolders({
       collectionSlug,
       folderCollectionSlug,

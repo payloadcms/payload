@@ -189,6 +189,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const collectionSlugs = new Set<CollectionSlug>()
 
+  addFolderCollections(configWithDefaults)
+
   for (let i = 0; i < config.collections.length; i++) {
     if (collectionSlugs.has(config.collections[i].slug)) {
       throw new DuplicateCollection('slug', config.collections[i].slug)
@@ -283,8 +285,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       richTextSanitizationPromises,
     ),
   )
-
-  addFolderCollections(configWithDefaults)
 
   if (config.serverURL !== '') {
     config.csrf.push(config.serverURL)

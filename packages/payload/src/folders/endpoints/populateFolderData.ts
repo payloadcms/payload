@@ -3,7 +3,7 @@ import httpStatus from 'http-status'
 import type { CollectionSlug, Endpoint } from '../../index.js'
 import type { FolderEnabledColection } from '../types.js'
 
-import { populateFolderAndData } from '../utils/populateFolderAndData.js'
+import { getBreadcrumbsAndSubFolders } from '../utils/getBreadcrumbsAndSubFolders.js'
 
 type PopulateBreadcrumbsArgs = {
   mediaSlug: CollectionSlug
@@ -35,13 +35,12 @@ export const populateFolderDataEndpoint = ({ mediaSlug }: PopulateBreadcrumbsArg
       )
     }
 
-    const folderData = await populateFolderAndData({
+    const folderData = await getBreadcrumbsAndSubFolders({
       collectionConfig: folderEnabledCollectionConfig,
       folderID: req.searchParams.get('folderID'),
       i18n: req.i18n,
       payload: req.payload,
       user: req.user,
-      // thread through where query
     })
 
     return Response.json(folderData)
