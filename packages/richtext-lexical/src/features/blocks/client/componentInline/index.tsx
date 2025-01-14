@@ -3,7 +3,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 const baseClass = 'inline-block'
 
-import type { BlocksFieldClient, FormState } from 'payload'
+import type { BlocksFieldClient, Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
@@ -33,7 +33,6 @@ import {
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
 } from 'lexical'
-import { reduceFieldsToValues } from 'payload/shared'
 
 import './index.scss'
 
@@ -308,13 +307,13 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
    * HANDLE FORM SUBMIT
    */
   const onFormSubmit = useCallback(
-    (formState: FormState) => {
-      const newData: any = reduceFieldsToValues(formState)
+    (formState: FormState, newData: Data) => {
       newData.blockType = formData.blockType
+
       editor.update(() => {
         const node = $getNodeByKey(nodeKey)
         if (node && $isInlineBlockNode(node)) {
-          node.setFields(newData, true)
+          node.setFields(newData as InlineBlockFields, true)
         }
       })
     },
@@ -414,8 +413,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       fields={clientBlock?.fields}
       initialState={initialState || {}}
       onChange={[onChange]}
-      onSubmit={(formState) => {
-        onFormSubmit(formState)
+      onSubmit={(formState, data) => {
+        onFormSubmit(formState, data)
         toggleDrawer()
       }}
       uuid={uuid()}
