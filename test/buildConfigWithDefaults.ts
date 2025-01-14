@@ -155,6 +155,11 @@ export async function buildConfigWithDefaults(
   if (!config.admin) {
     config.admin = {}
   }
+  if (!config.admin.experimental) {
+    config.admin.experimental = {}
+  }
+
+  config.admin.experimental.removeClientConfigI18n = true
 
   if (config.admin.autoLogin === undefined) {
     config.admin.autoLogin =

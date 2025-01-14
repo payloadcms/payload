@@ -797,6 +797,14 @@ export type Config = {
      * Note: If you've modified the default paths via `admin.routes`, delete those directories instead.
      */
     disable?: boolean
+    experimental?: {
+      /**
+       * This removes the clientConfig.i18n property from the client config, reducing the amount of data sent to the client.
+       *
+       * This will be enabled by default in 4.0, as the `useLocalization` hook will be the recommended way to access i18n data.
+       */
+      removeClientConfigI18n?: boolean
+    }
     importMap?: {
       /**
        * Automatically generate component map during development
