@@ -81,6 +81,9 @@ export const RscEntryLexicalField: React.FC<
   if (args.admin?.hideGutter) {
     admin.hideGutter = true
   }
+  if (args.admin?.hideInsertParagraphAtEnd) {
+    admin.hideInsertParagraphAtEnd = true
+  }
 
   const props: LexicalRichTextFieldProps = {
     clientFeatures,
