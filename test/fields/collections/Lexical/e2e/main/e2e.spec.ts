@@ -1218,6 +1218,65 @@ describe('lexicalMain', () => {
     await page.getByText('Creating new User')
   })
 
+  test('ensure links can created from clipboard and deleted', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    await richTextField.locator('.ContentEditable__root').first().click()
+    const lastParagraph = richTextField.locator('p').first()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    await lastParagraph.click()
+
+    page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+
+    // Paste in a link copied from a html page
+    const link = '<a href="https://www.google.com">Google</a>'
+    await page.evaluate(
+      async ([link]) => {
+        const blob = new Blob([link], { type: 'text/html' })
+        const clipboardItem = new ClipboardItem({ 'text/html': blob })
+        await navigator.clipboard.write([clipboardItem])
+      },
+      [link],
+    )
+
+    await page.keyboard.press('Meta+v')
+    await page.keyboard.press('Control+v')
+
+    const linkNode = richTextField.locator('a.LexicalEditorTheme__link').first()
+    await linkNode.scrollIntoViewIfNeeded()
+    await expect(linkNode).toBeVisible()
+
+    // Check link node text and attributes
+    await expect(linkNode).toHaveText('Google')
+    await expect(linkNode).toHaveAttribute('href', 'https://www.google.com/')
+
+    // Expect floating link editor link-input to be there
+    const linkInput = richTextField.locator('.link-input').first()
+    await expect(linkInput).toBeVisible()
+
+    const linkInInput = linkInput.locator('a').first()
+    expect(linkInInput).toBeVisible()
+
+    expect(linkInInput).toContainText('https://www.google.com/')
+    await expect(linkInInput).toHaveAttribute('href', 'https://www.google.com/')
+
+    // Click remove button
+    const removeButton = linkInput.locator('.link-trash').first()
+    await removeButton.click()
+
+    // Expect link to be removed
+    await expect(linkNode).not.toBeVisible()
+  })
+
   describe('localization', () => {
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)

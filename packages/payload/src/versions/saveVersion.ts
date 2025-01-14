@@ -42,6 +42,11 @@ export const saveVersion = async ({
   if (draft) {
     versionData._status = 'draft'
   }
+
+  if (collection?.timestamps && draft) {
+    versionData.updatedAt = now
+  }
+
   if (versionData._id) {
     delete versionData._id
   }

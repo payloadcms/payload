@@ -10,7 +10,7 @@ const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
 
 type Arguments = {
   collection: Collection
-  id: string
+  id: number | string
   req: PayloadRequest
 }
 

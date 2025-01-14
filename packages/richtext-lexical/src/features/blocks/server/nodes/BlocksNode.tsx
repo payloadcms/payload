@@ -39,23 +39,28 @@ export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = 
 >
 
 export class ServerBlockNode extends DecoratorBlockNode {
+  __cacheBuster: number
   __fields: BlockFields
 
   constructor({
+    cacheBuster,
     fields,
     format,
     key,
   }: {
+    cacheBuster?: number
     fields: BlockFields
     format?: ElementFormatType
     key?: NodeKey
   }) {
     super(format, key)
     this.__fields = fields
+    this.__cacheBuster = cacheBuster || 0
   }
 
   static clone(node: ServerBlockNode): ServerBlockNode {
     return new this({
+      cacheBuster: node.__cacheBuster,
       fields: node.__fields,
       format: node.__format,
       key: node.__key,
@@ -111,6 +116,10 @@ export class ServerBlockNode extends DecoratorBlockNode {
     }
   }
 
+  getCacheBuster(): number {
+    return this.getLatest().__cacheBuster
+  }
+
   getFields(): BlockFields {
     return this.getLatest().__fields
   }
@@ -119,9 +128,12 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return `Block Field`
   }
 
-  setFields(fields: BlockFields): void {
+  setFields(fields: BlockFields, preventFormStateUpdate?: boolean): void {
     const writable = this.getWritable()
     writable.__fields = fields
+    if (!preventFormStateUpdate) {
+      writable.__cacheBuster++
+    }
   }
 }
 

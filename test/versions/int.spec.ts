@@ -1,4 +1,5 @@
-import type { Payload, PayloadRequest } from 'payload'
+import { createLocalReq, Payload } from 'payload'
+import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 
 import path from 'path'
 import { ValidationError } from 'payload'
@@ -48,6 +49,7 @@ const formatGraphQLID = (id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
 describe('Versions', () => {
+  let user
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
@@ -69,12 +71,16 @@ describe('Versions', () => {
           password: "${devUser.password}"
         ) {
           token
+          user {
+            id
+          }
         }
       }`
     const { data } = await restClient
       .GRAPHQL_POST({ body: JSON.stringify({ query: login }) })
       .then((res) => res.json())
 
+    user = { ...data.loginUser.user, collection: 'users' }
     token = data.loginUser.token
 
     // now: initialize
@@ -591,6 +597,61 @@ describe('Versions', () => {
         expect(publishedPost.title).toBe(originalTitle)
         expect(draftPost.title.en).toBe(patchedTitle)
         expect(draftPost.title.es).toBe(spanishTitle)
+      })
+
+      it('should have correct updatedAt timestamps when saving drafts', async () => {
+        const created = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'desc',
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.update({
+          id: created.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
+      })
+
+      it('should have correct updatedAt timestamps when saving drafts with autosave', async () => {
+        const created = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'desc',
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.update({
+          id: created.id,
+          collection: draftCollectionSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+          autosave: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
       })
 
       it('should validate when publishing with the draft arg', async () => {
@@ -1375,6 +1436,20 @@ describe('Versions', () => {
     })
   })
 
+  describe('Collections - REST', () => {
+    it('sholud query versions', async () => {
+      const response = await restClient.GET(`/${collection}/versions`)
+      expect(response.status).toBe(200)
+      const json = await response.json()
+      expect(json.docs[0].parent).toBe(collectionLocalPostID)
+
+      const responseByID = await restClient.GET(`/${collection}/versions/${json.docs[0].id}`)
+      expect(responseByID.status).toBe(200)
+      const jsonByID = await responseByID.json()
+      expect(jsonByID.parent).toBe(collectionLocalPostID)
+    })
+  })
+
   describe('Globals - Local', () => {
     beforeEach(async () => {
       const title2 = 'Here is an updated global title in EN'
@@ -1807,10 +1882,6 @@ describe('Versions', () => {
 
       const currentDate = new Date()
 
-      const user = (
-        await payload.find({ collection: 'users', where: { email: { equals: devUser.email } } })
-      ).docs[0]
-
       await payload.jobs.queue({
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
@@ -1942,6 +2013,107 @@ describe('Versions', () => {
 
       expect(retrieved._status).toStrictEqual('draft')
       expect(retrieved.title).toStrictEqual('i will be a draft')
+    })
+
+    describe('server functions', () => {
+      let draftDoc
+      let event
+
+      beforeAll(async () => {
+        draftDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'my doc',
+            description: 'hello',
+            _status: 'draft',
+          },
+        })
+      })
+
+      it('should create using schedule-publish', async () => {
+        const currentDate = new Date()
+
+        const req = await createLocalReq({ user }, payload)
+
+        // use server action to create the event
+        await schedulePublishHandler({
+          req,
+          type: 'publish',
+          date: new Date(currentDate.getTime() + 3000),
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draftDoc.id,
+          },
+          user,
+          locale: 'all',
+        })
+
+        // fetch the job
+        ;[event] = (
+          await payload.find({
+            collection: 'payload-jobs',
+            where: {
+              'input.doc.value': {
+                equals: draftDoc.id,
+              },
+            },
+          })
+        ).docs
+
+        expect(event).toBeDefined()
+      })
+
+      it('should delete using schedule-publish', async () => {
+        const currentDate = new Date()
+
+        const req = await createLocalReq({ user }, payload)
+
+        // use server action to create the event
+        await schedulePublishHandler({
+          req,
+          type: 'publish',
+          date: new Date(currentDate.getTime() + 3000),
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draftDoc.id,
+          },
+          user,
+          locale: 'all',
+        })
+
+        // fetch the job
+        ;[event] = (
+          await payload.find({
+            collection: 'payload-jobs',
+            where: {
+              'input.doc.value': {
+                equals: draftDoc.id,
+              },
+            },
+          })
+        ).docs
+
+        // use server action to delete the event
+        await schedulePublishHandler({
+          req,
+          deleteID: event.id,
+          user,
+        })
+
+        // fetch the job
+        ;[event] = (
+          await payload.find({
+            collection: 'payload-jobs',
+            where: {
+              'input.doc.value': {
+                equals: String(draftDoc.id),
+              },
+            },
+          })
+        ).docs
+
+        expect(event).toBeUndefined()
+      })
     })
   })
 

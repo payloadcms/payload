@@ -2,10 +2,10 @@
 import { getTranslation } from '@payloadcms/translations'
 import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
-import { useLocale } from '../../providers/Locale/index.js'
+import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Popup, PopupList } from '../Popup/index.js'
@@ -21,6 +21,7 @@ export const Localizer: React.FC<{
   const { config } = useConfig()
   const { localization } = config
   const searchParams = useSearchParams()
+  const { setLocaleIsLoading } = useLocaleLoading()
 
   const { i18n } = useTranslation()
   const locale = useLocale()
@@ -41,6 +42,7 @@ export const Localizer: React.FC<{
                 return (
                   <PopupList.Button
                     active={locale.code === localeOption.code}
+                    disabled={locale.code === localeOption.code}
                     href={qs.stringify(
                       {
                         ...parseSearchParams(searchParams),
@@ -49,10 +51,22 @@ export const Localizer: React.FC<{
                       { addQueryPrefix: true },
                     )}
                     key={localeOption.code}
-                    onClick={close}
+                    onClick={() => {
+                      setLocaleIsLoading(true)
+                      close()
+                    }}
                   >
-                    {localeOptionLabel}
-                    {localeOptionLabel !== localeOption.code && ` (${localeOption.code})`}
+                    {localeOptionLabel !== localeOption.code ? (
+                      <Fragment>
+                        {localeOptionLabel}
+                        &nbsp;
+                        <span className={`${baseClass}__locale-code`}>
+                          {`(${localeOption.code})`}
+                        </span>
+                      </Fragment>
+                    ) : (
+                      <span className={`${baseClass}__locale-code`}>{localeOptionLabel}</span>
+                    )}
                   </PopupList.Button>
                 )
               })}

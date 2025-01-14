@@ -225,10 +225,12 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     async (json): Promise<FormState> => {
       const controller = handleAbortRef(abortOnSaveRef)
 
+      const document = json?.doc || json?.result
+
       reportUpdate({
         id,
         entitySlug,
-        updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+        updatedAt: document?.updatedAt || new Date().toISOString(),
       })
 
       // If we're editing the doc of the logged-in user,
@@ -240,13 +242,19 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       incrementVersionCount()
 
       if (typeof updateSavedDocumentData === 'function') {
-        void updateSavedDocumentData(json?.doc || {})
+        void updateSavedDocumentData(document || {})
       }
 
       if (typeof onSaveFromContext === 'function') {
+        const operation = id ? 'update' : 'create'
+
         void onSaveFromContext({
           ...json,
-          operation: id ? 'update' : 'create',
+          operation,
+          updatedAt:
+            operation === 'update'
+              ? new Date().toISOString()
+              : document?.updatedAt || new Date().toISOString(),
         })
       }
 
@@ -254,7 +262,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
+          path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
         })
         router.push(redirectRoute)
       } else {
@@ -269,7 +277,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         const { state } = await getFormState({
           id,
           collectionSlug,
-          data: json?.doc || json?.result,
+          data: document,
           docPermissions,
           docPreferences,
           globalSlug,
