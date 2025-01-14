@@ -4,6 +4,7 @@ import type {
   DocumentPreferences,
   Field,
   FieldSchemaMap,
+  FieldState,
   FormFieldWithoutComponents,
   FormState,
   FormStateWithoutComponents,
@@ -139,14 +140,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   let fieldPermissions: SanitizedFieldPermissions = true
 
-  const fieldState: FormFieldWithoutComponents = {
-    errorPaths: [],
-    fieldSchema: includeSchema ? field : undefined,
-    initialValue: undefined,
-    isSidebar: fieldIsSidebar(field),
-    passesCondition,
-    valid: true,
-    value: undefined,
+  const fieldState: FieldState = {}
+
+  if (passesCondition === false) {
+    fieldState.passesCondition = false
+  }
+
+  if (includeSchema) {
+    fieldState.fieldSchema = field
   }
 
   if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field)) {
@@ -213,6 +214,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         addErrorPathToParentArg(errorPath)
       }
 
+      if (!fieldState.errorPaths) {
+        fieldState.errorPaths = []
+      }
+
       if (!fieldState.errorPaths.includes(errorPath)) {
         fieldState.errorPaths.push(errorPath)
         fieldState.valid = false
@@ -223,8 +228,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldState.errorMessage = validationResult
       fieldState.valid = false
       addErrorPathToParent(path)
-    } else {
-      fieldState.valid = true
     }
 
     switch (field.type) {
@@ -237,13 +240,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             row.id = row?.id || new ObjectId().toHexString()
 
             if (!omitParents && (!filter || filter(args))) {
-              state[parentPath + '.id'] = {
-                fieldSchema: includeSchema
-                  ? field.fields.find((field) => fieldIsID(field))
-                  : undefined,
+              const idKey = parentPath + '.id'
+
+              state[idKey] = {
                 initialValue: row.id,
-                valid: true,
                 value: row.id,
+              }
+
+              if (includeSchema) {
+                state[idKey].fieldSchema = field.fields.find((field) => fieldIsID(field))
               }
             }
 
@@ -280,50 +285,58 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               }),
             )
 
-            const previousRows = previousFormState?.[path]?.rows || []
-            const collapsedRowIDsFromPrefs = preferences?.fields?.[path]?.collapsed
+            if (!acc.rows) {
+              acc.rows = []
+            }
 
             acc.rows.push({
               id: row.id,
-              collapsed: (() => {
-                // First, check if `previousFormState` has a matching row
-                const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
-                if (previousRow?.collapsed !== undefined) {
-                  return previousRow.collapsed
-                }
-
-                // If previousFormState is undefined, check preferences
-                if (collapsedRowIDsFromPrefs !== undefined) {
-                  return collapsedRowIDsFromPrefs.includes(row.id) // Check if collapsed in preferences
-                }
-
-                // If neither exists, fallback to `field.admin.initCollapsed`
-                return field.admin.initCollapsed
-              })(),
             })
+
+            const previousRows = previousFormState?.[path]?.rows || []
+            const collapsedRowIDsFromPrefs = preferences?.fields?.[path]?.collapsed
+
+            const collapsed = (() => {
+              // First, check if `previousFormState` has a matching row
+              const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
+              if (previousRow?.collapsed !== undefined) {
+                return previousRow.collapsed
+              }
+
+              // If previousFormState is undefined, check preferences
+              if (collapsedRowIDsFromPrefs !== undefined) {
+                return collapsedRowIDsFromPrefs.includes(row.id) // Check if collapsed in preferences
+              }
+
+              // If neither exists, fallback to `field.admin.initCollapsed`
+              return field.admin.initCollapsed
+            })()
+
+            if (collapsed) {
+              acc.rows[acc.rows.length - 1].collapsed = collapsed
+            }
 
             return acc
           },
           {
             promises: [],
-            rows: [],
+            rows: undefined,
           },
         )
 
         // Wait for all promises and update fields with the results
         await Promise.all(promises)
 
-        fieldState.rows = rows
+        if (rows) {
+          fieldState.rows = rows
+        }
 
         // Unset requiresRender
         // so it will be removed from form state
         fieldState.requiresRender = false
 
         // Add values to field state
-        if (data[field.name] === null) {
-          fieldState.value = null
-          fieldState.initialValue = null
-        } else {
+        if (data[field.name] !== null) {
           fieldState.value = forceFullValue ? arrayValue : arrayValue.length
           fieldState.initialValue = forceFullValue ? arrayValue : arrayValue.length
 
@@ -359,35 +372,48 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               row.id = row?.id || new ObjectId().toHexString()
 
               if (!omitParents && (!filter || filter(args))) {
-                state[parentPath + '.id'] = {
-                  fieldSchema: includeSchema
-                    ? block.fields.find((blockField) => fieldIsID(blockField))
-                    : undefined,
+                // Handle block `id` field
+                const idKey = parentPath + '.id'
+
+                state[idKey] = {
                   initialValue: row.id,
-                  valid: true,
                   value: row.id,
                 }
 
-                state[parentPath + '.blockType'] = {
-                  fieldSchema: includeSchema
-                    ? block.fields.find(
-                        (blockField) => 'name' in blockField && blockField.name === 'blockType',
-                      )
-                    : undefined,
+                if (includeSchema) {
+                  state[idKey].fieldSchema = includeSchema
+                    ? block.fields.find((blockField) => fieldIsID(blockField))
+                    : undefined
+                }
+
+                // Handle `blockType` field
+                const fieldKey = parentPath + '.blockType'
+
+                state[fieldKey] = {
                   initialValue: row.blockType,
-                  valid: true,
                   value: row.blockType,
                 }
 
-                state[parentPath + '.blockName'] = {
-                  fieldSchema: includeSchema
-                    ? block.fields.find(
-                        (blockField) => 'name' in blockField && blockField.name === 'blockName',
-                      )
-                    : undefined,
-                  initialValue: row.blockName,
-                  valid: true,
-                  value: row.blockName,
+                if (includeSchema) {
+                  state[fieldKey].fieldSchema = block.fields.find(
+                    (blockField) => 'name' in blockField && blockField.name === 'blockType',
+                  )
+                }
+
+                // Handle `blockName` field
+                const blockNameKey = parentPath + '.blockName'
+
+                state[blockNameKey] = {}
+
+                if (row.blockName) {
+                  state[blockNameKey].initialValue = row.blockName
+                  state[blockNameKey].value = row.blockName
+                }
+
+                if (includeSchema) {
+                  state[blockNameKey].fieldSchema = block.fields.find(
+                    (blockField) => 'name' in blockField && blockField.name === 'blockName',
+                  )
                 }
               }
 
@@ -428,16 +454,21 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }),
               )
 
-              const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
-
               acc.rowMetadata.push({
                 id: row.id,
                 blockType: row.blockType,
-                collapsed:
-                  collapsedRowIDs === undefined
-                    ? field.admin.initCollapsed
-                    : collapsedRowIDs.includes(row.id),
               })
+
+              const collapsedRowIDs = preferences?.fields?.[path]?.collapsed
+
+              const collapsed =
+                collapsedRowIDs === undefined
+                  ? field.admin.initCollapsed
+                  : collapsedRowIDs.includes(row.id)
+
+              if (collapsed) {
+                acc.rowMetadata[acc.rowMetadata.length - 1].collapsed = collapsed
+              }
             }
 
             return acc
@@ -604,8 +635,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       default: {
-        fieldState.value = data[field.name]
-        fieldState.initialValue = data[field.name]
+        if (data[field.name] !== undefined) {
+          fieldState.value = data[field.name]
+          fieldState.initialValue = data[field.name]
+        }
 
         // Add field to state
         if (!filter || filter(args)) {
@@ -621,11 +654,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (!filter || filter(args)) {
       state[path] = {
         disableFormData: true,
-        errorPaths: [],
-        initialValue: undefined,
-        passesCondition,
-        valid: true,
-        value: undefined,
+      }
+
+      if (passesCondition === false) {
+        state[path].passesCondition = false
       }
     }
 

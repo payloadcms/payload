@@ -83,6 +83,7 @@ export const handleEndpoints = async ({
 
     const url = `${request.url}?${new URLSearchParams(search).toString()}`
     const response = await handleEndpoints({
+      basePath,
       config: incomingConfig,
       request: new Request(url, {
         cache: request.cache,
