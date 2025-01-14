@@ -803,7 +803,7 @@ export type Config = {
        *
        * This will be enabled by default in 4.0, as the `useLocale` hook will be the recommended way to access i18n data.
        *
-       * @example const { i18n } = useTranslation()
+       * @example const { i18n } = useLocale()
        *
        * @todo Remove in 4.0
        */
