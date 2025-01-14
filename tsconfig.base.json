@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
     "composite": true,
     "declaration": true,
     "declarationMap": true,
@@ -21,7 +26,6 @@
     "types": ["jest", "node", "@types/jest"],
     "incremental": true,
     "isolatedModules": true,
-    "strict": false,
     "plugins": [
       {
         "name": "next"
