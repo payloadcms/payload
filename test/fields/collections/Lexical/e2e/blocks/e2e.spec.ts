@@ -1206,12 +1206,65 @@ describe('lexicalBlocks', () => {
       // Click button that says Add Avatar
       await inlineBlockDrawer.getByRole('button', { name: 'Add Avatar' }).click()
       await inlineBlockDrawer.getByRole('button', { name: 'Choose from existing' }).click()
-      await inlineBlockDrawer.getByText('payload.jpg').click()
+      const uploadDrawer = page.locator('dialog[id^=list-drawer_2_]').first()
+      await uploadDrawer.getByText('payload.jpg').click()
       await expect(inlineBlockDrawer.locator('.upload-relationship-details__filename')).toHaveText(
         'payload.jpg',
       )
-      const { inlineBlock, openEditDrawer } = await saveDrawer()
+      await saveDrawer()
       await saveDocAndAssert(page)
+
+      await assertLexicalDoc({
+        fn: async ({ lexicalWithBlocks }) => {
+          const firstParagraph: SerializedParagraphNode = lexicalWithBlocks.root
+            .children[0] as SerializedParagraphNode
+          const inlineBlock: SerializedInlineBlockNode = firstParagraph
+            .children[1] as SerializedInlineBlockNode
+
+          const uploadDoc: Upload = (
+            await payload.find({
+              collection: 'uploads',
+              depth: 0,
+              overrideAccess: true,
+              where: {
+                filename: {
+                  equals: 'payload.jpg',
+                },
+              },
+            })
+          ).docs[0] as never
+          await expect(inlineBlock.fields.blockType).toBe('AvatarGroup')
+          await expect(inlineBlock.fields.avatars?.length).toBe(1)
+          await expect(inlineBlock.fields.avatars[0].image).toBe(uploadDoc.id)
+        },
+      })
+
+      await assertLexicalDoc({
+        depth: 1,
+        fn: async ({ lexicalWithBlocks }) => {
+          const firstParagraph: SerializedParagraphNode = lexicalWithBlocks.root
+            .children[0] as SerializedParagraphNode
+          const inlineBlock: SerializedInlineBlockNode = firstParagraph
+            .children[1] as SerializedInlineBlockNode
+
+          const uploadDoc: Upload = (
+            await payload.find({
+              collection: 'uploads',
+              depth: 0,
+              overrideAccess: true,
+              where: {
+                filename: {
+                  equals: 'payload.jpg',
+                },
+              },
+            })
+          ).docs[0] as never
+          await expect(inlineBlock.fields.blockType).toBe('AvatarGroup')
+          await expect(inlineBlock.fields.avatars?.length).toBe(1)
+          await expect(inlineBlock.fields.avatars[0].image.id).toBe(uploadDoc.id)
+          await expect(inlineBlock.fields.avatars[0].image.text).toBe(uploadDoc.text)
+        },
+      })
     })
   })
 })
