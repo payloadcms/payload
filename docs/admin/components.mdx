@@ -127,7 +127,7 @@ The Import Map is automatically regenerated at startup and whenever Hot Module R
 
 If needed, custom items can be appended onto the Import Map. This is mostly only relevant for plugin authors who need to add a custom import that is not referenced in a known location.
 
-To add a custom import to the Import Map, use the `admin.dependencies` property in your [Payload Config](../getting-started/overview):
+To add a custom import to the Import Map, use the `admin.dependencies` property in your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -464,7 +464,7 @@ Payload also exports its [SCSS](https://sass-lang.com) library for reuse which i
 
 Root Components are those that effect the [Admin Panel](./overview) generally, such as the logo or the main nav.
 
-To override Root Components, use the `admin.components` property in your [Payload Config](../getting-started/overview):
+To override Root Components, use the `admin.components` property in your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'

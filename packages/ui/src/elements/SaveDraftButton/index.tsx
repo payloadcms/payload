@@ -23,6 +23,7 @@ export const SaveDraftButton: React.FC = () => {
   } = useConfig()
   const { id, collectionSlug, globalSlug, setUnpublishedVersionCount, uploadStatus } =
     useDocumentInfo()
+
   const modified = useFormModified()
   const { code: locale } = useLocale()
   const ref = useRef<HTMLButtonElement>(null)
@@ -31,10 +32,10 @@ export const SaveDraftButton: React.FC = () => {
   const { submit } = useForm()
   const operation = useOperation()
 
-  const forceDisable = (operation === 'update' && !modified) || uploadStatus === 'uploading'
+  const disabled = (operation === 'update' && !modified) || uploadStatus === 'uploading'
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) {
+    if (disabled) {
       return
     }
 
@@ -71,12 +72,12 @@ export const SaveDraftButton: React.FC = () => {
     api,
     locale,
     id,
-    forceDisable,
+    disabled,
     setUnpublishedVersionCount,
   ])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
-    if (forceDisable) {
+    if (disabled) {
       // absorb the event
     }
 
@@ -92,7 +93,7 @@ export const SaveDraftButton: React.FC = () => {
       buttonId="action-save-draft"
       buttonStyle="secondary"
       className={baseClass}
-      disabled={forceDisable}
+      disabled={disabled}
       onClick={() => {
         return void saveDraft()
       }}

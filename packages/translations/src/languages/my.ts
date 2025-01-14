@@ -301,6 +301,10 @@ export const myTranslations: DefaultTranslationsObject = {
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',
     remove: 'ဖယ်ရှားမည်။',
     reset: 'Tetapkan semula',
+    resetPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်မည်',
+    resetPreferencesDescription:
+      'ဤသည်သည် သင့်၏အကြိုက်များအားလုံးကို အခြားတပ်ဆင်မှုများမှ ပြန်လည်သတ်မှတ်ပေးပါလိမ့်မည်။',
+    resettingPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်နေပါသည်။',
     row: 'အတန်း',
     rows: 'Rows',
     save: 'သိမ်းဆည်းမည်။',

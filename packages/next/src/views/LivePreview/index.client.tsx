@@ -7,6 +7,7 @@ import type {
   ClientGlobalConfig,
   ClientUser,
   Data,
+  DocumentSlots,
   FormState,
   LivePreviewConfig,
 } from 'payload'
@@ -58,13 +59,18 @@ type Props = {
   readonly globalConfig?: ClientGlobalConfig
   readonly schemaPath: string
   readonly serverURL: string
-}
+} & DocumentSlots
 
 const PreviewView: React.FC<Props> = ({
   collectionConfig,
   config,
+  Description,
   fields,
   globalConfig,
+  PreviewButton,
+  PublishButton,
+  SaveButton,
+  SaveDraftButton,
   schemaPath,
 }) => {
   const {
@@ -474,6 +480,12 @@ const PreviewView: React.FC<Props> = ({
         />
         <DocumentControls
           apiURL={apiURL}
+          customComponents={{
+            PreviewButton,
+            PublishButton,
+            SaveButton,
+            SaveDraftButton,
+          }}
           data={initialData}
           disableActions={disableActions}
           hasPublishPermission={hasPublishPermission}
@@ -515,6 +527,7 @@ const PreviewView: React.FC<Props> = ({
             <DocumentFields
               AfterFields={AfterFields}
               BeforeFields={BeforeFields}
+              Description={Description}
               docPermissions={docPermissions}
               fields={fields}
               forceSidebarWrap
@@ -530,11 +543,13 @@ const PreviewView: React.FC<Props> = ({
   )
 }
 
-export const LivePreviewClient: React.FC<{
-  readonly breakpoints: LivePreviewConfig['breakpoints']
-  readonly initialData: Data
-  readonly url: string
-}> = (props) => {
+export const LivePreviewClient: React.FC<
+  {
+    readonly breakpoints: LivePreviewConfig['breakpoints']
+    readonly initialData: Data
+    readonly url: string
+  } & DocumentSlots
+> = (props) => {
   const { breakpoints, url } = props
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
@@ -572,10 +587,16 @@ export const LivePreviewClient: React.FC<{
           apiRoute={apiRoute}
           collectionConfig={collectionConfig}
           config={config}
+          Description={props.Description}
           fields={(collectionConfig || globalConfig)?.fields}
           globalConfig={globalConfig}
+          PreviewButton={props.PreviewButton}
+          PublishButton={props.PublishButton}
+          SaveButton={props.SaveButton}
+          SaveDraftButton={props.SaveDraftButton}
           schemaPath={schemaPath}
           serverURL={serverURL}
+          Upload={props.Upload}
         />
       </LivePreviewProvider>
     </Fragment>

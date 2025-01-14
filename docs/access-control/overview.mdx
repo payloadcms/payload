@@ -29,7 +29,7 @@ There are three main types of Access Control in Payload:
 
 ## Default Access Control
 
-Payload provides default Access Control so that your data is secured behind [Authentication](../authentication) without additional configuration. To do this, Payload sets a default function that simply checks if a user is present on the request. You can override this default behavior by defining your own Access Control functions as needed.
+Payload provides default Access Control so that your data is secured behind [Authentication](../authentication/overview) without additional configuration. To do this, Payload sets a default function that simply checks if a user is present on the request. You can override this default behavior by defining your own Access Control functions as needed.
 
 Here is the default Access Control that Payload provides:
 
@@ -58,3 +58,22 @@ To accomplish this, Payload exposes the [Access Operation](../authentication/ope
 </Banner>
 
 If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your Access Control is being executed via the Access Operation to determine solely what the user can do within the Admin Panel.
+
+
+## Locale Specific Access Control
+
+To implement locale-specific access control, you can use the `req.locale` argument in your access control functions. This argument allows you to evaluate the current locale of the request and determine access permissions accordingly.
+
+Here is an example:
+
+```ts
+const access = ({ req }) => {
+  // Grant access if the locale is 'en'
+  if (req.locale === 'en') {
+    return true;
+  }
+
+  // Deny access for all other locales
+  return false;
+}
+```

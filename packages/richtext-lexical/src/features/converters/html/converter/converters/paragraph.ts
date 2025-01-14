@@ -1,5 +1,4 @@
-import type { SerializedParagraphNode } from 'lexical'
-
+import type { SerializedParagraphNode } from '../../../../../nodeTypes.js'
 import type { HTMLConverter } from '../types.js'
 
 import { convertLexicalNodesToHTML } from '../index.js'

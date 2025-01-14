@@ -426,6 +426,59 @@ describe('Versions', () => {
       await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
+    test('collection - should update updatedAt', async () => {
+      await page.goto(url.create)
+      await page.waitForURL(`**/${url.create}`)
+
+      // fill out doc in english
+      await page.locator('#field-title').fill('title')
+      await page.locator('#field-description').fill('initial description')
+      await saveDocAndAssert(page)
+
+      const updatedAtWrapper = await page.locator(
+        '.doc-controls .doc-controls__content .doc-controls__list-item',
+        {
+          hasText: 'Last Modified',
+        },
+      )
+      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      // wait for 1 second so that the timestamp can be different
+      await wait(1000)
+
+      await page.locator('#field-description').fill('changed description')
+      await saveDocAndAssert(page)
+
+      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+    })
+
+    test('collection - should update updatedAt on autosave', async () => {
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const updatedAtWrapper = await page.locator(
+        '.doc-controls .doc-controls__content .doc-controls__list-item',
+        {
+          hasText: 'Last Modified',
+        },
+      )
+      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      // wait for 1 second so that the timestamp can be different
+      await wait(1000)
+
+      await page.locator('#field-title').fill('autosave title updated')
+      await waitForAutoSaveToRunAndComplete(page)
+
+      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+    })
+
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       await page.goto(url.global(autoSaveGlobalSlug))

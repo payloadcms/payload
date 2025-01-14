@@ -80,13 +80,13 @@ The Date Field inherits all of the default options from the base [Field Admin Co
 | **`date.timeIntervals`** *    | Time intervals to display. Defaults to 30 minutes.                                                                                     |
 | **`date.timeFormat`** *       | Determines time format. Defaults to `'h:mm aa'`.                                                                                       |
 
-_* This property is passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md). ._
+_* This property is passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md)._
 
 ### Display Format and Picker Appearance
 
 These properties only affect how the date is displayed in the UI. The full date is always stored in the format `YYYY-MM-DDTHH:mm:ss.SSSZ` (e.g. `1999-01-01T8:00:00.000+05:00`).
 
-`displayFormat` determines how the date is presented in the field **cell**, you can pass any valid (unicode date format)[https://date-fns.org/v4.1.0/docs/format].
+`displayFormat` determines how the date is presented in the field **cell**, you can pass any valid [unicode date format](https://date-fns.org/v4.1.0/docs/format).
 
 `pickerAppearance` sets the appearance of the **react datepicker**, the options available are `dayAndTime`, `dayOnly`, `timeOnly`, and `monthOnly`. By default, the datepicker will display `dayOnly`.
 

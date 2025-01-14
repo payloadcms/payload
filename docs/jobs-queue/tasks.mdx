@@ -203,3 +203,49 @@ export default buildConfig({
   }
 })
 ```
+
+## Nested tasks
+
+You can run sub-tasks within an existing task, by using the `tasks` or `ìnlineTask` arguments passed to the task `handler` function:
+
+
+```ts
+export default buildConfig({
+  // ...
+  jobs: {
+    // It is recommended to set `addParentToTaskLog` to `true` when using nested tasks, so that the parent task is included in the task log
+    // This allows for better observability and debugging of the task execution
+    addParentToTaskLog: true,
+    tasks: [
+      {
+        slug: 'parentTask',
+        inputSchema: [
+          {
+            name: 'text',
+            type: 'text'
+          },
+        ],
+        handler: async ({ input, req, tasks, inlineTask }) => {
+
+          await inlineTask('Sub Task 1', {
+            task: () => {
+              // Do something
+              return {
+                output: {},
+              }
+            },
+          })
+
+          await tasks.CreateSimple('Sub Task 2', {
+            input: { message: 'hello' },
+          })
+
+          return {
+            output: {},
+          }
+        }
+      } as TaskConfig<'parentTask'>,
+    ]
+  }
+})
+```

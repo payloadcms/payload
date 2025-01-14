@@ -25,6 +25,9 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Regla Horizontal',
   },
+  et: {
+    label: 'Horisontaalne reegel',
+  },
   fa: {
     label: 'قاعده افقی',
   },
@@ -79,11 +82,14 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Vodorovná čiara',
   },
+  sl: {
+    label: 'Vodoravna črta',
+  },
   sv: {
     label: 'Horisontell linje',
   },
   th: {
-    label: 'กฎขีดตรง',
+    label: 'เส้นขอบแนวนอน',
   },
   tr: {
     label: 'Yatay Çizgi',

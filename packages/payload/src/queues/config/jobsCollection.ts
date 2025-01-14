@@ -30,6 +30,70 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
     })
   }
 
+  const logFields: Field[] = [
+    {
+      name: 'executedAt',
+      type: 'date',
+      required: true,
+    },
+    {
+      name: 'completedAt',
+      type: 'date',
+      required: true,
+    },
+    {
+      name: 'taskSlug',
+      type: 'select',
+      options: [...taskSlugs],
+      required: true,
+    },
+    {
+      name: 'taskID',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'input',
+      type: 'json',
+    },
+    {
+      name: 'output',
+      type: 'json',
+    },
+    {
+      name: 'state',
+      type: 'radio',
+      options: ['failed', 'succeeded'],
+      required: true,
+    },
+    {
+      name: 'error',
+      type: 'json',
+      admin: {
+        condition: (_, data) => data.state === 'failed',
+      },
+      required: true,
+    },
+  ]
+
+  if (config?.jobs?.addParentToTaskLog) {
+    logFields.push({
+      name: 'parent',
+      type: 'group',
+      fields: [
+        {
+          name: 'taskSlug',
+          type: 'select',
+          options: [...taskSlugs],
+        },
+        {
+          name: 'taskID',
+          type: 'text',
+        },
+      ],
+    })
+  }
+
   const jobsCollection: CollectionConfig = {
     slug: 'payload-jobs',
     admin: {
@@ -89,51 +153,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
                 admin: {
                   description: 'Task execution log',
                 },
-                fields: [
-                  {
-                    name: 'executedAt',
-                    type: 'date',
-                    required: true,
-                  },
-                  {
-                    name: 'completedAt',
-                    type: 'date',
-                    required: true,
-                  },
-                  {
-                    name: 'taskSlug',
-                    type: 'select',
-                    options: [...taskSlugs],
-                    required: true,
-                  },
-                  {
-                    name: 'taskID',
-                    type: 'text',
-                    required: true,
-                  },
-                  {
-                    name: 'input',
-                    type: 'json',
-                  },
-                  {
-                    name: 'output',
-                    type: 'json',
-                  },
-                  {
-                    name: 'state',
-                    type: 'radio',
-                    options: ['failed', 'succeeded'],
-                    required: true,
-                  },
-                  {
-                    name: 'error',
-                    type: 'json',
-                    admin: {
-                      condition: (_, data) => data.state === 'failed',
-                    },
-                    required: true,
-                  },
-                ],
+                fields: logFields,
               },
             ],
             label: 'Status',
@@ -204,5 +224,6 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
     },
     lockDocuments: false,
   }
+
   return jobsCollection
 }

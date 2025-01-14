@@ -299,6 +299,10 @@ export const caTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexa tots el {{collections}}.',
     remove: 'Elimina',
     reset: 'Restableix',
+    resetPreferences: 'Restablir les preferències',
+    resetPreferencesDescription:
+      'Això restablirà totes les teves preferències a les configuracions per defecte.',
+    resettingPreferences: 'Restablint les preferències.',
     row: 'Fila',
     rows: 'Files',
     save: 'Desa',

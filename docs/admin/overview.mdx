@@ -10,7 +10,7 @@ Payload dynamically generates a beautiful, [fully type-safe](../typescript/overv
 
 The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](./components)—everything from simple field labels to entire views can be modified or replaced to perfectly tailor the interface for your editors.
 
-The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app). It supports [React Server Components](https://react.dev/reference/rsc/server-components), enabling the use of the [Local API](/docs/local-api/overview) on the front-end. You can install Payload into any [existing Next.js app in just one line](../getting-started/installation) and [deploy it anywhere](../production).
+The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app). It supports [React Server Components](https://react.dev/reference/rsc/server-components), enabling the use of the [Local API](/docs/local-api/overview) on the front-end. You can install Payload into any [existing Next.js app in just one line](../getting-started/installation) and [deploy it anywhere](../production/deployment).
 
 <Banner type="success">
   The Payload Admin Panel is designed to be as minimal and straightforward as possible to allow easy customization and control. [Learn more](./components).
@@ -57,7 +57,7 @@ The `admin` directory contains all the _pages_ related to the interface itself, 
 
 <Banner type="warning">
   **Note:**
-  If you don't use the [REST API](../rest/overview) or [GraphQL API](../graphql/overview), you can delete the [Next.js files corresponding to those routes](../admin/overview#project-structure), however, the overhead of this API is completely constrained to these endpoints, and will not slow down or affect Payload outside of the endpoints.
+  If you don't intend to use the Admin Panel, [REST API](../rest/overview), or [GraphQL API](../graphql/overview), you can opt-out by simply deleting their corresponding directories within your Next.js app. The overhead, however, is completely constrained to these routes, and will not slow down or affect Payload outside when not in use.
 </Banner>
 
 Finally, the `custom.scss` file is where you can add or override globally-oriented styles in the Admin Panel, such as modify the color palette. Customizing the look and feel through CSS alone is a powerful feature of the Admin Panel, [more on that here](./customizing-css).
@@ -94,7 +94,6 @@ The following options are available:
 | **`components`**               | Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                        |
 | **`custom`**                   | Any custom properties you wish to pass to the Admin Panel.                                                                                                            |
 | **`dateFormat`**               | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                       |
-| **`disable`**                  | If set to `true`, the entire Admin Panel will be disabled.                                                                                                            |
 | **`livePreview`**              | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                         |
 | **`meta`**                     | Base metadata to use for the Admin Panel. [More details](./metadata).                                                                                                 |
 | **`routes`**                   | Replace built-in Admin Panel routes with your own custom routes. [More details](#customizing-routes).                                                                 |
