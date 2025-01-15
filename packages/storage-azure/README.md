@@ -48,4 +48,5 @@ export default buildConfig({
 | `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist | `false` |
 | `baseURL`              | Base URL for the Azure Blob storage account                              |         |
 | `connectionString`     | Azure Blob storage connection string                                     |         |
+| `credential`           | Alternative to connection string you can use TokenCredential to connect  |         |
 | `containerName`        | Azure Blob storage container name                                        |         |
