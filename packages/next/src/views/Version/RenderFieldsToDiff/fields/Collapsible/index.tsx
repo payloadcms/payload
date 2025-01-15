@@ -7,7 +7,7 @@ import type { DiffComponentProps } from '../types.js'
 import { FieldDiffCollapser } from '../../FieldDiffCollapser/index.js'
 import RenderFieldsToDiff from '../../index.js'
 
-const baseClass = 'nested-diff'
+const baseClass = 'collapsible-diff'
 
 const Collapsible: React.FC<DiffComponentProps> = ({
   comparison,

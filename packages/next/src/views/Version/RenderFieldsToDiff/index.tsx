@@ -133,7 +133,6 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               <Component
                 comparison={comparison}
                 diffComponents={diffComponents}
-                disableGutter
                 field={field}
                 fieldPermissions={fieldPermissions}
                 fields={field.fields}
