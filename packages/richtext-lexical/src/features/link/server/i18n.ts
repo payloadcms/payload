@@ -25,6 +25,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Verknüpfung',
     loadingWithEllipsis: 'Laden...',
   },
+  el: {
+    label: 'Σύνδεσμος',
+    loadingWithEllipsis: 'Φόρτωση...',
+  },
   en: {
     label: 'Link',
     loadingWithEllipsis: 'Loading...',
