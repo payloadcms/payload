@@ -16,12 +16,6 @@ export const deleteScheduledPublishJobs = async ({
   req,
 }: Args): Promise<void> => {
   try {
-    const jobs = await payload.db.find({
-      collection: 'payload-jobs',
-      req,
-    })
-
-    // get the jobs collection
     await payload.db.deleteMany({
       collection: 'payload-jobs',
       req,
@@ -31,6 +25,11 @@ export const deleteScheduledPublishJobs = async ({
           {
             completedAt: {
               exists: false,
+            },
+          },
+          {
+            processing: {
+              equals: false,
             },
           },
           {
@@ -45,8 +44,8 @@ export const deleteScheduledPublishJobs = async ({
           },
           // data.type narrows scheduled publish jobs in case of another job having input.doc.value
           {
-            'input.type': {
-              exists: true,
+            taskSlug: {
+              equals: 'schedulePublish',
             },
           },
         ],
