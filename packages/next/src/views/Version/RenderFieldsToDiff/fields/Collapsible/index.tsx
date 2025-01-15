@@ -24,6 +24,7 @@ const Collapsible: React.FC<DiffComponentProps> = ({
   return (
     <div className={baseClass}>
       <FieldDiffCollapser
+        comparison={comparison}
         label={
           'label' in field &&
           field.label &&
@@ -34,6 +35,7 @@ const Collapsible: React.FC<DiffComponentProps> = ({
             </span>
           )
         }
+        version={version}
       >
         <RenderFieldsToDiff
           comparison={comparison}
