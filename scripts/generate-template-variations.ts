@@ -9,8 +9,6 @@
  *       There is no way currently to have lint-staged ignore the templates directory.
  */
 
-import type { DbType, StorageAdapterType } from 'packages/create-payload-app/src/types.js'
-
 import chalk from 'chalk'
 import { execSync } from 'child_process'
 import { configurePayloadConfig } from 'create-payload-app/lib/configure-payload-config.js'
@@ -19,6 +17,8 @@ import minimist from 'minimist'
 import * as fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+
+import type { DbType, StorageAdapterType } from '../packages/create-payload-app/src/types.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
