@@ -4,7 +4,7 @@ import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
-import FieldDiffCollapser from '../../FieldDiffCollapser/index.js'
+import { FieldDiffCollapser } from '../../FieldDiffCollapser/index.js'
 import RenderFieldsToDiff from '../../index.js'
 
 const baseClass = 'nested-diff'
@@ -24,6 +24,7 @@ const Collapsible: React.FC<DiffComponentProps> = ({
     <div className={baseClass}>
       <FieldDiffCollapser
         comparison={comparison}
+        fields={fields}
         label={
           'label' in field &&
           field.label &&

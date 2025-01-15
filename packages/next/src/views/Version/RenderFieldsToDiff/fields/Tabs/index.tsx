@@ -6,7 +6,7 @@ import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
-import FieldDiffCollapser from '../../FieldDiffCollapser/index.js'
+import { FieldDiffCollapser } from '../../FieldDiffCollapser/index.js'
 import RenderFieldsToDiff from '../../index.js'
 
 const baseClass = 'tabs-diff'
@@ -31,6 +31,7 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
           return (
             <FieldDiffCollapser
               comparison={comparisonUnwrapped}
+              fields={tab.fields}
               key={i}
               label={
                 'label' in tab &&
