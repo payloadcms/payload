@@ -1,17 +1,14 @@
 import { type RelationshipField } from 'payload'
 import { APIError } from 'payload'
 
-import type { MultiTenantPluginConfig } from '../../types.js'
-
 import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 
 type Args = {
-  access?: MultiTenantPluginConfig['tenantField']['access']
+  access?: RelationshipField['access']
   debug?: boolean
   name: string
-  tenantsCollectionSlug: MultiTenantPluginConfig['tenantsSlug']
+  tenantsCollectionSlug: string
   unique: boolean
-  userHasAccessToAllTenants: MultiTenantPluginConfig['userHasAccessToAllTenants']
 }
 export const tenantField = ({
   name,

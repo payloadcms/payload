@@ -4,14 +4,14 @@ export function combineWhereConstraints(constraints: Array<Where>): Where {
   if (constraints.length === 0) {
     return {}
   }
-  if (constraints.length === 1) {
+  if (constraints.length === 1 && constraints[0]) {
     return constraints[0]
   }
-  const andConstraint = {
+  const andConstraint: Where = {
     and: [],
   }
   constraints.forEach((constraint) => {
-    if (typeof constraint === 'object') {
+    if (andConstraint.and && constraint && typeof constraint === 'object') {
       andConstraint.and.push(constraint)
     }
   })

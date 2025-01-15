@@ -1,17 +1,19 @@
-import type { Access, AccessArgs, AccessResult } from 'payload'
+import type { Access, AccessArgs, AccessResult, User } from 'payload'
 
 import type { MultiTenantPluginConfig, UserWithTenantsField } from '../types.js'
 
 import { combineWhereConstraints } from './combineWhereConstraints.js'
 import { getTenantAccess } from './getTenantAccess.js'
 
-type Args = {
+type Args<ConfigType> = {
   accessFunction?: Access
   fieldName: string
-  userHasAccessToAllTenants: MultiTenantPluginConfig[Required<'userHasAccessToAllTenants'>]
+  userHasAccessToAllTenants: Required<
+    MultiTenantPluginConfig<ConfigType>
+  >['userHasAccessToAllTenants']
 }
 export const withTenantAccess =
-  ({ accessFunction, fieldName, userHasAccessToAllTenants }: Args) =>
+  <ConfigType>({ accessFunction, fieldName, userHasAccessToAllTenants }: Args<ConfigType>) =>
   async (args: AccessArgs): Promise<AccessResult> => {
     const constraints = []
     const accessFn =
@@ -26,7 +28,12 @@ export const withTenantAccess =
       constraints.push(accessResult)
     }
 
-    if (args.req.user && !userHasAccessToAllTenants(args.req.user)) {
+    if (
+      args.req.user &&
+      !userHasAccessToAllTenants(
+        args.req.user as ConfigType extends { user: User } ? ConfigType['user'] : User,
+      )
+    ) {
       constraints.push(
         getTenantAccess({
           fieldName,

@@ -5,10 +5,10 @@ import type { MultiTenantPluginConfig } from '../types.js'
 import { withTenantAccess } from './withTenantAccess.js'
 
 type AllAccessKeys<T extends readonly string[]> = T[number] extends keyof Omit<
-  CollectionConfig['access'],
+  Required<CollectionConfig>['access'],
   'admin'
 >
-  ? keyof Omit<CollectionConfig['access'], 'admin'> extends T[number]
+  ? keyof Omit<Required<CollectionConfig>['access'], 'admin'> extends T[number]
     ? T
     : never
   : never
@@ -17,27 +17,32 @@ const collectionAccessKeys: AllAccessKeys<
   ['create', 'read', 'update', 'delete', 'readVersions', 'unlock']
 > = ['create', 'read', 'update', 'delete', 'readVersions', 'unlock'] as const
 
-type Args = {
+type Args<ConfigType> = {
   collection: CollectionConfig
   fieldName: string
-  userHasAccessToAllTenants: MultiTenantPluginConfig[Required<'userHasAccessToAllTenants'>]
+  userHasAccessToAllTenants: Required<
+    MultiTenantPluginConfig<ConfigType>
+  >['userHasAccessToAllTenants']
 }
 
 /**
  * Adds tenant access constraint to collection
  */
-export const addCollectionAccess = ({
+export const addCollectionAccess = <ConfigType>({
   collection,
   fieldName,
   userHasAccessToAllTenants,
-}: Args): void => {
-  if (!collection.access) {
+}: Args<ConfigType>): void => {
+  if (!collection?.access) {
     collection.access = {}
   }
   collectionAccessKeys.reduce<{
     [key in (typeof collectionAccessKeys)[number]]?: Access
   }>((acc, key) => {
-    collection.access[key] = withTenantAccess({
+    if (!collection.access) {
+      return acc
+    }
+    collection.access[key] = withTenantAccess<ConfigType>({
       accessFunction: collection.access?.[key],
       fieldName,
       userHasAccessToAllTenants,

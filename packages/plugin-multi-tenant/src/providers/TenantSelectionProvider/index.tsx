@@ -1,16 +1,22 @@
 'use client'
 
+import type { OptionObject } from 'payload'
+
 import { useRouter } from 'next/navigation.js'
 import React, { createContext } from 'react'
 
 import { SELECT_ALL } from '../../constants.js'
 
 type ContextType = {
-  options: { label: string; value: string }[]
+  options: OptionObject[]
   selectedTenantID: number | string | undefined
-  setOptions?: (options: { label: string; value: string }[]) => void
-  setRefreshOnChange?: (refresh: boolean) => void
-  setTenant: (args: { from: 'cookie' | 'document'; id: number | string; refresh?: boolean }) => void
+  setOptions: (options: OptionObject[]) => void
+  setRefreshOnChange: (refresh: boolean) => void
+  setTenant: (args: {
+    from: 'cookie' | 'document'
+    id: number | string | undefined
+    refresh?: boolean
+  }) => void
 }
 
 const Context = createContext<ContextType>({
@@ -29,7 +35,7 @@ export const TenantSelectionProvider = ({ children }: { children: React.ReactNod
     'cookie' | 'document' | undefined
   >(undefined)
   const [refreshOnChange, setRefreshOnChange] = React.useState<boolean>(true)
-  const [options, setOptions] = React.useState<{ label: string; value: string }[]>([])
+  const [options, setOptions] = React.useState<OptionObject[]>([])
 
   const router = useRouter()
 
@@ -44,12 +50,12 @@ export const TenantSelectionProvider = ({ children }: { children: React.ReactNod
         return
       }
       setTenantSelectionFrom(from)
-      if (id) {
-        setSelectedTenantID(id)
-        setCookie(String(id))
-      } else {
+      if (id === undefined) {
         setSelectedTenantID(SELECT_ALL)
         setCookie(SELECT_ALL)
+      } else {
+        setSelectedTenantID(id)
+        setCookie(String(id))
       }
       if (refresh && refreshOnChange) {
         router.refresh()

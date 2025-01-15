@@ -1,4 +1,4 @@
-import type { Field, FilterOptionsProps, RelationshipField } from 'payload'
+import type { Field, FilterOptionsProps, RelationshipField, Where } from 'payload'
 
 import { getTenantFromCookie } from './getTenantFromCookie.js'
 
@@ -81,7 +81,7 @@ function addFilter(field: RelationshipField, tenantEnabledCollectionSlugs: strin
   const originalFilter = field.filterOptions
   field.filterOptions = async (args) => {
     const originalFilterResult =
-      typeof originalFilter === 'function' ? await originalFilter(args) : originalFilter
+      typeof originalFilter === 'function' ? await originalFilter(args) : (originalFilter ?? true)
 
     // If the relationTo is not a tenant enabled collection, return early
     if (args.relationTo && !tenantEnabledCollectionSlugs.includes(args.relationTo)) {

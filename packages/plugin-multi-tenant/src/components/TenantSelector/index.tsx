@@ -1,14 +1,14 @@
-import type { ServerProps } from 'payload'
+import type { OptionObject, ServerProps } from 'payload'
 
 import { cookies as getCookies } from 'next/headers.js'
 import React from 'react'
 
-import type { MultiTenantPluginConfig, Tenant, UserWithTenantsField } from '../../types.js'
+import type { UserWithTenantsField } from '../../types.js'
 
 import { TenantSelectorClient } from './index.client.js'
 
 type Args = {
-  tenantsCollectionSlug: MultiTenantPluginConfig['tenantsSlug']
+  tenantsCollectionSlug: string
   useAsTitle: string
   user?: UserWithTenantsField
 } & ServerProps
@@ -28,7 +28,7 @@ export const TenantSelector = async ({
     user,
   })
 
-  const tenantOptions = userTenants.map((doc: Tenant) => ({
+  const tenantOptions: OptionObject[] = userTenants.map((doc) => ({
     label: String(doc[useAsTitle]),
     value: String(doc.id),
   }))
@@ -38,7 +38,7 @@ export const TenantSelector = async ({
     (tenant) => tenant.value === cookies.get('payload-tenant')?.value,
   )?.value
 
-  if (!selectedTenant && userTenants.length > 0) {
+  if (!selectedTenant && userTenants?.[0]) {
     selectedTenant = String(userTenants[0].id)
   }
 

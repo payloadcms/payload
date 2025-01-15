@@ -25,7 +25,9 @@ export const multiTenantPlugin =
     /**
      * Set defaults
      */
-    pluginConfig.userHasAccessToAllTenants =
+    const userHasAccessToAllTenants: Required<
+      MultiTenantPluginConfig<ConfigType>
+    >['userHasAccessToAllTenants'] =
       typeof pluginConfig.userHasAccessToAllTenants === 'function'
         ? pluginConfig.userHasAccessToAllTenants
         : () => false
@@ -55,6 +57,9 @@ export const multiTenantPlugin =
     if (!incomingConfig.admin.components?.beforeNavLinks) {
       incomingConfig.admin.components.beforeNavLinks = []
     }
+    if (!incomingConfig.collections) {
+      incomingConfig.collections = []
+    }
 
     /**
      * Add tenants array field to users collection
@@ -66,6 +71,10 @@ export const multiTenantPlugin =
         return true
       }
     })
+
+    if (!adminUsersCollection) {
+      throw Error('An auth enabled collection was not found')
+    }
 
     /**
      * Add TenantSelectionProvider to admin providers
@@ -87,7 +96,7 @@ export const multiTenantPlugin =
       [string[], string[]]
     >(
       (acc, slug) => {
-        if (pluginConfig.collections[slug].isGlobal) {
+        if (pluginConfig?.collections?.[slug]?.isGlobal) {
           acc[1].push(slug)
         } else {
           acc[0].push(slug)
@@ -111,7 +120,7 @@ export const multiTenantPlugin =
         addCollectionAccess({
           collection,
           fieldName: 'id',
-          userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
+          userHasAccessToAllTenants,
         })
 
         if (pluginConfig.cleanupAfterTenantDelete !== false) {
@@ -148,12 +157,11 @@ export const multiTenantPlugin =
             name: tenantFieldName,
             debug: pluginConfig.debug,
             tenantsCollectionSlug,
-            unique: Boolean(pluginConfig.collections[collection.slug].isGlobal),
-            userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
+            unique: Boolean(pluginConfig.collections[collection.slug]?.isGlobal),
           }),
         )
 
-        if (pluginConfig.collections[collection.slug].useBaseListFilter !== false) {
+        if (pluginConfig.collections[collection.slug]?.useBaseListFilter !== false) {
           /**
            * Collection baseListFilter with selected tenant constraint (if selected)
            */
@@ -166,14 +174,14 @@ export const multiTenantPlugin =
           })
         }
 
-        if (pluginConfig.collections[collection.slug].useTenantAccess !== false) {
+        if (pluginConfig.collections[collection.slug]?.useTenantAccess !== false) {
           /**
            * Add access control constraint to tenant enabled collection
            */
           addCollectionAccess({
             collection,
             fieldName: tenantFieldName,
-            userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
+            userHasAccessToAllTenants,
           })
         }
       }

@@ -24,7 +24,7 @@ export default buildConfigWithDefaults({
   onInit: seed,
   plugins: [
     multiTenantPlugin<ConfigType>({
-      userHasAccessToAllTenants: (user) => user.roles?.includes('admin'),
+      userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
       tenantsArrayField: {
         rowFields: [
           {

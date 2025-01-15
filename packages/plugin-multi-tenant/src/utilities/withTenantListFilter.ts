@@ -34,9 +34,9 @@ export const withTenantListFilter =
     }
 
     if (filterConstraints.length) {
-      const combinedWhere = { and: [] }
+      const combinedWhere: Where = { and: [] }
       filterConstraints.forEach((constraint) => {
-        if (typeof constraint === 'object') {
+        if (combinedWhere.and && constraint && typeof constraint === 'object') {
           combinedWhere.and.push(constraint)
         }
       })
