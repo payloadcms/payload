@@ -198,7 +198,7 @@ export const multiTenantPlugin =
         tenantsCollectionSlug: tenantCollection.slug,
         useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
       },
-      path: '@payloadcms/plugin-multi-tenant/client#TenantSelectionProvider',
+      path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelectionProvider',
     })
 
     /**
@@ -222,7 +222,7 @@ export const multiTenantPlugin =
         tenantsCollectionSlug,
         useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
       },
-      path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
+      path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
     })
 
     return incomingConfig
