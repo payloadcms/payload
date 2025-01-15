@@ -16,20 +16,22 @@ export default buildConfigWithDefaults({
   collections: [],
   email: nodemailerAdapter(),
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
+    if (process.env.SKIP_ON_INIT !== 'true') {
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
 
-    const email = await payload.sendEmail({
-      subject: 'This was sent on init',
-      to: 'test@example.com',
-    })
+      const email = await payload.sendEmail({
+        subject: 'This was sent on init',
+        to: 'test@example.com',
+      })
 
-    payload.logger.info({ email, msg: 'Email sent' })
+      payload.logger.info({ email, msg: 'Email sent' })
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
