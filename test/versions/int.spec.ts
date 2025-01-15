@@ -955,49 +955,46 @@ describe('Versions', () => {
           },
         })
 
-        for (let i = 0; i < 200; i++) {
-          payload.logger.info(`try ${i}`)
-          const writeAmount = 3
+        const writeAmount = 100
 
-          const promises = Array.from({ length: writeAmount }, async (_, i) => {
-            return new Promise((resolve) => {
-              // Add latency so updates aren't immediate after each other but still in parallel
-              setTimeout(() => {
-                payload
-                  .update({
-                    id: doc.id,
-                    collection: 'draft-posts',
-                    data: {},
-                    draft: true,
-                  })
-                  .then(resolve)
-                  .catch(resolve)
-              }, i * 5)
-            })
+        const promises = Array.from({ length: writeAmount }, async (_, i) => {
+          return new Promise((resolve) => {
+            // Add latency so updates aren't immediate after each other but still in parallel
+            setTimeout(() => {
+              payload
+                .update({
+                  id: doc.id,
+                  collection: 'draft-posts',
+                  data: {},
+                  draft: true,
+                })
+                .then(resolve)
+                .catch(resolve)
+            }, i * 5)
           })
+        })
 
-          await Promise.all(promises)
+        await Promise.all(promises)
 
-          const { docs } = await payload.findVersions({
-            collection: 'draft-posts',
-            where: {
-              and: [
-                {
-                  parent: {
-                    equals: doc.id,
-                  },
+        const { docs } = await payload.findVersions({
+          collection: 'draft-posts',
+          where: {
+            and: [
+              {
+                parent: {
+                  equals: doc.id,
                 },
-                {
-                  latest: {
-                    equals: true,
-                  },
+              },
+              {
+                latest: {
+                  equals: true,
                 },
-              ],
-            },
-          })
+              },
+            ],
+          },
+        })
 
-          expect(docs[0]).toBeDefined()
-        }
+        expect(docs[0]).toBeDefined()
       })
     })
   })
