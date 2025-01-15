@@ -50,7 +50,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
         version={{ [field.name]: version }}
       >
         {maxRows > 0 && (
-          <React.Fragment>
+          <div className={`${baseClass}__rows`}>
             {Array.from(Array(maxRows).keys()).map((row, i) => {
               const versionRow = version?.[i] || {}
               const comparisonRow = comparison?.[i] || {}
@@ -65,26 +65,27 @@ const Iterable: React.FC<DiffComponentProps> = ({
               const rowLabel = fieldIsArrayType(field) ? `Item ${rowNumber}` : `Block ${rowNumber}`
 
               return (
-                <FieldDiffCollapser
-                  comparison={comparisonRow}
-                  fields={fields}
-                  key={i}
-                  label={rowLabel}
-                  version={versionRow}
-                >
-                  <RenderFieldsToDiff
+                <div className={`${baseClass}__row`} key={i}>
+                  <FieldDiffCollapser
                     comparison={comparisonRow}
-                    diffComponents={diffComponents}
-                    fieldPermissions={fieldPermissions}
                     fields={fields}
-                    i18n={i18n}
-                    locales={locales}
+                    label={rowLabel}
                     version={versionRow}
-                  />
-                </FieldDiffCollapser>
+                  >
+                    <RenderFieldsToDiff
+                      comparison={comparisonRow}
+                      diffComponents={diffComponents}
+                      fieldPermissions={fieldPermissions}
+                      fields={fields}
+                      i18n={i18n}
+                      locales={locales}
+                      version={versionRow}
+                    />
+                  </FieldDiffCollapser>
+                </div>
               )
             })}
-          </React.Fragment>
+          </div>
         )}
         {maxRows === 0 && (
           <div className={`${baseClass}__no-rows`}>
