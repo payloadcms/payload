@@ -1,6 +1,6 @@
 import type { ClientField } from 'payload'
 
-import { ChevronIcon, Pill } from '@payloadcms/ui'
+import { ChevronIcon, Pill, useTranslation } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
 import Label from '../Label/index.js'
@@ -36,6 +36,7 @@ export const FieldDiffCollapser: React.FC<Props> = ({
   label,
   version,
 }) => {
+  const { t } = useTranslation()
   const [isCollapsed, setIsCollapsed] = useState(initCollapsed)
 
   const changeCount = isIterable
@@ -60,7 +61,7 @@ export const FieldDiffCollapser: React.FC<Props> = ({
         <span className={`${baseClass}__label`}>{label}</span>
         {changeCount > 0 && (
           <Pill className={`${baseClass}__field-change-count`} pillStyle="light-gray" size="small">
-            {changeCount}
+            {t('version:changeCount', { count: changeCount })}
           </Pill>
         )}
       </Label>
