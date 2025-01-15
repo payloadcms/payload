@@ -1,4 +1,11 @@
-import type { CollectionAfterDeleteHook, CollectionConfig } from 'payload'
+import {
+  type CollectionAfterDeleteHook,
+  type CollectionConfig,
+  generateCookie,
+  mergeHeaders,
+} from 'payload'
+
+import { getTenantFromCookie } from '../utilities/getTenantFromCookie.js'
 
 type Args = {
   collection: CollectionConfig
@@ -39,6 +46,22 @@ export const afterTenantDelete =
     usersSlug,
   }: Omit<Args, 'collection'>): CollectionAfterDeleteHook =>
   async ({ id, req }) => {
+    const currentTenantCookieID = getTenantFromCookie(req.headers, req.payload.db.defaultIDType)
+    if (currentTenantCookieID === id) {
+      const newHeaders = new Headers({
+        'Set-Cookie': generateCookie<string>({
+          name: 'payload-tenant',
+          expires: new Date(Date.now() - 1000),
+          path: '/',
+          returnCookieAsObject: false,
+          value: '',
+        }),
+      })
+
+      req.responseHeaders = req.responseHeaders
+        ? mergeHeaders(req.responseHeaders, newHeaders)
+        : newHeaders
+    }
     const cleanupPromises = []
     enabledSlugs.forEach((slug) => {
       cleanupPromises.push(
