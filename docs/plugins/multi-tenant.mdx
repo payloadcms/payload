@@ -39,132 +39,114 @@ Install the plugin using any JavaScript package manager like [pnpm](https://pnpm
 The plugin accepts an object with the following properties:
 
 ```ts
-multiTenantPlugin({
+type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
-   * Enable debugging:
-   * - shows the relationship field on enabled collection documents
+   * After a tenant is deleted, the plugin will attempt to clean up related documents
+   * - removing documents with the tenant ID
+   * - removing the tenant from users
    *
-   * optional - @default false
+   * @default true
    */
-  debug: false,
+  cleanupAfterTenantDelete?: boolean
   /**
-   * Enables/Disables the plugin
-   *
-   * optional - @default true
-   */
-  enabled: true,
-  /**
-   * The slug of the tenants collection you added to your config
-   *
-   * optional - @default 'tenants'
-   */
-  tenantsSlug: 'tenants',
-  /**
-   * Define what collections you would like multi-tenancy to apply to
-   *
-   * Keyed on the slug of the collection
+   * Automatically
    */
   collections: {
-    pages: {
+    [key in CollectionSlug]?: {
       /**
-       * Used to opt out of using the provided baseListFilter
+       * Set to `true` if you want the collection to behave as a global
        *
-       * You can use the exported utility "getTenantFilter" within your own list filter
-       *
-       * optional - @default true
+       * @default false
        */
-      useBaseListFilter: true
+      isGlobal?: boolean
       /**
-       * Used to opt out of the merged access control provided
+       * Set to `false` if you want to manually apply the baseListFilter
        *
-       * You can use the exported utility "getTenantAccess" within your access control functions
-       *
-       * optional - @default true
+       * @default true
        */
-      useTenantAccess: true
+      useBaseListFilter?: boolean
       /**
-       * Used to make a collection feel like a global. When navigating to the list view, they will be redirected to the document view.
+       * Set to `false` if you want to handle collection access manually without the multi-tenant constraints applied
        *
-       * optional - @default false
+       * @default true
        */
-      isGlobal: false
-    },
-    /**
-     * Custom configuration for the tenant field placed on every enabled collection
-     */
-    tenantField: {
-      // optional - provide access control on the injected tenant field
-      access: {
-        create,
-        read,
-        update,
-      },
-      /**
-       * Name of the field
-       *
-       * optional - @default true
-       */
-      name: 'tenant',
-    },
-    /**
-     * Function that allows you to determine if certain users should have access to all tenants
-     *
-     * optional - @default () => false
-     */
-    userHasAccessToAllTenants: (user) => user.isSuperAdmin === true
-    /**
-     * Options for the array field that gets added to the users collection.
-     *
-     * The field is an array of rows, by default each row has a relationship to a tenant
-     *
-     * optional - @default undefined
-     */
-    tenantsArrayField: {
-      /**
-       * Allows you to set access control on the array field
-       *
-       * optional - @default undefined
-       */
-      arrayFieldAccess: {
-        create, // optional
-        read, // optional
-        update, // optional
-      },
-      /**
-       * Allows you to set access control on the tenant field on each row
-       *
-       * optional - @default undefined
-       */
-      tenantFieldAccess: {
-        create, // optional
-        read, // optional
-        update, // optional
-      },
-      /**
-       * If you want to add additional fields to the tenant rows, you can specify them under rowFields
-       *
-       * optional - @default undefined
-       */
-      rowFields: [
-        // Example adding a field onto the array row
-        {
-          name: 'roles',
-          type: 'select',
-          options: [
-            { label: 'Admin', value: 'admin' },
-            { label: 'User', value: 'user' },
-          ],
-        },
-      ],
-      /**
-       * Optionally omit the field and add it manually to your users collection. Useful when you want to place the field somewhere custom.
-       *
-       * optional - @default true
-       */
-      includeDefaultField: true,
+      useTenantAccess?: boolean
     }
-  },
-})
+  }
+  /**
+   * Enables debug mode
+   * - Makes the tenant field visible in the admin UI within applicable collections
+   *
+   * @default false
+   */
+  debug?: boolean
+  /**
+   * Enables the multi-tenant plugin
+   *
+   * @default true
+   */
+  enabled?: boolean
+  /**
+   * Field configuration for the field added to all tenant enabled collections
+   */
+  tenantField?: {
+    access?: RelationshipField['access']
+    /**
+     * The name of the field added to all tenant enabled collections
+     *
+     * @default 'tenant'
+     */
+    name?: string
+  }
+  /**
+   * Field configuration for the field added to the users collection
+   *
+   * If `includeDefaultField` is `false`, you must include the field on your users collection manually
+   * This is useful if you want to customize the field or place the field in a specific location
+   */
+  tenantsArrayField?:
+    | {
+        /**
+         * Access configuration for the array field
+         */
+        arrayFieldAccess?: ArrayField['access']
+        /**
+         * When `includeDefaultField` is `true`, the field will be added to the users collection automatically
+         */
+        includeDefaultField?: true
+        /**
+         * Additional fields to include on the tenants array field
+         */
+        rowFields?: Field[]
+        /**
+         * Access configuration for the tenant field
+         */
+        tenantFieldAccess?: RelationshipField['access']
+      }
+    | {
+        arrayFieldAccess?: never
+        /**
+         * When `includeDefaultField` is `false`, you must include the field on your users collection manually
+         */
+        includeDefaultField?: false
+        rowFields?: never
+        tenantFieldAccess?: never
+      }
+  /**
+   * The slug for the tenant collection
+   *
+   * @default 'tenants'
+   */
+  tenantsSlug?: string
+  /**
+   * Function that determines if a user has access to _all_ tenants
+   *
+   * Useful for super-admin type users
+   */
+  userHasAccessToAllTenants?: (
+    user: ConfigTypes extends { user } ? ConfigTypes['user'] : User,
+  ) => boolean
+}
 ```
 
 ## Basic Usage

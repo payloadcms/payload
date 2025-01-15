@@ -1,6 +1,17 @@
 import type { ArrayField, CollectionSlug, Field, RelationshipField, User } from 'payload'
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
+  /**
+   * After a tenant is deleted, the plugin will attempt to clean up related documents
+   * - removing documents with the tenant ID
+   * - removing the tenant from users
+   *
+   * @default true
+   */
+  cleanupAfterTenantDelete?: boolean
+  /**
+   * Automatically
+   */
   collections: {
     [key in CollectionSlug]?: {
       /**

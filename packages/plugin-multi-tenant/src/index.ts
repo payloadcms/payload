@@ -4,6 +4,7 @@ import type { MultiTenantPluginConfig } from './types.js'
 
 import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
+import { addTenantCleanup } from './hooks/afterTenantDelete.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
 import { withTenantAccess } from './utilities/withTenantAccess.js'
 import { withTenantListFilter } from './utilities/withTenantListFilter.js'
@@ -106,10 +107,13 @@ export const multiTenantPlugin =
      * Modify collections
      */
     incomingConfig.collections.forEach((collection) => {
+      /**
+       * Modify tenants collection
+       */
       if (collection.slug === tenantsCollectionSlug) {
         tenantCollection = collection
         /**
-         * Modify tenants collection
+         * Add access control to tenants collection
          */
         collection.access = collectionAccessKeys.reduce((acc, key) => {
           acc[key] = withTenantAccess({
@@ -120,12 +124,29 @@ export const multiTenantPlugin =
 
           return acc
         }, {})
-      } else if (pluginConfig.collections?.[collection.slug]) {
-        if (!collection.admin) {
-          collection.admin = {}
-        }
 
-        addFilterOptionsToFields(collection.fields, collectionSlugs)
+        if (pluginConfig.cleanupAfterTenantDelete !== false) {
+          /**
+           * Add cleanup logic when tenant is deleted
+           * - delete documents related to tenant
+           * - remove tenant from users
+           */
+          addTenantCleanup({
+            collection,
+            enabledSlugs: [...collectionSlugs, ...globalCollectionSlugs],
+            tenantFieldName,
+            usersSlug: adminUsersCollection.slug,
+          })
+        }
+      } else if (pluginConfig.collections?.[collection.slug]) {
+        /**
+         * Modify enabled collections
+         */
+        addFilterOptionsToFields({
+          fields: collection.fields,
+          tenantEnabledCollectionSlugs: collectionSlugs,
+          tenantEnabledGlobalSlugs: globalCollectionSlugs,
+        })
 
         /**
          * Add tenant field to enabled collections
@@ -147,6 +168,9 @@ export const multiTenantPlugin =
           /**
            * Collection baseListFilter with selected tenant constraint (if selected)
            */
+          if (!collection.admin) {
+            collection.admin = {}
+          }
           collection.admin.baseListFilter = withTenantListFilter({
             baseListFilter: collection.admin?.baseListFilter,
             tenantFieldName,
