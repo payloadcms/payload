@@ -1646,7 +1646,19 @@ describe('Localization', () => {
         expect(all.groupLocalizedRow.es.text).toBe('hola world or something')
       })
 
-      it('should properly create/update/read localized tab field', async () => {
+      it('should not crash on empty localized tab', async () => {
+        const result = await payload.create({
+          collection: tabSlug,
+          locale: englishLocale,
+          data: {
+            tabLocalized: {},
+          },
+        })
+
+        expect(result).toBeTruthy()
+      })
+
+      it('should properly create/update/read array field inside localized tab field', async () => {
         const result = await payload.create({
           collection: tabSlug,
           locale: englishLocale,
@@ -1684,6 +1696,50 @@ describe('Localization', () => {
 
         expect(docEn.tabLocalized.title).toBe('hello en')
         expect(docEs.tabLocalized.title).toBe('hello es')
+      })
+
+      it('should properly create/update/read localized tab field', async () => {
+        const result = await payload.create({
+          collection: tabSlug,
+          locale: englishLocale,
+          data: {
+            tabLocalized: {
+              array: [
+                {
+                  title: 'hello en',
+                },
+              ],
+            },
+          },
+        })
+
+        expect(result.tabLocalized.array[0].title).toBe('hello en')
+
+        await payload.update({
+          collection: tabSlug,
+          locale: spanishLocale,
+          id: result.id,
+          data: {
+            tabLocalized: {
+              array: [{ title: 'hello es' }],
+            },
+          },
+        })
+
+        const docEn = await payload.findByID({
+          collection: tabSlug,
+          locale: englishLocale,
+          id: result.id,
+        })
+
+        const docEs = await payload.findByID({
+          collection: tabSlug,
+          locale: spanishLocale,
+          id: result.id,
+        })
+
+        expect(docEn.tabLocalized.array[0].title).toBe('hello en')
+        expect(docEs.tabLocalized.array[0].title).toBe('hello es')
       })
 
       it('should properly create/update/read localized field inside of tab', async () => {

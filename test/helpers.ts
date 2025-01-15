@@ -1,4 +1,10 @@
-import type { BrowserContext, ChromiumBrowserContext, Locator, Page } from '@playwright/test'
+import type {
+  BrowserContext,
+  CDPSession,
+  ChromiumBrowserContext,
+  Locator,
+  Page,
+} from '@playwright/test'
 import type { Config } from 'payload'
 
 import { formatAdminURL } from '@payloadcms/ui/shared'
@@ -51,6 +57,11 @@ const networkConditions = {
     download: ((20 * 1000 * 1000) / 8) * 0.8,
     latency: 1000,
     upload: ((10 * 1000 * 1000) / 8) * 0.8,
+  },
+  None: {
+    download: 0,
+    latency: -1,
+    upload: -1,
   },
 }
 
@@ -134,7 +145,7 @@ export async function throttleTest({
   context: BrowserContext
   delay: keyof typeof networkConditions
   page: Page
-}) {
+}): Promise<CDPSession> {
   const cdpSession = await context.newCDPSession(page)
 
   await cdpSession.send('Network.emulateNetworkConditions', {
@@ -151,6 +162,8 @@ export async function throttleTest({
 
   const client = await (page.context() as ChromiumBrowserContext).newCDPSession(page)
   await client.send('Emulation.setCPUThrottlingRate', { rate: 8 }) // 8x slowdown
+
+  return client
 }
 
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
@@ -278,18 +291,50 @@ export async function closeNav(page: Page): Promise<void> {
   await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
 }
 
+export async function openLocaleSelector(page: Page): Promise<void> {
+  const button = page.locator('.localizer button.popup-button')
+  const popup = page.locator('.localizer .popup.popup--active')
+
+  if (!(await popup.isVisible())) {
+    await button.click()
+    await expect(popup).toBeVisible()
+  }
+}
+
+export async function closeLocaleSelector(page: Page): Promise<void> {
+  const popup = page.locator('.localizer .popup.popup--active')
+
+  if (await popup.isVisible()) {
+    await page.click('body', { position: { x: 0, y: 0 } })
+    await expect(popup).toBeHidden()
+  }
+}
+
 export async function changeLocale(page: Page, newLocale: string) {
-  await page.locator('.localizer >> button').first().click()
-  await page
-    .locator(`.localizer .popup.popup--active .popup-button-list__button`, {
-      hasText: newLocale,
-    })
-    .first()
-    .click()
+  await openLocaleSelector(page)
 
-  const regexPattern = new RegExp(`locale=${newLocale}`)
+  const currentlySelectedLocale = await page
+    .locator(
+      `.localizer .popup.popup--active .popup-button-list__button--selected .localizer__locale-code`,
+    )
+    .textContent()
 
-  await expect(page).toHaveURL(regexPattern)
+  if (currentlySelectedLocale !== `(${newLocale})`) {
+    const localeToSelect = page
+      .locator('.localizer .popup.popup--active .popup-button-list__button')
+      .locator('.localizer__locale-code', {
+        hasText: `(${newLocale})`,
+      })
+
+    await expect(localeToSelect).toBeEnabled()
+    await localeToSelect.click()
+
+    const regexPattern = new RegExp(`locale=${newLocale}`)
+
+    await expect(page).toHaveURL(regexPattern)
+  }
+
+  await closeLocaleSelector(page)
 }
 
 export function exactText(text: string) {

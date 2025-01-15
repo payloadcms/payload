@@ -95,7 +95,7 @@ async function main() {
         encodeURI(
           `${templateRepoUrlBase}/with-vercel-website` +
             '&project-name=payload-project' +
-            '&env=PAYLOAD_SECRET' +
+            '&env=PAYLOAD_SECRET%2CCRON_SECRET' +
             '&build-command=pnpm run ci' +
             '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
         ),

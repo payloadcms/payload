@@ -45,7 +45,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ header }) => {
       className="container relative z-20 py-8 flex justify-end gap-2"
       {...(theme ? { 'data-theme': theme } : {})}
     >
-      <Link href="/" className="mr-auto">
+      <Link href="/" className="me-auto">
         <Logo />
       </Link>
       <LocaleSwitcher />

@@ -89,7 +89,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Horisontell linje',
   },
   th: {
-    label: 'กฎขีดตรง',
+    label: 'เส้นขอบแนวนอน',
   },
   tr: {
     label: 'Yatay Çizgi',

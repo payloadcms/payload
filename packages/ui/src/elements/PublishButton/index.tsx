@@ -25,6 +25,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     hasPublishedDoc,
     hasPublishPermission,
     setHasPublishedDoc,
+    setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     unpublishedVersionCount,
     uploadStatus,
@@ -58,21 +59,27 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     }
   }, [collectionSlug, globalSlug, config])
 
-  const scheduledPublishEnabled =
-    typeof entityConfig?.versions?.drafts === 'object' &&
-    entityConfig?.versions?.drafts.schedulePublish
-
   const hasNewerVersions = unpublishedVersionCount > 0
+
   const canPublish =
     hasPublishPermission &&
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
+
+  const scheduledPublishEnabled =
+    typeof entityConfig?.versions?.drafts === 'object' &&
+    entityConfig?.versions?.drafts.schedulePublish
+
+  const canSchedulePublish = Boolean(
+    scheduledPublishEnabled && hasPublishPermission && (globalSlug || (collectionSlug && id)),
+  )
+
   const operation = useOperation()
 
-  const forceDisable = operation === 'update' && !modified
+  const disabled = operation === 'update' && !modified
 
   const saveDraft = useCallback(async () => {
-    if (forceDisable) {
+    if (disabled) {
       return
     }
 
@@ -99,7 +106,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, localeCode, id, forceDisable])
+  }, [submit, collectionSlug, globalSlug, serverURL, api, localeCode, id, disabled])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -122,8 +129,15 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     })
 
     setUnpublishedVersionCount(0)
+    setMostRecentVersionIsAutosaved(false)
     setHasPublishedDoc(true)
-  }, [setHasPublishedDoc, submit, setUnpublishedVersionCount, uploadStatus])
+  }, [
+    setHasPublishedDoc,
+    submit,
+    setUnpublishedVersionCount,
+    uploadStatus,
+    setMostRecentVersionIsAutosaved,
+  ])
 
   const publishSpecificLocale = useCallback(
     (locale) => {
@@ -163,11 +177,11 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
         onClick={publish}
         size="medium"
         SubMenuPopupContent={
-          localization || scheduledPublishEnabled
+          localization || canSchedulePublish
             ? ({ close }) => {
                 return (
                   <React.Fragment>
-                    {scheduledPublishEnabled && (
+                    {canSchedulePublish && (
                       <PopupList.ButtonGroup key="schedule-publish">
                         <PopupList.Button onClick={() => [toggleModal(drawerSlug), close()]}>
                           {t('version:schedulePublish')}
@@ -210,7 +224,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       >
         {label}
       </FormSubmit>
-      {scheduledPublishEnabled && isModalOpen(drawerSlug) && <ScheduleDrawer slug={drawerSlug} />}
+      {canSchedulePublish && isModalOpen(drawerSlug) && <ScheduleDrawer slug={drawerSlug} />}
     </React.Fragment>
   )
 }

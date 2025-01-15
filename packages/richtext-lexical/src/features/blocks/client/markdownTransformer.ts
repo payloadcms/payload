@@ -6,10 +6,12 @@ import { createHeadlessEditor } from '@lexical/headless'
 import type { Transformer } from '../../../packages/@lexical/markdown/index.js'
 import type { MultilineElementTransformer } from '../../../packages/@lexical/markdown/MarkdownTransformers.js'
 
-import { $convertToMarkdownString } from '../../../packages/@lexical/markdown/index.js'
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+} from '../../../packages/@lexical/markdown/index.js'
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
-import { $convertFromMarkdownString } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 import { $createBlockNode, $isBlockNode, BlockNode } from './nodes/BlocksNode.js'
 
 function createTagRegexes(tagName: string) {

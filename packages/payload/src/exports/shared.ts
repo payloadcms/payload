@@ -66,6 +66,8 @@ export { getSiblingData } from '../utilities/getSiblingData.js'
 
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
+export { isNextBuild } from '../utilities/isNextBuild.js'
+
 export { isNumber } from '../utilities/isNumber.js'
 
 export { isPlainObject } from '../utilities/isPlainObject.js'
@@ -83,7 +85,6 @@ export { setsAreEqual } from '../utilities/setsAreEqual.js'
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
 
 export { unflatten } from '../utilities/unflatten.js'
-
 export { validateMimeType } from '../utilities/validateMimeType.js'
 export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
