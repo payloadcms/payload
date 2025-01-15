@@ -1,5 +1,5 @@
 'use client'
-import type { TabsFieldClient } from 'payload'
+import type { ClientTab, TabsFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -12,54 +12,90 @@ import './index.scss'
 
 const baseClass = 'tabs-diff'
 
-const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
-  comparison,
-  diffComponents,
-  field,
-  fieldPermissions,
-  i18n,
-  locale,
-  locales,
-  version,
-}) => {
+const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
+  const { comparison, field, version } = props
   return (
     <div className={baseClass}>
       {field.tabs.map((tab, i) => {
-        const comparisonUnwrapped = 'name' in tab ? comparison?.[tab.name] : comparison
-        const versionUnwrapped = 'name' in tab ? version?.[tab.name] : version
-
         return (
           <div className={`${baseClass}__tab`} key={i}>
-            <DiffCollapser
-              comparison={comparisonUnwrapped}
-              fields={tab.fields}
-              label={
-                'label' in tab &&
-                tab.label &&
-                typeof tab.label !== 'function' && (
-                  <span>
-                    {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-                    {getTranslation(tab.label, i18n)}
-                  </span>
-                )
+            {(() => {
+              if ('name' in tab && tab.name && tab.localized) {
+                // Named localized tab
+                return props.locales.map((locale, index) => {
+                  const localizedTabProps = {
+                    ...props,
+                    comparison: comparison?.[tab.name]?.[locale],
+                    version: version?.[tab.name]?.[locale],
+                  }
+                  return (
+                    <div className={`${baseClass}__tab-locale`} key={[locale, index].join('-')}>
+                      <div className={`${baseClass}__tab-locale-value`}>
+                        <Tab key={locale} {...localizedTabProps} locale={locale} tab={tab} />
+                      </div>
+                    </div>
+                  )
+                })
+              } else if ('name' in tab && tab.name) {
+                // Named tab
+                const namedTabProps = {
+                  ...props,
+                  comparison: comparison?.[tab.name],
+                  version: version?.[tab.name],
+                }
+                return <Tab key={i} {...namedTabProps} tab={tab} />
+              } else {
+                // Unnamed tab
+                return <Tab key={i} {...props} tab={tab} />
               }
-              version={versionUnwrapped}
-            >
-              <RenderFieldsToDiff
-                comparison={comparisonUnwrapped}
-                diffComponents={diffComponents}
-                fieldPermissions={fieldPermissions}
-                fields={tab.fields}
-                i18n={i18n}
-                key={i}
-                locales={locales}
-                version={versionUnwrapped}
-              />
-            </DiffCollapser>
+            })()}
           </div>
         )
       })}
     </div>
+  )
+}
+
+type TabProps = {
+  tab: ClientTab
+} & DiffComponentProps<TabsFieldClient>
+
+const Tab: React.FC<TabProps> = ({
+  comparison,
+  diffComponents,
+  fieldPermissions,
+  i18n,
+  locale,
+  locales,
+  tab,
+  version,
+}) => {
+  return (
+    <DiffCollapser
+      comparison={comparison}
+      fields={tab.fields}
+      label={
+        'label' in tab &&
+        tab.label &&
+        typeof tab.label !== 'function' && (
+          <span>
+            {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
+            {getTranslation(tab.label, i18n)}
+          </span>
+        )
+      }
+      version={version}
+    >
+      <RenderFieldsToDiff
+        comparison={comparison}
+        diffComponents={diffComponents}
+        fieldPermissions={fieldPermissions}
+        fields={tab.fields}
+        i18n={i18n}
+        locales={locales}
+        version={version}
+      />
+    </DiffCollapser>
   )
 }
 
