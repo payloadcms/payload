@@ -2,6 +2,8 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
+import './index.scss'
+
 import type { DiffComponentProps } from '../types.js'
 
 import { DiffCollapser } from '../../DiffCollapser/index.js'
