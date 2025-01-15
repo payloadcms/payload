@@ -16,17 +16,13 @@ export const Row: React.FC<DiffComponentProps> = ({
   fieldPermissions,
   fields,
   i18n,
-  locale,
   locales,
   version,
 }) => {
   return (
     <div className={baseClass}>
       {'label' in field && field.label && typeof field.label !== 'function' && (
-        <Label>
-          {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-          {getTranslation(field.label, i18n)}
-        </Label>
+        <Label>{getTranslation(field.label, i18n)}</Label>
       )}
       <RenderFieldsToDiff
         comparison={comparison}
