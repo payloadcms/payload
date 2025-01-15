@@ -14,7 +14,7 @@ import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowCompar
 
 const baseClass = 'iterable-diff'
 
-const Iterable: React.FC<DiffComponentProps> = ({
+export const Iterable: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
   field,
@@ -104,5 +104,3 @@ const Iterable: React.FC<DiffComponentProps> = ({
     </div>
   )
 }
-
-export default Iterable

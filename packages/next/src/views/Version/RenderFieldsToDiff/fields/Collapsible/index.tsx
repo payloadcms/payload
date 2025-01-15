@@ -11,7 +11,7 @@ import RenderFieldsToDiff from '../../index.js'
 
 const baseClass = 'collapsible-diff'
 
-const Collapsible: React.FC<DiffComponentProps> = ({
+export const Collapsible: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
   field,
@@ -53,5 +53,3 @@ const Collapsible: React.FC<DiffComponentProps> = ({
     </div>
   )
 }
-
-export default Collapsible

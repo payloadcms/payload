@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'tabs-diff'
 
-const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
+export const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
   const { comparison, field, locales, version } = props
   return (
     <div className={baseClass}>
@@ -99,5 +99,3 @@ const Tab: React.FC<TabProps> = ({
     </DiffCollapser>
   )
 }
-
-export default Tabs
