@@ -32,18 +32,18 @@ export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
     this.__data = data
   }
 
-  static clone(node: UnknownConvertedNode): UnknownConvertedNode {
+  static override clone(node: UnknownConvertedNode): UnknownConvertedNode {
     return new UnknownConvertedNode({
       data: node.__data,
       key: node.__key,
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'unknownConverted'
   }
 
-  static importJSON(serializedNode: SerializedUnknownConvertedNode): UnknownConvertedNode {
+  static override importJSON(serializedNode: SerializedUnknownConvertedNode): UnknownConvertedNode {
     const node = $createUnknownConvertedNode({ data: serializedNode.data })
     return node
   }
@@ -56,17 +56,17 @@ export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
     return true
   }
 
-  createDOM(config: EditorConfig): HTMLElement {
+  override createDOM(config: EditorConfig): HTMLElement {
     const element = document.createElement('span')
     addClassNamesToElement(element, 'unknownConverted')
     return element
   }
 
-  decorate(): JSX.Element {
+  override decorate(): JSX.Element {
     return <Component data={this.__data} />
   }
 
-  exportJSON(): SerializedUnknownConvertedNode {
+  override exportJSON(): SerializedUnknownConvertedNode {
     return {
       type: this.getType(),
       data: this.__data,
@@ -76,11 +76,11 @@ export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
 
   // Mutation
 
-  isInline(): boolean {
+  override isInline(): boolean {
     return true
   }
 
-  updateDOM(prevNode: UnknownConvertedNode, dom: HTMLElement): boolean {
+  override updateDOM(prevNode: UnknownConvertedNode, dom: HTMLElement): boolean {
     return false
   }
 }

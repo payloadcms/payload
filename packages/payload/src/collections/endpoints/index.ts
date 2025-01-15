@@ -11,6 +11,7 @@ import { duplicateHandler } from './duplicate.js'
 import { findHandler } from './find.js'
 import { findByIDHandler } from './findByID.js'
 import { findVersionByIDHandler } from './findVersionByID.js'
+import { findVersionsHandler } from './findVersions.js'
 import { getFileHandler } from './getFile.js'
 import { previewHandler } from './preview.js'
 import { restoreVersionHandler } from './restoreVersion.js'
@@ -44,6 +45,11 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: docAccessHandler,
       method: 'post',
       path: '/access/:id?',
+    },
+    {
+      handler: findVersionsHandler,
+      method: 'get',
+      path: '/versions',
     },
     {
       handler: duplicateHandler,

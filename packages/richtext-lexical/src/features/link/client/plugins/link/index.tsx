@@ -29,6 +29,10 @@ export const LinkPlugin: PluginComponent<ClientProps> = ({ clientProps }) => {
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
         (payload: LinkPayload) => {
+          if (payload === null) {
+            $toggleLink(null)
+            return true
+          }
           if (!payload.fields?.linkType) {
             payload.fields.linkType = clientProps.defaultLinkType as any
           }

@@ -21,6 +21,7 @@ export type LexicalProviderProps = {
   composerKey: string
   editorConfig: SanitizedClientEditorConfig
   fieldProps: LexicalRichTextFieldProps
+  isSmallWidthViewport: boolean
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   readOnly: boolean
   value: SerializedEditorState
@@ -49,7 +50,8 @@ const NestProviders = ({
 }
 
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { composerKey, editorConfig, fieldProps, onChange, readOnly, value } = props
+  const { composerKey, editorConfig, fieldProps, isSmallWidthViewport, onChange, readOnly, value } =
+    props
 
   const parentContext = useEditorConfigContext()
 
@@ -113,6 +115,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
           <LexicalEditorComponent
             editorConfig={editorConfig}
             editorContainerRef={editorContainerRef}
+            isSmallWidthViewport={isSmallWidthViewport}
             onChange={onChange}
           />
         </NestProviders>

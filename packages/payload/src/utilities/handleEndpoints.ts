@@ -8,6 +8,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { createPayloadRequest } from './createPayloadRequest.js'
 import { headersWithCors } from './headersWithCors.js'
+import { mergeHeaders } from './mergeHeaders.js'
 import { routeError } from './routeError.js'
 
 const notFoundResponse = (req: PayloadRequest) => {
@@ -58,9 +59,11 @@ const notFoundResponse = (req: PayloadRequest) => {
  * ```
  */
 export const handleEndpoints = async ({
+  basePath = '',
   config: incomingConfig,
   request,
 }: {
+  basePath?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
   request: Request
 }): Promise<Response> => {
@@ -80,6 +83,7 @@ export const handleEndpoints = async ({
 
     const url = `${request.url}?${new URLSearchParams(search).toString()}`
     const response = await handleEndpoints({
+      basePath,
       config: incomingConfig,
       request: new Request(url, {
         cache: request.cache,
@@ -112,7 +116,7 @@ export const handleEndpoints = async ({
     const { payload } = req
     const { config } = payload
 
-    const pathname = new URL(req.url).pathname
+    const pathname = `${basePath}${new URL(req.url).pathname}`
 
     if (!pathname.startsWith(config.routes.api)) {
       return notFoundResponse(req)
@@ -213,14 +217,11 @@ export const handleEndpoints = async ({
     }
 
     const response = await handler(req)
-
-    if (req.responseHeaders) {
-      for (const [key, value] of req.responseHeaders) {
-        response.headers.append(key, value)
-      }
-    }
-
-    return response
+    return new Response(response.body, {
+      headers: mergeHeaders(req.responseHeaders ?? new Headers(), response.headers),
+      status: response.status,
+      statusText: response.statusText,
+    })
   } catch (err) {
     return routeError({
       collection,

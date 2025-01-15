@@ -180,7 +180,7 @@ export const LinkFeature = createServerFeature<
                 const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
                 const target: string = node.fields.newTab ? ' target="_blank"' : ''
 
-                let href: string = node.fields.url
+                let href: string = node.fields.url ?? ''
                 if (node.fields.linkType === 'internal') {
                   href =
                     typeof node.fields.doc?.value !== 'object'
