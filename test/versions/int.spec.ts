@@ -1944,6 +1944,94 @@ describe('Versions', () => {
       expect(retrieved._status).toStrictEqual('draft')
     })
 
+    it('should delete scheduled jobs after a document is deleted', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'my doc to publish in the future',
+          description: 'hello',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          type: 'publish',
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+        },
+      })
+
+      await payload.delete({
+        collection: draftCollectionSlug,
+        where: {
+          id: { equals: draft.id },
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          'input.doc.value': {
+            equals: draft.id,
+          },
+        },
+      })
+
+      expect(docs[0]).toBeUndefined()
+    })
+
+    it('should delete scheduled jobs after a document is deleted by ID', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'my doc to publish in the future',
+          description: 'hello',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          type: 'publish',
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+        },
+      })
+
+      await payload.delete({
+        collection: draftCollectionSlug,
+        id: draft.id,
+      })
+
+      const { docs } = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          'input.doc.value': {
+            equals: draft.id,
+          },
+        },
+      })
+
+      expect(docs[0]).toBeUndefined()
+    })
+
     it('should allow global scheduled publish', async () => {
       const draft = await payload.updateGlobal({
         slug: draftGlobalSlug,
