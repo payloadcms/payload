@@ -77,13 +77,6 @@ export const multiTenantPlugin =
     }
 
     /**
-     * Add TenantSelectionProvider to admin providers
-     */
-    incomingConfig.admin.components.providers.push({
-      path: '@payloadcms/plugin-multi-tenant/client#TenantSelectionProvider',
-    })
-
-    /**
      * Add tenants array field to users collection
      */
     if (pluginConfig?.tenantsArrayField?.includeDefaultField !== false) {
@@ -137,6 +130,12 @@ export const multiTenantPlugin =
           })
         }
       } else if (pluginConfig.collections?.[collection.slug]) {
+        const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
+
+        if (isGlobal) {
+          collection.disableDuplicate = true
+        }
+
         /**
          * Modify enabled collections
          */
@@ -157,7 +156,7 @@ export const multiTenantPlugin =
             name: tenantFieldName,
             debug: pluginConfig.debug,
             tenantsCollectionSlug,
-            unique: Boolean(pluginConfig.collections[collection.slug]?.isGlobal),
+            unique: isGlobal,
           }),
         )
 
@@ -192,6 +191,17 @@ export const multiTenantPlugin =
     }
 
     /**
+     * Add TenantSelectionProvider to admin providers
+     */
+    incomingConfig.admin.components.providers.push({
+      clientProps: {
+        tenantsCollectionSlug: tenantCollection.slug,
+        useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
+      },
+      path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelectionProvider',
+    })
+
+    /**
      * Add global redirect action
      */
     if (globalCollectionSlugs.length) {
@@ -212,7 +222,7 @@ export const multiTenantPlugin =
         tenantsCollectionSlug,
         useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
       },
-      path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
+      path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
     })
 
     return incomingConfig

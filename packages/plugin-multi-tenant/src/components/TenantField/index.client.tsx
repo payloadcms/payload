@@ -5,9 +5,9 @@ import type { RelationshipFieldClientProps } from 'payload'
 import { RelationshipField, useField } from '@payloadcms/ui'
 import React from 'react'
 
-import './index.scss'
 import { SELECT_ALL } from '../../constants.js'
-import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.js'
+import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
+import './index.scss'
 
 const baseClass = 'tenantField'
 
@@ -19,31 +19,32 @@ type Props = {
 export const TenantField = (args: Props) => {
   const { debug, path, unique } = args
   const { setValue, value } = useField<number | string>({ path })
-  const { options, selectedTenantID, setRefreshOnChange, setTenant } = useTenantSelection()
+  const { options, selectedTenantID, setPreventRefreshOnChange, setTenant } = useTenantSelection()
+
+  const hasSetValueRef = React.useRef(false)
 
   React.useEffect(() => {
-    if (!selectedTenantID && value) {
-      // Initialize the tenant selector with the field value
-      setTenant({ id: value, from: 'document' })
+    if (!hasSetValueRef.current && value) {
+      // set value on load
+      setTenant({ id: value, refresh: unique })
+      hasSetValueRef.current = true
     } else if (selectedTenantID && selectedTenantID === SELECT_ALL && options?.[0]?.value) {
-      setTenant({ id: options[0].value, from: 'document' })
+      // in the document view, the tenant field should always have a value
+      setTenant({ id: options[0].value, refresh: unique })
     } else if ((!value || value !== selectedTenantID) && selectedTenantID) {
       // Update the field value when the tenant is changed
       setValue(selectedTenantID)
     }
-  }, [value, selectedTenantID, setTenant, setValue, options])
+  }, [value, selectedTenantID, setTenant, setValue, options, unique])
 
   React.useEffect(() => {
     if (!unique) {
-      setRefreshOnChange(false)
+      setPreventRefreshOnChange(true)
     }
-
     return () => {
-      if (!unique) {
-        setRefreshOnChange(true)
-      }
+      setPreventRefreshOnChange(false)
     }
-  }, [setRefreshOnChange, unique])
+  }, [unique, setPreventRefreshOnChange])
 
   if (debug) {
     return (
