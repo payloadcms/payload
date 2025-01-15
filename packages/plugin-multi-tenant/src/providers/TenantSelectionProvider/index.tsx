@@ -10,7 +10,7 @@ type ContextType = {
   selectedTenantID: number | string | undefined
   setOptions?: (options: { label: string; value: string }[]) => void
   setRefreshOnChange?: (refresh: boolean) => void
-  setTenant: (id: number | string, from: 'cookie' | 'document', refresh?: boolean) => void
+  setTenant: (args: { from: 'cookie' | 'document'; id: number | string; refresh?: boolean }) => void
 }
 
 const Context = createContext<ContextType>({
@@ -38,8 +38,8 @@ export const TenantSelectionProvider = ({ children }) => {
     document.cookie = 'payload-tenant=' + (value || '') + expires + '; path=/'
   }, [])
 
-  const setTenant = React.useCallback(
-    (id: number | string, from: 'cookie' | 'document', refresh = false) => {
+  const setTenant = React.useCallback<ContextType['setTenant']>(
+    ({ id, from, refresh }) => {
       if (from === 'cookie' && tenantSelectionFrom === 'document') {
         return
       }

@@ -23,20 +23,22 @@ export const TenantSelectorClient = ({
   const handleChange = React.useCallback(
     (option: ReactSelectOption | ReactSelectOption[]) => {
       if (option && 'value' in option) {
-        setTenant(option.value as string, 'document', true)
+        setTenant({ id: option.value as string, from: 'document', refresh: true })
       } else {
-        setTenant(undefined, 'document', true)
+        setTenant({ id: undefined, from: 'document', refresh: true })
       }
     },
     [setTenant],
   )
 
   React.useEffect(() => {
-    // this runs if the user has no cookie set
     if (!selectedTenantID && initialValue) {
-      setTenant(initialValue, 'cookie', true)
+      setTenant({ id: initialValue, from: 'cookie', refresh: true })
+    } else if (selectedTenantID && !options.find((option) => option.value === selectedTenantID)) {
+      // this runs if the user has a selected value that is no longer a valid option
+      setTenant({ id: options[0].value, from: 'document', refresh: true })
     }
-  }, [initialValue, setTenant, selectedTenantID])
+  }, [initialValue, setTenant, selectedTenantID, options])
 
   React.useEffect(() => {
     setOptions(options)
@@ -49,13 +51,11 @@ export const TenantSelectorClient = ({
   return (
     <div className="tenant-selector">
       <SelectInput
-        // isClearable={false}
         label="Tenant"
         name="setTenant"
         onChange={handleChange}
         options={options}
         path="setTenant"
-        // readOnly={!value}
         value={
           selectedTenantID
             ? selectedTenantID === SELECT_ALL

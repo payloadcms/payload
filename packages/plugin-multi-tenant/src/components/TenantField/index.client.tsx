@@ -24,9 +24,9 @@ export const TenantField = (args: Props) => {
   React.useEffect(() => {
     if (!selectedTenantID && value) {
       // Initialize the tenant selector with the field value
-      setTenant(value, 'document')
+      setTenant({ id: value, from: 'document' })
     } else if (selectedTenantID && selectedTenantID === SELECT_ALL) {
-      setTenant(options?.[0].value, 'document')
+      setTenant({ id: options?.[0].value, from: 'document' })
     } else if ((!value || value !== selectedTenantID) && selectedTenantID) {
       // Update the field value when the tenant is changed
       setValue(selectedTenantID)
