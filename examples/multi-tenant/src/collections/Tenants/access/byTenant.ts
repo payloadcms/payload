@@ -2,6 +2,8 @@ import type { Access } from 'payload'
 
 import { isSuperAdmin } from '../../../access/isSuperAdmin'
 import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
+import { extractID } from '@/utilities/extractID'
+import { tenantUserRole } from '@/collections/Users/roles'
 
 export const filterByTenantRead: Access = (args) => {
   const req = args.req
@@ -56,9 +58,7 @@ export const canMutateTenant: Access = (args) => {
       in:
         req.user?.tenants
           ?.map(({ roles, tenant }) =>
-            roles?.includes('tenant-admin')
-              ? tenant && (typeof tenant === 'string' ? tenant : tenant.id)
-              : null,
+            roles?.includes(tenantUserRole.TENANT_ADMIN) ? tenant && extractID(tenant) : null,
           )
           .filter(Boolean) || [],
     },

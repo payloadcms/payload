@@ -1,17 +1,19 @@
 'use client'
+
+import { useEffect, useRef } from 'react'
 import { RelationshipField, useField } from '@payloadcms/ui'
-import React from 'react'
 
 type Props = {
-  initialValue?: string
+  initialValue?: number
   path: string
   readOnly: boolean
 }
+
 export function TenantFieldComponentClient({ initialValue, path, readOnly }: Props) {
   const { formInitializing, setValue, value } = useField({ path })
-  const hasSetInitialValue = React.useRef(false)
+  const hasSetInitialValue = useRef(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!hasSetInitialValue.current && !formInitializing && initialValue && !value) {
       setValue(initialValue)
       hasSetInitialValue.current = true

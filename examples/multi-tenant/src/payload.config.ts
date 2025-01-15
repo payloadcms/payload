@@ -1,4 +1,4 @@
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { Pages } from './collections/Pages'
 import { Tenants } from './collections/Tenants'
 import Users from './collections/Users'
+import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -20,8 +21,11 @@ export default buildConfig({
     user: 'users',
   },
   collections: [Pages, Users, Tenants],
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI as string,
+  db: postgresAdapter({
+    prodMigrations: migrations,
+    pool: {
+      connectionString: process.env.DATABASE_URI as string,
+    },
   }),
   editor: lexicalEditor({}),
   graphQL: {

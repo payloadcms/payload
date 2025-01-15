@@ -1,15 +1,14 @@
-import type { Access, Where } from 'payload'
+import { parseCookies, type Access, type Where } from 'payload'
 
-import { parseCookies } from 'payload'
-
-import { isSuperAdmin } from '../../../access/isSuperAdmin'
-import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
+import { isSuperAdmin } from '@/access/isSuperAdmin'
+import { getTenantAccessIDs } from '@/utilities/getTenantAccessIDs'
+import { TENANT_COOKIE_NAME } from '@/collections/Tenants/cookie'
 
 export const readAccess: Access = (args) => {
   const req = args.req
   const cookies = parseCookies(req.headers)
   const superAdmin = isSuperAdmin(args)
-  const selectedTenant = cookies.get('payload-tenant')
+  const selectedTenant = cookies.get(TENANT_COOKIE_NAME)
   const tenantAccessIDs = getTenantAccessIDs(req.user)
 
   const publicPageConstraint: Where = {
@@ -19,7 +18,10 @@ export const readAccess: Access = (args) => {
   }
 
   // If it's a super admin or has access to the selected tenant
-  if (selectedTenant && (superAdmin || tenantAccessIDs.some((id) => id === selectedTenant))) {
+  if (
+    selectedTenant &&
+    (superAdmin || tenantAccessIDs.some((id) => String(id) === selectedTenant))
+  ) {
     // filter access by selected tenant
     return {
       or: [

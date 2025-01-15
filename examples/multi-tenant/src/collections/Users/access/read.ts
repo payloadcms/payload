@@ -1,10 +1,9 @@
+import { parseCookies, type Access, type Where } from 'payload'
 import type { User } from '@/payload-types'
-import type { Access, Where } from 'payload'
 
-import { parseCookies } from 'payload'
-
-import { isSuperAdmin } from '../../../access/isSuperAdmin'
-import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
+import { isSuperAdmin } from '@/access/isSuperAdmin'
+import { getTenantAdminTenantAccessIDs } from '@/utilities/getTenantAccessIDs'
+import { TENANT_COOKIE_NAME } from '@/collections/Tenants/cookie'
 
 export const readAccess: Access<User> = (args) => {
   const { req } = args
@@ -14,7 +13,7 @@ export const readAccess: Access<User> = (args) => {
 
   const cookies = parseCookies(req.headers)
   const superAdmin = isSuperAdmin(args)
-  const selectedTenant = cookies.get('payload-tenant')
+  const selectedTenant = cookies.get(TENANT_COOKIE_NAME)
 
   if (selectedTenant) {
     // If it's a super admin,
@@ -28,7 +27,7 @@ export const readAccess: Access<User> = (args) => {
     }
 
     const tenantAccessIDs = getTenantAdminTenantAccessIDs(req.user)
-    const hasTenantAccess = tenantAccessIDs.some((id) => id === selectedTenant)
+    const hasTenantAccess = tenantAccessIDs.some((id) => String(id) === selectedTenant)
 
     // If NOT super admin,
     // give them access only if they have access to tenant ID set in cookie

@@ -2,6 +2,7 @@ import type { CollectionAfterLoginHook } from 'payload'
 
 import { mergeHeaders } from '@payloadcms/next/utilities'
 import { generateCookie, getCookieExpiration } from 'payload'
+import { TENANT_COOKIE_NAME } from '@/collections/Tenants/cookie'
 
 export const setCookieBasedOnDomain: CollectionAfterLoginHook = async ({ req, user }) => {
   const relatedOrg = await req.payload.find({
@@ -18,11 +19,11 @@ export const setCookieBasedOnDomain: CollectionAfterLoginHook = async ({ req, us
   // If a matching tenant is found, set the 'payload-tenant' cookie
   if (relatedOrg && relatedOrg.docs.length > 0) {
     const tenantCookie = generateCookie({
-      name: 'payload-tenant',
+      name: TENANT_COOKIE_NAME,
       expires: getCookieExpiration({ seconds: 7200 }),
       path: '/',
       returnCookieAsObject: false,
-      value: relatedOrg.docs[0].id,
+      value: String(relatedOrg.docs[0].id),
     })
 
     // Merge existing responseHeaders with the new Set-Cookie header
