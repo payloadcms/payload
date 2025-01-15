@@ -17,12 +17,21 @@
   }
 
   &__content {
-    // Indent the content, aligning it with the parent label
     [dir='ltr'] & {
-      margin-left: 15px;
+      // Vertical gutter
+      border-left: 3px solid var(--theme-elevation-50);
+      // Center-align the gutter with the chevron
+      margin-left: 3px;
+      // Content indentation
+      padding-left: calc(var(--base) * 0.5);
     }
     [dir='rtl'] & {
-      margin-right: 15px;
+      // Vertical gutter
+      border-right: 3px solid var(--theme-elevation-50);
+      // Center-align the gutter with the chevron
+      margin-right: 3px;
+      // Content indentation
+      padding-right: calc(var(--base) * 0.5);
     }
   }
 
