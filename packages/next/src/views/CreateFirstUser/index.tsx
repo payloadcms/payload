@@ -63,6 +63,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     renderAllFields: true,
     req,
     schemaPath: collectionConfig.slug,
+    skipValidation: true,
   })
 
   return (

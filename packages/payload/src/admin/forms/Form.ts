@@ -84,6 +84,7 @@ export type BuildFormStateArgs = {
   req: PayloadRequest
   returnLockStatus?: boolean
   schemaPath: string
+  skipValidation?: boolean
   updateLastEdited?: boolean
 } & (
   | {

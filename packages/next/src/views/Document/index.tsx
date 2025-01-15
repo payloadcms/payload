@@ -155,6 +155,7 @@ export const renderDocument = async ({
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
+      skipValidation: true,
     }),
   ])
 
