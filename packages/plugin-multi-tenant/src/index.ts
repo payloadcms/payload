@@ -137,6 +137,8 @@ export const multiTenantPlugin =
           })
         }
       } else if (pluginConfig.collections?.[collection.slug]) {
+        const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
+
         /**
          * Modify enabled collections
          */
@@ -157,9 +159,13 @@ export const multiTenantPlugin =
             name: tenantFieldName,
             debug: pluginConfig.debug,
             tenantsCollectionSlug,
-            unique: Boolean(pluginConfig.collections[collection.slug]?.isGlobal),
+            unique: isGlobal,
           }),
         )
+
+        if (isGlobal) {
+          collection.disableDuplicate = true
+        }
 
         if (pluginConfig.collections[collection.slug]?.useBaseListFilter !== false) {
           /**
