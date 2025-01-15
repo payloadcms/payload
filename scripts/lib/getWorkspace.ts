@@ -145,7 +145,7 @@ export const getWorkspace = async () => {
     let nextReleaseVersion
     if (bumpType === 'canary') {
       const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim().slice(0, 7)
-      nextReleaseVersion = semver.inc(monorepoVersion, 'patch') + `-canary.${hash}`
+      nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + `-canary.${hash}`
     } else {
       nextReleaseVersion = semver.inc(monorepoVersion, bumpType)
     }
