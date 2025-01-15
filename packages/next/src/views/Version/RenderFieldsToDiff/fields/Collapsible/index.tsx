@@ -4,7 +4,7 @@ import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
-import { FieldDiffCollapser } from '../../FieldDiffCollapser/index.js'
+import { DiffCollapser } from '../../DiffCollapser/index.js'
 import RenderFieldsToDiff from '../../index.js'
 
 const baseClass = 'collapsible-diff'
@@ -22,7 +22,7 @@ const Collapsible: React.FC<DiffComponentProps> = ({
 }) => {
   return (
     <div className={baseClass}>
-      <FieldDiffCollapser
+      <DiffCollapser
         comparison={comparison}
         fields={fields}
         label={
@@ -46,7 +46,7 @@ const Collapsible: React.FC<DiffComponentProps> = ({
           locales={locales}
           version={version}
         />
-      </FieldDiffCollapser>
+      </DiffCollapser>
     </div>
   )
 }

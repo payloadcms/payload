@@ -7,7 +7,7 @@ import Label from '../Label/index.js'
 import { countChangedFields } from './countChangedFields.js'
 import './index.scss'
 
-const baseClass = 'field-diff-collapser'
+const baseClass = 'diff-collapser'
 
 type Props = {
   children: React.ReactNode
@@ -18,7 +18,7 @@ type Props = {
   version?: unknown
 }
 
-export const FieldDiffCollapser: React.FC<Props> = ({
+export const DiffCollapser: React.FC<Props> = ({
   children,
   comparison,
   fields,

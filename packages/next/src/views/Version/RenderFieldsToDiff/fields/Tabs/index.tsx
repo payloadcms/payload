@@ -6,7 +6,7 @@ import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
-import { FieldDiffCollapser } from '../../FieldDiffCollapser/index.js'
+import { DiffCollapser } from '../../DiffCollapser/index.js'
 import RenderFieldsToDiff from '../../index.js'
 
 const baseClass = 'tabs-diff'
@@ -28,7 +28,7 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
         const versionUnwrapped = 'name' in tab ? version?.[tab.name] : version
 
         return (
-          <FieldDiffCollapser
+          <DiffCollapser
             comparison={comparisonUnwrapped}
             fields={tab.fields}
             key={i}
@@ -54,7 +54,7 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
               locales={locales}
               version={versionUnwrapped}
             />
-          </FieldDiffCollapser>
+          </DiffCollapser>
         )
       })}
     </div>
