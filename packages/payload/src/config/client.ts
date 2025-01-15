@@ -45,10 +45,6 @@ export type ClientConfig = {
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
-  /**
-   * @deprecated - will be removed in 4.0. Use the `useTranslation` hook instead.
-   */
-  i18n?: Omit<SanitizedConfig['i18n'], 'supportedLanguages'>
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
@@ -126,14 +122,6 @@ export const createClientConfig = ({
           i18n,
           importMap,
         })
-        break
-      case 'i18n':
-        if (config?.admin?.experimental?.removeClientConfigI18n !== true) {
-          clientConfig.i18n = {
-            fallbackLanguage: config.i18n.fallbackLanguage,
-            translations: config.i18n.translations,
-          }
-        }
         break
       case 'localization':
         if (typeof config.localization === 'object' && config.localization) {
