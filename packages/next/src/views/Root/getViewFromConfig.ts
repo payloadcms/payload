@@ -71,6 +71,7 @@ type ServerPropsFromView = {
   collectionConfig?: SanitizedConfig['collections'][number]
   globalConfig?: SanitizedConfig['globals'][number]
   viewActions: CustomComponent[]
+  viewType?: 'edit' | 'list'
 }
 
 type GetViewFromConfigArgs = {
@@ -203,6 +204,7 @@ export const getViewFromConfig = ({
 
         templateClassName = `${segmentTwo}-list`
         templateType = 'default'
+        serverProps.viewType = 'list'
         serverProps.viewActions = serverProps.viewActions.concat(
           matchedCollection.admin.components?.views?.list?.actions,
         )
@@ -249,6 +251,7 @@ export const getViewFromConfig = ({
 
         templateClassName = `collection-default-edit`
         templateType = 'default'
+        serverProps.viewType = 'edit'
 
         // Adds view actions to the current collection view
         if (matchedCollection.admin?.components?.views?.edit) {

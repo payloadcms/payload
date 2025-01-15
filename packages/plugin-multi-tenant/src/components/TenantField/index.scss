@@ -1,0 +1,14 @@
+.tenantField {
+  &__wrapper {
+    margin-top: calc(-.75 * var(--spacing-field));
+    margin-bottom: var(--spacing-field);
+    width: 25%;
+  }
+  &__hr {
+    width: calc(100% + 2 * var(--gutter-h));
+    margin-left: calc(-1 * var(--gutter-h));
+    background-color: var(--theme-elevation-100);
+    height: 1px;
+    margin-bottom: var(--spacing-field);
+  }
+ }
