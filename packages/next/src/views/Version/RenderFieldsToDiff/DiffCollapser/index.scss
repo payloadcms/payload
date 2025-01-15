@@ -25,4 +25,11 @@
       margin-right: 15px;
     }
   }
+
+  &__content--is-collapsed {
+    // Hide the content when collapsed. We use display: none instead of
+    // conditional rendering to avoid loosing children's collapsed state when
+    // remounting.
+    display: none;
+  }
 }

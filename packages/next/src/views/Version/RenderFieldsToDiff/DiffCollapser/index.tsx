@@ -35,6 +35,13 @@ export const DiffCollapser: React.FC<Props> = ({
     version,
   })
 
+  const contentClassNames = [
+    `${baseClass}__content`,
+    isCollapsed && `${baseClass}__content--is-collapsed`,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <div className={baseClass}>
       <Label>
@@ -53,7 +60,7 @@ export const DiffCollapser: React.FC<Props> = ({
           </Pill>
         )}
       </Label>
-      {!isCollapsed && <div className={`${baseClass}__content`}>{children}</div>}
+      <div className={contentClassNames}>{children}</div>
     </div>
   )
 }
