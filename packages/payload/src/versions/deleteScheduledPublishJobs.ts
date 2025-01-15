@@ -52,8 +52,9 @@ export const deleteScheduledPublishJobs = async ({
       },
     })
   } catch (err) {
-    payload.logger.error(
-      `There was an error deleting scheduled publish jobs from the queue for ${slug} document with ID ${id}.`,
-    )
+    payload.logger.error({
+      err,
+      msg: `There was an error deleting scheduled publish jobs from the queue for ${slug} document with ID ${id}.`,
+    })
   }
 }
