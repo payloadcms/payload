@@ -77,13 +77,6 @@ export const multiTenantPlugin =
     }
 
     /**
-     * Add TenantSelectionProvider to admin providers
-     */
-    incomingConfig.admin.components.providers.push({
-      path: '@payloadcms/plugin-multi-tenant/client#TenantSelectionProvider',
-    })
-
-    /**
      * Add tenants array field to users collection
      */
     if (pluginConfig?.tenantsArrayField?.includeDefaultField !== false) {
@@ -196,6 +189,17 @@ export const multiTenantPlugin =
     if (!tenantCollection) {
       throw new Error(`Tenants collection not found with slug: ${tenantsCollectionSlug}`)
     }
+
+    /**
+     * Add TenantSelectionProvider to admin providers
+     */
+    incomingConfig.admin.components.providers.push({
+      clientProps: {
+        tenantsCollectionSlug: tenantCollection.slug,
+        useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
+      },
+      path: '@payloadcms/plugin-multi-tenant/client#TenantSelectionProvider',
+    })
 
     /**
      * Add global redirect action

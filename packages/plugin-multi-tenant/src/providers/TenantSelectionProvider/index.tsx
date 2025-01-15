@@ -1,83 +1,47 @@
-'use client'
+import type { OptionObject, Payload, User } from 'payload'
 
-import type { OptionObject } from 'payload'
+import { cookies as getCookies } from 'next/headers.js'
 
-import { useRouter } from 'next/navigation.js'
-import React, { createContext } from 'react'
+import { TenantSelectionProviderClient } from './index.client.js'
 
-import { SELECT_ALL } from '../../constants.js'
-
-type ContextType = {
-  options: OptionObject[]
-  selectedTenantID: number | string | undefined
-  setOptions: (options: OptionObject[]) => void
-  setRefreshOnChange: (refresh: boolean) => void
-  setTenant: (args: {
-    from: 'cookie' | 'document'
-    id: number | string | undefined
-    refresh?: boolean
-  }) => void
+type Args = {
+  children: React.ReactNode
+  payload: Payload
+  tenantsCollectionSlug: string
+  useAsTitle: string
+  user: User
 }
 
-const Context = createContext<ContextType>({
-  options: [],
-  selectedTenantID: undefined,
-  setOptions: () => null,
-  setRefreshOnChange: () => null,
-  setTenant: () => null,
-})
+export const TenantSelectionProvider = async ({
+  children,
+  payload,
+  tenantsCollectionSlug,
+  useAsTitle,
+  user,
+}: Args) => {
+  const { docs: userTenants } = await payload.find({
+    collection: tenantsCollectionSlug,
+    depth: 0,
+    limit: 1000,
+    overrideAccess: false,
+    sort: useAsTitle,
+    user,
+  })
 
-export const TenantSelectionProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedTenantID, setSelectedTenantID] = React.useState<number | string | undefined>(
-    undefined,
-  )
-  const [tenantSelectionFrom, setTenantSelectionFrom] = React.useState<
-    'cookie' | 'document' | undefined
-  >(undefined)
-  const [refreshOnChange, setRefreshOnChange] = React.useState<boolean>(true)
-  const [options, setOptions] = React.useState<OptionObject[]>([])
-
-  const router = useRouter()
-
-  const setCookie = React.useCallback((value?: string) => {
-    const expires = '; expires=Fri, 31 Dec 9999 23:59:59 GMT'
-    document.cookie = 'payload-tenant=' + (value || '') + expires + '; path=/'
-  }, [])
-
-  const setTenant = React.useCallback<ContextType['setTenant']>(
-    ({ id, from, refresh }) => {
-      if (from === 'cookie' && tenantSelectionFrom === 'document') {
-        return
-      }
-      setTenantSelectionFrom(from)
-      if (id === undefined) {
-        setSelectedTenantID(SELECT_ALL)
-        setCookie(SELECT_ALL)
-      } else {
-        setSelectedTenantID(id)
-        setCookie(String(id))
-      }
-      if (refresh && refreshOnChange) {
-        router.refresh()
-      }
-    },
-    [
-      tenantSelectionFrom,
-      setSelectedTenantID,
-      setTenantSelectionFrom,
-      setCookie,
-      router,
-      refreshOnChange,
-    ],
-  )
+  const tenantOptions: OptionObject[] = userTenants.map((doc) => ({
+    label: String(doc[useAsTitle]),
+    value: String(doc.id),
+  }))
+  const cookies = await getCookies()
+  const tenantCookie = cookies.get('payload-tenant')?.value
+  const selectedTenant =
+    tenantOptions.find((option) => option.value === tenantCookie)?.label || tenantCookie
 
   return (
-    <Context.Provider
-      value={{ options, selectedTenantID, setOptions, setRefreshOnChange, setTenant }}
-    >
-      {children}
-    </Context.Provider>
+    <span data-selected-tenant-id={tenantCookie} data-selected-tenant-title={selectedTenant}>
+      <TenantSelectionProviderClient initialValue={tenantCookie} tenantOptions={tenantOptions}>
+        {children}
+      </TenantSelectionProviderClient>
+    </span>
   )
 }
-
-export const useTenantSelection = () => React.useContext(Context)
