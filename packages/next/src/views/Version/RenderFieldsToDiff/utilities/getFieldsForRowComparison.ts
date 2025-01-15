@@ -44,7 +44,6 @@ export function getFieldsForRowComparison({
         field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
         fields: [],
       }
-
       const matchedComparisonBlock = ('blocks' in field &&
         field.blocks?.find((block) => block.slug === comparisonRow?.blockType)) || {
         fields: [],

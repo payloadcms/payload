@@ -10,7 +10,7 @@ import type { DiffComponentProps } from '../types.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import './index.scss'
 import RenderFieldsToDiff from '../../index.js'
-import { getFieldsForRowComparison } from './getFieldsForRowComparison.js'
+import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowComparison.js'
 
 const baseClass = 'iterable-diff'
 
