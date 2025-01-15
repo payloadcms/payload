@@ -7,6 +7,7 @@ import path from 'path'
 
 interface Args {
   bucket: string
+  cacheControlMaxAge?: number
   collection: CollectionConfig
   getStorageClient: () => AWS.S3
 }
@@ -21,7 +22,12 @@ const streamToBuffer = async (readableStream: any) => {
   return Buffer.concat(chunks)
 }
 
-export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
+export const getHandler = ({
+  bucket,
+  cacheControlMaxAge,
+  collection,
+  getStorageClient,
+}: Args): StaticHandler => {
   return async (req, { params: { filename } }) => {
     try {
       const prefix = await getFilePrefix({ collection, filename, req })
@@ -42,6 +48,9 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
         return new Response(null, {
           headers: new Headers({
             'Accept-Ranges': String(object.AcceptRanges),
+            ...(cacheControlMaxAge
+              ? { 'Cache-Control': `public, max-age=${cacheControlMaxAge}` }
+              : {}),
             'Content-Length': String(object.ContentLength),
             'Content-Type': String(object.ContentType),
             ETag: String(object.ETag),
@@ -55,6 +64,9 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       return new Response(bodyBuffer, {
         headers: new Headers({
           'Accept-Ranges': String(object.AcceptRanges),
+          ...(cacheControlMaxAge
+            ? { 'Cache-Control': `public, max-age=${cacheControlMaxAge}` }
+            : {}),
           'Content-Length': String(object.ContentLength),
           'Content-Type': String(object.ContentType),
           ETag: String(object.ETag),

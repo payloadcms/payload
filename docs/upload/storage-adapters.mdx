@@ -113,6 +113,15 @@ export default buildConfig({
 
 See the the [AWS SDK Package](https://github.com/aws/aws-sdk-js-v3) and [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object for guidance on AWS S3 configuration.
 
+
+| Option               | Description                                                          | Default                                    |
+| -------------------- | -------------------------------------------------------------------- | ------------------------------------------ |
+| `enabled`            | Whether or not to enable the plugin                                  | `true`                                     |
+| `collections`        | Collections to apply the s3 adapter to                               |                                            |
+| `cacheControlMaxAge` | Cache-Control max-age in seconds                                     | `undefined` (Cache-Control header omitted) |
+
+
+
 ## Azure Blob Storage
 [`@payloadcms/storage-azure`](https://www.npmjs.com/package/@payloadcms/storage-azure)
 
