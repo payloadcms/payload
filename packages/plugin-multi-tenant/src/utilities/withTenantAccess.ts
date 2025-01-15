@@ -8,14 +8,16 @@ import { getTenantAccess } from './getTenantAccess.js'
 type Args = {
   accessFunction?: Access
   fieldName: string
-  userHasAccessToAllTenants: MultiTenantPluginConfig['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: MultiTenantPluginConfig[Required<'userHasAccessToAllTenants'>]
 }
 export const withTenantAccess =
   ({ accessFunction, fieldName, userHasAccessToAllTenants }: Args) =>
   async (args: AccessArgs): Promise<AccessResult> => {
     const constraints = []
     const accessFn =
-      typeof accessFunction === 'function' ? accessFunction : ({ req }) => Boolean(req.user)
+      typeof accessFunction === 'function'
+        ? accessFunction
+        : ({ req }: AccessArgs): AccessResult => Boolean(req.user)
     const accessResult: AccessResult = await accessFn(args)
 
     if (accessResult === false) {

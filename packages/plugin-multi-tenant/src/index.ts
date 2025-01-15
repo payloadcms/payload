@@ -5,8 +5,8 @@ import type { MultiTenantPluginConfig } from './types.js'
 import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
+import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
-import { withTenantAccess } from './utilities/withTenantAccess.js'
 import { withTenantListFilter } from './utilities/withTenantListFilter.js'
 
 const defaults = {
@@ -14,16 +14,6 @@ const defaults = {
   tenantFieldName: 'tenant',
   userTenantsArrayFieldName: 'tenants',
 }
-
-type AllAccessKeys<T extends readonly string[]> = T[number] extends keyof CollectionConfig['access']
-  ? keyof CollectionConfig['access'] extends T[number]
-    ? T
-    : never
-  : never
-
-const collectionAccessKeys: AllAccessKeys<
-  ['create', 'read', 'update', 'delete', 'admin', 'readVersions', 'unlock']
-> = ['create', 'read', 'update', 'delete', 'admin', 'readVersions', 'unlock']
 
 export const multiTenantPlugin =
   <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>
@@ -44,19 +34,11 @@ export const multiTenantPlugin =
     const tenantFieldName = pluginConfig?.tenantField?.name || defaults.tenantFieldName
 
     /**
-     * Add tenants array field to users collection
-     */
-    const adminUsersCollection = incomingConfig.collections.find(({ slug, auth }) => {
-      if (incomingConfig.admin?.user) {
-        return slug === incomingConfig.admin.user
-      } else if (auth) {
-        return true
-      }
-    })
-
-    /**
      * Add defaults for admin properties
      */
+    if (!incomingConfig.admin) {
+      incomingConfig.admin = {}
+    }
     if (!incomingConfig.admin?.components) {
       incomingConfig.admin.components = {
         actions: [],
@@ -75,6 +57,17 @@ export const multiTenantPlugin =
     }
 
     /**
+     * Add tenants array field to users collection
+     */
+    const adminUsersCollection = incomingConfig.collections.find(({ slug, auth }) => {
+      if (incomingConfig.admin?.user) {
+        return slug === incomingConfig.admin.user
+      } else if (auth) {
+        return true
+      }
+    })
+
+    /**
      * Add TenantSelectionProvider to admin providers
      */
     incomingConfig.admin.components.providers.push({
@@ -90,7 +83,9 @@ export const multiTenantPlugin =
 
     let tenantCollection: CollectionConfig | undefined
 
-    const [collectionSlugs, globalCollectionSlugs] = Object.keys(pluginConfig.collections).reduce(
+    const [collectionSlugs, globalCollectionSlugs] = Object.keys(pluginConfig.collections).reduce<
+      [string[], string[]]
+    >(
       (acc, slug) => {
         if (pluginConfig.collections[slug].isGlobal) {
           acc[1].push(slug)
@@ -112,18 +107,12 @@ export const multiTenantPlugin =
        */
       if (collection.slug === tenantsCollectionSlug) {
         tenantCollection = collection
-        /**
-         * Add access control to tenants collection
-         */
-        collection.access = collectionAccessKeys.reduce((acc, key) => {
-          acc[key] = withTenantAccess({
-            accessFunction: collection?.access?.[key],
-            fieldName: 'id',
-            userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
-          })
 
-          return acc
-        }, {})
+        addCollectionAccess({
+          collection,
+          fieldName: 'id',
+          userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
+        })
 
         if (pluginConfig.cleanupAfterTenantDelete !== false) {
           /**
@@ -179,17 +168,13 @@ export const multiTenantPlugin =
 
         if (pluginConfig.collections[collection.slug].useTenantAccess !== false) {
           /**
-           * Collection access functions with user assigned tenant constraints
+           * Add access control constraint to tenant enabled collection
            */
-          collection.access = collectionAccessKeys.reduce((acc, key) => {
-            acc[key] = withTenantAccess({
-              accessFunction: collection?.access?.[key],
-              fieldName: tenantFieldName,
-              userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
-            })
-
-            return acc
-          }, {})
+          addCollectionAccess({
+            collection,
+            fieldName: tenantFieldName,
+            userHasAccessToAllTenants: pluginConfig.userHasAccessToAllTenants,
+          })
         }
       }
     })

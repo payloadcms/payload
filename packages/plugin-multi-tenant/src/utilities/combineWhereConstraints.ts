@@ -7,7 +7,7 @@ export function combineWhereConstraints(constraints: Array<Where>): Where {
   if (constraints.length === 1) {
     return constraints[0]
   }
-  const andConstraint: Where = {
+  const andConstraint = {
     and: [],
   }
   constraints.forEach((constraint) => {

@@ -21,13 +21,13 @@ const Context = createContext<ContextType>({
   setTenant: () => null,
 })
 
-export const TenantSelectionProvider = ({ children }) => {
+export const TenantSelectionProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedTenantID, setSelectedTenantID] = React.useState<number | string | undefined>(
     undefined,
   )
-  const [tenantSelectionFrom, setTenantSelectionFrom] = React.useState<'cookie' | 'document'>(
-    undefined,
-  )
+  const [tenantSelectionFrom, setTenantSelectionFrom] = React.useState<
+    'cookie' | 'document' | undefined
+  >(undefined)
   const [refreshOnChange, setRefreshOnChange] = React.useState<boolean>(true)
   const [options, setOptions] = React.useState<{ label: string; value: string }[]>([])
 

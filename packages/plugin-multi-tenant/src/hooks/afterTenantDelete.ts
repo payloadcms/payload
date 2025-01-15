@@ -1,9 +1,13 @@
-import {
-  type CollectionAfterDeleteHook,
-  type CollectionConfig,
-  generateCookie,
-  mergeHeaders,
+import type {
+  CollectionAfterDeleteHook,
+  CollectionConfig,
+  JsonObject,
+  PaginatedDocs,
 } from 'payload'
+
+import { generateCookie, mergeHeaders } from 'payload'
+
+import type { UserWithTenantsField } from '../types.js'
 
 import { getTenantFromCookie } from '../utilities/getTenantFromCookie.js'
 
@@ -62,7 +66,7 @@ export const afterTenantDelete =
         ? mergeHeaders(req.responseHeaders, newHeaders)
         : newHeaders
     }
-    const cleanupPromises = []
+    const cleanupPromises: Promise<JsonObject>[] = []
     enabledSlugs.forEach((slug) => {
       cleanupPromises.push(
         req.payload.delete({
@@ -77,7 +81,7 @@ export const afterTenantDelete =
     })
 
     try {
-      const usersWithTenant = await req.payload.find({
+      const usersWithTenant = (await req.payload.find({
         collection: usersSlug,
         depth: 0,
         limit: 0,
@@ -86,7 +90,7 @@ export const afterTenantDelete =
             equals: id,
           },
         },
-      })
+      })) as PaginatedDocs<UserWithTenantsField>
 
       usersWithTenant?.docs?.forEach((user) => {
         cleanupPromises.push(

@@ -25,8 +25,8 @@ export const TenantField = (args: Props) => {
     if (!selectedTenantID && value) {
       // Initialize the tenant selector with the field value
       setTenant({ id: value, from: 'document' })
-    } else if (selectedTenantID && selectedTenantID === SELECT_ALL) {
-      setTenant({ id: options?.[0].value, from: 'document' })
+    } else if (selectedTenantID && selectedTenantID === SELECT_ALL && options?.[0]?.value) {
+      setTenant({ id: options[0].value, from: 'document' })
     } else if ((!value || value !== selectedTenantID) && selectedTenantID) {
       // Update the field value when the tenant is changed
       setValue(selectedTenantID)

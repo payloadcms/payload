@@ -59,7 +59,7 @@ export async function getGlobalViewRedirect({
         }
       }
     } catch (e) {
-      payload.logger.error(e, `${e?.message} - Multi Tenant Redirect`)
+      payload.logger.error(e, `${'message' in e ? `e?.message - ` : ''}Multi Tenant Redirect Error`)
     }
   }
   return redirectRoute
