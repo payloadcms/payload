@@ -768,10 +768,11 @@ describe('Queues', () => {
     expect(allSimples.docs[7].title).toBe('from single task')
   })
 
-  it('can queue single tasks 150 times', async () => {
+  it('can queue single tasks hundreds of times', async () => {
+    const numberOfTasks = 150
     // TODO: Ramp up the limit from 150 to 500 or 1000, to test reliability of the database
     payload.config.jobs.deleteJobOnComplete = false
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < numberOfTasks; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -781,17 +782,17 @@ describe('Queues', () => {
     }
 
     await payload.jobs.run({
-      limit: 1000,
+      limit: numberOfTasks,
     })
 
     const allSimples = await payload.find({
       collection: 'simple',
-      limit: 1000,
+      limit: numberOfTasks,
     })
 
-    expect(allSimples.totalDocs).toBe(150) // Default limit: 10
+    expect(allSimples.totalDocs).toBe(numberOfTasks) // Default limit: 10
     expect(allSimples.docs[0].title).toBe('from single task')
-    expect(allSimples.docs[140].title).toBe('from single task')
+    expect(allSimples.docs[numberOfTasks - 1].title).toBe('from single task')
     payload.config.jobs.deleteJobOnComplete = true
   })
 
