@@ -58,7 +58,7 @@ export class ServerBlockNode extends DecoratorBlockNode {
     this.__cacheBuster = cacheBuster || 0
   }
 
-  static clone(node: ServerBlockNode): ServerBlockNode {
+  static override clone(node: ServerBlockNode): ServerBlockNode {
     return new this({
       cacheBuster: node.__cacheBuster,
       fields: node.__fields,
@@ -67,15 +67,15 @@ export class ServerBlockNode extends DecoratorBlockNode {
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'block'
   }
 
-  static importDOM(): DOMConversionMap<HTMLDivElement> | null {
+  static override importDOM(): DOMConversionMap<HTMLDivElement> | null {
     return {}
   }
 
-  static importJSON(serializedNode: SerializedBlockNode): ServerBlockNode {
+  static override importJSON(serializedNode: SerializedBlockNode): ServerBlockNode {
     if (serializedNode.version === 1) {
       // Convert (version 1 had the fields wrapped in another, unnecessary data property)
       serializedNode = {
@@ -95,11 +95,11 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return false
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
     return null
   }
 
-  exportDOM(): DOMExportOutput {
+  override exportDOM(): DOMExportOutput {
     const element = document.createElement('div')
 
     const text = document.createTextNode(this.getTextContent())
@@ -107,7 +107,7 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return { element }
   }
 
-  exportJSON(): SerializedBlockNode {
+  override exportJSON(): SerializedBlockNode {
     return {
       ...super.exportJSON(),
       type: 'block',
@@ -124,7 +124,7 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return this.getLatest().__fields
   }
 
-  getTextContent(): string {
+  override getTextContent(): string {
     return `Block Field`
   }
 

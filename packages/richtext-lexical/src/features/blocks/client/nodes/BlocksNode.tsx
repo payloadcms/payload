@@ -10,15 +10,15 @@ import { ServerBlockNode } from '../../server/nodes/BlocksNode.js'
 import { BlockComponent } from '../component/index.js'
 
 export class BlockNode extends ServerBlockNode {
-  static clone(node: ServerBlockNode): ServerBlockNode {
+  static override clone(node: ServerBlockNode): ServerBlockNode {
     return super.clone(node)
   }
 
-  static getType(): string {
+  static override getType(): string {
     return super.getType()
   }
 
-  static importJSON(serializedNode: SerializedBlockNode): BlockNode {
+  static override importJSON(serializedNode: SerializedBlockNode): BlockNode {
     if (serializedNode.version === 1) {
       // Convert (version 1 had the fields wrapped in another, unnecessary data property)
       serializedNode = {
@@ -34,7 +34,7 @@ export class BlockNode extends ServerBlockNode {
     return node
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
     return (
       <BlockComponent
         cacheBuster={this.getCacheBuster()}
@@ -44,7 +44,7 @@ export class BlockNode extends ServerBlockNode {
     )
   }
 
-  exportJSON(): SerializedBlockNode {
+  override exportJSON(): SerializedBlockNode {
     return super.exportJSON()
   }
 }
