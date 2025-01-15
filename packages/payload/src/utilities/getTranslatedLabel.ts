@@ -2,7 +2,7 @@ import { getTranslation, type I18n } from '@payloadcms/translations'
 
 import type { LabelFunction, StaticLabel } from '../config/types.js'
 
-export const resolveLabel = (label: LabelFunction | StaticLabel, i18n?: I18n): string => {
+export const getTranslatedLabel = (label: LabelFunction | StaticLabel, i18n?: I18n): string => {
   if (typeof label === 'function') {
     return label({ t: i18n.t })
   }

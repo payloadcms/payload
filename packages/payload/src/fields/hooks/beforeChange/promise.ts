@@ -9,7 +9,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getFormattedLabel } from '../../../utilities/getFormattedLabel.js'
-import { resolveLabel } from '../../../utilities/resolveLabel.js'
+import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
@@ -161,7 +161,7 @@ export const promise = async ({
       )
 
       if (typeof validationResult === 'string') {
-        const label = resolveLabel(field?.label || field?.name, req.i18n)
+        const label = getTranslatedLabel(field?.label || field?.name, req.i18n)
 
         const fieldLabel =
           Array.isArray(parentPath) && parentPath.length > 0
