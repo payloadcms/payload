@@ -137,6 +137,12 @@ export const multiTenantPlugin =
           })
         }
       } else if (pluginConfig.collections?.[collection.slug]) {
+        const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
+
+        if (isGlobal) {
+          collection.disableDuplicate = true
+        }
+
         /**
          * Modify enabled collections
          */
@@ -157,7 +163,7 @@ export const multiTenantPlugin =
             name: tenantFieldName,
             debug: pluginConfig.debug,
             tenantsCollectionSlug,
-            unique: Boolean(pluginConfig.collections[collection.slug]?.isGlobal),
+            unique: isGlobal,
           }),
         )
 
