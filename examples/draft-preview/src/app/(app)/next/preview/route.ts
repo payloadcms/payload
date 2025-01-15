@@ -6,7 +6,6 @@ import { getPayload } from 'payload'
 
 import configPromise from '../../../../payload.config'
 
-const payloadToken = 'payload-token'
 
 export async function GET(
   req: {
@@ -18,7 +17,6 @@ export async function GET(
   } & Request,
 ): Promise<Response> {
   const payload = await getPayload({ config: configPromise })
-  const token = req.cookies.get(payloadToken)?.value
   const { searchParams } = new URL(req.url)
   const path = searchParams.get('path')
   const collection = searchParams.get('collection') as CollectionSlug
