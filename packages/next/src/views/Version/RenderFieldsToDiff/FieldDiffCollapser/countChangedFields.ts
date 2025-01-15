@@ -1,7 +1,7 @@
 import type { ClientField } from 'payload'
 
-// import { UnreachableCaseError } from 'payload'
-import { hasChanges } from './hasChanges.js'
+import { getFieldsForRowComparison } from '../fields/Iterable/getFieldsForRowComparison.js'
+import { fieldHasChanges } from './fieldHasChanges.js'
 
 type Args = {
   comparison: unknown
@@ -10,12 +10,9 @@ type Args = {
 }
 
 /**
- * Counts the number of fields that have changed between the version and comparison.
- * It only counts immediate children fields, not nested fields. Nested fields
- * are considered those displayed inside a FieldDiffCollapser, inluding those
- * not nested in the data structure
+ * Recursively counts the number of changed fields between comparison and
+ * version data for a given set of fields.
  */
-
 export function countChangedFields({ comparison, fields, version }: Args) {
   let count = 0
 
@@ -26,13 +23,40 @@ export function countChangedFields({ comparison, fields, version }: Args) {
     }
     const fieldType = field.type
     switch (fieldType) {
+      // Iterable fields are arrays and blocks fields. We iterate over each row and
+      // count the number of changed fields in each.
       case 'array':
-      case 'blocks':
+      case 'blocks': {
+        const iterableComparison = comparison?.[field.name] ?? []
+        const iterableVersion = version?.[field.name] ?? []
+
+        let i = 0
+        while (iterableComparison[i] || iterableVersion[i]) {
+          const comparisonRow = iterableComparison?.[i] || {}
+          const versionRow = iterableVersion?.[i] || {}
+
+          const rowFields = getFieldsForRowComparison({
+            comparisonRow,
+            field,
+            versionRow,
+          })
+
+          count += countChangedFields({
+            comparison: comparisonRow,
+            fields: rowFields,
+            version: versionRow,
+          })
+
+          i++
+        }
+        break
+      }
+
+      // Regular fields without nested fields.
       case 'checkbox':
       case 'code':
       case 'date':
       case 'email':
-      case 'group':
       case 'join':
       case 'json':
       case 'number':
@@ -45,60 +69,55 @@ export function countChangedFields({ comparison, fields, version }: Args) {
       case 'textarea':
       case 'upload': {
         // Fields that have a name and contain data. We can just check if the data has changed.
-        if (hasChanges(version?.[field.name], comparison?.[field.name])) {
+        if (fieldHasChanges(version?.[field.name], comparison?.[field.name])) {
           count++
         }
-        return
+        break
       }
-      case 'collapsible': {
-        // Collapsible fields don't have a name or nest their fields' data, but we show them in a
-        // FieldDiffCollapser, so we increment the count if any of it's fields have changed.
-        if (
-          countChangedFields({
-            comparison,
-            fields: field.fields,
-            version,
-          }) > 0
-        ) {
-          count++
-        }
-        return
-      }
+      // Fields that have nested fields, but don't nest their fields' data.
+      case 'collapsible':
       case 'row': {
-        // Rows don't have nest their fields' data and we don't show them in a
-        // FieldDiffCollapser so we add every changed field to the count.
         count += countChangedFields({
           comparison,
           fields: field.fields,
           version,
         })
-        return
+
+        break
       }
+
+      // Fields that have nested fields and nest their fields' data.
+      case 'group': {
+        count += countChangedFields({
+          comparison: comparison?.[field.name],
+          fields: field.fields,
+          version: version?.[field.name],
+        })
+        break
+      }
+
+      // Each tab in a tabs field has nested fields. The fields data may be
+      // nested or not depending on the existence of a name property.
       case 'tabs': {
-        // The tabs field is not displayed in the UI, but each of its tabs are.
-        // Each tab is displayed in a FieldDiffCollapser, so increment the count
-        // for each tab if any of the tab fields has changed.
         field.tabs.forEach((tab) => {
-          const tabFieldsChangeCount = countChangedFields({
+          count += countChangedFields({
             comparison: 'name' in tab ? comparison?.[tab.name] : comparison,
             fields: tab.fields,
             version: 'name' in tab ? version?.[tab.name] : version,
           })
-
-          if (tabFieldsChangeCount > 0) {
-            count++
-          }
         })
-        return
+        break
       }
+
+      // UI fields don't have data and are not displayed in the version view
+      // so we can ignore them.
       case 'ui': {
-        // UI fields don't have data and are not displayed in the version view
-        // so we can ignore them.
-        return
+        break
       }
+
       default: {
         const _exhaustiveCheck: never = fieldType
-        throw new Error(`Unhandled field.type in countChangedFields : ${String(fieldType)}`)
+        throw new Error(`Unexpected field.type in countChangedFields : ${String(fieldType)}`)
       }
     }
   })
