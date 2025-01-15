@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi, describe } from 'vitest'
 import fs from 'fs'
 import fse from 'fs-extra'
 import globby from 'globby'
@@ -15,7 +15,7 @@ describe('createProject', () => {
   let projectDir: string
   beforeAll(() => {
     // eslint-disable-next-line no-console
-    console.log = jest.fn()
+    console.log = vi.fn()
   })
 
   beforeEach(() => {
@@ -29,7 +29,7 @@ describe('createProject', () => {
     }
   })
 
-  describe('#createProject', () => {
+  describe('#createProject', { timeout: 30_000 }, () => {
     const args = {
       _: ['project-name'],
       '--db': 'mongodb',

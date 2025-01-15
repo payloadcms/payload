@@ -94,7 +94,7 @@
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:types": "tstyche",
-    "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
+    "test:unit": "cross-env NODE_OPTIONS=\"--no-deprecation\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true vitest --run packages",
     "translateNewKeys": "pnpm --filter translations run translateNewKeys"
   },
   "lint-staged": {
@@ -171,7 +171,8 @@
     "tstyche": "^3.1.1",
     "tsx": "4.19.2",
     "turbo": "^2.3.3",
-    "typescript": "5.7.2"
+    "typescript": "5.7.2",
+    "vitest": "^2.1.8"
   },
   "peerDependencies": {
     "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",

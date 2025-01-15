@@ -1,32 +1,32 @@
 import type { Config, Payload } from 'payload'
 
-import { jest } from '@jest/globals'
+import { vi, MockedFunction } from 'vitest'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
 import { defaults } from 'payload'
 
 // TO-DO: this would be needed for the TO-DO tests below.
-// maybe we have to use jest.unstable_mockModule? (already tried)
-// jest.mock('./plugin.ts', () => ({
-//   // generateRandomString: jest.fn<() => string>().mockReturnValue('instance'),
-//   generateRandomString: jest.fn().mockReturnValue('instance'),
+// maybe we have to use vi.unstable_mockModule? (already tried)
+// vi.mock('./plugin.ts', () => ({
+//   // generateRandomString: vi.fn<() => string>().mockReturnValue('instance'),
+//   generateRandomString: vi.fn().mockReturnValue('instance'),
 // }))
 
 const mockedPayload: Payload = {
-  updateGlobal: jest.fn(),
-  findGlobal: jest.fn().mockReturnValue('instance'),
+  updateGlobal: vi.fn(),
+  findGlobal: vi.fn().mockReturnValue('instance'),
 } as unknown as Payload
 
 import { payloadCloudPlugin } from './plugin.js'
 
 describe('plugin', () => {
-  let createTransportSpy: jest.Spied<any>
+  let createTransportSpy: MockedFunction<typeof nodemailer.createTransport>
 
   const skipVerify = true
 
   beforeAll(() => {
     // Mock createTestAccount to prevent calling external services
-    jest.spyOn(nodemailer, 'createTestAccount').mockImplementation(() => {
+    vi.spyOn(nodemailer, 'createTestAccount').mockImplementation(() => {
       return Promise.resolve({
         imap: { host: 'imap.test.com', port: 993, secure: true },
         pass: 'testpass',
@@ -39,12 +39,13 @@ describe('plugin', () => {
   })
 
   beforeEach(() => {
-    createTransportSpy = jest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
+    // @ts-expect-error
+    createTransportSpy = vi.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
       return {
         transporter: {
           name: 'Nodemailer - SMTP',
         },
-        verify: jest.fn(),
+        verify: vi.fn(),
       } as unknown as ReturnType<typeof nodemailer.createTransport>
     })
   })
@@ -67,7 +68,6 @@ describe('plugin', () => {
     })
 
     describe('storage', () => {
-      // eslint-disable-next-line jest/expect-expect
       it('should default to using payload cloud storage', async () => {
         const plugin = payloadCloudPlugin()
         const config = await plugin(createConfig())
@@ -75,7 +75,6 @@ describe('plugin', () => {
         assertCloudStorage(config)
       })
 
-      // eslint-disable-next-line jest/expect-expect
       it('should allow opt-out', async () => {
         const plugin = payloadCloudPlugin({ storage: false })
         const config = await plugin(createConfig())
@@ -114,7 +113,7 @@ describe('plugin', () => {
       })
 
       it('should not modify existing email transport', async () => {
-        const logSpy = jest.spyOn(console, 'log')
+        const logSpy = vi.spyOn(console, 'log')
 
         const existingTransport = nodemailer.createTransport({
           name: 'existing-transport',

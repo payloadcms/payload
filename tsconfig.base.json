@@ -59,6 +59,6 @@
       "@payloadcms/next": ["./packages/next/src/exports/*"]
     }
   },
-  "include": ["${configDir}/src"],
+  "include": ["${configDir}/src", "vite.config.ts"],
   "exclude": ["${configDir}/dist", "${configDir}/build", "${configDir}/temp", "**/*.spec.ts"]
 }
