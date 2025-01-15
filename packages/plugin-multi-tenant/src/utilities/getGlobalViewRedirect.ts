@@ -58,8 +58,11 @@ export async function getGlobalViewRedirect({
           redirectRoute = `${payload.config.routes.admin}/collections/${slug}/create`
         }
       }
-    } catch (e) {
-      payload.logger.error(e, `${'message' in e ? `e?.message - ` : ''}Multi Tenant Redirect Error`)
+    } catch (e: unknown) {
+      payload.logger.error(
+        e,
+        `${typeof e === 'object' && e && 'message' in e ? `e?.message - ` : ''}Multi Tenant Redirect Error`,
+      )
     }
   }
   return redirectRoute
