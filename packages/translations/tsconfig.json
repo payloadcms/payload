@@ -4,6 +4,5 @@
     /* TODO: remove the following lines */
     "strict": false,
     "noUncheckedIndexedAccess": false,
-    "noImplicitOverride": false,
   }
 }

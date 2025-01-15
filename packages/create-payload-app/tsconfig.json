@@ -3,6 +3,5 @@
   "compilerOptions": {
     /* TODO: remove the following lines */
     "noUncheckedIndexedAccess": false,
-    "noImplicitOverride": false,
   },
 }
