@@ -2,16 +2,39 @@ import type { Field, FilterOptionsProps, RelationshipField } from 'payload'
 
 import { getTenantFromCookie } from './getTenantFromCookie.js'
 
-export function addFilterOptionsToFields(fields: Field[], tenantEnabledCollectionSlugs: string[]) {
+type AddFilterOptionsToFieldsArgs = {
+  fields: Field[]
+  tenantEnabledCollectionSlugs: string[]
+  tenantEnabledGlobalSlugs: string[]
+}
+export function addFilterOptionsToFields({
+  fields,
+  tenantEnabledCollectionSlugs,
+  tenantEnabledGlobalSlugs,
+}: AddFilterOptionsToFieldsArgs) {
   fields.forEach((field) => {
     if (field.type === 'relationship') {
+      /**
+       * Adjusts relationship fields to filter by tenant
+       * and ensures relationTo cannot be a tenant global collection
+       */
       if (typeof field.relationTo === 'string') {
+        if (tenantEnabledGlobalSlugs.includes(field.relationTo)) {
+          throw new Error(
+            `The collection ${field.relationTo} is a global collection and cannot be related to a tenant enabled collection.`,
+          )
+        }
         if (tenantEnabledCollectionSlugs.includes(field.relationTo)) {
           addFilter(field, tenantEnabledCollectionSlugs)
         }
       } else {
-        field.relationTo.map((relation) => {
-          if (tenantEnabledCollectionSlugs.includes(relation)) {
+        field.relationTo.map((relationTo) => {
+          if (tenantEnabledGlobalSlugs.includes(relationTo)) {
+            throw new Error(
+              `The collection ${relationTo} is a global collection and cannot be related to a tenant enabled collection.`,
+            )
+          }
+          if (tenantEnabledCollectionSlugs.includes(relationTo)) {
             addFilter(field, tenantEnabledCollectionSlugs)
           }
         })
@@ -24,18 +47,30 @@ export function addFilterOptionsToFields(fields: Field[], tenantEnabledCollectio
       field.type === 'collapsible' ||
       field.type === 'group'
     ) {
-      addFilterOptionsToFields(field.fields, tenantEnabledCollectionSlugs)
+      addFilterOptionsToFields({
+        fields: field.fields,
+        tenantEnabledCollectionSlugs,
+        tenantEnabledGlobalSlugs,
+      })
     }
 
     if (field.type === 'blocks') {
       field.blocks.forEach((block) => {
-        addFilterOptionsToFields(block.fields, tenantEnabledCollectionSlugs)
+        addFilterOptionsToFields({
+          fields: block.fields,
+          tenantEnabledCollectionSlugs,
+          tenantEnabledGlobalSlugs,
+        })
       })
     }
 
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
-        addFilterOptionsToFields(tab.fields, tenantEnabledCollectionSlugs)
+        addFilterOptionsToFields({
+          fields: tab.fields,
+          tenantEnabledCollectionSlugs,
+          tenantEnabledGlobalSlugs,
+        })
       })
     }
   })
