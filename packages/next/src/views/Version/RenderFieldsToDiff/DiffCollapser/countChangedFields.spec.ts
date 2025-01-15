@@ -1,7 +1,9 @@
-import { countChangedFields } from './countChangedFields.js'
+import { countChangedFields, countChangedFieldsInRows } from './countChangedFields.js'
 import type { ClientField } from 'payload'
 
 describe('countChangedFields', () => {
+  // locales can be undefined when not configured in payload.config.js
+  const locales = undefined
   it('should return 0 when no fields have changed', () => {
     const fields: ClientField[] = [
       { name: 'a', type: 'text' },
@@ -10,7 +12,7 @@ describe('countChangedFields', () => {
     const comparison = { a: 'original', b: 123 }
     const version = { a: 'original', b: 123 }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(0)
   })
 
@@ -22,11 +24,11 @@ describe('countChangedFields', () => {
     const comparison = { a: 'original', b: 123 }
     const version = { a: 'changed', b: 123 }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(1)
   })
 
-  it('should count previewsly undfined fields', () => {
+  it('should count previously undefined fields', () => {
     const fields: ClientField[] = [
       { name: 'a', type: 'text' },
       { name: 'b', type: 'number' },
@@ -34,7 +36,7 @@ describe('countChangedFields', () => {
     const comparison = {}
     const version = { a: 'new', b: 123 }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(2)
   })
 
@@ -46,7 +48,7 @@ describe('countChangedFields', () => {
     const comparison = { id: 'original', a: 'original' }
     const version = { id: 'changed', a: 'original' }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(0)
   })
 
@@ -65,7 +67,7 @@ describe('countChangedFields', () => {
     const comparison = { a: 'original', b: 'original', c: 'original' }
     const version = { a: 'changed', b: 'changed', c: 'original' }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(2)
   })
 
@@ -83,7 +85,7 @@ describe('countChangedFields', () => {
     const comparison = { a: 'original', b: 'original', c: 'original' }
     const version = { a: 'changed', b: 'changed', c: 'original' }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(2)
   })
 
@@ -102,7 +104,7 @@ describe('countChangedFields', () => {
     const comparison = { group: { a: 'original', b: 'original', c: 'original' } }
     const version = { group: { a: 'changed', b: 'changed', c: 'original' } }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(2)
   })
 
@@ -125,7 +127,7 @@ describe('countChangedFields', () => {
     const comparison = { a: 'original', b: 'original', c: 'original' }
     const version = { a: 'changed', b: 'changed', c: 'original' }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(2)
   })
 
@@ -148,7 +150,7 @@ describe('countChangedFields', () => {
     const comparison = { namedTab: { a: 'original', b: 'original', c: 'original' } }
     const version = { namedTab: { a: 'changed', b: 'changed', c: 'original' } }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(2)
   })
 
@@ -164,11 +166,11 @@ describe('countChangedFields', () => {
     const comparison = { a: 'original', b: 'original' }
     const version = { a: 'original', b: 'changed' }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(0)
   })
 
-  it('should cound changed fields inside array fields', () => {
+  it('should count changed fields inside array fields', () => {
     const fields: ClientField[] = [
       {
         name: 'arrayField',
@@ -202,7 +204,7 @@ describe('countChangedFields', () => {
       ],
     }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(5)
   })
 
@@ -236,7 +238,7 @@ describe('countChangedFields', () => {
     const comparison = { arrayField: [{ a: 'original', b: 'original', c: 'original' }] }
     const version = { arrayField: [{ a: 'changed', b: 'changed', c: 'original' }] }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(2)
   })
 
@@ -270,7 +272,7 @@ describe('countChangedFields', () => {
       ],
     }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(5)
   })
 
@@ -306,7 +308,231 @@ describe('countChangedFields', () => {
       blocks: [{ blockType: 'blockB', b: 'original', c: 'changed', d: 'new' }],
     }
 
-    const result = countChangedFields({ comparison, fields, version })
+    const result = countChangedFields({ comparison, fields, version, locales })
     expect(result).toBe(3)
+  })
+
+  describe('localized fields', () => {
+    const locales = ['en', 'de']
+    it('should count simple localized fields', () => {
+      const fields: ClientField[] = [
+        { name: 'a', type: 'text', localized: true },
+        { name: 'b', type: 'text', localized: true },
+      ]
+      const comparison = {
+        a: { en: 'original', de: 'original' },
+        b: { en: 'original', de: 'original' },
+      }
+      const version = {
+        a: { en: 'changed', de: 'original' },
+        b: { en: 'original', de: 'original' },
+      }
+      const result = countChangedFields({ comparison, fields, version, locales })
+      expect(result).toBe(1)
+    })
+
+    it('should count multiple locales of the same localized field', () => {
+      const locales = ['en', 'de']
+      const fields: ClientField[] = [
+        { name: 'a', type: 'text', localized: true },
+        { name: 'b', type: 'text', localized: true },
+      ]
+      const comparison = {
+        a: { en: 'original', de: 'original' },
+        b: { en: 'original', de: 'original' },
+      }
+      const version = {
+        a: { en: 'changed', de: 'changed' },
+        b: { en: 'original', de: 'original' },
+      }
+      const result = countChangedFields({ comparison, fields, version, locales })
+      expect(result).toBe(2)
+    })
+
+    it('should count changed fields inside localized groups fields', () => {
+      const fields: ClientField[] = [
+        {
+          type: 'group',
+          name: 'group',
+          localized: true,
+          fields: [
+            { name: 'a', type: 'text' },
+            { name: 'b', type: 'text' },
+            { name: 'c', type: 'text' },
+          ],
+        },
+      ]
+      const comparison = {
+        group: {
+          en: { a: 'original', b: 'original', c: 'original' },
+          de: { a: 'original', b: 'original', c: 'original' },
+        },
+      }
+      const version = {
+        group: {
+          en: { a: 'changed', b: 'changed', c: 'original' },
+          de: { a: 'original', b: 'changed', c: 'original' },
+        },
+      }
+      const result = countChangedFields({ comparison, fields, version, locales })
+      expect(result).toBe(3)
+    })
+    it('should count changed fields inside localized tabs', () => {
+      const fields: ClientField[] = [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'tab',
+              localized: true,
+              fields: [
+                { name: 'a', type: 'text' },
+                { name: 'b', type: 'text' },
+                { name: 'c', type: 'text' },
+              ],
+            },
+          ],
+        },
+      ]
+      const comparison = {
+        tab: {
+          en: { a: 'original', b: 'original', c: 'original' },
+          de: { a: 'original', b: 'original', c: 'original' },
+        },
+      }
+      const version = {
+        tab: {
+          en: { a: 'changed', b: 'changed', c: 'original' },
+          de: { a: 'original', b: 'changed', c: 'original' },
+        },
+      }
+      const result = countChangedFields({ comparison, fields, version, locales })
+      expect(result).toBe(3)
+    })
+
+    it('should count changed fields inside localized array fields', () => {
+      const fields: ClientField[] = [
+        {
+          name: 'arrayField',
+          type: 'array',
+          localized: true,
+          fields: [
+            {
+              name: 'a',
+              type: 'text',
+            },
+            {
+              name: 'b',
+              type: 'text',
+            },
+            {
+              name: 'c',
+              type: 'text',
+            },
+          ],
+        },
+      ]
+      const comparison = {
+        arrayField: {
+          en: [{ a: 'original', b: 'original', c: 'original' }],
+          de: [{ a: 'original', b: 'original', c: 'original' }],
+        },
+      }
+      const version = {
+        arrayField: {
+          en: [{ a: 'changed', b: 'changed', c: 'original' }],
+          de: [{ a: 'original', b: 'changed', c: 'original' }],
+        },
+      }
+      const result = countChangedFields({ comparison, fields, version, locales })
+      expect(result).toBe(3)
+    })
+
+    it('should count changed fields inside localized blocks fields', () => {
+      const fields: ClientField[] = [
+        {
+          name: 'blocks',
+          type: 'blocks',
+          localized: true,
+          blocks: [
+            {
+              slug: 'blockA',
+              fields: [
+                { name: 'a', type: 'text' },
+                { name: 'b', type: 'text' },
+                { name: 'c', type: 'text' },
+              ],
+            },
+          ],
+        },
+      ]
+      const comparison = {
+        blocks: {
+          en: [{ blockType: 'blockA', a: 'original', b: 'original', c: 'original' }],
+          de: [{ blockType: 'blockA', a: 'original', b: 'original', c: 'original' }],
+        },
+      }
+      const version = {
+        blocks: {
+          en: [{ blockType: 'blockA', a: 'changed', b: 'changed', c: 'original' }],
+          de: [{ blockType: 'blockA', a: 'original', b: 'changed', c: 'original' }],
+        },
+      }
+      const result = countChangedFields({ comparison, fields, version, locales })
+      expect(result).toBe(3)
+    })
+  })
+})
+
+describe('countChangedFieldsInRows', () => {
+  it('should count fields in array rows', () => {
+    const field: ClientField = {
+      name: 'myArray',
+      type: 'array',
+      fields: [
+        { name: 'a', type: 'text' },
+        { name: 'b', type: 'text' },
+        { name: 'c', type: 'text' },
+      ],
+    }
+
+    const comparisonRows = [{ a: 'original', b: 'original', c: 'original' }]
+    const versionRows = [{ a: 'changed', b: 'changed', c: 'original' }]
+
+    const result = countChangedFieldsInRows({
+      comparisonRows,
+      field,
+      locales: undefined,
+      versionRows,
+    })
+    expect(result).toBe(2)
+  })
+
+  it('should count fields in blocks', () => {
+    const field: ClientField = {
+      name: 'myBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'blockA',
+          fields: [
+            { name: 'a', type: 'text' },
+            { name: 'b', type: 'text' },
+            { name: 'c', type: 'text' },
+          ],
+        },
+      ],
+    }
+
+    const comparisonRows = [{ blockType: 'blockA', a: 'original', b: 'original', c: 'original' }]
+    const versionRows = [{ blockType: 'blockA', a: 'changed', b: 'changed', c: 'original' }]
+
+    const result = countChangedFieldsInRows({
+      comparisonRows,
+      field,
+      locales: undefined,
+      versionRows,
+    })
+    expect(result).toBe(2)
   })
 })

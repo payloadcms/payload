@@ -1,4 +1,4 @@
-import type { ClientField } from 'payload'
+import type { ArrayFieldClient, BlocksFieldClient, ClientField } from 'payload'
 
 import { getFieldsForRowComparison } from '../fields/Iterable/getFieldsForRowComparison.js'
 import { fieldHasChanges } from './fieldHasChanges.js'
@@ -6,6 +6,7 @@ import { fieldHasChanges } from './fieldHasChanges.js'
 type Args = {
   comparison: unknown
   fields: ClientField[]
+  locales: string[] | undefined
   version: unknown
 }
 
@@ -13,7 +14,7 @@ type Args = {
  * Recursively counts the number of changed fields between comparison and
  * version data for a given set of fields.
  */
-export function countChangedFields({ comparison, fields, version }: Args) {
+export function countChangedFields({ comparison, fields, locales, version }: Args) {
   let count = 0
 
   fields.forEach((field) => {
@@ -27,27 +28,16 @@ export function countChangedFields({ comparison, fields, version }: Args) {
       // count the number of changed fields in each.
       case 'array':
       case 'blocks': {
-        const iterableComparison = comparison?.[field.name] ?? []
-        const iterableVersion = version?.[field.name] ?? []
-
-        let i = 0
-        while (iterableComparison[i] || iterableVersion[i]) {
-          const comparisonRow = iterableComparison?.[i] || {}
-          const versionRow = iterableVersion?.[i] || {}
-
-          const rowFields = getFieldsForRowComparison({
-            comparisonRow,
-            field,
-            versionRow,
+        if (locales && field.localized) {
+          locales.forEach((locale) => {
+            const comparisonRows = comparison?.[field.name]?.[locale] ?? []
+            const versionRows = version?.[field.name]?.[locale] ?? []
+            count += countChangedFieldsInRows({ comparisonRows, field, locales, versionRows })
           })
-
-          count += countChangedFields({
-            comparison: comparisonRow,
-            fields: rowFields,
-            version: versionRow,
-          })
-
-          i++
+        } else {
+          const comparisonRows = comparison?.[field.name] ?? []
+          const versionRows = version?.[field.name] ?? []
+          count += countChangedFieldsInRows({ comparisonRows, field, locales, versionRows })
         }
         break
       }
@@ -69,7 +59,15 @@ export function countChangedFields({ comparison, fields, version }: Args) {
       case 'textarea':
       case 'upload': {
         // Fields that have a name and contain data. We can just check if the data has changed.
-        if (fieldHasChanges(version?.[field.name], comparison?.[field.name])) {
+        if (locales && field.localized) {
+          locales.forEach((locale) => {
+            if (
+              fieldHasChanges(version?.[field.name]?.[locale], comparison?.[field.name]?.[locale])
+            ) {
+              count++
+            }
+          })
+        } else if (fieldHasChanges(version?.[field.name], comparison?.[field.name])) {
           count++
         }
         break
@@ -80,6 +78,7 @@ export function countChangedFields({ comparison, fields, version }: Args) {
         count += countChangedFields({
           comparison,
           fields: field.fields,
+          locales,
           version,
         })
 
@@ -88,11 +87,23 @@ export function countChangedFields({ comparison, fields, version }: Args) {
 
       // Fields that have nested fields and nest their fields' data.
       case 'group': {
-        count += countChangedFields({
-          comparison: comparison?.[field.name],
-          fields: field.fields,
-          version: version?.[field.name],
-        })
+        if (locales && field.localized) {
+          locales.forEach((locale) => {
+            count += countChangedFields({
+              comparison: comparison?.[field.name]?.[locale],
+              fields: field.fields,
+              locales,
+              version: version?.[field.name]?.[locale],
+            })
+          })
+        } else {
+          count += countChangedFields({
+            comparison: comparison?.[field.name],
+            fields: field.fields,
+            locales,
+            version: version?.[field.name],
+          })
+        }
         break
       }
 
@@ -100,11 +111,33 @@ export function countChangedFields({ comparison, fields, version }: Args) {
       // nested or not depending on the existence of a name property.
       case 'tabs': {
         field.tabs.forEach((tab) => {
-          count += countChangedFields({
-            comparison: 'name' in tab ? comparison?.[tab.name] : comparison,
-            fields: tab.fields,
-            version: 'name' in tab ? version?.[tab.name] : version,
-          })
+          if ('name' in tab && locales && tab.localized) {
+            // Named localized tab
+            locales.forEach((locale) => {
+              count += countChangedFields({
+                comparison: comparison?.[tab.name]?.[locale],
+                fields: tab.fields,
+                locales,
+                version: version?.[tab.name]?.[locale],
+              })
+            })
+          } else if ('name' in tab) {
+            // Named tab
+            count += countChangedFields({
+              comparison: comparison?.[tab.name],
+              fields: tab.fields,
+              locales,
+              version: version?.[tab.name],
+            })
+          } else {
+            // Unnamed tab
+            count += countChangedFields({
+              comparison,
+              fields: tab.fields,
+              locales,
+              version,
+            })
+          }
         })
         break
       }
@@ -122,5 +155,43 @@ export function countChangedFields({ comparison, fields, version }: Args) {
     }
   })
 
+  return count
+}
+
+type countChangedFieldsInRowsArgs = {
+  comparisonRows: unknown[]
+  field: ArrayFieldClient | BlocksFieldClient
+  locales: string[] | undefined
+  versionRows: unknown[]
+}
+
+export function countChangedFieldsInRows({
+  comparisonRows = [],
+  field,
+  locales,
+  versionRows = [],
+}: countChangedFieldsInRowsArgs) {
+  let count = 0
+  let i = 0
+
+  while (comparisonRows[i] || versionRows[i]) {
+    const comparisonRow = comparisonRows?.[i] || {}
+    const versionRow = versionRows?.[i] || {}
+
+    const rowFields = getFieldsForRowComparison({
+      comparisonRow,
+      field,
+      versionRow,
+    })
+
+    count += countChangedFields({
+      comparison: comparisonRow,
+      fields: rowFields,
+      locales,
+      version: versionRow,
+    })
+
+    i++
+  }
   return count
 }
