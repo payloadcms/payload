@@ -3,8 +3,14 @@
 A plugin for [Payload](https://github.com/payloadcms/payload) to easily manage multiple tenants from within your admin panel.
 
 - [Source code](https://github.com/payloadcms/payload/tree/main/packages/plugin-multi-tenant)
-<!-- - [Documentation](https://payloadcms.com/docs/plugins/multi-tenant)
-- [Documentation source](https://github.com/payloadcms/payload/tree/main/docs/plugins/multi-tenant.mdx) -->
+- [Documentation](https://payloadcms.com/docs/plugins/multi-tenant)
+- [Documentation source](https://github.com/payloadcms/payload/tree/main/docs/plugins/multi-tenant.mdx)
+
+## Installation
+
+```bash
+pnpm add @payloadcms/plugin-multi-tenant@beta
+```
 
 ## Plugin Types
 
