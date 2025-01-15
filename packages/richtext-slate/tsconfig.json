@@ -10,7 +10,6 @@
 
     /* TODO: remove the following lines */
     "strict": false,
-    "noUncheckedIndexedAccess": false,
   },
   "exclude": [
     "dist",
