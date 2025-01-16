@@ -1,5 +1,6 @@
-import httpStatus from 'http-status'
-import { APIError, ValidationError } from 'payload'
+import type { PayloadRequest } from 'payload'
+
+import { ValidationError } from 'payload'
 
 export const handleError = ({
   collection,
@@ -8,28 +9,31 @@ export const handleError = ({
   req,
 }: {
   collection?: string
-  error
+  error: Error
   global?: string
-  req
+  req?: Partial<PayloadRequest>
 }) => {
+  if (!error || typeof error !== 'object') {
+    throw error
+  }
+
   // Handle uniqueness error from MongoDB
-  if (error.code === 11000 && error.keyValue) {
+  if ('code' in error && error.code === 11000 && 'keyValue' in error && error.keyValue) {
+    const message = req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique'
     throw new ValidationError(
       {
         collection,
         errors: [
           {
-            message: req.t('error:valueMustBeUnique'),
+            message,
             path: Object.keys(error.keyValue)[0],
           },
         ],
         global,
       },
-      req.t,
+      req?.t,
     )
-  } else if (error.code === 11000) {
-    throw new APIError(req.t('error:valueMustBeUnique'), httpStatus.BAD_REQUEST)
-  } else {
-    throw error
   }
+
+  throw error
 }

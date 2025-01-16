@@ -76,7 +76,7 @@ If a Collection supports [Versions](../versions/overview), the following additio
 
 Returns a boolean which allows/denies access to the `create` request.
 
-To add create Access Control to a Collection, use the `create` property in the [Collection Config](../collections/overview):
+To add create Access Control to a Collection, use the `create` property in the [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -104,7 +104,7 @@ The following arguments are provided to the `create` function:
 
 Returns a boolean which allows/denies access to the `read` request.
 
-To add read Access Control to a Collection, use the `read` property in the [Collection Config](../collections/overview):
+To add read Access Control to a Collection, use the `read` property in the [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -122,7 +122,7 @@ export const CollectionWithReadAccess: CollectionConfig = {
 ```
 
 <Banner type="success">
-  <strong>Tip:</strong>
+  **Tip:**
   Return a [Query](../queries/overview) to limit the Documents to only those that match the constraint. This can be helpful to restrict users' access to specific Documents. [More details](../queries/overview).
 </Banner>
 
@@ -158,7 +158,7 @@ The following arguments are provided to the `read` function:
 
 Returns a boolean which allows/denies access to the `update` request.
 
-To add update Access Control to a Collection, use the `update` property in the [Collection Config](../collections/overview):
+To add update Access Control to a Collection, use the `update` property in the [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -176,7 +176,7 @@ export const CollectionWithUpdateAccess: CollectionConfig = {
 ```
 
 <Banner type="success">
-  <strong>Tip:</strong>
+  **Tip:**
   Return a [Query](../queries/overview) to limit the Documents to only those that match the constraint. This can be helpful to restrict users' access to specific Documents. [More details](../queries/overview).
 </Banner>
 
@@ -208,7 +208,7 @@ The following arguments are provided to the `update` function:
 
 Similarly to the Update function, returns a boolean or a [query constraint](/docs/queries/overview) to limit which documents can be deleted by which users.
 
-To add delete Access Control to a Collection, use the `delete` property in the [Collection Config](../collections/overview):
+To add delete Access Control to a Collection, use the `delete` property in the [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -252,10 +252,10 @@ export const canDeleteCustomer: Access = async ({ req, id }) => {
 
 The following arguments are provided to the `delete` function:
 
-| Option    | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
+| Option    | Description                                                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user. |
-| **`id`**  | `id` of document requested to delete.
+| **`id`**  | `id` of document requested to delete.                                                                                                                  |
 
 ### Admin
 
@@ -286,9 +286,9 @@ The following arguments are provided to the `admin` function:
 
 ### Unlock
 
-Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/overview#options).
+Determines which users can [unlock](/docs/authentication/operations#unlock) other users who may be blocked from authenticating successfully due to [failing too many login attempts](/docs/authentication/overview#config-options).
 
-To add Unlock Access Control to a Collection, use the `unlock` property in the [Collection Config](../collections/overview):
+To add Unlock Access Control to a Collection, use the `unlock` property in the [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'

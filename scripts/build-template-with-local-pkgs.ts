@@ -16,7 +16,7 @@ async function main() {
   const templateDir = path.resolve(dirname, '../templates')
   const templateName = process.argv[2]
   const templatePath = path.join(templateDir, templateName)
-  const databaseConnection = process.argv[3] || 'mongodb://127.0.0.1/payloadtests'
+  const databaseConnection = process.argv[3] || 'mongodb://127.0.0.1/your-database-name'
 
   console.log({
     templatePath,

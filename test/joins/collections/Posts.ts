@@ -54,6 +54,30 @@ export const Posts: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'polymorphic',
+      type: 'relationship',
+      relationTo: ['categories', 'users'],
+    },
+    {
+      name: 'polymorphics',
+      type: 'relationship',
+      relationTo: ['categories', 'users'],
+      hasMany: true,
+    },
+    {
+      name: 'localizedPolymorphic',
+      type: 'relationship',
+      relationTo: ['categories', 'users'],
+      localized: true,
+    },
+    {
+      name: 'localizedPolymorphics',
+      type: 'relationship',
+      relationTo: ['categories', 'users'],
+      hasMany: true,
+      localized: true,
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [
@@ -66,6 +90,33 @@ export const Posts: CollectionConfig = {
           name: 'camelCaseCategory',
           type: 'relationship',
           relationTo: categoriesSlug,
+        },
+      ],
+    },
+    {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: categoriesSlug,
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'category',
+              type: 'relationship',
+              relationTo: categoriesSlug,
+            },
+          ],
         },
       ],
     },

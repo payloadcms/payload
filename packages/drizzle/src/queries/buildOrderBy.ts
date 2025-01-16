@@ -1,3 +1,4 @@
+import type { Table } from 'drizzle-orm'
 import type { FlattenedField, Sort } from 'payload'
 
 import { asc, desc } from 'drizzle-orm'
@@ -5,10 +6,12 @@ import { asc, desc } from 'drizzle-orm'
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases, BuildQueryResult } from './buildQuery.js'
 
+import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 
 type Args = {
   adapter: DrizzleAdapter
+  aliasTable?: Table
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale?: string
@@ -22,6 +25,7 @@ type Args = {
  */
 export const buildOrderBy = ({
   adapter,
+  aliasTable,
   fields,
   joins,
   locale,
@@ -68,7 +72,10 @@ export const buildOrderBy = ({
       })
       if (sortTable?.[sortTableColumnName]) {
         orderBy.push({
-          column: sortTable[sortTableColumnName],
+          column:
+            aliasTable && tableName === getNameFromDrizzleTable(sortTable)
+              ? aliasTable[sortTableColumnName]
+              : sortTable[sortTableColumnName],
           order: sortDirection === 'asc' ? asc : desc,
         })
 

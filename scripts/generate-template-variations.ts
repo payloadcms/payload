@@ -9,15 +9,16 @@
  *       There is no way currently to have lint-staged ignore the templates directory.
  */
 
-import type { DbType, StorageAdapterType } from 'packages/create-payload-app/src/types.js'
-
 import chalk from 'chalk'
 import { execSync } from 'child_process'
 import { configurePayloadConfig } from 'create-payload-app/lib/configure-payload-config.js'
 import { copyRecursiveSync } from 'create-payload-app/utils/copy-recursive-sync.js'
+import minimist from 'minimist'
 import * as fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+
+import type { DbType, StorageAdapterType } from '../packages/create-payload-app/src/types.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -40,6 +41,11 @@ type TemplateVariations = {
    * @default false
    */
   skipReadme?: boolean
+  skipConfig?: boolean
+  /**
+   * @default false
+   */
+  skipDockerCompose?: boolean
   configureConfig?: boolean
   generateLockfile?: boolean
 }
@@ -50,12 +56,13 @@ main().catch((error) => {
 })
 
 async function main() {
+  const args = minimist(process.argv.slice(2))
+  const template = args['template'] // template directory name
   const templatesDir = path.resolve(dirname, '../templates')
 
-  // WARNING: This will need to be updated when this merges into main
   const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
 
-  const variations: TemplateVariations[] = [
+  let variations: TemplateVariations[] = [
     {
       name: 'payload-vercel-postgres-template',
       dirname: 'with-vercel-postgres',
@@ -88,7 +95,7 @@ async function main() {
         encodeURI(
           `${templateRepoUrlBase}/with-vercel-website` +
             '&project-name=payload-project' +
-            '&env=PAYLOAD_SECRET' +
+            '&env=PAYLOAD_SECRET%2CCRON_SECRET' +
             '&build-command=pnpm run ci' +
             '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
         ),
@@ -97,6 +104,7 @@ async function main() {
         dbUri: 'POSTGRES_URL',
       },
       skipReadme: true,
+      skipDockerCompose: true,
     },
     {
       name: 'payload-postgres-template',
@@ -132,19 +140,21 @@ async function main() {
       generateLockfile: true,
       storage: 'localDisk',
       sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
       configureConfig: false,
     },
-    {
-      name: 'payload-cloud-mongodb-template',
-      dirname: 'with-payload-cloud',
-      db: 'mongodb',
-      generateLockfile: true,
-      storage: 'payloadCloud',
-      sharp: true,
-    },
   ]
+
+  // If template is set, only generate that template
+  if (template) {
+    const variation = variations.find((v) => v.dirname === template)
+    if (!variation) {
+      throw new Error(`Variation not found: ${template}`)
+    }
+    variations = [variation]
+  }
 
   for (const {
     name,
@@ -158,6 +168,8 @@ async function main() {
     sharp,
     configureConfig,
     skipReadme = false,
+    skipConfig = false,
+    skipDockerCompose = false,
   } of variations) {
     header(`Generating ${name}...`)
     const destDir = path.join(templatesDir, dirname)
@@ -167,21 +179,24 @@ async function main() {
       '.next',
       '.env$',
       'pnpm-lock.yaml',
-      ...(skipReadme ? ['README.md'] : ['']),
+      ...(skipReadme ? ['README.md'] : []),
+      ...(skipDockerCompose ? ['docker-compose.yml'] : []),
+      ...(skipConfig ? ['payload.config.ts'] : []),
     ])
 
     log(`Copied to ${destDir}`)
 
     if (configureConfig !== false) {
       log('Configuring payload.config.ts')
-      await configurePayloadConfig({
+      const configureArgs = {
         dbType: db,
         packageJsonName: name,
         projectDirOrConfigPath: { projectDir: destDir },
         storageAdapter: storage,
         sharp,
         envNames,
-      })
+      }
+      await configurePayloadConfig(configureArgs)
 
       log('Configuring .env.example')
       // Replace DATABASE_URI with the correct env name if set
@@ -236,7 +251,7 @@ async function main() {
           ...process.env,
           PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
-          DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/payloadtests',
+          DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
         },
       })
     }
@@ -300,12 +315,25 @@ async function writeEnvExample({
 
   const fileContents = envFileContents
     .split('\n')
-    .filter((e) => e)
+    .filter((l) => {
+      // Remove the unwanted PostgreSQL connection comment for "with-vercel-website"
+      if (
+        dbType === 'vercel-postgres' &&
+        (l.startsWith('# Or use a PG connection string') ||
+          l.startsWith('#DATABASE_URI=postgresql://'))
+      ) {
+        return false // Skip this line
+      }
+      return true // Keep other lines
+    })
     .map((l) => {
       if (l.startsWith('DATABASE_URI')) {
+        if (dbType === 'mongodb') {
+          l = 'MONGODB_URI=mongodb://127.0.0.1/your-database-name'
+        }
         // Use db-appropriate connection string
         if (dbType.includes('postgres')) {
-          l = 'DATABASE_URI=postgresql://127.0.0.1:5432/payloadtests'
+          l = 'DATABASE_URI=postgresql://127.0.0.1:5432/your-database-name'
         }
 
         // Replace DATABASE_URI with the correct env name if set
@@ -315,6 +343,7 @@ async function writeEnvExample({
       }
       return l
     })
+    .filter((l) => l.trim() !== '')
     .join('\n')
 
   console.log(`Writing to ${envExamplePath}`)

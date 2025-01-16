@@ -329,7 +329,7 @@ export type CollectionAdminOptions = {
    */
   defaultColumns?: string[]
   /**
-   * Custom description for collection
+   * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
   enableRichTextLink?: boolean
@@ -424,6 +424,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   graphQL?:
     | {
+        disableMutations?: true
+        disableQueries?: true
         pluralName?: string
         singularName?: string
       }

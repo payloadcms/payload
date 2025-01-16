@@ -40,9 +40,8 @@
 
     // Unstyle the textarea, the border is rendered on .textarea-outer
     .textarea-element {
-      position: absolute;
-      top: 0;
-      left: 0;
+      position: relative;
+      z-index: 1;
       width: 100%;
       height: 100%;
       border: inherit;
@@ -66,13 +65,17 @@
 
     // Clone of textarea with same height
     .textarea-clone {
-      vertical-align: top;
-      display: inline-block;
-      flex-grow: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: pre-wrap;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       pointer-events: none;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      visibility: hidden;
+      z-index: 0;
+      line-height: inherit;
     }
 
     .textarea-clone::before {

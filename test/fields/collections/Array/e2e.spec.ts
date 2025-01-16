@@ -36,7 +36,7 @@ describe('Array', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
 
@@ -104,6 +104,12 @@ describe('Array', () => {
     )
 
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
+  })
+
+  test('should render default array field within custom component', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-customArrayField >> .array-field__add-row').click()
+    await expect(page.locator('#field-customArrayField__0__text')).toBeVisible()
   })
 
   // eslint-disable-next-line playwright/expect-expect
@@ -313,7 +319,7 @@ describe('Array', () => {
   test('should externally update array rows and render custom fields', async () => {
     await page.goto(url.create)
     await page.locator('#updateArrayExternally').click()
-    await expect(page.locator('#custom-field')).toBeVisible()
+    await expect(page.locator('#custom-text-field')).toBeVisible()
   })
 
   test('should not re-close initCollapsed true array rows on input in create new view', async () => {

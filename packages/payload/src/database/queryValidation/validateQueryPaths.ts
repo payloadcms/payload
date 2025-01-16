@@ -5,7 +5,7 @@ import type { Operator, PayloadRequest, Where, WhereField } from '../../types/in
 import type { EntityPolicies } from './types.js'
 
 import { QueryError } from '../../errors/QueryError.js'
-import { validOperators } from '../../types/constants.js'
+import { validOperatorSet } from '../../types/constants.js'
 import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
@@ -58,10 +58,11 @@ export async function validateQueryPaths({
     const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
     const promises = []
-    void whereFields.map((constraint) => {
-      void Object.keys(constraint).map((path) => {
-        void Object.entries(constraint[path]).map(([operator, val]) => {
-          if (validOperators.includes(operator as Operator)) {
+    for (const constraint of whereFields) {
+      for (const path in constraint) {
+        for (const operator in constraint[path]) {
+          const val = constraint[path][operator]
+          if (validOperatorSet.has(operator as Operator)) {
             promises.push(
               validateSearchParam({
                 collectionConfig,
@@ -78,9 +79,10 @@ export async function validateQueryPaths({
               }),
             )
           }
-        })
-      })
-    })
+        }
+      }
+    }
+
     await Promise.all(promises)
     if (errors.length > 0) {
       throw new QueryError(errors)

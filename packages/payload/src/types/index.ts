@@ -18,7 +18,7 @@ import type {
   TypedLocale,
   TypedUser,
 } from '../index.js'
-import type { validOperators } from './constants.js'
+import type { Operator } from './constants.js'
 export type { Payload as Payload } from '../index.js'
 
 export type CustomPayloadRequestProperties = {
@@ -29,8 +29,11 @@ export type CustomPayloadRequestProperties = {
   /**
    * The requested locale if specified
    * Only available for localized collections
+   *
+   * Suppressing warning below as it is a valid use case - won't be an issue if generated types exist
    */
-  locale?: TypedLocale
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  locale?: 'all' | TypedLocale
   /**
    * The payload object
    */
@@ -62,6 +65,7 @@ export type CustomPayloadRequestProperties = {
   transactionID?: number | Promise<number | string> | string
   /**
    * Used to ensure consistency when multiple operations try to create a transaction concurrently on the same request
+   * @deprecated This is not used anywhere, instead `transactionID` is used for the above. Will be removed in next major version.
    */
   transactionIDPromise?: Promise<void>
   /** The signed-in user */
@@ -97,7 +101,7 @@ export type PayloadRequest = CustomPayloadRequestProperties &
   PayloadRequestData &
   Required<Pick<Request, 'headers'>>
 
-export type Operator = (typeof validOperators)[number]
+export type { Operator }
 
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this

@@ -17,22 +17,30 @@ export const deleteUserPreferences = async ({ collectionConfig, ids, payload, re
       collection: 'payload-preferences',
       req,
       where: {
-        and: [
+        or: [
           {
-            'user.value': { in: ids },
+            and: [
+              {
+                'user.value': { in: ids },
+              },
+              {
+                'user.relationTo': { equals: collectionConfig.slug },
+              },
+            ],
           },
           {
-            'user.relationTo': { equals: collectionConfig.slug },
+            key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) },
           },
         ],
       },
     })
+  } else {
+    await payload.db.deleteMany({
+      collection: 'payload-preferences',
+      req,
+      where: {
+        key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) },
+      },
+    })
   }
-  await payload.db.deleteMany({
-    collection: 'payload-preferences',
-    req,
-    where: {
-      key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) },
-    },
-  })
 }

@@ -1,7 +1,11 @@
-import type { EditViewComponent, PaginatedDocs, PayloadServerReactComponent } from 'payload'
-
 import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
+import {
+  type EditViewComponent,
+  logError,
+  type PaginatedDocs,
+  type PayloadServerReactComponent,
+} from 'payload'
 import { isNumber } from 'payload/shared'
 import React from 'react'
 
@@ -94,8 +98,8 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
           status: 'published',
         })
       }
-    } catch (error) {
-      payload.logger.error(error)
+    } catch (err) {
+      logError({ err, payload })
     }
   }
 
@@ -137,8 +141,8 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
           status: 'published',
         })
       }
-    } catch (error) {
-      payload.logger.error(error)
+    } catch (err) {
+      logError({ err, payload })
     }
 
     if (!versionsData) {
@@ -190,7 +194,6 @@ export const VersionsView: PayloadServerReactComponent<EditViewComponent> = asyn
       <main className={baseClass}>
         <Gutter className={`${baseClass}__wrap`}>
           <ListQueryProvider
-            collectionSlug={collectionSlug}
             data={versionsData}
             defaultLimit={limitToUse}
             defaultSort={sort as string}

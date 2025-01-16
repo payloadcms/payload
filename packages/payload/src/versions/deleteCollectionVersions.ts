@@ -1,5 +1,6 @@
-import type { Payload } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
+
+import { type Payload } from '../index.js'
 
 type Args = {
   id?: number | string
@@ -20,8 +21,9 @@ export const deleteCollectionVersions = async ({ id, slug, payload, req }: Args)
       },
     })
   } catch (err) {
-    payload.logger.error(
-      `There was an error removing versions for the deleted ${slug} document with ID ${id}.`,
-    )
+    payload.logger.error({
+      err,
+      msg: `There was an error removing versions for the deleted ${slug} document with ID ${id}.`,
+    })
   }
 }
