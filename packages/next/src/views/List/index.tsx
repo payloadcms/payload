@@ -10,7 +10,7 @@ import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloa
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
-import { notFound } from 'next/navigation.js'
+import { notFound, redirect } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
@@ -96,6 +96,38 @@ export const renderListView = async (
     const sort =
       listPreferences?.sort ||
       (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+    // redirect to query params respecting sort and limit if not already set
+    if (
+      (limit && (searchParams.limit as string) !== String(limit)) ||
+      (sort && (searchParams.sort as string) !== sort)
+    ) {
+      const updatedSearchParams = new URLSearchParams()
+
+      // Convert the searchParams object into URLSearchParams format
+      Object.entries(searchParams).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((val) => updatedSearchParams.append(key, val))
+        } else {
+          updatedSearchParams.set(key, value)
+        }
+      })
+
+      if (limit) {
+        updatedSearchParams.set('limit', String(limit))
+      }
+
+      if (sort) {
+        updatedSearchParams.set('sort', sort)
+      }
+
+      const route = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}`,
+      })
+
+      redirect(`${route}?${updatedSearchParams.toString()}`)
+    }
 
     let where = mergeListSearchAndWhere({
       collectionConfig,
@@ -237,6 +269,10 @@ export const ListView: React.FC<ListViewArgs> = async (args) => {
     const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
     return RenderedList
   } catch (error) {
+    if (error?.message === 'NEXT_REDIRECT') {
+      throw error
+    }
+
     if (error.message === 'not-found') {
       notFound()
     } else {

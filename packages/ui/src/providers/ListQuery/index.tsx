@@ -2,13 +2,11 @@
 import type { ListQuery, PaginatedDocs, Sort, Where } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
-import { usePreferences } from '../Preferences/index.js'
 
 type ContextHandlers = {
   handlePageChange?: (page: number) => Promise<void>
@@ -53,7 +51,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 }) => {
   'use no memo'
   const router = useRouter()
-  const { setPreference } = usePreferences()
   const rawSearchParams = useSearchParams()
   const searchParams = useMemo(() => parseSearchParams(rawSearchParams), [rawSearchParams])
 
@@ -66,8 +63,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       return {}
     }
   })
-
-  const currentQueryRef = React.useRef(currentQuery)
 
   // If the search params change externally, update the current query
   useEffect(() => {
@@ -155,31 +150,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     },
     [refineListData],
   )
-
-  // If `defaultLimit` or `defaultSort` are updated externally, update the query
-  useEffect(() => {
-    if (modifySearchParams) {
-      let shouldUpdateQueryString = false
-      const newQuery = { ...(currentQueryRef.current || {}) }
-
-      // Allow the URL to override the default limit
-      if (isNumber(defaultLimit) && !('limit' in currentQueryRef.current)) {
-        newQuery.limit = String(defaultLimit)
-        shouldUpdateQueryString = true
-      }
-
-      // Allow the URL to override the default sort
-      if (defaultSort && !('sort' in currentQueryRef.current)) {
-        newQuery.sort = defaultSort
-        shouldUpdateQueryString = true
-      }
-
-      if (shouldUpdateQueryString) {
-        setCurrentQuery(newQuery)
-        router.replace(`?${qs.stringify(newQuery)}`)
-      }
-    }
-  }, [defaultSort, defaultLimit, router, modifySearchParams])
 
   return (
     <Context.Provider
