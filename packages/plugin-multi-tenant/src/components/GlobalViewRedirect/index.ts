@@ -9,7 +9,7 @@ type Args = {
   docID?: number | string
   globalSlugs: string[]
   tenantFieldName: string
-  viewType: 'edit' | 'list'
+  viewType: 'document' | 'list' | 'version'
 } & ServerProps
 
 export const GlobalViewRedirect = async (args: Args) => {

@@ -19,8 +19,7 @@ type Props = {
 export const TenantField = (args: Props) => {
   const { debug, path, unique } = args
   const { setValue, value } = useField<number | string>({ path })
-  const { options, selectedTenantID, setIsClearable, setPreventRefreshOnChange, setTenant } =
-    useTenantSelection()
+  const { options, selectedTenantID, setPreventRefreshOnChange, setTenant } = useTenantSelection()
 
   const hasSetValueRef = React.useRef(false)
 
@@ -39,15 +38,13 @@ export const TenantField = (args: Props) => {
   }, [value, selectedTenantID, setTenant, setValue, options, unique])
 
   React.useEffect(() => {
-    setIsClearable(false)
     if (!unique) {
       setPreventRefreshOnChange(true)
     }
     return () => {
-      setIsClearable(true)
       setPreventRefreshOnChange(false)
     }
-  }, [unique, setPreventRefreshOnChange, setIsClearable])
+  }, [unique, setPreventRefreshOnChange])
 
   if (debug) {
     return (

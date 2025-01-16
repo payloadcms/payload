@@ -10,8 +10,11 @@ import {
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import { DefaultNav } from '../../elements/Nav/index.js'
 import './index.scss'
+
+import type { DocumentSubViewTypes, ViewTypes } from '../../views/types.js'
+
+import { DefaultNav } from '../../elements/Nav/index.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 
@@ -22,9 +25,10 @@ export type DefaultTemplateProps = {
   className?: string
   collectionSlug?: string
   docID?: number | string
+  documentSubViewType?: DocumentSubViewTypes
   globalSlug?: string
   viewActions?: CustomComponent[]
-  viewType?: 'edit' | 'list'
+  viewType?: ViewTypes
   visibleEntities: VisibleEntities
 } & ServerProps
 
@@ -33,6 +37,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   className,
   collectionSlug,
   docID,
+  documentSubViewType,
   globalSlug,
   i18n,
   locale,
@@ -56,6 +61,14 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     } = {},
   } = payload.config || {}
 
+  const clientProps = React.useMemo(() => {
+    return {
+      documentSubViewType,
+      viewType,
+      visibleEntities,
+    }
+  }, [documentSubViewType, viewType, visibleEntities])
+
   const serverProps = React.useMemo<ServerProps>(
     () => ({
       collectionSlug,
@@ -68,8 +81,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       permissions,
       searchParams,
       user,
-      viewType,
-      visibleEntities,
     }),
     [
       i18n,
@@ -79,11 +90,9 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       permissions,
       searchParams,
       user,
-      visibleEntities,
       globalSlug,
       collectionSlug,
       docID,
-      viewType,
     ],
   )
 
@@ -96,12 +105,14 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             if (action) {
               if (typeof action === 'object') {
                 acc[action.path] = RenderServerComponent({
+                  clientProps,
                   Component: action,
                   importMap: payload.importMap,
                   serverProps,
                 })
               } else {
                 acc[action] = RenderServerComponent({
+                  clientProps,
                   Component: action,
                   importMap: payload.importMap,
                   serverProps,
@@ -113,10 +124,10 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           }, {})
         : undefined,
     }
-  }, [payload, serverProps, viewActions])
+  }, [payload, serverProps, viewActions, clientProps])
 
   const NavComponent = RenderServerComponent({
-    clientProps: { clientProps: { visibleEntities } },
+    clientProps,
     Component: CustomNav,
     Fallback: DefaultNav,
     importMap: payload.importMap,
@@ -128,7 +139,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       <BulkUploadProvider>
         <ActionsProvider Actions={Actions}>
           {RenderServerComponent({
-            clientProps: { clientProps: { visibleEntities } },
+            clientProps,
             Component: CustomHeader,
             importMap: payload.importMap,
             serverProps,

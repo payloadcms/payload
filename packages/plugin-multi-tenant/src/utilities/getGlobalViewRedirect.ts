@@ -10,7 +10,7 @@ type Args = {
   payload: Payload
   slug: string
   tenantFieldName: string
-  view: 'edit' | 'list'
+  view: 'document' | 'list' | 'version'
 }
 export async function getGlobalViewRedirect({
   slug,
@@ -41,7 +41,7 @@ export async function getGlobalViewRedirect({
 
       const tenantDocID = docs?.[0]?.id
 
-      if (view === 'edit') {
+      if (view === 'document') {
         if (docID && !tenantDocID) {
           // viewing a document with an id but does not match the selected tenant, redirect to create route
           redirectRoute = `${payload.config.routes.admin}/collections/${slug}/create`

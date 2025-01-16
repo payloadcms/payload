@@ -8,19 +8,15 @@ import React, { createContext } from 'react'
 import { SELECT_ALL } from '../../constants.js'
 
 type ContextType = {
-  isClearable: boolean
   options: OptionObject[]
   selectedTenantID: number | string | undefined
-  setIsClearable: React.Dispatch<React.SetStateAction<boolean>>
   setPreventRefreshOnChange: React.Dispatch<React.SetStateAction<boolean>>
   setTenant: (args: { id: number | string | undefined; refresh?: boolean }) => void
 }
 
 const Context = createContext<ContextType>({
-  isClearable: true,
   options: [],
   selectedTenantID: undefined,
-  setIsClearable: () => null,
   setPreventRefreshOnChange: () => null,
   setTenant: () => null,
 })
@@ -38,7 +34,6 @@ export const TenantSelectionProviderClient = ({
     initialValue || SELECT_ALL,
   )
   const [preventRefreshOnChange, setPreventRefreshOnChange] = React.useState(false)
-  const [isClearable, setIsClearable] = React.useState(true)
 
   const router = useRouter()
 
@@ -80,10 +75,8 @@ export const TenantSelectionProviderClient = ({
   return (
     <Context.Provider
       value={{
-        isClearable,
         options: tenantOptions,
         selectedTenantID,
-        setIsClearable,
         setPreventRefreshOnChange,
         setTenant,
       }}

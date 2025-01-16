@@ -218,10 +218,6 @@ export const multiTenantPlugin =
      * Add tenant selector to admin UI
      */
     incomingConfig.admin.components.beforeNavLinks.push({
-      clientProps: {
-        tenantsCollectionSlug,
-        useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
-      },
       path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
     })
 
