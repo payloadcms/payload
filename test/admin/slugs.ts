@@ -48,3 +48,4 @@ export const globalSlugs = [
   hiddenGlobalSlug,
   noApiViewGlobalSlug,
 ]
+export const with300DocumentsSlug = 'with300documents'
