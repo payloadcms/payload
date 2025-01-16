@@ -1,3 +1,5 @@
+import type { CollectionSlug } from 'payload'
+
 import { gcsStorage } from '@payloadcms/storage-gcs'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
@@ -38,8 +40,8 @@ export default buildConfigWithDefaults({
   plugins: [
     gcsStorage({
       collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
+        media: true,
+        'media-with-prefix': {
           prefix,
         },
       },
