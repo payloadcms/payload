@@ -176,7 +176,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       if (shouldUpdateQueryString) {
         setCurrentQuery(newQuery)
-        router.replace(`?${qs.stringify(newQuery)}`, { scroll: false })
+        // Do not use router.replace here to avoid re-rendering on initial load
+        window.history.pushState(null, '', `?${qs.stringify(newQuery)}`)
       }
     }
   }, [defaultSort, defaultLimit, router, modifySearchParams])
