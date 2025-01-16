@@ -16,7 +16,6 @@ export const validOperators = [
   'near',
 ] as const
 
-export const validOperatorMap = validOperators.reduce((acc, operator) => {
-  acc[operator] = true
-  return acc
-}, {})
+export type Operator = (typeof validOperators)[number]
+
+export const validOperatorSet = new Set<Operator>(validOperators)

@@ -5,7 +5,7 @@ import type { Operator, PayloadRequest, Where, WhereField } from '../../types/in
 import type { EntityPolicies } from './types.js'
 
 import { QueryError } from '../../errors/QueryError.js'
-import { validOperatorMap } from '../../types/constants.js'
+import { validOperatorSet } from '../../types/constants.js'
 import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
@@ -62,7 +62,7 @@ export async function validateQueryPaths({
       for (const path in constraint) {
         for (const operator in constraint[path]) {
           const val = constraint[path][operator]
-          if (validOperatorMap[operator as Operator]) {
+          if (validOperatorSet.has(operator as Operator)) {
             promises.push(
               validateSearchParam({
                 collectionConfig,

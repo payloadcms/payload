@@ -1,7 +1,3 @@
-const internalFieldMap: Record<string, true> = {
-  __v: true,
-}
-
 const sanitizeInternalFields = <T extends Record<string, unknown>>(incomingDoc: T): T => {
   // Create a new object to hold the sanitized fields
   const newDoc: Record<string, unknown> = {}
@@ -10,7 +6,7 @@ const sanitizeInternalFields = <T extends Record<string, unknown>>(incomingDoc: 
     const val = incomingDoc[key]
     if (key === '_id') {
       newDoc['id'] = val
-    } else if (!internalFieldMap[key]) {
+    } else if (key !== '__v') {
       newDoc[key] = val
     }
   }

@@ -1,7 +1,7 @@
 'use client'
 import type { Operator, Where } from 'payload'
 
-import { validOperatorMap } from 'payload/shared'
+import { validOperatorSet } from 'payload/shared'
 
 const validateWhereQuery = (whereQuery): whereQuery is Where => {
   if (
@@ -27,7 +27,7 @@ const validateWhereQuery = (whereQuery): whereQuery is Where => {
           for (const key of andKeys) {
             const operator = Object.keys(andQuery[key])[0]
             // Check if the key is a valid Operator.
-            if (!operator || !validOperatorMap[operator as Operator]) {
+            if (!operator || !validOperatorSet.has(operator as Operator)) {
               return false
             }
           }

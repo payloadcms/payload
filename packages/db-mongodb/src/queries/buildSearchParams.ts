@@ -2,7 +2,7 @@ import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
 import { getLocalizedPaths } from 'payload'
-import { validOperatorMap } from 'payload/shared'
+import { validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -187,7 +187,7 @@ export async function buildSearchParam({
       return relationshipQuery
     }
 
-    if (formattedOperator && validOperatorMap[formattedOperator as Operator]) {
+    if (formattedOperator && validOperatorSet.has(formattedOperator as Operator)) {
       const operatorKey = operatorMap[formattedOperator]
 
       if (field.type === 'relationship' || field.type === 'upload') {
