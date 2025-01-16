@@ -6,15 +6,41 @@ This example demonstrates how to achieve a multi-tenancy in [Payload](https://gi
 
 To spin up this example locally, follow these steps:
 
-1. Run the following command to create a project from the example:
+### 1. Create the Project  
+Run the following command to set up the project:  
 
-- `npx create-payload-app --example multi-tenant`
+```bash  
+npx create-payload-app --example multi-tenant
+```
 
-2. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
-   - Press `y` when prompted to seed the database
-3. `open http://localhost:3000` to access the home page
-4. `open http://localhost:3000/admin` to access the admin panel
-   - Login with email `demo@payloadcms.com` and password `demo`
+### 2. Configure Environment Variables
+Duplicate the .env.example file and rename it to .env
+
+```bash  
+cp .env.example .env
+```
+
+### 3. Start the Development Server
+Use your preferred package manager to start the server:
+
+```bash  
+pnpm dev
+```
+```bash  
+yarn dev
+```
+```bash  
+npm dev
+```
+
+> When prompted, press y to seed the database.
+
+### 4. Access the Application
+
+- Home Page: Open http://localhost:3000 in your browser.
+- Admin Panel: Open http://localhost:3000/admin and log in with the following credentials:
+	-	Email: demo@payloadcms.com
+	-	Password: demo
 
 ## How it works
 
