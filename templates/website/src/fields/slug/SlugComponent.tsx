@@ -53,7 +53,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
   }, [targetFieldValue, checkboxValue, setValue, value])
 
   const handleLock = useCallback(
-    (e) => {
+    (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
       dispatchFields({
