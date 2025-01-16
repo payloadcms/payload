@@ -1,4 +1,10 @@
-import type { CustomComponent, ServerProps, VisibleEntities } from 'payload'
+import type {
+  CustomComponent,
+  DocumentSubViewTypes,
+  ServerProps,
+  ViewTypes,
+  VisibleEntities,
+} from 'payload'
 
 import {
   ActionsProvider,
@@ -8,11 +14,10 @@ import {
   NavToggler,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import React from 'react'
 
 import './index.scss'
 
-import type { DocumentSubViewTypes, ViewTypes } from '../../views/types.js'
+import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { NavHamburger } from './NavHamburger/index.js'

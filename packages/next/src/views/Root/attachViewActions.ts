@@ -3,9 +3,8 @@ import type {
   EditConfig,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
+  ServerPropsFromView,
 } from 'payload'
-
-import type { ServerPropsFromView } from '../types.js'
 
 export function getViewActions({
   editConfig,
