@@ -707,7 +707,7 @@ describe('Fields', () => {
             min: 5,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: min')
+      ).rejects.toThrow('The following field is invalid: Min')
     })
     it('should not create number above max', async () => {
       await expect(async () =>
@@ -717,7 +717,7 @@ describe('Fields', () => {
             max: 15,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: max')
+      ).rejects.toThrow('The following field is invalid: Max')
     })
 
     it('should not create number below 0', async () => {
@@ -728,7 +728,7 @@ describe('Fields', () => {
             positiveNumber: -5,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: positiveNumber')
+      ).rejects.toThrow('The following field is invalid: Positive Number')
     })
 
     it('should not create number above 0', async () => {
@@ -739,7 +739,7 @@ describe('Fields', () => {
             negativeNumber: 5,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: negativeNumber')
+      ).rejects.toThrow('The following field is invalid: Negative Number')
     })
     it('should not create a decimal number below min', async () => {
       await expect(async () =>
@@ -749,7 +749,7 @@ describe('Fields', () => {
             decimalMin: -0.25,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: decimalMin')
+      ).rejects.toThrow('The following field is invalid: Decimal Min')
     })
 
     it('should not create a decimal number above max', async () => {
@@ -760,7 +760,7 @@ describe('Fields', () => {
             decimalMax: 1.5,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: decimalMax')
+      ).rejects.toThrow('The following field is invalid: Decimal Max')
     })
     it('should localize an array of numbers using hasMany', async () => {
       const localizedHasMany = [5, 10]
@@ -1142,7 +1142,7 @@ describe('Fields', () => {
             min: 5,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: min')
+      ).rejects.toThrow('The following field is invalid: Min')
 
       expect(doc.point).toEqual(point)
       expect(doc.localized).toEqual(localized)
@@ -2546,7 +2546,7 @@ describe('Fields', () => {
             json: '{ bad input: true }',
           },
         }),
-      ).rejects.toThrow('The following field is invalid: json')
+      ).rejects.toThrow('The following field is invalid: Json')
     })
 
     it('should validate json schema', async () => {
@@ -2557,7 +2557,7 @@ describe('Fields', () => {
             json: { foo: 'bad' },
           },
         }),
-      ).rejects.toThrow('The following field is invalid: json')
+      ).rejects.toThrow('The following field is invalid: Json')
     })
 
     it('should save empty json objects', async () => {
