@@ -5,7 +5,6 @@ import type { PayloadHandler } from '../../config/types.js'
 import type { Where } from '../../types/index.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
-import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
@@ -36,11 +35,6 @@ export const updateHandler: PayloadHandler = async (req) => {
     where,
   })
 
-  const headers = headersWithCors({
-    headers: new Headers(),
-    req,
-  })
-
   if (result.errors.length === 0) {
     const message = req.t('general:updatedCountSuccessfully', {
       count: result.docs.length,
@@ -56,7 +50,6 @@ export const updateHandler: PayloadHandler = async (req) => {
         message,
       },
       {
-        headers,
         status: httpStatus.OK,
       },
     )
@@ -75,7 +68,6 @@ export const updateHandler: PayloadHandler = async (req) => {
       message,
     },
     {
-      headers,
       status: httpStatus.BAD_REQUEST,
     },
   )
