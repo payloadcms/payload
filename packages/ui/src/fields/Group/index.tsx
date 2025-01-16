@@ -28,11 +28,13 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
     field,
     field: { name, admin: { className, description, hideGutter } = {}, fields, label },
+    forceRender = false,
     path,
     permissions,
     readOnly,
     schemaPath: schemaPathFromProps,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const { i18n } = useTranslation()
@@ -101,6 +103,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           {BeforeInput}
           <RenderFields
             fields={fields}
+            forceRender={forceRender}
             margins="small"
             parentIndexPath=""
             parentPath={path}

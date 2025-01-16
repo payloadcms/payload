@@ -18,7 +18,8 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
   const {
     className,
     fields,
-    forceRender,
+    forceRender: forceRenderFromProps,
+    forceRenderAllFields,
     margins,
     parentIndexPath,
     parentPath,
@@ -28,6 +29,8 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
   } = props
 
   const operation = useOperation()
+
+  const forceRender = forceRenderAllFields || forceRenderFromProps
 
   if (fields && fields.length > 0) {
     return (

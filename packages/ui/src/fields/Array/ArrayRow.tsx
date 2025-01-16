@@ -50,7 +50,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   duplicateRow,
   errorCount,
   fields,
-  forceRender = false,
+  forceRender,
   hasMaxRows,
   isDragging,
   isLoading: isLoadingFromProps,

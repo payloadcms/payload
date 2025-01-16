@@ -17,6 +17,7 @@ type Args = {
   readonly Description?: React.ReactNode
   readonly docPermissions: SanitizedDocumentPermissions
   readonly fields: ClientField[]
+  readonly forceRenderAllFields?: boolean
   readonly forceSidebarWrap?: boolean
   readonly readOnly?: boolean
   readonly schemaPathSegments: string[]
@@ -28,6 +29,7 @@ export const DocumentFields: React.FC<Args> = ({
   Description,
   docPermissions,
   fields,
+  forceRenderAllFields,
   forceSidebarWrap,
   readOnly: readOnlyProp,
   schemaPathSegments,
@@ -79,7 +81,7 @@ export const DocumentFields: React.FC<Args> = ({
           <RenderFields
             className={`${baseClass}__fields`}
             fields={mainFields}
-            forceRender
+            forceRenderAllFields={forceRenderAllFields}
             parentIndexPath=""
             parentPath=""
             parentSchemaPath={schemaPathSegments.join('.')}
@@ -95,7 +97,7 @@ export const DocumentFields: React.FC<Args> = ({
             <div className={`${baseClass}__sidebar-fields`}>
               <RenderFields
                 fields={sidebarFields}
-                forceRender
+                forceRenderAllFields={forceRenderAllFields}
                 parentIndexPath=""
                 parentPath=""
                 parentSchemaPath={schemaPathSegments.join('.')}
