@@ -19,4 +19,4 @@ export const validOperators = [
 export const validOperatorMap = validOperators.reduce((acc, operator) => {
   acc[operator] = true
   return acc
-})
+}, {})
