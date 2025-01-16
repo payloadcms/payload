@@ -29,6 +29,7 @@ export const generateMetadata: GenerateEditViewMetadata = async (args) => getMet
 // called on-demand from document drawers
 export const renderDocument = async ({
   disableActions,
+  documentSubViewType,
   drawerSlug,
   importMap,
   initialData,
@@ -38,6 +39,7 @@ export const renderDocument = async ({
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
+  viewType,
 }: {
   overrideEntityVisibility?: boolean
 } & AdminViewProps): Promise<{
@@ -316,7 +318,7 @@ export const renderDocument = async ({
     req,
   })
 
-  const clientProps = { formState, ...documentSlots }
+  const clientProps = { formState, ...documentSlots, documentSubViewType, viewType }
 
   return {
     data: doc,

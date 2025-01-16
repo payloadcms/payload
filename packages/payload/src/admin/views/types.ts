@@ -30,6 +30,7 @@ export type AdminViewConfig = {
 export type AdminViewProps = {
   readonly clientConfig: ClientConfig
   readonly disableActions?: boolean
+  readonly documentSubViewType?: DocumentSubViewTypes
   readonly drawerSlug?: string
   readonly importMap: ImportMap
   readonly initialData?: Data
@@ -38,6 +39,7 @@ export type AdminViewProps = {
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly searchParams: { [key: string]: string | string[] | undefined }
+  readonly viewType: ViewTypes
 }
 
 export type AdminViewComponent = PayloadComponent<AdminViewProps>
