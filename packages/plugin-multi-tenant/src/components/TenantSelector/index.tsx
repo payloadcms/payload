@@ -1,6 +1,6 @@
 'use client'
-import type { ViewTypes } from '@payloadcms/next/views'
 import type { ReactSelectOption } from '@payloadcms/ui'
+import type { ViewTypes } from 'payload'
 
 import { SelectInput } from '@payloadcms/ui'
 

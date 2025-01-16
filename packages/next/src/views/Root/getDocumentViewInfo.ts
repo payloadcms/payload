@@ -1,4 +1,4 @@
-import type { DocumentSubViewTypes, ViewTypes } from '../types.js'
+import type { DocumentSubViewTypes, ViewTypes } from 'payload'
 
 export function getDocumentViewInfo(segments: string[]): {
   documentSubViewType?: DocumentSubViewTypes

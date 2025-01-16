@@ -1,10 +1,17 @@
-import type { AdminViewComponent, AdminViewProps, ImportMap, SanitizedConfig } from 'payload'
+import type {
+  AdminViewComponent,
+  AdminViewProps,
+  DocumentSubViewTypes,
+  ImportMap,
+  SanitizedConfig,
+  ServerPropsFromView,
+  ViewTypes,
+} from 'payload'
 import type React from 'react'
 
 import { formatAdminURL } from '@payloadcms/ui/shared'
 
 import type { initPage } from '../../utilities/initPage/index.js'
-import type { DocumentSubViewTypes, ServerPropsFromView, ViewTypes } from '../types.js'
 
 import { Account } from '../Account/index.js'
 import { CreateFirstUserView } from '../CreateFirstUser/index.js'
@@ -81,8 +88,8 @@ export const getViewFromConfig = ({
   let ViewToRender: ViewFromConfig = null
   let templateClassName: string
   let templateType: 'default' | 'minimal' | undefined
-  let documentSubViewType: GetViewFromConfigResult['documentSubViewType']
-  let viewType: GetViewFromConfigResult['viewType']
+  let documentSubViewType: DocumentSubViewTypes
+  let viewType: ViewTypes
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,
@@ -161,6 +168,7 @@ export const getViewFromConfig = ({
 
         if (viewKey === 'account') {
           templateType = 'default'
+          viewType = 'account'
         }
       }
       break
@@ -173,6 +181,7 @@ export const getViewFromConfig = ({
         }
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
+        viewType = 'reset'
       }
 
       if (isCollection && matchedCollection) {
@@ -218,6 +227,7 @@ export const getViewFromConfig = ({
 
         templateClassName = 'verify'
         templateType = 'minimal'
+        viewType = 'verify'
       } else if (isCollection && matchedCollection) {
         // Custom Views
         // --> /collections/:collectionSlug/:id
