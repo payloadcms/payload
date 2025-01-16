@@ -159,7 +159,7 @@ export const buildTableState = async (
     const simpleSort =
       query?.sort && typeof query.sort === 'string'
         ? query.sort
-        : newPrefs?.sort ||
+        : listPreferences?.sort ||
           (typeof collectionConfig.defaultSort === 'string'
             ? collectionConfig.defaultSort
             : undefined)
