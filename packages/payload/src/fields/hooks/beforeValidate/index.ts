@@ -38,13 +38,11 @@ export const beforeValidate = async <T extends JsonObject>({
   overrideAccess,
   req,
 }: Args<T>): Promise<T> => {
-  const data = deepCopyObjectSimple(incomingData)
-
   await traverseFields({
     id,
     collection,
     context,
-    data,
+    data: incomingData,
     doc,
     fields: collection?.fields || global?.fields,
     global,
@@ -53,9 +51,9 @@ export const beforeValidate = async <T extends JsonObject>({
     path: [],
     req,
     schemaPath: [],
-    siblingData: data,
+    siblingData: incomingData,
     siblingDoc: doc,
   })
 
-  return data
+  return incomingData
 }
