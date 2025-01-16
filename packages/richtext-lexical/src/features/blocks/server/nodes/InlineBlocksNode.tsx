@@ -30,29 +30,40 @@ export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObje
 >
 
 export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactElement> {
+  __cacheBuster: number
   __fields: InlineBlockFields
 
-  constructor({ fields, key }: { fields: InlineBlockFields; key?: NodeKey }) {
+  constructor({
+    cacheBuster,
+    fields,
+    key,
+  }: {
+    cacheBuster?: number
+    fields: InlineBlockFields
+    key?: NodeKey
+  }) {
     super(key)
     this.__fields = fields
+    this.__cacheBuster = cacheBuster || 0
   }
 
-  static clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
+  static override clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
     return new this({
+      cacheBuster: node.__cacheBuster,
       fields: node.__fields,
       key: node.__key,
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'inlineBlock'
   }
 
-  static importDOM(): DOMConversionMap<HTMLDivElement> | null {
+  static override importDOM(): DOMConversionMap<HTMLDivElement> | null {
     return {}
   }
 
-  static importJSON(serializedNode: SerializedInlineBlockNode): ServerInlineBlockNode {
+  static override importJSON(serializedNode: SerializedInlineBlockNode): ServerInlineBlockNode {
     const node = $createServerInlineBlockNode(serializedNode.fields)
     return node
   }
@@ -64,18 +75,18 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   canIndent() {
     return true
   }
-  createDOM() {
+  override createDOM() {
     const element = document.createElement('span')
     element.classList.add('inline-block-container')
 
     return element
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
     return null
   }
 
-  exportDOM(): DOMExportOutput {
+  override exportDOM(): DOMExportOutput {
     const element = document.createElement('span')
     element.classList.add('inline-block-container')
 
@@ -84,7 +95,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return { element }
   }
 
-  exportJSON(): SerializedInlineBlockNode {
+  override exportJSON(): SerializedInlineBlockNode {
     return {
       type: 'inlineBlock',
       fields: this.getFields(),
@@ -92,24 +103,31 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     }
   }
 
+  getCacheBuster(): number {
+    return this.getLatest().__cacheBuster
+  }
+
   getFields(): InlineBlockFields {
     return this.getLatest().__fields
   }
 
-  getTextContent(): string {
+  override getTextContent(): string {
     return `Block Field`
   }
 
-  isInline() {
+  override isInline() {
     return true
   }
 
-  setFields(fields: InlineBlockFields): void {
+  setFields(fields: InlineBlockFields, preventFormStateUpdate?: boolean): void {
     const writable = this.getWritable()
     writable.__fields = fields
+    if (!preventFormStateUpdate) {
+      writable.__cacheBuster++
+    }
   }
 
-  updateDOM(): boolean {
+  override updateDOM(): boolean {
     return false
   }
 }

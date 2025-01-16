@@ -1,4 +1,4 @@
-import type { FormState } from 'payload'
+import type { FormFieldWithoutComponents, FormState } from 'payload'
 
 export type State = {
   activeIndex: number

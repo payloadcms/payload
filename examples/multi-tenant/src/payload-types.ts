@@ -36,9 +36,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -65,9 +65,9 @@ export interface UserAuthOperations {
  */
 export interface Page {
   id: string;
+  tenant?: (string | null) | Tenant;
   title?: string | null;
   slug?: string | null;
-  tenant: string | Tenant;
   updatedAt: string;
   createdAt: string;
 }
@@ -78,8 +78,9 @@ export interface Page {
 export interface Tenant {
   id: string;
   name: string;
+  domain?: string | null;
   slug: string;
-  public?: boolean | null;
+  allowPublicRead?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -90,6 +91,7 @@ export interface Tenant {
 export interface User {
   id: string;
   roles?: ('super-admin' | 'user')[] | null;
+  username?: string | null;
   tenants?:
     | {
         tenant: string | Tenant;
@@ -97,7 +99,6 @@ export interface User {
         id?: string | null;
       }[]
     | null;
-  username?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -175,9 +176,9 @@ export interface PayloadMigration {
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   slug?: T;
-  tenant?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -187,6 +188,7 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   roles?: T;
+  username?: T;
   tenants?:
     | T
     | {
@@ -194,7 +196,6 @@ export interface UsersSelect<T extends boolean = true> {
         roles?: T;
         id?: T;
       };
-  username?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -211,8 +212,9 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface TenantsSelect<T extends boolean = true> {
   name?: T;
+  domain?: T;
   slug?: T;
-  public?: T;
+  allowPublicRead?: T;
   updatedAt?: T;
   createdAt?: T;
 }

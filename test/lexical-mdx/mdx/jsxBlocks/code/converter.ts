@@ -10,6 +10,14 @@ export const codeConverter: BlockJSX = {
   import: ({ openMatch, children, closeMatch }) => {
     const language = openMatch[1]
 
+    // Removed first and last \n from children if present
+    if (children.startsWith('\n')) {
+      children = children.slice(1)
+    }
+    if (children.endsWith('\n')) {
+      children = children.slice(0, -1)
+    }
+
     const isSingleLineAndComplete =
       !!closeMatch && !children.includes('\n') && openMatch.input?.trim() !== '```' + language
 

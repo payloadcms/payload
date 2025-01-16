@@ -2,7 +2,7 @@ import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig } from 'payload'
 
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
-import { head } from '@vercel/blob'
+import { BlobNotFoundError, head } from '@vercel/blob'
 import path from 'path'
 
 type StaticHandlerArgs = {
@@ -24,10 +24,6 @@ export const getStaticHandler = (
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
 
       const blobMetadata = await head(fileUrl, { token })
-      if (!blobMetadata) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
-      }
-
       const uploadedAtString = blobMetadata.uploadedAt.toISOString()
       const ETag = `"${fileKey}-${uploadedAtString}"`
 
@@ -70,6 +66,9 @@ export const getStaticHandler = (
         status: 200,
       })
     } catch (err: unknown) {
+      if (err instanceof BlobNotFoundError) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
       req.payload.logger.error({ err, msg: 'Unexpected error in staticHandler' })
       return new Response('Internal Server Error', { status: 500 })
     }

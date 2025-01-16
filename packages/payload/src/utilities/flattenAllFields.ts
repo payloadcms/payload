@@ -1,4 +1,4 @@
-import type { Field, FlattenedField } from '../fields/config/types.js'
+import type { Field, FlattenedField, FlattenedJoinField } from '../fields/config/types.js'
 
 import { tabHasName } from '../fields/config/types.js'
 
@@ -33,6 +33,11 @@ export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedFiel
         for (const nestedField of flattenAllFields({ fields: field.fields })) {
           result.push(nestedField)
         }
+        break
+      }
+
+      case 'join': {
+        result.push(field as FlattenedJoinField)
         break
       }
 
