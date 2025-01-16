@@ -159,7 +159,7 @@ export const updateDocument = async <
     collection: collectionConfig,
     context: req.context,
     data,
-    doc: deepCopyObjectSimple(originalDoc),
+    doc: originalDoc,
     global: null,
     operation: 'update',
     overrideAccess,
