@@ -49,7 +49,7 @@ export class LinkNode extends ElementNode {
     this.__id = id
   }
 
-  static clone(node: LinkNode): LinkNode {
+  static override clone(node: LinkNode): LinkNode {
     return new LinkNode({
       id: node.__id,
       fields: node.__fields,
@@ -57,11 +57,11 @@ export class LinkNode extends ElementNode {
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'link'
   }
 
-  static importDOM(): DOMConversionMap | null {
+  static override importDOM(): DOMConversionMap | null {
     return {
       a: (node: Node) => ({
         conversion: $convertAnchorElement,
@@ -70,7 +70,7 @@ export class LinkNode extends ElementNode {
     }
   }
 
-  static importJSON(serializedNode: SerializedLinkNode): LinkNode {
+  static override importJSON(serializedNode: SerializedLinkNode): LinkNode {
     if (
       serializedNode.version === 1 &&
       typeof serializedNode.fields?.doc?.value === 'object' &&
@@ -95,19 +95,19 @@ export class LinkNode extends ElementNode {
     return node
   }
 
-  canBeEmpty(): false {
+  override canBeEmpty(): false {
     return false
   }
 
-  canInsertTextAfter(): false {
+  override canInsertTextAfter(): false {
     return false
   }
 
-  canInsertTextBefore(): false {
+  override canInsertTextBefore(): false {
     return false
   }
 
-  createDOM(config: EditorConfig): HTMLAnchorElement {
+  override createDOM(config: EditorConfig): HTMLAnchorElement {
     const element = document.createElement('a')
     if (this.__fields?.linkType === 'custom') {
       element.href = this.sanitizeUrl(this.__fields.url ?? '')
@@ -124,7 +124,7 @@ export class LinkNode extends ElementNode {
     return element
   }
 
-  exportJSON(): SerializedLinkNode {
+  override exportJSON(): SerializedLinkNode {
     const fields = this.getFields()
 
     if (fields?.linkType === 'internal') {
@@ -146,7 +146,7 @@ export class LinkNode extends ElementNode {
     return returnObject
   }
 
-  extractWithChild(
+  override extractWithChild(
     child: LexicalNode,
     selection: BaseSelection,
     destination: 'clone' | 'html',
@@ -173,7 +173,10 @@ export class LinkNode extends ElementNode {
     return this.getLatest().__id
   }
 
-  insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNodeType | null {
+  override insertNewAfter(
+    selection: RangeSelection,
+    restoreSelection = true,
+  ): ElementNodeType | null {
     const element = this.getParentOrThrow().insertNewAfter(selection, restoreSelection)
     if ($isElementNode(element)) {
       const linkNode = $createLinkNode({ fields: this.__fields })
@@ -183,7 +186,7 @@ export class LinkNode extends ElementNode {
     return null
   }
 
-  isInline(): true {
+  override isInline(): true {
     return true
   }
 
@@ -205,7 +208,7 @@ export class LinkNode extends ElementNode {
     writable.__fields = fields
   }
 
-  updateDOM(prevNode: LinkNode, anchor: HTMLAnchorElement, config: EditorConfig): boolean {
+  override updateDOM(prevNode: LinkNode, anchor: HTMLAnchorElement, config: EditorConfig): boolean {
     const url = this.__fields?.url
     const newTab = this.__fields?.newTab
     if (url != null && url !== prevNode.__fields?.url && this.__fields?.linkType === 'custom') {

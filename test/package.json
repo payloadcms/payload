@@ -40,6 +40,7 @@
     "@payloadcms/payload-cloud": "workspace:*",
     "@payloadcms/plugin-cloud-storage": "workspace:*",
     "@payloadcms/plugin-form-builder": "workspace:*",
+    "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/plugin-nested-docs": "workspace:*",
     "@payloadcms/plugin-redirects": "workspace:*",
     "@payloadcms/plugin-search": "workspace:*",
