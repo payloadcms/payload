@@ -32,7 +32,7 @@ export const BlocksPlugin: PluginComponent = () => {
 
   const [targetNodeKey, setTargetNodeKey] = useState<null | string>(null)
 
-  const { uuid } = useEditorConfigContext()
+  const { setCreatedInlineBlock, uuid } = useEditorConfigContext()
   const editDepth = useEditDepth()
 
   const drawerSlug = formatDrawerSlug({
@@ -98,6 +98,7 @@ export const BlocksPlugin: PluginComponent = () => {
           }
 
           const inlineBlockNode = $createInlineBlockNode(fields as BlockFields)
+          setCreatedInlineBlock?.(inlineBlockNode)
           $insertNodes([inlineBlockNode])
           if ($isRootOrShadowRoot(inlineBlockNode.getParentOrThrow())) {
             $wrapNodeInElement(inlineBlockNode, $createParagraphNode).selectEnd()
@@ -108,7 +109,7 @@ export const BlocksPlugin: PluginComponent = () => {
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [editor, targetNodeKey, toggleDrawer])
+  }, [editor, setCreatedInlineBlock, targetNodeKey, toggleDrawer])
 
   return null
 }

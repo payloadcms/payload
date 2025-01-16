@@ -5,7 +5,24 @@ import { readAccess } from './access/read'
 import { updateAndDeleteAccess } from './access/updateAndDelete'
 import { externalUsersLogin } from './endpoints/externalUsersLogin'
 import { ensureUniqueUsername } from './hooks/ensureUniqueUsername'
-// import { setCookieBasedOnDomain } from './hooks/setCookieBasedOnDomain'
+import { isSuperAdmin } from '@/access/isSuperAdmin'
+import { setCookieBasedOnDomain } from './hooks/setCookieBasedOnDomain'
+import { tenantsArrayField } from '@payloadcms/plugin-multi-tenant/fields'
+
+const defaultTenantArrayField = tenantsArrayField({
+  arrayFieldAccess: {},
+  tenantFieldAccess: {},
+  rowFields: [
+    {
+      name: 'roles',
+      type: 'select',
+      defaultValue: ['tenant-viewer'],
+      hasMany: true,
+      options: ['tenant-admin', 'tenant-viewer'],
+      required: true,
+    },
+  ],
+})
 
 const Users: CollectionConfig = {
   slug: 'users',
@@ -22,34 +39,19 @@ const Users: CollectionConfig = {
   endpoints: [externalUsersLogin],
   fields: [
     {
+      admin: {
+        position: 'sidebar',
+      },
       name: 'roles',
       type: 'select',
       defaultValue: ['user'],
       hasMany: true,
       options: ['super-admin', 'user'],
-    },
-    {
-      name: 'tenants',
-      type: 'array',
-      fields: [
-        {
-          name: 'tenant',
-          type: 'relationship',
-          index: true,
-          relationTo: 'tenants',
-          required: true,
-          saveToJWT: true,
+      access: {
+        update: ({ req }) => {
+          return isSuperAdmin(req.user)
         },
-        {
-          name: 'roles',
-          type: 'select',
-          defaultValue: ['tenant-viewer'],
-          hasMany: true,
-          options: ['tenant-admin', 'tenant-viewer'],
-          required: true,
-        },
-      ],
-      saveToJWT: true,
+      },
     },
     {
       name: 'username',
@@ -59,15 +61,21 @@ const Users: CollectionConfig = {
       },
       index: true,
     },
+    {
+      ...defaultTenantArrayField,
+      admin: {
+        ...(defaultTenantArrayField?.admin || {}),
+        position: 'sidebar',
+      },
+    },
   ],
   // The following hook sets a cookie based on the domain a user logs in from.
   // It checks the domain and matches it to a tenant in the system, then sets
   // a 'payload-tenant' cookie for that tenant.
 
-  // Uncomment this if you want to enable tenant-based cookie handling by domain.
-  // hooks: {
-  //   afterLogin: [setCookieBasedOnDomain],
-  // },
+  hooks: {
+    afterLogin: [setCookieBasedOnDomain],
+  },
 }
 
 export default Users

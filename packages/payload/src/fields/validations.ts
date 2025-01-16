@@ -525,6 +525,7 @@ const validateFilterOptions: Validate<
                 id,
                 data,
                 relationTo: collection,
+                req,
                 siblingData,
                 user,
               })

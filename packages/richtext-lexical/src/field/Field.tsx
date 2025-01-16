@@ -11,7 +11,7 @@ import {
   useField,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
@@ -78,13 +78,33 @@ const RichTextComponent: React.FC<
 
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
+  const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
+
+  useEffect(() => {
+    const updateViewPortWidth = () => {
+      const isNextSmallWidthViewport = window.matchMedia('(max-width: 768px)').matches
+
+      if (isNextSmallWidthViewport !== isSmallWidthViewport) {
+        setIsSmallWidthViewport(isNextSmallWidthViewport)
+      }
+    }
+    updateViewPortWidth()
+    window.addEventListener('resize', updateViewPortWidth)
+
+    return () => {
+      window.removeEventListener('resize', updateViewPortWidth)
+    }
+  }, [isSmallWidthViewport])
+
   const classes = [
     baseClass,
     'field-type',
     className,
     showError && 'error',
     disabled && `${baseClass}--read-only`,
-    editorConfig?.admin?.hideGutter !== true ? `${baseClass}--show-gutter` : null,
+    editorConfig?.admin?.hideGutter !== true && !isSmallWidthViewport
+      ? `${baseClass}--show-gutter`
+      : null,
   ]
     .filter(Boolean)
     .join(' ')
@@ -114,6 +134,7 @@ const RichTextComponent: React.FC<
             composerKey={pathWithEditDepth}
             editorConfig={editorConfig}
             fieldProps={props}
+            isSmallWidthViewport={isSmallWidthViewport}
             key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
             onChange={handleChange}
             readOnly={disabled}

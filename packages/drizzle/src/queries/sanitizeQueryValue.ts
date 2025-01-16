@@ -142,6 +142,12 @@ export const sanitizeQueryValue = ({
             collection: adapter.payload.collections[val.relationTo],
           })
 
+          if (isRawConstraint(val.value)) {
+            return {
+              operator,
+              value: val.value.value,
+            }
+          }
           return {
             operator,
             value: idType === 'number' ? Number(val.value) : String(val.value),

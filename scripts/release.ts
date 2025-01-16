@@ -1,3 +1,10 @@
+/**
+ * Usage: GITHUB_TOKEN=$GITHUB_TOKEN pnpm release --bump <minor|patch>
+ *
+ * Ensure your GITHUB_TOKEN is set in your environment variables
+ * and also has the ability to create releases in the repository.
+ */
+
 import type { ExecSyncOptions } from 'child_process'
 
 import chalk from 'chalk'
@@ -14,8 +21,8 @@ import semver from 'semver'
 import type { PackageDetails } from './lib/getPackageDetails.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
-import { getPackageRegistryVersions } from './lib/getPackageRegistryVersions.js'
 import { packagePublishList } from './lib/publishList.js'
+import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
 
@@ -34,7 +41,6 @@ const {
   'dry-run': dryRun,
   'git-tag': gitTag = true, // Whether to run git tag and commit operations
   'git-commit': gitCommit = true, // Whether to run git commit operations
-  versionOverride = undefined,
   tag, // Tag to publish to: latest, beta, canary
 } = args
 
@@ -108,14 +114,7 @@ async function main() {
     throw new Error('Could not find version in package.json')
   }
 
-  // TODO: Re-enable this check once we start tagging releases again
-  // if (monorepoVersion !== lastTag.replace('v', '')) {
-  //   throw new Error(
-  //     `Version in package.json (${monorepoVersion}) does not match last tag (${lastTag})`,
-  //   )
-  // }
-
-  const nextReleaseVersion = versionOverride || semver.inc(monorepoVersion, bump, undefined, tag)
+  const nextReleaseVersion = semver.inc(monorepoVersion, bump, undefined, tag)
 
   if (!nextReleaseVersion) {
     abort(`Invalid nextReleaseVersion: ${nextReleaseVersion}`)
@@ -126,7 +125,7 @@ async function main() {
   header(`${logPrefix}📝 Updating changelog...`)
   const {
     changelog: changelogContent,
-    releaseUrl,
+    releaseUrl: prefilledReleaseUrl,
     releaseNotes,
   } = await generateReleaseNotes({
     bump,
@@ -138,7 +137,7 @@ async function main() {
 
   console.log(chalk.green('\nFull Release Notes:\n\n'))
   console.log(chalk.gray(releaseNotes) + '\n\n')
-  console.log(`\n\nRelease URL: ${chalk.dim(releaseUrl)}`)
+  console.log(`\n\nRelease URL: ${chalk.dim(prefilledReleaseUrl)}`)
 
   let packageDetails = await getPackageDetails(packagePublishList)
 
@@ -229,16 +228,36 @@ async function main() {
       .join('\n') + '\n',
   )
 
-  // TODO: Push commit and tag
-  // const push = await confirm(`Push commits and tags?`)
-  // if (push) {
-  //   header(`Pushing commits and tags...`)
-  //   execSync(`git push --follow-tags`, execOpts)
-  // }
+  header(`🚀 Publishing complete!`)
 
+  const pushTags = await confirm('Push commit and tags to remote?')
+  if (pushTags) {
+    runCmd(`git push --follow-tags`, execOpts)
+    console.log(chalk.bold.green('Commit and tags pushed to remote'))
+  }
+
+  const createDraftRelease = await confirm('Create draft release on GitHub?')
+  if (createDraftRelease) {
+    try {
+      const { releaseUrl: draftReleaseUrl } = await createDraftGitHubRelease({
+        branch: 'main',
+        tag: `v${nextReleaseVersion}`,
+        releaseNotes,
+      })
+      console.log(chalk.bold.green(`Draft release created on GitHub: ${draftReleaseUrl}`))
+    } catch (error) {
+      console.log(chalk.bold.red('\nFull Release Notes:\n\n'))
+      console.log(chalk.gray(releaseNotes) + '\n\n')
+      console.log(`\n\nRelease URL: ${chalk.dim(prefilledReleaseUrl)}`)
+      console.log(chalk.bold.red(`Error creating draft release on GitHub: ${error.message}`))
+      console.log(
+        chalk.bold.red(
+          `Use the above link to create the release manually and optionally add the release notes.`,
+        ),
+      )
+    }
+  }
   header('🎉 Done!')
-
-  console.log(chalk.bold.green(`\n\nRelease URL: ${releaseUrl}`))
 }
 
 main().catch((error) => {
@@ -296,7 +315,7 @@ async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boole
       details:
         err instanceof Error
           ? `Error publishing ${pkg.name}: ${err.message}`
-          : `Unexpected error publishing ${pkg.name}: ${String(err)}`,
+          : `Unexpected error publishing ${pkg.name}: ${JSON.stringify(err)}`,
     }
   }
 }

@@ -15,29 +15,29 @@ const HorizontalRuleComponent = React.lazy(() =>
 )
 
 export class HorizontalRuleNode extends HorizontalRuleServerNode {
-  static clone(node: HorizontalRuleServerNode): HorizontalRuleServerNode {
+  static override clone(node: HorizontalRuleServerNode): HorizontalRuleServerNode {
     return super.clone(node)
   }
 
-  static getType(): string {
+  static override getType(): string {
     return super.getType()
   }
 
   /**
    * The data for this node is stored serialized as JSON. This is the "load function" of that node: it takes the saved data and converts it into a node.
    */
-  static importJSON(serializedNode: SerializedHorizontalRuleNode): HorizontalRuleNode {
+  static override importJSON(serializedNode: SerializedHorizontalRuleNode): HorizontalRuleNode {
     return $createHorizontalRuleNode()
   }
 
   /**
    * Allows you to render a React component within whatever createDOM returns.
    */
-  decorate(): React.ReactElement {
+  override decorate(): React.ReactElement {
     return <HorizontalRuleComponent nodeKey={this.__key} />
   }
 
-  exportJSON(): SerializedLexicalNode {
+  override exportJSON(): SerializedLexicalNode {
     return super.exportJSON()
   }
 }

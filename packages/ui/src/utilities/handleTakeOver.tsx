@@ -7,7 +7,7 @@ export const handleTakeOver = (
   user: ClientUser | number | string,
   isWithinDoc: boolean,
   updateDocumentEditor: (
-    docId: number | string,
+    docID: number | string,
     slug: string,
     user: ClientUser | number | string,
   ) => Promise<void>,

@@ -30,6 +30,10 @@ type ChangelogResult = {
    * The release notes, includes contributors. This is the content used for the releaseUrl
    */
   releaseNotes: string
+  /**
+   * The release tag, includes prefix 'v'
+   */
+  releaseTag: string
 }
 
 export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogResult> => {
@@ -48,6 +52,10 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   }
 
   const calculatedBump = bump || recommendedBump
+
+  if (!calculatedBump) {
+    throw new Error('Could not determine bump type')
+  }
 
   const proposedReleaseVersion = 'v' + semver.inc(fromVersion, calculatedBump, undefined, tag)
 
@@ -155,6 +163,7 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
     releaseUrl,
     changelog,
     releaseNotes,
+    releaseTag: proposedReleaseVersion,
   }
 }
 
@@ -216,7 +225,7 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
     const coAuthors = Array.from(
       commit.body.matchAll(coAuthorPattern),
       (match) => match.groups,
-    ).filter((e) => !e.email.includes('[bot]'))
+    ).filter((e) => !e?.email.includes('[bot]')) as { name: string; email: string }[]
 
     if (!coAuthors.length) {
       continue

@@ -3,21 +3,20 @@ import type { Access } from 'payload'
 import type { User } from '../../../payload-types'
 
 import { isSuperAdmin } from '../../../access/isSuperAdmin'
-import { getTenantAdminTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
+import { getUserTenantIDs } from '../../../utilities/getUserTenantIDs'
 
-export const createAccess: Access<User> = (args) => {
-  const { req } = args
+export const createAccess: Access<User> = ({ req }) => {
   if (!req.user) {
     return false
   }
 
-  if (isSuperAdmin(args)) {
+  if (isSuperAdmin(req.user)) {
     return true
   }
 
-  const adminTenantAccessIDs = getTenantAdminTenantAccessIDs(req.user)
+  const adminTenantAccessIDs = getUserTenantIDs(req.user, 'tenant-admin')
 
-  if (adminTenantAccessIDs.length > 0) {
+  if (adminTenantAccessIDs.length) {
     return true
   }
 

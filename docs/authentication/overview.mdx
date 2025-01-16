@@ -41,7 +41,7 @@ _Admin Panel screenshot depicting an Admins Collection with Auth enabled_
 Any [Collection](../configuration/collections) can opt-in to supporting Authentication. Once enabled, each Document that is created within the Collection can be thought of as a "user". This enables a complete authentication workflow on your Collection, such as logging in and out, resetting their password, and more.
 
 <Banner type="warning">
-  <strong>Note:</strong>
+  **Note:**
   By default, Payload provides an auth-enabled `User` Collection which is used to access the Admin Panel. [More details](../admin/overview#the-admin-user-collection).
 </Banner>
 
@@ -65,12 +65,12 @@ export const Admins: CollectionConfig = {
 ```
 
 <Banner type="info">
-  <strong>Tip:</strong>
+  **Tip:**
   For default auth behavior, set `auth: true`. This is a good starting point for most applications.
 </Banner>
 
 <Banner type="warning">
-  <strong>Note:</strong>
+  **Note:**
   Auth-enabled Collections with be automatically injected with the `hash`, `salt`, and `email` fields. [More details](../fields/overview#field-names).
 </Banner>
 
@@ -153,7 +153,7 @@ export default buildConfig({
 ```
 
 <Banner type="warning">
-  <strong>Warning:</strong>
+  **Warning:**
   The recommended way to use this feature is behind an [Environment Variable](../configuration/environment-vars). This will ensure it is _disabled_ in production.
 </Banner>
 
@@ -182,7 +182,7 @@ Each of these strategies can work together or independently. You can also create
 
 ### HTTP-Only Cookies
 
-[HTTP-only cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and <strong>cannot be read by JavaScript in the browser</strong>, unlike JWT's. [More details](./cookies).
+[HTTP-only cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) are a highly secure method of storing identifiable data on a user's device so that Payload can automatically recognize a returning user until their cookie expires. They are totally protected from common XSS attacks and **cannot be read by JavaScript in the browser**, unlike JWT's. [More details](./cookies).
 
 ### JSON Web Tokens
 

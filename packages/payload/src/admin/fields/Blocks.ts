@@ -23,14 +23,18 @@ type BlocksFieldBaseClientProps = {
   readonly validate?: BlocksFieldValidation
 } & FieldPaths
 
+type BlocksFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type BlocksFieldClientProps = BlocksFieldBaseClientProps &
   ClientFieldBase<BlocksFieldClientWithoutType>
 
-export type BlocksFieldServerProps = ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
+export type BlocksFieldServerProps = BlocksFieldBaseServerProps &
+  ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
 
 export type BlocksFieldServerComponent = FieldServerComponent<
   BlocksField,
-  BlocksFieldClientWithoutType
+  BlocksFieldClientWithoutType,
+  BlocksFieldBaseServerProps
 >
 
 export type BlocksFieldClientComponent = FieldClientComponent<

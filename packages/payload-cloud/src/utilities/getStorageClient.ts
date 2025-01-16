@@ -23,6 +23,16 @@ export const getStorageClient: GetStorageClient = async () => {
     }
   }
 
+  if (!process.env.PAYLOAD_CLOUD_PROJECT_ID) {
+    throw new Error('PAYLOAD_CLOUD_PROJECT_ID is required')
+  }
+  if (!process.env.PAYLOAD_CLOUD_COGNITO_PASSWORD) {
+    throw new Error('PAYLOAD_CLOUD_COGNITO_PASSWORD is required')
+  }
+  if (!process.env.PAYLOAD_CLOUD_COGNITO_IDENTITY_POOL_ID) {
+    throw new Error('PAYLOAD_CLOUD_COGNITO_IDENTITY_POOL_ID is required')
+  }
+
   session = await authAsCognitoUser(
     process.env.PAYLOAD_CLOUD_PROJECT_ID,
     process.env.PAYLOAD_CLOUD_COGNITO_PASSWORD,

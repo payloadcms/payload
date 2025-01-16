@@ -8,6 +8,7 @@ import type {
   ClientField,
   Field,
   FieldBase,
+  JoinFieldClient,
   LabelsClient,
   RadioFieldClient,
   RowFieldClient,
@@ -229,6 +230,16 @@ export const createClientField = ({
       break
     }
 
+    case 'join': {
+      const field = clientField as JoinFieldClient
+
+      field.targetField = {
+        relationTo: field.targetField.relationTo,
+      }
+
+      break
+    }
+
     case 'radio':
     // falls through
     case 'select': {
@@ -281,6 +292,8 @@ export const createClientField = ({
               continue
             }
 
+            const tabProp = tab[key]
+
             if (key === 'fields') {
               clientTab.fields = createClientFields({
                 defaultIDType,
@@ -289,8 +302,13 @@ export const createClientField = ({
                 i18n,
                 importMap,
               })
+            } else if (
+              (key === 'label' || key === 'description') &&
+              typeof tabProp === 'function'
+            ) {
+              clientTab[key] = tabProp({ t: i18n.t })
             } else {
-              clientTab[key] = tab[key]
+              clientTab[key] = tabProp
             }
           }
           field.tabs[i] = clientTab

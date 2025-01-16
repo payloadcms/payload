@@ -16,6 +16,8 @@ export const buildRawSchema = ({
   adapter: DrizzleAdapter
   setColumnID: SetColumnID
 }) => {
+  adapter.indexes = new Set()
+
   adapter.payload.config.collections.forEach((collection) => {
     createTableName({
       adapter,

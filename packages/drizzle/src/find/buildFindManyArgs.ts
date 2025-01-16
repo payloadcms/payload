@@ -9,6 +9,7 @@ import { traverseFields } from './traverseFields.js'
 
 type BuildFindQueryArgs = {
   adapter: DrizzleAdapter
+  collectionSlug?: string
   depth: number
   fields: FlattenedField[]
   joinQuery?: JoinQuery
@@ -32,6 +33,7 @@ export type Result = {
 // a collection field structure
 export const buildFindManyArgs = ({
   adapter,
+  collectionSlug,
   depth,
   fields,
   joinQuery,
@@ -74,6 +76,7 @@ export const buildFindManyArgs = ({
   traverseFields({
     _locales,
     adapter,
+    collectionSlug,
     currentArgs: result,
     currentTableName: tableName,
     depth,

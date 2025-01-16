@@ -9,6 +9,8 @@ import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../t
 import type { Result } from './buildFindManyArgs.js'
 
 import buildQuery from '../queries/buildQuery.js'
+import { getTableAlias } from '../queries/getTableAlias.js'
+import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
 import { chainMethods } from './chainMethods.js'
@@ -16,6 +18,7 @@ import { chainMethods } from './chainMethods.js'
 type TraverseFieldArgs = {
   _locales: Result
   adapter: DrizzleAdapter
+  collectionSlug?: string
   currentArgs: Result
   currentTableName: string
   depth?: number
@@ -42,6 +45,7 @@ type TraverseFieldArgs = {
 export const traverseFields = ({
   _locales,
   adapter,
+  collectionSlug,
   currentArgs,
   currentTableName,
   depth,
@@ -292,6 +296,7 @@ export const traverseFields = ({
         traverseFields({
           _locales,
           adapter,
+          collectionSlug,
           currentArgs,
           currentTableName,
           depth,
@@ -357,17 +362,39 @@ export const traverseFields = ({
           ? adapter.tables[currentTableName].parent
           : adapter.tables[currentTableName].id
 
-        let joinQueryWhere: Where = {
-          [field.on]: {
-            equals: rawConstraint(currentIDColumn),
-          },
+        let joinQueryWhere: Where
+
+        if (Array.isArray(field.targetField.relationTo)) {
+          joinQueryWhere = {
+            [field.on]: {
+              equals: {
+                relationTo: collectionSlug,
+                value: rawConstraint(currentIDColumn),
+              },
+            },
+          }
+        } else {
+          joinQueryWhere = {
+            [field.on]: {
+              equals: rawConstraint(currentIDColumn),
+            },
+          }
         }
 
-        if (where) {
+        if (where && Object.keys(where).length) {
           joinQueryWhere = {
             and: [joinQueryWhere, where],
           }
         }
+
+        const columnName = `${path.replaceAll('.', '_')}${field.name}`
+
+        const subQueryAlias = `${columnName}_alias`
+
+        const { newAliasTable } = getTableAlias({
+          adapter,
+          tableName: joinCollectionTableName,
+        })
 
         const {
           orderBy,
@@ -375,6 +402,7 @@ export const traverseFields = ({
           where: subQueryWhere,
         } = buildQuery({
           adapter,
+          aliasTable: newAliasTable,
           fields,
           joins,
           locale,
@@ -402,15 +430,21 @@ export const traverseFields = ({
 
         const db = adapter.drizzle as LibSQLDatabase
 
-        const columnName = `${path.replaceAll('.', '_')}${field.name}`
+        for (let key in selectFields) {
+          const val = selectFields[key]
 
-        const subQueryAlias = `${columnName}_alias`
+          if (val.table && getNameFromDrizzleTable(val.table) === joinCollectionTableName) {
+            delete selectFields[key]
+            key = key.split('.').pop()
+            selectFields[key] = newAliasTable[key]
+          }
+        }
 
         const subQuery = chainMethods({
           methods: chainedMethods,
           query: db
             .select(selectFields as any)
-            .from(adapter.tables[joinCollectionTableName])
+            .from(newAliasTable)
             .where(subQueryWhere)
             .orderBy(() => orderBy.map(({ column, order }) => order(column))),
         }).as(subQueryAlias)
@@ -424,7 +458,7 @@ export const traverseFields = ({
               }),
             }),
           })
-          .from(sql`${subQuery}`)}`.as(columnName)
+          .from(sql`${subQuery}`)}`.as(subQueryAlias)
 
         break
       }

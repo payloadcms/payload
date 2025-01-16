@@ -4,11 +4,12 @@ import type {
   ClientTranslationKeys,
   ClientTranslationsObject,
   I18nClient,
+  I18nOptions,
   Language,
   TFunction,
 } from '@payloadcms/translations'
 import type { Locale } from 'date-fns'
-import type { ClientConfig, LanguageOptions } from 'payload'
+import type { LanguageOptions } from 'payload'
 
 import { importDateFNSLocale, t } from '@payloadcms/translations'
 import { enUS } from 'date-fns/locale/en-US'
@@ -47,7 +48,7 @@ const Context = createContext<ContextType<any, any>>({
 type Props = {
   children: React.ReactNode
   dateFNSKey: Language['dateFNSKey']
-  fallbackLang: ClientConfig['i18n']['fallbackLanguage']
+  fallbackLang: I18nOptions['fallbackLanguage']
   language: string
   languageOptions: LanguageOptions
   switchLanguageServerAction: (lang: string) => Promise<void>

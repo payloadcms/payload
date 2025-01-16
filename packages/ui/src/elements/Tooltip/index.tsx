@@ -45,11 +45,11 @@ export const Tooltip: React.FC<Props> = (props) => {
   )
 
   useEffect(() => {
-    let timerId: NodeJS.Timeout
+    let timerID: NodeJS.Timeout
 
     // do not use the delay on transition-out
     if (delay && showFromProps) {
-      timerId = setTimeout(() => {
+      timerID = setTimeout(() => {
         setShow(showFromProps)
       }, delay)
     } else {
@@ -57,8 +57,8 @@ export const Tooltip: React.FC<Props> = (props) => {
     }
 
     return () => {
-      if (timerId) {
-        clearTimeout(timerId)
+      if (timerID) {
+        clearTimeout(timerID)
       }
     }
   }, [showFromProps, delay])

@@ -23,6 +23,8 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    // The autosave test uses this format in order to compare timestamps in the UI
+    dateFormat: 'MMMM do yyyy, h:mm:ss a',
   },
   collections: [
     DisablePublish,

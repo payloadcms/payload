@@ -2,7 +2,7 @@ import type { Document, Where } from '../../types/index.js'
 import type { PreferenceRequest } from '../types.js'
 
 import { NotFound } from '../../errors/NotFound.js'
-import { UnauthorizedError } from '../../errors/UnathorizedError.js'
+import { UnauthorizedError } from '../../errors/UnauthorizedError.js'
 
 export async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const {

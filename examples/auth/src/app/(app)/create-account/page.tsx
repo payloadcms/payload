@@ -10,7 +10,7 @@ import { CreateAccountForm } from './CreateAccountForm'
 import classes from './index.module.scss'
 
 export default async function CreateAccount() {
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers })
 

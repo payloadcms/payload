@@ -29,10 +29,12 @@ const ObjectId = (ObjectIdImport.default ||
  * Recursively builds the default data for joined collection
  */
 const getInitialDrawerData = ({
+  collectionSlug,
   docID,
   fields,
   segments,
 }: {
+  collectionSlug: string
   docID: number | string
   fields: ClientField[]
   segments: string[]
@@ -48,9 +50,15 @@ const getInitialDrawerData = ({
   }
 
   if (field.type === 'relationship' || field.type === 'upload') {
+    let value: { relationTo: string; value: number | string } | number | string = docID
+    if (Array.isArray(field.relationTo)) {
+      value = {
+        relationTo: collectionSlug,
+        value: docID,
+      }
+    }
     return {
-      // TODO: Handle polymorphic https://github.com/payloadcms/payload/pull/9990
-      [field.name]: field.hasMany ? [docID] : docID,
+      [field.name]: field.hasMany ? [value] : value,
     }
   }
 
@@ -58,12 +66,18 @@ const getInitialDrawerData = ({
 
   if (field.type === 'tab' || field.type === 'group') {
     return {
-      [field.name]: getInitialDrawerData({ docID, fields: field.fields, segments: nextSegments }),
+      [field.name]: getInitialDrawerData({
+        collectionSlug,
+        docID,
+        fields: field.fields,
+        segments: nextSegments,
+      }),
     }
   }
 
   if (field.type === 'array') {
     const initialData = getInitialDrawerData({
+      collectionSlug,
       docID,
       fields: field.fields,
       segments: nextSegments,
@@ -79,6 +93,7 @@ const getInitialDrawerData = ({
   if (field.type === 'blocks') {
     for (const block of field.blocks) {
       const blockInitialData = getInitialDrawerData({
+        collectionSlug,
         docID,
         fields: block.fields,
         segments: nextSegments,
@@ -110,7 +125,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     path,
   } = props
 
-  const { id: docID } = useDocumentInfo()
+  const { id: docID, docConfig } = useDocumentInfo()
 
   const {
     config: { collections },
@@ -126,9 +141,18 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       return null
     }
 
+    let value: { relationTo: string; value: number | string } | number | string = docID
+
+    if (Array.isArray(field.targetField.relationTo)) {
+      value = {
+        relationTo: docConfig.slug,
+        value,
+      }
+    }
+
     const where = {
       [on]: {
-        equals: docID,
+        equals: value,
       },
     }
 
@@ -139,17 +163,18 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     }
 
     return where
-  }, [docID, on, field.where])
+  }, [docID, field.targetField.relationTo, field.where, on, docConfig.slug])
 
   const initialDrawerData = useMemo(() => {
     const relatedCollection = collections.find((collection) => collection.slug === field.collection)
 
     return getInitialDrawerData({
+      collectionSlug: docConfig.slug,
       docID,
       fields: relatedCollection.fields,
       segments: field.on.split('.'),
     })
-  }, [collections, field.on, docID, field.collection])
+  }, [collections, field.on, field.collection, docConfig.slug, docID])
 
   return (
     <div

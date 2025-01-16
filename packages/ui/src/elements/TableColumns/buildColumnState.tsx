@@ -1,13 +1,16 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
+  ClientComponentProps,
   ClientField,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
+  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
+  ServerComponentProps,
   StaticLabel,
 } from 'payload'
 
@@ -21,15 +24,12 @@ import {
 } from 'payload/shared'
 import React from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
 import {
   RenderCustomComponent,
   RenderDefaultCell,
-  SelectAll,
-  SelectRow,
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
@@ -40,8 +40,8 @@ type Args = {
   beforeRows?: Column[]
   clientCollectionConfig: ClientCollectionConfig
   collectionConfig: SanitizedCollectionConfig
-  columnPreferences: ColumnPreferences
-  columns?: ColumnPreferences
+  columnPreferences: ListPreferences['columns']
+  columns?: ListPreferences['columns']
   customCellProps: DefaultCellComponentProps['customCellProps']
   docs: PaginatedDocs['docs']
   enableRowSelections: boolean
@@ -166,8 +166,29 @@ export const buildColumnState = (args: Args): Column[] => {
         ? _field.admin.components.Label
         : undefined
 
+    // TODO: customComponent will be optional in v4
+    const clientProps: Omit<ClientComponentProps, 'customComponents'> = {
+      field,
+    }
+
+    const serverProps: Pick<
+      ServerComponentProps,
+      'clientField' | 'collectionSlug' | 'field' | 'i18n' | 'payload'
+    > = {
+      clientField: field,
+      collectionSlug: collectionConfig.slug,
+      field: _field,
+      i18n,
+      payload,
+    }
+
     const CustomLabel = CustomLabelToRender
-      ? RenderServerComponent({ Component: CustomLabelToRender, importMap: payload.importMap })
+      ? RenderServerComponent({
+          clientProps,
+          Component: CustomLabelToRender,
+          importMap: payload.importMap,
+          serverProps,
+        })
       : undefined
 
     const fieldAffectsDataSubFields =
@@ -191,12 +212,6 @@ export const buildColumnState = (args: Args): Column[] => {
       customCellProps,
       field,
       rowData: undefined,
-    }
-
-    const serverProps: Pick<DefaultServerCellComponentProps, 'field' | 'i18n' | 'payload'> = {
-      field: _field,
-      i18n,
-      payload,
     }
 
     const column: Column = {
@@ -278,16 +293,6 @@ export const buildColumnState = (args: Args): Column[] => {
 
     return acc
   }, [])
-
-  if (enableRowSelections) {
-    sorted?.unshift({
-      accessor: '_select',
-      active: true,
-      field: null,
-      Heading: <SelectAll />,
-      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
-    })
-  }
 
   if (beforeRows) {
     sorted.unshift(...beforeRows)

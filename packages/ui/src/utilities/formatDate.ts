@@ -10,7 +10,9 @@ type FormatDateArgs = {
 
 export const formatDate = ({ date, i18n, pattern }: FormatDateArgs): string => {
   const theDate = new Date(date)
-  return format(theDate, pattern, { locale: i18n.dateFNS })
+  return i18n.dateFNS
+    ? format(theDate, pattern, { locale: i18n.dateFNS })
+    : `${i18n.t('general:loading')}...`
 }
 
 type FormatTimeToNowArgs = {
@@ -20,5 +22,7 @@ type FormatTimeToNowArgs = {
 
 export const formatTimeToNow = ({ date, i18n }: FormatTimeToNowArgs): string => {
   const theDate = new Date(date)
-  return formatDistanceToNow(theDate, { locale: i18n.dateFNS })
+  return i18n?.dateFNS
+    ? formatDistanceToNow(theDate, { locale: i18n.dateFNS })
+    : `${i18n.t('general:loading')}...`
 }

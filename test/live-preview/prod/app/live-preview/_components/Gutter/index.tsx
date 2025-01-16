@@ -1,6 +1,6 @@
 import type { Ref } from 'react'
 
-import React, { forwardRef } from 'react'
+import React from 'react'
 
 import classes from './index.module.scss'
 
@@ -12,8 +12,8 @@ type Props = {
   right?: boolean
 }
 
-export const Gutter: React.FC<Props> = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { children, className, left = true, right = true } = props
+export const Gutter: React.FC<{ ref?: Ref<HTMLDivElement> } & Props> = (props) => {
+  const { children, className, left = true, ref, right = true } = props
 
   return (
     <div
@@ -30,6 +30,4 @@ export const Gutter: React.FC<Props> = forwardRef<HTMLDivElement, Props>((props,
       {children}
     </div>
   )
-})
-
-Gutter.displayName = 'Gutter'
+}

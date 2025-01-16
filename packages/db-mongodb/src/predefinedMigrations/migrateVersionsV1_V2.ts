@@ -106,12 +106,12 @@ async function migrateCollectionDocs({
     return
   }
 
-  const remainingDocIds = remainingDocs.map((doc) => doc._versionID)
+  const remainingDocIDs = remainingDocs.map((doc) => doc._versionID)
 
   await VersionsModel.updateMany(
     {
       _id: {
-        $in: remainingDocIds,
+        $in: remainingDocIDs,
       },
     },
     {

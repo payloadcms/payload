@@ -101,7 +101,9 @@ export const LinkElement = () => {
       const { state } = await getFormState({
         collectionSlug,
         data,
-        docPermissions,
+        docPermissions: {
+          fields: true,
+        },
         docPreferences: await getDocPreferences(),
         globalSlug,
         operation: 'update',

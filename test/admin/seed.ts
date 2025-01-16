@@ -50,6 +50,8 @@ export const seed = async (_payload) => {
           data: {
             description: 'Description',
             title: `Post ${i + 1}`,
+            disableListColumnText: 'Disable List Column Text',
+            disableListFilterText: 'Disable List Filter Text',
           },
           depth: 0,
           overrideAccess: true,

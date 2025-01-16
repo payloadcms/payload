@@ -66,6 +66,14 @@ export interface PluginOptions {
     | false
 
   /**
+   *
+   * Configures whether cron jobs defined in config.jobs.autoRun will be run or not
+   *
+   * @default true
+   */
+  enableAutoRun?: boolean
+
+  /**
    * Payload Cloud API endpoint
    *
    * @internal Endpoint override for developement

@@ -31,6 +31,7 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
+  checkboxFieldsSlug,
   codeFieldsSlug,
   collapsibleFieldsSlug,
   collectionSlugs,
@@ -309,6 +310,24 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    collection: checkboxFieldsSlug,
+    data: {
+      checkbox: true,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: checkboxFieldsSlug,
+    data: {
+      checkbox: false,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
     collection: codeFieldsSlug,
     data: codeDoc,
     depth: 0,
@@ -481,6 +500,28 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: 'LexicalInBlock',
     data: {
+      content: {
+        root: {
+          children: [
+            {
+              format: '',
+              type: 'block',
+              version: 2,
+              fields: {
+                id: '6773773284be8978db7a498d',
+                lexicalInBlock: textToLexicalJSON({ text: 'text' }),
+                blockName: '',
+                blockType: 'blockInLexical',
+              },
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      },
       blocks: [
         {
           blockType: 'lexicalInBlock2',

@@ -23,6 +23,7 @@ export const tgzToPkgNameMap = {
   '@payloadcms/payload-cloud': 'payloadcms-payload-cloud-*',
   '@payloadcms/plugin-cloud-storage': 'payloadcms-plugin-cloud-storage-*',
   '@payloadcms/plugin-form-builder': 'payloadcms-plugin-form-builder-*',
+  '@payloadcms/plugin-multi-tenant': 'payloadcms-plugin-multi-tenant-*',
   '@payloadcms/plugin-nested-docs': 'payloadcms-plugin-nested-docs-*',
   '@payloadcms/plugin-redirects': 'payloadcms-plugin-redirects-*',
   '@payloadcms/plugin-search': 'payloadcms-plugin-search-*',

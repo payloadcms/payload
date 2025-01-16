@@ -87,7 +87,13 @@ export const buildDrizzleTable: BuildDrizzleTable = ({ adapter, locales, rawTabl
     }
 
     if (column.primaryKey) {
-      columns[key].primaryKey()
+      let args: Record<string, unknown> | undefined = undefined
+
+      if (column.type === 'integer' && column.autoIncrement) {
+        args = { autoIncrement: true }
+      }
+
+      columns[key].primaryKey(args)
     }
 
     if (column.notNull) {

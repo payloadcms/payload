@@ -6,6 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -25,14 +26,18 @@ type SelectFieldBaseClientProps = {
   readonly value?: string
 }
 
+type SelectFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutType> &
   SelectFieldBaseClientProps
 
-export type SelectFieldServerProps = ServerFieldBase<SelectField, SelectFieldClientWithoutType>
+export type SelectFieldServerProps = SelectFieldBaseServerProps &
+  ServerFieldBase<SelectField, SelectFieldClientWithoutType>
 
 export type SelectFieldServerComponent = FieldServerComponent<
   SelectField,
-  SelectFieldClientWithoutType
+  SelectFieldClientWithoutType,
+  SelectFieldBaseServerProps
 >
 
 export type SelectFieldClientComponent = FieldClientComponent<

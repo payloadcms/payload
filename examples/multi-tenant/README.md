@@ -6,15 +6,14 @@ This example demonstrates how to achieve a multi-tenancy in [Payload](https://gi
 
 To spin up this example locally, follow these steps:
 
-1. Clone this repo
-1. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+1. Run the following command to create a project from the example:
 
-   > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
+- `npx create-payload-app --example multi-tenant`
 
-1. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+2. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
    - Press `y` when prompted to seed the database
-1. `open http://localhost:3000` to access the home page
-1. `open http://localhost:3000/admin` to access the admin panel
+3. `open http://localhost:3000` to access the home page
+4. `open http://localhost:3000/admin` to access the admin panel
    - Login with email `demo@payloadcms.com` and password `demo`
 
 ## How it works
@@ -41,9 +40,13 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
   **Domain-based Tenant Setting**:
 
-  This example also supports domain-based tenant selection, where tenants can be associated with specific domains. If a tenant is associated with a domain (e.g., `abc.localhost.com:3000`), when a user logs in from that domain, they will be automatically scoped to the matching tenant. This is accomplished through an optional `afterLogin` hook that sets a `payload-tenant` cookie based on the domain.
+  This example also supports domain-based tenant selection, where tenants can be associated with a specific domain. If a tenant is associated with a domain (e.g., `gold.localhost.com:3000`), when a user logs in from that domain, they will be automatically scoped to the matching tenant. This is accomplished through an optional `afterLogin` hook that sets a `payload-tenant` cookie based on the domain.
 
-  By default, this functionality is commented out in the code but can be enabled easily. See the `setCookieBasedOnDomain` hook in the `Users` collection for more details.
+  The seed script seeds 3 tenants, for the domain portion of the example to function properly you will need to add the following entries to your systems `/etc/hosts` file:
+
+  - gold.localhost.com:3000
+  - silver.localhost.com:3000
+  - bronze.localhost.com:3000
 
 - #### Pages
 

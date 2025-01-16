@@ -25,19 +25,16 @@ jobs:
         with:
           debug-only: ${{ inputs.dry-run || false }}
 
-          days-before-stale: 23
-          days-before-close: 7
-          days-before-pr-close: -1 # Never close PRs
+          days-before-stale: 30
+          days-before-close: -1 # Disable closing
           ascending: true
           operations-per-run: 300
+          exempt-all-assignees: true
 
           # Issues
           stale-issue-label: stale
           exempt-issue-labels: 'prioritized,keep,created-by: Payload team,created-by: Contributor,status: verified'
-          stale-issue-message: |
-            This issue has been marked as stale due to lack of activity.
-
-            To keep this issue open, please indicate that it is still relevant in a comment below.
+          stale-issue-message: ''
 
           close-issue-message: |
             This issue was automatically closed due to lack of activity.
@@ -45,10 +42,7 @@ jobs:
           # Pull Requests
           stale-pr-label: stale
           exempt-pr-labels: 'prioritized,keep,created-by: Payload team,created-by: Contributor'
-          stale-pr-message: |
-            This PR is stale due to lack of activity.
-
-            To keep the PR open, please indicate that it is still relevant in a comment below.
+          stale-pr-message: ''
           close-pr-message: |
             This pull request was automatically closed due to lack of activity.
 

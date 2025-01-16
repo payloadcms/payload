@@ -1,5 +1,7 @@
 import type { SetColumnID } from '@payloadcms/drizzle/types'
 
+import type { SQLiteAdapter } from '../types.js'
+
 export const setColumnID: SetColumnID = ({ adapter, columns, fields }) => {
   const idField = fields.find((field) => field.name === 'id')
   if (idField) {
@@ -36,6 +38,7 @@ export const setColumnID: SetColumnID = ({ adapter, columns, fields }) => {
   columns.id = {
     name: 'id',
     type: 'integer',
+    autoIncrement: (adapter as unknown as SQLiteAdapter).autoIncrement,
     primaryKey: true,
   }
 

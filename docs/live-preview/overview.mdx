@@ -29,8 +29,8 @@ const config = buildConfig({
 })
 ```
 <Banner type="warning">
-  <strong>Reminder:</strong>
-  Alternatively, you can define the <code>admin.livePreview</code> property on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Settings defined here will be merged into the top-level as overrides.
+  **Reminder:**
+  Alternatively, you can define the `admin.livePreview` property on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Settings defined here will be merged into the top-level as overrides.
 </Banner>
 
 {/* IMAGE OF LIVE PREVIEW HERE */}
@@ -43,12 +43,12 @@ The following options are available:
 
 | Path              | Description                                                                                                                                           |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`url`** \*      | String, or function that returns a string, pointing to your front-end application. This value is used as the iframe `src`. [More details](#url).      |
+| **`url`** *      | String, or function that returns a string, pointing to your front-end application. This value is used as the iframe `src`. [More details](#url).      |
 | **`breakpoints`** | Array of breakpoints to be used as “device sizes” in the preview window. Each item appears as an option in the toolbar. [More details](#breakpoints). |
 | **`collections`** | Array of collection slugs to enable Live Preview on.                                                                                                  |
 | **`globals`**     | Array of global slugs to enable Live Preview on.                                                                                                      |
 
-_\* An asterisk denotes that a property is required._
+_* An asterisk denotes that a property is required._
 
 ### URL
 
@@ -88,10 +88,10 @@ const config = buildConfig({
       // highlight-start
       url: ({
         data,
-        documentInfo,
+        collectionConfig,
         locale
       }) => `${data.tenant.url}${ // Multi-tenant top-level domain
-        documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
+        collectionConfig.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
       }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
       collections: ['pages'],
     },
@@ -150,14 +150,12 @@ The following options are available for each breakpoint:
 
 | Path            | Description                                                                 |
 | --------------- | --------------------------------------------------------------------------- |
-| **`label`** \*  | The label to display in the drop-down. This is what the user will see.      |
-| **`name`** \*   | The name of the breakpoint.                                                 |
-| **`width`** \*  | The width of the breakpoint. This is used to set the width of the iframe.   |
-| **`height`** \* | The height of the breakpoint. This is used to set the height of the iframe. |
+| **`label`** *  | The label to display in the drop-down. This is what the user will see.      |
+| **`name`** *   | The name of the breakpoint.                                                 |
+| **`width`** *  | The width of the breakpoint. This is used to set the width of the iframe.   |
+| **`height`** * | The height of the breakpoint. This is used to set the height of the iframe. |
 
-_\* An asterisk denotes that a property is required._
-
-{/* IMAGE OF TOOLBAR HERE */}
+_* An asterisk denotes that a property is required._
 
 The "Responsive" option is always available in the drop-down and requires no additional configuration. This is the default breakpoint that will be used on initial load. This option styles the iframe with a width and height of `100%` so that it fills the screen at its maximum size and automatically resizes as the window changes size.
 
@@ -167,4 +165,4 @@ If you prefer to freely resize the Live Preview without the use of breakpoints, 
 
 ## Example
 
-For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview/payload).
+For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview).

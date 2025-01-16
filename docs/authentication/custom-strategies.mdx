@@ -19,15 +19,15 @@ A strategy is made up of the following:
 
 | Parameter                   | Description                                                               |
 | --------------------------- | ------------------------------------------------------------------------- |
-| **`name`** \*               | The name of your strategy                                                 |
-| **`authenticate`**&nbsp;\*  | A function that takes in the parameters below and returns a user or null. |
+| **`name`** *               | The name of your strategy                                                 |
+| **`authenticate`** *  | A function that takes in the parameters below and returns a user or null. |
 
 The `authenticate` function is passed the following arguments:
 
 | Argument            | Description                                                                                       |
 | ------------------- | ------------------------------------------------------------------------------------------------- |
-| **`headers`** \*    | The headers on the incoming request. Useful for retrieving identifiable information on a request. |
-| **`payload`** \*    | The Payload class. Useful for authenticating the identifiable information against Payload.        |
+| **`headers`** *    | The headers on the incoming request. Useful for retrieving identifiable information on a request. |
+| **`payload`** *    | The Payload class. Useful for authenticating the identifiable information against Payload.        |
 | **`isGraphQL`**     | Whether or not the request was made from a GraphQL endpoint. Default is `false`.                  |
 
 

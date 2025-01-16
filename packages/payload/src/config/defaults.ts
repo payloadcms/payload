@@ -10,7 +10,6 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     custom: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
     dependencies: {},
-    disable: false,
     importMap: {
       baseDir: `${typeof process?.cwd === 'function' ? process.cwd() : ''}`,
     },

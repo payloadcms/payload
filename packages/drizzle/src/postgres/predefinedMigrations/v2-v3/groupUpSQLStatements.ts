@@ -14,10 +14,10 @@ export type Groups =
  */
 function convertAddColumnToAlterColumn(sql) {
   // Regular expression to match the ADD COLUMN statement with its constraints
-  const regex = /ALTER TABLE ("[^"]+") ADD COLUMN ("[^"]+") [\w\s]+ NOT NULL;/
+  const regex = /ALTER TABLE ("[^"]+")\.(".*?") ADD COLUMN ("[^"]+") [\w\s]+ NOT NULL;/
 
   // Replace the matched part with "ALTER COLUMN ... SET NOT NULL;"
-  return sql.replace(regex, 'ALTER TABLE $1 ALTER COLUMN $2 SET NOT NULL;')
+  return sql.replace(regex, 'ALTER TABLE $1.$2 ALTER COLUMN $3 SET NOT NULL;')
 }
 
 export const groupUpSQLStatements = (list: string[]): Record<Groups, string[]> => {

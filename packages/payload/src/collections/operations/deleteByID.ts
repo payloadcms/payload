@@ -19,6 +19,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
+import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -148,6 +149,18 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 
     if (collectionConfig.versions) {
       await deleteCollectionVersions({
+        id,
+        slug: collectionConfig.slug,
+        payload,
+        req,
+      })
+    }
+
+    // /////////////////////////////////////
+    // Delete scheduled posts
+    // /////////////////////////////////////
+    if (collectionConfig.versions?.drafts && collectionConfig.versions.drafts.schedulePublish) {
+      await deleteScheduledPublishJobs({
         id,
         slug: collectionConfig.slug,
         payload,

@@ -6,7 +6,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config, Media, Relation } from './payload-types.js'
+import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -22,6 +22,8 @@ import { RESTClient } from '../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
+  adminThumbnailWithSearchQueries,
+  mediaWithoutCacheTagsSlug,
   adminThumbnailSizeSlug,
   animatedTypeMedia,
   audioSlug,
@@ -48,6 +50,8 @@ let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
+let adminThumbnailWithSearchQueriesURL: AdminUrlUtil
+let mediaWithoutCacheTagsSlugURL: AdminUrlUtil
 let focalOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
@@ -55,7 +59,7 @@ let withOnlyJPEGMetadataURL: AdminUrlUtil
 let relationPreviewURL: AdminUrlUtil
 let customFileNameURL: AdminUrlUtil
 
-describe('uploads', () => {
+describe('Uploads', () => {
   let page: Page
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -68,6 +72,11 @@ describe('uploads', () => {
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
+    adminThumbnailWithSearchQueriesURL = new AdminUrlUtil(
+      serverURL,
+      adminThumbnailWithSearchQueries,
+    )
+    mediaWithoutCacheTagsSlugURL = new AdminUrlUtil(serverURL, mediaWithoutCacheTagsSlug)
     focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
@@ -428,6 +437,77 @@ describe('uploads', () => {
       'src',
       'https://payloadcms.com/images/universal-truth.jpg',
     )
+  })
+
+  test('should render adminThumbnail when using a custom thumbnail URL with additional queries', async () => {
+    await page.goto(adminThumbnailWithSearchQueriesURL.list)
+    await page.waitForURL(adminThumbnailWithSearchQueriesURL.list)
+
+    const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
+    // Match the URL with the regex pattern
+    const regexPattern = /\/_next\/image\?url=.*?&w=384&q=5/
+
+    await expect(genericUploadImage).toHaveAttribute('src', regexPattern)
+  })
+
+  test('should render adminThumbnail without the additional cache tag', async () => {
+    const imageDoc = (
+      await payload.find({
+        collection: mediaWithoutCacheTagsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          mimeType: {
+            equals: 'image/png',
+          },
+        },
+      })
+    ).docs[0]
+
+    await page.goto(mediaWithoutCacheTagsSlugURL.edit(imageDoc.id))
+
+    const genericUploadImage = page.locator('.file-details .thumbnail img')
+
+    const src = await genericUploadImage.getAttribute('src')
+
+    /**
+     * Regex matcher for date cache tags.
+     *
+     * @example it will match `?2022-01-01T00:00:00.000Z`
+     */
+    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
+
+    expect(src).not.toMatch(cacheTagPattern)
+  })
+
+  test('should render adminThumbnail with the cache tag by default', async () => {
+    const imageDoc = (
+      await payload.find({
+        collection: adminThumbnailFunctionSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          mimeType: {
+            equals: 'image/png',
+          },
+        },
+      })
+    ).docs[0]
+
+    await page.goto(adminThumbnailFunctionURL.edit(imageDoc.id))
+
+    const genericUploadImage = page.locator('.file-details .thumbnail img')
+
+    const src = await genericUploadImage.getAttribute('src')
+
+    /**
+     * Regex matcher for date cache tags.
+     *
+     * @example it will match `?2022-01-01T00:00:00.000Z`
+     */
+    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
+
+    expect(src).toMatch(cacheTagPattern)
   })
 
   test('should render adminThumbnail when using a specific size', async () => {

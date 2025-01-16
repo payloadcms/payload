@@ -45,14 +45,13 @@ export type FieldState = {
    */
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
-  initialValue: unknown
-  isSidebar?: boolean
+  initialValue?: unknown
   passesCondition?: boolean
   requiresRender?: boolean
   rows?: Row[]
-  valid: boolean
+  valid?: boolean
   validate?: Validate
-  value: unknown
+  value?: unknown
 }
 
 export type FieldStateWithoutComponents = Omit<FieldState, 'customComponents'>

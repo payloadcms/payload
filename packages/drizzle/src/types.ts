@@ -270,11 +270,21 @@ export type EnumRawColumn = (
 ) &
   BaseRawColumn
 
+export type IntegerRawColumn = {
+  /**
+   * SQLite only.
+   * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for primary key to ensure that the same ID cannot be reused from previously deleted rows.
+   */
+  autoIncrement?: boolean
+  type: 'integer'
+} & BaseRawColumn
+
 export type RawColumn =
   | ({
-      type: 'boolean' | 'geometry' | 'integer' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
+      type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
     } & BaseRawColumn)
   | EnumRawColumn
+  | IntegerRawColumn
   | TimestampRawColumn
   | UUIDRawColumn
 
@@ -285,6 +295,15 @@ export type SetColumnID = (args: {
   columns: Record<string, RawColumn>
   fields: FlattenedField[]
 }) => IDType
+
+export type ColumnToCodeConverter = (args: {
+  adapter: DrizzleAdapter
+  addEnum: (name: string, options: string[]) => void
+  addImport: (from: string, name: string) => void
+  column: RawColumn
+  locales?: string[]
+  tableKey: string
+}) => string
 
 export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args: {
   adapter: T

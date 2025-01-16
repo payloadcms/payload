@@ -82,7 +82,7 @@ function $convertFromMarkdownString(
   transformers: Array<Transformer> = TRANSFORMERS,
   node?: ElementNode,
   shouldPreserveNewLines = false,
-  shouldMergeAdjacentLines = false,
+  shouldMergeAdjacentLines = true,
 ): void {
   const sanitizedMarkdown = shouldPreserveNewLines
     ? markdown

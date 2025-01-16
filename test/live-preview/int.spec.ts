@@ -1,6 +1,11 @@
 import type { Payload } from 'payload'
 
-import { handleMessage, mergeData, traverseRichText } from '@payloadcms/live-preview'
+import {
+  handleMessage,
+  type LivePreviewMessageEvent,
+  mergeData,
+  traverseRichText,
+} from '@payloadcms/live-preview'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fieldSchemaToJSON } from 'payload/shared'
@@ -97,7 +102,7 @@ describe('Collections - Live Preview', () => {
           type: 'payload-live-preview',
         },
         origin: serverURL,
-      } as MessageEvent,
+      } as MessageEvent as LivePreviewMessageEvent<Page>,
       initialData: {
         title: 'Test Page',
       } as Page,
@@ -118,7 +123,7 @@ describe('Collections - Live Preview', () => {
           type: 'payload-live-preview',
         },
         origin: serverURL,
-      } as MessageEvent,
+      } as MessageEvent as LivePreviewMessageEvent<Page>,
       initialData: {
         title: 'Test Page',
       } as Page,

@@ -6,7 +6,10 @@ This example demonstrates how to integrate email functionality into Payload.
 
 To spin up this example locally, follow these steps:
 
-1. Clone this repo
+1. Run the following command to create a project from the example:
+
+- `npx create-payload-app --example email`
+
 2. `cp .env.example .env` to copy the example environment variables
 3. `pnpm install && pnpm dev` to install dependencies and start the dev server
 4. open `http://localhost:3000/admin` to access the admin panel

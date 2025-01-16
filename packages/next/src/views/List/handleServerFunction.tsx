@@ -1,5 +1,4 @@
-import type { ListPreferences } from '@payloadcms/ui'
-import type { ListQuery, PayloadRequest, VisibleEntities } from 'payload'
+import type { ListPreferences, ListQuery, PayloadRequest, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'

@@ -8,7 +8,7 @@ const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, 'test.env') })
 
-let multiplier = process.env.CI ? 3 : 0.5
+let multiplier = process.env.CI ? 3 : 0.75
 let smallMultiplier = process.env.CI ? 2 : 0.75
 
 export const TEST_TIMEOUT_LONG = 640000 * multiplier // 8*3 minutes - used as timeOut for the beforeAll

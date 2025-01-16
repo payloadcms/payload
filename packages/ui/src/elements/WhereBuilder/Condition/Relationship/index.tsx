@@ -208,14 +208,11 @@ export const RelationshipField: React.FC<Props> = (props) => {
     return undefined
   }, [hasMany, hasMultipleRelations, value, options])
 
-  const handleInputChange = useCallback(
-    (newSearch) => {
-      if (search !== newSearch) {
-        setSearch(newSearch)
-      }
-    },
-    [search],
-  )
+  const handleInputChange = (input: string) => {
+    const relationSlug = partiallyLoadedRelationshipSlugs.current[0]
+    nextPageByRelationshipRef.current.set(relationSlug, 1)
+    setSearch(input)
+  }
 
   const addOptionByID = useCallback(
     async (id, relation) => {

@@ -83,26 +83,30 @@ export function BulkUploadDrawer() {
 
 type BulkUploadContext = {
   collectionSlug: string
+  currentActivePath: string
   drawerSlug: string
   initialFiles: FileList
   maxFiles: number
   onCancel: () => void
   onSuccess: (newDocs: JsonObject[], errorCount: number) => void
   setCollectionSlug: (slug: string) => void
+  setCurrentActivePath: (path: string) => void
   setInitialFiles: (files: FileList) => void
   setMaxFiles: (maxFiles: number) => void
   setOnCancel: (onCancel: BulkUploadContext['onCancel']) => void
-  setOnSuccess: (onSuccess: BulkUploadContext['onSuccess']) => void
+  setOnSuccess: (path: string, onSuccess: BulkUploadContext['onSuccess']) => void
 }
 
 const Context = React.createContext<BulkUploadContext>({
   collectionSlug: '',
+  currentActivePath: undefined,
   drawerSlug: '',
   initialFiles: undefined,
   maxFiles: undefined,
   onCancel: () => null,
   onSuccess: () => null,
   setCollectionSlug: () => null,
+  setCurrentActivePath: () => null,
   setInitialFiles: () => null,
   setMaxFiles: () => null,
   setOnCancel: () => null,
@@ -110,24 +114,30 @@ const Context = React.createContext<BulkUploadContext>({
 })
 export function BulkUploadProvider({ children }: { readonly children: React.ReactNode }) {
   const [collection, setCollection] = React.useState<string>()
-  const [onSuccessFunction, setOnSuccessFunction] = React.useState<BulkUploadContext['onSuccess']>()
+  const [onSuccessFunctionMap, setOnSuccessFunctionMap] =
+    React.useState<Record<string, BulkUploadContext['onSuccess']>>()
   const [onCancelFunction, setOnCancelFunction] = React.useState<BulkUploadContext['onCancel']>()
   const [initialFiles, setInitialFiles] = React.useState<FileList>(undefined)
   const [maxFiles, setMaxFiles] = React.useState<number>(undefined)
+  const [currentActivePath, setCurrentActivePath] = React.useState<string>(undefined)
   const drawerSlug = useBulkUploadDrawerSlug()
 
   const setCollectionSlug: BulkUploadContext['setCollectionSlug'] = (slug) => {
     setCollection(slug)
   }
 
-  const setOnSuccess: BulkUploadContext['setOnSuccess'] = (onSuccess) => {
-    setOnSuccessFunction(() => onSuccess)
-  }
+  const setOnSuccess: BulkUploadContext['setOnSuccess'] = React.useCallback((path, onSuccess) => {
+    setOnSuccessFunctionMap((prev) => ({
+      ...prev,
+      [path]: onSuccess,
+    }))
+  }, [])
 
   return (
     <Context.Provider
       value={{
         collectionSlug: collection,
+        currentActivePath,
         drawerSlug,
         initialFiles,
         maxFiles,
@@ -137,11 +147,13 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
           }
         },
         onSuccess: (docIDs, errorCount) => {
-          if (typeof onSuccessFunction === 'function') {
+          if (onSuccessFunctionMap && Object.hasOwn(onSuccessFunctionMap, currentActivePath)) {
+            const onSuccessFunction = onSuccessFunctionMap[currentActivePath]
             onSuccessFunction(docIDs, errorCount)
           }
         },
         setCollectionSlug,
+        setCurrentActivePath,
         setInitialFiles,
         setMaxFiles,
         setOnCancel: setOnCancelFunction,

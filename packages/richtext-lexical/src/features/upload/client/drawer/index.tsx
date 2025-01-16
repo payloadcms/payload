@@ -2,6 +2,7 @@
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { toast } from '@payloadcms/ui'
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -92,9 +93,32 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   return <ListDrawer onSelect={onSelect} />
 }
 
+const UploadDrawerComponentFallback: React.FC = () => {
+  const [editor] = useLexicalComposerContext()
+
+  useEffect(() => {
+    return editor.registerCommand<{
+      replace: { nodeKey: string } | false
+    }>(
+      INSERT_UPLOAD_WITH_DRAWER_COMMAND,
+      () => {
+        toast.error('No upload collections enabled')
+        return true
+      },
+      COMMAND_PRIORITY_EDITOR,
+    )
+  }, [editor])
+
+  return null
+}
+
 export const UploadDrawer = (props: Props): React.ReactNode => {
   return (
-    <EnabledRelationshipsCondition {...props} uploads>
+    <EnabledRelationshipsCondition
+      {...props}
+      FallbackComponent={UploadDrawerComponentFallback}
+      uploads
+    >
       <UploadDrawerComponent {...props} />
     </EnabledRelationshipsCondition>
   )

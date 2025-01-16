@@ -11,7 +11,7 @@ interface Args {
 }
 
 // Convert a stream into a promise that resolves with a Buffer
-const streamToBuffer = async (readableStream) => {
+const streamToBuffer = async (readableStream: any) => {
   const chunks = []
   for await (const chunk of readableStream) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
@@ -52,7 +52,7 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         Key: key,
       })
 
-      if (!object.Body) {
+      if (!object.Body || !object.ContentType || !object.ETag) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 

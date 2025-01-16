@@ -8,6 +8,7 @@ import type { NodeWithHooks } from '../../typesServer.js'
 
 import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
 import {
+  $convertFromMarkdownString,
   $convertToMarkdownString,
   type MultilineElementTransformer,
   type TextMatchTransformer,
@@ -15,7 +16,6 @@ import {
 } from '../../../packages/@lexical/markdown/index.js'
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
-import { $convertFromMarkdownString } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'
 import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
 import {
@@ -403,8 +403,7 @@ function getMarkdownTransformerForBlock(
 
         let childrenString = ''
         if (block?.jsx?.doNotTrimChildren) {
-          // Do not trim, but remove empty lines
-          childrenString = linesInBetween.filter((line) => line.trim().length > 0).join('\n')
+          childrenString = linesInBetween.join('\n')
         } else {
           childrenString = linesInBetween.join('\n').trim()
         }

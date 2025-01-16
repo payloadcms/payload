@@ -17,6 +17,7 @@ export const find: Find = async function find(
 
   return findMany({
     adapter: this,
+    collectionSlug: collectionConfig.slug,
     fields: collectionConfig.flattenedFields,
     joins,
     limit,

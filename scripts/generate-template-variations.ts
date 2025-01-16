@@ -9,8 +9,6 @@
  *       There is no way currently to have lint-staged ignore the templates directory.
  */
 
-import type { DbType, StorageAdapterType } from 'packages/create-payload-app/src/types.js'
-
 import chalk from 'chalk'
 import { execSync } from 'child_process'
 import { configurePayloadConfig } from 'create-payload-app/lib/configure-payload-config.js'
@@ -19,6 +17,8 @@ import minimist from 'minimist'
 import * as fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+
+import type { DbType, StorageAdapterType } from '../packages/create-payload-app/src/types.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -95,7 +95,7 @@ async function main() {
         encodeURI(
           `${templateRepoUrlBase}/with-vercel-website` +
             '&project-name=payload-project' +
-            '&env=PAYLOAD_SECRET' +
+            '&env=PAYLOAD_SECRET%2CCRON_SECRET' +
             '&build-command=pnpm run ci' +
             '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
         ),
@@ -251,7 +251,7 @@ async function main() {
           ...process.env,
           PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
-          DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/payloadtests',
+          DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
         },
       })
     }
@@ -315,12 +315,25 @@ async function writeEnvExample({
 
   const fileContents = envFileContents
     .split('\n')
-    .filter((e) => e)
+    .filter((l) => {
+      // Remove the unwanted PostgreSQL connection comment for "with-vercel-website"
+      if (
+        dbType === 'vercel-postgres' &&
+        (l.startsWith('# Or use a PG connection string') ||
+          l.startsWith('#DATABASE_URI=postgresql://'))
+      ) {
+        return false // Skip this line
+      }
+      return true // Keep other lines
+    })
     .map((l) => {
       if (l.startsWith('DATABASE_URI')) {
+        if (dbType === 'mongodb') {
+          l = 'MONGODB_URI=mongodb://127.0.0.1/your-database-name'
+        }
         // Use db-appropriate connection string
         if (dbType.includes('postgres')) {
-          l = 'DATABASE_URI=postgresql://127.0.0.1:5432/payloadtests'
+          l = 'DATABASE_URI=postgresql://127.0.0.1:5432/your-database-name'
         }
 
         // Replace DATABASE_URI with the correct env name if set
@@ -330,6 +343,7 @@ async function writeEnvExample({
       }
       return l
     })
+    .filter((l) => l.trim() !== '')
     .join('\n')
 
   console.log(`Writing to ${envExamplePath}`)

@@ -49,6 +49,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Alinear a la izquierda',
     alignRightLabel: 'Alinear a la derecha',
   },
+  et: {
+    alignCenterLabel: 'Keskjoondus',
+    alignJustifyLabel: 'Rööpjoondus',
+    alignLeftLabel: 'Vasakjoondus',
+    alignRightLabel: 'Paremjoondus',
+  },
   fa: {
     alignCenterLabel: 'تراز در مرکز',
     alignJustifyLabel: 'تراز کردن از دو طرف',
@@ -156,6 +162,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignJustifyLabel: 'Zarovnať do bloku',
     alignLeftLabel: 'Zarovnať doľava',
     alignRightLabel: 'Zarovnať doprava',
+  },
+  sl: {
+    alignCenterLabel: 'Poravnaj na sredino',
+    alignJustifyLabel: 'Poravnaj Obojestransko',
+    alignLeftLabel: 'Poravnaj na levo',
+    alignRightLabel: 'Poravnaj na desno',
   },
   sv: {
     alignCenterLabel: 'Centrera',

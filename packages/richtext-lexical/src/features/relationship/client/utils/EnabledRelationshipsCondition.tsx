@@ -29,8 +29,12 @@ const filterRichTextCollections: FilteredCollectionsT = (collections, options) =
   })
 }
 
-export const EnabledRelationshipsCondition: React.FC<any> = (props) => {
-  const { children, uploads = false, ...rest } = props
+export const EnabledRelationshipsCondition: React.FC<{
+  children: any
+  FallbackComponent?: React.FC
+  uploads?: boolean
+}> = (props) => {
+  const { children, FallbackComponent, uploads = false, ...rest } = props
   const {
     config: { collections },
   } = useConfig()
@@ -44,7 +48,7 @@ export const EnabledRelationshipsCondition: React.FC<any> = (props) => {
   )
 
   if (!enabledCollectionSlugs.length) {
-    return null
+    return FallbackComponent ? <FallbackComponent {...rest} /> : null
   }
 
   return React.cloneElement(children, { ...rest, enabledCollectionSlugs })

@@ -66,6 +66,8 @@ export interface Config {
       inlineTaskTest: WorkflowInlineTaskTest;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
+      subTask: WorkflowSubTask;
+      subTaskFails: WorkflowSubTaskFails;
     };
   };
   /**
@@ -155,6 +157,9 @@ export interface User {
  */
 export interface PayloadJob {
   id: string;
+  /**
+   * Input data provided to the job
+   */
   input?:
     | {
         [k: string]: unknown;
@@ -175,7 +180,13 @@ export interface PayloadJob {
     | null;
   completedAt?: string | null;
   totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
   hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
   error?:
     | {
         [k: string]: unknown;
@@ -185,6 +196,9 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
+  /**
+   * Task execution log
+   */
   log?:
     | {
         executedAt: string;
@@ -217,6 +231,21 @@ export interface PayloadJob {
           | number
           | boolean
           | null;
+        parent?: {
+          taskSlug?:
+            | (
+                | 'inline'
+                | 'UpdatePost'
+                | 'UpdatePostStep2'
+                | 'CreateSimple'
+                | 'CreateSimpleRetriesUndefined'
+                | 'CreateSimpleRetries0'
+                | 'CreateSimpleWithDuplicateMessage'
+                | 'ExternalTask'
+              )
+            | null;
+          taskID?: string | null;
+        };
         state: 'failed' | 'succeeded';
         error?:
           | {
@@ -245,6 +274,8 @@ export interface PayloadJob {
         | 'inlineTaskTest'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
+        | 'subTask'
+        | 'subTaskFails'
       )
     | null;
   taskSlug?:
@@ -386,6 +417,12 @@ export interface PayloadJobsSelect<T extends boolean = true> {
         taskID?: T;
         input?: T;
         output?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
         state?: T;
         error?: T;
         id?: T;
@@ -633,6 +670,24 @@ export interface WorkflowExternalWorkflow {
  * via the `definition` "WorkflowRetriesBackoffTest".
  */
 export interface WorkflowRetriesBackoffTest {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSubTask".
+ */
+export interface WorkflowSubTask {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSubTaskFails".
+ */
+export interface WorkflowSubTaskFails {
   input: {
     message: string;
   };

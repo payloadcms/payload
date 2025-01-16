@@ -19,6 +19,8 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
+  '**/*.spec.ts',
+  'next-env.d.ts',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */

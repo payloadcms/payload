@@ -7,6 +7,10 @@ import { fileURLToPath } from 'url'
 import { Pages } from './collections/Pages'
 import { Tenants } from './collections/Tenants'
 import Users from './collections/Users'
+import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
+import { isSuperAdmin } from './access/isSuperAdmin'
+import type { Config } from './payload-types'
+import { getUserTenantIDs } from './utilities/getUserTenantIDs'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -14,9 +18,6 @@ const dirname = path.dirname(filename)
 // eslint-disable-next-line no-restricted-exports
 export default buildConfig({
   admin: {
-    components: {
-      afterNavLinks: ['@/components/TenantSelector#TenantSelectorRSC'],
-    },
     user: 'users',
   },
   collections: [Pages, Users, Tenants],
@@ -31,4 +32,26 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
+  plugins: [
+    multiTenantPlugin<Config>({
+      collections: {
+        pages: {},
+      },
+      tenantField: {
+        access: {
+          read: () => true,
+          update: ({ req }) => {
+            if (isSuperAdmin(req.user)) {
+              return true
+            }
+            return getUserTenantIDs(req.user).length > 0
+          },
+        },
+      },
+      tenantsArrayField: {
+        includeDefaultField: false,
+      },
+      userHasAccessToAllTenants: (user) => isSuperAdmin(user),
+    }),
+  ],
 })

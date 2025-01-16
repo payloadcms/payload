@@ -768,10 +768,11 @@ describe('Queues', () => {
     expect(allSimples.docs[7].title).toBe('from single task')
   })
 
-  it('can queue single tasks 150 times', async () => {
+  it('can queue single tasks hundreds of times', async () => {
+    const numberOfTasks = 150
     // TODO: Ramp up the limit from 150 to 500 or 1000, to test reliability of the database
     payload.config.jobs.deleteJobOnComplete = false
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < numberOfTasks; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
@@ -781,17 +782,17 @@ describe('Queues', () => {
     }
 
     await payload.jobs.run({
-      limit: 1000,
+      limit: numberOfTasks,
     })
 
     const allSimples = await payload.find({
       collection: 'simple',
-      limit: 1000,
+      limit: numberOfTasks,
     })
 
-    expect(allSimples.totalDocs).toBe(150) // Default limit: 10
+    expect(allSimples.totalDocs).toBe(numberOfTasks) // Default limit: 10
     expect(allSimples.docs[0].title).toBe('from single task')
-    expect(allSimples.docs[140].title).toBe('from single task')
+    expect(allSimples.docs[numberOfTasks - 1].title).toBe('from single task')
     payload.config.jobs.deleteJobOnComplete = true
   })
 
@@ -1050,5 +1051,81 @@ describe('Queues', () => {
 
     expect(allCompletedJobs.totalDocs).toBe(1)
     expect((allCompletedJobs.docs[0].input as any).message).toBe('from single task 2')
+  })
+
+  it('can run sub-tasks', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    const job = await payload.jobs.queue({
+      workflow: 'subTask',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    await payload.jobs.run()
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(2)
+    expect(allSimples.docs[0].title).toBe('hello!')
+    expect(allSimples.docs[1].title).toBe('hello!')
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.log[0].taskID).toBe('create doc 1')
+    //expect(jobAfterRun.log[0].parent.taskID).toBe('create two docs')
+    // jobAfterRun.log[0].parent should not exist
+    expect(jobAfterRun.log[0].parent).toBeUndefined()
+
+    expect(jobAfterRun.log[1].taskID).toBe('create doc 2')
+    //expect(jobAfterRun.log[1].parent.taskID).toBe('create two docs')
+    expect(jobAfterRun.log[1].parent).toBeUndefined()
+
+    expect(jobAfterRun.log[2].taskID).toBe('create two docs')
+  })
+
+  it('ensure successful sub-tasks are not retried', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'subTaskFails',
+      input: {
+        message: 'hello!',
+      },
+    })
+
+    let hasJobsRemaining = true
+
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run()
+
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+    })
+
+    expect(allSimples.totalDocs).toBe(1)
+    expect(allSimples.docs[0].title).toBe('hello!')
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // @ts-expect-error
+    expect(jobAfterRun.input.amountTask2Retried).toBe(3)
+    // @ts-expect-error
+    expect(jobAfterRun.input.amountTask1Retried).toBe(0)
   })
 })

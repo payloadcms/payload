@@ -30,13 +30,20 @@ export const defaultValuePromise = async <T>({
       typeof siblingData[field.name] === 'undefined' &&
       typeof field.defaultValue !== 'undefined'
     ) {
-      siblingData[field.name] = await getDefaultValue({
-        defaultValue: field.defaultValue,
-        locale,
-        req,
-        user,
-        value: siblingData[field.name],
-      })
+      try {
+        siblingData[field.name] = await getDefaultValue({
+          defaultValue: field.defaultValue,
+          locale,
+          req,
+          user,
+          value: siblingData[field.name],
+        })
+      } catch (err) {
+        req.payload.logger.error({
+          err,
+          msg: `Error calculating default value for field: ${field.name}`,
+        })
+      }
     }
   }
 

@@ -38,10 +38,8 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const { id, collectionSlug } = useDocumentInfo()
   const operation = useOperation()
 
-  const { dispatchField, field } = useFormFields(([fields, dispatch]) => ({
-    dispatchField: dispatch,
-    field: (fields && fields?.[path]) || null,
-  }))
+  const dispatchField = useFormFields(([_, dispatch]) => dispatch)
+  const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
 
   const { t } = useTranslation()
   const { config } = useConfig()

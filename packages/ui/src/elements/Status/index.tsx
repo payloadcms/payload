@@ -6,10 +6,12 @@ import { toast } from 'sonner'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
+import { drawerZBase } from '../Drawer/index.js'
 import './index.scss'
 
 const baseClass = 'status'
@@ -22,6 +24,9 @@ export const Status: React.FC = () => {
     globalSlug,
     hasPublishedDoc,
     incrementVersionCount,
+    setHasPublishedDoc,
+    setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
     unpublishedVersionCount,
   } = useDocumentInfo()
   const { toggleModal } = useModal()
@@ -35,6 +40,8 @@ export const Status: React.FC = () => {
   const { reset: resetForm } = useForm()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
+
+  const editDepth = useEditDepth()
 
   const unPublishModalSlug = `confirm-un-publish-${id}`
   const revertModalSlug = `confirm-revert-${id}`
@@ -106,8 +113,14 @@ export const Status: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         resetForm(data)
         toast.success(json.message)
-
         incrementVersionCount()
+        setMostRecentVersionIsAutosaved(false)
+
+        if (action === 'unpublish') {
+          setHasPublishedDoc(false)
+        } else if (action === 'revert') {
+          setUnpublishedVersionCount(0)
+        }
       } else {
         toast.error(t('error:unPublishingDocument'))
       }
@@ -124,17 +137,19 @@ export const Status: React.FC = () => {
     [
       api,
       collectionSlug,
-      incrementVersionCount,
       globalSlug,
-      i18n.language,
       id,
+      i18n.language,
+      incrementVersionCount,
       locale,
       resetForm,
-      revertModalSlug,
       serverURL,
+      setUnpublishedVersionCount,
       t,
       toggleModal,
+      revertModalSlug,
       unPublishModalSlug,
+      setHasPublishedDoc,
     ],
   )
 
@@ -159,7 +174,11 @@ export const Status: React.FC = () => {
               >
                 {t('version:unpublish')}
               </Button>
-              <Modal className={`${baseClass}__modal`} slug={unPublishModalSlug}>
+              <Modal
+                className={`${baseClass}__modal`}
+                slug={unPublishModalSlug}
+                style={{ zIndex: drawerZBase + editDepth }}
+              >
                 <div className={`${baseClass}__wrapper`}>
                   <div className={`${baseClass}__content`}>
                     <h1>{t('version:confirmUnpublish')}</h1>

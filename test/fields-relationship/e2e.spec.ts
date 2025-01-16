@@ -51,7 +51,7 @@ const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 
-describe('fields - relationship', () => {
+describe('Relationship Field', () => {
   let url: AdminUrlUtil
   let versionedRelationshipFieldURL: AdminUrlUtil
   let page: Page

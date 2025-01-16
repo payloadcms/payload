@@ -3,18 +3,19 @@ import type {
   ClientCollectionConfig,
   ClientConfig,
   ErrorResult,
+  ListPreferences,
   PaginatedDocs,
   SanitizedCollectionConfig,
 } from 'payload'
 
-import { dequal } from 'dequal/lite'
 import { formatErrors } from 'payload'
+import { isNumber } from 'payload/shared'
 
 import type { Column } from '../elements/Table/index.js'
-import type { ListPreferences } from '../elements/TableColumns/index.js'
 
 import { getClientConfig } from './getClientConfig.js'
 import { renderFilters, renderTable } from './renderTable.js'
+import { upsertPreferences } from './upsertPreferences.js'
 
 type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
@@ -135,68 +136,15 @@ export const buildTableState = async (
     )
   }
 
-  // get prefs, then set update them using the columns that we just received
-  const preferencesKey = `${collectionSlug}-list`
-
-  const preferencesResult = await payload
-    .find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      pagination: false,
-      where: {
-        and: [
-          {
-            key: {
-              equals: preferencesKey,
-            },
-          },
-          {
-            'user.relationTo': {
-              equals: user.collection,
-            },
-          },
-          {
-            'user.value': {
-              equals: user.id,
-            },
-          },
-        ],
-      },
-    })
-    .then((res) => res.docs[0] ?? { id: null, value: {} })
-
-  let newPrefs = preferencesResult.value
-
-  if (!preferencesResult.id || !dequal(columns, preferencesResult?.columns)) {
-    const preferencesArgs = {
-      collection: 'payload-preferences',
-      data: {
-        key: preferencesKey,
-        user: {
-          collection: user.collection,
-          value: user.id,
-        },
-        value: {
-          ...(preferencesResult?.value || {}),
-          columns,
-        },
-      },
-      depth: 0,
-      req,
-    }
-
-    if (preferencesResult.id) {
-      newPrefs = await payload
-        .update({
-          ...preferencesArgs,
-          id: preferencesResult.id,
-        })
-        ?.then((res) => res.value as ListPreferences)
-    } else {
-      newPrefs = await payload.create(preferencesArgs)?.then((res) => res.value as ListPreferences)
-    }
-  }
+  const listPreferences = await upsertPreferences<ListPreferences>({
+    key: `${collectionSlug}-list`,
+    req,
+    value: {
+      columns,
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      sort: query?.sort as string,
+    },
+  })
 
   let docs = docsFromArgs
   let data: PaginatedDocs
@@ -236,7 +184,7 @@ export const buildTableState = async (
 
   return {
     data,
-    preferences: newPrefs,
+    preferences: listPreferences,
     renderedFilters,
     state: columnState,
     Table,

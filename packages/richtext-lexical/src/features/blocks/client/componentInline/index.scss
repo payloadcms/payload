@@ -5,6 +5,11 @@
     display: inline-block;
   }
 
+  .inline-block.inline-block-not-found {
+    max-width: calc(var(--base) * 20);
+    color: var(--theme-error-500);
+  }
+
   .inline-block {
     @extend %body;
     @include shadow-sm;

@@ -67,6 +67,10 @@ export const getBaseFields = (
       hooks: {
         beforeChange: [
           ({ value }) => {
+            if (!value) {
+              return
+            }
+
             if (!validateUrl(value)) {
               return encodeURIComponent(value)
             }
@@ -77,7 +81,10 @@ export const getBaseFields = (
       label: ({ t }) => t('fields:enterURL'),
       required: true,
       // @ts-expect-error - TODO: fix this
-      validate: (value: string) => {
+      validate: (value: string, options) => {
+        if (options?.siblingData?.linkType === 'internal') {
+          return // no validation needed, as no url should exist for internal links
+        }
         if (!validateUrlMinimal(value)) {
           return 'Invalid URL'
         }

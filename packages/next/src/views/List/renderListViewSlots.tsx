@@ -14,6 +14,7 @@ type Args = {
   payload: Payload
   serverProps: ListComponentServerProps
 }
+
 export const renderListViewSlots = ({
   clientProps,
   collectionConfig,

@@ -33,6 +33,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Enlace',
     loadingWithEllipsis: 'Cargando...',
   },
+  et: {
+    label: 'Link',
+    loadingWithEllipsis: 'Laadimine...',
+  },
   fa: {
     label: 'پیوند',
     loadingWithEllipsis: 'در حال بارگذاری...',
@@ -104,6 +108,10 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Odkaz',
     loadingWithEllipsis: 'Načítava sa...',
+  },
+  sl: {
+    label: 'Povezava',
+    loadingWithEllipsis: 'Nalaganje...',
   },
   sv: {
     label: 'Länk',

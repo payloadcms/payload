@@ -20,6 +20,7 @@ import { ReindexConfirmModal } from './ReindexConfirmModal/index.js'
 const confirmReindexModalSlug = 'confirm-reindex-modal'
 
 export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
+  apiBasePath,
   collectionLabels,
   searchCollections,
   searchSlug,
@@ -45,8 +46,10 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
     closeConfirmModal()
     setLoading(true)
 
+    const basePath = apiBasePath.endsWith('/') ? apiBasePath.slice(0, -1) : apiBasePath
+
     try {
-      const endpointRes = await fetch(`/api/${searchSlug}/reindex?locale=${locale.code}`, {
+      const endpointRes = await fetch(`${basePath}/${searchSlug}/reindex?locale=${locale.code}`, {
         body: JSON.stringify({
           collections: reindexCollections,
         }),
@@ -67,7 +70,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
       setReindexCollections([])
       setLoading(false)
     }
-  }, [closeConfirmModal, isLoading, reindexCollections, router, searchSlug, locale])
+  }, [closeConfirmModal, isLoading, reindexCollections, router, searchSlug, locale, apiBasePath])
 
   const handleShowConfirmModal = useCallback(
     (collections: string | string[] = searchCollections) => {

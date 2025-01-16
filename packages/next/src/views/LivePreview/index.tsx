@@ -52,5 +52,17 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
         })
       : livePreviewConfig?.url
 
-  return <LivePreviewClient breakpoints={breakpoints} initialData={doc} url={url} />
+  return (
+    <LivePreviewClient
+      breakpoints={breakpoints}
+      Description={props.Description}
+      initialData={doc}
+      PreviewButton={props.PreviewButton}
+      PublishButton={props.PublishButton}
+      SaveButton={props.SaveButton}
+      SaveDraftButton={props.SaveDraftButton}
+      Upload={props.Upload}
+      url={url}
+    />
+  )
 }

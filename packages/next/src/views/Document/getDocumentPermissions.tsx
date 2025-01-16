@@ -10,7 +10,7 @@ import {
   hasSavePermission as getHasSavePermission,
   isEditing as getIsEditing,
 } from '@payloadcms/ui/shared'
-import { docAccessOperation, docAccessOperationGlobal } from 'payload'
+import { docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
@@ -59,8 +59,8 @@ export const getDocumentPermissions = async (args: {
           },
         }).then((permissions) => permissions.update)
       }
-    } catch (error) {
-      req.payload.logger.error(error)
+    } catch (err) {
+      logError({ err, payload: req.payload })
     }
   }
 
@@ -86,8 +86,8 @@ export const getDocumentPermissions = async (args: {
           },
         }).then((permissions) => permissions.update)
       }
-    } catch (error) {
-      req.payload.logger.error(error)
+    } catch (err) {
+      logError({ err, payload: req.payload })
     }
   }
 

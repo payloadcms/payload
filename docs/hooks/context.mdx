@@ -72,8 +72,8 @@ const Customer: CollectionConfig = {
   slug: 'customers',
   hooks: {
     afterChange: [
-      async ({ doc }) => {
-        await payload.update({
+      async ({ doc, req }) => {
+        await req.payload.update({
           // DANGER: updating the same slug as the collection in an afterChange will create an infinite loop!
           collection: 'customers',
           id: doc.id,
@@ -101,12 +101,12 @@ const MyCollection: CollectionConfig = {
   slug: 'slug',
   hooks: {
     afterChange: [
-      async ({ context, doc }) => {
+      async ({ context, doc, req }) => {
         // return if flag was previously set
         if (context.triggerAfterChange === false) {
           return
         }
-        await payload.update({
+        await req.payload.update({
           collection: contextHooksSlug,
           id: doc.id,
           data: {

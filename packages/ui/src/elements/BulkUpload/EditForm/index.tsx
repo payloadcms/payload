@@ -17,7 +17,7 @@ import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
-import { abortAndIgnore } from '../../../utilities/abortAndIgnore.js'
+import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
@@ -56,7 +56,7 @@ export function EditForm({ submitted }: EditFormProps) {
     getEntityConfig,
   } = useConfig()
 
-  const formStateAbortControllerRef = React.useRef<AbortController>(null)
+  const abortOnChangeRef = React.useRef<AbortController>(null)
 
   const collectionConfig = getEntityConfig({ collectionSlug: docSlug }) as ClientCollectionConfig
   const router = useRouter()
@@ -111,12 +111,10 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
     async ({ formState: prevFormState }) => {
-      abortAndIgnore(formStateAbortControllerRef.current)
-
-      const controller = new AbortController()
-      formStateAbortControllerRef.current = controller
+      const controller = handleAbortRef(abortOnChangeRef)
 
       const docPreferences = await getDocPreferences()
+
       const { state: newFormState } = await getFormState({
         collectionSlug,
         docPermissions,
@@ -127,14 +125,18 @@ export function EditForm({ submitted }: EditFormProps) {
         signal: controller.signal,
       })
 
+      abortOnChangeRef.current = null
+
       return newFormState
     },
     [collectionSlug, schemaPath, getDocPreferences, getFormState, docPermissions],
   )
 
   useEffect(() => {
+    const abortOnChange = abortOnChangeRef.current
+
     return () => {
-      abortAndIgnore(formStateAbortControllerRef.current)
+      abortAndIgnore(abortOnChange)
     }
   }, [])
 

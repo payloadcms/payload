@@ -20,13 +20,20 @@ const baseClass = 'template-default'
 export type DefaultTemplateProps = {
   children?: React.ReactNode
   className?: string
+  collectionSlug?: string
+  docID?: number | string
+  globalSlug?: string
   viewActions?: CustomComponent[]
+  viewType?: 'edit' | 'list'
   visibleEntities: VisibleEntities
 } & ServerProps
 
 export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   children,
   className,
+  collectionSlug,
+  docID,
+  globalSlug,
   i18n,
   locale,
   params,
@@ -35,6 +42,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   searchParams,
   user,
   viewActions,
+  viewType,
   visibleEntities,
 }) => {
   const {
@@ -50,6 +58,20 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 
   const serverProps = React.useMemo<ServerProps>(
     () => ({
+      collectionSlug,
+      docID,
+      globalSlug,
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+      viewType,
+      visibleEntities,
+    }),
+    [
       i18n,
       locale,
       params,
@@ -58,8 +80,11 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       searchParams,
       user,
       visibleEntities,
-    }),
-    [i18n, locale, params, payload, permissions, searchParams, user, visibleEntities],
+      globalSlug,
+      collectionSlug,
+      docID,
+      viewType,
+    ],
   )
 
   const { Actions } = React.useMemo<{

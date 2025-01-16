@@ -11,14 +11,14 @@ Database transactions allow your application to make a series of database change
 By default, Payload will use transactions for all data changing operations, as long as it is supported by the configured database. Database changes are contained within all Payload operations and any errors thrown will result in all changes being rolled back without being committed. When transactions are not supported by the database, Payload will continue to operate as expected without them.
 
 <Banner type="info">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   MongoDB requires a connection to a replicaset in order to make use of transactions.
 </Banner>
 
 <Banner type="info">
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   Transactions in SQLite are disabled by default. You need to pass `transactionOptions: {}` to enable them.
 </Banner>
 

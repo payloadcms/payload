@@ -1,3 +1,4 @@
+import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedConfig } from '../../config/types.js'
@@ -5,7 +6,6 @@ import type { JobsConfig } from './types/index.js'
 
 import { fieldsToJSONSchema } from '../../utilities/configToJSONSchema.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
-
 export function generateJobsJSONSchemas(
   config: SanitizedConfig,
   jobsConfig: JobsConfig,
@@ -16,6 +16,7 @@ export function generateJobsJSONSchemas(
    * if they have custom ID fields.
    */
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
+  i18n?: I18n,
 ): {
   definitions?: Map<string, JSONSchema4>
   properties?: { tasks: JSONSchema4 }
@@ -43,6 +44,7 @@ export function generateJobsJSONSchemas(
           flattenAllFields({ fields: task.inputSchema }),
           interfaceNameDefinitions,
           config,
+          i18n,
         )
 
         const fullInputJsonSchema: JSONSchema4 = {
@@ -61,6 +63,7 @@ export function generateJobsJSONSchemas(
           flattenAllFields({ fields: task.outputSchema }),
           interfaceNameDefinitions,
           config,
+          i18n,
         )
 
         const fullOutputJsonSchema: JSONSchema4 = {
@@ -127,6 +130,7 @@ export function generateJobsJSONSchemas(
           flattenAllFields({ fields: workflow.inputSchema }),
           interfaceNameDefinitions,
           config,
+          i18n,
         )
 
         const fullInputJsonSchema: JSONSchema4 = {

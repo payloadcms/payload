@@ -77,10 +77,10 @@ export const CopyLocaleData: React.FC = () => {
         })
 
         setCopying(false)
-        toggleModal(drawerSlug)
         router.push(
           `${serverURL}${admin}/${collectionSlug ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}?locale=${to}`,
         )
+        toggleModal(drawerSlug)
       } catch (error) {
         toast.error(error.message)
       }

@@ -1,7 +1,6 @@
-import type { PaginatedDocs } from 'payload'
-import type { fieldSchemaToJSON } from 'payload/shared'
+import type { DocumentEvent, FieldSchemaJSON, PaginatedDocs } from 'payload'
 
-import type { PopulationsByCollection, UpdatedDocument } from './types.js'
+import type { PopulationsByCollection } from './types.js'
 
 import { traverseFields } from './traverseFields.js'
 
@@ -32,8 +31,8 @@ export const mergeData = async <T>(args: {
     serverURL: string
   }) => Promise<Response>
   depth?: number
-  externallyUpdatedRelationship?: UpdatedDocument
-  fieldSchema: ReturnType<typeof fieldSchemaToJSON>
+  externallyUpdatedRelationship?: DocumentEvent
+  fieldSchema: FieldSchemaJSON
   incomingData: Partial<T>
   initialData: T
   locale?: string

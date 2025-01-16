@@ -8,7 +8,15 @@ import type {
 } from 'payload'
 
 import * as qs from 'qs-esm'
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
@@ -16,7 +24,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import { useConfig } from '../Config/index.js'
-import { useLocale } from '../Locale/index.js'
+import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
@@ -95,6 +103,7 @@ const DocumentInfo: React.FC<
   const [mostRecentVersionIsAutosaved, setMostRecentVersionIsAutosaved] = useState(
     mostRecentVersionIsAutosavedFromProps,
   )
+
   const [versionCount, setVersionCount] = useState(versionCountFromProps)
 
   const [hasPublishedDoc, setHasPublishedDoc] = useState(hasPublishedDocFromProps)
@@ -106,11 +115,20 @@ const DocumentInfo: React.FC<
   const [currentEditor, setCurrentEditor] = useState<ClientUser | null>(currentEditorFromProps)
   const [lastUpdateTime, setLastUpdateTime] = useState<number>(lastUpdateTimeFromProps)
   const [savedDocumentData, setSavedDocumentData] = useState(initialData)
+  const [uploadStatus, setUploadStatus] = useState<'failed' | 'idle' | 'uploading'>('idle')
 
-  const isInitializing = initialState === undefined || initialData === undefined
+  const updateUploadStatus = useCallback((status: 'failed' | 'idle' | 'uploading') => {
+    setUploadStatus(status)
+  }, [])
 
   const { getPreference, setPreference } = usePreferences()
   const { code: locale } = useLocale()
+  const { localeIsLoading } = useLocaleLoading()
+
+  const isInitializing = useMemo(
+    () => initialState === undefined || initialData === undefined || localeIsLoading,
+    [initialData, initialState, localeIsLoading],
+  )
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -133,21 +151,21 @@ const DocumentInfo: React.FC<
   }
 
   const unlockDocument = useCallback(
-    async (docId: number | string, slug: string) => {
+    async (docID: number | string, slug: string) => {
       try {
         const isGlobal = slug === globalSlug
 
         const query = isGlobal
           ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docId}&where[document.relationTo][equals]=${slug}`
+          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
 
         const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
 
         const { docs } = await request.json()
 
         if (docs.length > 0) {
-          const lockId = docs[0].id
-          await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
+          const lockID = docs[0].id
+          await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
             headers: {
               'Content-Type': 'application/json',
             },
@@ -163,13 +181,13 @@ const DocumentInfo: React.FC<
   )
 
   const updateDocumentEditor = useCallback(
-    async (docId: number | string, slug: string, user: ClientUser | number | string) => {
+    async (docID: number | string, slug: string, user: ClientUser | number | string) => {
       try {
         const isGlobal = slug === globalSlug
 
         const query = isGlobal
           ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docId}&where[document.relationTo][equals]=${slug}`
+          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
 
         // Check if the document is already locked
         const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
@@ -177,7 +195,7 @@ const DocumentInfo: React.FC<
         const { docs } = await request.json()
 
         if (docs.length > 0) {
-          const lockId = docs[0].id
+          const lockID = docs[0].id
 
           const userData =
             typeof user === 'object'
@@ -185,7 +203,7 @@ const DocumentInfo: React.FC<
               : { relationTo: 'users', value: user }
 
           // Send a patch request to update the _lastEdited info
-          await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockId}`, {
+          await requests.patch(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
             body: JSON.stringify({
               user: userData,
             }),
@@ -329,11 +347,13 @@ const DocumentInfo: React.FC<
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
+    setUploadStatus: updateUploadStatus,
     title: documentTitle,
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,
     updateSavedDocumentData,
+    uploadStatus,
     versionCount,
   }
 

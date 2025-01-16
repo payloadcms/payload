@@ -1,8 +1,9 @@
 'use client'
-import type { I18nClient, Language } from '@payloadcms/translations'
+import type { I18nClient, I18nOptions, Language } from '@payloadcms/translations'
 import type {
   ClientConfig,
   LanguageOptions,
+  Locale,
   SanitizedPermissions,
   ServerFunctionClient,
   User,
@@ -37,10 +38,11 @@ type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
-  readonly fallbackLang: ClientConfig['i18n']['fallbackLanguage']
+  readonly fallbackLang: I18nOptions['fallbackLanguage']
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
+  readonly locale?: Locale['code']
   readonly permissions: SanitizedPermissions
   readonly serverFunction: ServerFunctionClient
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
@@ -57,6 +59,7 @@ export const RootProvider: React.FC<Props> = ({
   isNavOpen,
   languageCode,
   languageOptions,
+  locale,
   permissions,
   serverFunction,
   switchLanguageServerAction,
@@ -96,7 +99,7 @@ export const RootProvider: React.FC<Props> = ({
                           <PreferencesProvider>
                             <ThemeProvider theme={theme}>
                               <ParamsProvider>
-                                <LocaleProvider>
+                                <LocaleProvider locale={locale}>
                                   <StepNavProvider>
                                     <LoadingOverlayProvider>
                                       <DocumentEventsProvider>

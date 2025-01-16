@@ -6,7 +6,7 @@ import type {
   ResolvedClientFeatureMap,
   SanitizedClientFeatures,
 } from '../../../features/typesClient.js'
-import type { LexicalFieldAdminProps } from '../../../types.js'
+import type { LexicalFieldAdminClientProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
 export const sanitizeClientFeatures = (
@@ -219,7 +219,7 @@ export const sanitizeClientFeatures = (
 export function sanitizeClientEditorConfig(
   resolvedClientFeatureMap: ResolvedClientFeatureMap,
   lexical?: LexicalEditorConfig,
-  admin?: LexicalFieldAdminProps,
+  admin?: LexicalFieldAdminClientProps,
 ): SanitizedClientEditorConfig {
   return {
     admin,

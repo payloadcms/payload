@@ -10,20 +10,20 @@ import { LinkNode } from './LinkNode.js'
 // allow typing within the link
 
 export class AutoLinkNode extends LinkNode {
-  static clone(node: AutoLinkNode): AutoLinkNode {
+  static override clone(node: AutoLinkNode): AutoLinkNode {
     return new AutoLinkNode({ id: '', fields: node.__fields, key: node.__key })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'autolink'
   }
 
-  static importDOM(): null {
+  static override importDOM(): null {
     // TODO: Should link node should handle the import over autolink?
     return null
   }
 
-  static importJSON(serializedNode: SerializedAutoLinkNode): AutoLinkNode {
+  static override importJSON(serializedNode: SerializedAutoLinkNode): AutoLinkNode {
     if (
       serializedNode.version === 1 &&
       typeof serializedNode.fields?.doc?.value === 'object' &&
@@ -55,7 +55,7 @@ export class AutoLinkNode extends LinkNode {
     }
   }
 
-  insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNode | null {
+  override insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNode | null {
     const element = this.getParentOrThrow().insertNewAfter(selection, restoreSelection)
     if ($isElementNode(element)) {
       const linkNode = $createAutoLinkNode({ fields: this.__fields })

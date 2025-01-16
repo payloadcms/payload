@@ -28,6 +28,7 @@ type Props = {
   readonly reloadDoc: ReloadDoc
   readonly serverURL: string
 }
+
 export function UploadComponentHasMany(props: Props) {
   const { className, fileDocs, isSortable, onRemove, onReorder, readonly, reloadDoc, serverURL } =
     props
@@ -69,10 +70,12 @@ export function UploadComponentHasMany(props: Props) {
           const url: string = value.thumbnailURL || value.url
           let src: string
 
-          try {
-            src = new URL(url, serverURL).toString()
-          } catch {
-            src = `${serverURL}${url}`
+          if (url) {
+            try {
+              src = new URL(url, serverURL).toString()
+            } catch {
+              src = `${serverURL}${url}`
+            }
           }
 
           return (

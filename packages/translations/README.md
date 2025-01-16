@@ -31,7 +31,7 @@ The home of Payloads API and Admin Panel translations.
 #### Adding a new language
 
 1. Create a new TS file in the `<payload-repo-root>/packages/translations/src/languages` folder, use the language code as the file name (e.g. `<payload-repo-root>/packages/translations/src/languages/en.ts` for English)
-2. Copy all translations from an existing language file and update all of the translations to match your new language
+2. Copy all translations from an existing language file and update all of the translations to match your new language. Make sure the translation object containing all the translations is type `DefaultTranslationsObject`.
 3. Run one of the following:
    ```sh
    yarn build

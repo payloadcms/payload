@@ -22,6 +22,7 @@ import {
   $isRangeSelection,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
+  getDOMSelection,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
@@ -39,6 +40,12 @@ import { useLexicalDrawer } from '../../../../../../utilities/fieldsDrawer/useLe
 import { $isAutoLinkNode } from '../../../../nodes/AutoLinkNode.js'
 import { $createLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
+
+function preventDefault(
+  event: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLElement>,
+): void {
+  event.preventDefault()
+}
 
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
   const [editor] = useLexicalComposerContext()
@@ -203,7 +210,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     }
 
     const editorElem = editorRef.current
-    const nativeSelection = window.getSelection()
+    const nativeSelection = getDOMSelection(editor._window)
     const { activeElement } = document
 
     if (editorElem === null) {
@@ -349,12 +356,11 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               <button
                 aria-label="Edit link"
                 className="link-edit"
-                onClick={() => {
+                onClick={(event) => {
+                  event.preventDefault()
                   toggleDrawer()
                 }}
-                onMouseDown={(event) => {
-                  event.preventDefault()
-                }}
+                onMouseDown={preventDefault}
                 tabIndex={0}
                 type="button"
               >
@@ -367,9 +373,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
                   onClick={() => {
                     editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
                   }}
-                  onMouseDown={(event) => {
-                    event.preventDefault()
-                  }}
+                  onMouseDown={preventDefault}
                   tabIndex={0}
                   type="button"
                 >

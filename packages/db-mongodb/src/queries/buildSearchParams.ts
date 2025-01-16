@@ -87,6 +87,7 @@ export async function buildSearchParam({
     const sanitizedQueryValue = sanitizeQueryValue({
       field,
       hasCustomID,
+      locale,
       operator,
       path,
       payload,

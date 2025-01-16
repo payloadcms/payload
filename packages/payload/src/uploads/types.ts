@@ -101,6 +101,12 @@ export type UploadConfig = {
    */
   bulkUpload?: boolean
   /**
+   * Appends a cache tag to the image URL when fetching the thumbnail in the admin panel. It may be desirable to disable this when hosting via CDNs with strict parameters.
+   *
+   * @default true
+   */
+  cacheTags?: boolean
+  /**
    * Enables cropping of images.
    * @default true
    */

@@ -26,7 +26,7 @@ export const LinkJSXConverter: (args: {
     const rel: string | undefined = node.fields.newTab ? 'noopener noreferrer' : undefined
     const target: string | undefined = node.fields.newTab ? '_blank' : undefined
 
-    let href: string = node.fields.url
+    let href: string = node.fields.url ?? ''
     if (node.fields.linkType === 'internal') {
       if (internalDocToHref) {
         href = internalDocToHref({ linkNode: node })

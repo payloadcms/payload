@@ -38,7 +38,7 @@ describe('Upload', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
     }))
@@ -107,6 +107,38 @@ describe('Upload', () => {
       'src',
       /\/api\/uploads\/file\/og-image\.jpg(\?.*)?$/,
     )
+  })
+
+  test('should disable save button during upload progress from remote URL', async () => {
+    await page.goto(url.create)
+
+    const pasteURLButton = page.locator('.file-field__upload button', {
+      hasText: 'Paste URL',
+    })
+    await pasteURLButton.click()
+
+    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
+
+    const inputField = page.locator('.file-field__upload .file-field__remote-file')
+    await inputField.fill(remoteImage)
+
+    // Intercept the upload request
+    await page.route(
+      'https://payloadcms.com/images/og-image.jpg',
+      (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
+    )
+
+    const addFileButton = page.locator('.file-field__add-file')
+    await addFileButton.click()
+
+    const submitButton = page.locator('.form-submit .btn')
+    await expect(submitButton).toBeDisabled()
+
+    // Wait for the upload to complete
+    await page.waitForResponse('https://payloadcms.com/images/og-image.jpg')
+
+    // Assert the submit button is re-enabled after upload
+    await expect(submitButton).toBeEnabled()
   })
 
   // test that the image renders

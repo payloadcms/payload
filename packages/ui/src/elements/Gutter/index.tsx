@@ -46,5 +46,3 @@ export const Gutter: React.FC<GutterProps> = (props) => {
     </div>
   )
 }
-
-Gutter.displayName = 'Gutter'

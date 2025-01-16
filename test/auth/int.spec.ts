@@ -13,6 +13,7 @@ import {
   apiKeysSlug,
   namedSaveToJWTValue,
   partialDisableLocaleStrategiesSlug,
+  publicUsersSlug,
   saveToJWTKey,
   slug,
 } from './shared.js'
@@ -276,7 +277,7 @@ describe('Auth', () => {
 
       it('should allow verification of a user', async () => {
         const emailToVerify = 'verify@me.com'
-        const response = await restClient.POST(`/public-users`, {
+        const response = await restClient.POST(`/${publicUsersSlug}`, {
           body: JSON.stringify({
             email: emailToVerify,
             password,
@@ -290,7 +291,7 @@ describe('Auth', () => {
         expect(response.status).toBe(201)
 
         const userResult = await payload.find({
-          collection: 'public-users',
+          collection: publicUsersSlug,
           limit: 1,
           showHiddenFields: true,
           where: {
@@ -306,13 +307,13 @@ describe('Auth', () => {
         expect(_verificationToken).toBeDefined()
 
         const verificationResponse = await restClient.POST(
-          `/public-users/verify/${_verificationToken}`,
+          `/${publicUsersSlug}/verify/${_verificationToken}`,
         )
 
         expect(verificationResponse.status).toBe(200)
 
         const afterVerifyResult = await payload.find({
-          collection: 'public-users',
+          collection: publicUsersSlug,
           limit: 1,
           showHiddenFields: true,
           where: {
@@ -782,24 +783,24 @@ describe('Auth', () => {
   describe('API Key', () => {
     it('should authenticate via the correct API key user', async () => {
       const usersQuery = await payload.find({
-        collection: 'api-keys',
+        collection: apiKeysSlug,
       })
 
       const [user1, user2] = usersQuery.docs
 
       const success = await restClient
-        .GET(`/api-keys/${user2.id}`, {
+        .GET(`/${apiKeysSlug}/${user2.id}`, {
           headers: {
-            Authorization: `api-keys API-Key ${user2.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
           },
         })
         .then((res) => res.json())
 
       expect(success.apiKey).toStrictEqual(user2.apiKey)
 
-      const fail = await restClient.GET(`/api-keys/${user1.id}`, {
+      const fail = await restClient.GET(`/${apiKeysSlug}/${user1.id}`, {
         headers: {
-          Authorization: `api-keys API-Key ${user2.apiKey}`,
+          Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
         },
       })
 
@@ -809,7 +810,7 @@ describe('Auth', () => {
     it('should not remove an API key from a user when updating other fields', async () => {
       const apiKey = uuid()
       const user = await payload.create({
-        collection: 'api-keys',
+        collection: apiKeysSlug,
         data: {
           apiKey,
           enableAPIKey: true,
@@ -818,14 +819,14 @@ describe('Auth', () => {
 
       const updatedUser = await payload.update({
         id: user.id,
-        collection: 'api-keys',
+        collection: apiKeysSlug,
         data: {
           enableAPIKey: true,
         },
       })
 
       const userResult = await payload.find({
-        collection: 'api-keys',
+        collection: apiKeysSlug,
         where: {
           id: {
             equals: user.id,
@@ -857,7 +858,7 @@ describe('Auth', () => {
 
       // use the api key in a fetch to assert that it is disabled
       const response = await restClient
-        .GET(`/api-keys/me`, {
+        .GET(`/${apiKeysSlug}/me`, {
           headers: {
             Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
           },
@@ -888,7 +889,7 @@ describe('Auth', () => {
 
       // use the api key in a fetch to assert that it is disabled
       const response = await restClient
-        .GET(`/api-keys/me`, {
+        .GET(`/${apiKeysSlug}/me`, {
           headers: {
             Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
           },

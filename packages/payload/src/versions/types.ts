@@ -4,11 +4,13 @@ export type Autosave = {
 
 export type IncomingDrafts = {
   autosave?: Autosave | boolean
+  schedulePublish?: boolean
   validate?: boolean
 }
 
 export type SanitizedDrafts = {
   autosave: Autosave | false
+  schedulePublish: boolean
   validate: boolean
 }
 

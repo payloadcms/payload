@@ -10,6 +10,7 @@ import {
   create,
   createGlobal,
   createGlobalVersion,
+  createSchemaGenerator,
   createVersion,
   deleteMany,
   deleteOne,
@@ -36,6 +37,7 @@ import {
   updateVersion,
 } from '@payloadcms/drizzle'
 import {
+  columnToCodeConverter,
   countDistinct,
   createDatabase,
   createExtensions,
@@ -100,6 +102,14 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       },
       fieldConstraints: {},
       forceUseVercelPostgres: args.forceUseVercelPostgres ?? false,
+      generateSchema: createSchemaGenerator({
+        columnToCodeConverter,
+        corePackageSuffix: 'pg-core',
+        defaultOutputFile: args.generateSchemaOutputFile,
+        enumImport: 'pgEnum',
+        schemaImport: 'pgSchema',
+        tableImport: 'pgTable',
+      }),
       idType: postgresIDType,
       indexes: new Set<string>(),
       initializing,
@@ -189,4 +199,5 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
 }
 
 export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
+export { geometryColumn } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'

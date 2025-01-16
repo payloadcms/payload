@@ -1,4 +1,4 @@
-import { cn } from 'src/utilities/cn'
+import { cn } from '@/utilities/ui'
 import React, { Fragment } from 'react'
 
 import type { Page } from '@/payload-types'

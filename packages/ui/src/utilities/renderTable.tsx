@@ -1,25 +1,26 @@
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import {
-  type ClientCollectionConfig,
-  type CollectionConfig,
-  type Field,
-  type ImportMap,
-  type PaginatedDocs,
-  type Payload,
-  type SanitizedCollectionConfig,
+import type {
+  ClientCollectionConfig,
+  CollectionConfig,
+  Field,
+  ImportMap,
+  ListPreferences,
+  PaginatedDocs,
+  Payload,
+  SanitizedCollectionConfig,
 } from 'payload'
+
+import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
-import type { ColumnPreferences } from '../providers/ListQuery/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { Pill, Table } from '../exports/client/index.js'
+import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 
 export const renderFilters = (
   fields: Field[],
@@ -62,8 +63,8 @@ export const renderTable = ({
 }: {
   clientCollectionConfig: ClientCollectionConfig
   collectionConfig: SanitizedCollectionConfig
-  columnPreferences: ColumnPreferences
-  columns?: ColumnPreferences
+  columnPreferences: ListPreferences['columns']
+  columns?: ListPreferences['columns']
   customCellProps?: Record<string, any>
   docs: PaginatedDocs['docs']
   drawerSlug?: string
@@ -91,19 +92,6 @@ export const renderTable = ({
       )
 
   const columnState = buildColumnState({
-    beforeRows: renderRowTypes
-      ? [
-          {
-            accessor: 'collection',
-            active: true,
-            field: null,
-            Heading: i18n.t('version:type'),
-            renderedCells: docs.map((_, i) => (
-              <Pill key={i}>{getTranslation(clientCollectionConfig.labels.singular, i18n)}</Pill>
-            )),
-          },
-        ]
-      : undefined,
     clientCollectionConfig,
     collectionConfig,
     columnPreferences,
@@ -117,8 +105,42 @@ export const renderTable = ({
     useAsTitle,
   })
 
+  const columnsToUse = [...columnState]
+
+  if (renderRowTypes) {
+    columnsToUse.unshift({
+      accessor: 'collection',
+      active: true,
+      field: {
+        admin: {
+          disabled: true,
+        },
+        hidden: true,
+      },
+      Heading: i18n.t('version:type'),
+      renderedCells: docs.map((_, i) => (
+        <Pill key={i}>{getTranslation(clientCollectionConfig.labels.singular, i18n)}</Pill>
+      )),
+    } as Column)
+  }
+
+  if (enableRowSelections) {
+    columnsToUse.unshift({
+      accessor: '_select',
+      active: true,
+      field: {
+        admin: {
+          disabled: true,
+        },
+        hidden: true,
+      },
+      Heading: <SelectAll />,
+      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
+    } as Column)
+  }
+
   return {
     columnState,
-    Table: <Table appearance={tableAppearance} columns={columnState} data={docs} />,
+    Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} />,
   }
 }

@@ -1,5 +1,7 @@
 import type { Payload, Where } from 'payload'
 
+import { logError } from 'payload'
+
 type ReturnType = {
   id: string
   updatedAt: string
@@ -60,8 +62,9 @@ export async function getLatestVersion(args: Args): Promise<ReturnType> {
       id: response.docs[0].id,
       updatedAt: response.docs[0].updatedAt,
     }
-  } catch (e) {
-    payload.logger.error(e)
+  } catch (err) {
+    logError({ err, payload })
+
     return null
   }
 }

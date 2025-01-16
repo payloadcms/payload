@@ -4,14 +4,11 @@ import { type FormState } from 'payload'
 
 import { mergeErrorPaths } from './mergeErrorPaths.js'
 
-const serverPropsToAccept = [
-  'passesCondition',
-  'valid',
-  'errorMessage',
-  'rows',
-  'customComponents',
-  'requiresRender',
-]
+type Args = {
+  acceptValues?: boolean
+  existingState: FormState
+  incomingState: FormState
+}
 
 /**
  * Merges certain properties from the server state into the client state. These do not include values,
@@ -20,10 +17,24 @@ const serverPropsToAccept = [
  * We want to use this to update the error state, and other properties that are not user input, as the error state
  * is the thing we want to keep in sync with the server (where it's calculated) on the client.
  */
-export const mergeServerFormState = (
-  existingState: FormState,
-  incomingState: FormState,
-): { changed: boolean; newState: FormState } => {
+export const mergeServerFormState = ({
+  acceptValues,
+  existingState,
+  incomingState,
+}: Args): { changed: boolean; newState: FormState } => {
+  const serverPropsToAccept = [
+    'passesCondition',
+    'valid',
+    'errorMessage',
+    'rows',
+    'customComponents',
+    'requiresRender',
+  ]
+
+  if (acceptValues) {
+    serverPropsToAccept.push('value')
+  }
+
   let changed = false
 
   const newState = {}

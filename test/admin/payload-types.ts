@@ -131,8 +131,20 @@ export interface Upload {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
+ * This is a custom collection description.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
@@ -173,6 +185,14 @@ export interface Post {
   defaultValueField?: string | null;
   relationship?: (string | null) | Post;
   customCell?: string | null;
+  upload?: (string | null) | Upload;
+  hiddenField?: string | null;
+  adminHiddenField?: string | null;
+  disableListColumnText?: string | null;
+  disableListFilterText?: string | null;
+  /**
+   * This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.
+   */
   sidebarField?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -254,7 +274,13 @@ export interface CustomField {
   id: string;
   customTextServerField?: string | null;
   customTextClientField?: string | null;
+  /**
+   * Static field description.
+   */
   descriptionAsString?: string | null;
+  /**
+   * Function description
+   */
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
@@ -486,6 +512,20 @@ export interface UploadsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -528,6 +568,11 @@ export interface PostsSelect<T extends boolean = true> {
   defaultValueField?: T;
   relationship?: T;
   customCell?: T;
+  upload?: T;
+  hiddenField?: T;
+  adminHiddenField?: T;
+  disableListColumnText?: T;
+  disableListFilterText?: T;
   sidebarField?: T;
   updatedAt?: T;
   createdAt?: T;

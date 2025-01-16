@@ -15,7 +15,7 @@ const { beforeAll, describe } = test
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('field error states', () => {
+describe('Field Error States', () => {
   let serverURL: string
   let page: Page
   let validateDraftsOff: AdminUrlUtil

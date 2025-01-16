@@ -9,7 +9,7 @@ import classes from './index.module.scss'
 import { RecoverPasswordForm } from './RecoverPasswordForm'
 
 export default async function RecoverPassword() {
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers })
 

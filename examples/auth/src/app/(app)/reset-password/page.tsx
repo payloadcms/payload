@@ -9,7 +9,7 @@ import classes from './index.module.scss'
 import { ResetPasswordForm } from './ResetPasswordForm'
 
 export default async function ResetPassword() {
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers })
 

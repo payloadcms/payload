@@ -9,6 +9,7 @@ type Args = {
   searchParams: { [key: string]: string | string[] }
   user?: User
 }
+
 export const handleAuthRedirect = ({ config, route, searchParams, user }: Args): string => {
   const {
     admin: {

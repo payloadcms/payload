@@ -15,11 +15,11 @@ import {
 import { $isParagraphNode, $isTextNode } from 'lexical'
 
 import {
+  $convertFromMarkdownString,
   $convertToMarkdownString,
   type ElementTransformer,
   type Transformer,
 } from '../../packages/@lexical/markdown/index.js'
-import { $convertFromMarkdownString } from '../../utilities/jsx/lexicalMarkdownCopy.js'
 
 // Very primitive table setup
 const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/

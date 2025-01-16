@@ -2,6 +2,14 @@ import type { InitOptions, Payload } from 'payload'
 
 import { getPayload } from 'payload'
 
+/**
+ *  getPayloadHMR is no longer preferred.
+ *  You can now use in all contexts:
+ *  ```ts
+ *   import { getPayload } from 'payload'
+ *  ```
+ * @deprecated
+ */
 export const getPayloadHMR = async (
   options: Pick<InitOptions, 'config' | 'importMap'>,
 ): Promise<Payload> => {

@@ -8,8 +8,6 @@ import type {
   User,
 } from 'payload'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
-
 export type DefaultListViewProps = {
   collectionSlug: SanitizedCollectionConfig['slug']
   listSearchableFields: SanitizedCollectionConfig['admin']['listSearchableFields']
@@ -17,12 +15,6 @@ export type DefaultListViewProps = {
 
 export type ListIndexProps = {
   collection: SanitizedCollectionConfig
-}
-
-export type ListPreferences = {
-  columns: ColumnPreferences
-  limit: number
-  sort: string
 }
 
 export type ListComponentClientProps = {
