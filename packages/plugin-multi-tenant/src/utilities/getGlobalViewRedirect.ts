@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, ViewTypes } from 'payload'
 
 import { headers as getHeaders } from 'next/headers.js'
 
@@ -10,7 +10,7 @@ type Args = {
   payload: Payload
   slug: string
   tenantFieldName: string
-  view: 'document' | 'list' | 'version'
+  view: ViewTypes
 }
 export async function getGlobalViewRedirect({
   slug,
