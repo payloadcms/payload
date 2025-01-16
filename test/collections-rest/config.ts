@@ -34,7 +34,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
   }
 }
 
-export const slug = 'posts'
+export const postsSlug = 'posts'
 export const relationSlug = 'relation'
 export const pointSlug = 'point'
 export const customIdSlug = 'custom-id'
