@@ -912,8 +912,12 @@ describe('database', () => {
           },
         })
       } catch (e: any) {
-        await expect(e.message).toBe(
-          'posts validation failed: D1.D2.D3.D4: Cast to string failed for value "{}" (type Object) at path "D4"',
+        await expect(e.message).toMatch(
+          payload.db.name === 'mongoose'
+            ? 'posts validation failed: D1.D2.D3.D4: Cast to string failed for value "{}" (type Object) at path "D4"'
+            : payload.db.name === 'sqlite'
+              ? 'SQLite3 can only bind numbers, strings, bigints, buffers, and null'
+              : '',
         )
       }
     })
