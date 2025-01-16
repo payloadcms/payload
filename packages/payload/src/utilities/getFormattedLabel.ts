@@ -5,7 +5,7 @@ export const getFormattedLabel = (path: (number | string)[]): string => {
       if (typeof part === 'number' || (typeof part === 'string' && !isNaN(Number(part)))) {
         // Convert index to 1-based and format as "Array 01", "Array 02", etc.
         const fieldName = acc.pop()
-        acc.push(`${fieldName} ${String(Number(part) + 1).padStart(2, '0')}`)
+        acc.push(`${fieldName} ${Number(part) + 1}`)
       } else {
         // Capitalize field names
         acc.push(part.charAt(0).toUpperCase() + part.slice(1))

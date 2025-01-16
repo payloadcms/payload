@@ -133,34 +133,6 @@ describe('Array', () => {
     await expect(page.locator('#field-items #items-row-0 .row-label')).toContainText('Item 01')
   })
 
-  test('should show proper validation error message on text field in nested array', async () => {
-    await page.goto(url.create)
-    await page.locator('#field-items #field-items__0__subArray > .array-field__add-row').click()
-    await wait(300)
-
-    await page.locator('#field-items__0__subArray__0__textTwo').fill('')
-
-    await page.locator('.form-submit #action-save').click()
-
-    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-      'The following field is invalid: Items 01 > SubArray 01 > Second text field',
-    )
-  })
-
-  test('should show proper validation error message on text field in row field in nested array', async () => {
-    await page.goto(url.create)
-    await page.locator('#field-items #field-items__0__subArray > .array-field__add-row').click()
-    await wait(300)
-
-    await page.locator('#field-items__0__subArray__0__textInRow').fill('')
-
-    await page.locator('.form-submit #action-save').click()
-
-    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-      'The following field is invalid: Items 01 > SubArray 01 > Text In Row',
-    )
-  })
-
   describe('row manipulation', () => {
     test('should add, remove and duplicate rows', async () => {
       const assertText0 = 'array row 1'

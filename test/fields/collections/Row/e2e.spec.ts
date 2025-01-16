@@ -205,16 +205,4 @@ describe('Row', () => {
       expect(fieldABox.height).toEqual(fieldBBox.height)
     }).toPass()
   })
-
-  test('should show proper validation error message on text field within row field', async () => {
-    await page.goto(url.create)
-
-    await page.locator('#field-id').fill('some custom ID')
-
-    await page.locator('.form-submit #action-save').click()
-
-    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-      'The following field is invalid: Title within a row',
-    )
-  })
 })

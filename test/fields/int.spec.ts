@@ -486,6 +486,20 @@ describe('Fields', () => {
     })
   })
 
+  describe('rows', () => {
+    it('show proper validation error message on text field within row field', async () => {
+      await expect(async () =>
+        payload.create({
+          collection: 'row-fields',
+          data: {
+            id: 'some-id',
+            title: '',
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: Title within a row')
+    })
+  })
+
   describe('timestamps', () => {
     const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10)
     let doc
@@ -1662,6 +1676,46 @@ describe('Fields', () => {
 
       expect(res.id).toBe(doc.id)
     })
+
+    it('show proper validation error on text field in nested array', async () => {
+      await expect(async () =>
+        payload.create({
+          collection,
+          data: {
+            items: [
+              {
+                text: 'required',
+                subArray: [
+                  {
+                    textTwo: '',
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Second text field')
+    })
+
+    it('show proper validation error on text field in row field in nested array', async () => {
+      await expect(async () =>
+        payload.create({
+          collection,
+          data: {
+            items: [
+              {
+                text: 'required',
+                subArray: [
+                  {
+                    textInRow: '',
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Text In Row')
+    })
   })
 
   describe('group', () => {
@@ -2168,6 +2222,28 @@ describe('Fields', () => {
       expect(res.camelCaseTab.array[0].text).toBe('text')
       expect(res.camelCaseTab.array[0].array[0].text).toBe('nested')
     })
+
+    it('should show proper validation error message on text field within array within tab', async () => {
+      await expect(async () =>
+        payload.update({
+          id: document.id,
+          collection: tabsFieldsSlug,
+          data: {
+            array: [
+              {
+                text: 'one',
+              },
+              {
+                text: 'two',
+              },
+              {
+                text: '',
+              },
+            ],
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: Array 3 > Text')
+    })
   })
 
   describe('blocks', () => {
@@ -2426,6 +2502,26 @@ describe('Fields', () => {
       })
 
       expect(result.blocksWithLocalizedArray[0].array[0].text).toEqual('localized')
+    })
+  })
+
+  describe('collapsible', () => {
+    it('show proper validation error message for fields nested in collapsible', async () => {
+      await expect(async () =>
+        payload.create({
+          collection: 'collapsible-fields',
+          data: {
+            text: 'required',
+            group: {
+              subGroup: {
+                requiredTextWithinSubGroup: '',
+              },
+            },
+          },
+        }),
+      ).rejects.toThrow(
+        'The following field is invalid: Group > SubGroup > Required Text Within Sub Group',
+      )
     })
   })
 
