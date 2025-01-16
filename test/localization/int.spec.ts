@@ -276,6 +276,34 @@ describe('Localization', () => {
           expect(localized.title.es).toEqual(spanishTitle)
         })
 
+        it('REST all locales with all', async () => {
+          const response = await restClient.GET(`/${collection}/${localizedPost.id}`, {
+            query: {
+              locale: 'all',
+            },
+          })
+
+          expect(response.status).toBe(200)
+          const localized = await response.json()
+
+          expect(localized.title.en).toEqual(englishTitle)
+          expect(localized.title.es).toEqual(spanishTitle)
+        })
+
+        it('REST all locales with asterisk', async () => {
+          const response = await restClient.GET(`/${collection}/${localizedPost.id}`, {
+            query: {
+              locale: '*',
+            },
+          })
+
+          expect(response.status).toBe(200)
+          const localized = await response.json()
+
+          expect(localized.title.en).toEqual(englishTitle)
+          expect(localized.title.es).toEqual(spanishTitle)
+        })
+
         it('by localized field value - default locale', async () => {
           const result = await payload.find({
             collection,
