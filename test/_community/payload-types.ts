@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     posts: Post;
     media: Media;
+    'blocks-collection': BlocksCollection;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -22,19 +23,22 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'blocks-collection': BlocksCollectionSelect<false> | BlocksCollectionSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {
     menu: Menu;
+    'blocks-global': BlocksGlobal;
   };
   globalsSelect: {
     menu: MenuSelect<false> | MenuSelect<true>;
+    'blocks-global': BlocksGlobalSelect<false> | BlocksGlobalSelect<true>;
   };
   locale: null;
   user: User & {
@@ -68,7 +72,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -79,7 +83,7 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -120,10 +124,390 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-collection".
+ */
+export interface BlocksCollection {
+  id: number;
+  blocks?:
+    | (
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-1';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-2';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-3';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-4';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-5';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-6';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-7';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-8';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-9';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-10';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots1';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots2';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots3';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots4';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots5';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots6';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots7';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots8';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots9';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots10';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots11';
+          }
+        | {
+            title: string;
+            blocks?:
+              | {
+                  block: Block;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blocks1';
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Hotspot".
+ */
+export interface Hotspot {
+  nr: string;
+  title: string;
+  text: string;
+  coordinates: {
+    /**
+     * The X coordinate of the hotspot in %
+     */
+    x: number;
+    /**
+     * The Y coordinate of the hotspot in %
+     */
+    y: number;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  title: string;
+  text: string;
+  blocks?:
+    | (
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-1';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-2';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-3';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-4';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-5';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-6';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-7';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-8';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-9';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-10';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots1';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots2';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots3';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots4';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots5';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots6';
+          }
+      )[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -140,24 +524,28 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'blocks-collection';
+        value: number | BlocksCollection;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -167,10 +555,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -190,7 +578,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -259,6 +647,419 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-collection_select".
+ */
+export interface BlocksCollectionSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        'test-block-1'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-2'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-3'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-4'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-5'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-6'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-7'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-8'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-9'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-10'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        hotspots1?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots2?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots3?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots4?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots5?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots6?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots7?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots8?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots9?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots10?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots11?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        blocks1?:
+          | T
+          | {
+              title?: T;
+              blocks?:
+                | T
+                | {
+                    block?: T | BlockSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Hotspot_select".
+ */
+export interface HotspotSelect<T extends boolean = true> {
+  nr?: T;
+  title?: T;
+  text?: T;
+  coordinates?:
+    | T
+    | {
+        x?: T;
+        y?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_select".
+ */
+export interface BlockSelect<T extends boolean = true> {
+  title?: T;
+  text?: T;
+  blocks?:
+    | T
+    | {
+        'test-block-1'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-2'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-3'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-4'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-5'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-6'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-7'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-8'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-9'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-10'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        hotspots1?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots2?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots3?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots4?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots5?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots6?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -309,8 +1110,225 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "menu".
  */
 export interface Menu {
-  id: string;
+  id: number;
   globalText?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-global".
+ */
+export interface BlocksGlobal {
+  id: number;
+  blocks?:
+    | (
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-1';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-2';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-3';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-4';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-5';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-6';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-7';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-8';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-9';
+          }
+        | {
+            title: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block-10';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots1';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots2';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots3';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots4';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots5';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots6';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots7';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots8';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots9';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots10';
+          }
+        | {
+            title: string;
+            hotspots?:
+              | {
+                  hotspot: Hotspot;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hotspots11';
+          }
+        | {
+            title: string;
+            blocks?:
+              | {
+                  block: Block;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blocks1';
+          }
+      )[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -320,6 +1338,245 @@ export interface Menu {
  */
 export interface MenuSelect<T extends boolean = true> {
   globalText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-global_select".
+ */
+export interface BlocksGlobalSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        'test-block-1'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-2'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-3'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-4'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-5'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-6'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-7'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-8'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-9'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'test-block-10'?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        hotspots1?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots2?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots3?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots4?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots5?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots6?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots7?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots8?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots9?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots10?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        hotspots11?:
+          | T
+          | {
+              title?: T;
+              hotspots?:
+                | T
+                | {
+                    hotspot?: T | HotspotSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        blocks1?:
+          | T
+          | {
+              title?: T;
+              blocks?:
+                | T
+                | {
+                    block?: T | BlockSelect<T>;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

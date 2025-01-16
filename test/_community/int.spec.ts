@@ -74,4 +74,53 @@ describe('_Community Tests', () => {
 
     expect(data.doc.title).toEqual('REST API EXAMPLE')
   })
+
+  it('blocks benchmark', async () => {
+    for (let i = 0; i < 100; i++) {
+      await payload.create({
+        collection: 'blocks-collection',
+        data: {
+          blocks: Array.from({ length: 100 }, () => ({
+            blockType:
+              Math.random() > 0.5
+                ? 'test-block-2'
+                : Math.random() > 0.5
+                  ? 'test-block-1'
+                  : 'test-block-3',
+            title: 'asd',
+          })),
+        },
+      })
+    }
+
+    let collection = 0
+    let global = 0
+
+    for (let i = 0; i < 100; i++) {
+      await payload.updateGlobal({
+        slug: 'blocks-global',
+        data: {
+          blocks: Array.from({ length: 100 }, () => ({
+            blockType:
+              Math.random() > 0.5
+                ? 'test-block-2'
+                : Math.random() > 0.5
+                  ? 'test-block-1'
+                  : 'test-block-3',
+            title: 'asd',
+          })),
+        },
+      })
+
+      let now = Date.now()
+      await payload.find({ collection: 'blocks-collection', limit: 1 })
+      collection += Date.now() - now
+      now = Date.now()
+      await payload.findGlobal({ slug: 'blocks-global' })
+      global += Date.now() - now
+    }
+
+    payload.logger.info(`COLLECTION - ${collection}MS`)
+    payload.logger.info(`GLOBAL - ${global}MS`)
+  })
 })
