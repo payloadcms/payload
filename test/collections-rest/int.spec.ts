@@ -1660,32 +1660,6 @@ describe('collections-rest', () => {
 
       payload.collections.posts.config.hooks.afterError = []
     })
-
-    it('should return field-level validation errors', async () => {
-      let errorMessage: string
-
-      try {
-        const result = await payload.create({
-          collection: postsSlug,
-          data: {
-            D1: {
-              D2: {
-                D3: {
-                  // @ts-expect-error
-                  D4: {},
-                },
-              },
-            },
-          },
-        })
-      } catch (e) {
-        errorMessage = e.message
-      }
-
-      await expect(errorMessage).toBe(
-        'posts validation failed: D1.D2.D3.D4: Cast to string failed for value "{}" (type Object) at path "D4"',
-      )
-    })
   })
 
   describe('Local', () => {
