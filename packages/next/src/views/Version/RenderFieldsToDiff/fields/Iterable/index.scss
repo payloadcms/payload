@@ -14,16 +14,8 @@
       }
     }
 
-    &__wrap {
-      margin: calc(var(--base) * 0.5);
-      [dir='ltr'] & {
-        padding-left: calc(var(--base) * 0.5);
-        // border-left: $style-stroke-width-s solid var(--theme-elevation-150);
-      }
-      [dir='rtl'] & {
-        padding-right: calc(var(--base) * 0.5);
-        // border-right: $style-stroke-width-s solid var(--theme-elevation-150);
-      }
+    &__row:not(:first-child) {
+      margin-top: calc(var(--base) * 0.5);
     }
 
     &__no-rows {

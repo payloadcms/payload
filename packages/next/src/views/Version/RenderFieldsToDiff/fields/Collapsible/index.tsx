@@ -2,18 +2,18 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
-
-import RenderFieldsToDiff from '../../index.js'
-import Label from '../../Label/index.js'
 import './index.scss'
 
-const baseClass = 'nested-diff'
+import type { DiffComponentProps } from '../types.js'
 
-const Nested: React.FC<DiffComponentProps> = ({
+import { DiffCollapser } from '../../DiffCollapser/index.js'
+import RenderFieldsToDiff from '../../index.js'
+
+const baseClass = 'collapsible-diff'
+
+export const Collapsible: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
-  disableGutter = false,
   field,
   fieldPermissions,
   fields,
@@ -24,16 +24,21 @@ const Nested: React.FC<DiffComponentProps> = ({
 }) => {
   return (
     <div className={baseClass}>
-      {'label' in field && field.label && typeof field.label !== 'function' && (
-        <Label>
-          {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-          {getTranslation(field.label, i18n)}
-        </Label>
-      )}
-      <div
-        className={[`${baseClass}__wrap`, !disableGutter && `${baseClass}__wrap--gutter`]
-          .filter(Boolean)
-          .join(' ')}
+      <DiffCollapser
+        comparison={comparison}
+        fields={fields}
+        label={
+          'label' in field &&
+          field.label &&
+          typeof field.label !== 'function' && (
+            <span>
+              {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
+              {getTranslation(field.label, i18n)}
+            </span>
+          )
+        }
+        locales={locales}
+        version={version}
       >
         <RenderFieldsToDiff
           comparison={comparison}
@@ -44,9 +49,7 @@ const Nested: React.FC<DiffComponentProps> = ({
           locales={locales}
           version={version}
         />
-      </div>
+      </DiffCollapser>
     </div>
   )
 }
-
-export default Nested

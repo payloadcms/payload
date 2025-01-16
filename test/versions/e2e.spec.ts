@@ -841,15 +841,20 @@ describe('Versions', () => {
       await page.waitForURL(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
 
-      const blocksDiffLabel = page.locator('.field-diff-label', {
-        hasText: exactText('Blocks Field'),
-      })
-
+      const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
-      const blocksDiff = blocksDiffLabel.locator('+ .iterable-diff__wrap > .render-field-diffs')
+
+      const blocksDiff = page.locator('.iterable-diff', { has: blocksDiffLabel })
       await expect(blocksDiff).toBeVisible()
-      const blockTypeDiffLabel = blocksDiff.locator('.render-field-diffs__field').first()
-      await expect(blockTypeDiffLabel).toBeVisible()
+
+      const blocksDiffRows = blocksDiff.locator('.iterable-diff__rows')
+      await expect(blocksDiffRows).toBeVisible()
+
+      const firstBlocksDiffRow = blocksDiffRows.locator('.iterable-diff__row').first()
+      await expect(firstBlocksDiffRow).toBeVisible()
+
+      const firstBlockDiffLabel = firstBlocksDiffRow.getByText('Block 01', { exact: true })
+      await expect(firstBlockDiffLabel).toBeVisible()
     })
   })
 })

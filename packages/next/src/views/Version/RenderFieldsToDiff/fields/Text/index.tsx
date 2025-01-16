@@ -13,7 +13,7 @@ import './index.scss'
 
 const baseClass = 'text-diff'
 
-const Text: React.FC<DiffComponentProps<TextFieldClient>> = ({
+export const Text: React.FC<DiffComponentProps<TextFieldClient>> = ({
   comparison,
   diffMethod,
   field,
@@ -58,5 +58,3 @@ const Text: React.FC<DiffComponentProps<TextFieldClient>> = ({
     </div>
   )
 }
-
-export default Text

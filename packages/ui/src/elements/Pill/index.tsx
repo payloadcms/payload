@@ -22,6 +22,7 @@ export type PillProps = {
   onClick?: () => void
   pillStyle?: 'dark' | 'error' | 'light' | 'light-gray' | 'success' | 'warning' | 'white'
   rounded?: boolean
+  size?: 'medium' | 'small'
   to?: string
 }
 
@@ -76,12 +77,14 @@ const StaticPill: React.FC<PillProps> = (props) => {
     onClick,
     pillStyle = 'light',
     rounded,
+    size = 'medium',
     to,
   } = props
 
   const classes = [
     baseClass,
     `${baseClass}--style-${pillStyle}`,
+    `${baseClass}--size-${size}`,
     className && className,
     to && `${baseClass}--has-link`,
     (to || onClick) && `${baseClass}--has-action`,
@@ -115,7 +118,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
       type={Element === 'button' ? 'button' : undefined}
     >
       <span className={`${baseClass}__label`}>{children}</span>
-      {icon && <span className={`${baseClass}__icon`}>{icon}</span>}
+      {Boolean(icon) && <span className={`${baseClass}__icon`}>{icon}</span>}
     </Element>
   )
 }
