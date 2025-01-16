@@ -6,8 +6,12 @@ import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 import { debug, error } from '../utils/log.js'
 import { dbChoiceRecord } from './select-db.js'
 
-const updateEnvExampleVariables = (contents: string, databaseType: DbType | undefined): string => {
-  return contents
+const updateEnvExampleVariables = (
+  contents: string,
+  databaseType: DbType | undefined,
+  payloadSecret?: string,
+): string => {
+  const updatedEnv = contents
     .split('\n')
     .map((line) => {
       if (line.startsWith('#') || !line.includes('=')) {
@@ -32,39 +36,14 @@ const updateEnvExampleVariables = (contents: string, databaseType: DbType | unde
       }
 
       if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {
-        return `PAYLOAD_SECRET=YOUR_SECRET_HERE`
+        return `PAYLOAD_SECRET=${payloadSecret || 'YOUR_SECRET_HERE'}`
       }
 
       return line
     })
     .join('\n')
-}
 
-const generateEnvContent = (
-  existingEnv: string,
-  databaseType: DbType | undefined,
-  databaseUri: string,
-  payloadSecret: string,
-): string => {
-  const dbKey = databaseType === 'vercel-postgres' ? 'POSTGRES_URL' : 'DATABASE_URI'
-
-  const envVars: Record<string, string> = {}
-  existingEnv
-    .split('\n')
-    .filter((line) => line.includes('=') && !line.startsWith('#'))
-    .forEach((line) => {
-      const [key, value] = line.split('=')
-      envVars[key] = value
-    })
-
-  // Override specific keys
-  envVars[dbKey] = databaseUri
-  envVars['PAYLOAD_SECRET'] = payloadSecret
-
-  // Rebuild content
-  return Object.entries(envVars)
-    .map(([key, value]) => `${key}=${value}`)
-    .join('\n')
+  return updatedEnv
 }
 
 /** Parse and swap .env.example values and write .env */
@@ -87,7 +66,7 @@ export async function manageEnvFiles(args: {
 
   const envExamplePath = path.join(projectDir, '.env.example')
   const envPath = path.join(projectDir, '.env')
-
+  const emptyEnvContent = `# Added by Payload\nDATABASE_URI=your-connection-string-here\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n`
   try {
     let updatedExampleContents: string
 
@@ -107,18 +86,27 @@ export async function manageEnvFiles(args: {
         debug(`.env.example file successfully updated`)
       }
     } else {
-      updatedExampleContents = `# Added by Payload\nDATABASE_URI=your-connection-string-here\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n`
-      await fs.writeFile(envExamplePath, updatedExampleContents.trimEnd() + '\n')
+      if (!fs.existsSync(envExamplePath)) {
+        updatedExampleContents = updateEnvExampleVariables(
+          emptyEnvContent,
+          databaseType,
+          payloadSecret,
+        )
+      } else {
+        const envExampleContents = await fs.readFile(envExamplePath, 'utf8')
+        updatedExampleContents = updateEnvExampleVariables(
+          envExampleContents,
+          databaseType,
+          payloadSecret,
+        )
+      }
+      await fs.writeFile(envExamplePath, updatedExampleContents + '\n')
     }
 
     // Merge existing variables and create or update .env
-    const envExampleContents = await fs.readFile(envExamplePath, 'utf8')
-    const envContent = generateEnvContent(
-      envExampleContents,
-      databaseType,
-      databaseUri,
-      payloadSecret,
-    )
+    const envContents = await fs.readFile(envPath, 'utf8')
+
+    const envContent = updateEnvExampleVariables(envContents, databaseType, payloadSecret)
     await fs.writeFile(envPath, `# Added by Payload\n${envContent.trimEnd()}\n`)
 
     if (debugFlag) {
