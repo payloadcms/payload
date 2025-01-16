@@ -40,6 +40,7 @@ export const packagePublishList = [
   'plugin-cloud',
   'plugin-cloud-storage',
   'plugin-form-builder',
+  // 'plugin-multi-tenant',
   'plugin-nested-docs',
   'plugin-redirects',
   'plugin-search',
