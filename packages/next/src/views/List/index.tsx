@@ -11,7 +11,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { isNumber } from 'payload/shared'
+import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
@@ -135,6 +135,13 @@ export const renderListView = async (
     })
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
+
+    if (clientCollectionConfig.upload) {
+      data.docs = data.docs.map((doc) => ({
+        ...doc,
+        filesize: formatFilesize(doc.filesize),
+      }))
+    }
 
     const { columnState, Table } = renderTable({
       clientCollectionConfig,

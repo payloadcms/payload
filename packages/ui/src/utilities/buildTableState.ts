@@ -8,7 +8,7 @@ import type {
   SanitizedCollectionConfig,
 } from 'payload'
 
-import { formatErrors } from 'payload'
+import { combineQueries, formatErrors } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import type { Column } from '../elements/Table/index.js'
@@ -86,6 +86,10 @@ export const buildTableState = async (
     tableAppearance,
   } = args
 
+  if (query) {
+    req.query = query
+  }
+
   const incomingUserSlug = user?.collection
 
   const adminUserSlug = config.admin.user
@@ -152,6 +156,22 @@ export const buildTableState = async (
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
 
   if (!docs || query) {
+    const simpleSort =
+      query?.sort && typeof query.sort === 'string'
+        ? query.sort
+        : newPrefs?.sort ||
+          (typeof collectionConfig.defaultSort === 'string'
+            ? collectionConfig.defaultSort
+            : undefined)
+
+    const baseListFilter = await payload.collections[collectionSlug].config.admin?.baseListFilter({
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      locale: req.locale,
+      page: isNumber(query?.page) ? Number(query.page) : undefined,
+      req,
+      sort: simpleSort,
+    })
+
     data = await payload.find({
       collection: collectionSlug,
       depth: 0,
@@ -160,7 +180,7 @@ export const buildTableState = async (
       page: query?.page ? parseInt(query.page, 10) : undefined,
       sort: query?.sort,
       user: req.user,
-      where: query?.where,
+      where: combineQueries(baseListFilter, query?.where),
     })
 
     docs = data.docs

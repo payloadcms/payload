@@ -36,19 +36,26 @@ export {
 export { getFieldPaths } from '../fields/getFieldPaths.js'
 
 export * from '../fields/validations.js'
+export type {
+  Breadcrumb,
+  BreadcrumbsAndSubfolders as FolderAndDocumentsResult,
+  FolderEnabledColection,
+  FolderInterface,
+  Subfolder,
+} from '../folders/types.js'
 
 export { validOperators } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
-
 export {
   deepCopyObject,
   deepCopyObjectComplex,
   deepCopyObjectSimple,
   deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
@@ -89,4 +96,5 @@ export { validateMimeType } from '../utilities/validateMimeType.js'
 export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 export { versionDefaults } from '../versions/defaults.js'
+
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

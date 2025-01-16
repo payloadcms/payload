@@ -16,6 +16,7 @@ import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
+import { addFolderCollections } from '../folders/addFolderCollections.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
@@ -188,6 +189,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const collectionSlugs = new Set<CollectionSlug>()
 
+  addFolderCollections(configWithDefaults)
+
   for (let i = 0; i < config.collections.length; i++) {
     if (collectionSlugs.has(config.collections[i].slug)) {
       throw new DuplicateCollection('slug', config.collections[i].slug)
@@ -287,7 +290,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.csrf.push(config.serverURL)
   }
 
-  // Get deduped list of upload adapters
+  const uploadAdapters = new Set<string>()
+  // interact with all collections
+  for (const collection of config.collections) {
+    // deduped upload adapters
+    if (collection.upload?.adapter) {
+      uploadAdapters.add(collection.upload.adapter)
+    }
+  }
+
   if (!config.upload) {
     config.upload = { adapters: [] }
   }

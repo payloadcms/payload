@@ -1,0 +1,12 @@
+.folderDrawer {
+  &__subHeaderContainer {
+    border-bottom: 1px solid var(--theme-border-color);
+  }
+
+  &__subHeaderContent {
+    margin-left: var(--gutter-h);
+    margin-right: var(--gutter-h);
+    display: flex;
+    justify-content: space-between;
+  }
+}

@@ -148,6 +148,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     getDocumentView()
   }, [getDocumentView])
 
+  const reloadDocument = useCallback(() => {
+    getDocumentView(existingDocID)
+  }, [getDocumentView, existingDocID])
+
   useEffect(() => {
     if (!DocumentView && !hasRenderedDocument.current) {
       getDocumentView(existingDocID)
