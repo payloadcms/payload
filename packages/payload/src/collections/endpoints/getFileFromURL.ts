@@ -4,6 +4,7 @@ import executeAccess from '../../auth/executeAccess.js'
 import { APIError } from '../../errors/APIError.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
+import { isURLAllowed } from '../../utilities/isURLAllowed.js'
 
 // If doc id is provided, it means we are updating the doc
 // /:collectionSlug/paste-url/:doc-id?src=:fileUrl
@@ -46,6 +47,13 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
     }
 
     const validatedUrl = new URL(src)
+
+    if (
+      typeof config.upload?.pasteURL === 'object' &&
+      !isURLAllowed(validatedUrl.href, config.upload.pasteURL.allowList)
+    ) {
+      throw new APIError(`The provided URL (${validatedUrl.href}) is not allowed.`, 400)
+    }
 
     // Fetch the file with no compression
     const response = await fetch(validatedUrl.href, {

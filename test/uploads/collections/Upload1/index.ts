@@ -12,11 +12,9 @@ export const Uploads1: CollectionConfig = {
     pasteURL: {
       allowList: [
         {
-          protocol: 'https',
-          hostname: 'payloadcms.com',
-          pathname: '/images/*',
-          port: '',
-          search: '',
+          protocol: 'http',
+          hostname: 'localhost',
+          port: '4000',
         },
       ],
     },

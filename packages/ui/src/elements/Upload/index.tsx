@@ -14,7 +14,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
-import { isUrlAllowed } from '../../utilities/isURLAllowed.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -185,7 +184,6 @@ export const Upload: React.FC<UploadProps> = (props) => {
   )
 
   const handleUrlSubmit = async () => {
-    // Disable URL submission if pasteURL is false
     if (uploadConfig?.pasteURL === false) {
       return
     }
@@ -194,42 +192,52 @@ export const Upload: React.FC<UploadProps> = (props) => {
       setUploadStatus('uploading')
 
       try {
-        // Check if pasteURL.allowList is defined
-        if (useServerSideFetch) {
-          // Perform server-side fetch if the URL is allowed
-          if (isUrlAllowed(fileUrl, uploadConfig.pasteURL.allowList)) {
-            const pasteURL = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
-            const response = await fetch(`${serverURL}${api}${pasteURL}`)
+        // Attempt client-side fetch first
+        const response = await fetch(fileUrl)
 
-            if (!response.ok) {
-              const errorData = await response.json()
-              throw new Error(errorData.error || 'Failed to fetch the file from the server')
-            }
+        if (!response.ok) {
+          throw new Error(`Client-side fetch failed with status: ${response.status}`)
+        }
 
-            const blob = await response.blob()
-            const fileName = fileUrl.split('/').pop()
-            const file = new File([blob], fileName, { type: blob.type })
+        const data = await response.blob()
+        const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
 
-            handleFileChange(file)
-            setUploadStatus('idle')
-          } else {
-            throw new Error('The provided URL is not allowed.')
+        const file = new File([data], fileName, { type: data.type })
+        handleFileChange(file)
+        setUploadStatus('idle')
+        return // Exit if client-side fetch succeeds
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        // Continue to server-side fallback
+      }
+
+      // If pasteURL.allowList is defined, try to server-side fetch
+      if (useServerSideFetch) {
+        try {
+          const pasteURL = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
+          const response = await fetch(`${serverURL}${api}${pasteURL}`)
+
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || 'Server-side fetch failed.')
           }
-        } else {
-          // Perform client-side fetch if no allowList is specified
-          const response = await fetch(fileUrl)
-          const data = await response.blob()
 
-          // Extract the file name from the URL
-          const fileName = fileUrl.split('/').pop()
+          const blob = await response.blob()
+          const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
+          const file = new File([blob], fileName, { type: blob.type })
 
-          // Create a new File object from the Blob data
-          const file = new File([data], fileName, { type: data.type })
           handleFileChange(file)
           setUploadStatus('idle')
+          return // Exit if server-side fetch succeeds
+        } catch (serverError) {
+          toast.error(`${serverError.message} The provided URL is not allowed.`)
+          setUploadStatus('failed')
         }
-      } catch (e) {
-        toast.error(e.message)
+      } else {
+        // Only show error if all attempts have failed
+        toast.error(
+          'Client-side fetch is disabled or failed, and no server-side fallback is available.',
+        )
         setUploadStatus('failed')
       }
     }

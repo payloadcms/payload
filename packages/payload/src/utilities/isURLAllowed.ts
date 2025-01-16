@@ -1,4 +1,4 @@
-import type { AllowList } from 'payload'
+import type { AllowList } from '../uploads/types.js'
 
 export const isURLAllowed = (url: string, allowList: AllowList): boolean => {
   try {
@@ -20,6 +20,7 @@ export const isURLAllowed = (url: string, allowList: AllowList): boolean => {
           const regexPattern = value
             .replace(/\*\*/g, '.*') // Match any path
             .replace(/\*/g, '[^/]*') // Match any part of a path segment
+            .replace(/\/$/, '(/)?') // Allow optional trailing slash
           const regex = new RegExp(`^${regexPattern}$`)
           return regex.test(parsedUrl.pathname)
         }

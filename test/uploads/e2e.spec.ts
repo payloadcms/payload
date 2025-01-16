@@ -36,10 +36,11 @@ import {
   withOnlyJPEGMetadataSlug,
   withoutMetadataSlug,
 } from './shared.js'
+import { startMockCorsServer } from './startMockCorsServer.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, beforeEach, describe } = test
+const { afterAll, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
@@ -63,6 +64,7 @@ let uploadsTwo: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
+  let mockCorsServer: ReturnType<typeof startMockCorsServer> | undefined
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -91,7 +93,7 @@ describe('Uploads', () => {
     const context = await browser.newContext()
     page = await context.newPage()
 
-    initPageConsoleErrorCatch(page)
+    initPageConsoleErrorCatch(page, { ignoreCORS: true })
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -108,6 +110,12 @@ describe('Uploads', () => {
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  afterAll(() => {
+    if (mockCorsServer) {
+      mockCorsServer.close()
+    }
   })
 
   test('should show upload filename in upload collection list', async () => {
@@ -186,73 +194,6 @@ describe('Uploads', () => {
       hasText: 'Paste URL',
     })
     await expect(pasteURLButton).toBeHidden()
-  })
-
-  test('should fetch remote url server side if pasteURL.allowList is defined', async () => {
-    // allowList only includes the payloadcms.com domain
-    await page.goto(uploadsOne.create)
-
-    const pasteURLButton = page.locator('.file-field__upload button', {
-      hasText: 'Paste URL',
-    })
-    await pasteURLButton.click()
-
-    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
-
-    const encodedImageURL = encodeURIComponent(remoteImage)
-    const pasteUrlEndpoint = `http://localhost:3000/api/uploads-1/paste-url?src=${encodedImageURL}`
-
-    const inputField = page.locator('.file-field__upload .file-field__remote-file')
-    await inputField.fill(remoteImage)
-
-    const addFileButton = page.locator('.file-field__add-file')
-    await addFileButton.click()
-
-    // Intercept the 'paste-url' upload request
-    await page.route(
-      pasteUrlEndpoint,
-      (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
-    )
-
-    await expect(page.locator('.file-field .file-field__filename')).toHaveValue('og-image.jpg')
-
-    await saveDocAndAssert(page)
-
-    await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
-      'src',
-      /\/api\/uploads-1\/file\/og-image(-\d+)?\.jpg(\?.*)?$/,
-    )
-  })
-
-  test('should fail to fetch remote url server side if the pasteURL.allowList domains do not match', async () => {
-    // allowList is defined and only includes the some-example-website.com domain
-    await page.goto(uploadsTwo.create)
-
-    const pasteURLButton = page.locator('.file-field__upload button', {
-      hasText: 'Paste URL',
-    })
-    await pasteURLButton.click()
-
-    const remoteImage = 'https://payloadcms.com/images/og-image.jpg'
-
-    const encodedImageURL = encodeURIComponent(remoteImage)
-    const pasteUrlEndpoint = `http://localhost:3000/api/uploads-1/paste-url?src=${encodedImageURL}`
-
-    const inputField = page.locator('.file-field__upload .file-field__remote-file')
-    await inputField.fill(remoteImage)
-
-    // Intercept the 'paste-url' upload request
-    await page.route(
-      pasteUrlEndpoint,
-      (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
-    )
-
-    const addFileButton = page.locator('.file-field__add-file')
-    await addFileButton.click()
-
-    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-      'The provided URL is not allowed.',
-    )
   })
 
   test('should properly create IOS file upload', async () => {
@@ -729,6 +670,83 @@ describe('Uploads', () => {
 
     // With metadata, the animated image filesize would be 218762
     expect(webpMediaDoc.sizes.sizeThree.filesize).toEqual(211638)
+  })
+
+  describe('remote url fetching', () => {
+    beforeAll(async () => {
+      mockCorsServer = startMockCorsServer()
+    })
+
+    afterAll(() => {
+      if (mockCorsServer) {
+        mockCorsServer.close()
+      }
+    })
+
+    test('should fetch remote URL server-side if pasteURL.allowList is defined', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+
+      // Click the "Paste URL" button
+      const pasteURLButton = page.locator('.file-field__upload button', { hasText: 'Paste URL' })
+      await pasteURLButton.click()
+
+      // Input the remote URL
+      const remoteImage = 'http://localhost:4000/mock-cors-image'
+      const inputField = page.locator('.file-field__upload .file-field__remote-file')
+      await inputField.fill(remoteImage)
+
+      // Intercept the server-side fetch to the paste-url endpoint
+      const encodedImageURL = encodeURIComponent(remoteImage)
+      const pasteUrlEndpoint = `/api/uploads-1/paste-url?src=${encodedImageURL}`
+      const serverSideFetchPromise = page.waitForResponse(
+        (response) => response.url().includes(pasteUrlEndpoint) && response.status() === 200,
+        { timeout: 1000 },
+      )
+
+      // Click the "Add File" button
+      const addFileButton = page.locator('.file-field__add-file')
+      await addFileButton.click()
+
+      // Wait for the server-side fetch to complete
+      const serverSideFetch = await serverSideFetchPromise
+      // Assert that the server-side fetch completed successfully
+      await serverSideFetch.text()
+
+      // Wait for the filename field to be updated
+      const filenameInput = page.locator('.file-field .file-field__filename')
+      await expect(filenameInput).toHaveValue('mock-cors-image', { timeout: 500 })
+
+      // Save and assert the document
+      await saveDocAndAssert(page)
+
+      // Validate the uploaded image
+      const imageDetails = page.locator('.file-field .file-details img')
+      await expect(imageDetails).toHaveAttribute('src', /mock-cors-image/, { timeout: 500 })
+    })
+
+    test('should fail to fetch remote URL server-side if the pasteURL.allowList domains do not match', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsTwo.create)
+
+      // Click the "Paste URL" button
+      const pasteURLButton = page.locator('.file-field__upload button', { hasText: 'Paste URL' })
+      await pasteURLButton.click()
+
+      // Input the remote URL
+      const remoteImage = 'http://localhost:4000/mock-cors-image'
+      const inputField = page.locator('.file-field__upload .file-field__remote-file')
+      await inputField.fill(remoteImage)
+
+      // Click the "Add File" button
+      const addFileButton = page.locator('.file-field__add-file')
+      await addFileButton.click()
+
+      // Verify the toast error appears with the correct message
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'The provided URL is not allowed.',
+      )
+    })
   })
 
   describe('image manipulation', () => {
