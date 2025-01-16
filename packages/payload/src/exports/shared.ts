@@ -37,7 +37,7 @@ export { getFieldPaths } from '../fields/getFieldPaths.js'
 
 export * from '../fields/validations.js'
 
-export { validOperators } from '../types/constants.js'
+export { validOperators, validOperatorSet } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 

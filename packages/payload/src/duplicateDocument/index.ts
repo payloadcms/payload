@@ -9,6 +9,7 @@ import { Forbidden } from '../errors/Forbidden.js'
 import { NotFound } from '../errors/NotFound.js'
 import { afterRead } from '../fields/hooks/afterRead/index.js'
 import { beforeDuplicate } from '../fields/hooks/beforeDuplicate/index.js'
+import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 import { getLatestCollectionVersion } from '../versions/getLatestCollectionVersion.js'
 
 type GetDuplicateDocumentArgs = {
@@ -92,7 +93,7 @@ export const getDuplicateDocumentData = async ({
     collection: collectionConfig,
     context: req.context,
     depth: 0,
-    doc: duplicatedFromDocWithLocales,
+    doc: deepCopyObjectSimple(duplicatedFromDocWithLocales),
     draft: draftArg,
     fallbackLocale: null,
     global: null,

@@ -1,7 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
-import type { AccessResult, CollectionSlug, FileToSave, SanitizedConfig } from '../../../index.js'
 import type {
   Payload,
   PayloadRequest,
@@ -22,6 +21,13 @@ import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
+import {
+  type AccessResult,
+  type CollectionSlug,
+  deepCopyObjectSimple,
+  type FileToSave,
+  type SanitizedConfig,
+} from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
@@ -110,7 +116,7 @@ export const updateDocument = async <
     collection: collectionConfig,
     context: req.context,
     depth: 0,
-    doc: docWithLocales,
+    doc: deepCopyObjectSimple(docWithLocales),
     draft: draftArg,
     fallbackLocale: id ? null : fallbackLocale,
     global: null,

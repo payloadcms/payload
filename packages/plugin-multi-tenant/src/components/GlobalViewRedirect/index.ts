@@ -1,4 +1,4 @@
-import type { CollectionSlug, ServerProps } from 'payload'
+import type { CollectionSlug, ServerProps, ViewTypes } from 'payload'
 
 import { redirect } from 'next/navigation.js'
 
@@ -9,7 +9,7 @@ type Args = {
   docID?: number | string
   globalSlugs: string[]
   tenantFieldName: string
-  viewType: 'edit' | 'list'
+  viewType: ViewTypes
 } & ServerProps
 
 export const GlobalViewRedirect = async (args: Args) => {

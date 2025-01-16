@@ -158,6 +158,7 @@ export const renderListHandler = async (args: {
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},
+    viewType: 'list',
   })
 
   return {
