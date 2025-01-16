@@ -49,7 +49,8 @@ export const UploadActions = ({
 }: UploadActionsArgs) => {
   const { t } = useTranslation()
 
-  const fileTypeIsAdjustable = isImage(mimeType) && mimeType !== 'image/svg+xml'
+  const fileTypeIsAdjustable =
+    isImage(mimeType) && mimeType !== 'image/svg+xml' && mimeType !== 'image/jxl'
 
   if (!fileTypeIsAdjustable && (!customActions || customActions.length === 0)) {
     return null
