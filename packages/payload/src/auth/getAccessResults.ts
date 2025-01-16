@@ -10,7 +10,10 @@ type GetAccessResultsArgs = {
 export async function getAccessResults({
   req,
 }: GetAccessResultsArgs): Promise<SanitizedPermissions> {
-  const results = {} as Permissions
+  const results = {
+    collections: {},
+    globals: {},
+  } as Permissions
   const { payload, user } = req
 
   const isLoggedIn = !!user
@@ -49,10 +52,7 @@ export async function getAccessResults({
         operations: collectionOperations,
         req,
       })
-      results.collections = {
-        ...results.collections,
-        [collection.slug]: collectionPolicy,
-      }
+      results.collections[collection.slug] = collectionPolicy
     }),
   )
 
@@ -70,10 +70,7 @@ export async function getAccessResults({
         operations: globalOperations,
         req,
       })
-      results.globals = {
-        ...results.globals,
-        [global.slug]: globalPolicy,
-      }
+      results.globals[global.slug] = globalPolicy
     }),
   )
 
