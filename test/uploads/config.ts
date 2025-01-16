@@ -385,6 +385,7 @@ export default buildConfigWithDefaults({
             width: 300,
           },
         ],
+        pasteURL: false,
       },
     },
     {

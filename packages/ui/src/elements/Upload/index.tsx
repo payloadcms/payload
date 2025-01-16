@@ -2,24 +2,26 @@
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { isImage } from 'payload/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
 import { useForm, useFormProcessing } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { isUrlAllowed } from '../../utilities/isURLAllowed.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
-import { PreviewSizes } from '../PreviewSizes/index.js'
 import './index.scss'
+import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 
 const baseClass = 'file-field'
@@ -91,10 +93,17 @@ export type UploadProps = {
 export const Upload: React.FC<UploadProps> = (props) => {
   const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
 
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
+
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
-  const { docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
+  const { id, docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
@@ -109,6 +118,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const urlInputRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const useServerSideFetch =
+    typeof uploadConfig?.pasteURL === 'object' && uploadConfig.pasteURL.allowList?.length > 0
 
   const handleFileChange = useCallback(
     (newFile: File) => {
@@ -173,19 +185,49 @@ export const Upload: React.FC<UploadProps> = (props) => {
   )
 
   const handleUrlSubmit = async () => {
+    // Disable URL submission if pasteURL is false
+    if (uploadConfig?.pasteURL === false) {
+      return
+    }
+
     if (fileUrl) {
       setUploadStatus('uploading')
+
       try {
-        const response = await fetch(fileUrl)
-        const data = await response.blob()
+        // Check if pasteURL.allowList is defined
+        if (useServerSideFetch) {
+          // Perform server-side fetch if the URL is allowed
+          if (isUrlAllowed(fileUrl, uploadConfig.pasteURL.allowList)) {
+            const pasteURL = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
+            const response = await fetch(`${serverURL}${api}${pasteURL}`)
 
-        // Extract the file name from the URL
-        const fileName = fileUrl.split('/').pop()
+            if (!response.ok) {
+              const errorData = await response.json()
+              throw new Error(errorData.error || 'Failed to fetch the file from the server')
+            }
 
-        // Create a new File object from the Blob data
-        const file = new File([data], fileName, { type: data.type })
-        handleFileChange(file)
-        setUploadStatus('idle')
+            const blob = await response.blob()
+            const fileName = fileUrl.split('/').pop()
+            const file = new File([blob], fileName, { type: blob.type })
+
+            handleFileChange(file)
+            setUploadStatus('idle')
+          } else {
+            throw new Error('The provided URL is not allowed.')
+          }
+        } else {
+          // Perform client-side fetch if no allowList is specified
+          const response = await fetch(fileUrl)
+          const data = await response.blob()
+
+          // Extract the file name from the URL
+          const fileName = fileUrl.split('/').pop()
+
+          // Create a new File object from the Blob data
+          const file = new File([data], fileName, { type: data.type })
+          handleFileChange(file)
+          setUploadStatus('idle')
+        }
       } catch (e) {
         toast.error(e.message)
         setUploadStatus('failed')
@@ -271,16 +313,20 @@ export const Upload: React.FC<UploadProps> = (props) => {
                     ref={inputRef}
                     type="file"
                   />
-                  <span className={`${baseClass}__orText`}>{t('general:or')}</span>
-                  <Button
-                    buttonStyle="pill"
-                    onClick={() => {
-                      setShowUrlInput(true)
-                    }}
-                    size="small"
-                  >
-                    {t('upload:pasteURL')}
-                  </Button>
+                  {uploadConfig?.pasteURL !== false && (
+                    <Fragment>
+                      <span className={`${baseClass}__orText`}>{t('general:or')}</span>
+                      <Button
+                        buttonStyle="pill"
+                        onClick={() => {
+                          setShowUrlInput(true)
+                        }}
+                        size="small"
+                      >
+                        {t('upload:pasteURL')}
+                      </Button>
+                    </Fragment>
+                  )}
                 </div>
 
                 <p className={`${baseClass}__dragAndDropText`}>
