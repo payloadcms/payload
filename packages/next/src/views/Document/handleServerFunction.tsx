@@ -143,6 +143,7 @@ export const renderDocumentHandler = async (args: {
   const { data, Document } = await renderDocument({
     clientConfig,
     disableActions,
+    documentSubViewType: 'default',
     drawerSlug,
     importMap: payload.importMap,
     initialData,
@@ -167,6 +168,7 @@ export const renderDocumentHandler = async (args: {
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},
+    viewType: 'document',
   })
 
   return {
