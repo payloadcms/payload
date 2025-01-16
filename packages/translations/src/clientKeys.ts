@@ -361,6 +361,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:draft',
   'version:draftSavedSuccessfully',
   'version:lastSavedAgo',
+  'version:modifiedOnly',
   'version:noFurtherVersionsFound',
   'version:noRowsFound',
   'version:noRowsSelected',
