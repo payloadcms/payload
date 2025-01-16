@@ -896,8 +896,6 @@ describe('database', () => {
     })
 
     it('should return proper deeply nested field validation errors', async () => {
-      let errorMessage: string = ''
-
       try {
         await payload.create({
           collection: postsSlug,
@@ -914,12 +912,10 @@ describe('database', () => {
           },
         })
       } catch (e: any) {
-        errorMessage = e.message
+        await expect(e.message).toBe(
+          'posts validation failed: D1.D2.D3.D4: Cast to string failed for value "{}" (type Object) at path "D4"',
+        )
       }
-
-      await expect(errorMessage).toBe(
-        'posts validation failed: D1.D2.D3.D4: Cast to string failed for value "{}" (type Object) at path "D4"',
-      )
     })
   })
 
