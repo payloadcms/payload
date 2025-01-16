@@ -109,13 +109,34 @@ export const traverseFields = ({
     if (field.type === 'tabs' && 'tabs' in field) {
       for (const tab of field.tabs) {
         let tabRef = ref
+
+        if (skip) {
+          return false
+        }
+
         if ('name' in tab && tab.name) {
           if (!ref[tab.name] || typeof ref[tab.name] !== 'object') {
             if (fillEmpty) {
-              ref[tab.name] = {}
+              if (tab.localized) {
+                ref[tab.name] = { en: {} }
+              } else {
+                ref[tab.name] = {}
+              }
             } else {
               continue
             }
+          }
+
+          if (
+            callback &&
+            callback({
+              field: { ...tab, type: 'tab' },
+              next,
+              parentRef: currentParentRef,
+              ref: tabRef,
+            })
+          ) {
+            return true
           }
 
           tabRef = tabRef[tab.name]
@@ -132,29 +153,34 @@ export const traverseFields = ({
                 })
               }
             }
-            continue
+          }
+        } else {
+          if (
+            callback &&
+            callback({
+              field: { ...tab, type: 'tab' },
+              next,
+              parentRef: currentParentRef,
+              ref: tabRef,
+            })
+          ) {
+            return true
           }
         }
 
-        if (
-          callback &&
-          callback({
-            field: { ...tab, type: 'tab' },
-            next,
+        if (!tab.localized) {
+          traverseFields({
+            callback,
+            fields: tab.fields,
+            fillEmpty,
             parentRef: currentParentRef,
             ref: tabRef,
           })
-        ) {
-          return true
         }
 
-        traverseFields({
-          callback,
-          fields: tab.fields,
-          fillEmpty,
-          parentRef: currentParentRef,
-          ref: tabRef,
-        })
+        if (skip) {
+          return false
+        }
       }
 
       return
@@ -166,10 +192,18 @@ export const traverseFields = ({
         if (!ref[field.name]) {
           if (fillEmpty) {
             if (field.type === 'group') {
-              ref[field.name] = {}
+              if (field.localized) {
+                ref[field.name] = {
+                  en: {},
+                }
+              } else {
+                ref[field.name] = {}
+              }
             } else if (field.type === 'array' || field.type === 'blocks') {
               if (field.localized) {
-                ref[field.name] = {}
+                ref[field.name] = {
+                  en: [],
+                }
               } else {
                 ref[field.name] = []
               }
