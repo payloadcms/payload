@@ -12,6 +12,7 @@ import {
   Pill,
   RenderFields,
   SectionTitle,
+  useDocumentForm,
   useDocumentInfo,
   useEditDepth,
   useFormSubmitted,
@@ -23,6 +24,7 @@ import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
 const baseClass = 'lexical-block'
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { getTranslation } from '@payloadcms/translations'
 import { $getNodeByKey } from 'lexical'
@@ -33,9 +35,9 @@ import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import './index.scss'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import { BlockContent } from './BlockContent.js'
-import './index.scss'
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 type Props = {
@@ -64,6 +66,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
     },
     uuid: uuidFromContext,
   } = useEditorConfigContext()
+
+  const { fields: parentDocumentFields } = useDocumentForm()
   const onChangeAbortControllerRef = useRef(new AbortController())
   const editDepth = useEditDepth()
   const [errorCount, setErrorCount] = React.useState(0)
@@ -127,6 +131,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
+        fullFormStateOverride: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
         globalSlug,
         operation: 'update',
         renderAllFields: true,
@@ -164,6 +169,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     collectionSlug,
     globalSlug,
     getDocPreferences,
+    parentDocumentFields,
   ])
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(
@@ -197,6 +203,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         },
         docPreferences: await getDocPreferences(),
         formState: prevFormState,
+        fullFormStateOverride: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
         globalSlug,
         operation: 'update',
         renderAllFields: submit ? true : false,
@@ -252,6 +259,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       globalSlug,
       schemaFieldsPath,
       formData.blockType,
+      parentDocumentFields,
       editor,
       nodeKey,
     ],
