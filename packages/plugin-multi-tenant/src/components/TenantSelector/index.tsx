@@ -9,7 +9,7 @@ import { SELECT_ALL } from '../../constants.js'
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 
 export const TenantSelector = () => {
-  const { options, selectedTenantID, setTenant } = useTenantSelection()
+  const { isClearable, options, selectedTenantID, setTenant } = useTenantSelection()
 
   const handleChange = React.useCallback(
     (option: ReactSelectOption | ReactSelectOption[]) => {
@@ -29,6 +29,7 @@ export const TenantSelector = () => {
   return (
     <div className="tenant-selector">
       <SelectInput
+        isClearable={isClearable}
         label="Tenant"
         name="setTenant"
         onChange={handleChange}
