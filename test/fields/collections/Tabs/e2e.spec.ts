@@ -154,4 +154,16 @@ describe('Tabs', () => {
       timeout: POLL_TOPASS_TIMEOUT,
     })
   })
+
+  test('should show proper validation error message on text field within array within tab', async () => {
+    await navigateToDoc(page, url)
+
+    await page.locator('#array-row-2 #field-array__2__text').fill('')
+
+    await page.locator('.form-submit #action-save').click()
+
+    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+      'The following field is invalid: Array 03 > Text',
+    )
+  })
 })

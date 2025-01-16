@@ -102,4 +102,20 @@ describe('Collapsibles', () => {
     )
     await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase')
   })
+
+  test('should show proper validation error message for fields nested in collapsible', async () => {
+    await page.goto(url.create)
+
+    await page.locator('#field-collapsible-_index-0 #field-text').fill('some text')
+
+    await page
+      .locator('#field-collapsible-_index-0 #field-group__subGroup__requiredTextWithinSubGroup')
+      .fill('')
+
+    await page.locator('.form-submit #action-save').click()
+
+    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+      'The following field is invalid: Group > SubGroup > Required Text Within Sub Group',
+    )
+  })
 })
