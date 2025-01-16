@@ -110,6 +110,36 @@ export const Categories: CollectionConfig = {
       on: 'array.category',
     },
     {
+      name: 'localizedArrayPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'localizedArray.category',
+    },
+    {
+      name: 'localizedGroupPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'localizedGroup.category',
+    },
+    {
+      name: 'localizedGroupArrayPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'localizedGroup.array.category',
+    },
+    // {
+    //   name: 'localizedTabPosts',
+    //   type: 'join',
+    //   collection: 'posts',
+    //   on: 'localizedTab.category',
+    // },
+    // {
+    //   name: 'localizedTabArrayPosts',
+    //   type: 'join',
+    //   collection: 'posts',
+    //   on: 'localizedTab.array.category',
+    // },
+    {
       name: 'blocksPosts',
       type: 'join',
       collection: 'posts',

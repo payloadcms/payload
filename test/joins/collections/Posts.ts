@@ -105,6 +105,68 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
+      name: 'localizedArray',
+      type: 'array',
+      localized: true,
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: categoriesSlug,
+        },
+      ],
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'localizedTab',
+          localized: true,
+          fields: [
+            {
+              name: 'category',
+              type: 'relationship',
+              relationTo: categoriesSlug,
+            },
+            {
+              name: 'array',
+              type: 'array',
+              fields: [
+                {
+                  name: 'category',
+                  type: 'relationship',
+                  relationTo: categoriesSlug,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'localizedGroup',
+      localized: true,
+      type: 'group',
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: categoriesSlug,
+        },
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              name: 'category',
+              type: 'relationship',
+              relationTo: categoriesSlug,
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'blocks',
       type: 'blocks',
       blocks: [

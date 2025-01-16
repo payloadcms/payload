@@ -23,6 +23,7 @@ export const sanitizeJoinField = ({
   if (typeof field.maxDepth === 'undefined') {
     field.maxDepth = 1
   }
+
   const join: SanitizedJoin = {
     field,
     joinPath: `${joinPath ? joinPath + '.' : ''}${field.name}`,
@@ -39,15 +40,39 @@ export const sanitizeJoinField = ({
   const pathSegments = field.on.split('.') // Split the schema path into segments
   let currentSegmentIndex = 0
 
+  let localized = false
   // Traverse fields and match based on the schema path
   traverseFields({
     callback: ({ field, next }) => {
       if (!('name' in field) || !field.name) {
         return
       }
+
       const currentSegment = pathSegments[currentSegmentIndex]
+
       // match field on path segments
       if ('name' in field && field.name === currentSegment) {
+        if ('localized' in field && field.localized) {
+          localized = true
+          const fieldIndex = currentSegmentIndex
+
+          join.getForeignPath = ({ locale }) => {
+            return pathSegments.reduce((acc, segment, index) => {
+              let result = `${acc}${segment}`
+
+              if (index === fieldIndex) {
+                result = `${result}.${locale}`
+              }
+
+              if (index !== pathSegments.length - 1) {
+                result = `${result}.`
+              }
+
+              return result
+            }, '')
+          }
+        }
+
         // Check if this is the last segment in the path
         if (
           (currentSegmentIndex === pathSegments.length - 1 &&
@@ -78,7 +103,8 @@ export const sanitizeJoinField = ({
   join.targetField = joinRelationship
 
   // override the join field localized property to use whatever the relationship field has
-  field.localized = joinRelationship.localized
+  // or if it's nested to a localized array / blocks / tabs / group
+  field.localized = localized
   // override the join field hasMany property to use whatever the relationship field has
   field.hasMany = joinRelationship.hasMany
 
