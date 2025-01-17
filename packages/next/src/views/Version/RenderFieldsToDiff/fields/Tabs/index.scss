@@ -1,9 +1,11 @@
 @layer payload-default {
   .tabs-diff {
-    &__tab:not(:first-child),
-    &__tab-locale:not(:first-child) {
+    // Space between each tab or tab locale
+    &__tab:not(:first-of-type),
+    &__tab-locale:not(:first-of-type) {
       margin-top: var(--base);
     }
+
     &__locale-label {
       background: var(--theme-elevation-100);
       padding: calc(var(--base) * 0.25);
