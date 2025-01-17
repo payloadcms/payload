@@ -1,0 +1,25 @@
+.field-diff-collapser {
+  &__toggle-button {
+    all: unset;
+    cursor: pointer;
+    // Align the chevron visually with the label text
+    vertical-align: 1px;
+    // Align the chevron horizontally with other labels that don't have a chevron
+    [dir='ltr'] & {
+      margin-left: -5px;
+    }
+    [dir='rtl'] & {
+      margin-right: -5px;
+    }
+  }
+
+  &__content {
+    // Indent the content, aligning it with the parent label
+    [dir='ltr'] & {
+      margin-left: 15px;
+    }
+    [dir='rtl'] & {
+      margin-right: 15px;
+    }
+  }
+}
