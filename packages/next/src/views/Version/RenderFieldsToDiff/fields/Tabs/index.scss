@@ -1,0 +1,5 @@
+.tabs-diff {
+  &__tab:not(:first-child) {
+    margin-top: var(--base);
+  }
+}

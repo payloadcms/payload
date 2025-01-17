@@ -14,6 +14,10 @@
       }
     }
 
+    &__row:not(:first-child) {
+      margin-top: calc(var(--base) * 0.5);
+    }
+
     &__no-rows {
       font-family: monospace;
       background-color: var(--theme-elevation-50);

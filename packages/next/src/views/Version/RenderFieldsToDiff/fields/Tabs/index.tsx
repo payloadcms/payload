@@ -8,6 +8,7 @@ import type { DiffComponentProps } from '../types.js'
 
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import RenderFieldsToDiff from '../../index.js'
+import './index.scss'
 
 const baseClass = 'tabs-diff'
 
@@ -28,33 +29,34 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
         const versionUnwrapped = 'name' in tab ? version?.[tab.name] : version
 
         return (
-          <DiffCollapser
-            comparison={comparisonUnwrapped}
-            fields={tab.fields}
-            key={i}
-            label={
-              'label' in tab &&
-              tab.label &&
-              typeof tab.label !== 'function' && (
-                <span>
-                  {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-                  {getTranslation(tab.label, i18n)}
-                </span>
-              )
-            }
-            version={versionUnwrapped}
-          >
-            <RenderFieldsToDiff
+          <div className={`${baseClass}__tab`} key={i}>
+            <DiffCollapser
               comparison={comparisonUnwrapped}
-              diffComponents={diffComponents}
-              fieldPermissions={fieldPermissions}
               fields={tab.fields}
-              i18n={i18n}
-              key={i}
-              locales={locales}
+              label={
+                'label' in tab &&
+                tab.label &&
+                typeof tab.label !== 'function' && (
+                  <span>
+                    {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
+                    {getTranslation(tab.label, i18n)}
+                  </span>
+                )
+              }
               version={versionUnwrapped}
-            />
-          </DiffCollapser>
+            >
+              <RenderFieldsToDiff
+                comparison={comparisonUnwrapped}
+                diffComponents={diffComponents}
+                fieldPermissions={fieldPermissions}
+                fields={tab.fields}
+                i18n={i18n}
+                key={i}
+                locales={locales}
+                version={versionUnwrapped}
+              />
+            </DiffCollapser>
+          </div>
         )
       })}
     </div>
