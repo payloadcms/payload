@@ -30,6 +30,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
   return (
     <div className={baseClass}>
       <FieldDiffCollapser
+        comparison={comparison}
         label={
           'label' in field &&
           field.label &&
@@ -40,6 +41,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
             </span>
           )
         }
+        version={version}
       >
         {maxRows > 0 && (
           <React.Fragment>
@@ -96,7 +98,12 @@ const Iterable: React.FC<DiffComponentProps> = ({
               }
 
               return (
-                <FieldDiffCollapser key={i} label={iterableItemLabel}>
+                <FieldDiffCollapser
+                  comparison={comparisonRow}
+                  key={i}
+                  label={iterableItemLabel}
+                  version={versionRow}
+                >
                   <RenderFieldsToDiff
                     comparison={comparisonRow}
                     diffComponents={diffComponents}

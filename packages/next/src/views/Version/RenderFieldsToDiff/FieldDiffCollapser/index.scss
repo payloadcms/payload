@@ -4,13 +4,18 @@
     cursor: pointer;
     // Align the chevron visually with the label text
     vertical-align: 1px;
-    // Align the chevron horizontally with other labels that don't have a chevron
-    [dir='ltr'] & {
-      margin-left: -5px;
-    }
-    [dir='rtl'] & {
-      margin-right: -5px;
-    }
+  }
+
+  &__label {
+    margin: 0 calc(var(--base) * 0.25);
+  }
+
+  &__plus-sign {
+    color: var(--theme-success-500);
+  }
+
+  &__minus-sign {
+    color: var(--theme-error-500);
   }
 
   &__content {
