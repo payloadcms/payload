@@ -1,7 +1,7 @@
 import Collapsible from './Collapsible/index.js'
 import Iterable from './Iterable/index.js'
-import Nested from './Nested/index.js'
 import Relationship from './Relationship/index.js'
+import Row from './Row/index.js'
 import Select from './Select/index.js'
 import Tabs from './Tabs/index.js'
 import Text from './Text/index.js'
@@ -21,7 +21,7 @@ export const diffComponents = {
   radio: Select,
   relationship: Relationship,
   richText: Text,
-  row: Nested,
+  row: Row,
   select: Select,
   tabs: Tabs,
   text: Text,
