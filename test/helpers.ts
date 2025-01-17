@@ -392,7 +392,9 @@ export async function switchTab(page: Page, selector: string) {
  * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
  * @param page
  */
-export function initPageConsoleErrorCatch(page: Page) {
+export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
+  const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
+
   page.on('console', (msg) => {
     if (
       msg.type() === 'error' &&
@@ -407,12 +409,30 @@ export function initPageConsoleErrorCatch(page: Page) {
       !msg.text().includes('Error getting document data') &&
       !msg.text().includes('Failed trying to load default language strings') &&
       !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
-      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') // This is a weird error that happens in the console
+      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
+      // Conditionally ignore CORS errors based on the `ignoreCORS` option
+      !(
+        ignoreCORS &&
+        msg.text().includes('Access to fetch at') &&
+        msg.text().includes("No 'Access-Control-Allow-Origin' header is present")
+      ) &&
+      // Conditionally ignore network-related errors
+      !msg.text().includes('Failed to load resource: net::ERR_FAILED')
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
       // Most importantly, this should catch react errors.
       throw new Error(`Browser console error: ${msg.text()}`)
+    }
+
+    // Log ignored CORS-related errors for visibility
+    if (msg.type() === 'error' && msg.text().includes('Access to fetch at') && ignoreCORS) {
+      console.log(`Ignoring expected CORS-related error: ${msg.text()}`)
+    }
+
+    // Log ignored network-related errors for visibility
+    if (msg.type() === 'error' && msg.text().includes('Failed to load resource: net::ERR_FAILED')) {
+      console.log(`Ignoring expected network error: ${msg.text()}`)
     }
   })
 }
