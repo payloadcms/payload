@@ -447,6 +447,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Succesvol automatisch bewaard.',
     autosavedVersion: 'Automatisch bewaarde versie',
     changed: 'Gewijzigd',
+    changedFieldsCount_one: '{{count}} gewijzigd veld',
+    changedFieldsCount_other: '{{count}} gewijzigde velden',
     compareVersion: 'Vergelijk versie met:',
     confirmPublish: 'Bevestig publiceren',
     confirmRevertToSaved: 'Bevestig terugdraaien naar bewaarde versie',
