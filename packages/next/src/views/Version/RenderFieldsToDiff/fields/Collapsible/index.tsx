@@ -12,7 +12,6 @@ const baseClass = 'nested-diff'
 const Collapsible: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
-  disableGutter = false,
   field,
   fields,
   i18n,
