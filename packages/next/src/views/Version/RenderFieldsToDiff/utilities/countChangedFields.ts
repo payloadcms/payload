@@ -1,7 +1,7 @@
 import type { ArrayFieldClient, BlocksFieldClient, ClientField } from 'payload'
 
-import { getFieldsForRowComparison } from '../fields/Iterable/getFieldsForRowComparison.js'
 import { fieldHasChanges } from './fieldHasChanges.js'
+import { getFieldsForRowComparison } from './getFieldsForRowComparison.js'
 
 type Args = {
   comparison: unknown

@@ -6,7 +6,7 @@ import React, { useState } from 'react'
 
 import Label from '../Label/index.js'
 import './index.scss'
-import { countChangedFields, countChangedFieldsInRows } from './countChangedFields.js'
+import { countChangedFields, countChangedFieldsInRows } from '../utilities/countChangedFields.js'
 
 const baseClass = 'diff-collapser'
 
