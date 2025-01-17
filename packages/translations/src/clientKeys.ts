@@ -351,6 +351,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:autosavedSuccessfully',
   'version:autosavedVersion',
   'version:changed',
+  'version:changeCount',
   'version:confirmRevertToSaved',
   'version:compareVersion',
   'version:confirmPublish',

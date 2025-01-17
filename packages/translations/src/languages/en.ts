@@ -442,6 +442,8 @@ export const enTranslations = {
     autosave: 'Autosave',
     autosavedSuccessfully: 'Autosaved successfully.',
     autosavedVersion: 'Autosaved version',
+    changeCount_one: '{{count}} change',
+    changeCount_other: '{{count}} changes',
     changed: 'Changed',
     compareVersion: 'Compare version against:',
     confirmPublish: 'Confirm publish',
