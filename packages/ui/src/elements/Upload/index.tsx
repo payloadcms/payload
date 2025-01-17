@@ -184,62 +184,53 @@ export const Upload: React.FC<UploadProps> = (props) => {
   )
 
   const handleUrlSubmit = async () => {
-    if (uploadConfig?.pasteURL === false) {
+    if (!fileUrl || uploadConfig?.pasteURL === false) {
       return
     }
 
-    if (fileUrl) {
-      setUploadStatus('uploading')
+    setUploadStatus('uploading')
+    try {
+      // Attempt client-side fetch
+      const clientResponse = await fetch(fileUrl)
 
-      try {
-        // Attempt client-side fetch first
-        const response = await fetch(fileUrl)
-
-        if (!response.ok) {
-          throw new Error(`Client-side fetch failed with status: ${response.status}`)
-        }
-
-        const data = await response.blob()
-        const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
-
-        const file = new File([data], fileName, { type: data.type })
-        handleFileChange(file)
-        setUploadStatus('idle')
-        return // Exit if client-side fetch succeeds
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        // Continue to server-side fallback
+      if (!clientResponse.ok) {
+        throw new Error(`Fetch failed with status: ${clientResponse.status}`)
       }
 
-      // If pasteURL.allowList is defined, try to server-side fetch
-      if (useServerSideFetch) {
-        try {
-          const pasteURL = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
-          const response = await fetch(`${serverURL}${api}${pasteURL}`)
+      const blob = await clientResponse.blob()
+      const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
+      const file = new File([blob], fileName, { type: blob.type })
 
-          if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || 'Server-side fetch failed.')
-          }
-
-          const blob = await response.blob()
-          const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
-          const file = new File([blob], fileName, { type: blob.type })
-
-          handleFileChange(file)
-          setUploadStatus('idle')
-          return // Exit if server-side fetch succeeds
-        } catch (serverError) {
-          toast.error(`${serverError.message} The provided URL is not allowed.`)
-          setUploadStatus('failed')
-        }
-      } else {
-        // Only show error if all attempts have failed
-        toast.error(
-          'Client-side fetch is disabled or failed, and no server-side fallback is available.',
-        )
+      handleFileChange(file)
+      setUploadStatus('idle')
+      return // Exit if client-side fetch succeeds
+    } catch (_clientError) {
+      if (!useServerSideFetch) {
+        // If server-side fetch is not enabled, show client-side error
+        toast.error('Failed to fetch the file.')
         setUploadStatus('failed')
+        return
       }
+    }
+
+    // Attempt server-side fetch if client-side fetch fails and useServerSideFetch is true
+    try {
+      const pasteURL = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
+      const serverResponse = await fetch(`${serverURL}${api}${pasteURL}`)
+
+      if (!serverResponse.ok) {
+        throw new Error(`Fetch failed with status: ${serverResponse.status}`)
+      }
+
+      const blob = await serverResponse.blob()
+      const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
+      const file = new File([blob], fileName, { type: blob.type })
+
+      handleFileChange(file)
+      setUploadStatus('idle')
+    } catch (_serverError) {
+      toast.error('The provided URL is not allowed.')
+      setUploadStatus('failed')
     }
   }
 
