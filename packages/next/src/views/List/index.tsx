@@ -69,8 +69,6 @@ export const renderListView = async (
 
   const query = queryFromArgs || queryFromReq
 
-  const preferenceKey = `${collectionSlug}-list`
-
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
     req,
