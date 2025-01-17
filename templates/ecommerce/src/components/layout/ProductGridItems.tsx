@@ -5,13 +5,18 @@ import { GridTileImage } from '@/components/grid/tile'
 import Link from 'next/link'
 import React from 'react'
 
-export function ProductGridItems({ products }: { products: Product[] }) {
+export function ProductGridItems({ products }: { products: Partial<Product>[] }) {
   return (
     <React.Fragment>
       {products.map((product) => {
-        const image = typeof product.meta?.image !== 'string' ? product.meta?.image : undefined
+        const firstGalleryImage =
+          typeof product.gallery?.[0] !== 'string' ? product.gallery?.[0] : undefined
+        const metaImage = typeof product.meta?.image !== 'string' ? product.meta?.image : undefined
+
+        const image = metaImage || firstGalleryImage
 
         if (!image) return null
+
         return (
           <Grid.Item className="animate-fadeIn" key={product.id}>
             <Link
@@ -22,7 +27,7 @@ export function ProductGridItems({ products }: { products: Product[] }) {
                 label={{
                   amount: product.price!,
                   currencyCode: product.currency!,
-                  title: product.title,
+                  title: product.title!,
                 }}
                 media={image}
               />

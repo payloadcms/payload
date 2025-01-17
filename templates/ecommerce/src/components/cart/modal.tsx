@@ -73,28 +73,31 @@ export function CartModal() {
             <div className="flex flex-col justify-between w-full">
               <ul className="flex-grow overflow-auto py-4">
                 {cart?.items?.map((item, i) => {
-                  if (typeof item.product === 'string' || !item || !item.url)
+                  const product = item.product
+
+                  if (typeof product === 'string' || !item || !item.url || !product)
                     return <React.Fragment key={i} />
 
-                  const product = item.product
-                  let image =
-                    product?.meta?.image && typeof product?.meta?.image !== 'string'
+                  const metaImage =
+                    product.meta?.image && typeof product.meta?.image !== 'string'
                       ? product.meta.image
                       : undefined
 
+                  const firstGalleryImage =
+                    typeof product.gallery?.[0] !== 'string' ? product.gallery?.[0] : undefined
+
+                  let image = firstGalleryImage || metaImage
+
                   const isVariant = Boolean(item.variant)
-                  const variant = item.product?.variants?.variants?.length
-                    ? item.product.variants.variants.find((v) => v.id === item.variant)
+                  const variant = product?.variants?.variants?.length
+                    ? product.variants.variants.find((v) => v.id === item.variant)
                     : undefined
 
                   const info = isVariant ? (variant?.info as InfoType) : (product?.info as InfoType)
 
                   if (isVariant) {
-                    if (
-                      variant?.images?.[0]?.image &&
-                      typeof variant.images?.[0]?.image !== 'string'
-                    ) {
-                      image = variant.images[0].image
+                    if (variant?.images?.[0] && typeof variant.images?.[0] !== 'string') {
+                      image = variant.images[0]
                     }
                   }
 
@@ -113,9 +116,9 @@ export function CartModal() {
                               <Image
                                 alt={image?.alt || product?.title || ''}
                                 className="h-full w-full object-cover"
-                                height={64}
+                                height={94}
                                 src={image.url}
-                                width={64}
+                                width={94}
                               />
                             )}
                           </div>

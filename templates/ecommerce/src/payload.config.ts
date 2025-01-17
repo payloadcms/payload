@@ -16,8 +16,6 @@ import {
   UnderlineFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import { DocumentInfoContext } from '@payloadcms/ui'
-import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload'
 // import sharp from 'sharp'
@@ -29,16 +27,14 @@ import { Orders } from '@/collections/Orders'
 import { Pages } from '@/collections/Pages'
 import { Products } from '@/collections/Products'
 import { Users } from '@/collections/Users'
-import { BeforeDashboard } from '@/components/BeforeDashboard'
-import { BeforeLogin } from '@/components/BeforeLogin'
 import { createPaymentIntent } from '@/endpoints/create-payment-intent'
 import { customersProxy } from '@/endpoints/customers'
 import { productsProxy } from '@/endpoints/products'
-import { seed } from '@/endpoints/seed'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
 import { paymentSucceeded } from '@/stripe/webhooks/paymentSucceeded'
 import { productUpdated } from '@/stripe/webhooks/productUpdated'
+import { plugins } from './plugins'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -65,9 +61,11 @@ export default buildConfig({
     user: Users.slug,
   },
   collections: [Users, Products, Pages, Categories, Media, Orders],
+  // database-adapter-config-start
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
+  // database-adapter-config-end
   editor: lexicalEditor({
     features: () => {
       return [
@@ -120,44 +118,8 @@ export default buildConfig({
   ],
   globals: [Footer, Header],
   plugins: [
-    stripePlugin({
-      isTestKey: Boolean(process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY),
-      logs: true,
-      rest: false,
-      stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
-      stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
-      webhooks: {
-        'payment_intent.succeeded': paymentSucceeded,
-        'product.updated': productUpdated,
-      },
-    }),
-    redirectsPlugin({
-      collections: ['pages', 'products'],
-    }),
-    formBuilderPlugin({
-      fields: {
-        payment: false,
-      },
-      formOverrides: {
-        fields: ({ defaultFields }) => {
-          return defaultFields.map((field) => {
-            if ('name' in field && field.name === 'confirmationMessage') {
-              return {
-                ...field,
-                editor: lexicalEditor(),
-              }
-            }
-            return field
-          })
-        },
-      },
-    }),
-    seoPlugin({
-      collections: ['pages', 'products'],
-      generateTitle,
-      uploadsCollection: 'media',
-    }),
-    payloadCloudPlugin(),
+    ...plugins,
+    // storage-adapter-placeholder
   ],
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

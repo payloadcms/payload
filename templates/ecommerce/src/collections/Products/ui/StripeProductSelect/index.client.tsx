@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject, StaticLabel, TextField, TextFieldClientProps } from 'payload'
+import type { OptionObject, StaticLabel } from 'payload'
 import type Stripe from 'stripe'
 
 import { useField, useFormFields, withCondition } from '@payloadcms/ui'
@@ -154,7 +154,11 @@ export const Component: React.FC<Props> = (props) => {
                 options.find((option) => option.value === stripeProductID)?.label || 'Unknown'
               }" in Stripe`}
             </span>
-            <CopyToClipboard value={href} />
+            <CopyToClipboard
+              defaultMessage="Copy to clipboard"
+              successMessage="Copied!"
+              value={href}
+            />
           </div>
           <div
             style={{

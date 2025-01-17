@@ -9,16 +9,24 @@ export const metadata = {
   title: 'Search',
 }
 
-export default async function SearchPage({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined }
-}) {
-  const { q: searchValue, sort } = searchParams as { [key: string]: string }
+type SearchParams = { [key: string]: string | string[] | undefined }
+
+type Props = {
+  searchParams: Promise<SearchParams>
+}
+
+export default async function SearchPage({ searchParams }: Props) {
+  const { q: searchValue, sort } = await searchParams
   const payload = await getPayload({ config: configPromise })
 
   const products = await payload.find({
     collection: 'products',
+    select: {
+      title: true,
+      slug: true,
+      gallery: true,
+      categories: true,
+    },
     ...(sort ? { sort } : { sort: 'title' }),
     ...(searchValue
       ? {
@@ -39,6 +47,8 @@ export default async function SearchPage({
         }
       : {}),
   })
+
+  console.log({ products })
   const resultsText = products.docs.length > 1 ? 'results' : 'result'
 
   return (
