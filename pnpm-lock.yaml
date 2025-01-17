@@ -1557,8 +1557,8 @@ importers:
         specifier: 0.25.0
         version: 0.25.0
       sonner:
-        specifier: ^1.7.0
-        version: 1.7.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: ^1.7.2
+        version: 1.7.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       ts-essentials:
         specifier: 10.0.3
         version: 10.0.3(typescript@5.7.2)
@@ -9399,6 +9399,12 @@ packages:
 
   sonner@1.7.0:
     resolution: {integrity: sha512-W6dH7m5MujEPyug3lpI2l3TC3Pp1+LTgK0Efg+IHDrBbtEjyCmCHHo6yfNBOsf1tFZ6zf+jceWwB38baC8yO9g==}
+    peerDependencies:
+      react: 19.0.0
+      react-dom: 19.0.0
+
+  sonner@1.7.2:
+    resolution: {integrity: sha512-zMbseqjrOzQD1a93lxahm+qMGxWovdMxBlkTbbnZdNqVLt4j+amF9PQxUCL32WfztOFt9t9ADYkejAL3jF9iNA==}
     peerDependencies:
       react: 19.0.0
       react-dom: 19.0.0
@@ -19547,6 +19553,11 @@ snapshots:
       atomic-sleep: 1.0.0
 
   sonner@1.7.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+    dependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
+  sonner@1.7.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
