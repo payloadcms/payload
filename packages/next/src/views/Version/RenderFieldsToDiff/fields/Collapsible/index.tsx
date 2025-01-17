@@ -2,8 +2,6 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import './index.scss'
-
 import type { DiffComponentProps } from '../types.js'
 
 import { DiffCollapser } from '../../DiffCollapser/index.js'
@@ -18,7 +16,6 @@ export const Collapsible: React.FC<DiffComponentProps> = ({
   fieldPermissions,
   fields,
   i18n,
-  locale,
   locales,
   version,
 }) => {
@@ -30,12 +27,7 @@ export const Collapsible: React.FC<DiffComponentProps> = ({
         label={
           'label' in field &&
           field.label &&
-          typeof field.label !== 'function' && (
-            <span>
-              {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-              {getTranslation(field.label, i18n)}
-            </span>
-          )
+          typeof field.label !== 'function' && <span>{getTranslation(field.label, i18n)}</span>
         }
         locales={locales}
         version={version}

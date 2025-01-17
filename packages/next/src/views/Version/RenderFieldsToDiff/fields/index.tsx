@@ -1,4 +1,5 @@
 import { Collapsible } from './Collapsible/index.js'
+import { Group } from './Group/index.js'
 import { Iterable } from './Iterable/index.js'
 import { Relationship } from './Relationship/index.js'
 import { Row } from './Row/index.js'
@@ -14,7 +15,7 @@ export const diffComponents = {
   collapsible: Collapsible,
   date: Text,
   email: Text,
-  group: Collapsible,
+  group: Group,
   json: Text,
   number: Text,
   point: Text,
