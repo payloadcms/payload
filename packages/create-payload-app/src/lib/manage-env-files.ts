@@ -10,37 +10,46 @@ const updateEnvExampleVariables = (
   contents: string,
   databaseType: DbType | undefined,
   payloadSecret?: string,
+  databaseUri?: string,
 ): string => {
+  const seenKeys = new Set<string>()
   const updatedEnv = contents
     .split('\n')
     .map((line) => {
       if (line.startsWith('#') || !line.includes('=')) {
-        return line // Preserve comments and unrelated lines
+        return line
       }
 
       const [key] = line.split('=')
 
       if (key === 'DATABASE_URI' || key === 'POSTGRES_URL' || key === 'MONGODB_URI') {
         const dbChoice = databaseType ? dbChoiceRecord[databaseType] : null
-
         if (dbChoice) {
-          const placeholderUri = `${dbChoice.dbConnectionPrefix}your-database-name${
-            dbChoice.dbConnectionSuffix || ''
-          }`
-          return databaseType === 'vercel-postgres'
-            ? `POSTGRES_URL=${placeholderUri}`
-            : `DATABASE_URI=${placeholderUri}`
+          const placeholderUri = databaseUri
+            ? databaseUri
+            : `${dbChoice.dbConnectionPrefix}your-database-name${dbChoice.dbConnectionSuffix || ''}`
+          line =
+            databaseType === 'vercel-postgres'
+              ? `POSTGRES_URL=${placeholderUri}`
+              : `DATABASE_URI=${placeholderUri}`
         }
-
-        return `DATABASE_URI=your-database-connection-here` // Fallback
       }
 
       if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {
-        return `PAYLOAD_SECRET=${payloadSecret || 'YOUR_SECRET_HERE'}`
+        line = `PAYLOAD_SECRET=${payloadSecret || 'YOUR_SECRET_HERE'}`
       }
+
+      // handles dupes
+      if (seenKeys.has(key)) {
+        return null
+      }
+
+      seenKeys.add(key)
 
       return line
     })
+    .filter(Boolean)
+    .reverse()
     .join('\n')
 
   return updatedEnv
@@ -70,47 +79,67 @@ export async function manageEnvFiles(args: {
   try {
     let updatedExampleContents: string
 
-    // Update .env.example
-    if (template?.type === 'starter') {
-      if (!fs.existsSync(envExamplePath)) {
-        error(`.env.example file not found at ${envExamplePath}`)
-        process.exit(1)
+    if (template?.type === 'plugin') {
+      if (debugFlag) {
+        debug(`plugin template detected - no .env added .env.example added`)
       }
+      return
+    }
 
+    if (!fs.existsSync(envExamplePath)) {
+      updatedExampleContents = updateEnvExampleVariables(
+        emptyEnvContent,
+        databaseType,
+        payloadSecret,
+        databaseUri,
+      )
+
+      await fs.writeFile(envExamplePath, updatedExampleContents)
+      if (debugFlag) {
+        debug(`.env.example file successfully created`)
+      }
+    } else {
       const envExampleContents = await fs.readFile(envExamplePath, 'utf8')
-      updatedExampleContents = updateEnvExampleVariables(envExampleContents, databaseType)
+      const mergedEnvs = envExampleContents + '\n' + emptyEnvContent
+      updatedExampleContents = updateEnvExampleVariables(
+        mergedEnvs,
+        databaseType,
+        payloadSecret,
+        databaseUri,
+      )
 
-      await fs.writeFile(envExamplePath, updatedExampleContents.trimEnd() + '\n')
-
+      await fs.writeFile(envExamplePath, updatedExampleContents)
       if (debugFlag) {
         debug(`.env.example file successfully updated`)
       }
-    } else {
-      if (!fs.existsSync(envExamplePath)) {
-        updatedExampleContents = updateEnvExampleVariables(
-          emptyEnvContent,
-          databaseType,
-          payloadSecret,
-        )
-      } else {
-        const envExampleContents = await fs.readFile(envExamplePath, 'utf8')
-        updatedExampleContents = updateEnvExampleVariables(
-          envExampleContents,
-          databaseType,
-          payloadSecret,
-        )
-      }
-      await fs.writeFile(envExamplePath, updatedExampleContents + '\n')
     }
 
-    // Merge existing variables and create or update .env
-    const envContents = await fs.readFile(envPath, 'utf8')
+    if (!fs.existsSync(envPath)) {
+      const envContent = updateEnvExampleVariables(
+        emptyEnvContent,
+        databaseType,
+        payloadSecret,
+        databaseUri,
+      )
+      await fs.writeFile(envPath, envContent)
 
-    const envContent = updateEnvExampleVariables(envContents, databaseType, payloadSecret)
-    await fs.writeFile(envPath, `# Added by Payload\n${envContent.trimEnd()}\n`)
+      if (debugFlag) {
+        debug(`.env file successfully created`)
+      }
+    } else {
+      const envContents = await fs.readFile(envPath, 'utf8')
+      const mergedEnvs = envContents + '\n' + emptyEnvContent
+      const updatedEnvContents = updateEnvExampleVariables(
+        mergedEnvs,
+        databaseType,
+        payloadSecret,
+        databaseUri,
+      )
 
-    if (debugFlag) {
-      debug(`.env file successfully created or updated`)
+      await fs.writeFile(envPath, updatedEnvContents)
+      if (debugFlag) {
+        debug(`.env file successfully updated`)
+      }
     }
   } catch (err: unknown) {
     error('Unable to manage environment files')
