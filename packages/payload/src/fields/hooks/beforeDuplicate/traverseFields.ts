@@ -3,6 +3,7 @@ import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
 
 type Args<T> = {
@@ -12,9 +13,10 @@ type Args<T> = {
   fields: (Field | TabAsField)[]
   id?: number | string
   overrideAccess: boolean
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string[]
   siblingDoc: JsonObject
 }
 
@@ -25,13 +27,25 @@ export const traverseFields = async <T>({
   doc,
   fields,
   overrideAccess,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingDoc,
 }: Args<T>): Promise<void> => {
   const promises = []
+
   fields.forEach((field, fieldIndex) => {
+    const { indexPath, path, schemaPath } = getFieldPaths({
+      field,
+      index: fieldIndex,
+      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentPath,
+      parentSchemaPath,
+    })
+
+    req.payload.logger.info(`beforeDuplicate: ${path}`)
+
     promises.push(
       promise({
         id,
@@ -40,10 +54,14 @@ export const traverseFields = async <T>({
         doc,
         field,
         fieldIndex,
+        indexPath,
         overrideAccess,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
+        path,
         req,
+        schemaPath,
         siblingDoc,
       }),
     )

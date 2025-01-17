@@ -39,6 +39,7 @@ export const beforeValidate = async <T extends JsonObject>({
   req,
 }: Args<T>): Promise<T> => {
   const data = deepCopyObjectSimple(incomingData)
+
   await traverseFields({
     id,
     collection,

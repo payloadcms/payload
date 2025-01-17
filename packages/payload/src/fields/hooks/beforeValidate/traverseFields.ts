@@ -4,6 +4,7 @@ import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
 
 type Args<T> = {
@@ -19,9 +20,10 @@ type Args<T> = {
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string[]
   siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
@@ -39,14 +41,26 @@ export const traverseFields = async <T>({
   global,
   operation,
   overrideAccess,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
   const promises = []
+
   fields.forEach((field, fieldIndex) => {
+    const { indexPath, path, schemaPath } = getFieldPaths({
+      field,
+      index: fieldIndex,
+      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentPath,
+      parentSchemaPath,
+    })
+
+    req.payload.logger.info(`beforeValidate: ${path}`)
+
     promises.push(
       promise({
         id,
@@ -55,17 +69,21 @@ export const traverseFields = async <T>({
         data,
         doc,
         field,
-        fieldIndex,
         global,
+        indexPath,
         operation,
         overrideAccess,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
+        path,
         req,
+        schemaPath,
         siblingData,
         siblingDoc,
       }),
     )
   })
+
   await Promise.all(promises)
 }

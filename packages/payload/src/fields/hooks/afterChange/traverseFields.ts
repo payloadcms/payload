@@ -4,6 +4,7 @@ import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
 
 type Args = {
@@ -14,11 +15,12 @@ type Args = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   previousDoc: JsonObject
   previousSiblingDoc: JsonObject
   req: PayloadRequest
-  schemaPath: string[]
   siblingData: JsonObject
   siblingDoc: JsonObject
 }
@@ -31,17 +33,28 @@ export const traverseFields = async ({
   fields,
   global,
   operation,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   previousDoc,
   previousSiblingDoc,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
 }: Args): Promise<void> => {
   const promises = []
 
   fields.forEach((field, fieldIndex) => {
+    const { indexPath, path, schemaPath } = getFieldPaths({
+      field,
+      index: fieldIndex,
+      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentPath,
+      parentSchemaPath,
+    })
+
+    req.payload.logger.info(`afterChange: ${path}`)
+
     promises.push(
       promise({
         collection,
@@ -51,12 +64,16 @@ export const traverseFields = async ({
         field,
         fieldIndex,
         global,
+        indexPath,
         operation,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
+        path,
         previousDoc,
         previousSiblingDoc,
         req,
+        schemaPath,
         siblingData,
         siblingDoc,
       }),

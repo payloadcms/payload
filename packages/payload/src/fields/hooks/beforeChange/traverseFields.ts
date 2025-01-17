@@ -5,6 +5,7 @@ import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
 
 type Args = {
@@ -25,9 +26,10 @@ type Args = {
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string[]
   siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
@@ -60,9 +62,10 @@ export const traverseFields = async ({
   global,
   mergeLocaleActions,
   operation,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
@@ -71,6 +74,16 @@ export const traverseFields = async ({
   const promises = []
 
   fields.forEach((field, fieldIndex) => {
+    const { indexPath, path, schemaPath } = getFieldPaths({
+      field,
+      index: fieldIndex,
+      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentPath,
+      parentSchemaPath,
+    })
+
+    req.payload.logger.info(`beforeChange: ${path}`)
+
     promises.push(
       promise({
         id,
@@ -83,11 +96,15 @@ export const traverseFields = async ({
         field,
         fieldIndex,
         global,
+        indexPath,
         mergeLocaleActions,
         operation,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
+        path,
         req,
+        schemaPath,
         siblingData,
         siblingDoc,
         siblingDocWithLocales,

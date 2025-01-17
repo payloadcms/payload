@@ -10,6 +10,7 @@ import type {
 } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
 
 type Args = {
@@ -30,11 +31,12 @@ type Args = {
   global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
-  schemaPath: string[]
   select?: SelectType
   selectMode?: SelectMode
   showHiddenFields: boolean
@@ -58,11 +60,12 @@ export const traverseFields = ({
   global,
   locale,
   overrideAccess,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   populate,
   populationPromises,
   req,
-  schemaPath,
   select,
   selectMode,
   showHiddenFields,
@@ -71,6 +74,16 @@ export const traverseFields = ({
   triggerHooks = true,
 }: Args): void => {
   fields.forEach((field, fieldIndex) => {
+    const { indexPath, path, schemaPath } = getFieldPaths({
+      field,
+      index: fieldIndex,
+      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentPath,
+      parentSchemaPath,
+    })
+
+    req.payload.logger.info(`afterRead: ${path}`)
+
     fieldPromises.push(
       promise({
         collection,
@@ -86,13 +99,17 @@ export const traverseFields = ({
         findMany,
         flattenLocales,
         global,
+        indexPath,
         locale,
         overrideAccess,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
+        path,
         populate,
         populationPromises,
         req,
+        schemaPath,
         select,
         selectMode,
         showHiddenFields,

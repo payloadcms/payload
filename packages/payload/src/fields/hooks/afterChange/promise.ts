@@ -16,20 +16,17 @@ type Args = {
   data: JsonObject
   doc: JsonObject
   field: Field | TabAsField
-  fieldIndex: number
   global: null | SanitizedGlobalConfig
+  indexPath: string
   operation: 'create' | 'update'
-  /**
-   * The parent's path
-   */
-  parentPath: (number | string)[]
-  /**
-   * The parent's schemaPath (path without indexes).
-   */
-  parentSchemaPath: string[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
+  path: string
   previousDoc: JsonObject
   previousSiblingDoc: JsonObject
   req: PayloadRequest
+  schemaPath: string
   siblingData: JsonObject
   siblingDoc: JsonObject
 }
@@ -43,26 +40,22 @@ export const promise = async ({
   data,
   doc,
   field,
-  fieldIndex,
   global,
+  indexPath,
   operation,
+  parentIndexPath,
   parentPath,
   parentSchemaPath,
+  path,
   previousDoc,
   previousSiblingDoc,
   req,
+  schemaPath,
   siblingData,
   siblingDoc,
 }: Args): Promise<void> => {
-  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
-    field,
-    index: fieldIndex,
-    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
-    parentPath: parentPath.join('.'),
-    parentSchemaPath: parentSchemaPath.join('.'),
-  })
-  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
-  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
+  const fieldPathSegments = path ? path.split('.') : []
+  const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
 
   if (fieldAffectsData(field)) {
     // Execute hooks
@@ -78,12 +71,12 @@ export const promise = async ({
           global,
           operation,
           originalDoc: doc,
-          path: fieldPath,
+          path: fieldPathSegments,
           previousDoc,
           previousSiblingDoc,
           previousValue: previousDoc[field.name],
           req,
-          schemaPath: fieldSchemaPath,
+          schemaPath: fieldSchemaPathSegments,
           siblingData,
           value: siblingDoc[field.name],
         })
@@ -112,11 +105,12 @@ export const promise = async ({
               fields: field.fields,
               global,
               operation,
-              path: [...fieldPath, i],
+              parentIndexPath: '',
+              parentPath,
+              parentSchemaPath: schemaPath,
               previousDoc,
               previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as JsonObject),
               req,
-              schemaPath: fieldSchemaPath,
               siblingData: siblingData?.[field.name]?.[i] || {},
               siblingDoc: row ? { ...row } : {},
             }),
@@ -124,6 +118,7 @@ export const promise = async ({
         })
         await Promise.all(promises)
       }
+
       break
     }
 
@@ -132,6 +127,7 @@ export const promise = async ({
 
       if (Array.isArray(rows)) {
         const promises = []
+
         rows.forEach((row, i) => {
           const block = field.blocks.find(
             (blockType) => blockType.slug === (row as JsonObject).blockType,
@@ -147,17 +143,19 @@ export const promise = async ({
                 fields: block.fields,
                 global,
                 operation,
-                path: [...fieldPath, i],
+                parentIndexPath: '',
+                parentPath,
+                parentSchemaPath: schemaPath + '.' + block.slug,
                 previousDoc,
                 previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as JsonObject),
                 req,
-                schemaPath: fieldSchemaPath,
                 siblingData: siblingData?.[field.name]?.[i] || {},
                 siblingDoc: row ? { ...row } : {},
               }),
             )
           }
         })
+
         await Promise.all(promises)
       }
 
@@ -174,17 +172,19 @@ export const promise = async ({
         fields: field.fields,
         global,
         operation,
-        path: fieldPath,
+        parentIndexPath: indexPath,
+        parentPath,
+        parentSchemaPath,
         previousDoc,
         previousSiblingDoc: { ...previousSiblingDoc },
         req,
-        schemaPath: fieldSchemaPath,
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
       })
 
       break
     }
+
     case 'group': {
       await traverseFields({
         collection,
@@ -194,11 +194,12 @@ export const promise = async ({
         fields: field.fields,
         global,
         operation,
-        path: fieldPath,
+        parentIndexPath: '',
+        parentPath: path,
+        parentSchemaPath: schemaPath,
         previousDoc,
         previousSiblingDoc: previousDoc[field.name] as JsonObject,
         req,
-        schemaPath: fieldSchemaPath,
         siblingData: (siblingData?.[field.name] as JsonObject) || {},
         siblingDoc: siblingDoc[field.name] as JsonObject,
       })
@@ -210,6 +211,7 @@ export const promise = async ({
       if (!field?.editor) {
         throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
+
       if (typeof field?.editor === 'function') {
         throw new Error('Attempted to access unsanitized rich text editor.')
       }
@@ -228,12 +230,12 @@ export const promise = async ({
             global,
             operation,
             originalDoc: doc,
-            path: fieldPath,
+            path: fieldPathSegments,
             previousDoc,
             previousSiblingDoc,
             previousValue: previousDoc[field.name],
             req,
-            schemaPath: fieldSchemaPath,
+            schemaPath: fieldSchemaPathSegments,
             siblingData,
             value: siblingDoc[field.name],
           })
@@ -246,54 +248,54 @@ export const promise = async ({
       break
     }
 
-    case 'tab': {
-      let tabSiblingData = siblingData
-      let tabSiblingDoc = siblingDoc
-      let tabPreviousSiblingDoc = siblingDoc
-
-      if (tabHasName(field)) {
-        tabSiblingData = (siblingData[field.name] as JsonObject) ?? {}
-        tabSiblingDoc = (siblingDoc[field.name] as JsonObject) ?? {}
-        tabPreviousSiblingDoc = (previousDoc[field.name] as JsonObject) ?? {}
-      }
-
-      await traverseFields({
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        path: fieldPath,
-        previousDoc,
-        previousSiblingDoc: tabPreviousSiblingDoc,
-        req,
-        schemaPath: fieldSchemaPath,
-        siblingData: tabSiblingData,
-        siblingDoc: tabSiblingDoc,
-      })
-
-      break
-    }
-
     case 'tabs': {
-      await traverseFields({
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-        global,
-        operation,
-        path: fieldPath,
-        previousDoc,
-        previousSiblingDoc: { ...previousSiblingDoc },
-        req,
-        schemaPath: fieldSchemaPath,
-        siblingData: siblingData || {},
-        siblingDoc: { ...siblingDoc },
+      field.tabs.forEach(async (tab, tabIndex) => {
+        let tabSiblingData = siblingData
+        let tabSiblingDoc = siblingDoc
+        let tabPreviousSiblingDoc = siblingDoc
+
+        const isNamedTab = tabHasName(tab)
+
+        if (isNamedTab) {
+          tabSiblingData = (siblingData[tab.name] as JsonObject) ?? {}
+          tabSiblingDoc = (siblingDoc[tab.name] as JsonObject) ?? {}
+          tabPreviousSiblingDoc = (previousDoc[tab.name] as JsonObject) ?? {}
+        }
+
+        const {
+          indexPath: tabIndexPath,
+          path: tabPath,
+          schemaPath: tabSchemaPath,
+        } = getFieldPaths({
+          field: {
+            ...tab,
+            type: 'tab',
+          },
+          index: tabIndex,
+          parentIndexPath: indexPath,
+          parentPath,
+          parentSchemaPath,
+        })
+
+        await traverseFields({
+          collection,
+          context,
+          data,
+          doc,
+          fields: tab.fields,
+          global,
+          operation,
+          parentIndexPath: isNamedTab ? '' : tabIndexPath,
+          parentPath: isNamedTab ? tabPath : parentPath,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+          previousDoc,
+          previousSiblingDoc: { ...tabPreviousSiblingDoc },
+          req,
+          siblingData: tabSiblingData || {},
+          siblingDoc: { ...tabSiblingDoc },
+        })
       })
+
       break
     }
 

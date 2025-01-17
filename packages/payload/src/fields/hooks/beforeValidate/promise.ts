@@ -22,14 +22,17 @@ type Args<T> = {
    */
   doc: T
   field: Field | TabAsField
-  fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
+  indexPath: string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  parentPath: (number | string)[]
-  parentSchemaPath: string[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
+  path: string
   req: PayloadRequest
+  schemaPath: string
   siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
@@ -51,25 +54,20 @@ export const promise = async <T>({
   data,
   doc,
   field,
-  fieldIndex,
   global,
+  indexPath,
   operation,
   overrideAccess,
   parentPath,
   parentSchemaPath,
+  path,
   req,
+  schemaPath,
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
-  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
-    field,
-    index: fieldIndex,
-    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
-    parentPath: parentPath.join('.'),
-    parentSchemaPath: parentSchemaPath.join('.'),
-  })
-  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
-  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
+  const fieldPathSegments = path ? path.split('.') : []
+  const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
 
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
@@ -280,11 +278,11 @@ export const promise = async <T>({
           operation,
           originalDoc: doc,
           overrideAccess,
-          path: fieldPath,
+          path: fieldPathSegments,
           previousSiblingDoc: siblingDoc,
           previousValue: siblingDoc[field.name],
           req,
-          schemaPath: fieldSchemaPath,
+          schemaPath: fieldSchemaPathSegments,
           siblingData,
           value: siblingData[field.name],
         })
@@ -331,6 +329,7 @@ export const promise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
+
         rows.forEach((row, i) => {
           promises.push(
             traverseFields({
@@ -343,14 +342,16 @@ export const promise = async <T>({
               global,
               operation,
               overrideAccess,
-              path: [...fieldPath, i],
+              parentIndexPath: '',
+              parentPath,
+              parentSchemaPath: schemaPath,
               req,
-              schemaPath: fieldSchemaPath,
               siblingData: row as JsonObject,
               siblingDoc: getExistingRowDoc(row as JsonObject, siblingDoc[field.name]),
             }),
           )
         })
+
         await Promise.all(promises)
       }
       break
@@ -361,6 +362,7 @@ export const promise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
+
         rows.forEach((row, i) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
@@ -380,15 +382,17 @@ export const promise = async <T>({
                 global,
                 operation,
                 overrideAccess,
-                path: [...fieldPath, i],
+                parentIndexPath: '',
+                parentPath,
+                parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
-                schemaPath: fieldSchemaPath,
                 siblingData: row as JsonObject,
                 siblingDoc: rowSiblingDoc,
               }),
             )
           }
         })
+
         await Promise.all(promises)
       }
 
@@ -407,19 +411,22 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
-        path: fieldPath,
+        parentIndexPath: indexPath,
+        parentPath,
+        parentSchemaPath,
         req,
-        schemaPath: fieldSchemaPath,
         siblingData,
         siblingDoc,
       })
 
       break
     }
+
     case 'group': {
       if (typeof siblingData[field.name] !== 'object') {
         siblingData[field.name] = {}
       }
+
       if (typeof siblingDoc[field.name] !== 'object') {
         siblingDoc[field.name] = {}
       }
@@ -437,9 +444,10 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
-        path: fieldPath,
+        parentIndexPath: '',
+        parentPath: path,
+        parentSchemaPath: schemaPath,
         req,
-        schemaPath: fieldSchemaPath,
         siblingData: groupData as JsonObject,
         siblingDoc: groupDoc as JsonObject,
       })
@@ -451,6 +459,7 @@ export const promise = async <T>({
       if (!field?.editor) {
         throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
+
       if (typeof field?.editor === 'function') {
         throw new Error('Attempted to access unsanitized rich text editor.')
       }
@@ -470,11 +479,11 @@ export const promise = async <T>({
             operation,
             originalDoc: doc,
             overrideAccess,
-            path: fieldPath,
+            path: fieldPathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingData[field.name],
             req,
-            schemaPath: fieldSchemaPath,
+            schemaPath: fieldSchemaPathSegments,
             siblingData,
             value: siblingData[field.name],
           })
@@ -487,60 +496,61 @@ export const promise = async <T>({
       break
     }
 
-    case 'tab': {
-      let tabSiblingData
-      let tabSiblingDoc
-      if (tabHasName(field)) {
-        if (typeof siblingData[field.name] !== 'object') {
-          siblingData[field.name] = {}
-        }
-        if (typeof siblingDoc[field.name] !== 'object') {
-          siblingDoc[field.name] = {}
-        }
-
-        tabSiblingData = siblingData[field.name] as Record<string, unknown>
-        tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>
-      } else {
-        tabSiblingData = siblingData
-        tabSiblingDoc = siblingDoc
-      }
-
-      await traverseFields({
-        id,
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        overrideAccess,
-        path: fieldPath,
-        req,
-        schemaPath: fieldSchemaPath,
-        siblingData: tabSiblingData,
-        siblingDoc: tabSiblingDoc,
-      })
-
-      break
-    }
-
     case 'tabs': {
-      await traverseFields({
-        id,
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-        global,
-        operation,
-        overrideAccess,
-        path: fieldPath,
-        req,
-        schemaPath: fieldSchemaPath,
-        siblingData,
-        siblingDoc,
+      field.tabs.forEach(async (tab, tabIndex) => {
+        let tabSiblingData
+        let tabSiblingDoc
+
+        const isNamedTab = tabHasName(tab)
+
+        if (isNamedTab) {
+          if (typeof siblingData[tab.name] !== 'object') {
+            siblingData[tab.name] = {}
+          }
+
+          if (typeof siblingDoc[tab.name] !== 'object') {
+            siblingDoc[tab.name] = {}
+          }
+
+          tabSiblingData = siblingData[tab.name] as Record<string, unknown>
+          tabSiblingDoc = siblingDoc[tab.name] as Record<string, unknown>
+        } else {
+          tabSiblingData = siblingData
+          tabSiblingDoc = siblingDoc
+        }
+
+        const {
+          indexPath: tabIndexPath,
+          path: tabPath,
+          schemaPath: tabSchemaPath,
+        } = getFieldPaths({
+          field: {
+            ...tab,
+            type: 'tab',
+          },
+          index: tabIndex,
+          parentIndexPath: indexPath,
+          parentPath,
+          parentSchemaPath,
+        })
+
+        await traverseFields({
+          id,
+          collection,
+          context,
+          data,
+          doc,
+          fields: tab.fields,
+          global,
+          operation,
+          overrideAccess,
+          parentIndexPath: isNamedTab ? '' : tabIndexPath,
+          parentPath: isNamedTab ? tabPath : parentPath,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+          req,
+          siblingData: tabSiblingData,
+          siblingDoc: tabSiblingDoc,
+        })
       })
 
       break

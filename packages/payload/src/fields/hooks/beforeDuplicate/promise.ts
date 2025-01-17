@@ -4,7 +4,6 @@ import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPaths } from '../../getFieldPaths.js'
 import { runBeforeDuplicateHooks } from './runHook.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -13,12 +12,15 @@ type Args<T> = {
   context: RequestContext
   doc: T
   field: Field | TabAsField
-  fieldIndex: number
   id?: number | string
+  indexPath: string
   overrideAccess: boolean
-  parentPath: (number | string)[]
-  parentSchemaPath: string[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
+  path: string
   req: PayloadRequest
+  schemaPath: string
   siblingDoc: JsonObject
 }
 
@@ -28,24 +30,17 @@ export const promise = async <T>({
   context,
   doc,
   field,
-  fieldIndex,
   overrideAccess,
   parentPath,
   parentSchemaPath,
   req,
+  schemaPath,
   siblingDoc,
 }: Args<T>): Promise<void> => {
   const { localization } = req.payload.config
 
-  const { path: _fieldPath, schemaPath: _fieldSchemaPath } = getFieldPaths({
-    field,
-    index: fieldIndex,
-    parentIndexPath: '', // Doesn't matter, as unnamed fields do not affect data, and hooks are only run on fields that affect data
-    parentPath: parentPath.join('.'),
-    parentSchemaPath: parentSchemaPath.join('.'),
-  })
-  const fieldPath = _fieldPath ? _fieldPath.split('.') : []
-  const fieldSchemaPath = _fieldSchemaPath ? _fieldSchemaPath.split('.') : []
+  const fieldPathSegments = path ? path.split('.') : []
+  const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
 
   // Handle unnamed tabs
   if (field.type === 'tab' && !tabHasName(field)) {
@@ -201,7 +196,6 @@ export const promise = async <T>({
             }
 
             case 'group':
-
             case 'tab': {
               promises.push(
                 traverseFields({
@@ -255,6 +249,7 @@ export const promise = async <T>({
           }
           break
         }
+
         case 'blocks': {
           const rows = siblingDoc[field.name]
 
@@ -290,7 +285,6 @@ export const promise = async <T>({
         }
 
         case 'group':
-
         case 'tab': {
           if (typeof siblingDoc[field.name] !== 'object') {
             siblingDoc[field.name] = {}
