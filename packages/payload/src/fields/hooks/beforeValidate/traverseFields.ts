@@ -59,8 +59,6 @@ export const traverseFields = async <T>({
       parentSchemaPath,
     })
 
-    req.payload.logger.info(`beforeValidate: ${path}`)
-
     promises.push(
       promise({
         id,

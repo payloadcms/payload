@@ -44,8 +44,6 @@ export const traverseFields = async <T>({
       parentSchemaPath,
     })
 
-    req.payload.logger.info(`beforeDuplicate: ${path}`)
-
     promises.push(
       promise({
         id,

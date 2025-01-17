@@ -82,8 +82,6 @@ export const traverseFields = ({
       parentSchemaPath,
     })
 
-    req.payload.logger.info(`afterRead: ${path}`)
-
     fieldPromises.push(
       promise({
         collection,

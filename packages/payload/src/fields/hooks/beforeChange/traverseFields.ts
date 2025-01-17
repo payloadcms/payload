@@ -82,8 +82,6 @@ export const traverseFields = async ({
       parentSchemaPath,
     })
 
-    req.payload.logger.info(`beforeChange: ${path}`)
-
     promises.push(
       promise({
         id,

@@ -417,9 +417,11 @@ export const promise = async ({
           if (typeof siblingData[tab.name] !== 'object') {
             siblingData[tab.name] = {}
           }
+
           if (typeof siblingDoc[tab.name] !== 'object') {
             siblingDoc[tab.name] = {}
           }
+
           if (typeof siblingDocWithLocales[tab.name] !== 'object') {
             siblingDocWithLocales[tab.name] = {}
           }
@@ -461,7 +463,7 @@ export const promise = async ({
           parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
           req,
           siblingData: tabSiblingData,
-          siblingDo: tabSiblingDoc,
+          siblingDoc: tabSiblingDoc,
           siblingDocWithLocales: tabSiblingDocWithLocales,
           skipValidation: skipValidationFromHere,
         })

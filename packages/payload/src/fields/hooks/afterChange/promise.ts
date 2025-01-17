@@ -43,7 +43,6 @@ export const promise = async ({
   global,
   indexPath,
   operation,
-  parentIndexPath,
   parentPath,
   parentSchemaPath,
   path,

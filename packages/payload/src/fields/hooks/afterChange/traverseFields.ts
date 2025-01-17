@@ -53,8 +53,6 @@ export const traverseFields = async ({
       parentSchemaPath,
     })
 
-    req.payload.logger.info(`afterChange: ${path}`)
-
     promises.push(
       promise({
         collection,
