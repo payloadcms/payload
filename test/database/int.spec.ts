@@ -892,7 +892,7 @@ describe('database', () => {
         errorMessage = e.message
       }
 
-      await expect(errorMessage).toBe('The following field is invalid: title')
+      await expect(errorMessage).toBe('The following field is invalid: Title')
     })
 
     it('should return proper deeply nested field validation errors', async () => {
