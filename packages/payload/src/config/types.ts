@@ -18,7 +18,10 @@ import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type {
   AdminViewConfig,
+  DocumentSubViewTypes,
+  ServerPropsFromView,
   ServerSideEditViewProps,
+  ViewTypes,
   VisibleEntities,
 } from '../admin/views/types.js'
 import type { SanitizedPermissions } from '../auth/index.js'
@@ -400,6 +403,7 @@ type ClientProps = {
 }
 
 export type ServerProps = {
+  readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
   readonly locale?: Locale
   readonly params?: { [key: string]: string | string[] | undefined }
@@ -407,6 +411,7 @@ export type ServerProps = {
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: { [key: string]: string | string[] | undefined }
   readonly user?: TypedUser
+  readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
 } & ClientProps
 
@@ -1190,3 +1195,5 @@ export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 
 export type { EmailAdapter, SendEmailOptions }
+
+export type { DocumentSubViewTypes, ServerPropsFromView, ViewTypes }
