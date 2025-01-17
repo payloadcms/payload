@@ -118,7 +118,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
       type={Element === 'button' ? 'button' : undefined}
     >
       <span className={`${baseClass}__label`}>{children}</span>
-      {icon && <span className={`${baseClass}__icon`}>{icon}</span>}
+      {Boolean(icon) && <span className={`${baseClass}__icon`}>{icon}</span>}
     </Element>
   )
 }
