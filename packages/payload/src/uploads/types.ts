@@ -83,6 +83,14 @@ export type ImageSize = {
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
 
+export type AllowList = Array<{
+  hostname: string
+  pathname?: string
+  port?: string
+  protocol?: 'http' | 'https'
+  search?: string
+}>
+
 export type UploadConfig = {
   /**
    * The adapter name to use for uploads. Used for storage adapter telemetry.
@@ -175,6 +183,17 @@ export type UploadConfig = {
    * @default undefined
    */
   modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers
+  /**
+   * Controls the behavior of pasting/uploading files from URLs.
+   * If set to `false`, fetching from remote URLs is disabled.
+   * If an allowList is provided, server-side fetching will be enabled for specified URLs.
+   * @default true (client-side fetching enabled)
+   */
+  pasteURL?:
+    | {
+        allowList: AllowList
+      }
+    | false
   /**
    * Sharp resize options for the original image.
    * @link https://sharp.pixelplumbing.com/api-resize#resize

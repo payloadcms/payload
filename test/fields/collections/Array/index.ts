@@ -54,6 +54,24 @@ const ArrayFields: CollectionConfig = {
               name: 'text',
               type: 'text',
             },
+            {
+              name: 'textTwo',
+              label: 'Second text field',
+              type: 'text',
+              required: true,
+              defaultValue: 'default',
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'textInRow',
+                  type: 'text',
+                  required: true,
+                  defaultValue: 'default',
+                },
+              ],
+            },
           ],
           type: 'array',
         },
