@@ -44,7 +44,7 @@ export const promise = async <T>({
 
   const fieldPathSegments = path ? path.split('.') : []
   const parentSchemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
-  const fieldIndexPathSegments = indexPath ? indexPath.split('-') : []
+  const fieldIndexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
 
   if (fieldAffectsData(field)) {
     let fieldData = siblingDoc?.[field.name]

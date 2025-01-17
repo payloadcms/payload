@@ -82,7 +82,7 @@ export const promise = async ({
   const fieldPathSegments = path ? path.split('.') : []
   const parentSchemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
   const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
-  const fieldIndexPathSegments = indexPath ? indexPath.split('-') : []
+  const fieldIndexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
