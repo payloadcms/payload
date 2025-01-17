@@ -255,9 +255,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     [initializeSharedFormState, hasInitializedState, toggleLoadingOverlay],
   )
 
-  const removeFile: FormsManagerContext['removeFile'] = React.useCallback((index) => {
-    dispatch({ type: 'REMOVE_FORM', index })
+  const removeThumbnails = React.useCallback((indexes: number[]) => {
+    thumbnailUrlsRef.current = thumbnailUrlsRef.current.filter((_, i) => !indexes.includes(i))
+    setRenderedThumbnails([...thumbnailUrlsRef.current])
   }, [])
+
+  const removeFile: FormsManagerContext['removeFile'] = React.useCallback(
+    (index) => {
+      dispatch({ type: 'REMOVE_FORM', index })
+      removeThumbnails([index])
+    },
+    [removeThumbnails],
+  )
 
   const setFormTotalErrorCount: FormsManagerContext['setFormTotalErrorCount'] = React.useCallback(
     ({ errorCount, index }) => {
@@ -355,7 +364,17 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       setLoadingText('')
       setIsUploading(false)
 
-      const remainingForms = currentForms.filter(({ errorCount }) => errorCount > 0)
+      const remainingForms = []
+      const thumbnailIndexesToRemove = []
+
+      currentForms.forEach(({ errorCount }, i) => {
+        if (errorCount) {
+          remainingForms.push(currentForms[i])
+        } else {
+          thumbnailIndexesToRemove.push(i)
+        }
+      })
+
       const successCount = Math.max(0, currentForms.length - remainingForms.length)
       const errorCount = currentForms.length - successCount
 
@@ -364,6 +383,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
         if (typeof onSuccess === 'function') {
           onSuccess(newDocs, errorCount)
+        }
+
+        if (remainingForms.length && thumbnailIndexesToRemove.length) {
+          removeThumbnails(thumbnailIndexesToRemove)
         }
       }
 
@@ -382,7 +405,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         },
       })
     },
-    [actionURL, activeIndex, forms, onSuccess, t, closeModal, drawerSlug],
+    [forms, activeIndex, t, actionURL, onSuccess, removeThumbnails, closeModal, drawerSlug],
   )
 
   React.useEffect(() => {
