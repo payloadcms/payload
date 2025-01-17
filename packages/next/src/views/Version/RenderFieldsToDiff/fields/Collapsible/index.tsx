@@ -37,6 +37,7 @@ const Collapsible: React.FC<DiffComponentProps> = ({
             </span>
           )
         }
+        locales={locales}
         version={version}
       >
         <RenderFieldsToDiff

@@ -13,16 +13,16 @@ import './index.scss'
 const baseClass = 'tabs-diff'
 
 const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
-  const { comparison, field, version } = props
+  const { comparison, field, locales, version } = props
   return (
     <div className={baseClass}>
       {field.tabs.map((tab, i) => {
         return (
           <div className={`${baseClass}__tab`} key={i}>
             {(() => {
-              if ('name' in tab && tab.name && tab.localized) {
+              if ('name' in tab && locales && tab.localized) {
                 // Named localized tab
-                return props.locales.map((locale, index) => {
+                return locales.map((locale, index) => {
                   const localizedTabProps = {
                     ...props,
                     comparison: comparison?.[tab.name]?.[locale],
@@ -84,6 +84,7 @@ const Tab: React.FC<TabProps> = ({
           </span>
         )
       }
+      locales={locales}
       version={version}
     >
       <RenderFieldsToDiff

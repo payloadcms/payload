@@ -1,39 +1,86 @@
 import type { ClientField } from 'payload'
 
 import { ChevronIcon, Pill, useTranslation } from '@payloadcms/ui'
+import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React, { useState } from 'react'
 
 import Label from '../Label/index.js'
-import { countChangedFields } from './countChangedFields.js'
 import './index.scss'
+import { countChangedFields, countChangedFieldsInRows } from './countChangedFields.js'
 
 const baseClass = 'diff-collapser'
 
-type Props = {
-  children: React.ReactNode
-  comparison?: unknown
-  fields: ClientField[]
-  initCollapsed?: boolean
-  label: React.ReactNode
-  version?: unknown
-}
+type Props =
+  | {
+      // fields collapser
+      children: React.ReactNode
+      comparison: unknown
+      field?: never
+      fields: ClientField[]
+      initCollapsed?: boolean
+      isIterable?: false
+      label: React.ReactNode
+      locales: string[] | undefined
+      version: unknown
+    }
+  | {
+      // iterable collapser
+      children: React.ReactNode
+      comparison?: unknown
+      field: ClientField
+      fields?: never
+      initCollapsed?: boolean
+      isIterable: true
+      label: React.ReactNode
+      locales: string[] | undefined
+      version: unknown
+    }
 
 export const DiffCollapser: React.FC<Props> = ({
   children,
   comparison,
+  field,
   fields,
   initCollapsed = false,
+  isIterable = false,
   label,
+  locales,
   version,
 }) => {
   const { t } = useTranslation()
   const [isCollapsed, setIsCollapsed] = useState(initCollapsed)
 
-  const changeCount = countChangedFields({
-    comparison,
-    fields,
-    version,
-  })
+  let changeCount = 0
+
+  if (isIterable) {
+    if (!fieldIsArrayType(field) && !fieldIsBlockType(field)) {
+      throw new Error(
+        'DiffCollapser: field must be an array or blocks field when isIterable is true',
+      )
+    }
+    const comparisonRows = comparison ?? []
+    const versionRows = version ?? []
+
+    if (!Array.isArray(comparisonRows) || !Array.isArray(versionRows)) {
+      throw new Error(
+        'DiffCollapser: comparison and version must be arrays when isIterable is true',
+      )
+    }
+
+    changeCount = countChangedFieldsInRows({
+      comparisonRows,
+      field,
+      locales,
+      versionRows,
+    })
+  } else {
+    changeCount = countChangedFields({
+      comparison,
+      fields,
+      locales,
+      version,
+    })
+  }
 
   const contentClassNames = [
     `${baseClass}__content`,
