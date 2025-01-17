@@ -4,12 +4,12 @@ import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
-import RenderFieldsToDiff from '../../index.js'
+import { RenderFieldsToDiff } from '../../index.js'
 import Label from '../../Label/index.js'
 
 const baseClass = 'row-diff'
 
-const Row: React.FC<DiffComponentProps> = ({
+export const Row: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
   field,
@@ -40,5 +40,3 @@ const Row: React.FC<DiffComponentProps> = ({
     </div>
   )
 }
-
-export default Row

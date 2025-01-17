@@ -9,9 +9,9 @@ import type { DiffComponentProps } from '../types.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import { RenderFieldsToDiff } from '../../index.js'
 
-const baseClass = 'collapsible-diff'
+const baseClass = 'group-diff'
 
-export const Collapsible: React.FC<DiffComponentProps> = ({
+export const Group: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
   field,

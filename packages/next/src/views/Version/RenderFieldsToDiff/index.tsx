@@ -12,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'render-field-diffs'
 
-const RenderFieldsToDiff: React.FC<Props> = ({
+export const RenderFieldsToDiff: React.FC<Props> = ({
   comparison,
   diffComponents: __diffComponents,
   fieldPermissions,
@@ -127,7 +127,8 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             )
           }
 
-          // At this point, we are dealing with a `row`, etc
+          // At this point, we are dealing with a field with subfields but no
+          // nested data, eg. row, collapsible, etc.
           if ('fields' in field) {
             return (
               <Component
@@ -150,5 +151,3 @@ const RenderFieldsToDiff: React.FC<Props> = ({
     </div>
   )
 }
-
-export default RenderFieldsToDiff

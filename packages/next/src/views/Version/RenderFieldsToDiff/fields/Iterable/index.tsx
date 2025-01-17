@@ -9,12 +9,12 @@ import type { DiffComponentProps } from '../types.js'
 
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import './index.scss'
-import RenderFieldsToDiff from '../../index.js'
+import { RenderFieldsToDiff } from '../../index.js'
 import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowComparison.js'
 
 const baseClass = 'iterable-diff'
 
-const Iterable: React.FC<DiffComponentProps> = ({
+export const Iterable: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
   field,
@@ -104,5 +104,3 @@ const Iterable: React.FC<DiffComponentProps> = ({
     </div>
   )
 }
-
-export default Iterable

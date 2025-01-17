@@ -1,10 +1,10 @@
-import Collapsible from './Collapsible/index.js'
-import Iterable from './Iterable/index.js'
-import Relationship from './Relationship/index.js'
-import Row from './Row/index.js'
-import Select from './Select/index.js'
-import Tabs from './Tabs/index.js'
-import Text from './Text/index.js'
+import { Collapsible } from './Collapsible/index.js'
+import { Iterable } from './Iterable/index.js'
+import { Relationship } from './Relationship/index.js'
+import { Row } from './Row/index.js'
+import { Select } from './Select/index.js'
+import { Tabs } from './Tabs/index.js'
+import { Text } from './Text/index.js'
 
 export const diffComponents = {
   array: Iterable,
