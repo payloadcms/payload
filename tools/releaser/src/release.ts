@@ -14,7 +14,6 @@ import { execSync } from 'child_process'
 import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
-import { fileURLToPath } from 'node:url'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
@@ -26,9 +25,6 @@ import { packagePublishList } from './lib/publishList.js'
 import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 // Always execute in project root
 const cwd = PROJECT_ROOT

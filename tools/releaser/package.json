@@ -26,6 +26,8 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "list-published": "tsx src/lib/getPackageRegistryVersions.ts",
     "release": "tsx src/release.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
