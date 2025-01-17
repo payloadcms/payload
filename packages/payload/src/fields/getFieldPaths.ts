@@ -8,7 +8,7 @@ type Args = {
   parentSchemaPath: string
 }
 
-type Result = {
+type FieldPaths = {
   /**
    * A string of '-' separated indexes representing where
    * to find this field in a given field schema array.
@@ -16,11 +16,11 @@ type Result = {
    */
   indexPath: string
   /**
-   * Path for this field specifically.
+   * Path for this field relative to its position in the data.
    */
   path: string
   /**
-   * Schema path for this field specifically.
+   * Path for this field relative to its position in the schema.
    */
   schemaPath: string
 }
@@ -31,7 +31,7 @@ export function getFieldPaths({
   parentIndexPath,
   parentPath,
   parentSchemaPath,
-}: Args): Result {
+}: Args): FieldPaths {
   if ('name' in field) {
     return {
       indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,

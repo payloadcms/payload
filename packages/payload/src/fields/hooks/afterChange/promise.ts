@@ -43,6 +43,7 @@ export const promise = async ({
   global,
   indexPath,
   operation,
+  parentIndexPath,
   parentPath,
   parentSchemaPath,
   path,
@@ -55,6 +56,7 @@ export const promise = async ({
 }: Args): Promise<void> => {
   const fieldPathSegments = path ? path.split('.') : []
   const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
+  const fieldIndexPathSegments = indexPath ? indexPath.split('-') : []
 
   if (fieldAffectsData(field)) {
     // Execute hooks
@@ -68,6 +70,7 @@ export const promise = async ({
           data,
           field,
           global,
+          indexPath: fieldIndexPathSegments,
           operation,
           originalDoc: doc,
           path: fieldPathSegments,
@@ -227,6 +230,7 @@ export const promise = async ({
             data,
             field,
             global,
+            indexPath: fieldIndexPathSegments,
             operation,
             originalDoc: doc,
             path: fieldPathSegments,

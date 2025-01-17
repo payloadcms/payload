@@ -94,6 +94,7 @@ export const promise = async ({
 }: Args): Promise<void> => {
   const fieldPathSegments = path ? path.split('.') : []
   const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
+  const fieldIndexPathSegments = indexPath ? indexPath.split('-') : []
 
   if (
     fieldAffectsData(field) &&
@@ -239,6 +240,7 @@ export const promise = async ({
                 field,
                 findMany,
                 global,
+                indexPath: fieldIndexPathSegments,
                 operation: 'read',
                 originalDoc: doc,
                 overrideAccess,
@@ -268,6 +270,7 @@ export const promise = async ({
             field,
             findMany,
             global,
+            indexPath: fieldIndexPathSegments,
             operation: 'read',
             originalDoc: doc,
             overrideAccess,
@@ -654,6 +657,7 @@ export const promise = async ({
                   findMany,
                   flattenLocales,
                   global,
+                  indexPath: fieldIndexPathSegments,
                   locale,
                   operation: 'read',
                   originalDoc: doc,
@@ -691,6 +695,7 @@ export const promise = async ({
               findMany,
               flattenLocales,
               global,
+              indexPath: fieldIndexPathSegments,
               locale,
               operation: 'read',
               originalDoc: doc,

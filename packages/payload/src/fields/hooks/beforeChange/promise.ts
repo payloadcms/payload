@@ -82,6 +82,7 @@ export const promise = async ({
   const fieldPathSegments = path ? path.split('.') : []
   const parentSchemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
   const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
+  const fieldIndexPathSegments = indexPath ? indexPath.split('-') : []
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
@@ -102,6 +103,7 @@ export const promise = async ({
           data,
           field,
           global,
+          indexPath: fieldIndexPathSegments,
           operation,
           originalDoc: doc,
           path: fieldPathSegments,
@@ -393,6 +395,7 @@ export const promise = async ({
             errors,
             field,
             global,
+            indexPath: fieldIndexPathSegments,
             mergeLocaleActions,
             operation,
             originalDoc: doc,

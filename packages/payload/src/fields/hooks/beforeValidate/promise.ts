@@ -68,6 +68,7 @@ export const promise = async <T>({
 }: Args<T>): Promise<void> => {
   const fieldPathSegments = path ? path.split('.') : []
   const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
+  const fieldIndexPathSegments = indexPath ? indexPath.split('-') : []
 
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
@@ -275,6 +276,7 @@ export const promise = async <T>({
           data,
           field,
           global,
+          indexPath: fieldIndexPathSegments,
           operation,
           originalDoc: doc,
           overrideAccess,
@@ -476,6 +478,7 @@ export const promise = async <T>({
             data,
             field,
             global,
+            indexPath: fieldIndexPathSegments,
             operation,
             originalDoc: doc,
             overrideAccess,
