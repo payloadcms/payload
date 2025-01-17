@@ -7,15 +7,13 @@
   }
 
   &__label {
+    // Add space between label, chevron, and change count
     margin: 0 calc(var(--base) * 0.25);
   }
 
-  &__plus-sign {
-    color: var(--theme-success-500);
-  }
-
-  &__minus-sign {
-    color: var(--theme-error-500);
+  &__field-change-count {
+    // Reset the font weight of the change count to normal
+    font-weight: normal;
   }
 
   &__content {

@@ -1,31 +1,50 @@
-import { ChevronIcon } from '@payloadcms/ui'
-import React, { useMemo, useState } from 'react'
+import type { ClientField } from 'payload'
+
+import { ChevronIcon, Pill } from '@payloadcms/ui'
+import React, { useState } from 'react'
 
 import Label from '../Label/index.js'
+import { countChangedFields } from './countChangedFields.js'
+import { countChangedRows } from './countChangedRows.js'
 import './index.scss'
 
 const baseClass = 'field-diff-collapser'
 
 type Props = {
   children: React.ReactNode
-  comparison: any
+  comparison?: unknown
   initCollapsed?: boolean
   label: React.ReactNode
-  version: any
-}
+  version?: unknown
+} & ( // The collapsible is either is iterable, or it has fields, but not both.
+  | {
+      fields: ClientField[]
+      isIterable?: boolean
+    }
+  | {
+      fields?: ClientField[]
+      isIterable: boolean
+    }
+)
 
-const FieldDiffCollapser: React.FC<Props> = ({
+export const FieldDiffCollapser: React.FC<Props> = ({
   children,
   comparison,
+  fields,
   initCollapsed = false,
+  isIterable,
   label,
   version,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(initCollapsed)
 
-  const hasChanges = useMemo(() => {
-    return JSON.stringify(version) !== JSON.stringify(comparison)
-  }, [version, comparison])
+  const changeCount = isIterable
+    ? countChangedRows({ comparison, version })
+    : countChangedFields({
+        comparison,
+        fields,
+        version,
+      })
 
   return (
     <div className={baseClass}>
@@ -39,16 +58,13 @@ const FieldDiffCollapser: React.FC<Props> = ({
           <ChevronIcon direction={isCollapsed ? 'right' : 'down'} />
         </button>
         <span className={`${baseClass}__label`}>{label}</span>
-        {isCollapsed && hasChanges && (
-          <span className={`${baseClass}__has-changes-indicator`}>
-            <span className={`${baseClass}__plus-sign`}>+</span>
-            <span className={`${baseClass}__minus-sign`}>–</span>
-          </span>
+        {changeCount > 0 && (
+          <Pill className={`${baseClass}__field-change-count`} pillStyle="light-gray" size="small">
+            {changeCount}
+          </Pill>
         )}
       </Label>
       {!isCollapsed && <div className={`${baseClass}__content`}>{children}</div>}
     </div>
   )
 }
-
-export default FieldDiffCollapser
