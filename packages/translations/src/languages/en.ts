@@ -239,6 +239,7 @@ export const enTranslations = {
     duplicate: 'Duplicate',
     duplicateWithoutSaving: 'Duplicate without saving changes',
     edit: 'Edit',
+    editAll: 'Edit all',
     editedSince: 'Edited since',
     editing: 'Editing',
     editingLabel_many: 'Editing {{count}} {{label}}',
