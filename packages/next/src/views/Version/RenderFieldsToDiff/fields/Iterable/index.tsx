@@ -61,20 +61,15 @@ const Iterable: React.FC<DiffComponentProps> = ({
                 versionRow,
               })
 
-              const iterableItemNumber = String(i + 1).padStart(2, '0')
-              let iterableItemLabel = `Item ${iterableItemNumber}`
-
-              // If the field has labels, use the singular form
-              if ('labels' in field && field.labels && typeof field.labels !== 'function') {
-                iterableItemLabel = `${getTranslation(field.labels.singular, i18n)} ${iterableItemNumber}`
-              }
+              const rowNumber = String(i + 1).padStart(2, '0')
+              const rowLabel = fieldIsArrayType(field) ? `Item ${rowNumber}` : `Block ${rowNumber}`
 
               return (
                 <FieldDiffCollapser
                   comparison={comparisonRow}
                   fields={fields}
                   key={i}
-                  label={iterableItemLabel}
+                  label={rowLabel}
                   version={versionRow}
                 >
                   <RenderFieldsToDiff
