@@ -18,7 +18,7 @@ import type {
   TypedLocale,
   TypedUser,
 } from '../index.js'
-import type { validOperators } from './constants.js'
+import type { Operator } from './constants.js'
 export type { Payload as Payload } from '../index.js'
 
 export type CustomPayloadRequestProperties = {
@@ -101,7 +101,7 @@ export type PayloadRequest = CustomPayloadRequestProperties &
   PayloadRequestData &
   Required<Pick<Request, 'headers'>>
 
-export type Operator = (typeof validOperators)[number]
+export type { Operator }
 
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
