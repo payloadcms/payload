@@ -8,7 +8,6 @@ import { generateReindexHandler } from '../utilities/generateReindexHandler.js'
 export const generateSearchCollection = (
   pluginConfig: SearchPluginConfigWithLocales,
 ): CollectionConfig => {
-  const apiBasePath = pluginConfig?.apiBasePath || '/api'
   const searchSlug = pluginConfig?.searchOverrides?.slug || 'search'
   const searchCollections = pluginConfig?.collections || []
   const collectionLabels = pluginConfig?.labels
@@ -71,7 +70,6 @@ export const generateSearchCollection = (
               {
                 path: '@payloadcms/plugin-search/client#ReindexButton',
                 serverProps: {
-                  apiBasePath,
                   collectionLabels,
                   searchCollections,
                   searchSlug,

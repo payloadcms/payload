@@ -3,7 +3,7 @@ import type { SearchReindexButtonServerComponent } from './types.js'
 import { ReindexButtonClient } from './index.client.js'
 
 export const ReindexButton: SearchReindexButtonServerComponent = (props) => {
-  const { apiBasePath, collectionLabels, i18n, searchCollections, searchSlug } = props
+  const { collectionLabels, i18n, searchCollections, searchSlug } = props
 
   const getStaticLocalizedPluralLabels = () => {
     return Object.fromEntries(
@@ -26,7 +26,6 @@ export const ReindexButton: SearchReindexButtonServerComponent = (props) => {
 
   return (
     <ReindexButtonClient
-      apiBasePath={apiBasePath}
       collectionLabels={getStaticLocalizedPluralLabels()}
       searchCollections={searchCollections}
       searchSlug={searchSlug}

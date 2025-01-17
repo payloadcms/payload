@@ -5,6 +5,7 @@ import {
   Popup,
   PopupList,
   toast,
+  useConfig,
   useLocale,
   useModal,
   useTranslation,
@@ -20,11 +21,11 @@ import { ReindexConfirmModal } from './ReindexConfirmModal/index.js'
 const confirmReindexModalSlug = 'confirm-reindex-modal'
 
 export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
-  apiBasePath,
   collectionLabels,
   searchCollections,
   searchSlug,
 }) => {
+  const apiBasePath = useConfig().config.routes.api
   const { closeModal, openModal } = useModal()
   const {
     i18n: { t },
