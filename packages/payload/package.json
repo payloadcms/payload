@@ -103,7 +103,7 @@
     "jose": "5.9.6",
     "json-schema-to-typescript": "15.0.3",
     "minimist": "1.2.8",
-    "path-to-regexp": "6.2.1",
+    "path-to-regexp": "6.3.0",
     "pino": "9.5.0",
     "pino-pretty": "13.0.0",
     "pluralize": "8.0.0",
