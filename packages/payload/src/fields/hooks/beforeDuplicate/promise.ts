@@ -4,6 +4,7 @@ import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { runBeforeDuplicateHooks } from './runHook.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -30,9 +31,11 @@ export const promise = async <T>({
   context,
   doc,
   field,
+  indexPath,
   overrideAccess,
   parentPath,
   parentSchemaPath,
+  path,
   req,
   schemaPath,
   siblingDoc,
@@ -41,6 +44,7 @@ export const promise = async <T>({
 
   const fieldPathSegments = path ? path.split('.') : []
   const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
+  const parentSchemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
 
   // Handle unnamed tabs
   if (field.type === 'tab' && !tabHasName(field)) {
@@ -51,9 +55,9 @@ export const promise = async <T>({
       doc,
       fields: field.fields,
       overrideAccess,
-      path: fieldPath,
+      path: fieldPathSegments,
       req,
-      schemaPath: fieldSchemaPath,
+      schemaPath: fieldSchemaPathSegments,
       siblingDoc,
     })
 
@@ -77,11 +81,11 @@ export const promise = async <T>({
               data: doc,
               field,
               global: undefined,
-              path: fieldPath,
+              path: fieldPathSegments,
               previousSiblingDoc: siblingDoc,
               previousValue: siblingDoc[field.name]?.[locale],
               req,
-              schemaPath: parentSchemaPath,
+              schemaPath: parentSchemaPathSegments,
               siblingData: siblingDoc,
               siblingDocWithLocales: siblingDoc,
               value: siblingDoc[field.name]?.[locale],
@@ -109,11 +113,11 @@ export const promise = async <T>({
           data: doc,
           field,
           global: undefined,
-          path: fieldPath,
+          path: fieldPathSegments,
           previousSiblingDoc: siblingDoc,
           previousValue: siblingDoc[field.name],
           req,
-          schemaPath: parentSchemaPath,
+          schemaPath: parentSchemaPathSegments,
           siblingData: siblingDoc,
           siblingDocWithLocales: siblingDoc,
           value: siblingDoc[field.name],
@@ -154,9 +158,10 @@ export const promise = async <T>({
                       doc,
                       fields: field.fields,
                       overrideAccess,
-                      path: [...fieldPath, i],
+                      parentIndexPath: '',
+                      parentPath,
+                      parentSchemaPath: schemaPath,
                       req,
-                      schemaPath: fieldSchemaPath,
                       siblingDoc: row,
                     }),
                   )
@@ -184,9 +189,10 @@ export const promise = async <T>({
                       doc,
                       fields: block.fields,
                       overrideAccess,
-                      path: [...fieldPath, i],
+                      parentIndexPath: '',
+                      parentPath,
+                      parentSchemaPath: schemaPath + '.' + block.slug,
                       req,
-                      schemaPath: fieldSchemaPath,
                       siblingDoc: row,
                     }),
                   )
@@ -195,8 +201,7 @@ export const promise = async <T>({
               break
             }
 
-            case 'group':
-            case 'tab': {
+            case 'group': {
               promises.push(
                 traverseFields({
                   id,
@@ -205,9 +210,10 @@ export const promise = async <T>({
                   doc,
                   fields: field.fields,
                   overrideAccess,
-                  path: fieldSchemaPath,
+                  parentIndexPath: '',
+                  parentPath: path,
+                  parentSchemaPath: schemaPath,
                   req,
-                  schemaPath: fieldSchemaPath,
                   siblingDoc: fieldData[locale],
                 }),
               )
@@ -238,9 +244,10 @@ export const promise = async <T>({
                   doc,
                   fields: field.fields,
                   overrideAccess,
-                  path: [...fieldPath, i],
+                  parentIndexPath: '',
+                  parentPath,
+                  parentSchemaPath: schemaPath,
                   req,
-                  schemaPath: fieldSchemaPath,
                   siblingDoc: row,
                 }),
               )
@@ -255,7 +262,7 @@ export const promise = async <T>({
 
           if (Array.isArray(rows)) {
             const promises = []
-            rows.forEach((row, i) => {
+            rows.forEach((row) => {
               const blockTypeToMatch = row.blockType
               const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
 
@@ -270,9 +277,10 @@ export const promise = async <T>({
                     doc,
                     fields: block.fields,
                     overrideAccess,
-                    path: [...fieldPath, i],
+                    parentIndexPath: '',
+                    parentPath,
+                    parentSchemaPath: schemaPath + '.' + block.slug,
                     req,
-                    schemaPath: fieldSchemaPath,
                     siblingDoc: row,
                   }),
                 )
@@ -284,8 +292,7 @@ export const promise = async <T>({
           break
         }
 
-        case 'group':
-        case 'tab': {
+        case 'group': {
           if (typeof siblingDoc[field.name] !== 'object') {
             siblingDoc[field.name] = {}
           }
@@ -299,9 +306,10 @@ export const promise = async <T>({
             doc,
             fields: field.fields,
             overrideAccess,
-            path: fieldPath,
+            parentIndexPath: '',
+            parentPath: path,
+            parentSchemaPath: schemaPath,
             req,
-            schemaPath: fieldSchemaPath,
             siblingDoc: groupDoc as JsonObject,
           })
 
@@ -321,9 +329,10 @@ export const promise = async <T>({
           doc,
           fields: field.fields,
           overrideAccess,
-          path: fieldPath,
+          parentIndexPath: indexPath,
+          parentPath,
+          parentSchemaPath,
           req,
-          schemaPath: fieldSchemaPath,
           siblingDoc,
         })
 
@@ -331,17 +340,37 @@ export const promise = async <T>({
       }
 
       case 'tabs': {
-        await traverseFields({
-          id,
-          collection,
-          context,
-          doc,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-          overrideAccess,
-          path: fieldPath,
-          req,
-          schemaPath: fieldSchemaPath,
-          siblingDoc,
+        field.tabs.forEach(async (tab, tabIndex) => {
+          const isNamedTab = tabHasName(tab)
+
+          const {
+            indexPath: tabIndexPath,
+            path: tabPath,
+            schemaPath: tabSchemaPath,
+          } = getFieldPaths({
+            field: {
+              ...tab,
+              type: 'tab',
+            },
+            index: tabIndex,
+            parentIndexPath: indexPath,
+            parentPath,
+            parentSchemaPath,
+          })
+
+          await traverseFields({
+            id,
+            collection,
+            context,
+            doc,
+            fields: tab.fields,
+            overrideAccess,
+            parentIndexPath: isNamedTab ? '' : tabIndexPath,
+            parentPath: isNamedTab ? tabPath : parentPath,
+            parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+            req,
+            siblingDoc,
+          })
         })
 
         break

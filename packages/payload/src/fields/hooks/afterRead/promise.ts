@@ -429,7 +429,7 @@ export const promise = async ({
       let blocksSelect = select?.[field.name]
 
       if (Array.isArray(rows)) {
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           const block = field.blocks.find(
             (blockType) => blockType.slug === (row as JsonObject).blockType,
           )
@@ -761,7 +761,7 @@ export const promise = async ({
           draft,
           fallbackLocale,
           fieldPromises,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          fields: tab.fields,
           findMany,
           flattenLocales,
           global,

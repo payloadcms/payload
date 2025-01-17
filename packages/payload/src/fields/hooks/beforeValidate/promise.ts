@@ -363,7 +363,7 @@ export const promise = async <T>({
       if (Array.isArray(rows)) {
         const promises = []
 
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
           const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)

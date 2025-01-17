@@ -233,7 +233,7 @@ export const promise = async ({
       const rows = siblingData[field.name]
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
           const rowSiblingDocWithLocales = getExistingRowDoc(
             row as JsonObject,
