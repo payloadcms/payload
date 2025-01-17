@@ -325,6 +325,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               findMany,
               flattenLocales,
               global,
+              indexPath,
               locale,
               originalDoc,
               overrideAccess,
@@ -337,6 +338,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               triggerAccessControl,
               triggerHooks,
             } = args
+
             let { value } = args
 
             if (finalSanitizedEditorConfig?.features?.hooks?.afterRead?.length) {
@@ -361,29 +363,28 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             for (let node of flattenedNodes) {
               const afterReadHooks = finalSanitizedEditorConfig.features.nodeHooks?.afterRead
               const afterReadHooksForNode = afterReadHooks?.get(node.type)
-
               if (afterReadHooksForNode) {
                 for (const hook of afterReadHooksForNode) {
                   node = await hook({
                     context,
-                    currentDepth,
-                    depth,
-                    draft,
-                    fallbackLocale,
-                    fieldPromises,
-                    findMany,
-                    flattenLocales,
-                    locale,
+                    currentDepth: currentDepth!,
+                    depth: depth!,
+                    draft: draft!,
+                    fallbackLocale: fallbackLocale!,
+                    fieldPromises: fieldPromises!,
+                    findMany: findMany!,
+                    flattenLocales: flattenLocales!,
+                    locale: locale!,
                     node,
-                    overrideAccess,
+                    overrideAccess: overrideAccess!,
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
                     populateArg: populate,
-                    populationPromises,
+                    populationPromises: populationPromises!,
                     req,
-                    showHiddenFields,
-                    triggerAccessControl,
-                    triggerHooks,
+                    showHiddenFields: showHiddenFields!,
+                    triggerAccessControl: triggerAccessControl!,
+                    triggerHooks: triggerHooks!,
                   })
                 }
               }
@@ -400,24 +401,25 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                   afterReadTraverseFields({
                     collection,
                     context,
-                    currentDepth,
-                    depth,
+                    currentDepth: currentDepth!,
+                    depth: depth!,
                     doc: originalDoc,
-                    draft,
-                    fallbackLocale,
-                    fieldPromises,
+                    draft: draft!,
+                    fallbackLocale: fallbackLocale!,
+                    fieldPromises: fieldPromises!,
                     fields: subFields,
-                    findMany,
-                    flattenLocales,
+                    findMany: findMany!,
+                    flattenLocales: flattenLocales!,
                     global,
-                    locale,
-                    overrideAccess,
-                    path,
+                    locale: locale!,
+                    overrideAccess: overrideAccess!,
+                    parentIndexPath: indexPath.join('-'),
+                    parentPath: path.join('.'),
+                    parentSchemaPath: schemaPath.join('.'),
                     populate,
-                    populationPromises,
+                    populationPromises: populationPromises!,
                     req,
-                    schemaPath,
-                    showHiddenFields,
+                    showHiddenFields: showHiddenFields!,
                     siblingDoc: nodeSliblingData,
                     triggerAccessControl,
                     triggerHooks,
@@ -526,20 +528,19 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     )
                     continue
                   }
-
                   node = await hook({
                     context,
-                    errors,
-                    mergeLocaleActions,
+                    errors: errors!,
+                    mergeLocaleActions: mergeLocaleActions!,
                     node,
-                    operation,
+                    operation: operation!,
                     originalNode: originalNodeIDMap[id],
                     originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
                     previousNode: previousNodeIDMap[id],
                     req,
-                    skipValidation,
+                    skipValidation: skipValidation!,
                   })
                 }
               }
@@ -568,15 +569,14 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     data: data ?? {},
                     doc: originalDoc ?? {},
                     docWithLocales: docWithLocales ?? {},
-                    errors,
+                    errors: errors!,
                     fields: subFields,
                     global,
-                    mergeLocaleActions,
-                    operation,
+                    mergeLocaleActions: mergeLocaleActions!,
+                    operation: operation!,
                     parentIndexPath: indexPath.join('-'),
                     parentPath: path.join('.'),
                     parentSchemaPath: schemaPath.join('.'),
-                    path,
                     req,
                     siblingData: nodeSiblingData,
                     siblingDoc: nodePreviousSiblingDoc,
@@ -601,7 +601,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               [key: string]: SerializedLexicalNode
             } = {}
 
-            const previousOriginalValue = siblingData[field.name]
+            const previousOriginalValue = siblingData[field.name!]
 
             recurseNodeTree({
               nodeIDMap: newOriginalNodeIDMap,
@@ -719,9 +719,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             for (let [id, node] of Object.entries(nodeIDMap)) {
               const beforeValidateHooks =
                 finalSanitizedEditorConfig.features.nodeHooks.beforeValidate
-
               const beforeValidateHooksForNode = beforeValidateHooks?.get(node.type)
-
               if (beforeValidateHooksForNode) {
                 for (const hook of beforeValidateHooksForNode) {
                   if (!originalNodeIDMap[id]) {
@@ -735,20 +733,18 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     )
                     continue
                   }
-
                   node = await hook({
                     context,
                     node,
                     operation,
                     originalNode: originalNodeIDMap[id],
-                    overrideAccess,
+                    overrideAccess: overrideAccess!,
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
                     req,
                   })
                 }
               }
-
               const subFieldFn = finalSanitizedEditorConfig.features.getSubFields?.get(node.type)
               const subFieldDataFn = finalSanitizedEditorConfig.features.getSubFieldsData?.get(
                 node.type,
@@ -769,7 +765,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     fields: subFields,
                     global,
                     operation,
-                    overrideAccess,
+                    overrideAccess: overrideAccess!,
                     parentIndexPath: indexPath.join('-'),
                     parentPath: path.join('.'),
                     parentSchemaPath: schemaPath.join('.'),
