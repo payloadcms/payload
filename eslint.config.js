@@ -26,12 +26,8 @@ export const defaultESLintIgnores = [
 /** @typedef {import('eslint').Linter.Config} Config */
 
 export const rootParserOptions = {
-  sourceType: 'module',
-  ecmaVersion: 'latest',
-  projectService: {
-    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
-    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs', '*.d.ts'],
-  },
+  projectService: true,
+  tsconfigRootDir: import.meta.dirname,
 }
 
 /** @type {Config[]} */
@@ -74,11 +70,7 @@ export default [
   ...rootEslintConfig,
   {
     languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
+      parserOptions: rootParserOptions,
     },
   },
   {

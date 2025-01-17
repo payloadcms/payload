@@ -4,16 +4,15 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-
     "composite": true,
     "declaration": true,
     "declarationMap": true,
     "target": "ES2022",
-    "rootDir": "${configDir}/src",
+    "rootDir": "${configDir}",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
@@ -70,6 +69,13 @@
       "@payloadcms/next": ["./packages/next/src/exports/*"]
     }
   },
-  "include": ["${configDir}/src"],
+  "include": [
+    "${configDir}/**/*.ts",
+    "${configDir}/**/*.tsx",
+    "${configDir}/**/*.cjs",
+    "${configDir}/**/*.js",
+    "${configDir}/**/*.jsx",
+    "${configDir}/**/*.mjs"
+  ],
   "exclude": ["${configDir}/dist", "${configDir}/build", "${configDir}/temp", "**/*.spec.ts"]
 }

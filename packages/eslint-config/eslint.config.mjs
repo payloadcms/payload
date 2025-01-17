@@ -1,3 +1,5 @@
+/* eslint-disable perfectionist/sort-imports */
+/* eslint-disable perfectionist/sort-objects */
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import perfectionist from 'eslint-plugin-perfectionist'
@@ -9,8 +11,8 @@ import jestExtends from './configs/jest/index.mjs'
 import globals from 'globals'
 import importX from 'eslint-plugin-import-x'
 import typescriptParser from '@typescript-eslint/parser'
-import { deepMerge } from './deepMerge.js'
 
+/** @type {import('eslint').Linter.RulesRecord} */
 const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
   'class-methods-use-this': 'off',
@@ -38,21 +40,10 @@ const baseRules = {
       },
     },
   ],
-  /*'perfectionist/sort-object-types': [
-    'error',
-    {
-      partitionByNewLine: true,
-    },
-  ],
-  'perfectionist/sort-interfaces': [
-    'error',
-    {
-      partitionByNewLine': true,
-    },
-  ],*/
   'payload/no-jsx-import-statements': 'error',
 }
 
+/** @type {import('eslint').Linter.RulesRecord} */
 const reactA11yRules = {
   'jsx-a11y/anchor-is-valid': 'warn',
   'jsx-a11y/control-has-associated-label': 'warn',
@@ -60,6 +51,7 @@ const reactA11yRules = {
   'jsx-a11y/label-has-associated-control': 'warn',
 }
 
+/** @type {import('eslint').Linter.RulesRecord} */
 const typescriptRules = {
   '@typescript-eslint/no-use-before-define': 'off',
 
@@ -107,24 +99,21 @@ const typescriptRules = {
   '@typescript-eslint/no-empty-object-type': 'warn',
 }
 
-/** @typedef {import('eslint').Linter.Config} Config */
-
-/** @type {FlatConfig} */
-const baseExtends = deepMerge(
-  js.configs.recommended,
-  perfectionist.configs['recommended-natural'],
-  regexpPluginConfigs['flat/recommended'],
-)
-
-/** @type {Config[]} */
-export const rootEslintConfig = [
+export const rootEslintConfig = tseslint.config(
+  {
+    name: 'Base',
+    extends: [
+      js.configs.recommended,
+      perfectionist.configs['recommended-natural'],
+      regexpPluginConfigs['flat/recommended'],
+    ],
+  },
   {
     name: 'Settings',
     languageOptions: {
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -139,59 +128,39 @@ export const rootEslintConfig = [
   },
   {
     name: 'TypeScript',
-    // has 3 entries: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/typescript-eslint/src/configs/recommended-type-checked.ts
-    ...deepMerge(
-      baseExtends,
-      tseslint.configs.recommendedTypeChecked[0],
-      tseslint.configs.recommendedTypeChecked[1],
-      tseslint.configs.recommendedTypeChecked[2],
-      eslintConfigPrettier,
-      {
-        plugins: {
-          payload: payloadPlugin,
-        },
-        rules: {
-          ...baseRules,
-          ...typescriptRules,
-        },
-      },
-    ),
-    files: ['**/*.ts'],
+    extends: [...tseslint.configs.recommendedTypeChecked, eslintConfigPrettier],
+    plugins: {
+      payload: payloadPlugin,
+    },
+    rules: {
+      ...baseRules,
+      ...typescriptRules,
+    },
   },
   {
     name: 'TypeScript-React',
-    ...deepMerge(
-      baseExtends,
-      tseslint.configs.recommendedTypeChecked[0],
-      tseslint.configs.recommendedTypeChecked[1],
-      tseslint.configs.recommendedTypeChecked[2],
-      reactExtends,
-      eslintConfigPrettier,
-      {
-        plugins: {
-          payload: payloadPlugin,
-        },
-        rules: {
-          ...baseRules,
-          ...typescriptRules,
-          ...reactA11yRules,
-        },
-      },
-    ),
+    extends: [...tseslint.configs.recommendedTypeChecked, reactExtends, eslintConfigPrettier],
+    plugins: {
+      payload: payloadPlugin,
+    },
+    rules: {
+      ...baseRules,
+      ...typescriptRules,
+      ...reactA11yRules,
+    },
     files: ['**/*.tsx'],
   },
   {
     name: 'Unit Tests',
-    ...deepMerge(jestExtends, {
-      plugins: {
-        payload: payloadPlugin,
-      },
-      rules: {
-        ...baseRules,
-        ...typescriptRules,
-        '@typescript-eslint/unbound-method': 'off',
-      },
-    }),
+    extends: [jestExtends],
+    plugins: {
+      payload: payloadPlugin,
+    },
+    rules: {
+      ...baseRules,
+      ...typescriptRules,
+      '@typescript-eslint/unbound-method': 'off',
+    },
     files: ['**/*.spec.ts'],
   },
   {
@@ -206,6 +175,7 @@ export const rootEslintConfig = [
     },
     files: ['*.config.ts', 'config.ts'],
   },
-]
+)
 
+// eslint-disable-next-line no-restricted-exports
 export default rootEslintConfig

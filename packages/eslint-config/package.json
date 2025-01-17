@@ -19,7 +19,7 @@
     }
   ],
   "type": "module",
-  "main": "index.mjs",
+  "main": "eslint.config.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -42,5 +42,8 @@
     "globals": "15.12.0",
     "typescript": "5.7.2",
     "typescript-eslint": "8.14.0"
+  },
+  "devDependencies": {
+    "@types/eslint-config-prettier": "^6.11.3"
   }
 }
