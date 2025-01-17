@@ -14,6 +14,7 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
+    "build-template-with-local-pkgs": "pnpm runts src/build-template-with-local-pkgs.ts",
     "gen-templates": "pnpm runts src/generate-template-variations.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
