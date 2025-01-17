@@ -13,11 +13,11 @@ const Collapsible: React.FC<DiffComponentProps> = ({
   comparison,
   diffComponents,
   field,
+  fieldPermissions,
   fields,
   i18n,
   locale,
   locales,
-  permissions,
   version,
 }) => {
   return (
@@ -40,7 +40,7 @@ const Collapsible: React.FC<DiffComponentProps> = ({
         <RenderFieldsToDiff
           comparison={comparison}
           diffComponents={diffComponents}
-          fieldPermissions={permissions}
+          fieldPermissions={fieldPermissions}
           fields={fields}
           i18n={i18n}
           locales={locales}
