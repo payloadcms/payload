@@ -50,9 +50,10 @@ export const beforeValidate = async <T extends JsonObject>({
     global,
     operation,
     overrideAccess,
-    path: [],
+    parentIndexPath: '',
+    parentPath: '',
+    parentSchemaPath: '',
     req,
-    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
   })

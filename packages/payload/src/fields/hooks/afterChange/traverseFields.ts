@@ -60,7 +60,6 @@ export const traverseFields = async ({
         data,
         doc,
         field,
-        fieldIndex,
         global,
         indexPath,
         operation,

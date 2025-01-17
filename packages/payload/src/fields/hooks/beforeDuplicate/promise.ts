@@ -43,26 +43,7 @@ export const promise = async <T>({
   const { localization } = req.payload.config
 
   const fieldPathSegments = path ? path.split('.') : []
-  const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const parentSchemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
-
-  // Handle unnamed tabs
-  if (field.type === 'tab' && !tabHasName(field)) {
-    await traverseFields({
-      id,
-      collection,
-      context,
-      doc,
-      fields: field.fields,
-      overrideAccess,
-      path: fieldPathSegments,
-      req,
-      schemaPath: fieldSchemaPathSegments,
-      siblingDoc,
-    })
-
-    return
-  }
 
   if (fieldAffectsData(field)) {
     let fieldData = siblingDoc?.[field.name]

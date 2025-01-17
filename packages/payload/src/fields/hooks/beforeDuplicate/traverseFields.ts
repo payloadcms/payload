@@ -51,7 +51,6 @@ export const traverseFields = async <T>({
         context,
         doc,
         field,
-        fieldIndex,
         indexPath,
         overrideAccess,
         parentIndexPath,

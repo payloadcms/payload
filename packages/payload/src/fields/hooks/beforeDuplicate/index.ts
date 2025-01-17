@@ -35,9 +35,10 @@ export const beforeDuplicate = async <T extends JsonObject>({
     doc,
     fields: collection?.fields,
     overrideAccess,
-    path: [],
+    parentIndexPath: '',
+    parentPath: '',
+    parentSchemaPath: '',
     req,
-    schemaPath: [],
     siblingDoc: doc,
   })
 

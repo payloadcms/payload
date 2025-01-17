@@ -92,7 +92,6 @@ export const traverseFields = async ({
         docWithLocales,
         errors,
         field,
-        fieldIndex,
         global,
         indexPath,
         mergeLocaleActions,
