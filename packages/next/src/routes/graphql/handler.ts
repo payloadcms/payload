@@ -3,7 +3,7 @@ import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload
 
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 import {
   addDataAndFileToRequest,
   addLocalesToRequestFromData,

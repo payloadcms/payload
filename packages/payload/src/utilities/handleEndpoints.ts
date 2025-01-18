@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 import { match } from 'path-to-regexp'
 
 import type { Collection } from '../collections/config/types.js'

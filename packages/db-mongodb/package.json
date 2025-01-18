@@ -46,7 +46,6 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "http-status": "1.6.2",
     "mongoose": "8.9.5",
     "mongoose-aggregate-paginate-v2": "1.1.2",
     "mongoose-paginate-v2": "1.8.5",
