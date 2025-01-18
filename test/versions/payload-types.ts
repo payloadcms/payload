@@ -14,6 +14,7 @@ export interface Config {
     'disable-publish': DisablePublish;
     posts: Post;
     'autosave-posts': AutosavePost;
+    'autosave-multi-select-posts': AutosaveMultiSelectPost;
     'draft-posts': DraftPost;
     'draft-with-max-posts': DraftWithMaxPost;
     'localized-posts': LocalizedPost;
@@ -30,6 +31,7 @@ export interface Config {
     'disable-publish': DisablePublishSelect<false> | DisablePublishSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
+    'autosave-multi-select-posts': AutosaveMultiSelectPostsSelect<false> | AutosaveMultiSelectPostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'draft-with-max-posts': DraftWithMaxPostsSelect<false> | DraftWithMaxPostsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
@@ -158,6 +160,18 @@ export interface DraftPost {
     | null;
   relation?: (string | null) | DraftPost;
   restrictedToUpdate?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-multi-select-posts".
+ */
+export interface AutosaveMultiSelectPost {
+  id: string;
+  title: string;
+  tag?: ('blog' | 'essay' | 'portfolio')[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -337,6 +351,10 @@ export interface PayloadLockedDocument {
         value: string | AutosavePost;
       } | null)
     | ({
+        relationTo: 'autosave-multi-select-posts';
+        value: string | AutosaveMultiSelectPost;
+      } | null)
+    | ({
         relationTo: 'draft-posts';
         value: string | DraftPost;
       } | null)
@@ -434,6 +452,17 @@ export interface PostsSelect<T extends boolean = true> {
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-multi-select-posts_select".
+ */
+export interface AutosaveMultiSelectPostsSelect<T extends boolean = true> {
+  title?: T;
+  tag?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
