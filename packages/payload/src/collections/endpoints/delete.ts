@@ -1,5 +1,5 @@
 import { getTranslation } from '@payloadcms/translations'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 import type { Where } from '../../types/index.js'
