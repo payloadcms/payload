@@ -3,7 +3,6 @@ import type { DeepPartial } from 'ts-essentials'
 import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug } from '../../index.js'
 import type {
   PayloadRequest,
   PopulateType,
@@ -20,6 +19,7 @@ import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
+import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -168,7 +168,7 @@ export const updateByIDOperation = async <
       autosave,
       collectionConfig,
       config,
-      data: newFileData,
+      data: deepCopyObjectSimple(newFileData),
       depth,
       docWithLocales,
       draftArg,
