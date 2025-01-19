@@ -4,7 +4,7 @@ import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Field } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
@@ -22,7 +22,7 @@ type Args = {
   doc: JsonObject
   docWithLocales: JsonObject
   errors: ValidationFieldError[]
-  field: Field | TabAsField
+  field: Field
   global: null | SanitizedGlobalConfig
   id?: number | string
   indexPath: string
@@ -79,10 +79,9 @@ export const promise = async ({
   const defaultLocale = localization ? localization?.defaultLocale : 'en'
   const operationLocale = req.locale || defaultLocale
 
-  const fieldPathSegments = path ? path.split('.') : []
-  const parentSchemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
-  const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
-  const fieldIndexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
+  const pathSegments = path ? path.split('.') : []
+  const schemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
+  const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
@@ -103,14 +102,14 @@ export const promise = async ({
           data,
           field,
           global,
-          indexPath: fieldIndexPathSegments,
+          indexPath: indexPathSegments,
           operation,
           originalDoc: doc,
-          path: fieldPathSegments,
+          path: pathSegments,
           previousSiblingDoc: siblingDoc,
           previousValue: siblingDoc[field.name],
           req,
-          schemaPath: parentSchemaPathSegments,
+          schemaPath: schemaPathSegments,
           siblingData,
           siblingDocWithLocales,
           value: siblingData[field.name],
@@ -206,7 +205,7 @@ export const promise = async ({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           promises.push(
             traverseFields({
               id,
@@ -395,15 +394,15 @@ export const promise = async ({
             errors,
             field,
             global,
-            indexPath: fieldIndexPathSegments,
+            indexPath: indexPathSegments,
             mergeLocaleActions,
             operation,
             originalDoc: doc,
-            path: fieldPathSegments,
+            path: pathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingDoc[field.name],
             req,
-            schemaPath: parentSchemaPathSegments,
+            schemaPath: schemaPathSegments,
             siblingData,
             siblingDocWithLocales,
             skipValidation,

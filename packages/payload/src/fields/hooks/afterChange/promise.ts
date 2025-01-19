@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Field } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -15,7 +15,7 @@ type Args = {
   context: RequestContext
   data: JsonObject
   doc: JsonObject
-  field: Field | TabAsField
+  field: Field
   global: null | SanitizedGlobalConfig
   indexPath: string
   operation: 'create' | 'update'
@@ -43,7 +43,6 @@ export const promise = async ({
   global,
   indexPath,
   operation,
-  parentIndexPath,
   parentPath,
   parentSchemaPath,
   path,
@@ -54,9 +53,9 @@ export const promise = async ({
   siblingData,
   siblingDoc,
 }: Args): Promise<void> => {
-  const fieldPathSegments = path ? path.split('.') : []
-  const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
-  const fieldIndexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
+  const pathSegments = path ? path.split('.') : []
+  const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
+  const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
 
   if (fieldAffectsData(field)) {
     // Execute hooks
@@ -70,15 +69,15 @@ export const promise = async ({
           data,
           field,
           global,
-          indexPath: fieldIndexPathSegments,
+          indexPath: indexPathSegments,
           operation,
           originalDoc: doc,
-          path: fieldPathSegments,
+          path: pathSegments,
           previousDoc,
           previousSiblingDoc,
           previousValue: previousDoc[field.name],
           req,
-          schemaPath: fieldSchemaPathSegments,
+          schemaPath: schemaPathSegments,
           siblingData,
           value: siblingDoc[field.name],
         })
@@ -230,15 +229,15 @@ export const promise = async ({
             data,
             field,
             global,
-            indexPath: fieldIndexPathSegments,
+            indexPath: indexPathSegments,
             operation,
             originalDoc: doc,
-            path: fieldPathSegments,
+            path: pathSegments,
             previousDoc,
             previousSiblingDoc,
             previousValue: previousDoc[field.name],
             req,
-            schemaPath: fieldSchemaPathSegments,
+            schemaPath: schemaPathSegments,
             siblingData,
             value: siblingDoc[field.name],
           })

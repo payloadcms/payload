@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
+import type { Field, FieldHookArgs } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
@@ -12,7 +12,7 @@ type Args<T> = {
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   doc: T
-  field: Field | TabAsField
+  field: Field
   id?: number | string
   indexPath: string
   overrideAccess: boolean
@@ -42,9 +42,9 @@ export const promise = async <T>({
 }: Args<T>): Promise<void> => {
   const { localization } = req.payload.config
 
-  const fieldPathSegments = path ? path.split('.') : []
-  const parentSchemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
-  const fieldIndexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
+  const pathSegments = path ? path.split('.') : []
+  const schemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
+  const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
 
   if (fieldAffectsData(field)) {
     let fieldData = siblingDoc?.[field.name]
@@ -63,12 +63,12 @@ export const promise = async <T>({
               data: doc,
               field,
               global: undefined,
-              indexPath: fieldIndexPathSegments,
-              path: fieldPathSegments,
+              indexPath: indexPathSegments,
+              path: pathSegments,
               previousSiblingDoc: siblingDoc,
               previousValue: siblingDoc[field.name]?.[locale],
               req,
-              schemaPath: parentSchemaPathSegments,
+              schemaPath: schemaPathSegments,
               siblingData: siblingDoc,
               siblingDocWithLocales: siblingDoc,
               value: siblingDoc[field.name]?.[locale],
@@ -96,12 +96,12 @@ export const promise = async <T>({
           data: doc,
           field,
           global: undefined,
-          indexPath: fieldIndexPathSegments,
-          path: fieldPathSegments,
+          indexPath: indexPathSegments,
+          path: pathSegments,
           previousSiblingDoc: siblingDoc,
           previousValue: siblingDoc[field.name],
           req,
-          schemaPath: parentSchemaPathSegments,
+          schemaPath: schemaPathSegments,
           siblingData: siblingDoc,
           siblingDocWithLocales: siblingDoc,
           value: siblingDoc[field.name],
@@ -133,7 +133,7 @@ export const promise = async <T>({
 
               if (Array.isArray(rows)) {
                 const promises = []
-                rows.forEach((row, i) => {
+                rows.forEach((row) => {
                   promises.push(
                     traverseFields({
                       id,
@@ -158,7 +158,7 @@ export const promise = async <T>({
 
               if (Array.isArray(rows)) {
                 const promises = []
-                rows.forEach((row, i) => {
+                rows.forEach((row) => {
                   const blockTypeToMatch = row.blockType
 
                   const block = field.blocks.find(
@@ -219,7 +219,7 @@ export const promise = async <T>({
 
           if (Array.isArray(rows)) {
             const promises = []
-            rows.forEach((row, i) => {
+            rows.forEach((row) => {
               promises.push(
                 traverseFields({
                   id,

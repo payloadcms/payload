@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Field } from '../../config/types.js'
 
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
@@ -15,7 +15,7 @@ type Args<T> = {
    * The original data (not modified by any hooks)
    */
   doc: T
-  fields: (Field | TabAsField)[]
+  fields: Field[]
   global: null | SanitizedGlobalConfig
   id?: number | string
   operation: 'create' | 'update'

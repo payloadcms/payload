@@ -26,7 +26,7 @@ type Args = {
   doc: JsonObject
   draft: boolean
   fallbackLocale: null | string
-  field: Field | TabAsField
+  field: Field
   fieldIndex: number
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
@@ -54,6 +54,36 @@ type Args = {
   triggerHooks?: boolean
 }
 
+const stripUnselectedFields = ({
+  field,
+  select,
+  selectMode,
+  siblingDoc,
+}: {
+  field: Field | TabAsField
+  select: SelectType
+  selectMode: SelectMode
+  siblingDoc: JsonObject
+}): boolean => {
+  if (fieldAffectsData(field) && select && selectMode) {
+    if (selectMode === 'include') {
+      if (!select[field.name]) {
+        delete siblingDoc[field.name]
+        return false
+      }
+    }
+
+    if (selectMode === 'exclude') {
+      if (select[field.name] === false) {
+        delete siblingDoc[field.name]
+        return false
+      }
+    }
+  }
+
+  return true
+}
+
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response
 // - Flatten locales into requested locale
@@ -61,7 +91,6 @@ type Args = {
 // - Execute field hooks
 // - Execute read access control
 // - Populate relationships
-
 export const promise = async ({
   collection,
   context,
@@ -92,9 +121,9 @@ export const promise = async ({
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): Promise<void> => {
-  const fieldPathSegments = path ? path.split('.') : []
-  const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
-  const fieldIndexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
+  const pathSegments = path ? path.split('.') : []
+  const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
+  const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
 
   if (
     fieldAffectsData(field) &&
@@ -105,20 +134,15 @@ export const promise = async ({
     delete siblingDoc[field.name]
   }
 
-  if (fieldAffectsData(field) && select && selectMode) {
-    if (selectMode === 'include') {
-      if (!select[field.name]) {
-        delete siblingDoc[field.name]
-        return
-      }
-    }
+  const shouldContinue = stripUnselectedFields({
+    field,
+    select,
+    selectMode,
+    siblingDoc,
+  })
 
-    if (selectMode === 'exclude') {
-      if (select[field.name] === false) {
-        delete siblingDoc[field.name]
-        return
-      }
-    }
+  if (!shouldContinue) {
+    return
   }
 
   const shouldHoistLocalizedValue =
@@ -240,13 +264,13 @@ export const promise = async ({
                 field,
                 findMany,
                 global,
-                indexPath: fieldIndexPathSegments,
+                indexPath: indexPathSegments,
                 operation: 'read',
                 originalDoc: doc,
                 overrideAccess,
-                path: fieldPathSegments,
+                path: pathSegments,
                 req,
-                schemaPath: fieldSchemaPathSegments,
+                schemaPath: schemaPathSegments,
                 showHiddenFields,
                 siblingData: siblingDoc,
                 value,
@@ -270,13 +294,13 @@ export const promise = async ({
             field,
             findMany,
             global,
-            indexPath: fieldIndexPathSegments,
+            indexPath: indexPathSegments,
             operation: 'read',
             originalDoc: doc,
             overrideAccess,
-            path: fieldPathSegments,
+            path: pathSegments,
             req,
-            schemaPath: fieldSchemaPathSegments,
+            schemaPath: schemaPathSegments,
             showHiddenFields,
             siblingData: siblingDoc,
             value: siblingDoc[field.name],
@@ -357,7 +381,7 @@ export const promise = async ({
       }
 
       if (Array.isArray(rows)) {
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           traverseFields({
             collection,
             context,
@@ -390,7 +414,7 @@ export const promise = async ({
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
-            localeRows.forEach((row, i) => {
+            localeRows.forEach((row) => {
               traverseFields({
                 collection,
                 context,
@@ -503,7 +527,7 @@ export const promise = async ({
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
-            localeRows.forEach((row, i) => {
+            localeRows.forEach((row) => {
               const block = field.blocks.find(
                 (blockType) => blockType.slug === (row as JsonObject).blockType,
               )
@@ -657,16 +681,16 @@ export const promise = async ({
                   findMany,
                   flattenLocales,
                   global,
-                  indexPath: fieldIndexPathSegments,
+                  indexPath: indexPathSegments,
                   locale,
                   operation: 'read',
                   originalDoc: doc,
                   overrideAccess,
-                  path: fieldPathSegments,
+                  path: pathSegments,
                   populate,
                   populationPromises,
                   req,
-                  schemaPath: fieldSchemaPathSegments,
+                  schemaPath: schemaPathSegments,
                   showHiddenFields,
                   siblingData: siblingDoc,
                   triggerAccessControl,
@@ -695,16 +719,16 @@ export const promise = async ({
               findMany,
               flattenLocales,
               global,
-              indexPath: fieldIndexPathSegments,
+              indexPath: indexPathSegments,
               locale,
               operation: 'read',
               originalDoc: doc,
               overrideAccess,
-              path: fieldPathSegments,
+              path: pathSegments,
               populate,
               populationPromises,
               req,
-              schemaPath: fieldSchemaPathSegments,
+              schemaPath: schemaPathSegments,
               showHiddenFields,
               siblingData: siblingDoc,
               triggerAccessControl,
@@ -728,6 +752,11 @@ export const promise = async ({
 
         const isNamedTab = tabHasName(tab)
 
+        const tabAsField: TabAsField = {
+          ...tab,
+          type: 'tab',
+        }
+
         if (isNamedTab) {
           tabDoc = siblingDoc[tab.name] as JsonObject
 
@@ -735,8 +764,15 @@ export const promise = async ({
             tabDoc = {}
           }
 
-          if (typeof select?.[tab.name] === 'object') {
-            tabSelect = select?.[tab.name] as SelectType
+          const shouldContinue = stripUnselectedFields({
+            field: tabAsField,
+            select,
+            selectMode,
+            siblingDoc: tabDoc,
+          })
+
+          if (!shouldContinue) {
+            return
           }
         } else {
           tabSelect = select
@@ -747,10 +783,7 @@ export const promise = async ({
           path: tabPath,
           schemaPath: tabSchemaPath,
         } = getFieldPaths({
-          field: {
-            ...tab,
-            type: 'tab',
-          },
+          field: tabAsField,
           index: tabIndex,
           parentIndexPath: indexPath,
           parentPath,

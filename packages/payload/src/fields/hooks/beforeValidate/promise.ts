@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Field } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
@@ -21,7 +21,7 @@ type Args<T> = {
    * The original data (not modified by any hooks)
    */
   doc: T
-  field: Field | TabAsField
+  field: Field
   global: null | SanitizedGlobalConfig
   id?: number | string
   indexPath: string
@@ -66,9 +66,9 @@ export const promise = async <T>({
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
-  const fieldPathSegments = path ? path.split('.') : []
-  const fieldSchemaPathSegments = schemaPath ? schemaPath.split('.') : []
-  const fieldIndexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
+  const pathSegments = path ? path.split('.') : []
+  const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
+  const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
 
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
@@ -276,15 +276,15 @@ export const promise = async <T>({
           data,
           field,
           global,
-          indexPath: fieldIndexPathSegments,
+          indexPath: indexPathSegments,
           operation,
           originalDoc: doc,
           overrideAccess,
-          path: fieldPathSegments,
+          path: pathSegments,
           previousSiblingDoc: siblingDoc,
           previousValue: siblingDoc[field.name],
           req,
-          schemaPath: fieldSchemaPathSegments,
+          schemaPath: schemaPathSegments,
           siblingData,
           value: siblingData[field.name],
         })
@@ -332,7 +332,7 @@ export const promise = async <T>({
       if (Array.isArray(rows)) {
         const promises = []
 
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           promises.push(
             traverseFields({
               id,
@@ -478,15 +478,15 @@ export const promise = async <T>({
             data,
             field,
             global,
-            indexPath: fieldIndexPathSegments,
+            indexPath: indexPathSegments,
             operation,
             originalDoc: doc,
             overrideAccess,
-            path: fieldPathSegments,
+            path: pathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingData[field.name],
             req,
-            schemaPath: fieldSchemaPathSegments,
+            schemaPath: schemaPathSegments,
             siblingData,
             value: siblingData[field.name],
           })
