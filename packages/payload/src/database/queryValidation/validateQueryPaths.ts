@@ -1,12 +1,11 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { Operator, PayloadRequest, Where } from '../../types/index.js'
+import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
 import type { EntityPolicies } from './types.js'
 
 import { QueryError } from '../../errors/QueryError.js'
 import { validOperatorSet } from '../../types/constants.js'
-import { flattenWhereToOperators } from '../flattenWhereToOperators.js'
 import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
@@ -27,6 +26,22 @@ type Args = {
     }
 )
 
+const flattenWhere = (query: Where): WhereField[] => {
+  const flattenedConstraints: WhereField[] = []
+
+  for (const [key, val] of Object.entries(query)) {
+    if ((key === 'and' || key === 'or') && Array.isArray(val)) {
+      for (const subVal of val) {
+        flattenedConstraints.push(...flattenWhere(subVal))
+      }
+    } else {
+      flattenedConstraints.push({ [key]: val })
+    }
+  }
+
+  return flattenedConstraints
+}
+
 export async function validateQueryPaths({
   collectionConfig,
   errors = [],
@@ -43,7 +58,7 @@ export async function validateQueryPaths({
   const fields = versionFields || (globalConfig || collectionConfig).flattenedFields
 
   if (typeof where === 'object') {
-    const whereFields = flattenWhereToOperators(where)
+    const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
     const promises = []
     for (const constraint of whereFields) {
