@@ -26,18 +26,21 @@ type Args = {
     }
 )
 
-const flattenWhere = (query: Where): WhereField[] =>
-  Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
-    if ((key === 'and' || key === 'or') && Array.isArray(val)) {
-      const subWhereConstraints: Where[] = val.reduce((acc, subVal) => {
-        const subWhere = flattenWhere(subVal)
-        return [...acc, ...subWhere]
-      }, [])
-      return [...flattenedConstraints, ...subWhereConstraints]
-    }
+const flattenWhere = (query: Where): WhereField[] => {
+  const flattenedConstraints: WhereField[] = []
 
-    return [...flattenedConstraints, { [key]: val }]
-  }, [])
+  for (const [key, val] of Object.entries(query)) {
+    if ((key === 'and' || key === 'or') && Array.isArray(val)) {
+      for (const subVal of val) {
+        flattenedConstraints.push(...flattenWhere(subVal))
+      }
+    } else {
+      flattenedConstraints.push({ [key]: val })
+    }
+  }
+
+  return flattenedConstraints
+}
 
 export async function validateQueryPaths({
   collectionConfig,
