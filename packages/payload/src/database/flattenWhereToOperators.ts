@@ -1,18 +1,20 @@
 import type { Where, WhereField } from '../types/index.js'
 
-// Take a where query and flatten it to all top-level operators
-const flattenWhereToOperators = (query: Where): WhereField[] =>
-  Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
+/**
+ * Take a where query and flatten it to all top-level operators
+ */
+export const flattenWhereToOperators = (query: Where): WhereField[] => {
+  const flattenedConstraints: WhereField[] = []
+
+  for (const [key, val] of Object.entries(query)) {
     if ((key === 'and' || key === 'or') && Array.isArray(val)) {
-      return [
-        ...flattenedConstraints,
-        ...val.reduce((subVals, subVal) => {
-          return [...subVals, ...flattenWhereToOperators(subVal)]
-        }, []),
-      ]
+      for (const subVal of val) {
+        flattenedConstraints.push(...flattenWhereToOperators(subVal))
+      }
+    } else {
+      flattenedConstraints.push({ [key]: val })
     }
+  }
 
-    return [...flattenedConstraints, val]
-  }, [])
-
-export default flattenWhereToOperators
+  return flattenedConstraints
+}
