@@ -4,7 +4,6 @@ import type {
   ClientComponentProps,
   ClientField,
   DefaultCellComponentProps,
-  DefaultServerCellComponentProps,
   Field,
   ListPreferences,
   PaginatedDocs,
@@ -16,7 +15,6 @@ import type {
 
 import { MissingEditorProp } from 'payload'
 import {
-  deepCopyObjectSimple,
   fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsPresentationalOnly,
@@ -26,6 +24,7 @@ import React from 'react'
 
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
+import type { InitialDefaultCellComponentProps } from './RenderDefaultCell/index.js'
 
 import {
   RenderCustomComponent,
@@ -35,6 +34,7 @@ import {
 } from '../../exports/client/index.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { filterFields } from './filterFields.js'
+import { RenderWithCollectionConfig } from './RenderWithCollectionConfig.js'
 
 type Args = {
   beforeRows?: Column[]
@@ -206,9 +206,9 @@ export const buildColumnState = (args: Args): Column[] => {
       />
     )
 
-    const baseCellClientProps: DefaultCellComponentProps = {
+    const baseCellClientProps: InitialDefaultCellComponentProps = {
       cellData: undefined,
-      collectionConfig: deepCopyObjectSimple(clientCollectionConfig),
+      collectionSlug: clientCollectionConfig.slug,
       customCellProps,
       field,
       rowData: undefined,
@@ -224,7 +224,7 @@ export const buildColumnState = (args: Args): Column[] => {
         ? docs.map((doc, i) => {
             const isLinkedColumn = index === activeColumnsIndices[0]
 
-            const cellClientProps: DefaultCellComponentProps = {
+            const cellClientProps: InitialDefaultCellComponentProps = {
               ...baseCellClientProps,
               cellData: 'name' in field ? doc[field.name] : undefined,
               link: isLinkedColumn,
@@ -254,21 +254,44 @@ export const buildColumnState = (args: Args): Column[] => {
                 clientProps: cellClientProps,
                 Component: _field.editor.CellComponent,
                 importMap: payload.importMap,
+                overrideRender: ({ Component, isRSC, key }) => {
+                  if (isRSC) {
+                    return false // Do not override
+                  }
+                  return (
+                    <RenderWithCollectionConfig
+                      clientProps={cellClientProps}
+                      Component={Component}
+                      key={key}
+                    />
+                  )
+                },
                 serverProps,
               })
             } else {
-              CustomCell =
-                _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
-                  ? RenderServerComponent({
-                      clientProps: cellClientProps,
-                      Component:
-                        _field?.admin &&
-                        'components' in _field.admin &&
-                        _field.admin.components?.Cell,
-                      importMap: payload.importMap,
-                      serverProps,
-                    })
-                  : undefined
+              const CustomCellComponent = _field?.admin?.components?.Cell
+              if (CustomCellComponent) {
+                CustomCell = RenderServerComponent({
+                  clientProps: cellClientProps,
+                  Component: CustomCellComponent,
+                  importMap: payload.importMap,
+                  overrideRender: ({ Component, isRSC, key }) => {
+                    if (isRSC) {
+                      return false // Do not override
+                    }
+                    return (
+                      <RenderWithCollectionConfig
+                        clientProps={cellClientProps}
+                        Component={Component}
+                        key={key}
+                      />
+                    )
+                  },
+                  serverProps,
+                })
+              } else {
+                CustomCell = undefined
+              }
             }
 
             return (

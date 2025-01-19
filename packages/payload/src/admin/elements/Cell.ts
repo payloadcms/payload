@@ -71,18 +71,18 @@ export type DefaultCellComponentProps<
                             ? { x: number; y: number }
                             : any
     : TCellData
-  readonly className?: string
-  readonly collectionConfig: ClientCollectionConfig
-  readonly columnIndex?: number
-  readonly customCellProps?: Record<string, any>
-  readonly field: TField
-  readonly link?: boolean
-  readonly onClick?: (args: {
+  className?: string
+  collectionConfig: ClientCollectionConfig
+  columnIndex?: number
+  customCellProps?: Record<string, any>
+  field: TField
+  link?: boolean
+  onClick?: (args: {
     cellData: unknown
     collectionSlug: SanitizedCollectionConfig['slug']
     rowData: RowData
   }) => void
-  readonly rowData: RowData
+  rowData: RowData
 }
 
 export type DefaultServerCellComponentProps<
