@@ -25,7 +25,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
   const [initialAPIKey] = useState(uuidv4())
   const [highlightedField, setHighlightedField] = useState(false)
   const { i18n, t } = useTranslation()
-  const { getEntityConfig } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { collectionSlug } = useDocumentInfo()
 
   const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
