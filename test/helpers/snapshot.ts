@@ -4,7 +4,6 @@ import type { PgTable } from 'drizzle-orm/pg-core'
 import type { SQLiteTable } from 'drizzle-orm/sqlite-core'
 import type { Payload } from 'payload'
 
-import { GenericTable } from '@payloadcms/drizzle/types'
 import { sql } from 'drizzle-orm'
 
 import { isMongoose } from './isMongoose.js'
@@ -55,6 +54,7 @@ async function createDrizzleSnapshot(db: PostgresAdapter | SQLiteAdapter, snapsh
 
   for (const tableName in schema) {
     const table = db.drizzle.query[tableName]['fullSchema'][tableName] //db.drizzle._.schema[tableName]
+    // @ts-expect-error - Our type overrides will not work in the test directory
     const records = await db.drizzle.select().from(table).execute()
     snapshot[tableName] = records
   }
@@ -85,18 +85,22 @@ async function restoreFromDrizzleSnapshot(
   // Temporarily disable foreign key constraint checks
   try {
     await db.execute({
+      // @ts-expect-error - Our type overrides will not work in the test directory
       drizzle: db.drizzle,
       raw: disableFKConstraintChecksQuery,
     })
     for (const tableName in dbSnapshot[snapshotKey]) {
       const table = db.drizzle.query[tableName]['fullSchema'][tableName]
       await db.execute({
+        // @ts-expect-error - Our type overrides will not work in the test directory
         drizzle: db.drizzle,
+        // @ts-expect-error - Our type overrides will not work in the test directory
         sql: sql`DELETE FROM ${table}`,
       }) // This deletes all records from the table. Probably not necessary, as I'm deleting the table before restoring anyways
 
       const records = dbSnapshot[snapshotKey][tableName]
       if (records.length > 0) {
+        // @ts-expect-error - Our type overrides will not work in the test directory
         await db.drizzle.insert(table).values(records).execute()
       }
     }
@@ -105,6 +109,7 @@ async function restoreFromDrizzleSnapshot(
   } finally {
     // Re-enable foreign key constraint checks
     await db.execute({
+      // @ts-expect-error - Our type overrides will not work in the test directory
       drizzle: db.drizzle,
       raw: enableFKConstraintChecksQuery,
     })

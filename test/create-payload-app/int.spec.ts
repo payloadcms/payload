@@ -82,14 +82,16 @@ describe('create-payload-app', () => {
       expect(firstResult.success).toEqual(false)
 
       // Move all files from app to top-level directory named `(app)`
-      if (firstResult.success === false && 'nextAppDir' in firstResult) {
-        fs.mkdirSync(path.resolve(firstResult.nextAppDir, '(app)'))
-        fs.readdirSync(path.resolve(firstResult.nextAppDir)).forEach((file) => {
-          if (file === '(app)') return
-          fs.renameSync(
-            path.resolve(firstResult.nextAppDir, file),
-            path.resolve(firstResult.nextAppDir, '(app)', file),
-          )
+      if (
+        firstResult.success === false &&
+        'nextAppDir' in firstResult &&
+        typeof firstResult.nextAppDir === 'string'
+      ) {
+        const nextAppDir = firstResult.nextAppDir
+        fs.mkdirSync(path.resolve(nextAppDir, '(app)'))
+        fs.readdirSync(path.resolve(nextAppDir)).forEach((file) => {
+          if (file === '(app)') {return}
+          fs.renameSync(path.resolve(nextAppDir, file), path.resolve(nextAppDir, '(app)', file))
         })
       }
 
@@ -124,7 +126,7 @@ describe('create-payload-app', () => {
       }
 
       // Check that `@payload-config` path is added to tsconfig
-      expect(userTsConfig.compilerOptions.paths?.['@payload-config']).toStrictEqual([
+      expect(userTsConfig.compilerOptions?.paths?.['@payload-config']).toStrictEqual([
         `./${result.isSrcDir ? 'src/' : ''}payload.config.ts`,
       ])
 

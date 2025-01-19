@@ -42,5 +42,23 @@ export default buildConfigWithDefaults({
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+    schema: [
+      ({ jsonSchema }) => {
+        if (jsonSchema.definitions) {
+          jsonSchema.definitions.objectWithNumber = {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              id: {
+                type: 'number',
+                required: true,
+              },
+            },
+            required: true,
+          }
+        }
+        return jsonSchema
+      },
+    ],
   },
 })
