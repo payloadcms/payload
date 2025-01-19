@@ -1,7 +1,30 @@
+/* eslint-disable perfectionist/sort-object-types  */ // Need to disable this rule because the order of the overloads is important
 'use client'
-import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientConfig,
+  ClientGlobalConfig,
+  CollectionSlug,
+  GlobalSlug,
+} from 'payload'
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+
+type GetEntityConfigFn = {
+  // Overload #1: collectionSlug only
+  // @todo remove "{} |" in 4.0, which would be a breaking change
+  (args: { collectionSlug: {} | CollectionSlug; globalSlug?: never }): ClientCollectionConfig
+
+  // Overload #2: globalSlug only
+  // @todo remove "{} |" in 4.0, which would be a breaking change
+  (args: { collectionSlug?: never; globalSlug: {} | GlobalSlug }): ClientGlobalConfig
+
+  // Overload #3: both/none (fall back to union | null)
+  (args: {
+    collectionSlug?: {} | CollectionSlug
+    globalSlug?: {} | GlobalSlug
+  }): ClientCollectionConfig | ClientGlobalConfig | null
+}
 
 export type ClientConfigContext = {
   config: ClientConfig
@@ -10,10 +33,7 @@ export type ClientConfigContext = {
    * using `config.collections.find` or `config.globals.find`, because
    * getEntityConfig uses a lookup map for O(1) lookups.
    */
-  getEntityConfig: (args: {
-    collectionSlug?: string
-    globalSlug?: string
-  }) => ClientCollectionConfig | ClientGlobalConfig | null
+  getEntityConfig: GetEntityConfigFn
   setConfig: (config: ClientConfig) => void
 }
 
@@ -46,15 +66,15 @@ export const ConfigProvider: React.FC<{
     return { collectionsBySlug, globalsBySlug }
   }, [config])
 
-  const getEntityConfig = useCallback(
-    ({ collectionSlug, globalSlug }: { collectionSlug?: string; globalSlug?: string }) => {
-      if (collectionSlug) {
-        return collectionsBySlug[collectionSlug] ?? null
+  const getEntityConfig: GetEntityConfigFn = useCallback(
+    (args) => {
+      if ('collectionSlug' in args) {
+        return collectionsBySlug[args.collectionSlug] ?? null
       }
-      if (globalSlug) {
-        return globalsBySlug[globalSlug] ?? null
+      if ('globalSlug' in args) {
+        return globalsBySlug[args.globalSlug] ?? null
       }
-      return null
+      return null as any
     },
     [collectionsBySlug, globalsBySlug],
   )
