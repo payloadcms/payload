@@ -31,7 +31,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     uploadStatus,
   } = useDocumentInfo()
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
@@ -51,13 +51,13 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
 
   const entityConfig = React.useMemo(() => {
     if (collectionSlug) {
-      return config.collections.find(({ slug }) => slug === collectionSlug)
+      return getEntityConfig({ collectionSlug })
     }
 
     if (globalSlug) {
-      return config.globals.find(({ slug }) => slug === globalSlug)
+      return getEntityConfig({ globalSlug })
     }
-  }, [collectionSlug, globalSlug, config])
+  }, [collectionSlug, globalSlug, getEntityConfig])
 
   const hasNewerVersions = unpublishedVersionCount > 0
 

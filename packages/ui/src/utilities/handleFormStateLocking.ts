@@ -14,6 +14,8 @@ type Result = {
   user: TypedUser
 }
 
+const lockDurationDefault = 300 // Default 5 minutes in seconds
+
 export const handleFormStateLocking = async ({
   id,
   collectionSlug,
@@ -39,9 +41,8 @@ export const handleFormStateLocking = async ({
       }
     }
 
-    const lockDurationDefault = 300 // Default 5 minutes in seconds
     const lockDocumentsProp = collectionSlug
-      ? req.payload.config.collections.find((c) => c.slug === collectionSlug)?.lockDocuments
+      ? req.payload.collections?.[collectionSlug]?.config.lockDocuments
       : req.payload.config.globals.find((g) => g.slug === globalSlug)?.lockDocuments
 
     const lockDuration =

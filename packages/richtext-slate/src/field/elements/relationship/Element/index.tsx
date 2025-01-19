@@ -40,6 +40,7 @@ const RelationshipElementComponent: React.FC = () => {
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
   const [enabledCollectionSlugs] = useState(() =>
     collections
@@ -47,7 +48,7 @@ const RelationshipElementComponent: React.FC = () => {
       .map(({ slug }) => slug),
   )
   const [relatedCollection, setRelatedCollection] = useState(() =>
-    collections.find((coll) => coll.slug === relationTo),
+    getEntityConfig({ collectionSlug: relationTo }),
   )
 
   const selected = useSelected()
@@ -117,7 +118,7 @@ const RelationshipElementComponent: React.FC = () => {
         { at: elementPath },
       )
 
-      setRelatedCollection(collections.find((coll) => coll.slug === collectionSlug))
+      setRelatedCollection(getEntityConfig({ collectionSlug }))
 
       setParams({
         ...initialParams,
@@ -127,7 +128,7 @@ const RelationshipElementComponent: React.FC = () => {
       closeListDrawer()
       dispatchCacheBust()
     },
-    [closeListDrawer, editor, element, cacheBust, setParams, collections],
+    [closeListDrawer, editor, element, cacheBust, setParams, getEntityConfig],
   )
 
   return (

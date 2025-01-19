@@ -62,7 +62,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     uuid,
   } = useEditorConfigContext()
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const { i18n, t } = useTranslation<object, 'lexical:link:loadingWithEllipsis'>()
 
@@ -150,7 +150,9 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         }`,
       )
 
-      const relatedField = config.collections.find((coll) => coll.slug === fields?.doc?.relationTo)
+      const relatedField = fields?.doc?.relationTo
+        ? getEntityConfig({ collectionSlug: fields?.doc?.relationTo })
+        : undefined
       if (!relatedField) {
         // Usually happens if the user removed all default fields. In this case, we let them specify the label or do not display the label at all.
         // label could be a virtual field the user added. This is useful if they want to use the link feature for things other than links.

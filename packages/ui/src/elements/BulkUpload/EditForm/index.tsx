@@ -58,7 +58,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const abortOnChangeRef = React.useRef<AbortController>(null)
 
-  const collectionConfig = getEntityConfig({ collectionSlug: docSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug: docSlug })
   const router = useRouter()
   const depth = useEditDepth()
   const params = useSearchParams()
