@@ -27,6 +27,9 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {
+    ConfigBlockTest: ConfigBlockTest;
+  };
   collections: {
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
@@ -151,6 +154,14 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ConfigBlockTest".
+ */
+export interface ConfigBlockTest {
+  deduplicatedText?: string | null;
+  blockType: 'ConfigBlockTest';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -466,6 +477,8 @@ export interface ArrayField {
     subArray?:
       | {
           text?: string | null;
+          textTwo: string;
+          textInRow: string;
           id?: string | null;
         }[]
       | null;
@@ -548,16 +561,29 @@ export interface ArrayField {
  */
 export interface BlockField {
   id: string;
-  blocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
-  duplicate: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  blocks: (ConfigBlockTest | ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  duplicate: (ConfigBlockTest | ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
   collapsedByDefaultBlocks: (
+    | ConfigBlockTest
     | LocalizedContentBlock
     | LocalizedNumberBlock
     | LocalizedSubBlocksBlock
     | LocalizedTabsBlock
   )[];
-  disableSort: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
-  localizedBlocks: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
+  disableSort: (
+    | ConfigBlockTest
+    | LocalizedContentBlock
+    | LocalizedNumberBlock
+    | LocalizedSubBlocksBlock
+    | LocalizedTabsBlock
+  )[];
+  localizedBlocks: (
+    | ConfigBlockTest
+    | LocalizedContentBlock
+    | LocalizedNumberBlock
+    | LocalizedSubBlocksBlock
+    | LocalizedTabsBlock
+  )[];
   i18nBlocks?:
     | {
         text?: string | null;
@@ -878,10 +904,11 @@ export interface CodeField {
 export interface CollapsibleField {
   id: string;
   text: string;
-  group?: {
+  group: {
     textWithinGroup?: string | null;
-    subGroup?: {
+    subGroup: {
       textWithinSubGroup?: string | null;
+      requiredTextWithinSubGroup: string;
     };
   };
   someText?: string | null;
@@ -1565,7 +1592,7 @@ export interface TabsField {
     text: string;
     id?: string | null;
   }[];
-  blocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  blocks: (ConfigBlockTest | ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
   group: {
     number: number;
   };
@@ -2087,6 +2114,8 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              textTwo?: T;
+              textInRow?: T;
               id?: T;
             };
         id?: T;
@@ -2490,6 +2519,7 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
           | T
           | {
               textWithinSubGroup?: T;
+              requiredTextWithinSubGroup?: T;
             };
       };
   someText?: T;

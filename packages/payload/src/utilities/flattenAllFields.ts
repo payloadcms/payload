@@ -1,6 +1,19 @@
-import type { Field, FlattenedField, FlattenedJoinField } from '../fields/config/types.js'
+import type {
+  Block,
+  Field,
+  FlattenedBlock,
+  FlattenedField,
+  FlattenedJoinField,
+} from '../fields/config/types.js'
 
 import { tabHasName } from '../fields/config/types.js'
+
+export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
+  return {
+    ...block,
+    flattenedFields: flattenAllFields({ fields: block.fields }),
+  }
+}
 
 export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedField[] => {
   const result: FlattenedField[] = []
@@ -16,10 +29,11 @@ export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedFiel
       case 'blocks': {
         const blocks = []
         for (const block of field.blocks) {
-          blocks.push({
-            ...block,
-            flattenedFields: flattenAllFields({ fields: block.fields }),
-          })
+          if (typeof block === 'string') {
+            blocks.push(block)
+            continue
+          }
+          blocks.push(flattenBlock({ block }))
         }
         result.push({
           ...field,

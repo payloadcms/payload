@@ -105,6 +105,9 @@ export interface GeneratedTypes {
     }
   }
 
+  blocksUntyped: {
+    [slug: string]: JsonObject
+  }
   collectionsJoinsUntyped: {
     [slug: string]: {
       [schemaPath: string]: CollectionSlug
@@ -150,6 +153,11 @@ type ResolveCollectionType<T> = 'collections' extends keyof T
   : // @ts-expect-error
     T['collectionsUntyped']
 
+type ResolveBlockType<T> = 'blocks' extends keyof T
+  ? T['blocks']
+  : // @ts-expect-error
+    T['blocksUntyped']
+
 type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
   ? T['collectionsSelect']
   : // @ts-expect-error
@@ -172,6 +180,8 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
+
+export type TypedBlock = ResolveBlockType<GeneratedTypes>
 
 export type TypedUploadCollection = NonNever<{
   [K in keyof TypedCollection]:
@@ -196,6 +206,8 @@ export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
+
+export type BlockSlug = StringKeyOf<TypedBlock>
 
 export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
 

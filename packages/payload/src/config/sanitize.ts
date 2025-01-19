@@ -3,7 +3,6 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
-import type { CollectionSlug, GlobalSlug } from '../index.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
@@ -17,9 +16,18 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
+import {
+  baseBlockFields,
+  type Block,
+  type CollectionSlug,
+  formatLabels,
+  type GlobalSlug,
+  sanitizeFields,
+} from '../index.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
+import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { defaults } from './defaults.js'
 
@@ -188,6 +196,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const collectionSlugs = new Set<CollectionSlug>()
 
+  const validRelationships = config.collections.map((c) => c.slug) ?? []
+
   for (let i = 0; i < config.collections.length; i++) {
     if (collectionSlugs.has(config.collections[i].slug)) {
       throw new DuplicateCollection('slug', config.collections[i].slug)
@@ -205,6 +215,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config as unknown as Config,
       config.collections[i],
       richTextSanitizationPromises,
+      validRelationships,
     )
   }
 
@@ -220,6 +231,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         config as unknown as Config,
         config.globals[i],
         richTextSanitizationPromises,
+        validRelationships,
       )
     }
   }
@@ -256,6 +268,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config as unknown as Config,
       defaultJobsCollection,
       richTextSanitizationPromises,
+      validRelationships,
     )
 
     configWithDefaults.collections.push(sanitizedJobsCollection)
@@ -266,6 +279,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config as unknown as Config,
       getLockedDocumentsCollection(config as unknown as Config),
       richTextSanitizationPromises,
+      validRelationships,
     ),
   )
   configWithDefaults.collections.push(
@@ -273,6 +287,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config as unknown as Config,
       getPreferencesCollection(config as unknown as Config),
       richTextSanitizationPromises,
+      validRelationships,
     ),
   )
   configWithDefaults.collections.push(
@@ -280,6 +295,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config as unknown as Config,
       migrationsCollection,
       richTextSanitizationPromises,
+      validRelationships,
     ),
   )
 
@@ -320,6 +336,32 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     promises.push(sanitizeFunction(config as SanitizedConfig))
   }
   await Promise.all(promises)
+
+  config.blocks = {}
+  for (const blockSlug in incomingConfig.blocks) {
+    const block = incomingConfig.blocks[blockSlug]
+    block.slug = blockSlug
+    const sanitizedBlock = flattenBlock({ block: block as Block })
+
+    if (sanitizedBlock._sanitized === true) {
+      continue
+    }
+    sanitizedBlock._sanitized = true
+    sanitizedBlock.fields = sanitizedBlock.fields.concat(baseBlockFields)
+    sanitizedBlock.labels = !sanitizedBlock.labels
+      ? formatLabels(sanitizedBlock.slug)
+      : sanitizedBlock.labels
+    sanitizedBlock.fields = await sanitizeFields({
+      config: config as unknown as Config,
+      existingFieldNames: new Set(),
+      fields: block.fields,
+      parentIsLocalized: false,
+      richTextSanitizationPromises,
+      validRelationships,
+    })
+
+    config.blocks[blockSlug] = sanitizedBlock
+  }
 
   return config as SanitizedConfig
 }

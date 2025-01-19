@@ -222,6 +222,9 @@ export const sanitizeFields = async ({
 
     if (field.type === 'blocks' && field.blocks) {
       for (const block of field.blocks) {
+        if (typeof block === 'string') {
+          continue
+        }
         if (block._sanitized === true) {
           continue
         }

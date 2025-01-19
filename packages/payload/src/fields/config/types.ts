@@ -114,6 +114,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type {
   ArrayFieldValidation,
   BlocksFieldValidation,
+  BlockSlug,
   CheckboxFieldValidation,
   CodeFieldValidation,
   CollectionSlug,
@@ -1342,7 +1343,7 @@ export type BlocksField = {
      */
     isSortable?: boolean
   } & Admin
-  blocks: Block[]
+  blocks: (Block | BlockSlug)[]
   defaultValue?: DefaultValue
   labels?: Labels
   maxRows?: number
@@ -1448,7 +1449,7 @@ export type FlattenedBlock = {
 } & Block
 
 export type FlattenedBlocksField = {
-  blocks: FlattenedBlock[]
+  blocks: (FlattenedBlock | string)[]
 } & BlocksField
 
 export type FlattenedGroupField = {
