@@ -90,15 +90,15 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
 
   const emojiHeaderMap: Record<Section, string> = {
     breaking: '⚠️ BREAKING CHANGES',
-    build: '� Build',
+    build: '🔨 Build',
     chore: '🏡 Chores',
     ci: '⚙️ CI',
     docs: '📚 Documentation',
     examples: '📓 Examples',
     feat: '🚀 Features',
-    fix: '� Bug Fixes',
+    fix: '🐛 Bug Fixes',
     perf: '⚡ Performance',
-    refactor: '� Refactors',
+    refactor: '🛠 Refactors',
     style: '🎨 Styles',
     templates: '📝 Templates',
     test: '🧪 Tests',
