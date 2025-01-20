@@ -181,7 +181,7 @@ describe('Block fields', () => {
       .click()
 
     await expect(
-      await page.locator('#field-blocks .blocks-field__row .collapsible__header-wrap', {
+      await page.locator('#field-blocks .blocks-field__row .blocks-field__block-header', {
         hasText: 'Custom Block Label',
       }),
     ).toBeVisible()
