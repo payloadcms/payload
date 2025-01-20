@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
+import type { ClientCollectionConfig, DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
@@ -17,7 +17,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const {
     cellData,
     className: classNameFromProps,
-    collectionConfig,
+    collectionSlug,
     field,
     field: { admin },
     link,
@@ -31,7 +31,10 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     config: {
       routes: { admin: adminRoute },
     },
+    getEntityConfig,
   } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
 
@@ -83,6 +86,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
         <CodeCell
           cellData={`ID: ${cellData}`}
           collectionConfig={collectionConfig}
+          collectionSlug={collectionSlug}
           field={{
             ...field,
             type: 'code',

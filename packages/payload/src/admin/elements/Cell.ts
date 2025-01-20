@@ -1,6 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
 
-import type { ClientCollectionConfig } from '../../collections/config/client.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type {
   ArrayFieldClient,
@@ -72,7 +71,7 @@ export type DefaultCellComponentProps<
                             : any
     : TCellData
   className?: string
-  collectionConfig: ClientCollectionConfig
+  collectionSlug: SanitizedCollectionConfig['slug']
   columnIndex?: number
   customCellProps?: Record<string, any>
   field: TField

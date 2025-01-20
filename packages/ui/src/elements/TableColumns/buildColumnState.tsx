@@ -34,7 +34,6 @@ import {
 } from '../../exports/client/index.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { filterFields } from './filterFields.js'
-import { RenderWithCollectionConfig } from './RenderWithCollectionConfig.js'
 
 type Args = {
   beforeRows?: Column[]
@@ -254,39 +253,16 @@ export const buildColumnState = (args: Args): Column[] => {
                 clientProps: cellClientProps,
                 Component: _field.editor.CellComponent,
                 importMap: payload.importMap,
-                overrideRender: ({ Component, isRSC, key }) => {
-                  if (isRSC) {
-                    return false // Do not override
-                  }
-                  return (
-                    <RenderWithCollectionConfig
-                      clientProps={cellClientProps}
-                      Component={Component}
-                      key={key}
-                    />
-                  )
-                },
                 serverProps,
               })
             } else {
               const CustomCellComponent = _field?.admin?.components?.Cell
+
               if (CustomCellComponent) {
                 CustomCell = RenderServerComponent({
                   clientProps: cellClientProps,
                   Component: CustomCellComponent,
                   importMap: payload.importMap,
-                  overrideRender: ({ Component, isRSC, key }) => {
-                    if (isRSC) {
-                      return false // Do not override
-                    }
-                    return (
-                      <RenderWithCollectionConfig
-                        clientProps={cellClientProps}
-                        Component={Component}
-                        key={key}
-                      />
-                    )
-                  },
                   serverProps,
                 })
               } else {

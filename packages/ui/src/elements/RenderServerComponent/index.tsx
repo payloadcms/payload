@@ -15,18 +15,6 @@ type RenderServerComponentFn = (args: {
   readonly Fallback?: React.ComponentType
   readonly importMap: ImportMap
   readonly key?: string
-  /**
-   * Allows you to take control of the rendering of the component. This is useful for
-   * rendering an HOC.
-   *
-   * Return false to continue with the default rendering behaviour.
-   */
-  overrideRender?: (args: {
-    Component: React.ComponentType
-    isRSC: boolean
-    key?: string
-    sanitizedProps: object
-  }) => false | React.ReactNode
   readonly serverProps?: object
 }) => React.ReactNode
 
@@ -39,7 +27,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
   Fallback,
   importMap,
   key,
-  overrideRender,
   serverProps,
 }) => {
   if (Array.isArray(Component)) {
@@ -49,7 +36,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
         Component: c,
         importMap,
         key: index,
-        overrideRender,
         serverProps,
       }),
     )
@@ -63,13 +49,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
       ...clientProps,
       ...(isRSC ? serverProps : {}),
     })
-
-    if (overrideRender) {
-      const Override = overrideRender({ Component, isRSC, key, sanitizedProps })
-      if (Override !== false) {
-        return Override
-      }
-    }
 
     return <Component key={key} {...sanitizedProps} />
   }
@@ -94,18 +73,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
         ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
       })
 
-      if (overrideRender) {
-        const Override = overrideRender({
-          Component: ResolvedComponent,
-          isRSC,
-          key,
-          sanitizedProps,
-        })
-        if (Override !== false) {
-          return Override
-        }
-      }
-
       return <ResolvedComponent key={key} {...sanitizedProps} />
     }
   }
@@ -116,7 +83,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
         Component: Fallback,
         importMap,
         key,
-        overrideRender,
         serverProps,
       })
     : null
