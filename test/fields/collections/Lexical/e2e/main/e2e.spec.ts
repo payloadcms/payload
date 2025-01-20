@@ -1278,6 +1278,18 @@ describe('lexicalMain', () => {
   })
 
   describe('localization', () => {
+    test('ensure lexical translations from other languages do not get sent to the client', async () => {
+      await navigateToLexicalFields()
+      // Now check if the html contains "Comience a escribir"
+
+      const htmlContent = await page.content()
+
+      // Check if the HTML contains "Comience a escribir"
+      expect(htmlContent).not.toContain('Comience a escribir')
+      expect(htmlContent).not.toContain('Beginne zu tippen oder')
+      expect(htmlContent).not.toContain('Cargando...')
+      expect(htmlContent).toContain('Start typing, or press')
+    })
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)
     })

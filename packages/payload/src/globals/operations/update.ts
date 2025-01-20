@@ -127,7 +127,7 @@ export const updateOperation = async <
       collection: null,
       context: req.context,
       depth: 0,
-      doc: globalJSON,
+      doc: deepCopyObjectSimple(globalJSON),
       draft: draftArg,
       fallbackLocale,
       global: globalConfig,

@@ -47,7 +47,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     this.__cacheBuster = cacheBuster || 0
   }
 
-  static clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
+  static override clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
     return new this({
       cacheBuster: node.__cacheBuster,
       fields: node.__fields,
@@ -55,15 +55,15 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'inlineBlock'
   }
 
-  static importDOM(): DOMConversionMap<HTMLDivElement> | null {
+  static override importDOM(): DOMConversionMap<HTMLDivElement> | null {
     return {}
   }
 
-  static importJSON(serializedNode: SerializedInlineBlockNode): ServerInlineBlockNode {
+  static override importJSON(serializedNode: SerializedInlineBlockNode): ServerInlineBlockNode {
     const node = $createServerInlineBlockNode(serializedNode.fields)
     return node
   }
@@ -75,18 +75,18 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   canIndent() {
     return true
   }
-  createDOM() {
+  override createDOM() {
     const element = document.createElement('span')
     element.classList.add('inline-block-container')
 
     return element
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
     return null
   }
 
-  exportDOM(): DOMExportOutput {
+  override exportDOM(): DOMExportOutput {
     const element = document.createElement('span')
     element.classList.add('inline-block-container')
 
@@ -95,7 +95,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return { element }
   }
 
-  exportJSON(): SerializedInlineBlockNode {
+  override exportJSON(): SerializedInlineBlockNode {
     return {
       type: 'inlineBlock',
       fields: this.getFields(),
@@ -111,11 +111,11 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return this.getLatest().__fields
   }
 
-  getTextContent(): string {
+  override getTextContent(): string {
     return `Block Field`
   }
 
-  isInline() {
+  override isInline() {
     return true
   }
 
@@ -127,7 +127,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     }
   }
 
-  updateDOM(): boolean {
+  override updateDOM(): boolean {
     return false
   }
 }

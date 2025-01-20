@@ -1,7 +1,7 @@
 import type { Readable } from 'stream'
 
 import Busboy from 'busboy'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { FetchAPIFileUploadOptions } from '../../config/types.js'
 import type { FetchAPIFileUploadResponse } from './index.js'

@@ -254,14 +254,12 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           {data.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
-                collectionSlug={relationTo}
                 data={data}
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
                 }
                 modifySearchParams={false}
                 onQueryChange={setQuery}
-                preferenceKey={preferenceKey}
               >
                 <TableColumnsProvider
                   collectionSlug={relationTo}
