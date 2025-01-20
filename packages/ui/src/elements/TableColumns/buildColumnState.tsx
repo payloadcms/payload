@@ -24,7 +24,6 @@ import React from 'react'
 
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
-import type { InitialDefaultCellComponentProps } from './RenderDefaultCell/index.js'
 
 import {
   RenderCustomComponent,
@@ -205,7 +204,7 @@ export const buildColumnState = (args: Args): Column[] => {
       />
     )
 
-    const baseCellClientProps: InitialDefaultCellComponentProps = {
+    const baseCellClientProps: DefaultCellComponentProps = {
       cellData: undefined,
       collectionSlug: clientCollectionConfig.slug,
       customCellProps,
@@ -223,7 +222,7 @@ export const buildColumnState = (args: Args): Column[] => {
         ? docs.map((doc, i) => {
             const isLinkedColumn = index === activeColumnsIndices[0]
 
-            const cellClientProps: InitialDefaultCellComponentProps = {
+            const cellClientProps: DefaultCellComponentProps = {
               ...baseCellClientProps,
               cellData: 'name' in field ? doc[field.name] : undefined,
               link: isLinkedColumn,

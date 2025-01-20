@@ -10,17 +10,13 @@ import { useTableColumns } from '../index.js'
 
 const baseClass = 'default-cell'
 
-export type InitialDefaultCellComponentProps = {
-  collectionSlug: string
-} & Omit<DefaultCellComponentProps, 'collectionConfig'>
-
 const CellPropsContext = React.createContext<DefaultCellComponentProps | null>(null)
 
 export const useCellProps = (): DefaultCellComponentProps | null =>
   React.useContext(CellPropsContext)
 
 export const RenderDefaultCell: React.FC<{
-  clientProps: InitialDefaultCellComponentProps
+  clientProps: DefaultCellComponentProps
   columnIndex: number
   enableRowSelections?: boolean
   isLinkedColumn?: boolean
