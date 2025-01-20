@@ -457,7 +457,9 @@ jobs:
       - name: Build Template
         run: |
           pnpm run script:pack --dest templates/${{ matrix.template }}
-          pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }} $POSTGRES_URL
+          pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $POSTGRES_URL
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
 
   tests-type-generation:
     runs-on: ubuntu-24.04

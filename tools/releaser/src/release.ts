@@ -7,13 +7,13 @@
 
 import type { ExecSyncOptions } from 'child_process'
 
+import { PROJECT_ROOT, ROOT_PACKAGE_JSON } from '@tools/constants'
 import chalk from 'chalk'
 import { loadChangelogConfig } from 'changelogen'
 import { execSync } from 'child_process'
 import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
-import { fileURLToPath } from 'node:url'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
@@ -26,12 +26,10 @@ import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 import { getRecommendedBump } from './utils/getRecommendedBump.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-const cwd = path.resolve(dirname, '..')
-
-const execOpts: ExecSyncOptions = { stdio: 'inherit' }
-const execaOpts: execa.Options = { stdio: 'inherit' }
+// Always execute in project root
+const cwd = PROJECT_ROOT
+const execOpts: ExecSyncOptions = { stdio: 'inherit', cwd }
+const execaOpts: execa.Options = { stdio: 'inherit', cwd }
 
 const args = minimist(process.argv.slice(2))
 
@@ -39,8 +37,8 @@ const {
   bump, // Semver release type: major, minor, patch, premajor, preminor, prepatch, prerelease
   changelog = false, // Whether to update the changelog. WARNING: This gets throttled on too many commits
   'dry-run': dryRun,
-  'git-tag': gitTag = true, // Whether to run git tag and commit operations
   'git-commit': gitCommit = true, // Whether to run git commit operations
+  'git-tag': gitTag = true, // Whether to run git tag and commit operations
   tag, // Tag to publish to: latest, beta, canary
 } = args
 
@@ -67,6 +65,8 @@ const cmdRunnerAsync =
   }
 
 async function main() {
+  console.log({ projectRoot: PROJECT_ROOT })
+
   if (!process.env.GITHUB_TOKEN) {
     throw new Error('GITHUB_TOKEN env var is required')
   }
@@ -108,7 +108,7 @@ async function main() {
     abort(`Prerelease bumps must have tag: beta or canary`)
   }
 
-  const monorepoVersion = fse.readJSONSync('package.json')?.version
+  const monorepoVersion = fse.readJSONSync(ROOT_PACKAGE_JSON)?.version
 
   if (!monorepoVersion) {
     throw new Error('Could not find version in package.json')
@@ -125,14 +125,14 @@ async function main() {
   header(`${logPrefix}📝 Updating changelog...`)
   const {
     changelog: changelogContent,
-    releaseUrl: prefilledReleaseUrl,
     releaseNotes,
+    releaseUrl: prefilledReleaseUrl,
   } = await generateReleaseNotes({
     bump,
     dryRun,
-    toVersion: 'HEAD',
     fromVersion,
     openReleaseUrl: true,
+    toVersion: 'HEAD',
   })
 
   console.log(chalk.green('\nFull Release Notes:\n\n'))
@@ -160,7 +160,8 @@ async function main() {
 
   await execa('pnpm', ['install'], execaOpts)
 
-  const buildResult = await execa('pnpm', ['build:all', '--output-logs=errors-only'], execaOpts)
+  // const buildResult = await execa('pnpm', ['build:all', '--output-logs=errors-only'], execaOpts)
+  const buildResult = await execa('pnpm', ['build:all'], execaOpts)
   if (buildResult.exitCode !== 0) {
     console.error(chalk.bold.red('Build failed'))
     console.log(buildResult.stderr)
@@ -171,21 +172,21 @@ async function main() {
   header(`${logPrefix}📦 Updating package.json versions...`)
   await Promise.all(
     packageDetails.map(async (pkg) => {
-      const packageJson = await fse.readJSON(`${pkg.packagePath}/package.json`)
+      const packageJsonPath = path.join(PROJECT_ROOT, `${pkg.packagePath}/package.json`)
+      const packageJson = await fse.readJSON(packageJsonPath)
       packageJson.version = nextReleaseVersion
       if (!dryRun) {
-        await fse.writeJSON(`${pkg.packagePath}/package.json`, packageJson, { spaces: 2 })
+        await fse.writeJSON(packageJsonPath, packageJson, { spaces: 2 })
       }
     }),
   )
 
   // Set version in root package.json
   header(`${logPrefix}📦 Updating root package.json...`)
-  const rootPackageJsonPath = path.resolve(dirname, '../package.json')
-  const rootPackageJson = await fse.readJSON(rootPackageJsonPath)
+  const rootPackageJson = await fse.readJSON(ROOT_PACKAGE_JSON)
   rootPackageJson.version = nextReleaseVersion
   if (!dryRun) {
-    await fse.writeJSON(rootPackageJsonPath, rootPackageJson, { spaces: 2 })
+    await fse.writeJSON(ROOT_PACKAGE_JSON, rootPackageJson, { spaces: 2 })
   }
 
   // Commit
@@ -241,15 +242,19 @@ async function main() {
     try {
       const { releaseUrl: draftReleaseUrl } = await createDraftGitHubRelease({
         branch: 'main',
-        tag: `v${nextReleaseVersion}`,
         releaseNotes,
+        tag: `v${nextReleaseVersion}`,
       })
       console.log(chalk.bold.green(`Draft release created on GitHub: ${draftReleaseUrl}`))
-    } catch (error) {
+    } catch (error: unknown) {
       console.log(chalk.bold.red('\nFull Release Notes:\n\n'))
       console.log(chalk.gray(releaseNotes) + '\n\n')
       console.log(`\n\nRelease URL: ${chalk.dim(prefilledReleaseUrl)}`)
-      console.log(chalk.bold.red(`Error creating draft release on GitHub: ${error.message}`))
+      console.log(
+        chalk.bold.red(
+          `Error creating draft release on GitHub: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
+        ),
+      )
       console.log(
         chalk.bold.red(
           `Use the above link to create the release manually and optionally add the release notes.`,
@@ -273,6 +278,7 @@ async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boole
     const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--json', '--tag', tag]
     if (dryRun) {
       cmdArgs.push('--dry-run')
+      console.log(chalk.gray(`\n${logPrefix} pnpm ${cmdArgs.join(' ')}\n`))
     }
     const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
       cwd,
@@ -300,8 +306,8 @@ async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boole
 
       return {
         name: pkg.name,
-        success: false,
         details: `Exit Code: ${retryExitCode}, stderr: ${retryStdError}`,
+        success: false,
       }
     }
 
@@ -311,11 +317,11 @@ async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boole
     console.error(err)
     return {
       name: pkg.name,
-      success: false,
       details:
         err instanceof Error
           ? `Error publishing ${pkg.name}: ${err.message}`
           : `Unexpected error publishing ${pkg.name}: ${JSON.stringify(err)}`,
+      success: false,
     }
   }
 }
@@ -370,7 +376,7 @@ function header(message: string, opts?: { enable?: boolean }) {
 }
 
 type PublishResult = {
+  details?: string
   name: string
   success: boolean
-  details?: string
 }

@@ -1,7 +1,6 @@
 import type { GitCommit } from 'changelogen'
 
 import { execSync } from 'child_process'
-import fse from 'fs-extra'
 import minimist from 'minimist'
 import open from 'open'
 import semver from 'semver'
@@ -10,18 +9,14 @@ import { getLatestCommits } from './getLatestCommits.js'
 import { getRecommendedBump } from './getRecommendedBump.js'
 
 type Args = {
-  fromVersion?: string
-  toVersion?: string
   bump?: 'major' | 'minor' | 'patch' | 'prerelease'
   dryRun?: boolean
+  fromVersion?: string
   openReleaseUrl?: boolean
+  toVersion?: string
 }
 
 type ChangelogResult = {
-  /**
-   * URL to open releases/new with the changelog pre-filled
-   */
-  releaseUrl: string
   /**
    * The changelog content, does not include contributors
    */
@@ -34,10 +29,14 @@ type ChangelogResult = {
    * The release tag, includes prefix 'v'
    */
   releaseTag: string
+  /**
+   * URL to open releases/new with the changelog pre-filled
+   */
+  releaseUrl: string
 }
 
 export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogResult> => {
-  const { toVersion = 'HEAD', dryRun, bump, openReleaseUrl } = args
+  const { bump, dryRun, openReleaseUrl, toVersion = 'HEAD' } = args
 
   const fromVersion =
     args.fromVersion || execSync('git describe --match "v*" --tags --abbrev=0').toString().trim()
@@ -62,11 +61,11 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   console.log(`Generating release notes for ${fromVersion} to ${toVersion}...`)
 
   console.log({
-    tag,
-    recommendedBump,
     fromVersion,
-    toVersion,
     proposedVersion: proposedReleaseVersion,
+    recommendedBump,
+    tag,
+    toVersion,
   })
 
   const conventionalCommits = await getLatestCommits(fromVersion, toVersion)
@@ -87,22 +86,22 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
     'breaking',
   ] as const
 
-  type Sections = (typeof commitTypesForChangelog)[number]
+  type Section = (typeof commitTypesForChangelog)[number]
 
-  const emojiHeaderMap: Record<Sections, string> = {
-    feat: '🚀 Features',
-    fix: '🐛 Bug Fixes',
-    perf: '⚡ Performance',
-    refactor: '🛠 Refactors',
-    docs: '📚 Documentation',
-    style: '🎨 Styles',
-    test: '🧪 Tests',
-    templates: '📝 Templates',
-    examples: '📓 Examples',
-    build: '🔨 Build',
-    ci: '⚙️ CI',
-    chore: '🏡 Chores',
+  const emojiHeaderMap: Record<Section, string> = {
     breaking: '⚠️ BREAKING CHANGES',
+    build: '� Build',
+    chore: '🏡 Chores',
+    ci: '⚙️ CI',
+    docs: '📚 Documentation',
+    examples: '📓 Examples',
+    feat: '🚀 Features',
+    fix: '� Bug Fixes',
+    perf: '⚡ Performance',
+    refactor: '� Refactors',
+    style: '🎨 Styles',
+    templates: '📝 Templates',
+    test: '🧪 Tests',
   }
 
   const sections = conventionalCommits.reduce(
@@ -111,16 +110,18 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
         sections.breaking.push(c)
       }
 
-      if (commitTypesForChangelog.includes(c.type as Sections)) {
-        if (!sections[c.type]) {
-          sections[c.type] = []
+      const typedCommitType: Section = c.type as Section
+
+      if (commitTypesForChangelog.includes(typedCommitType)) {
+        if (!sections[typedCommitType]) {
+          sections[typedCommitType] = []
         }
-        sections[c.type].push(c)
+        sections[typedCommitType].push(c)
       }
 
       return sections
     },
-    {} as Record<'breaking' | Sections, GitCommit[]>,
+    {} as Record<Section, GitCommit[]>,
   )
 
   // Sort commits by scope, unscoped first
@@ -160,10 +161,10 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   }
 
   return {
-    releaseUrl,
     changelog,
     releaseNotes,
     releaseTag: proposedReleaseVersion,
+    releaseUrl,
   }
 }
 
@@ -213,7 +214,7 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
       continue
     }
 
-    const { author } = (await res.json()) as { author: { login: string; email: string } }
+    const { author } = (await res.json()) as { author: { email: string; login: string } }
 
     if (!contributors.some((c) => c.username === author.login)) {
       contributors.push({ name: commit.author.name, username: author.login })
@@ -225,7 +226,7 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
     const coAuthors = Array.from(
       commit.body.matchAll(coAuthorPattern),
       (match) => match.groups,
-    ).filter((e) => !e?.email.includes('[bot]')) as { name: string; email: string }[]
+    ).filter((e) => !e?.email?.includes('[bot]')) as { email: string; name: string }[]
 
     if (!coAuthors.length) {
       continue
@@ -289,7 +290,7 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
 type Contributor = { name: string; username: string }
 
 function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = false): string {
-  const { scope, references, description, isBreaking } = commit
+  const { description, isBreaking, references, scope } = commit
 
   let formatted = `* ${scope ? `**${scope}:** ` : ''}${description}`
   references.forEach((ref) => {
@@ -310,7 +311,7 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
     let notes =
       `  ` +
       rawNotes
-        .split('\n')
+        ?.split('\n')
         .map((l) => `  ${l}`) // Indent notes
         .join('\n')
         .trim()
@@ -329,13 +330,13 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
 // module import workaround for ejs
 if (import.meta.url === `file://${process.argv[1]}`) {
   // This module is being run directly
-  const { fromVersion, toVersion, bump, openReleaseUrl } = minimist(process.argv.slice(2))
+  const { bump, fromVersion, openReleaseUrl, toVersion } = minimist(process.argv.slice(2))
   generateReleaseNotes({
     bump,
-    fromVersion,
-    toVersion,
     dryRun: false,
+    fromVersion,
     openReleaseUrl,
+    toVersion,
   })
     .then(() => {
       console.log('Done')
