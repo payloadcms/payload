@@ -152,6 +152,7 @@ export const renderField: RenderFieldMethod = ({
             importMap: req.payload.importMap,
             serverProps: {
               ...serverProps,
+              blockType: row.blockType,
               rowLabel: `${getTranslation(blockConfig.labels.singular, req.i18n)} ${String(
                 rowIndex + 1,
               ).padStart(2, '0')}`,
