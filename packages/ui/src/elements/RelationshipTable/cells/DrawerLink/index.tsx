@@ -20,7 +20,7 @@ export const DrawerLink: React.FC<{
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     id: cellProps?.rowData.id,
-    collectionSlug: cellProps?.collectionConfig.slug,
+    collectionSlug: cellProps?.collectionSlug,
   })
 
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
