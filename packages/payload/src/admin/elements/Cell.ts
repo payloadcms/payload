@@ -88,6 +88,7 @@ export type DefaultServerCellComponentProps<
   TField extends ClientField = ClientField,
   TCellData = any,
 > = {
+  collectionConfig: SanitizedCollectionConfig
   field: Field
   i18n: I18nClient
   payload: Payload

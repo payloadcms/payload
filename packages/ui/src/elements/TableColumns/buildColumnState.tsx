@@ -4,6 +4,7 @@ import type {
   ClientComponentProps,
   ClientField,
   DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
   Field,
   ListPreferences,
   PaginatedDocs,
@@ -169,7 +170,7 @@ export const buildColumnState = (args: Args): Column[] => {
       field,
     }
 
-    const serverProps: Pick<
+    const customLabelServerProps: Pick<
       ServerComponentProps,
       'clientField' | 'collectionSlug' | 'field' | 'i18n' | 'payload'
     > = {
@@ -185,7 +186,7 @@ export const buildColumnState = (args: Args): Column[] => {
           clientProps,
           Component: CustomLabelToRender,
           importMap: payload.importMap,
-          serverProps,
+          serverProps: customLabelServerProps,
         })
       : undefined
 
@@ -229,6 +230,21 @@ export const buildColumnState = (args: Args): Column[] => {
               rowData: doc,
             }
 
+            const cellServerProps: DefaultServerCellComponentProps = {
+              cellData: cellClientProps.cellData,
+              className: baseCellClientProps.className,
+              collectionConfig,
+              collectionSlug: collectionConfig.slug,
+              columnIndex: baseCellClientProps.columnIndex,
+              customCellProps: baseCellClientProps.customCellProps,
+              field: _field,
+              i18n,
+              link: cellClientProps.link,
+              onClick: baseCellClientProps.onClick,
+              payload,
+              rowData: doc,
+            }
+
             let CustomCell = null
 
             if (_field?.type === 'richText') {
@@ -252,7 +268,7 @@ export const buildColumnState = (args: Args): Column[] => {
                 clientProps: cellClientProps,
                 Component: _field.editor.CellComponent,
                 importMap: payload.importMap,
-                serverProps,
+                serverProps: cellServerProps,
               })
             } else {
               const CustomCellComponent = _field?.admin?.components?.Cell
@@ -262,7 +278,7 @@ export const buildColumnState = (args: Args): Column[] => {
                   clientProps: cellClientProps,
                   Component: CustomCellComponent,
                   importMap: payload.importMap,
-                  serverProps,
+                  serverProps: cellServerProps,
                 })
               } else {
                 CustomCell = undefined
