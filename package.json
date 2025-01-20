@@ -82,6 +82,7 @@
     "reinstall": "pnpm clean:all && pnpm install",
     "release": "pnpm --filter releaser release --tag latest",
     "release:beta": "pnpm runts ./scripts/release.ts --bump prerelease --tag beta",
+    "release:canary": "pnpm --filter releaser release:canary",
     "runts": "cross-env NODE_OPTIONS=--no-deprecation node --no-deprecation --import @swc-node/register/esm-register",
     "script:build-template-with-local-pkgs": "pnpm --filter scripts build-template-with-local-pkgs",
     "script:gen-templates": "pnpm --filter scripts gen-templates",
