@@ -24,14 +24,6 @@ export function getFieldsForRowComparison({
   }
 
   if (field.type === 'blocks') {
-    fields = [
-      // {
-      //   name: 'blockType',
-      //   label: i18n.t('fields:blockType'),
-      //   type: 'text',
-      // },
-    ]
-
     if (versionRow?.blockType === comparisonRow?.blockType) {
       const matchedBlock = ('blocks' in field &&
         field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
