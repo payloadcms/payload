@@ -19,6 +19,7 @@ import type { LexicalProviderProps } from './LexicalProvider.js'
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
 import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
+import { DecoratorSelectionPlugin } from './plugins/DecoratorSelection/index.js'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
 import { InsertParagraphAtEndPlugin } from './plugins/InsertParagraphAtEnd/index.js'
@@ -112,6 +113,7 @@ export const LexicalEditor: React.FC<
           ErrorBoundary={LexicalErrorBoundary}
         />
         <InsertParagraphAtEndPlugin />
+        <DecoratorSelectionPlugin />
         <TextPlugin features={editorConfig.features} />
         <OnChangePlugin
           // Selection changes can be ignored here, reducing the
