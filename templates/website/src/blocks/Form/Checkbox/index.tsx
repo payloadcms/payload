@@ -21,8 +21,8 @@ export const Checkbox: React.FC<
     register: UseFormRegister<FieldValues>
     setValue: any
   }
-> = ({ name, defaultValue, errors, label, register, required: requiredFromProps, width }) => {
-  const props = register(name, { required: requiredFromProps })
+> = ({ name, defaultValue, errors, label, register, required, width }) => {
+  const props = register(name, { required: required })
   const { setValue } = useFormContext()
 
   return (
@@ -36,9 +36,16 @@ export const Checkbox: React.FC<
             setValue(props.name, checked)
           }}
         />
-        <Label htmlFor={name}>{label}</Label>
+        <Label htmlFor={name}>
+          {required && (
+            <span className="required">
+              * <span className="sr-only">(required)</span>
+            </span>
+          )}
+          {label}
+        </Label>
       </div>
-      {requiredFromProps && errors[name] && <Error />}
+      {errors[name] && <Error />}
     </Width>
   )
 }
