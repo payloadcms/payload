@@ -37,7 +37,7 @@ export const withTenantAccess =
       constraints.push(
         getTenantAccess({
           fieldName,
-          user: args.req.user,
+          user: args.req.user as UserWithTenantsField,
         }),
       )
       return combineWhereConstraints(constraints)
