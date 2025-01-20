@@ -17,7 +17,7 @@ export function getFieldsForRowComparison({
   field: ArrayFieldClient | BlocksFieldClient
   versionRow: any
 }) {
-  let fields: ClientField[]
+  let fields: ClientField[] = []
 
   if (field.type === 'array' && 'fields' in field) {
     fields = field.fields
@@ -30,7 +30,7 @@ export function getFieldsForRowComparison({
         fields: [],
       }
 
-      fields = [...fields, ...matchedBlock.fields]
+      fields = matchedBlock.fields
     } else {
       const matchedVersionBlock = ('blocks' in field &&
         field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
@@ -42,7 +42,7 @@ export function getFieldsForRowComparison({
       }
 
       fields = getUniqueListBy<ClientField>(
-        [...fields, ...matchedVersionBlock.fields, ...matchedComparisonBlock.fields],
+        [...matchedVersionBlock.fields, ...matchedComparisonBlock.fields],
         'name',
       )
     }
