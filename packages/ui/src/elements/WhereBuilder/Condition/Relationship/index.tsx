@@ -76,18 +76,17 @@ export const RelationshipField: React.FC<Props> = (props) => {
         const fieldToSearch = collection?.admin?.useAsTitle || 'id'
         const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
-        const query: {
-          depth?: number
-          limit?: number
-          page?: number
-          where: Where
-        } = {
+        const where: Where = {
+          and: [],
+        }
+        const query = {
           depth: 0,
           limit: maxResultsPerRequest,
           page: pageIndex,
-          where: {
-            and: [],
+          select: {
+            [fieldToSearch]: true,
           },
+          where,
         }
 
         if (debouncedSearch) {
@@ -115,15 +114,13 @@ export const RelationshipField: React.FC<Props> = (props) => {
             if (data.docs.length > 0) {
               addOptions(data, relationSlug)
 
-              if (!debouncedSearch) {
-                if (data.nextPage) {
-                  nextPageByRelationshipRef.current.set(relationSlug, data.nextPage)
-                } else {
-                  partiallyLoadedRelationshipSlugs.current =
-                    partiallyLoadedRelationshipSlugs.current.filter(
-                      (partiallyLoadedRelation) => partiallyLoadedRelation !== relationSlug,
-                    )
-                }
+              if (data.nextPage) {
+                nextPageByRelationshipRef.current.set(relationSlug, data.nextPage)
+              } else {
+                partiallyLoadedRelationshipSlugs.current =
+                  partiallyLoadedRelationshipSlugs.current.filter(
+                    (partiallyLoadedRelation) => partiallyLoadedRelation !== relationSlug,
+                  )
               }
             }
           } else {
@@ -209,7 +206,9 @@ export const RelationshipField: React.FC<Props> = (props) => {
   }, [hasMany, hasMultipleRelations, value, options])
 
   const handleInputChange = (input: string) => {
+    dispatchOptions({ type: 'CLEAR', i18n, required: false })
     const relationSlug = partiallyLoadedRelationshipSlugs.current[0]
+    partiallyLoadedRelationshipSlugs.current = relationSlugs
     nextPageByRelationshipRef.current.set(relationSlug, 1)
     setSearch(input)
   }
