@@ -150,6 +150,12 @@ export const getWorkspace = async () => {
       nextReleaseVersion = semver.inc(monorepoVersion, bumpType)
     }
 
+    if (!nextReleaseVersion) {
+      throw new Error(
+        `Invalid bump type: ${bumpType}. Could not determine next version from ${monorepoVersion}.`,
+      )
+    }
+
     console.log(`\n  Version: ${monorepoVersion} => ${nextReleaseVersion}\n`)
     console.log(`  Bump: ${bumpType}`)
     console.log(`  Changes (${packageDetails.length} packages):\n`)

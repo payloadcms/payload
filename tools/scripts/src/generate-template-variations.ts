@@ -9,45 +9,42 @@
  *       There is no way currently to have lint-staged ignore the templates directory.
  */
 
+import type { DbType, StorageAdapterType } from 'create-payload-app/types'
+
+import { PROJECT_ROOT, TEMPLATES_DIR } from '@tools/constants'
 import chalk from 'chalk'
 import { execSync } from 'child_process'
 import { configurePayloadConfig } from 'create-payload-app/lib/configure-payload-config.js'
 import { copyRecursiveSync } from 'create-payload-app/utils/copy-recursive-sync.js'
 import minimist from 'minimist'
 import * as fs from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
 import path from 'path'
 
-import type { DbType, StorageAdapterType } from '../packages/create-payload-app/src/types.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
 type TemplateVariations = {
-  /** package.json name */
-  name: string
   /** Base template to copy from */
   base?: string
+  configureConfig?: boolean
+  db: DbType
   /** Directory in templates dir */
   dirname: string
-  db: DbType
-  storage: StorageAdapterType
-  sharp: boolean
-  vercelDeployButtonLink?: string
   envNames?: {
     dbUri: string
   }
-  /**
-   * @default false
-   */
-  skipReadme?: boolean
+  generateLockfile?: boolean
+  /** package.json name */
+  name: string
+  sharp: boolean
   skipConfig?: boolean
   /**
    * @default false
    */
   skipDockerCompose?: boolean
-  configureConfig?: boolean
-  generateLockfile?: boolean
+  /**
+   * @default false
+   */
+  skipReadme?: boolean
+  storage: StorageAdapterType
+  vercelDeployButtonLink?: string
 }
 
 main().catch((error) => {
@@ -58,17 +55,20 @@ main().catch((error) => {
 async function main() {
   const args = minimist(process.argv.slice(2))
   const template = args['template'] // template directory name
-  const templatesDir = path.resolve(dirname, '../templates')
 
   const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
 
   let variations: TemplateVariations[] = [
     {
       name: 'payload-vercel-postgres-template',
-      dirname: 'with-vercel-postgres',
       db: 'vercel-postgres',
-      storage: 'vercelBlobStorage',
+      dirname: 'with-vercel-postgres',
+      envNames: {
+        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        dbUri: 'POSTGRES_URL',
+      },
       sharp: false,
+      storage: 'vercelBlobStorage',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
@@ -78,18 +78,20 @@ async function main() {
             '&build-command=pnpm run ci' +
             '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
         ),
-      envNames: {
-        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
-        dbUri: 'POSTGRES_URL',
-      },
     },
     {
       name: 'payload-vercel-website-template',
       base: 'website', // This is the base template to copy from
-      dirname: 'with-vercel-website',
       db: 'vercel-postgres',
-      storage: 'vercelBlobStorage',
+      dirname: 'with-vercel-website',
+      envNames: {
+        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        dbUri: 'POSTGRES_URL',
+      },
       sharp: true,
+      skipDockerCompose: true,
+      skipReadme: true,
+      storage: 'vercelBlobStorage',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
@@ -99,26 +101,23 @@ async function main() {
             '&build-command=pnpm run ci' +
             '&stores=[{"type":"postgres"},{"type":"blob"}]', // Postgres and Vercel Blob Storage
         ),
-      envNames: {
-        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
-        dbUri: 'POSTGRES_URL',
-      },
-      skipReadme: true,
-      skipDockerCompose: true,
     },
     {
       name: 'payload-postgres-template',
-      dirname: 'with-postgres',
       db: 'postgres',
-      storage: 'localDisk',
+      dirname: 'with-postgres',
       sharp: true,
+      storage: 'localDisk',
     },
     {
       name: 'payload-vercel-mongodb-template',
-      dirname: 'with-vercel-mongodb',
       db: 'mongodb',
-      storage: 'vercelBlobStorage',
+      dirname: 'with-vercel-mongodb',
+      envNames: {
+        dbUri: 'MONGODB_URI',
+      },
       sharp: false,
+      storage: 'vercelBlobStorage',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
@@ -129,18 +128,15 @@ async function main() {
             '&stores=[{"type":"blob"}]' + // Vercel Blob Storage
             '&integration-ids=oac_jnzmjqM10gllKmSrG0SGrHOH', // MongoDB Atlas
         ),
-      envNames: {
-        dbUri: 'MONGODB_URI',
-      },
     },
     {
       name: 'blank',
-      dirname: 'blank',
       db: 'mongodb',
+      dirname: 'blank',
       generateLockfile: true,
-      storage: 'localDisk',
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
       configureConfig: false,
@@ -159,21 +155,21 @@ async function main() {
   for (const {
     name,
     base,
-    dirname,
-    db,
-    generateLockfile,
-    storage,
-    vercelDeployButtonLink,
-    envNames,
-    sharp,
     configureConfig,
-    skipReadme = false,
+    db,
+    dirname,
+    envNames,
+    generateLockfile,
+    sharp,
     skipConfig = false,
     skipDockerCompose = false,
+    skipReadme = false,
+    storage,
+    vercelDeployButtonLink,
   } of variations) {
     header(`Generating ${name}...`)
-    const destDir = path.join(templatesDir, dirname)
-    copyRecursiveSync(path.join(templatesDir, base || '_template'), destDir, [
+    const destDir = path.join(TEMPLATES_DIR, dirname)
+    copyRecursiveSync(path.join(TEMPLATES_DIR, base || '_template'), destDir, [
       'node_modules',
       '\\*\\.tgz',
       '.next',
@@ -190,32 +186,32 @@ async function main() {
       log('Configuring payload.config.ts')
       const configureArgs = {
         dbType: db,
+        envNames,
         packageJsonName: name,
         projectDirOrConfigPath: { projectDir: destDir },
-        storageAdapter: storage,
         sharp,
-        envNames,
+        storageAdapter: storage,
       }
       await configurePayloadConfig(configureArgs)
 
       log('Configuring .env.example')
       // Replace DATABASE_URI with the correct env name if set
       await writeEnvExample({
+        dbType: db,
         destDir,
         envNames,
-        dbType: db,
       })
     }
 
     if (!skipReadme) {
       await generateReadme({
-        destDir,
         data: {
           name,
-          description: name, // TODO: Add descriptions
           attributes: { db, storage },
+          description: name, // TODO: Add descriptions
           ...(vercelDeployButtonLink && { vercelDeployButtonLink }),
         },
+        destDir,
       })
     }
 
@@ -240,7 +236,7 @@ async function main() {
       const migrationDestDir = path.join(destDir, 'src/migrations')
 
       // Delete and recreate migrations directory
-      await fs.rm(migrationDestDir, { recursive: true, force: true })
+      await fs.rm(migrationDestDir, { force: true, recursive: true })
       await fs.mkdir(migrationDestDir, { recursive: true })
 
       log(`Generating initial migrations in ${migrationDestDir}`)
@@ -249,9 +245,9 @@ async function main() {
         cwd: destDir,
         env: {
           ...process.env,
-          PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
           DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
+          PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
         },
       })
     }
@@ -262,24 +258,23 @@ async function main() {
 
     log(`Done configuring payload config for ${destDir}/src/payload.config.ts`)
   }
-  // TODO: Run prettier manually on the generated files, husky blows up
   log('Running prettier on generated files...')
-  execSyncSafe(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`)
+  execSyncSafe(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`, { cwd: PROJECT_ROOT })
 
   log('Template generation complete!')
 }
 
 async function generateReadme({
+  data: { name, attributes, description, vercelDeployButtonLink },
   destDir,
-  data: { name, description, attributes, vercelDeployButtonLink },
 }: {
-  destDir: string
   data: {
-    name: string
-    description: string
     attributes: Pick<TemplateVariations, 'db' | 'storage'>
+    description: string
+    name: string
     vercelDeployButtonLink?: string
   }
+  destDir: string
 }) {
   let header = `# ${name}\n`
   if (vercelDeployButtonLink) {
@@ -302,13 +297,13 @@ ${description}
 }
 
 async function writeEnvExample({
+  dbType,
   destDir,
   envNames,
-  dbType,
 }: {
+  dbType: DbType
   destDir: string
   envNames?: TemplateVariations['envNames']
-  dbType: DbType
 }) {
   const envExamplePath = path.join(destDir, '.env.example')
   const envFileContents = await fs.readFile(envExamplePath, 'utf8')
@@ -363,7 +358,9 @@ function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1])
     execSync(command, { stdio: 'inherit', ...options })
   } catch (error) {
     if (error instanceof Error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const stderr = (error as any).stderr?.toString()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const stdout = (error as any).stdout?.toString()
 
       if (stderr && stderr.trim()) {

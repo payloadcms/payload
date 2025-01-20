@@ -1,7 +1,7 @@
 import type { TFunction } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { LabelFunction, StaticLabel } from '../config/types.js'
 
