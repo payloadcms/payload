@@ -1,4 +1,3 @@
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -14,6 +13,13 @@ import type {
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
+import {
+  type CollectionSlug,
+  deepCopyObjectSimple,
+  type Payload,
+  type RequestContext,
+  type TypedLocale,
+} from '../../../index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
@@ -80,7 +86,7 @@ export default async function createLocal<
 
   return createOperation<TSlug, TSelect>({
     collection,
-    data,
+    data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
     disableTransaction,
     disableVerificationEmail,
