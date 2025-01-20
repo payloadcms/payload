@@ -831,6 +831,22 @@ const MyComponent: React.FC = () => {
 }
 ```
 
+If you need to retrieve a specific collection or global config by its slug, `getEntityConfig` is the most efficient way to do so:
+
+```tsx
+'use client'
+import { useConfig } from '@payloadcms/ui'
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const { getEntityConfig } = useConfig()
+  const mediaConfig = getEntityConfig({ collectionSlug: 'media'})
+  // highlight-end
+
+  return <span>The media collection has {mediaConfig.fields.length} fields.</span>
+}
+```
+
 ## useEditDepth
 
 Sends back how many editing levels "deep" the current component is. Edit depth is relevant while adding new documents / editing documents in modal windows and other cases.

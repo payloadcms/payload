@@ -148,9 +148,7 @@ export const renderDocumentHandler = async (args: {
     importMap: payload.importMap,
     initialData,
     initPageResult: {
-      collectionConfig: payload.config.collections.find(
-        (collection) => collection.slug === collectionSlug,
-      ),
+      collectionConfig: payload?.collections?.[collectionSlug]?.config,
       cookies,
       docID,
       globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),

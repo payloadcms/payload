@@ -42,7 +42,7 @@ export const Account: React.FC<AdminViewProps> = async ({
     serverURL,
   } = config
 
-  const collectionConfig = config.collections.find((collection) => collection.slug === userSlug)
+  const collectionConfig = payload?.collections?.[userSlug]?.config
 
   if (collectionConfig && user?.id) {
     // Fetch the data required for the view
