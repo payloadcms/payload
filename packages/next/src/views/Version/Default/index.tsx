@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientGlobalConfig, OptionObject } from 'payload'
+import type { OptionObject } from 'payload'
 
 import { Gutter, useConfig, useDocumentInfo, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
@@ -31,11 +31,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const { i18n } = useTranslation()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
-  const [collectionConfig] = useState(
-    () => getEntityConfig({ collectionSlug }) as ClientCollectionConfig,
-  )
+  const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug }))
 
-  const [globalConfig] = useState(() => getEntityConfig({ globalSlug }) as ClientGlobalConfig)
+  const [globalConfig] = useState(() => getEntityConfig({ globalSlug }))
 
   const [locales, setLocales] = useState<OptionObject[]>(localeOptions)
 

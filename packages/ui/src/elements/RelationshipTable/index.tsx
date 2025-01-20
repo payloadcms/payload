@@ -91,9 +91,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [query, setQuery] = useState<ListQuery>()
   const [openColumnSelector, setOpenColumnSelector] = useState(false)
 
-  const [collectionConfig] = useState(
-    () => getEntityConfig({ collectionSlug: relationTo }) as ClientCollectionConfig,
-  )
+  const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug: relationTo }))
 
   const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
   const [data, setData] = useState<PaginatedDocs>(initialData)

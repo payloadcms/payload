@@ -35,13 +35,13 @@ const Restore: React.FC<Props> = ({
 }) => {
   const {
     config: {
-      collections,
       routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = collections.find((collection) => collection.slug === collectionSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { toggleModal } = useModal()
   const [processing, setProcessing] = useState(false)

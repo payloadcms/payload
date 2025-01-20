@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, PaginatedDocs, Where } from 'payload'
+import type { PaginatedDocs, Where } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
@@ -28,7 +28,6 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
@@ -55,7 +54,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
   const addOptions = useCallback(
     (data, relation) => {
-      const collection = getEntityConfig({ collectionSlug: relation }) as ClientCollectionConfig
+      const collection = getEntityConfig({ collectionSlug: relation })
       dispatchOptions({ type: 'ADD', collection, data, hasMultipleRelations, i18n, relation })
     },
     [hasMultipleRelations, i18n, getEntityConfig],
@@ -72,7 +71,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
       if (relationSlug && partiallyLoadedRelationshipSlugs.current.includes(relationSlug)) {
         const collection = getEntityConfig({
           collectionSlug: relationSlug,
-        }) as ClientCollectionConfig
+        })
         const fieldToSearch = collection?.admin?.useAsTitle || 'id'
         const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
@@ -135,7 +134,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
       setHasLoadedFirstOptions(true)
     },
-    [addOptions, api, collections, debouncedSearch, i18n.language, serverURL, t],
+    [addOptions, api, debouncedSearch, getEntityConfig, i18n.language, serverURL, t],
   )
 
   const loadMoreOptions = React.useCallback(() => {

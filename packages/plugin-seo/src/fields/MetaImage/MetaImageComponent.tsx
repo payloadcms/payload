@@ -36,10 +36,10 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
 
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const field: FieldType<string> = useField({ ...props, path } as Options)
@@ -109,7 +109,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
 
   const hasImage = Boolean(value)
 
-  const collection = collections?.find((coll) => coll.slug === relationTo) || undefined
+  const collection = getEntityConfig({ collectionSlug: relationTo })
 
   return (
     <div

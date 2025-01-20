@@ -90,6 +90,7 @@ const ListDrawerHeader: React.FC<ListHeaderProps> = ({
 }) => {
   const {
     config: { collections },
+    getEntityConfig,
   } = useConfig()
 
   const { closeModal } = useModal()
@@ -102,7 +103,7 @@ const ListDrawerHeader: React.FC<ListHeaderProps> = ({
     setSelectedOption,
   } = useListDrawerContext()
 
-  const collectionConfig = collections.find(({ slug }) => slug === selectedOption.value)
+  const collectionConfig = getEntityConfig({ collectionSlug: selectedOption.value })
 
   const enabledCollectionConfigs = collections.filter(({ slug }) =>
     enabledCollections.includes(slug),

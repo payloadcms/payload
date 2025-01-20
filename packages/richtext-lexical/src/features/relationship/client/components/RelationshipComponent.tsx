@@ -59,14 +59,14 @@ const Component: React.FC<Props> = (props) => {
   } = useEditorConfigContext()
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
-  const [relatedCollection, setRelatedCollection] = useState(
-    () => collections.find((coll) => coll.slug === relationTo)!,
+  const [relatedCollection, setRelatedCollection] = useState(() =>
+    getEntityConfig({ collectionSlug: relationTo }),
   )
 
   const { i18n, t } = useTranslation()
