@@ -466,6 +466,8 @@ export interface ArrayField {
     subArray?:
       | {
           text?: string | null;
+          textTwo: string;
+          textInRow: string;
           id?: string | null;
         }[]
       | null;
@@ -878,10 +880,11 @@ export interface CodeField {
 export interface CollapsibleField {
   id: string;
   text: string;
-  group?: {
+  group: {
     textWithinGroup?: string | null;
-    subGroup?: {
+    subGroup: {
       textWithinSubGroup?: string | null;
+      requiredTextWithinSubGroup: string;
     };
   };
   someText?: string | null;
@@ -2087,6 +2090,8 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              textTwo?: T;
+              textInRow?: T;
               id?: T;
             };
         id?: T;
@@ -2490,6 +2495,7 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
           | T
           | {
               textWithinSubGroup?: T;
+              requiredTextWithinSubGroup?: T;
             };
       };
   someText?: T;
