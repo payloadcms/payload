@@ -1,6 +1,5 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -11,6 +10,13 @@ import type {
 import type { DataFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
+import {
+  deepCopyObjectSimple,
+  type GlobalSlug,
+  type Payload,
+  type RequestContext,
+  type TypedLocale,
+} from '../../../index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 
@@ -60,7 +66,7 @@ export default async function updateLocal<
 
   return updateOperation<TSlug, TSelect>({
     slug: globalSlug as string,
-    data,
+    data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
     draft,
     globalConfig,

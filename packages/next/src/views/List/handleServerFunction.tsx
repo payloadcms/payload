@@ -139,9 +139,7 @@ export const renderListHandler = async (args: {
     enableRowSelections,
     importMap: payload.importMap,
     initPageResult: {
-      collectionConfig: payload.config.collections.find(
-        (collection) => collection.slug === collectionSlug,
-      ),
+      collectionConfig: payload?.collections?.[collectionSlug]?.config,
       cookies,
       globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
       languageOptions: undefined, // TODO

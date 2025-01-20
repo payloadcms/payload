@@ -127,9 +127,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   const { id: docID, docConfig } = useDocumentInfo()
 
-  const {
-    config: { collections },
-  } = useConfig()
+  const { getEntityConfig } = useConfig()
 
   const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, value } =
     useField<PaginatedDocs>({
@@ -166,7 +164,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   }, [docID, field.targetField.relationTo, field.where, on, docConfig.slug])
 
   const initialDrawerData = useMemo(() => {
-    const relatedCollection = collections.find((collection) => collection.slug === field.collection)
+    const relatedCollection = getEntityConfig({ collectionSlug: field.collection })
 
     return getInitialDrawerData({
       collectionSlug: docConfig.slug,
@@ -174,7 +172,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       fields: relatedCollection.fields,
       segments: field.on.split('.'),
     })
-  }, [collections, field.on, field.collection, docConfig.slug, docID])
+  }, [getEntityConfig, field.collection, field.on, docConfig.slug, docID])
 
   return (
     <div

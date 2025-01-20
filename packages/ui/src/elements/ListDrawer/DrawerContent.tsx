@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ListQuery } from 'payload'
+import type { ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -45,7 +45,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const [selectedOption, setSelectedOption] = useState<Option<string>>(() => {
     const initialSelection = selectedCollectionFromProps || enabledCollections[0]?.slug
-    const found = getEntityConfig({ collectionSlug: initialSelection }) as ClientCollectionConfig
+    const found = getEntityConfig({ collectionSlug: initialSelection })
 
     return found
       ? {
@@ -63,7 +63,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     () => {
       if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
         setSelectedOption({
-          label: collections.find(({ slug }) => slug === selectedCollectionFromProps).labels,
+          label: getEntityConfig({ collectionSlug: selectedCollectionFromProps })?.labels,
           value: selectedCollectionFromProps,
         })
       }

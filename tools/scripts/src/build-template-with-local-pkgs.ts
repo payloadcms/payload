@@ -1,11 +1,8 @@
+import { TEMPLATES_DIR } from '@tools/constants'
 import chalk from 'chalk'
 import { exec as execOrig, execSync } from 'child_process'
 import fs from 'fs/promises'
-import { fileURLToPath } from 'node:url'
 import path from 'path'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 main().catch((error) => {
   console.error(error)
@@ -13,9 +10,11 @@ main().catch((error) => {
 })
 
 async function main() {
-  const templateDir = path.resolve(dirname, '../templates')
   const templateName = process.argv[2]
-  const templatePath = path.join(templateDir, templateName)
+  if (!templateName) {
+    throw new Error('Please provide a template name')
+  }
+  const templatePath = path.join(TEMPLATES_DIR, templateName)
   const databaseConnection = process.argv[3] || 'mongodb://127.0.0.1/your-database-name'
 
   console.log({

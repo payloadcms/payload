@@ -1,23 +1,15 @@
+import type { PackageDetails } from '@tools/releaser'
 import type { ExecSyncOptions } from 'child_process'
-import type execa from 'execa'
 
+import { PROJECT_ROOT } from '@tools/constants'
+import { getPackageDetails } from '@tools/releaser'
 import chalk from 'chalk'
 import { exec as execOrig, execSync } from 'child_process'
-import fse from 'fs-extra'
 import minimist from 'minimist'
-import { fileURLToPath } from 'node:url'
 import path from 'path'
 import util from 'util'
 
-import type { PackageDetails } from './lib/getPackageDetails.js'
-
-import { getPackageDetails } from './lib/getPackageDetails.js'
-
-const execOpts: ExecSyncOptions = { stdio: 'inherit' }
-const execaOpts: execa.Options = { stdio: 'inherit' }
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const execOpts: ExecSyncOptions = { stdio: 'inherit', cwd: PROJECT_ROOT }
 
 const exec = util.promisify(execOrig)
 
@@ -39,10 +31,10 @@ async function main() {
     throw new Error('--dest is required')
   }
 
-  const resolvedDest = path.resolve(dest)
+  const resolvedDest = path.resolve(path.isAbsolute(dest) ? dest : path.join(PROJECT_ROOT, dest))
 
   const packageWhitelist = all
-    ? null
+    ? undefined
     : [
         'payload',
         'db-mongodb',
@@ -73,18 +65,18 @@ async function main() {
   const filtered = packageDetails.filter((p): p is Exclude<typeof p, null> => p !== null)
 
   if (!noBuild) {
-    execSync('pnpm build:all --output-logs=errors-only', { stdio: 'inherit' })
+    execSync('pnpm build:all --output-logs=errors-only', execOpts)
   }
 
   header(`\nOutputting ${filtered.length} packages...
 
 ${chalk.white.bold(listPackages(filtered))}`)
 
-  header(`\n📦 Packing all packages to ${dest}...`)
+  header(`\n📦 Packing all packages to ${resolvedDest}...`)
 
   await Promise.all(
     filtered.map(async (p) => {
-      await exec(`pnpm pack -C ${p.packagePath} --pack-destination ${resolvedDest}`)
+      await exec(`pnpm pack -C ${p.packagePath} --pack-destination ${resolvedDest}`, execOpts)
     }),
   )
 
