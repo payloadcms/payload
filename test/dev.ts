@@ -80,13 +80,13 @@ const app = nextImport({
 
 const handle = app.getRequestHandler()
 
-let resolveServer
+let resolveServer: () => void
 
-const serverPromise = new Promise((res) => (resolveServer = res))
+const serverPromise = new Promise<void>((res) => (resolveServer = res))
 
 void app.prepare().then(() => {
   createServer(async (req, res) => {
-    const parsedUrl = parse(req.url, true)
+    const parsedUrl = parse(req.url || '', true)
     await handle(req, res, parsedUrl)
   }).listen(port, () => {
     resolveServer()
