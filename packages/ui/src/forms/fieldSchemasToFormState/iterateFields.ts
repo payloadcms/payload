@@ -113,8 +113,6 @@ export const iterateFields = async ({
       parentSchemaPath,
     })
 
-    req.payload.logger.info(`fieldSchemasToFormState: ${path}`)
-
     if (!skipConditionChecks) {
       try {
         passesCondition = Boolean(

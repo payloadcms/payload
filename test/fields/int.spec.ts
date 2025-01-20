@@ -30,6 +30,7 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
+  collapsibleFieldsSlug,
   groupFieldsSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
@@ -2509,7 +2510,7 @@ describe('Fields', () => {
     it('show proper validation error message for fields nested in collapsible', async () => {
       await expect(async () =>
         payload.create({
-          collection: 'collapsible-fields',
+          collection: collapsibleFieldsSlug,
           data: {
             text: 'required',
             group: {

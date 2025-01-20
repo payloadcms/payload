@@ -81,6 +81,7 @@ export const promise = async ({
 
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
+  const parentPathSegments = parentPath ? parentPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
 
   if (fieldAffectsData(field)) {
@@ -154,8 +155,8 @@ export const promise = async ({
         const label = getTranslatedLabel(field?.label || field?.name, req.i18n)
 
         const fieldLabel =
-          Array.isArray(parentPath) && parentPath.length > 0
-            ? getFormattedLabel([...parentPath, label])
+          Array.isArray(parentPathSegments) && parentPathSegments.length > 0
+            ? getFormattedLabel(parentPathSegments.concat(label))
             : label
 
         errors.push({
