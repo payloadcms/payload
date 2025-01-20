@@ -10,11 +10,6 @@ import { useTableColumns } from '../index.js'
 
 const baseClass = 'default-cell'
 
-/**
- * Initial props sent from server to client - the collectionslug will then be
- * replaced by the collectionconfig on the client, so that we do not send the
- * entire collectionconfig to the client.
- */
 export type InitialDefaultCellComponentProps = {
   collectionSlug: string
 } & Omit<DefaultCellComponentProps, 'collectionConfig'>
