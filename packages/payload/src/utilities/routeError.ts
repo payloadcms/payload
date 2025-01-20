@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { Collection } from '../collections/config/types.js'
 import type { ErrorResult, SanitizedConfig } from '../config/types.js'

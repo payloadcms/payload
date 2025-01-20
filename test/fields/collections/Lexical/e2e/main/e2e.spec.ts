@@ -69,7 +69,7 @@ describe('lexicalMain', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -1278,6 +1278,18 @@ describe('lexicalMain', () => {
   })
 
   describe('localization', () => {
+    test('ensure lexical translations from other languages do not get sent to the client', async () => {
+      await navigateToLexicalFields()
+      // Now check if the html contains "Comience a escribir"
+
+      const htmlContent = await page.content()
+
+      // Check if the HTML contains "Comience a escribir"
+      expect(htmlContent).not.toContain('Comience a escribir')
+      expect(htmlContent).not.toContain('Beginne zu tippen oder')
+      expect(htmlContent).not.toContain('Cargando...')
+      expect(htmlContent).toContain('Start typing, or press')
+    })
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)
     })

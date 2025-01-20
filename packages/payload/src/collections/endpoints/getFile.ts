@@ -1,6 +1,6 @@
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 import path from 'path'
 
 import type { PayloadHandler } from '../../config/types.js'

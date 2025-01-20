@@ -686,7 +686,7 @@ describe('Versions', () => {
 
         expect(updateManyResult.docs).toHaveLength(0)
         expect(updateManyResult.errors).toStrictEqual([
-          { id: doc.id, message: 'The following field is invalid: title' },
+          { id: doc.id, message: 'The following field is invalid: Title' },
         ])
       })
     })
@@ -955,49 +955,46 @@ describe('Versions', () => {
           },
         })
 
-        for (let i = 0; i < 200; i++) {
-          payload.logger.info(`try ${i}`)
-          const writeAmount = 3
+        const writeAmount = 100
 
-          const promises = Array.from({ length: writeAmount }, async (_, i) => {
-            return new Promise((resolve) => {
-              // Add latency so updates aren't immediate after each other but still in parallel
-              setTimeout(() => {
-                payload
-                  .update({
-                    id: doc.id,
-                    collection: 'draft-posts',
-                    data: {},
-                    draft: true,
-                  })
-                  .then(resolve)
-                  .catch(resolve)
-              }, i * 5)
-            })
+        const promises = Array.from({ length: writeAmount }, async (_, i) => {
+          return new Promise((resolve) => {
+            // Add latency so updates aren't immediate after each other but still in parallel
+            setTimeout(() => {
+              payload
+                .update({
+                  id: doc.id,
+                  collection: 'draft-posts',
+                  data: {},
+                  draft: true,
+                })
+                .then(resolve)
+                .catch(resolve)
+            }, i * 5)
           })
+        })
 
-          await Promise.all(promises)
+        await Promise.all(promises)
 
-          const { docs } = await payload.findVersions({
-            collection: 'draft-posts',
-            where: {
-              and: [
-                {
-                  parent: {
-                    equals: doc.id,
-                  },
+        const { docs } = await payload.findVersions({
+          collection: 'draft-posts',
+          where: {
+            and: [
+              {
+                parent: {
+                  equals: doc.id,
                 },
-                {
-                  latest: {
-                    equals: true,
-                  },
+              },
+              {
+                latest: {
+                  equals: true,
                 },
-              ],
-            },
-          })
+              },
+            ],
+          },
+        })
 
-          expect(docs[0]).toBeDefined()
-        }
+        expect(docs[0]).toBeDefined()
       })
     })
   })
@@ -1945,6 +1942,94 @@ describe('Versions', () => {
       })
 
       expect(retrieved._status).toStrictEqual('draft')
+    })
+
+    it('should delete scheduled jobs after a document is deleted', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'my doc to publish in the future',
+          description: 'hello',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          type: 'publish',
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+        },
+      })
+
+      await payload.delete({
+        collection: draftCollectionSlug,
+        where: {
+          id: { equals: draft.id },
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          'input.doc.value': {
+            equals: draft.id,
+          },
+        },
+      })
+
+      expect(docs[0]).toBeUndefined()
+    })
+
+    it('should delete scheduled jobs after a document is deleted by ID', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'my doc to publish in the future',
+          description: 'hello',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toStrictEqual('draft')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+        input: {
+          type: 'publish',
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+        },
+      })
+
+      await payload.delete({
+        collection: draftCollectionSlug,
+        id: draft.id,
+      })
+
+      const { docs } = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          'input.doc.value': {
+            equals: draft.id,
+          },
+        },
+      })
+
+      expect(docs[0]).toBeUndefined()
     })
 
     it('should allow global scheduled publish', async () => {

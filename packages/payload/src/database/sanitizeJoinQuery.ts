@@ -74,7 +74,7 @@ export const sanitizeJoinQuery = async ({
           overrideAccess,
           req,
           // incoming where input, but we shouldn't validate generated from the access control.
-          where: deepCopyObjectSimple(joinQuery.where),
+          where: joinQuery.where,
         }),
       )
 

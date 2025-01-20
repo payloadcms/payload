@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 // This gets dynamically reassigned during compilation
 export let APIErrorName = 'APIError'

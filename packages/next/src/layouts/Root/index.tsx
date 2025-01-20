@@ -1,5 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
@@ -60,19 +60,18 @@ export const RootLayout = async ({
     ? 'RTL'
     : 'LTR'
 
-  const languageOptions = Object.entries(config.i18n.supportedLanguages || {}).reduce(
-    (acc, [language, languageConfig]) => {
-      if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
-        acc.push({
-          label: languageConfig.translations.general.thisLanguage,
-          value: language,
-        })
-      }
+  const languageOptions: LanguageOptions = Object.entries(
+    config.i18n.supportedLanguages || {},
+  ).reduce((acc, [language, languageConfig]) => {
+    if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
+      acc.push({
+        label: languageConfig.translations.general.thisLanguage,
+        value: language,
+      })
+    }
 
-      return acc
-    },
-    [],
-  )
+    return acc
+  }, [])
 
   async function switchLanguageServerAction(lang: string): Promise<void> {
     'use server'

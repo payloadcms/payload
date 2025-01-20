@@ -39,7 +39,7 @@ let serverURL: string
 describe('Locked Documents', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     globalUrl = new AdminUrlUtil(serverURL, 'menu')
     postsUrl = new AdminUrlUtil(serverURL, 'posts')

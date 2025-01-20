@@ -1038,7 +1038,7 @@ export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
-export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
+export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 export { createMigration } from './database/migrations/createMigration.js'
 export { getMigrations } from './database/migrations/getMigrations.js'
@@ -1112,6 +1112,7 @@ export type {
   UpdateVersion,
   UpdateVersionArgs,
   Upsert,
+  UpsertArgs,
 } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
