@@ -1,5 +1,7 @@
 'use client'
 
+import type { ClientCollectionConfig } from 'payload'
+
 import { useModal } from '@faceless-ui/modal'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { isImage } from 'payload/shared'
@@ -16,16 +18,21 @@ import { Pill } from '../../Pill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
-import { AddFilesView } from '../AddFilesView/index.js'
-import { useFormsManager } from '../FormsManager/index.js'
 import './index.scss'
+import { AddFilesView } from '../AddFilesView/index.js'
+import { EditManyBulkUploads } from '../EditMany/index.js'
+import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
 
 const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
 
 const baseClass = 'file-selections'
 
-export function FileSidebar() {
+export type FileSidebarProps = {
+  readonly collectionConfig: ClientCollectionConfig
+}
+
+export function FileSidebar({ collectionConfig }: FileSidebarProps) {
   const {
     activeIndex,
     addFiles,
@@ -106,6 +113,7 @@ export function FileSidebar() {
               </span>
               <ChevronIcon direction={showFiles ? 'down' : 'up'} />
             </Button>
+            <EditManyBulkUploads collection={collectionConfig} />
 
             <Drawer gutter={false} Header={null} slug={addMoreFilesDrawerSlug}>
               <AddFilesView

@@ -38,16 +38,16 @@ export function AddingFilesView() {
   const { user } = useAuth()
   const { openModal } = useModal()
 
-  const collection = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
 
   return (
     <div className={baseClass}>
-      <FileSidebar />
+      <FileSidebar collectionConfig={collectionConfig} />
 
       <div className={`${baseClass}__editView`}>
         <DrawerHeader
           onClose={() => openModal(discardBulkUploadModalSlug)}
-          title={getTranslation(collection.labels.singular, i18n)}
+          title={getTranslation(collectionConfig.labels.singular, i18n)}
         />
         {activeForm ? (
           <DocumentInfoProvider

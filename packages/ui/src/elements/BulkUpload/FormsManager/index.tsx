@@ -46,6 +46,7 @@ type FormsManagerContext = {
   }) => void
   readonly thumbnailUrls: string[]
   readonly totalErrorCount?: number
+  readonly updateForm: (index: number, formState: FormState) => void
 }
 
 const Context = React.createContext<FormsManagerContext>({
@@ -66,6 +67,7 @@ const Context = React.createContext<FormsManagerContext>({
   setFormTotalErrorCount: () => {},
   thumbnailUrls: [],
   totalErrorCount: 0,
+  updateForm: () => {},
 })
 
 const initialState: State = {
@@ -385,6 +387,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     [actionURL, activeIndex, forms, onSuccess, t, closeModal, drawerSlug],
   )
 
+  const updateForm = React.useCallback((index: number, formState: FormState) => {
+    dispatch({
+      type: 'UPDATE_FORM',
+      formState,
+      index,
+    })
+  }, [])
+
   React.useEffect(() => {
     if (!collectionSlug) {
       return
@@ -440,6 +450,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         setFormTotalErrorCount,
         thumbnailUrls: renderedThumbnails,
         totalErrorCount,
+        updateForm,
       }}
     >
       {isUploading && (
