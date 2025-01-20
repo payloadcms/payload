@@ -31,7 +31,7 @@ async function main() {
     throw new Error('--dest is required')
   }
 
-  const resolvedDest = path.resolve(dest)
+  const resolvedDest = path.resolve(path.isAbsolute(dest) ? dest : path.join(PROJECT_ROOT, dest))
 
   const packageWhitelist = all
     ? undefined
