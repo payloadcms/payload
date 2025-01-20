@@ -12,6 +12,11 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
     {
       slug: prefix ? `${prefix}Content` : 'content',
       interfaceName: prefix ? `${prefix}ContentBlock` : 'ContentBlock',
+      admin: {
+        components: {
+          Label: './collections/Blocks/components/CustomBlockLabel.tsx',
+        },
+      },
       fields: [
         {
           name: 'text',
