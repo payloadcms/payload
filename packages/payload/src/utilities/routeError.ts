@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { Collection } from '../collections/config/types.js'
 import type { ErrorResult, SanitizedConfig } from '../config/types.js'
@@ -22,7 +22,7 @@ export const routeError = async ({
   err: APIError
   req: PayloadRequest | Request
 }) => {
-  let payload = 'payload' in incomingReq && incomingReq?.payload
+  let payload = incomingReq && 'payload' in incomingReq && incomingReq?.payload
 
   if (!payload) {
     try {

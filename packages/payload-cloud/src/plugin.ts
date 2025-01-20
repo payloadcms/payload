@@ -128,7 +128,7 @@ export const payloadCloudPlugin =
       return config
     }
 
-    const oldAutoRunCopy = config.jobs.autoRun
+    const oldAutoRunCopy = config.jobs.autoRun ?? []
 
     const newAutoRun = async (payload: Payload) => {
       const instance = generateRandomString()

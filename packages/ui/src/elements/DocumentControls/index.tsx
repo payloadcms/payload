@@ -98,9 +98,9 @@ export const DocumentControls: React.FC<{
 
   const { config, getEntityConfig } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug: slug })
 
-  const globalConfig = getEntityConfig({ globalSlug: slug }) as ClientGlobalConfig
+  const globalConfig = getEntityConfig({ globalSlug: slug })
 
   const {
     admin: { dateFormat },

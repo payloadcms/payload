@@ -60,6 +60,8 @@ export type {
 } from './fields/Array.js'
 
 export type {
+  BlockRowLabelClientComponent,
+  BlockRowLabelServerComponent,
   BlocksFieldClientComponent,
   BlocksFieldClientProps,
   BlocksFieldDescriptionClientComponent,
@@ -453,6 +455,12 @@ export type RenderedField = {
   Field: React.ReactNode
   indexPath?: string
   initialSchemaPath?: string
+  /**
+   * @deprecated
+   * This is a legacy property that will be removed in v4.
+   * Please use `fieldIsSidebar(field)` from `payload` instead.
+   * Or check `field.admin.position === 'sidebar'` directly.
+   */
   isSidebar: boolean
   path: string
   schemaPath: string

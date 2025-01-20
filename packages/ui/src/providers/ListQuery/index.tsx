@@ -8,7 +8,6 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
-import { usePreferences } from '../Preferences/index.js'
 
 type ContextHandlers = {
   handlePageChange?: (page: number) => Promise<void>
@@ -20,7 +19,7 @@ type ContextHandlers = {
 
 export type ListQueryProps = {
   readonly children: React.ReactNode
-  readonly collectionSlug: string
+  readonly collectionSlug?: string
   readonly data: PaginatedDocs
   readonly defaultLimit?: number
   readonly defaultSort?: Sort
@@ -43,17 +42,14 @@ export const useListQuery = (): ListQueryContext => useContext(Context)
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
-  collectionSlug,
   data,
   defaultLimit,
   defaultSort,
   modifySearchParams,
   onQueryChange: onQueryChangeFromProps,
-  preferenceKey,
 }) => {
   'use no memo'
   const router = useRouter()
-  const { setPreference } = usePreferences()
   const rawSearchParams = useSearchParams()
   const searchParams = useMemo(() => parseSearchParams(rawSearchParams), [rawSearchParams])
 
@@ -176,7 +172,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       if (shouldUpdateQueryString) {
         setCurrentQuery(newQuery)
-        router.replace(`?${qs.stringify(newQuery)}`)
+        // Do not use router.replace here to avoid re-rendering on initial load
+        window.history.pushState(null, '', `?${qs.stringify(newQuery)}`)
       }
     }
   }, [defaultSort, defaultLimit, router, modifySearchParams])

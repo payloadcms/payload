@@ -1,6 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
+  ClientComponentProps,
   ClientField,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
@@ -9,6 +10,7 @@ import type {
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
+  ServerComponentProps,
   StaticLabel,
 } from 'payload'
 
@@ -164,8 +166,29 @@ export const buildColumnState = (args: Args): Column[] => {
         ? _field.admin.components.Label
         : undefined
 
+    // TODO: customComponent will be optional in v4
+    const clientProps: Omit<ClientComponentProps, 'customComponents'> = {
+      field,
+    }
+
+    const serverProps: Pick<
+      ServerComponentProps,
+      'clientField' | 'collectionSlug' | 'field' | 'i18n' | 'payload'
+    > = {
+      clientField: field,
+      collectionSlug: collectionConfig.slug,
+      field: _field,
+      i18n,
+      payload,
+    }
+
     const CustomLabel = CustomLabelToRender
-      ? RenderServerComponent({ Component: CustomLabelToRender, importMap: payload.importMap })
+      ? RenderServerComponent({
+          clientProps,
+          Component: CustomLabelToRender,
+          importMap: payload.importMap,
+          serverProps,
+        })
       : undefined
 
     const fieldAffectsDataSubFields =
@@ -189,12 +212,6 @@ export const buildColumnState = (args: Args): Column[] => {
       customCellProps,
       field,
       rowData: undefined,
-    }
-
-    const serverProps: Pick<DefaultServerCellComponentProps, 'field' | 'i18n' | 'payload'> = {
-      field: _field,
-      i18n,
-      payload,
     }
 
     const column: Column = {

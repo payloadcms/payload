@@ -89,6 +89,6 @@ export default buildConfig({
         return authHeader === `Bearer ${process.env.CRON_SECRET}`
       },
     },
-    tasks: []
+    tasks: [],
   },
 })

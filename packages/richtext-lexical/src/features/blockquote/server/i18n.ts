@@ -89,7 +89,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Blockcitat',
   },
   th: {
-    label: '[SKIPPED]',
+    label: 'ข้อความอ้างอิง',
   },
   tr: {
     label: 'Alıntı',

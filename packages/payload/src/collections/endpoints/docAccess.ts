@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
@@ -7,7 +7,7 @@ import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { docAccessOperation } from '../operations/docAccess.js'
 
 export const docAccessHandler: PayloadHandler = async (req) => {
-  const { id, collection } = getRequestCollectionWithID(req)
+  const { id, collection } = getRequestCollectionWithID(req, { optionalID: true })
   const result = await docAccessOperation({
     id,
     collection,

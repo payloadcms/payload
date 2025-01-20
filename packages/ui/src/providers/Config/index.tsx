@@ -1,24 +1,40 @@
+/* eslint-disable perfectionist/sort-object-types  */ // Need to disable this rule because the order of the overloads is important
 'use client'
-import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientConfig,
+  ClientGlobalConfig,
+  CollectionSlug,
+  GlobalSlug,
+} from 'payload'
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+
+type GetEntityConfigFn = {
+  // Overload #1: collectionSlug only
+  // @todo remove "{} |" in 4.0, which would be a breaking change
+  (args: { collectionSlug: {} | CollectionSlug; globalSlug?: never }): ClientCollectionConfig
+
+  // Overload #2: globalSlug only
+  // @todo remove "{} |" in 4.0, which would be a breaking change
+  (args: { collectionSlug?: never; globalSlug: {} | GlobalSlug }): ClientGlobalConfig
+
+  // Overload #3: both/none (fall back to union | null)
+  (args: {
+    collectionSlug?: {} | CollectionSlug
+    globalSlug?: {} | GlobalSlug
+  }): ClientCollectionConfig | ClientGlobalConfig | null
+}
 
 export type ClientConfigContext = {
   config: ClientConfig
-  getEntityConfig: (args: {
-    collectionSlug?: string
-    globalSlug?: string
-  }) => ClientCollectionConfig | ClientGlobalConfig | null
+  /**
+   * Get a collection or global config by its slug. This is preferred over
+   * using `config.collections.find` or `config.globals.find`, because
+   * getEntityConfig uses a lookup map for O(1) lookups.
+   */
+  getEntityConfig: GetEntityConfigFn
   setConfig: (config: ClientConfig) => void
-}
-
-export type EntityConfigContext = {
-  collectionConfig?: ClientCollectionConfig
-  globalConfig?: ClientGlobalConfig
-  setEntityConfig: (args: {
-    collectionConfig?: ClientCollectionConfig | null
-    globalConfig?: ClientGlobalConfig | null
-  }) => void
 }
 
 const RootConfigContext = createContext<ClientConfigContext | undefined>(undefined)
@@ -35,19 +51,32 @@ export const ConfigProvider: React.FC<{
     setConfig(configFromProps)
   }, [configFromProps])
 
-  const getEntityConfig = useCallback(
-    ({ collectionSlug, globalSlug }: { collectionSlug?: string; globalSlug?: string }) => {
-      if (collectionSlug) {
-        return config.collections.find((collection) => collection.slug === collectionSlug)
-      }
+  // Build lookup maps for collections and globals so we can do O(1) lookups by slug
+  const { collectionsBySlug, globalsBySlug } = useMemo(() => {
+    const collectionsBySlug: Record<string, ClientCollectionConfig> = {}
+    const globalsBySlug: Record<string, ClientGlobalConfig> = {}
 
-      if (globalSlug) {
-        return config.globals.find((global) => global.slug === globalSlug)
-      }
+    for (const collection of config.collections) {
+      collectionsBySlug[collection.slug] = collection
+    }
+    for (const global of config.globals) {
+      globalsBySlug[global.slug] = global
+    }
 
-      return null
+    return { collectionsBySlug, globalsBySlug }
+  }, [config])
+
+  const getEntityConfig = useCallback<GetEntityConfigFn>(
+    (args) => {
+      if ('collectionSlug' in args) {
+        return collectionsBySlug[args.collectionSlug] ?? null
+      }
+      if ('globalSlug' in args) {
+        return globalsBySlug[args.globalSlug] ?? null
+      }
+      return null as any
     },
-    [config],
+    [collectionsBySlug, globalsBySlug],
   )
 
   return (

@@ -1,4 +1,4 @@
-import { cn } from 'src/utilities/cn'
+import { cn } from '@/utilities/ui'
 import * as React from 'react'
 
 const Input: React.FC<

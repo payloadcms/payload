@@ -1,5 +1,6 @@
 import type {
   SerializedLineBreakNode as _SerializedLineBreakNode,
+  SerializedTabNode as _SerializedTabNode,
   SerializedTextNode as _SerializedTextNode,
   SerializedEditorState,
   SerializedElementNode,
@@ -53,6 +54,14 @@ export type SerializedTextNode = Spread<
     type: 'text'
   },
   _SerializedTextNode
+>
+
+export type SerializedTabNode = Spread<
+  {
+    children?: never // required so that our typed editor state doesn't automatically add children
+    type: 'tab'
+  },
+  _SerializedTabNode
 >
 
 export type SerializedLineBreakNode = Spread<

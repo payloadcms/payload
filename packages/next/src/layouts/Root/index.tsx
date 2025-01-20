@@ -1,5 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui'
@@ -54,25 +54,24 @@ export const RootLayout = async ({
 
   const payload = await getPayload({ config, importMap })
 
-  const { i18n, permissions, user } = await initReq(config)
+  const { permissions, req } = await initReq(config)
 
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
     : 'LTR'
 
-  const languageOptions = Object.entries(config.i18n.supportedLanguages || {}).reduce(
-    (acc, [language, languageConfig]) => {
-      if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
-        acc.push({
-          label: languageConfig.translations.general.thisLanguage,
-          value: language,
-        })
-      }
+  const languageOptions: LanguageOptions = Object.entries(
+    config.i18n.supportedLanguages || {},
+  ).reduce((acc, [language, languageConfig]) => {
+    if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
+      acc.push({
+        label: languageConfig.translations.general.thisLanguage,
+        value: language,
+      })
+    }
 
-      return acc
-    },
-    [],
-  )
+    return acc
+  }, [])
 
   async function switchLanguageServerAction(lang: string): Promise<void> {
     'use server'
@@ -84,17 +83,16 @@ export const RootLayout = async ({
     })
   }
 
-  const navPrefs = await getNavPrefs({ payload, user })
+  const navPrefs = await getNavPrefs({ payload, user: req.user })
 
   const clientConfig = getClientConfig({
     config,
-    i18n,
+    i18n: req.i18n,
     importMap,
   })
 
   const locale = await getRequestLocale({
-    payload,
-    user,
+    req,
   })
 
   return (
@@ -110,7 +108,7 @@ export const RootLayout = async ({
       <body>
         <RootProvider
           config={clientConfig}
-          dateFNSKey={i18n.dateFNSKey}
+          dateFNSKey={req.i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
@@ -120,8 +118,8 @@ export const RootLayout = async ({
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
-          translations={i18n.translations}
-          user={user}
+          translations={req.i18n.translations}
+          user={req.user}
         >
           {Array.isArray(config.admin?.components?.providers) &&
           config.admin?.components?.providers.length > 0 ? (
@@ -129,10 +127,10 @@ export const RootLayout = async ({
               importMap={payload.importMap}
               providers={config.admin?.components?.providers}
               serverProps={{
-                i18n,
+                i18n: req.i18n,
                 payload,
                 permissions,
-                user,
+                user: req.user,
               }}
             >
               {children}

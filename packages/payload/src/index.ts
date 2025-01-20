@@ -77,6 +77,7 @@ import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
+import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -580,9 +581,9 @@ export class BasePayload {
       config: this.config.globals,
     }
 
-    this.config.collections.forEach((collection) => {
+    for (const collection of this.config.collections) {
       let customIDType = undefined
-      const findCustomID: TraverseFieldsCallback = ({ field, next }) => {
+      const findCustomID: TraverseFieldsCallback = ({ field }) => {
         if (
           ['array', 'blocks', 'group'].includes(field.type) ||
           (field.type === 'tab' && 'name' in field)
@@ -606,7 +607,7 @@ export class BasePayload {
         config: collection,
         customIDType,
       }
-    })
+    }
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
@@ -706,15 +707,21 @@ export class BasePayload {
       })
     }
 
-    if (!options.disableOnInit) {
-      if (typeof options.onInit === 'function') {
-        await options.onInit(this)
+    try {
+      if (!options.disableOnInit) {
+        if (typeof options.onInit === 'function') {
+          await options.onInit(this)
+        }
+        if (typeof this.config.onInit === 'function') {
+          await this.config.onInit(this)
+        }
       }
-      if (typeof this.config.onInit === 'function') {
-        await this.config.onInit(this)
-      }
+    } catch (error) {
+      this.logger.error({ err: error }, 'Error running onInit function')
+      throw error
     }
-    if (this.config.jobs.autoRun) {
+
+    if (this.config.jobs.autoRun && !isNextBuild()) {
       const DEFAULT_CRON = '* * * * *'
       const DEFAULT_LIMIT = 10
 
@@ -1031,7 +1038,7 @@ export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
-export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
+export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 export { createMigration } from './database/migrations/createMigration.js'
 export { getMigrations } from './database/migrations/getMigrations.js'
@@ -1105,6 +1112,7 @@ export type {
   UpdateVersion,
   UpdateVersionArgs,
   Upsert,
+  UpsertArgs,
 } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {

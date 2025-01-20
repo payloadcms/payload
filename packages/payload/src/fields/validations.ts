@@ -166,7 +166,7 @@ export const email: EmailFieldValidation = (
   {
     collectionSlug,
     req: {
-      payload: { config },
+      payload: { collections },
       t,
     },
     required,
@@ -174,7 +174,7 @@ export const email: EmailFieldValidation = (
   },
 ) => {
   if (collectionSlug) {
-    const collection = config.collections.find(({ slug }) => slug === collectionSlug)
+    const collection = collections?.[collectionSlug]?.config
 
     if (
       collection.auth.loginWithUsername &&
@@ -201,7 +201,7 @@ export const username: UsernameFieldValidation = (
   {
     collectionSlug,
     req: {
-      payload: { config },
+      payload: { collections, config },
       t,
     },
     required,
@@ -211,7 +211,7 @@ export const username: UsernameFieldValidation = (
   let maxLength: number
 
   if (collectionSlug) {
-    const collection = config.collections.find(({ slug }) => slug === collectionSlug)
+    const collection = collections?.[collectionSlug]?.config
 
     if (
       collection.auth.loginWithUsername &&

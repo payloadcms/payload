@@ -22,6 +22,7 @@ import {
   $isRangeSelection,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
+  getDOMSelection,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
@@ -40,6 +41,12 @@ import { $isAutoLinkNode } from '../../../../nodes/AutoLinkNode.js'
 import { $createLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
 
+function preventDefault(
+  event: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLElement>,
+): void {
+  event.preventDefault()
+}
+
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
   const [editor] = useLexicalComposerContext()
   // TO-DO: There are several states that should not be state, because they
@@ -55,7 +62,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     uuid,
   } = useEditorConfigContext()
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const { i18n, t } = useTranslation<object, 'lexical:link:loadingWithEllipsis'>()
 
@@ -143,7 +150,9 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         }`,
       )
 
-      const relatedField = config.collections.find((coll) => coll.slug === fields?.doc?.relationTo)
+      const relatedField = fields?.doc?.relationTo
+        ? getEntityConfig({ collectionSlug: fields?.doc?.relationTo })
+        : undefined
       if (!relatedField) {
         // Usually happens if the user removed all default fields. In this case, we let them specify the label or do not display the label at all.
         // label could be a virtual field the user added. This is useful if they want to use the link feature for things other than links.
@@ -203,7 +212,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     }
 
     const editorElem = editorRef.current
-    const nativeSelection = window.getSelection()
+    const nativeSelection = getDOMSelection(editor._window)
     const { activeElement } = document
 
     if (editorElem === null) {
@@ -349,12 +358,11 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               <button
                 aria-label="Edit link"
                 className="link-edit"
-                onClick={() => {
+                onClick={(event) => {
+                  event.preventDefault()
                   toggleDrawer()
                 }}
-                onMouseDown={(event) => {
-                  event.preventDefault()
-                }}
+                onMouseDown={preventDefault}
                 tabIndex={0}
                 type="button"
               >
@@ -367,9 +375,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
                   onClick={() => {
                     editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
                   }}
-                  onMouseDown={(event) => {
-                    event.preventDefault()
-                  }}
+                  onMouseDown={preventDefault}
                   tabIndex={0}
                   type="button"
                 >

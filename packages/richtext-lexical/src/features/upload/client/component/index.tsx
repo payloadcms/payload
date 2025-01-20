@@ -64,10 +64,10 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
   const uploadRef = useRef<HTMLDivElement | null>(null)
   const { uuid } = useEditorConfigContext()
@@ -82,8 +82,8 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
-  const [relatedCollection] = useState<ClientCollectionConfig>(
-    () => collections.find((coll) => coll.slug === relationTo)!,
+  const [relatedCollection] = useState<ClientCollectionConfig>(() =>
+    getEntityConfig({ collectionSlug: relationTo }),
   )
 
   const componentID = useId()

@@ -88,6 +88,13 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title: string;
+  D1?: {
+    D2?: {
+      D3?: {
+        D4?: string | null;
+      };
+    };
+  };
   hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
   arrayWithIDs?:
@@ -440,6 +447,19 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  D1?:
+    | T
+    | {
+        D2?:
+          | T
+          | {
+              D3?:
+                | T
+                | {
+                    D4?: T;
+                  };
+            };
+      };
   hasTransaction?: T;
   throwAfterChange?: T;
   arrayWithIDs?:
