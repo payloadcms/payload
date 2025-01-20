@@ -120,6 +120,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
               <FileCell
                 cellData={label}
                 collectionConfig={relatedCollection}
+                collectionSlug={relatedCollection.slug}
                 customCellProps={customCellContext}
                 field={field}
                 rowData={document}
