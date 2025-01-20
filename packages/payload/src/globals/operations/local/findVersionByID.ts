@@ -1,5 +1,18 @@
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
+import type {
+  AllowedDepth,
+  DefaultDepth,
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDepthInternal,
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+} from '../../../types/index.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -7,9 +20,9 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionByIDOperation } from '../findVersionByID.js'
 
-export type Options<TSlug extends GlobalSlug> = {
+export type Options<TSlug extends GlobalSlug, TDepth extends AllowedDepth = DefaultDepth> = {
   context?: RequestContext
-  depth?: number
+  depth?: TDepth
   disableErrors?: boolean
   fallbackLocale?: false | TypedLocale
   id: string
@@ -24,10 +37,13 @@ export type Options<TSlug extends GlobalSlug> = {
 }
 
 // eslint-disable-next-line no-restricted-exports
-export default async function findVersionByIDLocal<TSlug extends GlobalSlug>(
+export default async function findVersionByIDLocal<
+  TSlug extends GlobalSlug,
+  TDepth extends AllowedDepth = DefaultDepth,
+>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<TypeWithVersion<DataFromGlobalSlug<TSlug>>> {
+): Promise<TypeWithVersion<ApplyDepthInternal<DataFromGlobalSlug<TSlug>, TDepth>>> {
   const {
     id,
     slug: globalSlug,

@@ -36,6 +36,14 @@ export interface Config {
     tasks: unknown;
     workflows: unknown;
   };
+  /**
+   * typescript.typeSafeDepth is not enabled
+   */
+  depth: {
+    allowed: number;
+    decremented: number[];
+    default: number;
+  };
 }
 export interface UserAuthOperations {
   forgotPassword: {

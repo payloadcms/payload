@@ -1,7 +1,15 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
+  AllowedDepth,
+  DefaultDepth,
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -14,10 +22,14 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+export type Options<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   context?: RequestContext
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-  depth?: number
+  depth?: TDepth
   draft?: boolean
   fallbackLocale?: false | TypedLocale
   locale?: 'all' | TypedLocale
@@ -35,10 +47,11 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
 export default async function updateLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect>,
-): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
+): Promise<ApplyDepthInternal<TransformGlobalWithSelect<TSlug, TSelect>, TDepth>> {
   const {
     slug: globalSlug,
     data,

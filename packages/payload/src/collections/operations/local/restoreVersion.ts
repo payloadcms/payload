@@ -1,18 +1,31 @@
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
+import type {
+  AllowedDepth,
+  CollectionSlug,
+  DefaultDepth,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDepthInternal,
+  Document,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+} from '../../../types/index.js'
 import type { DataFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type Options<TSlug extends CollectionSlug, TDepth extends AllowedDepth = DefaultDepth> = {
   collection: TSlug
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
-  depth?: number
+  depth?: TDepth
   draft?: boolean
   fallbackLocale?: false | TypedLocale
   id: string
@@ -25,10 +38,13 @@ export type Options<TSlug extends CollectionSlug> = {
   user?: Document
 }
 
-export default async function restoreVersionLocal<TSlug extends CollectionSlug>(
+export default async function restoreVersionLocal<
+  TSlug extends CollectionSlug,
+  TDepth extends AllowedDepth = DefaultDepth,
+>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<DataFromCollectionSlug<TSlug>> {
+): Promise<ApplyDepthInternal<DataFromCollectionSlug<TSlug>, TDepth>> {
   const {
     id,
     collection: collectionSlug,

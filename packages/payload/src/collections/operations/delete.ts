@@ -1,7 +1,7 @@
 import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { AllowedDepth, CollectionSlug, DefaultDepth } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type {
   BeforeOperationHook,
@@ -42,9 +42,10 @@ export type Arguments = {
 export const deleteOperation = async <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   incomingArgs: Arguments,
-): Promise<BulkOperationResult<TSlug, TSelect>> => {
+): Promise<BulkOperationResult<TSlug, TSelect, TDepth>> => {
   let args = incomingArgs
 
   try {
@@ -304,7 +305,7 @@ export const deleteOperation = async <
       await commitTransaction(req)
     }
 
-    return result
+    return result as BulkOperationResult<TSlug, TSelect, TDepth>
   } catch (error: unknown) {
     await killTransaction(args.req)
     throw error

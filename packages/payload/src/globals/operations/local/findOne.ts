@@ -1,5 +1,13 @@
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
+  AllowedDepth,
+  DefaultDepth,
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -12,9 +20,13 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOneOperation } from '../findOne.js'
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+export type Options<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
+> = {
   context?: RequestContext
-  depth?: number
+  depth?: TDepth
   draft?: boolean
   fallbackLocale?: false | TypedLocale
   includeLockStatus?: boolean
@@ -31,10 +43,11 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
 export default async function findOneLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
   options: Options<TSlug, TSelect>,
-): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
+): Promise<ApplyDepthInternal<TransformGlobalWithSelect<TSlug, TSelect>, TDepth>> {
   const {
     slug: globalSlug,
     depth,

@@ -713,6 +713,13 @@ export function entityToJSONSchema(
     jsonSchema.description = entityDescription
   }
 
+  if (config.typescript?.typeSafeDepth) {
+    jsonSchema.properties.__collection = {
+      type: 'string',
+      enum: [entity.slug],
+    }
+  }
+
   return jsonSchema
 }
 
@@ -1086,11 +1093,13 @@ export function configToJSONSchema(
     ],
     title: 'Config',
   }
+
   if (jobsSchemas.definitions?.size) {
     for (const [key, value] of jobsSchemas.definitions) {
       jsonSchema.definitions[key] = value
     }
   }
+
   if (jobsSchemas.properties) {
     jsonSchema.properties.jobs = {
       type: 'object',
@@ -1099,6 +1108,59 @@ export function configToJSONSchema(
       required: ['tasks', 'workflows'],
     }
   }
+
+  if (config.typescript?.typeSafeDepth) {
+    jsonSchema.properties.depth = {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        allowed: {
+          type: 'number',
+          enum: Array.from({ length: config.maxDepth + 1 }, (_, i) => i),
+        },
+        decremented: {
+          type: 'array',
+          items: [
+            { type: 'null' },
+            ...Array.from({ length: config.maxDepth + 1 }, (_, i) => ({
+              type: 'number',
+              enum: [i],
+            })),
+          ],
+          maxItems: config.maxDepth + 1,
+          minItems: config.maxDepth + 1,
+        },
+        default: {
+          type: 'number',
+          enum: [config.defaultDepth],
+        },
+      },
+      required: ['allowed', 'default', 'decremented'],
+    }
+  } else {
+    jsonSchema.properties.depth = {
+      type: 'object',
+      additionalProperties: false,
+      description: 'typescript.typeSafeDepth is not enabled',
+      properties: {
+        allowed: {
+          type: 'number',
+        },
+        decremented: {
+          type: 'array',
+          items: {
+            type: 'number',
+          },
+        },
+        default: {
+          type: 'number',
+        },
+      },
+      required: ['allowed', 'default', 'decremented'],
+    }
+  }
+
+  ;(jsonSchema.required as string[]).push('depth')
 
   if (config?.typescript?.schema?.length) {
     for (const schema of config.typescript.schema) {

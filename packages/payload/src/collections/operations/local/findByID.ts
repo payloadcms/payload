@@ -1,6 +1,8 @@
 /* eslint-disable no-restricted-exports */
 import type {
+  AllowedDepth,
   CollectionSlug,
+  DefaultDepth,
   JoinQuery,
   Payload,
   RequestContext,
@@ -8,6 +10,7 @@ import type {
   TypedLocale,
 } from '../../../index.js'
 import type {
+  ApplyDepthInternal,
   ApplyDisableErrors,
   Document,
   PayloadRequest,
@@ -24,6 +27,7 @@ export type Options<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
+  TDepth extends AllowedDepth = DefaultDepth,
 > = {
   collection: TSlug
   /**
@@ -31,7 +35,7 @@ export type Options<
    */
   context?: RequestContext
   currentDepth?: number
-  depth?: number
+  depth?: TDepth
   disableErrors?: TDisableErrors
   draft?: boolean
   fallbackLocale?: false | TypedLocale
@@ -51,10 +55,16 @@ export default async function findByIDLocal<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDepth extends AllowedDepth = DefaultDepth,
 >(
   payload: Payload,
   options: Options<TSlug, TDisableErrors, TSelect>,
-): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> {
+): Promise<
+  ApplyDisableErrors<
+    ApplyDepthInternal<TransformCollectionWithSelect<TSlug, TSelect>, TDepth>,
+    TDisableErrors
+  >
+> {
   const {
     id,
     collection: collectionSlug,

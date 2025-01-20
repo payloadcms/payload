@@ -1,7 +1,15 @@
 /* eslint-disable no-restricted-exports */
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
+  AllowedDepth,
+  DefaultDepth,
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
+import type {
+  ApplyDepthInternal,
   Document,
   PayloadRequest,
   PopulateType,
@@ -16,9 +24,9 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionsOperation } from '../findVersions.js'
 
-export type Options<TSlug extends GlobalSlug> = {
+export type Options<TSlug extends GlobalSlug, TDepth extends AllowedDepth = DefaultDepth> = {
   context?: RequestContext
-  depth?: number
+  depth?: TDepth
   fallbackLocale?: false | TypedLocale
   limit?: number
   locale?: 'all' | TypedLocale
@@ -34,10 +42,13 @@ export type Options<TSlug extends GlobalSlug> = {
   where?: Where
 }
 
-export default async function findVersionsLocal<TSlug extends GlobalSlug>(
+export default async function findVersionsLocal<
+  TSlug extends GlobalSlug,
+  TDepth extends AllowedDepth = DefaultDepth,
+>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<TSlug>>>> {
+): Promise<PaginatedDocs<TypeWithVersion<ApplyDepthInternal<DataFromGlobalSlug<TSlug>, TDepth>>>> {
   const {
     slug: globalSlug,
     depth,

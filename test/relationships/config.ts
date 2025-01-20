@@ -539,5 +539,7 @@ export default buildConfigWithDefaults({
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+    // Uncomment this when/if we enable it by default
+    // typeSafeDepth: false,
   },
 })

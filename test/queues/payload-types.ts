@@ -70,6 +70,14 @@ export interface Config {
       subTaskFails: WorkflowSubTaskFails;
     };
   };
+  /**
+   * typescript.typeSafeDepth is not enabled
+   */
+  depth: {
+    allowed: number;
+    decremented: number[];
+    default: number;
+  };
 }
 export interface UserAuthOperations {
   forgotPassword: {
