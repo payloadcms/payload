@@ -50,13 +50,13 @@ export const productMousepad: Partial<Product> = {
   gallery: ['{{IMAGE_1}}', '{{IMAGE_2}}', '{{IMAGE_3}}'],
   info: {
     price: {
-      amount: 1999,
+      amount: 2999,
       currency: 'usd',
     },
     productName: 'Payload Cup Whites',
   },
   categories: ['{{CATEGORY_1}}'],
-  price: 1999,
-  stripeProductID: 'prod_QCbCABrJiPGU1k',
+  price: 2999,
+  stripeProductID: 'prod_Rd19g69yRRN50q',
   title: 'Mouse pad',
 }
