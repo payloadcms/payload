@@ -10,11 +10,17 @@ To spin up this example locally, follow these steps:
 
 - `npx create-payload-app --example multi-tenant`
 
-2. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+2. `cp .env.example .env` to copy the example environment variables
+
+3. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
    - Press `y` when prompted to seed the database
-3. `open http://localhost:3000` to access the home page
-4. `open http://localhost:3000/admin` to access the admin panel
-   - Login with email `demo@payloadcms.com` and password `demo`
+4. `open http://localhost:3000` to access the home page
+5. `open http://localhost:3000/admin` to access the admin panel
+
+### Default users
+
+The seed script seeds 3 tenants.
+Login with email `demo@payloadcms.com` and password `demo`
 
 ## How it works
 
@@ -40,13 +46,13 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
   **Domain-based Tenant Setting**:
 
-  This example also supports domain-based tenant selection, where tenants can be associated with a specific domain. If a tenant is associated with a domain (e.g., `gold.localhost.com:3000`), when a user logs in from that domain, they will be automatically scoped to the matching tenant. This is accomplished through an optional `afterLogin` hook that sets a `payload-tenant` cookie based on the domain.
+  This example also supports domain-based tenant selection, where tenants can be associated with a specific domain. If a tenant is associated with a domain (e.g., `gold.test:3000`), when a user logs in from that domain, they will be automatically scoped to the matching tenant. This is accomplished through an optional `afterLogin` hook that sets a `payload-tenant` cookie based on the domain.
 
-  The seed script seeds 3 tenants, for the domain portion of the example to function properly you will need to add the following entries to your systems `/etc/hosts` file:
+For the domain portion of the example to function properly, you will need to add the following entries to your system's `/etc/hosts` file:
 
-  - gold.localhost.com:3000
-  - silver.localhost.com:3000
-  - bronze.localhost.com:3000
+- gold.test:3000
+- silver.test:3000
+- bronze.test:3000
 
 - #### Pages
 
