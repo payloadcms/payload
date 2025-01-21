@@ -38,6 +38,7 @@ export const buildInitialFormState = (fields: FormFieldBlock[]) => {
         [field.name]: '',
       }
     }
-    throw new Error('invalid blocktype')
+
+    return initialSchema
   }, {})
 }
