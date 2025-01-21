@@ -252,17 +252,7 @@ export const promise = async ({
 
     case 'tabs': {
       field.tabs.forEach(async (tab, tabIndex) => {
-        let tabSiblingData = siblingData
-        let tabSiblingDoc = siblingDoc
-        let tabPreviousSiblingDoc = siblingDoc
-
         const isNamedTab = tabHasName(tab)
-
-        if (isNamedTab) {
-          tabSiblingData = (siblingData[tab.name] as JsonObject) ?? {}
-          tabSiblingDoc = (siblingDoc[tab.name] as JsonObject) ?? {}
-          tabPreviousSiblingDoc = (previousDoc[tab.name] as JsonObject) ?? {}
-        }
 
         const {
           indexPath: tabIndexPath,
@@ -291,10 +281,14 @@ export const promise = async ({
           parentPath: isNamedTab ? tabPath : parentPath,
           parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
           previousDoc,
-          previousSiblingDoc: { ...tabPreviousSiblingDoc },
+          previousSiblingDoc: isNamedTab
+            ? ((previousDoc[tab.name] as JsonObject) ?? {})
+            : previousSiblingDoc || {},
           req,
-          siblingData: tabSiblingData || {},
-          siblingDoc: { ...tabSiblingDoc },
+          siblingData: isNamedTab
+            ? ((siblingData[tab.name] as JsonObject) ?? {})
+            : siblingData || {},
+          siblingDoc: isNamedTab ? ((siblingDoc[tab.name] as JsonObject) ?? {}) : siblingDoc || {},
         })
       })
 

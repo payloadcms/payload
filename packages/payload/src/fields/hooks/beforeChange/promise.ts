@@ -421,10 +421,6 @@ export const promise = async ({
 
     case 'tabs': {
       field.tabs.forEach(async (tab, tabIndex) => {
-        let tabSiblingData = siblingData
-        let tabSiblingDoc = siblingDoc
-        let tabSiblingDocWithLocales = siblingDocWithLocales
-
         const isNamedTab = tabHasName(tab)
 
         if (isNamedTab) {
@@ -439,10 +435,6 @@ export const promise = async ({
           if (typeof siblingDocWithLocales[tab.name] !== 'object') {
             siblingDocWithLocales[tab.name] = {}
           }
-
-          tabSiblingData = siblingData[tab.name] as JsonObject
-          tabSiblingDoc = siblingDoc[tab.name] as JsonObject
-          tabSiblingDocWithLocales = siblingDocWithLocales[tab.name] as JsonObject
         }
 
         const {
@@ -476,9 +468,11 @@ export const promise = async ({
           parentPath: isNamedTab ? tabPath : parentPath,
           parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
           req,
-          siblingData: tabSiblingData,
-          siblingDoc: tabSiblingDoc,
-          siblingDocWithLocales: tabSiblingDocWithLocales,
+          siblingData: isNamedTab ? (siblingData[tab.name] as JsonObject) : siblingData,
+          siblingDoc: isNamedTab ? (siblingDoc[tab.name] as JsonObject) : siblingDoc,
+          siblingDocWithLocales: isNamedTab
+            ? (siblingDocWithLocales[tab.name] as JsonObject)
+            : siblingDocWithLocales,
           skipValidation: skipValidationFromHere,
         })
       })
