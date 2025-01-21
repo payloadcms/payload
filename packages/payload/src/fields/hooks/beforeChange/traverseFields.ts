@@ -3,7 +3,7 @@ import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
-import type { Field } from '../../config/types.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
@@ -21,7 +21,7 @@ type Args = {
    */
   docWithLocales: JsonObject
   errors: ValidationFieldError[]
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
@@ -92,6 +92,7 @@ export const traverseFields = async ({
         docWithLocales,
         errors,
         field,
+        fieldIndex,
         global,
         indexPath,
         mergeLocaleActions,

@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field } from '../../config/types.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
@@ -12,7 +12,7 @@ type Args = {
   context: RequestContext
   data: JsonObject
   doc: JsonObject
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   parentIndexPath: string
@@ -60,6 +60,7 @@ export const traverseFields = async ({
         data,
         doc,
         field,
+        fieldIndex,
         global,
         indexPath,
         operation,

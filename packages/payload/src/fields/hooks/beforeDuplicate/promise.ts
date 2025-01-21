@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field, FieldHookArgs } from '../../config/types.js'
+import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
@@ -12,7 +12,8 @@ type Args<T> = {
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   doc: T
-  field: Field
+  field: Field | TabAsField
+  fieldIndex: number
   id?: number | string
   indexPath: string
   overrideAccess: boolean
@@ -31,8 +32,10 @@ export const promise = async <T>({
   context,
   doc,
   field,
+  fieldIndex,
   indexPath,
   overrideAccess,
+  parentIndexPath,
   parentPath,
   parentSchemaPath,
   path,
@@ -153,6 +156,7 @@ export const promise = async <T>({
               }
               break
             }
+
             case 'blocks': {
               const rows = fieldData[locale]
 
@@ -182,6 +186,7 @@ export const promise = async <T>({
                   )
                 })
               }
+
               break
             }
 
@@ -203,6 +208,41 @@ export const promise = async <T>({
               )
 
               break
+            }
+
+            case 'tab': {
+              const isNamedTab = tabHasName(field)
+
+              const {
+                indexPath: tabIndexPath,
+                path: tabPath,
+                schemaPath: tabSchemaPath,
+              } = getFieldPaths({
+                field: {
+                  ...field,
+                  type: 'tab',
+                },
+                index: fieldIndex,
+                parentIndexPath: indexPath,
+                parentPath,
+                parentSchemaPath,
+              })
+
+              promises.push(
+                traverseFields({
+                  id,
+                  collection,
+                  context,
+                  doc,
+                  fields: field.fields,
+                  overrideAccess,
+                  parentIndexPath: isNamedTab ? '' : tabIndexPath,
+                  parentPath: isNamedTab ? tabPath : parentPath,
+                  parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+                  req,
+                  siblingDoc: fieldData[locale],
+                }),
+              )
             }
           }
         }
@@ -238,6 +278,7 @@ export const promise = async <T>({
             })
             await Promise.all(promises)
           }
+
           break
         }
 
@@ -299,6 +340,47 @@ export const promise = async <T>({
 
           break
         }
+
+        case 'tab': {
+          const isNamedTab = tabHasName(field)
+
+          if (typeof siblingDoc[field.name] !== 'object') {
+            siblingDoc[field.name] = {}
+          }
+
+          const tabDoc = siblingDoc[field.name] as Record<string, unknown>
+
+          const {
+            indexPath: tabIndexPath,
+            path: tabPath,
+            schemaPath: tabSchemaPath,
+          } = getFieldPaths({
+            field: {
+              ...field,
+              type: 'tab',
+            },
+            index: fieldIndex,
+            parentIndexPath: indexPath,
+            parentPath,
+            parentSchemaPath,
+          })
+
+          await traverseFields({
+            id,
+            collection,
+            context,
+            doc,
+            fields: field.fields,
+            overrideAccess,
+            parentIndexPath: isNamedTab ? '' : tabIndexPath,
+            parentPath: isNamedTab ? tabPath : parentPath,
+            parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+            req,
+            siblingDoc: tabDoc,
+          })
+
+          break
+        }
       }
     }
   } else {
@@ -324,37 +406,18 @@ export const promise = async <T>({
       }
 
       case 'tabs': {
-        field.tabs.forEach(async (tab, tabIndex) => {
-          const isNamedTab = tabHasName(tab)
-
-          const {
-            indexPath: tabIndexPath,
-            path: tabPath,
-            schemaPath: tabSchemaPath,
-          } = getFieldPaths({
-            field: {
-              ...tab,
-              type: 'tab',
-            },
-            index: tabIndex,
-            parentIndexPath: indexPath,
-            parentPath,
-            parentSchemaPath,
-          })
-
-          await traverseFields({
-            id,
-            collection,
-            context,
-            doc,
-            fields: tab.fields,
-            overrideAccess,
-            parentIndexPath: isNamedTab ? '' : tabIndexPath,
-            parentPath: isNamedTab ? tabPath : parentPath,
-            parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
-            req,
-            siblingDoc,
-          })
+        await traverseFields({
+          id,
+          collection,
+          context,
+          doc,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          overrideAccess,
+          parentIndexPath,
+          parentPath,
+          parentSchemaPath,
+          req,
+          siblingDoc,
         })
 
         break

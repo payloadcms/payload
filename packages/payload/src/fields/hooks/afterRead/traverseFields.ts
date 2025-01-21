@@ -8,7 +8,7 @@ import type {
   SelectMode,
   SelectType,
 } from '../../../types/index.js'
-import type { Field } from '../../config/types.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
@@ -25,7 +25,7 @@ type Args = {
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
   fieldPromises: Promise<void>[]
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   findMany: boolean
   flattenLocales: boolean
   global: null | SanitizedGlobalConfig
