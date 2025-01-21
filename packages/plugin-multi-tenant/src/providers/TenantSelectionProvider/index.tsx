@@ -19,19 +19,26 @@ export const TenantSelectionProvider = async ({
   useAsTitle,
   user,
 }: Args) => {
-  const { docs: userTenants } = await payload.find({
-    collection: tenantsCollectionSlug,
-    depth: 0,
-    limit: 1000,
-    overrideAccess: false,
-    sort: useAsTitle,
-    user,
-  })
+  let tenantOptions: OptionObject[] = []
 
-  const tenantOptions: OptionObject[] = userTenants.map((doc) => ({
-    label: String(doc[useAsTitle]),
-    value: String(doc.id),
-  }))
+  try {
+    const { docs: userTenants } = await payload.find({
+      collection: tenantsCollectionSlug,
+      depth: 0,
+      limit: 1000,
+      overrideAccess: false,
+      sort: useAsTitle,
+      user,
+    })
+
+    tenantOptions = userTenants.map((doc) => ({
+      label: String(doc[useAsTitle]),
+      value: String(doc.id),
+    }))
+  } catch (_) {
+    // user likely does not have access
+  }
+
   const cookies = await getCookies()
   const tenantCookie = cookies.get('payload-tenant')?.value
   const selectedTenant =
