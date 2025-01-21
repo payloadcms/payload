@@ -1,7 +1,7 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
 import type {
   ClientField,
-  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
   LabelFunction,
   RichTextAdapter,
   RichTextFieldClient,
@@ -116,7 +116,7 @@ export type LexicalRichTextFieldProps = {
 } & Pick<ServerFieldBase, 'permissions'> &
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 
-export type LexicalRichTextCellProps = DefaultCellComponentProps<
+export type LexicalRichTextCellProps = DefaultServerCellComponentProps<
   RichTextFieldClient<SerializedEditorState, AdapterProps, object>,
   SerializedEditorState
 >
