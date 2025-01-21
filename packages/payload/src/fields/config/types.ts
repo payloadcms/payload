@@ -23,6 +23,8 @@ import type {
   BlocksFieldClientProps,
   BlocksFieldErrorClientComponent,
   BlocksFieldErrorServerComponent,
+  BlocksFieldLabelClientComponent,
+  BlocksFieldLabelServerComponent,
   CheckboxFieldClientProps,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
@@ -1336,6 +1338,7 @@ export type BlocksField = {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
       Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
+      Label?: CustomComponent<BlocksFieldLabelClientComponent | BlocksFieldLabelServerComponent>
     } & Admin['components']
     initCollapsed?: boolean
     /**

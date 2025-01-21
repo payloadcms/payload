@@ -319,12 +319,22 @@ export function parseParams({
 
                     case 'near': {
                       const [lng, lat, maxDistance, minDistance] = queryValue as number[]
+                      const geoConstraints: SQL[] = []
 
-                      let constraint = sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`
-                      if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
-                        constraint = sql`${constraint} AND ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`
+                      if (typeof maxDistance === 'number' && !Number.isNaN(maxDistance)) {
+                        geoConstraints.push(
+                          sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`,
+                        )
                       }
-                      constraints.push(constraint)
+
+                      if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
+                        geoConstraints.push(
+                          sql`ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`,
+                        )
+                      }
+                      if (geoConstraints.length) {
+                        constraints.push(and(...geoConstraints))
+                      }
                       break
                     }
 

@@ -1,9 +1,9 @@
 import type { ReleaseType } from 'semver'
 
+import { PROJECT_ROOT, ROOT_PACKAGE_JSON } from '@tools/constants'
 import { execSync } from 'child_process'
 import execa from 'execa'
 import fse from 'fs-extra'
-import { fileURLToPath } from 'node:url'
 import pLimit from 'p-limit'
 import path from 'path'
 import semver from 'semver'
@@ -11,14 +11,10 @@ import semver from 'semver'
 import { getPackageDetails } from './getPackageDetails.js'
 import { packagePublishList } from './publishList.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-const projectRoot = path.resolve(dirname, '../../')
-const rootPackageJsonPath = path.resolve(projectRoot, 'package.json')
 const npmPublishLimit = pLimit(5)
-const cwd = path.resolve(dirname, '../../')
+const cwd = PROJECT_ROOT
 
-const execaOpts: execa.Options = { stdio: 'inherit' }
+const execaOpts: execa.Options = { stdio: 'inherit', cwd }
 
 type PackageDetails = {
   /** Name in package.json / npm registry */
@@ -125,16 +121,17 @@ export const getWorkspace = async () => {
   }
 
   const setVersion = async (version: string) => {
-    const rootPackageJson = await fse.readJSON(rootPackageJsonPath)
+    const rootPackageJson = await fse.readJSON(ROOT_PACKAGE_JSON)
     rootPackageJson.version = version
-    await fse.writeJSON(rootPackageJsonPath, rootPackageJson, { spaces: 2 })
+    await fse.writeJSON(ROOT_PACKAGE_JSON, rootPackageJson, { spaces: 2 })
 
     const packageJsons = await getPackageDetails(packagePublishList)
     await Promise.all(
       packageJsons.map(async (pkg) => {
-        const packageJson = await fse.readJSON(`${pkg.packagePath}/package.json`)
+        const packageJsonPath = path.resolve(PROJECT_ROOT, `${pkg.packagePath}/package.json`)
+        const packageJson = await fse.readJSON(packageJsonPath)
         packageJson.version = version
-        await fse.writeJSON(`${pkg.packagePath}/package.json`, packageJson, { spaces: 2 })
+        await fse.writeJSON(packageJsonPath, packageJson, { spaces: 2 })
       }),
     )
   }
@@ -167,7 +164,7 @@ export const getWorkspace = async () => {
   }
 
   const workspace: Workspace = {
-    version: async () => (await fse.readJSON(rootPackageJsonPath)).version,
+    version: async () => (await fse.readJSON(ROOT_PACKAGE_JSON)).version,
     tag: 'latest',
     packages: await getPackageDetails(packagePublishList),
     showVersions,
@@ -185,7 +182,7 @@ async function getCurrentPackageState(): Promise<{
   version: string
 }> {
   const packageDetails = await getPackageDetails(packagePublishList)
-  const rootPackageJson = await fse.readJSON(rootPackageJsonPath)
+  const rootPackageJson = await fse.readJSON(ROOT_PACKAGE_JSON)
   return { packages: packageDetails, version: rootPackageJson.version }
 }
 
