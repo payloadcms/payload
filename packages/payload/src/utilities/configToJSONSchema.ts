@@ -655,7 +655,7 @@ export function entityToJSONSchema(
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity)
   const title = entity.typescript?.interface
     ? entity.typescript.interface
-    : singular(toWords(entity.slug, true))
+    : `${entity.typescript?.interfacePrefix ?? ''}${singular(toWords(entity.slug, true))}`
 
   const idField: FieldAffectingData = { name: 'id', type: defaultIDType as 'text', required: true }
   const customIdField = entity.flattenedFields.find(
