@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, FormState } from 'payload'
+import type { ClientCollectionConfig, FieldWithPathClient, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -16,7 +16,7 @@ import { XIcon } from '../../../icons/X/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
+import { abortAndIgnore } from '../../../utilities/abortAndIgnore.js'
 import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { baseClass, type EditManyBulkUploadsProps } from './index.js'
@@ -36,9 +36,9 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
   const { permissions } = useAuth()
   const { i18n, t } = useTranslation()
   const { closeModal } = useModal()
-  const { updateForm } = useFormsManager()
+  const { bulkUpdateForm } = useFormsManager()
 
-  const [selectedFields, setSelectedFields] = useState([])
+  const [selectedFields, setSelectedFields] = useState<FieldWithPathClient[]>([])
   const [initialState, setInitialState] = useState<FormState>()
   const hasInitializedState = React.useRef(false)
   const abortOnChangeRef = useRef<AbortController>(null)
@@ -59,7 +59,17 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
           signal: controller.signal,
         })
 
-        setInitialState(result)
+        if (result) {
+          setInitialState(
+            Object.entries(result).reduce((acc, [key]) => {
+              acc[key] = {
+                valid: true,
+              }
+              return acc
+            }, {}),
+          )
+        }
+
         hasInitializedState.current = true
       }
 
@@ -71,55 +81,20 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     }
   }, [collectionPermissions, getFormState, slug])
 
-  const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
-      const controller = handleAbortRef(abortOnChangeRef)
-
-      const { state } = await getFormState({
-        collectionSlug: slug,
-        docPermissions: collectionPermissions,
-        docPreferences: null,
-        formState: prevFormState,
-        operation: 'create',
-        schemaPath: slug,
-        signal: controller.signal,
-      })
-
-      abortOnChangeRef.current = null
-
-      setInitialState(state)
-
-      return state
-    },
-    [collectionPermissions, getFormState, slug],
-  )
-
-  const handleSave = useCallback(() => {
-    if (!initialState) {
-      return
-    }
-
-    forms.forEach((form, index) => {
-      const updatedFormState = { ...form.formState }
-
-      // Iterate over `initialState` to update the corresponding `formState`
-      Object.entries(initialState).forEach(([path, field]) => {
-        if (updatedFormState[path]) {
-          updatedFormState[path] = {
-            ...updatedFormState[path],
-            errorMessage: undefined,
-            valid: true,
-            value: field.value,
-          }
+  const handleSubmit: FormProps['onSubmit'] = useCallback(
+    (formState) => {
+      const pairedData = selectedFields.reduce((acc, field) => {
+        const { path } = field
+        if (formState[path]) {
+          acc[path] = formState[path].value
         }
-      })
+        return acc
+      }, {})
 
-      // Push updated formState back to the FormsManager
-      updateForm(index, updatedFormState)
-    })
-
-    closeModal(drawerSlug)
-  }, [closeModal, drawerSlug, forms, initialState, updateForm])
+      void bulkUpdateForm(pairedData, () => closeModal(drawerSlug))
+    },
+    [closeModal, drawerSlug, bulkUpdateForm, selectedFields],
+  )
 
   useEffect(() => {
     const abortOnChange = abortOnChangeRef.current
@@ -148,7 +123,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
           <XIcon />
         </button>
       </div>
-      <Form className={`${baseClass}__form`} initialState={initialState} onChange={[onChange]}>
+      <Form className={`${baseClass}__form`} initialState={initialState} onSubmit={handleSubmit}>
         <FieldSelect fields={fields} setSelected={setSelectedFields} />
         {selectedFields.length === 0 ? null : (
           <RenderFields
@@ -164,9 +139,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
           <div className={`${baseClass}__sidebar`}>
             <div className={`${baseClass}__sidebar-sticky-wrap`}>
               <div className={`${baseClass}__document-actions`}>
-                <Button onClick={handleSave} type="button">
-                  {t('general:applyChanges')}
-                </Button>
+                <Button type="submit">{t('general:applyChanges')}</Button>
               </div>
             </div>
           </div>

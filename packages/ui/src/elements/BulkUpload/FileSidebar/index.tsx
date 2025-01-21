@@ -95,7 +95,7 @@ export function FileSidebar({ collectionConfig }: FileSidebarProps) {
           </div>
 
           <div className={`${baseClass}__header__actions`}>
-            {typeof maxFiles === 'number' && totalFileCount < maxFiles ? (
+            {(typeof maxFiles === 'number' ? totalFileCount < maxFiles : true) ? (
               <Pill onClick={() => openModal(addMoreFilesDrawerSlug)}>{t('upload:addFile')}</Pill>
             ) : null}
             <Button
