@@ -43,7 +43,7 @@ export const promise = async <T>({
   const { localization } = req.payload.config
 
   const pathSegments = path ? path.split('.') : []
-  const schemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
+  const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
 
   if (fieldAffectsData(field)) {

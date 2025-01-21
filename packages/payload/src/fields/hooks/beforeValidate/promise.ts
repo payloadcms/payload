@@ -495,6 +495,9 @@ export const promise = async <T>({
 
     case 'tabs': {
       field.tabs.forEach(async (tab, tabIndex) => {
+        let tabSiblingData
+        let tabSiblingDoc
+
         const isNamedTab = tabHasName(tab)
 
         if (isNamedTab) {
@@ -505,6 +508,12 @@ export const promise = async <T>({
           if (typeof siblingDoc[tab.name] !== 'object') {
             siblingDoc[tab.name] = {}
           }
+
+          tabSiblingData = siblingData[tab.name] as Record<string, unknown>
+          tabSiblingDoc = siblingDoc[tab.name] as Record<string, unknown>
+        } else {
+          tabSiblingData = siblingData
+          tabSiblingDoc = siblingDoc
         }
 
         const {
@@ -536,10 +545,8 @@ export const promise = async <T>({
           parentPath: isNamedTab ? tabPath : parentPath,
           parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
           req,
-          siblingData: isNamedTab
-            ? (siblingData[tab.name] as Record<string, unknown>)
-            : siblingData,
-          siblingDoc: isNamedTab ? (siblingDoc[tab.name] as Record<string, unknown>) : siblingDoc,
+          siblingData: tabSiblingData,
+          siblingDoc: tabSiblingDoc,
         })
       })
 

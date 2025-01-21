@@ -80,8 +80,7 @@ export const promise = async ({
   const operationLocale = req.locale || defaultLocale
 
   const pathSegments = path ? path.split('.') : []
-  const schemaPathSegments = parentSchemaPath ? parentSchemaPath.split('.') : []
-  const parentPathSegments = parentPath ? parentPath.split('.') : []
+  const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
 
   if (fieldAffectsData(field)) {
@@ -153,6 +152,7 @@ export const promise = async ({
 
       if (typeof validationResult === 'string') {
         const label = getTranslatedLabel(field?.label || field?.name, req.i18n)
+        const parentPathSegments = parentPath ? parentPath.split('.') : []
 
         const fieldLabel =
           Array.isArray(parentPathSegments) && parentPathSegments.length > 0
@@ -424,6 +424,10 @@ export const promise = async ({
 
     case 'tabs': {
       field.tabs.forEach(async (tab, tabIndex) => {
+        let tabSiblingData = siblingData
+        let tabSiblingDoc = siblingDoc
+        let tabSiblingDocWithLocales = siblingDocWithLocales
+
         const isNamedTab = tabHasName(tab)
 
         if (isNamedTab) {
@@ -438,6 +442,10 @@ export const promise = async ({
           if (typeof siblingDocWithLocales[tab.name] !== 'object') {
             siblingDocWithLocales[tab.name] = {}
           }
+
+          tabSiblingData = siblingData[tab.name] as JsonObject
+          tabSiblingDoc = siblingDoc[tab.name] as JsonObject
+          tabSiblingDocWithLocales = siblingDocWithLocales[tab.name] as JsonObject
         }
 
         const {
@@ -471,11 +479,9 @@ export const promise = async ({
           parentPath: isNamedTab ? tabPath : parentPath,
           parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
           req,
-          siblingData: isNamedTab ? (siblingData[tab.name] as JsonObject) : siblingData,
-          siblingDoc: isNamedTab ? (siblingDoc[tab.name] as JsonObject) : siblingDoc,
-          siblingDocWithLocales: isNamedTab
-            ? (siblingDocWithLocales[tab.name] as JsonObject)
-            : siblingDocWithLocales,
+          siblingData: tabSiblingData,
+          siblingDoc: tabSiblingDoc,
+          siblingDocWithLocales: tabSiblingDocWithLocales,
           skipValidation: skipValidationFromHere,
         })
       })
