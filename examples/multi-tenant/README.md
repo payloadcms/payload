@@ -50,9 +50,9 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 For the domain portion of the example to function properly, you will need to add the following entries to your system's `/etc/hosts` file:
 
-- gold.test:3000
-- silver.test:3000
-- bronze.test:3000
+```
+127.0.0.1 gold.test silver.test bronze.test
+```
 
 - #### Pages
 
