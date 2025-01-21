@@ -44,6 +44,7 @@ export const mergeServerFormState = ({
       if (!incomingState[path]) {
         return
       }
+      let fieldChanged = false
 
       const newFieldState = existingState[path]
 
@@ -67,6 +68,7 @@ export const mergeServerFormState = ({
       if (incomingState[path]?.filterOptions || newFieldState.filterOptions) {
         if (!dequal(incomingState[path]?.filterOptions, newFieldState.filterOptions)) {
           changed = true
+          fieldChanged = true
           newFieldState.filterOptions = incomingState[path].filterOptions
         }
       }
@@ -77,6 +79,7 @@ export const mergeServerFormState = ({
       serverPropsToAccept.forEach((prop) => {
         if (!dequal(incomingState[path]?.[prop], newFieldState[prop])) {
           changed = true
+          fieldChanged = true
           if (!(prop in incomingState[path])) {
             // Regarding excluding the customComponents prop from being deleted: the incoming state might not have been rendered, as rendering components for every form onchange is expensive.
             // Thus, we simply re-use the initial render state
@@ -97,7 +100,7 @@ export const mergeServerFormState = ({
       }
 
       // Conditions don't work if we don't memcopy the new state, as the object references would otherwise be the same
-      newState[path] = changed ? { ...newFieldState } : newFieldState
+      newState[path] = fieldChanged ? { ...newFieldState } : newFieldState
     }
 
     // Now loop over values that are part of incoming state but not part of existing state, and add them to the new state.
