@@ -284,19 +284,39 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         // ..
         // This is a performance enhancement for saving
         // large documents with hundreds of fields
-        const newState = {}
+        const newState: FormState = {}
 
-        Object.entries(action.state).forEach(([path, field]) => {
+        for (const path in action.state) {
           const oldField = state[path]
-          const newField = field
+          const newField = action.state[path]
+
+          if (newField.valid !== false) {
+            newField.valid = true
+          }
+          if (newField.passesCondition !== false) {
+            newField.passesCondition = true
+          }
 
           if (!dequal(oldField, newField)) {
             newState[path] = newField
           } else if (oldField) {
             newState[path] = oldField
           }
-        })
+        }
+
         return newState
+      }
+
+      if (action.sanitize) {
+        for (const path in action.state) {
+          const field = action.state[path]
+          if (field.valid !== false) {
+            field.valid = true
+          }
+          if (field.passesCondition !== false) {
+            field.passesCondition = true
+          }
+        }
       }
       // If we're not optimizing, just set the state to the new state
       return action.state
