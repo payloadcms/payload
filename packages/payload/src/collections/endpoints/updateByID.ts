@@ -3,7 +3,6 @@ import { status as httpStatus } from 'http-status'
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
-import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
@@ -47,10 +46,6 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
       message,
     },
     {
-      headers: headersWithCors({
-        headers: new Headers(),
-        req,
-      }),
       status: httpStatus.OK,
     },
   )

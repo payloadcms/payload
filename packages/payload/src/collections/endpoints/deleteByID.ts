@@ -3,7 +3,6 @@ import { status as httpStatus } from 'http-status'
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
-import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
@@ -25,18 +24,12 @@ export const deleteByIDHandler: PayloadHandler = async (req) => {
     select: sanitizeSelectParam(req.query.select),
   })
 
-  const headers = headersWithCors({
-    headers: new Headers(),
-    req,
-  })
-
   if (!doc) {
     return Response.json(
       {
         message: req.t('general:notFound'),
       },
       {
-        headers,
         status: httpStatus.NOT_FOUND,
       },
     )
@@ -48,7 +41,6 @@ export const deleteByIDHandler: PayloadHandler = async (req) => {
       message: req.t('general:deletedSuccessfully'),
     },
     {
-      headers,
       status: httpStatus.OK,
     },
   )
