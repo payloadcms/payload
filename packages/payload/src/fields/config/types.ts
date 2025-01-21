@@ -716,11 +716,16 @@ export type CollapsibleFieldClient = {
   Pick<CollapsibleField, 'type'>
 
 type TabBase = {
+  admin?: Pick<Admin, 'description'>
+  /**
+   * @deprecated
+   * Use `admin.description` instead. This will be removed in a future major version.
+   */
   description?: LabelFunction | StaticDescription
   fields: Field[]
   interfaceName?: string
   saveToJWT?: boolean | string
-} & Omit<FieldBase, 'required' | 'validate'>
+} & Omit<FieldBase, 'admin' | 'required' | 'validate'>
 
 export type NamedTab = {
   /** Customize generated GraphQL and Typescript schema names.
