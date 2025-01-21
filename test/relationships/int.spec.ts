@@ -1352,6 +1352,38 @@ describe('Relationships', () => {
       expect(queryTwo.docs).toHaveLength(1)
     })
 
+    it('should allow REST all querying on polymorphic relationships', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+      await payload.create({
+        collection: polymorphicRelationshipsSlug,
+        data: {
+          polymorphic: {
+            relationTo: 'movies',
+            value: movie.id,
+          },
+        },
+      })
+
+      const queryOne = await restClient
+        .GET(`/${polymorphicRelationshipsSlug}`, {
+          query: {
+            where: {
+              'polymorphic.value': {
+                all: [movie.id],
+              },
+            },
+          },
+        })
+        .then((res) => res.json())
+
+      expect(queryOne.docs).toHaveLength(1)
+    })
+
     it('should allow querying on polymorphic relationships with an object syntax', async () => {
       const movie = await payload.create({
         collection: 'movies',
