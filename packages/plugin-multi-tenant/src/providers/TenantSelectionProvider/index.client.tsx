@@ -2,6 +2,7 @@
 
 import type { OptionObject } from 'payload'
 
+import { useAuth } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import React, { createContext } from 'react'
 
@@ -34,6 +35,8 @@ export const TenantSelectionProviderClient = ({
     initialValue || SELECT_ALL,
   )
   const [preventRefreshOnChange, setPreventRefreshOnChange] = React.useState(false)
+  const { user } = useAuth()
+  const userID = React.useMemo(() => user?.id, [user?.id])
 
   const router = useRouter()
 
@@ -71,6 +74,10 @@ export const TenantSelectionProviderClient = ({
       }
     }
   }, [initialValue, setTenant, selectedTenantID, tenantOptions])
+
+  React.useEffect(() => {
+    router.refresh()
+  }, [userID, router])
 
   return (
     <Context.Provider
