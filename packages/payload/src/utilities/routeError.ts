@@ -94,7 +94,6 @@ export const routeError = async ({
   }, Promise.resolve())
 
   return Response.json(response, {
-    // headers with req.responseHeaders are merged in handleEndpoints directly
     status,
   })
 }
