@@ -459,6 +459,45 @@ describe('Relationships', () => {
           expect(query2.totalDocs).toStrictEqual(2)
         })
 
+        it('should query using "all" by hasMany relationship field', async () => {
+          const movie1 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+          const movie2 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie2.id, movie1.id],
+            },
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie2.id],
+            },
+          })
+
+          const query1 = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              movies: {
+                all: [movie1.id],
+              },
+            },
+          })
+
+          expect(query1.totalDocs).toStrictEqual(1)
+        })
+
         it('should sort by a property of a hasMany relationship', async () => {
           // no support for sort by relation in mongodb
           if (isMongoose(payload)) {
