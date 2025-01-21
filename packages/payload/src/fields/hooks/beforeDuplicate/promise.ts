@@ -133,7 +133,8 @@ export const promise = async <T>({
 
               if (Array.isArray(rows)) {
                 const promises = []
-                rows.forEach((row) => {
+
+                rows.forEach((row, rowIndex) => {
                   promises.push(
                     traverseFields({
                       id,
@@ -143,7 +144,7 @@ export const promise = async <T>({
                       fields: field.fields,
                       overrideAccess,
                       parentIndexPath: '',
-                      parentPath,
+                      parentPath: path + '.' + rowIndex,
                       parentSchemaPath: schemaPath,
                       req,
                       siblingDoc: row,
@@ -151,14 +152,17 @@ export const promise = async <T>({
                   )
                 })
               }
+
               break
             }
+
             case 'blocks': {
               const rows = fieldData[locale]
 
               if (Array.isArray(rows)) {
                 const promises = []
-                rows.forEach((row) => {
+
+                rows.forEach((row, rowIndex) => {
                   const blockTypeToMatch = row.blockType
 
                   const block = field.blocks.find(
@@ -174,7 +178,7 @@ export const promise = async <T>({
                       fields: block.fields,
                       overrideAccess,
                       parentIndexPath: '',
-                      parentPath,
+                      parentPath: path + '.' + rowIndex,
                       parentSchemaPath: schemaPath + '.' + block.slug,
                       req,
                       siblingDoc: row,
@@ -219,7 +223,8 @@ export const promise = async <T>({
 
           if (Array.isArray(rows)) {
             const promises = []
-            rows.forEach((row) => {
+
+            rows.forEach((row, rowIndex) => {
               promises.push(
                 traverseFields({
                   id,
@@ -229,15 +234,17 @@ export const promise = async <T>({
                   fields: field.fields,
                   overrideAccess,
                   parentIndexPath: '',
-                  parentPath,
+                  parentPath: path + '.' + rowIndex,
                   parentSchemaPath: schemaPath,
                   req,
                   siblingDoc: row,
                 }),
               )
             })
+
             await Promise.all(promises)
           }
+
           break
         }
 
@@ -246,7 +253,8 @@ export const promise = async <T>({
 
           if (Array.isArray(rows)) {
             const promises = []
-            rows.forEach((row) => {
+
+            rows.forEach((row, rowIndex) => {
               const blockTypeToMatch = row.blockType
               const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
 
@@ -262,7 +270,7 @@ export const promise = async <T>({
                     fields: block.fields,
                     overrideAccess,
                     parentIndexPath: '',
-                    parentPath,
+                    parentPath: path + '.' + rowIndex,
                     parentSchemaPath: schemaPath + '.' + block.slug,
                     req,
                     siblingDoc: row,
@@ -270,6 +278,7 @@ export const promise = async <T>({
                 )
               }
             })
+
             await Promise.all(promises)
           }
 
@@ -315,7 +324,7 @@ export const promise = async <T>({
           overrideAccess,
           parentIndexPath: indexPath,
           parentPath,
-          parentSchemaPath,
+          parentSchemaPath: schemaPath,
           req,
           siblingDoc,
         })
@@ -351,7 +360,7 @@ export const promise = async <T>({
             overrideAccess,
             parentIndexPath: isNamedTab ? '' : tabIndexPath,
             parentPath: isNamedTab ? tabPath : parentPath,
-            parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+            parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
             req,
             siblingDoc,
           })

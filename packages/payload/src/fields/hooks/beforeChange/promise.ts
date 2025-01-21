@@ -206,7 +206,8 @@ export const promise = async ({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row) => {
+
+        rows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
               id,
@@ -221,7 +222,7 @@ export const promise = async ({
               mergeLocaleActions,
               operation,
               parentIndexPath: '',
-              parentPath,
+              parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
               siblingData: row as JsonObject,
@@ -245,8 +246,10 @@ export const promise = async ({
       const rows = siblingData[field.name]
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row) => {
+
+        rows.forEach((row, rowIndex) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
+
           const rowSiblingDocWithLocales = getExistingRowDoc(
             row as JsonObject,
             siblingDocWithLocales ? siblingDocWithLocales[field.name] : {},
@@ -270,7 +273,7 @@ export const promise = async ({
                 mergeLocaleActions,
                 operation,
                 parentIndexPath: '',
-                parentPath,
+                parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
                 siblingData: row as JsonObject,
@@ -304,7 +307,7 @@ export const promise = async ({
         operation,
         parentIndexPath: indexPath,
         parentPath,
-        parentSchemaPath,
+        parentSchemaPath: schemaPath,
         req,
         siblingData,
         siblingDoc,
@@ -466,7 +469,7 @@ export const promise = async ({
           operation,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentPath: isNamedTab ? tabPath : parentPath,
-          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
           req,
           siblingData: isNamedTab ? (siblingData[tab.name] as JsonObject) : siblingData,
           siblingDoc: isNamedTab ? (siblingDoc[tab.name] as JsonObject) : siblingDoc,

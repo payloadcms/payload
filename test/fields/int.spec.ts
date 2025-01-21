@@ -488,7 +488,7 @@ describe('Fields', () => {
   })
 
   describe('rows', () => {
-    it('show proper validation error message on text field within row field', async () => {
+    it('should show proper validation error message on text field within row field', async () => {
       await expect(async () =>
         payload.create({
           collection: 'row-fields',
@@ -1678,7 +1678,7 @@ describe('Fields', () => {
       expect(res.id).toBe(doc.id)
     })
 
-    it('show proper validation error on text field in nested array', async () => {
+    it('should show proper validation error on text field in nested array', async () => {
       await expect(async () =>
         payload.create({
           collection,
@@ -1698,7 +1698,7 @@ describe('Fields', () => {
       ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Second text field')
     })
 
-    it('show proper validation error on text field in row field in nested array', async () => {
+    it('should show proper validation error on text field in row field in nested array', async () => {
       await expect(async () =>
         payload.create({
           collection,
@@ -2507,7 +2507,7 @@ describe('Fields', () => {
   })
 
   describe('collapsible', () => {
-    it('show proper validation error message for fields nested in collapsible', async () => {
+    it('should show proper validation error message for fields nested in collapsible', async () => {
       await expect(async () =>
         payload.create({
           collection: collapsibleFieldsSlug,

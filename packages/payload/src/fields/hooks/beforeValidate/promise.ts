@@ -326,7 +326,7 @@ export const promise = async <T>({
       if (Array.isArray(rows)) {
         const promises = []
 
-        rows.forEach((row) => {
+        rows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
               id,
@@ -339,7 +339,7 @@ export const promise = async <T>({
               operation,
               overrideAccess,
               parentIndexPath: '',
-              parentPath,
+              parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
               siblingData: row as JsonObject,
@@ -359,7 +359,7 @@ export const promise = async <T>({
       if (Array.isArray(rows)) {
         const promises = []
 
-        rows.forEach((row) => {
+        rows.forEach((row, rowIndex) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
           const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
@@ -379,7 +379,7 @@ export const promise = async <T>({
                 operation,
                 overrideAccess,
                 parentIndexPath: '',
-                parentPath,
+                parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
                 siblingData: row as JsonObject,
@@ -409,7 +409,7 @@ export const promise = async <T>({
         overrideAccess,
         parentIndexPath: indexPath,
         parentPath,
-        parentSchemaPath,
+        parentSchemaPath: schemaPath,
         req,
         siblingData,
         siblingDoc,
@@ -534,7 +534,7 @@ export const promise = async <T>({
           overrideAccess,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentPath: isNamedTab ? tabPath : parentPath,
-          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
           req,
           siblingData: isNamedTab
             ? (siblingData[tab.name] as Record<string, unknown>)

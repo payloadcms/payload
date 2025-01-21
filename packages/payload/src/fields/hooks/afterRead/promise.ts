@@ -381,7 +381,7 @@ export const promise = async ({
       }
 
       if (Array.isArray(rows)) {
-        rows.forEach((row) => {
+        rows.forEach((row, rowIndex) => {
           traverseFields({
             collection,
             context,
@@ -398,7 +398,7 @@ export const promise = async ({
             locale,
             overrideAccess,
             parentIndexPath: '',
-            parentPath,
+            parentPath: path + '.' + rowIndex,
             parentSchemaPath: schemaPath,
             populate,
             populationPromises,
@@ -414,7 +414,7 @@ export const promise = async ({
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
-            localeRows.forEach((row) => {
+            localeRows.forEach((row, rowIndex) => {
               traverseFields({
                 collection,
                 context,
@@ -431,7 +431,7 @@ export const promise = async ({
                 locale,
                 overrideAccess,
                 parentIndexPath: '',
-                parentPath,
+                parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath,
                 populate,
                 populationPromises,
@@ -456,7 +456,7 @@ export const promise = async ({
       let blocksSelect = select?.[field.name]
 
       if (Array.isArray(rows)) {
-        rows.forEach((row) => {
+        rows.forEach((row, rowIndex) => {
           const block = field.blocks.find(
             (blockType) => blockType.slug === (row as JsonObject).blockType,
           )
@@ -510,7 +510,7 @@ export const promise = async ({
               locale,
               overrideAccess,
               parentIndexPath: '',
-              parentPath,
+              parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath + '.' + block.slug,
               populate,
               populationPromises,
@@ -527,7 +527,7 @@ export const promise = async ({
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
-            localeRows.forEach((row) => {
+            localeRows.forEach((row, rowIndex) => {
               const block = field.blocks.find(
                 (blockType) => blockType.slug === (row as JsonObject).blockType,
               )
@@ -549,7 +549,7 @@ export const promise = async ({
                   locale,
                   overrideAccess,
                   parentIndexPath: '',
-                  parentPath,
+                  parentPath: path + '.' + rowIndex,
                   parentSchemaPath: schemaPath + '.' + block.slug,
                   populate,
                   populationPromises,
@@ -589,7 +589,7 @@ export const promise = async ({
         overrideAccess,
         parentIndexPath: indexPath,
         parentPath,
-        parentSchemaPath,
+        parentSchemaPath: schemaPath,
         populate,
         populationPromises,
         req,
@@ -807,7 +807,7 @@ export const promise = async ({
           overrideAccess,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentPath: isNamedTab ? tabPath : parentPath,
-          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
           populate,
           populationPromises,
           req,

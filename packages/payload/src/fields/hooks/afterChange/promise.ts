@@ -96,7 +96,7 @@ export const promise = async ({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row, i) => {
+        rows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
               collection,
@@ -107,12 +107,12 @@ export const promise = async ({
               global,
               operation,
               parentIndexPath: '',
-              parentPath,
+              parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               previousDoc,
-              previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as JsonObject),
+              previousSiblingDoc: previousDoc?.[field.name]?.[rowIndex] || ({} as JsonObject),
               req,
-              siblingData: siblingData?.[field.name]?.[i] || {},
+              siblingData: siblingData?.[field.name]?.[rowIndex] || {},
               siblingDoc: row ? { ...row } : {},
             }),
           )
@@ -129,7 +129,7 @@ export const promise = async ({
       if (Array.isArray(rows)) {
         const promises = []
 
-        rows.forEach((row, i) => {
+        rows.forEach((row, rowIndex) => {
           const block = field.blocks.find(
             (blockType) => blockType.slug === (row as JsonObject).blockType,
           )
@@ -145,12 +145,12 @@ export const promise = async ({
                 global,
                 operation,
                 parentIndexPath: '',
-                parentPath,
+                parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 previousDoc,
-                previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as JsonObject),
+                previousSiblingDoc: previousDoc?.[field.name]?.[rowIndex] || ({} as JsonObject),
                 req,
-                siblingData: siblingData?.[field.name]?.[i] || {},
+                siblingData: siblingData?.[field.name]?.[rowIndex] || {},
                 siblingDoc: row ? { ...row } : {},
               }),
             )
@@ -175,7 +175,7 @@ export const promise = async ({
         operation,
         parentIndexPath: indexPath,
         parentPath,
-        parentSchemaPath,
+        parentSchemaPath: schemaPath,
         previousDoc,
         previousSiblingDoc: { ...previousSiblingDoc },
         req,
@@ -279,7 +279,7 @@ export const promise = async ({
           operation,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentPath: isNamedTab ? tabPath : parentPath,
-          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
           previousDoc,
           previousSiblingDoc: isNamedTab
             ? ((previousDoc[tab.name] as JsonObject) ?? {})
