@@ -40,10 +40,11 @@ export function AddingFilesView() {
 
   return (
     <div className={baseClass}>
-      <FileSidebar collectionConfig={collectionConfig} />
+      <FileSidebar />
 
       <div className={`${baseClass}__editView`}>
         <DrawerHeader
+          collectionConfig={collectionConfig}
           onClose={() => openModal(discardBulkUploadModalSlug)}
           title={getTranslation(collectionConfig.labels.singular, i18n)}
         />

@@ -1,7 +1,5 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
-
 import { useModal } from '@faceless-ui/modal'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { isImage } from 'payload/shared'
@@ -20,7 +18,6 @@ import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
 import './index.scss'
 import { AddFilesView } from '../AddFilesView/index.js'
-import { EditManyBulkUploads } from '../EditMany/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
 
@@ -28,11 +25,7 @@ const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
 
 const baseClass = 'file-selections'
 
-export type FileSidebarProps = {
-  readonly collectionConfig: ClientCollectionConfig
-}
-
-export function FileSidebar({ collectionConfig }: FileSidebarProps) {
+export function FileSidebar() {
   const {
     activeIndex,
     addFiles,
@@ -96,7 +89,12 @@ export function FileSidebar({ collectionConfig }: FileSidebarProps) {
 
           <div className={`${baseClass}__header__actions`}>
             {(typeof maxFiles === 'number' ? totalFileCount < maxFiles : true) ? (
-              <Pill onClick={() => openModal(addMoreFilesDrawerSlug)}>{t('upload:addFile')}</Pill>
+              <Pill
+                className={`${baseClass}__header__addFile`}
+                onClick={() => openModal(addMoreFilesDrawerSlug)}
+              >
+                {t('upload:addFile')}
+              </Pill>
             ) : null}
             <Button
               buttonStyle="transparent"
@@ -113,7 +111,6 @@ export function FileSidebar({ collectionConfig }: FileSidebarProps) {
               </span>
               <ChevronIcon direction={showFiles ? 'down' : 'up'} />
             </Button>
-            <EditManyBulkUploads collection={collectionConfig} />
 
             <Drawer gutter={false} Header={null} slug={addMoreFilesDrawerSlug}>
               <AddFilesView

@@ -376,8 +376,8 @@ export const enTranslations = {
     within: 'within',
   },
   upload: {
-    addFile: 'Add File',
-    addFiles: 'Add Files',
+    addFile: 'Add file',
+    addFiles: 'Add files',
     bulkUpload: 'Bulk Upload',
     crop: 'Crop',
     cropToolDescription:

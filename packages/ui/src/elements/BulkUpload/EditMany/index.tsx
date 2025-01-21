@@ -19,10 +19,7 @@ export type EditManyBulkUploadsProps = {
 }
 
 export const EditManyBulkUploads: React.FC<EditManyBulkUploadsProps> = (props) => {
-  const {
-    collection: { slug },
-    collection,
-  } = props
+  const { collection: { slug } = {}, collection } = props
 
   const { permissions } = useAuth()
 
