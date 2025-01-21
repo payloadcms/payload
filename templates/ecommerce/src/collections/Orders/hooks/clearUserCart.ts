@@ -2,6 +2,9 @@ import type { CollectionAfterChangeHook } from 'payload'
 
 import type { Order } from '@/payload-types'
 
+/**
+ * Clears the user's stored cart once an order is created.
+ */
 export const clearUserCart: CollectionAfterChangeHook<Order> = async ({ doc, operation, req }) => {
   const { payload } = req
 

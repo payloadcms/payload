@@ -9,7 +9,7 @@ export const KeyLabel: React.FC<RowLabelProps> = () => {
   const [label, setLabel] = useState(`Key ${rowNumber}`)
 
   useEffect(() => {
-    if (data.label) {
+    if (data.label && data?.values?.length) {
       const title = `${data.label}`
       const values = data?.values?.map((option) => option.label) ?? []
 

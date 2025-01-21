@@ -40,7 +40,11 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    users: {
+      orders: 'orders';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -102,7 +106,10 @@ export interface User {
   id: string;
   name?: string | null;
   roles?: ('admin' | 'customer')[] | null;
-  orders?: (string | Order)[] | null;
+  orders?: {
+    docs?: (string | Order)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   stripeCustomerID?: string | null;
   cart?: {
     items?: CartItems;
@@ -219,6 +226,7 @@ export interface Product {
   stock?: number | null;
   price?: number | null;
   currency?: string | null;
+  relatedProducts?: (string | Product)[] | null;
   meta?: {
     title?: string | null;
     /**
@@ -228,7 +236,6 @@ export interface Product {
     description?: string | null;
   };
   categories?: (string | Category)[] | null;
-  relatedProducts?: (string | Product)[] | null;
   slug?: string | null;
   skipSync?: boolean | null;
   updatedAt: string;
@@ -1005,6 +1012,7 @@ export interface ProductsSelect<T extends boolean = true> {
   stock?: T;
   price?: T;
   currency?: T;
+  relatedProducts?: T;
   meta?:
     | T
     | {
@@ -1013,7 +1021,6 @@ export interface ProductsSelect<T extends boolean = true> {
         description?: T;
       };
   categories?: T;
-  relatedProducts?: T;
   slug?: T;
   skipSync?: T;
   updatedAt?: T;

@@ -17,7 +17,7 @@ export const VariantLabel: React.FC<RowLabelProps> = () => {
   const [label, setLabel] = useState(`Variant ${rowNumber}`)
 
   useEffect(() => {
-    if (data?.info) {
+    if (data?.info && data?.info?.options?.length) {
       const info = data.info
 
       const labels: string[] = []

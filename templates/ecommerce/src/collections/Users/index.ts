@@ -92,14 +92,13 @@ export const Users: CollectionConfig = {
     },
     {
       name: 'orders',
-      type: 'relationship',
-      access: {
-        /* create: admins, */
-        update: admins,
+      type: 'join',
+      collection: 'orders',
+      on: 'orderedBy',
+      admin: {
+        allowCreate: false,
+        defaultColumns: ['id', 'createdAt', 'total', 'currency', 'items'],
       },
-      hasMany: true,
-      label: 'Orders',
-      relationTo: 'orders',
     },
     {
       name: 'stripeCustomerID',
@@ -163,25 +162,6 @@ export const Users: CollectionConfig = {
           interfaceName: 'CartItems',
           label: 'Items',
         },
-        // If you wanted to maintain a 'created on'
-        // or 'last modified' date for the cart
-        // you could do so here:
-        // {
-        //   name: 'createdOn',
-        //   label: 'Created On',
-        //   type: 'date',
-        //   admin: {
-        //     readOnly: true
-        //   }
-        // },
-        // {
-        //   name: 'lastModified',
-        //   label: 'Last Modified',
-        //   type: 'date',
-        //   admin: {
-        //     readOnly: true
-        //   }
-        // },
       ],
       label: 'Cart',
     },

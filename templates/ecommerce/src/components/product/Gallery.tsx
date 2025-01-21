@@ -68,7 +68,7 @@ export function Gallery({ images }: { images: MediaType[] }) {
             imageSearchParams.set('image', index.toString())
 
             return (
-              <li className="h-20 w-20" key={image.id}>
+              <li className="h-20 w-20" key={`${image.id}--${index}`}>
                 <Link
                   aria-label="Enlarge product image"
                   className="h-full w-full"

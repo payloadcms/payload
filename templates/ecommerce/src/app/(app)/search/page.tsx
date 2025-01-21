@@ -26,6 +26,8 @@ export default async function SearchPage({ searchParams }: Props) {
       slug: true,
       gallery: true,
       categories: true,
+      currency: true,
+      price: true,
     },
     ...(sort ? { sort } : { sort: 'title' }),
     ...(searchValue
@@ -48,7 +50,6 @@ export default async function SearchPage({ searchParams }: Props) {
       : {}),
   })
 
-  console.log({ products })
   const resultsText = products.docs.length > 1 ? 'results' : 'result'
 
   return (

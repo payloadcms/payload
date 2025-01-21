@@ -11,7 +11,7 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
           type: 'custom',
           appearance: 'default',
           label: 'All products',
-          url: '/products',
+          url: '/search',
         },
       },
       {

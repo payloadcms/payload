@@ -5,7 +5,6 @@ import { adminsOrLoggedIn } from '@/access/adminsOrLoggedIn'
 import { adminsOrOrderedByOrPaymentId } from '@/access/adminsOrOrderedByOrPaymentId'
 import { clearUserCart } from './hooks/clearUserCart'
 import { populateOrderedBy } from './hooks/populateOrderedBy'
-import { updateUserOrders } from './hooks/updateUserOrders'
 import { LinkToPaymentIntent } from './ui/LinkToPaymentIntent'
 
 export const Orders: CollectionConfig = {
@@ -85,6 +84,6 @@ export const Orders: CollectionConfig = {
     },
   ],
   hooks: {
-    afterChange: [updateUserOrders, clearUserCart],
+    afterChange: [clearUserCart],
   },
 }

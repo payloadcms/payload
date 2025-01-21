@@ -58,7 +58,6 @@ export const Products: CollectionConfig = {
   fields: [
     {
       name: 'title',
-
       type: 'text',
       required: true,
     },
@@ -198,6 +197,7 @@ export const Products: CollectionConfig = {
                     condition: (data, siblingData) => {
                       return Boolean(siblingData?.options?.length)
                     },
+                    initCollapsed: true,
                   },
                   fields: [
                     {
@@ -335,6 +335,19 @@ export const Products: CollectionConfig = {
                 hidden: true,
               },
             },
+            {
+              name: 'relatedProducts',
+              type: 'relationship',
+              filterOptions: ({ id }) => {
+                return {
+                  id: {
+                    not_in: [id],
+                  },
+                }
+              },
+              hasMany: true,
+              relationTo: 'products',
+            },
           ],
           label: 'Product Details',
         },
@@ -376,19 +389,6 @@ export const Products: CollectionConfig = {
       },
       hasMany: true,
       relationTo: 'categories',
-    },
-    {
-      name: 'relatedProducts',
-      type: 'relationship',
-      filterOptions: ({ id }) => {
-        return {
-          id: {
-            not_in: [id],
-          },
-        }
-      },
-      hasMany: true,
-      relationTo: 'products',
     },
     slugField(),
     {

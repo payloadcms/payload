@@ -2,6 +2,8 @@ import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from '
 
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
+import { productMousepad as productMousepadData } from './product-mousepad'
+import { productHat as productHatData } from './product-hat'
 import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
@@ -11,7 +13,7 @@ const collections: CollectionSlug[] = [
   'categories',
   'media',
   'pages',
-  //'products', // todo
+  'products',
   'forms',
   'form-submissions',
   'search',
@@ -98,12 +100,10 @@ export const seed = async ({
     image2Doc,
     image3Doc,
     imageHomeDoc,
-    technologyCategory,
-    newsCategory,
-    financeCategory,
-    designCategory,
-    softwareCategory,
-    engineeringCategory,
+    accessoriesCategory,
+    tshirtsCategory,
+    hatsCategory,
+    hoodiesCategory,
   ] = await Promise.all([
     payload.create({
       collection: 'users',
@@ -137,12 +137,12 @@ export const seed = async ({
     payload.create({
       collection: 'categories',
       data: {
-        title: 'Technology',
-        slug: 'technology',
+        title: 'Accessories',
+        slug: 'accessories',
         breadcrumbs: [
           {
-            label: 'Technology',
-            url: '/technology',
+            label: 'Accessories',
+            url: '/accessories',
           },
         ],
       },
@@ -151,12 +151,12 @@ export const seed = async ({
     payload.create({
       collection: 'categories',
       data: {
-        title: 'News',
-        slug: 'news',
+        title: 'T-Shirts',
+        slug: 'tshirts',
         breadcrumbs: [
           {
-            label: 'News',
-            url: '/news',
+            label: 'T-Shirts',
+            url: '/tshirts',
           },
         ],
       },
@@ -165,12 +165,12 @@ export const seed = async ({
     payload.create({
       collection: 'categories',
       data: {
-        title: 'Finance',
-        slug: 'finance',
+        title: 'Hats',
+        slug: 'hats',
         breadcrumbs: [
           {
-            label: 'Finance',
-            url: '/finance',
+            label: 'Hats',
+            url: '/hats',
           },
         ],
       },
@@ -178,40 +178,12 @@ export const seed = async ({
     payload.create({
       collection: 'categories',
       data: {
-        title: 'Design',
-        slug: 'design',
+        title: 'Hoodies',
+        slug: 'hoodies',
         breadcrumbs: [
           {
-            label: 'Design',
-            url: '/design',
-          },
-        ],
-      },
-    }),
-
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Software',
-        slug: 'software',
-        breadcrumbs: [
-          {
-            label: 'Software',
-            url: '/software',
-          },
-        ],
-      },
-    }),
-
-    payload.create({
-      collection: 'categories',
-      data: {
-        title: 'Engineering',
-        slug: 'engineering',
-        breadcrumbs: [
-          {
-            label: 'Engineering',
-            url: '/engineering',
+            label: 'Hoodies',
+            url: '/hoodies',
           },
         ],
       },
@@ -225,15 +197,56 @@ export const seed = async ({
   let image3ID: number | string = image3Doc.id
   let imageHomeID: number | string = imageHomeDoc.id
 
+  let accessoriesID: number | string = accessoriesCategory.id
+  let tshirtsID: number | string = tshirtsCategory.id
+  let hatsID: number | string = hatsCategory.id
+  let hoodiesID: number | string = hoodiesCategory.id
+
   if (payload.db.defaultIDType === 'text') {
     image1ID = `"${image1Doc.id}"`
     image2ID = `"${image2Doc.id}"`
     image3ID = `"${image3Doc.id}"`
     imageHomeID = `"${imageHomeDoc.id}"`
     demoAuthorID = `"${demoAuthorID}"`
+
+    accessoriesID = `"${accessoriesCategory.id}"`
+    tshirtsID = `"${tshirtsCategory.id}"`
+    hatsID = `"${hatsCategory.id}"`
+    hoodiesID = `"${hoodiesCategory.id}"`
   }
 
   payload.logger.info(`— Seeding products...`)
+
+  const productMousepad = await payload.create({
+    collection: 'products',
+    depth: 0,
+    data: JSON.parse(
+      JSON.stringify(productMousepadData)
+        .replace(/"\{\{IMAGE_1\}\}"/g, String(image1ID))
+        .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID))
+        .replace(/"\{\{IMAGE_3\}\}"/g, String(image3ID))
+        .replace(/"\{\{CATEGORY_1\}\}"/g, String(accessoriesID)),
+    ),
+  })
+
+  let mousePadID: number | string = productMousepad.id
+
+  if (payload.db.defaultIDType === 'text') {
+    mousePadID = `"${mousePadID}"`
+  }
+
+  const productHat = await payload.create({
+    collection: 'products',
+    depth: 0,
+    data: JSON.parse(
+      JSON.stringify(productHatData)
+        .replace(/"\{\{IMAGE_1\}\}"/g, String(image1ID))
+        .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID))
+        .replace(/"\{\{IMAGE_3\}\}"/g, String(image3ID))
+        .replace(/"\{\{CATEGORY_1\}\}"/g, String(hatsID))
+        .replace(/"\{\{RELATED_PRODUCT_1\}\}"/g, String(mousePadID)),
+    ),
+  })
 
   payload.logger.info(`— Seeding contact form...`)
 
@@ -284,7 +297,7 @@ export const seed = async ({
             link: {
               type: 'custom',
               label: 'Products',
-              url: '/products',
+              url: '/search',
             },
           },
           {
