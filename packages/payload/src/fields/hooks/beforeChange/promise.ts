@@ -8,7 +8,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
-import { getFormattedLabel } from '../../../utilities/getFormattedLabel.js'
+import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
@@ -159,7 +159,7 @@ export const promise = async ({
 
         const fieldLabel =
           Array.isArray(parentPathSegments) && parentPathSegments.length > 0
-            ? getFormattedLabel(parentPathSegments.concat(label))
+            ? getLabelFromPath(parentPathSegments.concat(label))
             : label
 
         errors.push({
