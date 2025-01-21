@@ -4,7 +4,7 @@ import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Field } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
@@ -22,8 +22,7 @@ type Args = {
   doc: JsonObject
   docWithLocales: JsonObject
   errors: ValidationFieldError[]
-  field: Field | TabAsField
-  fieldIndex: number
+  field: Field
   global: null | SanitizedGlobalConfig
   id?: number | string
   indexPath: string
@@ -58,12 +57,10 @@ export const promise = async ({
   docWithLocales,
   errors,
   field,
-  fieldIndex,
   global,
   indexPath,
   mergeLocaleActions,
   operation,
-  parentIndexPath,
   parentPath,
   parentSchemaPath,
   path,
@@ -422,86 +419,68 @@ export const promise = async ({
       break
     }
 
-    case 'tab': {
-      const isNamedTab = tabHasName(field)
-
-      if (isNamedTab) {
-        if (typeof siblingData[field.name] !== 'object') {
-          siblingData[field.name] = {}
-        }
-
-        if (typeof siblingDoc[field.name] !== 'object') {
-          siblingDoc[field.name] = {}
-        }
-
-        if (typeof siblingDocWithLocales[field.name] !== 'object') {
-          siblingDocWithLocales[field.name] = {}
-        }
-      }
-
-      const {
-        indexPath: tabIndexPath,
-        path: tabPath,
-        schemaPath: tabSchemaPath,
-      } = getFieldPaths({
-        field: {
-          ...field,
-          type: 'tab',
-        },
-        index: fieldIndex,
-        parentIndexPath: indexPath,
-        parentPath,
-        parentSchemaPath,
-      })
-
-      await traverseFields({
-        id,
-        collection,
-        context,
-        data,
-        doc,
-        docWithLocales,
-        errors,
-        fields: field.fields,
-        global,
-        mergeLocaleActions,
-        operation,
-        parentIndexPath: isNamedTab ? '' : tabIndexPath,
-        parentPath: isNamedTab ? tabPath : parentPath,
-        parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
-        req,
-        siblingData: isNamedTab ? (siblingData[field.name] as JsonObject) : siblingData,
-        siblingDoc: isNamedTab ? (siblingDoc[field.name] as JsonObject) : siblingDoc,
-        siblingDocWithLocales: isNamedTab
-          ? (siblingDocWithLocales[field.name] as JsonObject)
-          : siblingDocWithLocales,
-        skipValidation: skipValidationFromHere,
-      })
-
-      break
-    }
-
     case 'tabs': {
-      await traverseFields({
-        id,
-        collection,
-        context,
-        data,
-        doc,
-        docWithLocales,
-        errors,
-        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-        global,
-        mergeLocaleActions,
-        operation,
-        parentIndexPath,
-        parentPath,
-        parentSchemaPath,
-        req,
-        siblingData,
-        siblingDoc,
-        siblingDocWithLocales,
-        skipValidation: skipValidationFromHere,
+      field.tabs.forEach(async (tab, tabIndex) => {
+        let tabSiblingData = siblingData
+        let tabSiblingDoc = siblingDoc
+        let tabSiblingDocWithLocales = siblingDocWithLocales
+
+        const isNamedTab = tabHasName(tab)
+
+        if (isNamedTab) {
+          if (typeof siblingData[tab.name] !== 'object') {
+            siblingData[tab.name] = {}
+          }
+
+          if (typeof siblingDoc[tab.name] !== 'object') {
+            siblingDoc[tab.name] = {}
+          }
+
+          if (typeof siblingDocWithLocales[tab.name] !== 'object') {
+            siblingDocWithLocales[tab.name] = {}
+          }
+
+          tabSiblingData = siblingData[tab.name] as JsonObject
+          tabSiblingDoc = siblingDoc[tab.name] as JsonObject
+          tabSiblingDocWithLocales = siblingDocWithLocales[tab.name] as JsonObject
+        }
+
+        const {
+          indexPath: tabIndexPath,
+          path: tabPath,
+          schemaPath: tabSchemaPath,
+        } = getFieldPaths({
+          field: {
+            ...tab,
+            type: 'tab',
+          },
+          index: tabIndex,
+          parentIndexPath: indexPath,
+          parentPath,
+          parentSchemaPath,
+        })
+
+        await traverseFields({
+          id,
+          collection,
+          context,
+          data,
+          doc,
+          docWithLocales,
+          errors,
+          fields: tab.fields,
+          global,
+          mergeLocaleActions,
+          operation,
+          parentIndexPath: isNamedTab ? '' : tabIndexPath,
+          parentPath: isNamedTab ? tabPath : parentPath,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+          req,
+          siblingData: tabSiblingData,
+          siblingDoc: tabSiblingDoc,
+          siblingDocWithLocales: tabSiblingDocWithLocales,
+          skipValidation: skipValidationFromHere,
+        })
       })
 
       break

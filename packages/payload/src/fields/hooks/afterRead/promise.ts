@@ -26,7 +26,7 @@ type Args = {
   doc: JsonObject
   draft: boolean
   fallbackLocale: null | string
-  field: Field | TabAsField
+  field: Field
   fieldIndex: number
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
@@ -54,6 +54,36 @@ type Args = {
   triggerHooks?: boolean
 }
 
+const stripUnselectedFields = ({
+  field,
+  select,
+  selectMode,
+  siblingDoc,
+}: {
+  field: Field | TabAsField
+  select: SelectType
+  selectMode: SelectMode
+  siblingDoc: JsonObject
+}): boolean => {
+  if (fieldAffectsData(field) && select && selectMode) {
+    if (selectMode === 'include') {
+      if (!select[field.name]) {
+        delete siblingDoc[field.name]
+        return false
+      }
+    }
+
+    if (selectMode === 'exclude') {
+      if (select[field.name] === false) {
+        delete siblingDoc[field.name]
+        return false
+      }
+    }
+  }
+
+  return true
+}
+
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response
 // - Flatten locales into requested locale
@@ -61,7 +91,6 @@ type Args = {
 // - Execute field hooks
 // - Execute read access control
 // - Populate relationships
-
 export const promise = async ({
   collection,
   context,
@@ -71,7 +100,6 @@ export const promise = async ({
   draft,
   fallbackLocale,
   field,
-  fieldIndex,
   fieldPromises,
   findMany,
   flattenLocales,
@@ -79,7 +107,6 @@ export const promise = async ({
   indexPath,
   locale,
   overrideAccess,
-  parentIndexPath,
   parentPath,
   parentSchemaPath,
   path,
@@ -107,20 +134,15 @@ export const promise = async ({
     delete siblingDoc[field.name]
   }
 
-  if (fieldAffectsData(field) && select && selectMode) {
-    if (selectMode === 'include') {
-      if (!select[field.name]) {
-        delete siblingDoc[field.name]
-        return
-      }
-    }
+  const shouldContinue = stripUnselectedFields({
+    field,
+    select,
+    selectMode,
+    siblingDoc,
+  })
 
-    if (selectMode === 'exclude') {
-      if (select[field.name] === false) {
-        delete siblingDoc[field.name]
-        return
-      }
-    }
+  if (!shouldContinue) {
+    return
   }
 
   const shouldHoistLocalizedValue =
@@ -723,100 +745,79 @@ export const promise = async ({
       break
     }
 
-    case 'tab': {
-      let tabDoc = siblingDoc
-      let tabSelect: SelectType | undefined
-      const isNamedTab = tabHasName(field)
-
-      if (isNamedTab) {
-        tabDoc = siblingDoc[field.name] as JsonObject
-
-        if (typeof siblingDoc[field.name] !== 'object') {
-          tabDoc = {}
-        }
-
-        if (typeof select?.[field.name] === 'object') {
-          tabSelect = select?.[field.name] as SelectType
-        }
-      } else {
-        tabSelect = select
-      }
-
-      const {
-        indexPath: tabIndexPath,
-        path: tabPath,
-        schemaPath: tabSchemaPath,
-      } = getFieldPaths({
-        field: {
-          ...field,
-          type: 'tab',
-        },
-        index: fieldIndex,
-        parentIndexPath: indexPath,
-        parentPath,
-        parentSchemaPath,
-      })
-
-      traverseFields({
-        collection,
-        context,
-        currentDepth,
-        depth,
-        doc,
-        draft,
-        fallbackLocale,
-        fieldPromises,
-        fields: field.fields,
-        findMany,
-        flattenLocales,
-        global,
-        locale,
-        overrideAccess,
-        parentIndexPath: isNamedTab ? '' : tabIndexPath,
-        parentPath: isNamedTab ? tabPath : parentPath,
-        parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
-        populate,
-        populationPromises,
-        req,
-        select: tabSelect,
-        selectMode,
-        showHiddenFields,
-        siblingDoc: tabDoc,
-        triggerAccessControl,
-        triggerHooks,
-      })
-
-      break
-    }
-
     case 'tabs': {
-      traverseFields({
-        collection,
-        context,
-        currentDepth,
-        depth,
-        doc,
-        draft,
-        fallbackLocale,
-        fieldPromises,
-        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-        findMany,
-        flattenLocales,
-        global,
-        locale,
-        overrideAccess,
-        parentIndexPath,
-        parentPath,
-        parentSchemaPath,
-        populate,
-        populationPromises,
-        req,
-        select,
-        selectMode,
-        showHiddenFields,
-        siblingDoc,
-        triggerAccessControl,
-        triggerHooks,
+      field.tabs.forEach((tab, tabIndex) => {
+        let tabDoc = siblingDoc
+        let tabSelect: SelectType | undefined
+
+        const isNamedTab = tabHasName(tab)
+
+        const tabAsField: TabAsField = {
+          ...tab,
+          type: 'tab',
+        }
+
+        if (isNamedTab) {
+          tabDoc = siblingDoc[tab.name] as JsonObject
+
+          if (typeof siblingDoc[tab.name] !== 'object') {
+            tabDoc = {}
+          }
+
+          const shouldContinue = stripUnselectedFields({
+            field: tabAsField,
+            select,
+            selectMode,
+            siblingDoc: tabDoc,
+          })
+
+          if (!shouldContinue) {
+            return
+          }
+        } else {
+          tabSelect = select
+        }
+
+        const {
+          indexPath: tabIndexPath,
+          path: tabPath,
+          schemaPath: tabSchemaPath,
+        } = getFieldPaths({
+          field: tabAsField,
+          index: tabIndex,
+          parentIndexPath: indexPath,
+          parentPath,
+          parentSchemaPath,
+        })
+
+        traverseFields({
+          collection,
+          context,
+          currentDepth,
+          depth,
+          doc,
+          draft,
+          fallbackLocale,
+          fieldPromises,
+          fields: tab.fields,
+          findMany,
+          flattenLocales,
+          global,
+          locale,
+          overrideAccess,
+          parentIndexPath: isNamedTab ? '' : tabIndexPath,
+          parentPath: isNamedTab ? tabPath : parentPath,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+          populate,
+          populationPromises,
+          req,
+          select: tabSelect,
+          selectMode,
+          showHiddenFields,
+          siblingDoc: tabDoc,
+          triggerAccessControl,
+          triggerHooks,
+        })
       })
 
       break

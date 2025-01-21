@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Field } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -15,8 +15,7 @@ type Args = {
   context: RequestContext
   data: JsonObject
   doc: JsonObject
-  field: Field | TabAsField
-  fieldIndex: number
+  field: Field
   global: null | SanitizedGlobalConfig
   indexPath: string
   operation: 'create' | 'update'
@@ -41,11 +40,9 @@ export const promise = async ({
   data,
   doc,
   field,
-  fieldIndex,
   global,
   indexPath,
   operation,
-  parentIndexPath,
   parentPath,
   parentSchemaPath,
   path,
@@ -253,64 +250,52 @@ export const promise = async ({
       break
     }
 
-    case 'tab': {
-      const isNamedTab = tabHasName(field)
-
-      const {
-        indexPath: tabIndexPath,
-        path: tabPath,
-        schemaPath: tabSchemaPath,
-      } = getFieldPaths({
-        field: {
-          ...field,
-          type: 'tab',
-        },
-        index: fieldIndex,
-        parentIndexPath: indexPath,
-        parentPath,
-        parentSchemaPath,
-      })
-
-      await traverseFields({
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        parentIndexPath: isNamedTab ? '' : tabIndexPath,
-        parentPath: isNamedTab ? tabPath : parentPath,
-        parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
-        previousDoc,
-        previousSiblingDoc: isNamedTab
-          ? ((previousDoc[field.name] as JsonObject) ?? {})
-          : siblingDoc,
-        req,
-        siblingData: isNamedTab ? ((siblingData[field.name] as JsonObject) ?? {}) : siblingData,
-        siblingDoc: isNamedTab ? ((siblingDoc[field.name] as JsonObject) ?? {}) : siblingDoc,
-      })
-
-      break
-    }
-
     case 'tabs': {
-      await traverseFields({
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-        global,
-        operation,
-        parentIndexPath,
-        parentPath: path,
-        parentSchemaPath,
-        previousDoc,
-        previousSiblingDoc: { ...previousSiblingDoc },
-        req,
-        siblingData: siblingData || {},
-        siblingDoc: { ...siblingDoc },
+      field.tabs.forEach(async (tab, tabIndex) => {
+        let tabSiblingData = siblingData
+        let tabSiblingDoc = siblingDoc
+        let tabPreviousSiblingDoc = siblingDoc
+
+        const isNamedTab = tabHasName(tab)
+
+        if (isNamedTab) {
+          tabSiblingData = (siblingData[tab.name] as JsonObject) ?? {}
+          tabSiblingDoc = (siblingDoc[tab.name] as JsonObject) ?? {}
+          tabPreviousSiblingDoc = (previousDoc[tab.name] as JsonObject) ?? {}
+        }
+
+        const {
+          indexPath: tabIndexPath,
+          path: tabPath,
+          schemaPath: tabSchemaPath,
+        } = getFieldPaths({
+          field: {
+            ...tab,
+            type: 'tab',
+          },
+          index: tabIndex,
+          parentIndexPath: indexPath,
+          parentPath,
+          parentSchemaPath,
+        })
+
+        await traverseFields({
+          collection,
+          context,
+          data,
+          doc,
+          fields: tab.fields,
+          global,
+          operation,
+          parentIndexPath: isNamedTab ? '' : tabIndexPath,
+          parentPath: isNamedTab ? tabPath : parentPath,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
+          previousDoc,
+          previousSiblingDoc: { ...tabPreviousSiblingDoc },
+          req,
+          siblingData: tabSiblingData || {},
+          siblingDoc: { ...tabSiblingDoc },
+        })
       })
 
       break

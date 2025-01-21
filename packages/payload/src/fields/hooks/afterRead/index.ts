@@ -3,6 +3,7 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 
+import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { getSelectMode } from '../../../utilities/getSelectMode.js'
 import { traverseFields } from './traverseFields.js'
 

@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Field } from '../../config/types.js'
 
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
@@ -10,7 +10,7 @@ type Args<T> = {
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   doc: T
-  fields: (Field | TabAsField)[]
+  fields: Field[]
   id?: number | string
   overrideAccess: boolean
   parentIndexPath: string
@@ -51,7 +51,6 @@ export const traverseFields = async <T>({
         context,
         doc,
         field,
-        fieldIndex,
         indexPath,
         overrideAccess,
         parentIndexPath,
