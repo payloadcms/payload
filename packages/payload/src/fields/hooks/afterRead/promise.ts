@@ -768,7 +768,7 @@ export const promise = async ({
             field: tabAsField,
             select,
             selectMode,
-            siblingDoc: tabDoc,
+            siblingDoc,
           })
 
           if (!shouldContinue) {
