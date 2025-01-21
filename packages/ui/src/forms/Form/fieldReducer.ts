@@ -286,9 +286,8 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         // large documents with hundreds of fields
         const newState: FormState = {}
 
-        for (const path in action.state) {
+        for (const [path, newField] of Object.entries(action.state)) {
           const oldField = state[path]
-          const newField = action.state[path]
 
           if (newField.valid !== false) {
             newField.valid = true
@@ -308,8 +307,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       }
 
       if (action.sanitize) {
-        for (const path in action.state) {
-          const field = action.state[path]
+        for (const field of Object.values(action.state)) {
           if (field.valid !== false) {
             field.valid = true
           }

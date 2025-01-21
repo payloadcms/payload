@@ -40,13 +40,11 @@ export const mergeServerFormState = ({
       serverPropsToAccept.push('value')
     }
 
-    for (const path in existingState) {
+    for (const [path, newFieldState] of Object.entries(existingState)) {
       if (!incomingState[path]) {
         return
       }
       let fieldChanged = false
-
-      const newFieldState = existingState[path]
 
       /**
        * Handle error paths
@@ -107,10 +105,10 @@ export const mergeServerFormState = ({
     // This can happen if a new array row was added. In our local state, we simply add out stubbed `array` and `array.[index].id` entries to the local form state.
     // However, all other array sub-fields are not added to the local state - those will be added by the server and may be incoming here.
 
-    for (const path in incomingState) {
+    for (const [path, field] of Object.entries(incomingState)) {
       if (!existingState[path]) {
         changed = true
-        newState[path] = incomingState[path]
+        newState[path] = field
       }
     }
   }
