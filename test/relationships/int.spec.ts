@@ -39,6 +39,8 @@ const dirname = path.dirname(filename)
 
 type EasierChained = { id: string; relation: EasierChained }
 
+const mongoIt = process.env.PAYLOAD_DATABASE === 'mongodb' ? it : it.skip
+
 describe('Relationships', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
@@ -459,7 +461,8 @@ describe('Relationships', () => {
           expect(query2.totalDocs).toStrictEqual(2)
         })
 
-        it('should query using "all" by hasMany relationship field', async () => {
+        // all operator is not supported in Postgres yet for any fields
+        mongoIt('should query using "all" by hasMany relationship field', async () => {
           const movie1 = await payload.create({
             collection: 'movies',
             data: {},
@@ -1391,7 +1394,8 @@ describe('Relationships', () => {
       expect(queryTwo.docs).toHaveLength(1)
     })
 
-    it('should allow REST all querying on polymorphic relationships', async () => {
+    // all operator is not supported in Postgres yet for any fields
+    mongoIt('should allow REST all querying on polymorphic relationships', async () => {
       const movie = await payload.create({
         collection: 'movies',
         data: {
