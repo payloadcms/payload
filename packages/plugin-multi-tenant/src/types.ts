@@ -105,7 +105,7 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Useful for super-admin type users
    */
   userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user: User } ? ConfigTypes['user'] : User,
+    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
   ) => boolean
 }
 
