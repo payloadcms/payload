@@ -4,8 +4,9 @@ import type { ClientCollectionConfig, FormState } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import type { FormProps } from '../../../forms/Form/index.js'
 import type { State } from '../FormsManager/reducer.js'
 
 import { Button } from '../../../elements/Button/index.js'
@@ -13,7 +14,9 @@ import { Form } from '../../../forms/Form/index.js'
 import { RenderFields } from '../../../forms/RenderFields/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
+import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { baseClass, type EditManyBulkUploadsProps } from './index.js'
@@ -27,87 +30,104 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
   } & EditManyBulkUploadsProps
 > = (props) => {
   const { collection: { slug, fields, labels: { plural } } = {}, drawerSlug, forms } = props
+
+  const { getFormState } = useServerFunctions()
+
   const { permissions } = useAuth()
   const { i18n, t } = useTranslation()
   const { closeModal } = useModal()
   const { updateForm } = useFormsManager()
+
   const [selectedFields, setSelectedFields] = useState([])
   const [initialState, setInitialState] = useState<FormState>()
+  const hasInitializedState = React.useRef(false)
+  const abortOnChangeRef = useRef<AbortController>(null)
   const collectionPermissions = permissions?.collections?.[slug]
 
-  // Build initial state from forms
   useEffect(() => {
-    const state: FormState = {}
+    const controller = new AbortController()
 
-    forms.forEach((form, index) => {
-      Object.entries(form.formState).forEach(([path, field]) => {
-        // Namespace paths by index
-        const namespacedPath = `${index}.${path}`
-        state[namespacedPath] = {
-          initialValue: field?.value,
-          valid: field?.valid,
-          value: field?.value,
-        }
-      })
-    })
-
-    setInitialState(state)
-  }, [forms])
-
-  const onChange = useCallback(
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async ({ formState }: { formState: FormState }): Promise<FormState> => {
-      setInitialState((prevState) => {
-        const updatedState = { ...prevState }
-
-        Object.entries(formState).forEach(([path, field]) => {
-          // If the path is namespaced (e.g., "0.title"), update it directly
-          if (path.includes('.')) {
-            updatedState[path] = {
-              ...updatedState[path],
-              ...field,
-            }
-          } else {
-            // Spread the value to all indexed paths for the selected field
-            Object.keys(prevState || {})
-              .filter((key) => key.endsWith(`.${path}`)) // Match indexed keys like "0.title"
-              .forEach((key) => {
-                updatedState[key] = {
-                  ...updatedState[key],
-                  ...field,
-                }
-              })
-          }
+    if (!hasInitializedState.current) {
+      const getInitialState = async () => {
+        const { state: result } = await getFormState({
+          collectionSlug: slug,
+          data: {},
+          docPermissions: collectionPermissions,
+          docPreferences: null,
+          operation: 'create',
+          schemaPath: slug,
+          signal: controller.signal,
         })
 
-        return updatedState
+        setInitialState(result)
+        hasInitializedState.current = true
+      }
+
+      void getInitialState()
+    }
+
+    return () => {
+      abortAndIgnore(controller)
+    }
+  }, [collectionPermissions, getFormState, slug])
+
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) => {
+      const controller = handleAbortRef(abortOnChangeRef)
+
+      const { state } = await getFormState({
+        collectionSlug: slug,
+        docPermissions: collectionPermissions,
+        docPreferences: null,
+        formState: prevFormState,
+        operation: 'create',
+        schemaPath: slug,
+        signal: controller.signal,
       })
 
-      return formState
+      abortOnChangeRef.current = null
+
+      setInitialState(state)
+
+      return state
     },
-    [],
+    [collectionPermissions, getFormState, slug],
   )
 
-  // Handle saving changes to FormsManager
   const handleSave = useCallback(() => {
+    if (!initialState) {
+      return
+    }
+
     forms.forEach((form, index) => {
       const updatedFormState = { ...form.formState }
 
-      Object.entries(initialState || {})
-        .filter(([path]) => path.startsWith(`${index}.`)) // Filter by index
-        .forEach(([path, field]) => {
-          const fieldPath = path.replace(`${index}.`, '') // Remove namespace
-          updatedFormState[fieldPath] = {
-            ...updatedFormState[fieldPath],
+      // Iterate over `initialState` to update the corresponding `formState`
+      Object.entries(initialState).forEach(([path, field]) => {
+        if (updatedFormState[path]) {
+          updatedFormState[path] = {
+            ...updatedFormState[path],
+            errorMessage: undefined,
+            valid: true,
             value: field.value,
           }
-        })
+        }
+      })
 
+      // Push updated formState back to the FormsManager
       updateForm(index, updatedFormState)
     })
 
     closeModal(drawerSlug)
-  }, [forms, initialState, updateForm, closeModal, drawerSlug])
+  }, [closeModal, drawerSlug, forms, initialState, updateForm])
+
+  useEffect(() => {
+    const abortOnChange = abortOnChangeRef.current
+
+    return () => {
+      abortAndIgnore(abortOnChange)
+    }
+  }, [])
 
   return (
     <div className={`${baseClass}__main`}>

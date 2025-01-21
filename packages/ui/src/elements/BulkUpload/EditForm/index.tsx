@@ -1,7 +1,5 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
-
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback, useEffect } from 'react'
 
