@@ -2,6 +2,7 @@ import type { ConnectOptions } from 'mongoose'
 import type { Connect } from 'payload'
 
 import mongoose from 'mongoose'
+import { defaultBeginTransaction } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -46,7 +47,7 @@ export const connect: Connect = async function connect(
 
     if (!client.options.replicaSet) {
       this.transactionOptions = false
-      this.beginTransaction = undefined
+      this.beginTransaction = defaultBeginTransaction()
     }
 
     if (!this.mongoMemoryServer && !hotReload) {
