@@ -55,7 +55,7 @@ export const promise = async ({
 }: Args): Promise<void> => {
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
-  const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
+  const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
 
   if (fieldAffectsData(field)) {
     // Execute hooks
@@ -275,7 +275,7 @@ export const promise = async ({
           },
           index: tabIndex,
           parentIndexPath: indexPath,
-          parentPath,
+          parentPath: '',
           parentSchemaPath,
         })
 

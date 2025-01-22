@@ -68,7 +68,7 @@ export const promise = async <T>({
 }: Args<T>): Promise<void> => {
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
-  const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
+  const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
 
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
@@ -527,7 +527,7 @@ export const promise = async <T>({
           },
           index: tabIndex,
           parentIndexPath: indexPath,
-          parentPath,
+          parentPath: '',
           parentSchemaPath,
         })
 

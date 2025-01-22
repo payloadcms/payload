@@ -123,7 +123,7 @@ export const promise = async ({
 }: Args): Promise<void> => {
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
-  const indexPathSegments = indexPath ? indexPath.split('-').map(Number) : []
+  const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
 
   if (
     fieldAffectsData(field) &&
@@ -786,7 +786,7 @@ export const promise = async ({
           field: tabAsField,
           index: tabIndex,
           parentIndexPath: indexPath,
-          parentPath,
+          parentPath: '',
           parentSchemaPath,
         })
 
