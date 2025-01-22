@@ -122,7 +122,9 @@ type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
 
-export type Plugin = (config: Config) => Config | Promise<Config>
+export type Plugin = (
+  config: Config,
+) => ({ name?: string } & Config) | Promise<{ name?: string } & Config>
 
 export type LivePreviewConfig = {
   /**
