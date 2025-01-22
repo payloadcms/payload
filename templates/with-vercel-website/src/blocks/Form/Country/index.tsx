@@ -30,6 +30,12 @@ export const Country: React.FC<
     <Width width={width}>
       <Label className="" htmlFor={name}>
         {label}
+
+        {required && (
+          <span className="required">
+            * <span className="sr-only">(required)</span>
+          </span>
+        )}
       </Label>
       <Controller
         control={control}
@@ -57,7 +63,7 @@ export const Country: React.FC<
         }}
         rules={{ required }}
       />
-      {required && errors[name] && <Error />}
+      {errors[name] && <Error />}
     </Width>
   )
 }

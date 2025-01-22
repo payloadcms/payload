@@ -1,7 +1,5 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
-
 import {
   CheckboxField,
   CopyToClipboard,
@@ -41,8 +39,8 @@ export const APIViewClient: React.FC = () => {
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const globalConfig = getEntityConfig({ globalSlug })
 
   const localeOptions =
     localization &&

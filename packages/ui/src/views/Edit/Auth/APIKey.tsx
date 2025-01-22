@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { CopyToClipboard } from '../../../elements/CopyToClipboard/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
-import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { useFormFields } from '../../../forms/Form/context.js'
 import { useField } from '../../../forms/useField/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -26,16 +25,14 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
   const [initialAPIKey] = useState(uuidv4())
   const [highlightedField, setHighlightedField] = useState(false)
   const { i18n, t } = useTranslation()
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { collectionSlug } = useDocumentInfo()
 
   const apiKey = useFormFields(([fields]) => (fields && fields[path]) || null)
 
-  const apiKeyField: TextFieldClient = config.collections
-    .find((collection) => {
-      return collection.slug === collectionSlug
-    })
-    ?.fields?.find((field) => 'name' in field && field.name === 'apiKey') as TextFieldClient
+  const apiKeyField: TextFieldClient = getEntityConfig({ collectionSlug })?.fields?.find(
+    (field) => 'name' in field && field.name === 'apiKey',
+  ) as TextFieldClient
 
   const validate = (val) =>
     text(val, {

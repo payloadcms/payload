@@ -1,6 +1,6 @@
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 import path from 'path'
 
 import type { PayloadHandler } from '../../config/types.js'
@@ -10,7 +10,6 @@ import { checkFileAccess } from '../../uploads/checkFileAccess.js'
 import { streamFile } from '../../uploads/fetchAPI-stream-file/index.js'
 import { getFileTypeFallback } from '../../uploads/getFileTypeFallback.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
-import { headersWithCors } from '../../utilities/headersWithCors.js'
 
 export const getFileHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
@@ -65,10 +64,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
     : headers
 
   return new Response(data, {
-    headers: headersWithCors({
-      headers,
-      req,
-    }),
+    headers,
     status: httpStatus.OK,
   })
 }

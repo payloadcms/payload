@@ -56,7 +56,6 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     showHiddenFields,
   } = args
 
-  const doc = deepCopyObjectSimple(incomingDoc)
   const fieldPromises = []
   const populationPromises = []
 
@@ -75,7 +74,7 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     context,
     currentDepth,
     depth,
-    doc,
+    doc: incomingDoc,
     draft,
     fallbackLocale,
     fieldPromises,
@@ -93,11 +92,11 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     select,
     selectMode: select ? getSelectMode(select) : undefined,
     showHiddenFields,
-    siblingDoc: doc,
+    siblingDoc: incomingDoc,
   })
 
   await Promise.all(fieldPromises)
   await Promise.all(populationPromises)
 
-  return doc
+  return incomingDoc
 }

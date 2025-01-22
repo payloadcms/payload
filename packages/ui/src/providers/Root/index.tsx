@@ -1,5 +1,5 @@
 'use client'
-import type { I18nClient, Language } from '@payloadcms/translations'
+import type { I18nClient, I18nOptions, Language } from '@payloadcms/translations'
 import type {
   ClientConfig,
   LanguageOptions,
@@ -38,7 +38,7 @@ type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
-  readonly fallbackLang: ClientConfig['i18n']['fallbackLanguage']
+  readonly fallbackLang: I18nOptions['fallbackLanguage']
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions

@@ -49,6 +49,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
+    updateSavedDocumentData,
   } = useDocumentInfo()
   const queueRef = useRef([])
   const isProcessingRef = useRef(false)
@@ -180,9 +181,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                         setMostRecentVersionIsAutosaved(true)
                         setUnpublishedVersionCount((prev) => prev + 1)
                       }
-                    } else {
-                      return res.json()
                     }
+
+                    return res.json()
                   })
                   .then((json) => {
                     if (
@@ -230,6 +231,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                         setSubmitted(true)
                         setSaving(false)
                         return
+                      }
+                    } else {
+                      // If it's not an error then we can update the document data inside the context
+                      const document = json?.doc || json?.result
+
+                      // Manually update the data since this function doesn't fire the `submit` function from useForm
+                      if (document) {
+                        updateSavedDocumentData(document)
                       }
                     }
                   })

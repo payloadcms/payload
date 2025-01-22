@@ -100,22 +100,23 @@
 
     &__tableAddColumns:after,
     &__tableAddRows:after {
-      background-image: url(../../../../../lexical/ui/icons/Add/index.svg);
-      background-position: center;
-      background-repeat: no-repeat;
-      display: block;
-      content: ' ';
+      display: flex;
+      content: '+';
+      font-size: 1.4rem;
+      border-radius: $style-radius-s;
+      justify-content: center;
+      align-items: center;
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      opacity: 0.4;
+      color: var(--theme-elevation-500);
     }
 
     &__tableAddColumns:hover,
     &__tableAddRows:hover {
-      background-color: var(--theme-elevation-200);
+      background-color: var(--theme-elevation-150);
     }
 
     &__tableAddRows {
@@ -178,9 +179,14 @@
         mix-blend-mode: screen;
       }
 
-      &__tableAddColumns:after,
-      &__tableAddRows:after {
-        background-image: url(../../../../../lexical/ui/icons/Add/light.svg);
+      &__tableAddColumns,
+      &__tableAddRows {
+        background-color: var(--theme-elevation-50);
+      }
+
+      &__tableAddColumns:hover,
+      &__tableAddRows:hover {
+        background-color: var(--theme-elevation-100);
       }
     }
   }

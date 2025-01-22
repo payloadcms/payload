@@ -1038,7 +1038,7 @@ export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
-export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
+export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 export { createMigration } from './database/migrations/createMigration.js'
 export { getMigrations } from './database/migrations/getMigrations.js'
@@ -1112,6 +1112,7 @@ export type {
   UpdateVersion,
   UpdateVersionArgs,
   Upsert,
+  UpsertArgs,
 } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
@@ -1403,7 +1404,7 @@ export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
-export { headersWithCors } from './utilities/headersWithCors.js'
+export { headersWithCors_public as headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'

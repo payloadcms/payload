@@ -67,7 +67,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const { admin: { defaultColumns, useAsTitle } = {}, fields } = getEntityConfig({
     collectionSlug,
-  }) as ClientCollectionConfig
+  })
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference } = usePreferences()

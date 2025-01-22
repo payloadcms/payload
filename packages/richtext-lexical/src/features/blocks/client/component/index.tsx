@@ -491,14 +491,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
         fields={clientBlock?.fields}
         initialState={initialState}
         onChange={[onChange]}
-        onSubmit={(formState) => {
+        onSubmit={(formState, newData) => {
           // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-          const newData: any = reduceFieldsToValues(formState)
           newData.blockType = formData.blockType
           editor.update(() => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isBlockNode(node)) {
-              node.setFields(newData, true)
+              node.setFields(newData as BlockFields, true)
             }
           })
           toggleDrawer()

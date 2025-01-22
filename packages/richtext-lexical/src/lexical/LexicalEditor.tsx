@@ -4,7 +4,13 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary.js'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
-import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
+import {
+  $createParagraphNode,
+  $getRoot,
+  BLUR_COMMAND,
+  COMMAND_PRIORITY_LOW,
+  FOCUS_COMMAND,
+} from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
@@ -15,6 +21,7 @@ import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
+import { InsertParagraphAtEndPlugin } from './plugins/InsertParagraphAtEnd/index.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { TextPlugin } from './plugins/TextPlugin/index.js'
@@ -104,6 +111,7 @@ export const LexicalEditor: React.FC<
           }
           ErrorBoundary={LexicalErrorBoundary}
         />
+        <InsertParagraphAtEndPlugin />
         <TextPlugin features={editorConfig.features} />
         <OnChangePlugin
           // Selection changes can be ignored here, reducing the

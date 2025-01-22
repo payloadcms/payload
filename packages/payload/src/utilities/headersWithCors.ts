@@ -4,6 +4,7 @@ type CorsArgs = {
   headers: Headers
   req: Partial<PayloadRequest>
 }
+
 export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
   const cors = req?.payload.config.cors
   const requestOrigin = req?.headers.get('Origin')
@@ -46,3 +47,9 @@ export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
 
   return headers
 }
+
+/**
+ * This function is not needed anymore for public usage. CORS headers are applied by default to response.
+ * @deprecated
+ */
+export const headersWithCors_public = headersWithCors

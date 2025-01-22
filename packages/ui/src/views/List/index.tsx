@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, ListPreferences } from 'payload'
+import type { ListPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
@@ -113,7 +113,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { labels, upload } = collectionConfig
 

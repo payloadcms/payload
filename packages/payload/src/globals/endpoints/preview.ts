@@ -1,10 +1,9 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
 import { extractJWT } from '../../auth/extractJWT.js'
 import { getRequestGlobal } from '../../utilities/getRequestEntity.js'
-import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { findOneOperation } from '../operations/findOne.js'
 
@@ -38,10 +37,6 @@ export const previewHandler: PayloadHandler = async (req) => {
   }
 
   return Response.json(previewURL, {
-    headers: headersWithCors({
-      headers: new Headers(),
-      req,
-    }),
     status: httpStatus.OK,
   })
 }

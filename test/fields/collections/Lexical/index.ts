@@ -177,6 +177,25 @@ const editorConfig: ServerEditorConfig = {
       ],
       inlineBlocks: [
         {
+          slug: 'AvatarGroup',
+          interfaceName: 'AvatarGroupBlock',
+          fields: [
+            {
+              name: 'avatars',
+              type: 'array',
+              minRows: 1,
+              maxRows: 6,
+              fields: [
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'uploads',
+                },
+              ],
+            },
+          ],
+        },
+        {
           slug: 'myInlineBlock',
           admin: {
             components: {},

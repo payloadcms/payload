@@ -5,6 +5,8 @@ import { createLocalReq } from 'payload'
 
 import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types.js'
 
+import { hasText } from '../../../../validate/hasText.js'
+
 export type ConvertLexicalToHTMLArgs = {
   converters: HTMLConverter[]
   currentDepth?: number
@@ -53,7 +55,7 @@ export async function convertLexicalToHTML({
   req,
   showHiddenFields,
 }: ConvertLexicalToHTMLArgs): Promise<string> {
-  if (data?.root?.children?.length) {
+  if (hasText(data)) {
     if (req === undefined && payload) {
       req = await createLocalReq({}, payload)
     }

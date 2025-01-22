@@ -1,6 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
+  ClientComponentProps,
   ClientField,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
@@ -9,12 +10,12 @@ import type {
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
+  ServerComponentProps,
   StaticLabel,
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
 import {
-  deepCopyObjectSimple,
   fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsPresentationalOnly,
@@ -164,8 +165,29 @@ export const buildColumnState = (args: Args): Column[] => {
         ? _field.admin.components.Label
         : undefined
 
+    // TODO: customComponent will be optional in v4
+    const clientProps: Omit<ClientComponentProps, 'customComponents'> = {
+      field,
+    }
+
+    const customLabelServerProps: Pick<
+      ServerComponentProps,
+      'clientField' | 'collectionSlug' | 'field' | 'i18n' | 'payload'
+    > = {
+      clientField: field,
+      collectionSlug: collectionConfig.slug,
+      field: _field,
+      i18n,
+      payload,
+    }
+
     const CustomLabel = CustomLabelToRender
-      ? RenderServerComponent({ Component: CustomLabelToRender, importMap: payload.importMap })
+      ? RenderServerComponent({
+          clientProps,
+          Component: CustomLabelToRender,
+          importMap: payload.importMap,
+          serverProps: customLabelServerProps,
+        })
       : undefined
 
     const fieldAffectsDataSubFields =
@@ -185,16 +207,10 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const baseCellClientProps: DefaultCellComponentProps = {
       cellData: undefined,
-      collectionConfig: deepCopyObjectSimple(clientCollectionConfig),
+      collectionSlug: clientCollectionConfig.slug,
       customCellProps,
       field,
       rowData: undefined,
-    }
-
-    const serverProps: Pick<DefaultServerCellComponentProps, 'field' | 'i18n' | 'payload'> = {
-      field: _field,
-      i18n,
-      payload,
     }
 
     const column: Column = {
@@ -211,6 +227,21 @@ export const buildColumnState = (args: Args): Column[] => {
               ...baseCellClientProps,
               cellData: 'name' in field ? doc[field.name] : undefined,
               link: isLinkedColumn,
+              rowData: doc,
+            }
+
+            const cellServerProps: DefaultServerCellComponentProps = {
+              cellData: cellClientProps.cellData,
+              className: baseCellClientProps.className,
+              collectionConfig,
+              collectionSlug: collectionConfig.slug,
+              columnIndex: baseCellClientProps.columnIndex,
+              customCellProps: baseCellClientProps.customCellProps,
+              field: _field,
+              i18n,
+              link: cellClientProps.link,
+              onClick: baseCellClientProps.onClick,
+              payload,
               rowData: doc,
             }
 
@@ -237,21 +268,21 @@ export const buildColumnState = (args: Args): Column[] => {
                 clientProps: cellClientProps,
                 Component: _field.editor.CellComponent,
                 importMap: payload.importMap,
-                serverProps,
+                serverProps: cellServerProps,
               })
             } else {
-              CustomCell =
-                _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
-                  ? RenderServerComponent({
-                      clientProps: cellClientProps,
-                      Component:
-                        _field?.admin &&
-                        'components' in _field.admin &&
-                        _field.admin.components?.Cell,
-                      importMap: payload.importMap,
-                      serverProps,
-                    })
-                  : undefined
+              const CustomCellComponent = _field?.admin?.components?.Cell
+
+              if (CustomCellComponent) {
+                CustomCell = RenderServerComponent({
+                  clientProps: cellClientProps,
+                  Component: CustomCellComponent,
+                  importMap: payload.importMap,
+                  serverProps: cellServerProps,
+                })
+              } else {
+                CustomCell = undefined
+              }
             }
 
             return (
