@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { postsSlug } from '../shared.js'
+import { userFilterOptions } from './Users/filterOptions.js'
 
 export const Posts: CollectionConfig = {
   slug: postsSlug,
@@ -19,19 +20,15 @@ export const Posts: CollectionConfig = {
       required: true,
     },
     {
-      name: 'excerpt',
-      label: 'Excerpt',
-      type: 'text',
-    },
-    {
-      type: 'text',
-      name: 'slug',
-      localized: true,
-    },
-    {
       name: 'relatedLinks',
       relationTo: 'links',
       type: 'relationship',
+    },
+    {
+      name: 'author',
+      relationTo: 'users',
+      type: 'relationship',
+      filterOptions: userFilterOptions,
     },
   ],
 }
