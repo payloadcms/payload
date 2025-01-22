@@ -20,6 +20,12 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      graphics: {
+        Logo: '/components/Logo/index.js#Logo',
+        Icon: '/components/Icon/index.js#Icon',
+      },
+    },
   },
   onInit: seed,
   plugins: [
