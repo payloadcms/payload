@@ -20,7 +20,10 @@ export const PostsCollection: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
-          BlocksFeature({ blocks: [ContactBlock] }),
+          BlocksFeature({
+            blocks: [ContactBlock],
+            inlineBlocks: [{ slug: 'inline-contact', fields: ContactBlock.fields }],
+          }),
           TreeViewFeature(),
         ],
       }),
@@ -37,16 +40,6 @@ export const ContactBlock: Block = {
     {
       name: 'first',
       label: 'first line',
-      required: true,
-      type: 'text',
-      admin: {
-        description: '...',
-      },
-    },
-    {
-      name: 'two',
-      label: 'second line',
-      required: true,
       type: 'text',
       admin: {
         description: '...',
