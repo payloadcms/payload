@@ -285,6 +285,10 @@ export type CollectionAdminOptions = {
      */
     edit?: {
       /**
+       * Document edit view description
+       */
+      Description?: EntityDescriptionComponent
+      /**
        * Replaces the "Preview" button
        */
       PreviewButton?: CustomPreviewButton
