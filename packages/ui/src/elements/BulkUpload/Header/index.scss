@@ -12,11 +12,5 @@
     h2 {
       margin: 0;
     }
-
-    &__title {
-      display: flex;
-      align-items: center;
-      gap: calc(var(--base) * 0.8);
-    }
   }
 }

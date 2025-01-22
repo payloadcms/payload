@@ -108,9 +108,8 @@ export interface Post {
   id: string;
   tenant?: (string | null) | Tenant;
   title: string;
-  excerpt?: string | null;
-  slug?: string | null;
   relatedLinks?: (string | null) | Link;
+  author?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -247,9 +246,8 @@ export interface TenantsSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   tenant?: T;
   title?: T;
-  excerpt?: T;
-  slug?: T;
   relatedLinks?: T;
+  author?: T;
   updatedAt?: T;
   createdAt?: T;
 }
