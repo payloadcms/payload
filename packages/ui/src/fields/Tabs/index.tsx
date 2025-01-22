@@ -147,7 +147,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 
   const activeTabConfig = tabs[activeTabIndex]
 
-  const activeTabDescription = activeTabConfig.description
+  const activeTabDescription = activeTabConfig.admin?.description ?? activeTabConfig.description
 
   const activeTabStaticDescription =
     typeof activeTabDescription === 'function'
@@ -257,7 +257,9 @@ function ActiveTabContent({
     >
       <RenderCustomComponent
         CustomComponent={Description}
-        Fallback={<FieldDescription description={description} path={path} />}
+        Fallback={
+          <FieldDescription description={description} marginPlacement="bottom" path={path} />
+        }
       />
       {BeforeInput}
       <RenderFields
