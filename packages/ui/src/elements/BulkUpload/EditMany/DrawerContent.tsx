@@ -1,10 +1,10 @@
 'use client'
 
-import type { ClientCollectionConfig, FieldWithPathClient, FormState } from 'payload'
+import type { ClientCollectionConfig, FieldWithPathClient } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import type { FormProps } from '../../../forms/Form/index.js'
 import type { State } from '../FormsManager/reducer.js'
@@ -14,9 +14,7 @@ import { Form } from '../../../forms/Form/index.js'
 import { RenderFields } from '../../../forms/RenderFields/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
-import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { abortAndIgnore } from '../../../utilities/abortAndIgnore.js'
 import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { baseClass, type EditManyBulkUploadsProps } from './index.js'
@@ -31,55 +29,13 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
 > = (props) => {
   const { collection: { slug, fields, labels: { plural } } = {}, drawerSlug, forms } = props
 
-  const { getFormState } = useServerFunctions()
-
   const { permissions } = useAuth()
   const { i18n, t } = useTranslation()
   const { closeModal } = useModal()
   const { bulkUpdateForm } = useFormsManager()
 
   const [selectedFields, setSelectedFields] = useState<FieldWithPathClient[]>([])
-  const [initialState, setInitialState] = useState<FormState>()
-  const hasInitializedState = React.useRef(false)
-  const abortOnChangeRef = useRef<AbortController>(null)
   const collectionPermissions = permissions?.collections?.[slug]
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    if (!hasInitializedState.current) {
-      const getInitialState = async () => {
-        const { state: result } = await getFormState({
-          collectionSlug: slug,
-          data: {},
-          docPermissions: collectionPermissions,
-          docPreferences: null,
-          operation: 'create',
-          schemaPath: slug,
-          signal: controller.signal,
-        })
-
-        if (result) {
-          setInitialState(
-            Object.entries(result).reduce((acc, [key]) => {
-              acc[key] = {
-                valid: true,
-              }
-              return acc
-            }, {}),
-          )
-        }
-
-        hasInitializedState.current = true
-      }
-
-      void getInitialState()
-    }
-
-    return () => {
-      abortAndIgnore(controller)
-    }
-  }, [collectionPermissions, getFormState, slug])
 
   const handleSubmit: FormProps['onSubmit'] = useCallback(
     (formState) => {
@@ -95,14 +51,6 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     },
     [closeModal, drawerSlug, bulkUpdateForm, selectedFields],
   )
-
-  useEffect(() => {
-    const abortOnChange = abortOnChangeRef.current
-
-    return () => {
-      abortAndIgnore(abortOnChange)
-    }
-  }, [])
 
   return (
     <div className={`${baseClass}__main`}>
@@ -123,7 +71,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
           <XIcon />
         </button>
       </div>
-      <Form className={`${baseClass}__form`} initialState={initialState} onSubmit={handleSubmit}>
+      <Form className={`${baseClass}__form`} initialState={{}} onSubmit={handleSubmit}>
         <FieldSelect fields={fields} setSelected={setSelectedFields} />
         {selectedFields.length === 0 ? null : (
           <RenderFields
