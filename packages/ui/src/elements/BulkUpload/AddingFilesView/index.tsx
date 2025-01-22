@@ -44,7 +44,6 @@ export function AddingFilesView() {
 
       <div className={`${baseClass}__editView`}>
         <DrawerHeader
-          collectionConfig={collectionConfig}
           onClose={() => openModal(discardBulkUploadModalSlug)}
           title={getTranslation(collectionConfig.labels.singular, i18n)}
         />
@@ -67,7 +66,7 @@ export function AddingFilesView() {
             Upload={documentSlots.Upload}
             versionCount={0}
           >
-            <ActionsBar />
+            <ActionsBar collectionConfig={collectionConfig} />
             <EditForm submitted={hasSubmitted} />
           </DocumentInfoProvider>
         ) : null}
