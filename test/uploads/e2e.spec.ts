@@ -413,7 +413,7 @@ describe('Uploads', () => {
     // save the document and expect an error
     await page.locator('button#action-save').click()
     await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-      'The following field is invalid: audio',
+      'The following field is invalid: Audio',
     )
   })
 
@@ -687,6 +687,171 @@ describe('Uploads', () => {
       '.collection-edit--custom-upload-field .document-fields__edit h3',
     )
     await expect(clientText).toHaveText('This text was rendered on the client')
+  })
+
+  describe('bulk uploads', () => {
+    test('should bulk upload multiple files', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+      await page.waitForURL(uploadsOne.create)
+
+      // Upload single file
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files at once
+      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './test-image.png'),
+      ])
+
+      await page
+        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .fill('prefix-one')
+
+      const nextImageChevronButton = page.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      )
+      await nextImageChevronButton.click()
+
+      await page
+        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .fill('prefix-two')
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
+      const itemCount = await page
+        .locator('#field-hasManyUpload .upload--has-many__dragItem')
+        .count()
+      expect(itemCount).toEqual(2)
+
+      await saveDocAndAssert(page)
+    })
+
+    test('should apply field value to all bulk upload files after edit many', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+      await page.waitForURL(uploadsOne.create)
+
+      // Upload single file
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files at once
+      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './test-image.png'),
+      ])
+
+      await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
+      const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
+      await expect(editManyBulkUploadModal).toBeVisible()
+
+      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
+      await fieldSelector.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      // Select an option
+      await options.locator('text=Prefix').click()
+
+      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+
+      await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
+      const itemCount = await page
+        .locator('#field-hasManyUpload .upload--has-many__dragItem')
+        .count()
+      expect(itemCount).toEqual(2)
+
+      await saveDocAndAssert(page)
+    })
+
+    test('should remove validation errors from bulk upload files after correction in edit many drawer', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+      await page.waitForURL(uploadsOne.create)
+
+      // Upload single file
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files at once
+      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './test-image.png'),
+      ])
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+      await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 2 files')
+
+      const errorCount = page
+        .locator('#bulk-upload-drawer-slug-1 .file-selections .error-pill__count')
+        .first()
+      await expect(errorCount).toHaveText('2')
+
+      await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
+      const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
+      await expect(editManyBulkUploadModal).toBeVisible()
+
+      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
+      await fieldSelector.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      // Select an option
+      await options.locator('text=Prefix').click()
+
+      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+
+      await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+
+      await saveButton.click()
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'Successfully saved 2 files',
+      )
+
+      await saveDocAndAssert(page)
+    })
   })
 
   describe('remote url fetching', () => {
