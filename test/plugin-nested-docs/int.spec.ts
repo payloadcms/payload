@@ -4,6 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { Page } from './payload-types.js'
 
 let payload: Payload
 
@@ -51,6 +52,62 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(query.docs[0].breadcrumbs[2].url).toStrictEqual(
         '/parent-page/child-page/grandchild-page',
       )
+    })
+
+    it('should update more than 10 (default limit) breadcrumbs', async () => {
+      // create a parent doc
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: '11 children',
+          slug: '11-children',
+        },
+      })
+
+      // create 11 children docs
+      for (let i = 0; i < 11; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Child ${i + 1}`,
+            slug: `child-${i + 1}`,
+            parent: parentDoc.id,
+          },
+        })
+      }
+
+      // update parent doc
+      await payload.update({
+        collection: 'pages',
+        id: parentDoc.id,
+        data: {
+          title: '11 children updated',
+          slug: '11-children-updated',
+        },
+      })
+
+      // read children docs
+      const { docs } = await payload.find({
+        collection: 'pages',
+        limit: 0,
+        draft: true,
+        where: {
+          parent: {
+            equals: parentDoc.id,
+          },
+        },
+      })
+
+      const firstUpdatedChildBreadcrumbs = docs[0]?.breadcrumbs as Page['breadcrumbs']
+      const lastUpdatedChildBreadcrumbs = docs[10]?.breadcrumbs as Page['breadcrumbs']
+
+      expect(firstUpdatedChildBreadcrumbs).toHaveLength(2)
+      // @ts-ignore
+      expect(firstUpdatedChildBreadcrumbs[0].url).toStrictEqual('/11-children-updated')
+
+      expect(firstUpdatedChildBreadcrumbs).toBeDefined()
+      // @ts-ignore
+      expect(lastUpdatedChildBreadcrumbs[0].url).toStrictEqual('/11-children-updated')
     })
   })
 
