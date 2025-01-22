@@ -78,8 +78,17 @@ export interface Page {
 export interface Tenant {
   id: string;
   name: string;
+  /**
+   * Used for domain-based tenant handling
+   */
   domain?: string | null;
+  /**
+   * Used for url paths, example: /tenant-slug/page-slug
+   */
   slug: string;
+  /**
+   * If checked, logging in is not required to read. Useful for building public pages.
+   */
   allowPublicRead?: boolean | null;
   updatedAt: string;
   createdAt: string;

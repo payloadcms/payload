@@ -1,8 +1,7 @@
-import type { CollectionConfig, Where } from 'payload'
-
-import { getTenantFromCookie } from '@payloadcms/plugin-multi-tenant/utilities'
+import type { CollectionConfig } from 'payload'
 
 import { postsSlug } from '../shared.js'
+import { userFilterOptions } from './Users/filterOptions.js'
 
 export const Posts: CollectionConfig = {
   slug: postsSlug,
@@ -29,28 +28,7 @@ export const Posts: CollectionConfig = {
       name: 'author',
       relationTo: 'users',
       type: 'relationship',
-      filterOptions: ({ req }) => {
-        // try using coookies from next?
-        const selectedTenant = getTenantFromCookie(req.headers, req.payload.db.defaultIDType)
-        if (!selectedTenant) {
-          return false
-        }
-
-        return {
-          or: [
-            {
-              'tenants.tenant': {
-                equals: selectedTenant,
-              },
-            },
-            {
-              roles: {
-                in: ['admin'],
-              },
-            },
-          ],
-        }
-      },
+      filterOptions: userFilterOptions,
     },
   ],
 }
