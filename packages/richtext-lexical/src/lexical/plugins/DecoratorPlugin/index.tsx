@@ -50,12 +50,11 @@ export function DecoratorPlugin() {
           const { decoratorElement, decoratorNode } = decorator
           const { target } = event
           const isInteractive =
-            target instanceof HTMLElement &&
-            (target.tagName === 'INPUT' ||
-              target.tagName === 'TEXTAREA' ||
-              target.isContentEditable ||
-              target.tagName === 'BUTTON' ||
-              target.closest('.react-select, .code-editor, .no-select-decorator'))
+            !(target instanceof HTMLElement) ||
+            target.isContentEditable ||
+            target.closest(
+              'button, textarea, input, .react-select, .code-editor, .no-select-decorator, [role="button"]',
+            )
           if (isInteractive) {
             $setSelection(null)
           } else {
