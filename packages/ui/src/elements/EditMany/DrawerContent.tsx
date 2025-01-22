@@ -170,7 +170,7 @@ export const EditManyDrawerContent: React.FC<
   const collectionPermissions = permissions?.collections?.[slug]
   const searchParams = useSearchParams()
 
-  const filteredFields = filterOutUploadFields(collection, fields)
+  const filteredFields = filterOutUploadFields(fields)
 
   React.useEffect(() => {
     const controller = new AbortController()

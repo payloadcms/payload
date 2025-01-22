@@ -30,12 +30,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     forms: State['forms']
   } & EditManyBulkUploadsProps
 > = (props) => {
-  const {
-    collection: { slug, fields, labels: { plural } } = {},
-    collection,
-    drawerSlug,
-    forms,
-  } = props
+  const { collection: { slug, fields, labels: { plural } } = {}, drawerSlug, forms } = props
 
   const { getFormState } = useServerFunctions()
 
@@ -49,7 +44,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
   const hasInitializedState = React.useRef(false)
   const abortOnChangeRef = useRef<AbortController>(null)
   const collectionPermissions = permissions?.collections?.[slug]
-  const filteredFields = filterOutUploadFields(collection, fields)
+  const filteredFields = filterOutUploadFields(fields)
 
   useEffect(() => {
     const controller = new AbortController()
