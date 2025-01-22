@@ -6,6 +6,10 @@
     z-index: 1;
   }
 
+  [data-lexical-decorator='true']:has(.lexical-block) {
+    width: auto;
+  }
+
   .lexical-block-not-found {
     color: var(--theme-error-500);
     font-size: 1.1rem;
