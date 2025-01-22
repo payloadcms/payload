@@ -35,9 +35,12 @@ export const TenantSelectionProviderClient = ({
     initialValue || SELECT_ALL,
   )
   const [preventRefreshOnChange, setPreventRefreshOnChange] = React.useState(false)
-  const preventOnRefreshRef = React.useRef(false)
   const { user } = useAuth()
   const userID = React.useMemo(() => user?.id, [user?.id])
+  const selectedTenantLabel = React.useMemo(
+    () => tenantOptions.find((option) => option.value === selectedTenantID)?.label,
+    [selectedTenantID, tenantOptions],
+  )
 
   const router = useRouter()
 
@@ -80,26 +83,22 @@ export const TenantSelectionProviderClient = ({
     router.refresh()
   }, [userID, router])
 
-  React.useEffect(() => {
-    if (preventOnRefreshRef.current && !preventRefreshOnChange) {
-      preventOnRefreshRef.current = false
-      router.refresh()
-    } else {
-      preventOnRefreshRef.current = preventRefreshOnChange
-    }
-  }, [router, preventRefreshOnChange])
-
   return (
-    <Context.Provider
-      value={{
-        options: tenantOptions,
-        selectedTenantID,
-        setPreventRefreshOnChange,
-        setTenant,
-      }}
+    <span
+      data-selected-tenant-id={selectedTenantID}
+      data-selected-tenant-title={selectedTenantLabel}
     >
-      {children}
-    </Context.Provider>
+      <Context.Provider
+        value={{
+          options: tenantOptions,
+          selectedTenantID,
+          setPreventRefreshOnChange,
+          setTenant,
+        }}
+      >
+        {children}
+      </Context.Provider>
+    </span>
   )
 }
 

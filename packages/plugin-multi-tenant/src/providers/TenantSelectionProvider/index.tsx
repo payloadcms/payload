@@ -41,14 +41,10 @@ export const TenantSelectionProvider = async ({
 
   const cookies = await getCookies()
   const tenantCookie = cookies.get('payload-tenant')?.value
-  const selectedTenant =
-    tenantOptions.find((option) => option.value === tenantCookie)?.label || tenantCookie
 
   return (
-    <span data-selected-tenant-id={tenantCookie} data-selected-tenant-title={selectedTenant}>
-      <TenantSelectionProviderClient initialValue={tenantCookie} tenantOptions={tenantOptions}>
-        {children}
-      </TenantSelectionProviderClient>
-    </span>
+    <TenantSelectionProviderClient initialValue={tenantCookie} tenantOptions={tenantOptions}>
+      {children}
+    </TenantSelectionProviderClient>
   )
 }
