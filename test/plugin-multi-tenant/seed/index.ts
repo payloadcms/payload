@@ -1,39 +1,67 @@
 import type { Config } from 'payload'
 
-import { devUser, regularUser } from '../../credentials.js'
+import { devUser } from '../../credentials.js'
 
 export const seed: Config['onInit'] = async (payload) => {
   // create tenants
-  const tenant1 = await payload.create({
+  const blueDogTenant = await payload.create({
     collection: 'tenants',
     data: {
       name: 'Blue Dog',
-      slug: 'blue-dog',
       domain: 'bluedog.com',
     },
   })
-  const tenant2 = await payload.create({
+  const steelCatTenant = await payload.create({
     collection: 'tenants',
     data: {
       name: 'Steel Cat',
-      slug: 'steel-cat',
       domain: 'steelcat.com',
     },
   })
 
-  // create posts
+  // Create blue dog menu items
   await payload.create({
-    collection: 'posts',
+    collection: 'menu-items',
     data: {
-      title: 'Blue Dog Post',
-      tenant: tenant1.id,
+      name: 'Chorizo Con Queso and Chips',
+      tenant: blueDogTenant.id,
     },
   })
   await payload.create({
-    collection: 'posts',
+    collection: 'menu-items',
     data: {
-      title: 'Steel Cat Post',
-      tenant: tenant2.id,
+      name: 'Garlic Parmesan Tots',
+      tenant: blueDogTenant.id,
+    },
+  })
+  await payload.create({
+    collection: 'menu-items',
+    data: {
+      name: 'Spicy Mac',
+      tenant: blueDogTenant.id,
+    },
+  })
+
+  // Create steel cat menu items
+  await payload.create({
+    collection: 'menu-items',
+    data: {
+      name: 'Pretzel Bites',
+      tenant: steelCatTenant.id,
+    },
+  })
+  await payload.create({
+    collection: 'menu-items',
+    data: {
+      name: 'Buffalo Chicken Dip',
+      tenant: steelCatTenant.id,
+    },
+  })
+  await payload.create({
+    collection: 'menu-items',
+    data: {
+      name: 'Pulled Pork Nachos',
+      tenant: steelCatTenant.id,
     },
   })
 
@@ -50,12 +78,44 @@ export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
     collection: 'users',
     data: {
-      email: regularUser.email,
-      password: regularUser.password,
+      email: 'jane@blue-dog.com',
+      password: 'test',
       roles: ['user'],
       tenants: [
         {
-          tenant: tenant1.id,
+          tenant: blueDogTenant.id,
+        },
+      ],
+    },
+  })
+
+  // create menus
+  await payload.create({
+    collection: 'menu',
+    data: {
+      description: 'This collection behaves like globals, 1 document per tenant. No list view.',
+      title: 'Blue Dog Menu',
+      tenant: blueDogTenant.id,
+    },
+  })
+  await payload.create({
+    collection: 'menu',
+    data: {
+      description: 'This collection behaves like globals, 1 document per tenant. No list view.',
+      title: 'Steel Cat Menu',
+      tenant: steelCatTenant.id,
+    },
+  })
+
+  await payload.create({
+    collection: 'users',
+    data: {
+      email: 'huel@steel-cat.com',
+      password: 'test',
+      roles: ['user'],
+      tenants: [
+        {
+          tenant: steelCatTenant.id,
         },
       ],
     },

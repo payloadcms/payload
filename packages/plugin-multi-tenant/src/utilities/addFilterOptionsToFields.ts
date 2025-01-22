@@ -1,4 +1,4 @@
-import type { Field, FilterOptionsProps, RelationshipField, Where } from 'payload'
+import type { Field, FilterOptionsProps, RelationshipField } from 'payload'
 
 import { getTenantFromCookie } from './getTenantFromCookie.js'
 
@@ -7,6 +7,7 @@ type AddFilterOptionsToFieldsArgs = {
   tenantEnabledCollectionSlugs: string[]
   tenantEnabledGlobalSlugs: string[]
 }
+
 export function addFilterOptionsToFields({
   fields,
   tenantEnabledCollectionSlugs,
