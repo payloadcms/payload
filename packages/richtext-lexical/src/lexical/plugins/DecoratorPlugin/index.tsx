@@ -55,7 +55,7 @@ export function DecoratorPlugin() {
               target.tagName === 'TEXTAREA' ||
               target.isContentEditable ||
               target.tagName === 'BUTTON' ||
-              target.closest('.react-select'))
+              target.closest('.react-select, .code-editor, .no-select-decorator'))
           if (isInteractive) {
             $setSelection(null)
           } else {

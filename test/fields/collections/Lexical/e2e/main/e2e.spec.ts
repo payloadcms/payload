@@ -1341,5 +1341,13 @@ describe('lexicalMain', () => {
     // TEST DELETE!
     await page.keyboard.press('Backspace')
     await expect(labelInsideCollapsableBody2).not.toBeVisible()
+
+    const monacoLabel = page.locator('label').getByText('Code')
+    await monacoLabel.click()
+    await expectInsideSelectedDecorator(monacoLabel)
+
+    const monacoCode = page.getByText('Some code')
+    await monacoCode.click()
+    await expect(decoratorLocator).not.toBeVisible()
   })
 })
