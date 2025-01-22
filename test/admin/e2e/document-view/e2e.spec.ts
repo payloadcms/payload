@@ -24,6 +24,7 @@ import {
   customTabLabel,
   customTabViewPath,
   customTabViewTitle,
+  customTabAdminDescription,
 } from '../../shared.js'
 import {
   customFieldsSlug,
@@ -375,6 +376,31 @@ describe('Document View', () => {
       await expect(drawer2Content).toBeVisible()
       const drawer2Left = await drawer2Content.boundingBox().then((box) => box.x)
       expect(drawer2Left > drawerLeft).toBe(true)
+    })
+  })
+
+  describe('descriptions', () => {
+    test('should render tab admin description', async () => {
+      await page.goto(postsUrl.create)
+      await page.waitForURL(postsUrl.create)
+
+      const tabsContent = page.locator('.tabs-field__content-wrap')
+      await expect(tabsContent.locator('.field-description')).toHaveText(customTabAdminDescription)
+    })
+
+    test('should render tab admin description as a translation function', async () => {
+      await page.goto(postsUrl.create)
+      await page.waitForURL(postsUrl.create)
+
+      const secondTab = page.locator('.tabs-field__tab-button').nth(1)
+      secondTab.click()
+
+      wait(500)
+
+      const tabsContent = page.locator('.tabs-field__content-wrap')
+      await expect(
+        tabsContent.locator('.field-description', { hasText: `t:${customTabAdminDescription}` }),
+      ).toBeVisible()
     })
   })
 

@@ -1,12 +1,11 @@
 import type { Payload, ViewTypes } from 'payload'
 
-import { headers as getHeaders } from 'next/headers.js'
-
 import { SELECT_ALL } from '../constants.js'
 import { getTenantFromCookie } from './getTenantFromCookie.js'
 
 type Args = {
   docID?: number | string
+  headers: Headers
   payload: Payload
   slug: string
   tenantFieldName: string
@@ -15,11 +14,11 @@ type Args = {
 export async function getGlobalViewRedirect({
   slug,
   docID,
+  headers,
   payload,
   tenantFieldName,
   view,
 }: Args): Promise<string | void> {
-  const headers = await getHeaders()
   const tenant = getTenantFromCookie(headers, payload.db.defaultIDType)
   let redirectRoute
 
