@@ -1,6 +1,6 @@
-import type { Block, CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-import { BlocksFeature, lexicalEditor, TreeViewFeature } from '@payloadcms/richtext-lexical'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const postsSlug = 'posts'
 
@@ -15,36 +15,14 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'richText',
+      name: 'content',
       type: 'richText',
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          BlocksFeature({
-            blocks: [ContactBlock],
-            inlineBlocks: [{ slug: 'inline-contact', fields: ContactBlock.fields }],
-          }),
-          TreeViewFeature(),
-        ],
+        features: ({ defaultFeatures }) => [...defaultFeatures],
       }),
     },
   ],
   versions: {
     drafts: true,
   },
-}
-
-export const ContactBlock: Block = {
-  slug: 'contact',
-  fields: [
-    {
-      name: 'first',
-      label: 'first line',
-      type: 'text',
-      admin: {
-        description: '...',
-      },
-    },
-  ],
-  interfaceName: 'ContactBlock',
 }
