@@ -23,6 +23,8 @@ import type {
   BlocksFieldClientProps,
   BlocksFieldErrorClientComponent,
   BlocksFieldErrorServerComponent,
+  BlocksFieldLabelClientComponent,
+  BlocksFieldLabelServerComponent,
   CheckboxFieldClientProps,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
@@ -127,7 +129,7 @@ import type {
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequest, Where } from '../../types/index.js'
+import type { DefaultValue, Operation, PayloadRequest, Where } from '../../types/index.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -243,6 +245,7 @@ export type FilterOptionsProps<TData = any> = {
    * The collection `slug` to filter against, limited to this field's `relationTo` property.
    */
   relationTo: CollectionSlug
+  req: PayloadRequest
   /**
    * An object containing document data that is scoped to only fields within the same parent of this field.
    */
@@ -280,6 +283,10 @@ type Admin = {
   condition?: Condition
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
+  /**
+   * The field description will be displayed next to the field in the admin UI. Additionally,
+   * we use the field description to generate JSDoc comments for the generated TypeScript types.
+   */
   description?: Description
   disableBulkEdit?: boolean
   disabled?: boolean
@@ -395,7 +402,7 @@ export interface FieldBase {
   admin?: Admin
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-  defaultValue?: any
+  defaultValue?: DefaultValue
   hidden?: boolean
   hooks?: {
     afterChange?: FieldHook[]
@@ -658,7 +665,7 @@ export type RowField = {
   admin?: Omit<Admin, 'description'>
   fields: Field[]
   type: 'row'
-} & Omit<FieldBase, 'admin' | 'label' | 'name' | 'validate' | 'virtual'>
+} & Omit<FieldBase, 'admin' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
 
 export type RowFieldClient = {
   admin?: Omit<AdminClient, 'description'>
@@ -697,7 +704,7 @@ export type CollapsibleField = {
       label: Required<FieldBase['label']>
     }
 ) &
-  Omit<FieldBase, 'label' | 'name' | 'validate' | 'virtual'>
+  Omit<FieldBase, 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
 
 export type CollapsibleFieldClient = {
   admin?: {
@@ -1330,6 +1337,7 @@ export type BlocksField = {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
       Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
+      Label?: CustomComponent<BlocksFieldLabelClientComponent | BlocksFieldLabelServerComponent>
     } & Admin['components']
     initCollapsed?: boolean
     /**
@@ -1338,7 +1346,7 @@ export type BlocksField = {
     isSortable?: boolean
   } & Admin
   blocks: Block[]
-  defaultValue?: unknown
+  defaultValue?: DefaultValue
   labels?: Labels
   maxRows?: number
   minRows?: number
@@ -1411,6 +1419,13 @@ export type JoinField = {
    * This does not need to be set and will be overridden by the relationship field's localized property.
    */
   localized?: boolean
+  /**
+   * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
+   *
+   * @see https://payloadcms.com/docs/getting-started/concepts#depth
+   *
+   * @default 1
+   */
   maxDepth?: number
   /**
    * A string for the field in the collection being joined to.
@@ -1425,7 +1440,7 @@ export type JoinField = {
 export type JoinFieldClient = {
   admin?: AdminClient &
     Pick<JoinField['admin'], 'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'>
-} & FieldBaseClient &
+} & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
     JoinField,
     'collection' | 'defaultLimit' | 'defaultSort' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'
@@ -1451,6 +1466,10 @@ export type FlattenedTabAsField = {
   flattenedFields: FlattenedField[]
 } & MarkRequired<TabAsField, 'name'>
 
+export type FlattenedJoinField = {
+  targetField: RelationshipField | UploadField
+} & JoinField
+
 export type FlattenedField =
   | CheckboxField
   | CodeField
@@ -1459,8 +1478,8 @@ export type FlattenedField =
   | FlattenedArrayField
   | FlattenedBlocksField
   | FlattenedGroupField
+  | FlattenedJoinField
   | FlattenedTabAsField
-  | JoinField
   | JSONField
   | NumberField
   | PointField

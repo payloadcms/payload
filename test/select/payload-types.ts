@@ -17,6 +17,8 @@ export interface Config {
     'deep-posts': DeepPost;
     pages: Page;
     points: Point;
+    upload: Upload;
+    rels: Rel;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -30,6 +32,8 @@ export interface Config {
     'deep-posts': DeepPostsSelect<false> | DeepPostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     points: PointsSelect<false> | PointsSelect<true>;
+    upload: UploadSelect<false> | UploadSelect<true>;
+    rels: RelsSelect<false> | RelsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -116,6 +120,28 @@ export interface Post {
   };
   unnamedTabText?: string | null;
   unnamedTabNumber?: number | null;
+  hasOne?: (string | null) | Rel;
+  hasMany?: (string | Rel)[] | null;
+  hasManyUpload?: (string | Rel)[] | null;
+  hasOnePoly?: {
+    relationTo: 'rels';
+    value: string | Rel;
+  } | null;
+  hasManyPoly?:
+    | {
+        relationTo: 'rels';
+        value: string | Rel;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rels".
+ */
+export interface Rel {
+  id: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -345,6 +371,24 @@ export interface Point {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload".
+ */
+export interface Upload {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -390,6 +434,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'points';
         value: string | Point;
+      } | null)
+    | ({
+        relationTo: 'upload';
+        value: string | Upload;
+      } | null)
+    | ({
+        relationTo: 'rels';
+        value: string | Rel;
       } | null)
     | ({
         relationTo: 'users';
@@ -487,6 +539,11 @@ export interface PostsSelect<T extends boolean = true> {
       };
   unnamedTabText?: T;
   unnamedTabNumber?: T;
+  hasOne?: T;
+  hasMany?: T;
+  hasManyUpload?: T;
+  hasOnePoly?: T;
+  hasManyPoly?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -702,6 +759,31 @@ export interface PagesSelect<T extends boolean = true> {
 export interface PointsSelect<T extends boolean = true> {
   text?: T;
   point?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload_select".
+ */
+export interface UploadSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rels_select".
+ */
+export interface RelsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
 }

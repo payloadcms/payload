@@ -1,4 +1,4 @@
-import type { DefaultCellComponentProps, Payload } from 'payload'
+import type { DefaultServerCellComponentProps, Payload } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { formatAdminURL } from '@payloadcms/ui/shared'
@@ -11,7 +11,7 @@ export const RscEntrySlateCell: React.FC<
   {
     i18n: I18nClient
     payload: Payload
-  } & DefaultCellComponentProps
+  } & DefaultServerCellComponentProps
 > = (props) => {
   const {
     cellData,

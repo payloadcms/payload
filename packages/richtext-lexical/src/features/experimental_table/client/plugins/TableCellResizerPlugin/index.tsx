@@ -13,6 +13,7 @@ import {
   $isTableCellNode,
   $isTableRowNode,
   getDOMCellFromTarget,
+  getTableElement,
   TableNode,
 } from '@lexical/table'
 import { calculateZoomLevel } from '@lexical/utils'
@@ -76,27 +77,27 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
 
   useEffect(() => {
     const onMouseMove = (event: MouseEvent) => {
-      setTimeout(() => {
-        const target = event.target
+      const target = event.target
 
-        if (draggingDirection) {
-          updateMouseCurrentPos({
-            x: event.clientX,
-            y: event.clientY,
-          })
-          return
-        }
-        updateIsMouseDown(isMouseDownOnEvent(event))
-        if (resizerRef.current && resizerRef.current.contains(target as Node)) {
-          return
-        }
+      if (draggingDirection) {
+        updateMouseCurrentPos({
+          x: event.clientX,
+          y: event.clientY,
+        })
+        return
+      }
+      updateIsMouseDown(isMouseDownOnEvent(event))
+      if (resizerRef.current && resizerRef.current.contains(target as Node)) {
+        return
+      }
 
-        if (targetRef.current !== target) {
-          targetRef.current = target as HTMLElement
-          const cell = getDOMCellFromTarget(target as HTMLElement)
+      if (targetRef.current !== target) {
+        targetRef.current = target as HTMLElement
+        const cell = getDOMCellFromTarget(target as HTMLElement)
 
-          if (cell && activeCell !== cell) {
-            editor.update(() => {
+        if (cell && activeCell !== cell) {
+          editor.getEditorState().read(
+            () => {
               const tableCellNode = $getNearestNodeFromDOMNode(cell.elem)
 
               if (!tableCellNode) {
@@ -104,8 +105,10 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
               }
 
               const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode)
-              const tableElement = editor.getElementByKey(tableNode.getKey())
-
+              const tableElement = getTableElement(
+                tableNode,
+                editor.getElementByKey(tableNode.getKey()),
+              )
               if (!tableElement) {
                 throw new Error('TableCellResizer: Table element not found.')
               }
@@ -113,24 +116,21 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
               targetRef.current = target as HTMLElement
               tableRectRef.current = tableElement.getBoundingClientRect()
               updateActiveCell(cell)
-            })
-          } else if (cell == null) {
-            resetState()
-          }
+            },
+            { editor },
+          )
+        } else if (cell == null) {
+          resetState()
         }
-      }, 0)
+      }
     }
 
     const onMouseDown = (event: MouseEvent) => {
-      setTimeout(() => {
-        updateIsMouseDown(true)
-      }, 0)
+      updateIsMouseDown(true)
     }
 
     const onMouseUp = (event: MouseEvent) => {
-      setTimeout(() => {
-        updateIsMouseDown(false)
-      }, 0)
+      updateIsMouseDown(false)
     }
 
     const removeRootListener = editor.registerRootListener((rootElement, prevRootElement) => {

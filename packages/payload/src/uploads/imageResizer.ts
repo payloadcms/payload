@@ -176,6 +176,15 @@ const getImageResizeAction = ({
     }
   }
 
+  if (withoutEnlargement === undefined && (!targetWidth || !targetHeight)) {
+    if (
+      (targetWidth && originalImage.width < targetWidth) ||
+      (targetHeight && originalImage.height < targetHeight)
+    ) {
+      return 'omit'
+    }
+  }
+
   const originalImageIsSmallerXOrY =
     originalImage.width < targetWidth || originalImage.height < targetHeight
   if (fit === 'contain' || fit === 'inside') {

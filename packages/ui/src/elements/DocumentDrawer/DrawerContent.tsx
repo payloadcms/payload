@@ -8,9 +8,10 @@ import type { DocumentDrawerProps } from './types.js'
 
 import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
@@ -29,15 +30,12 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   redirectAfterDelete,
   redirectAfterDuplicate,
 }) => {
-  const {
-    config: { collections },
-  } = useConfig()
+  const { getEntityConfig } = useConfig()
+  const locale = useLocale()
 
-  const [collectionConfig] = useState(() =>
-    collections.find((collection) => collection.slug === collectionSlug),
-  )
+  const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug }))
 
-  const documentViewAbortControllerRef = React.useRef<AbortController>(null)
+  const abortGetDocumentViewRef = React.useRef<AbortController>(null)
 
   const { closeModal } = useModal()
   const { t } = useTranslation()
@@ -50,10 +48,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const getDocumentView = useCallback(
     (docID?: number | string) => {
-      abortAndIgnore(documentViewAbortControllerRef.current)
-
-      const controller = new AbortController()
-      documentViewAbortControllerRef.current = controller
+      const controller = handleAbortRef(abortGetDocumentViewRef)
 
       const fetchDocumentView = async () => {
         setIsLoading(true)
@@ -65,6 +60,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
             docID,
             drawerSlug,
             initialData,
+            locale,
             overrideEntityVisibility,
             redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
             redirectAfterDuplicate:
@@ -81,6 +77,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           closeModal(drawerSlug)
           // toast.error(data?.errors?.[0].message || t('error:unspecific'))
         }
+
+        abortGetDocumentViewRef.current = null
       }
 
       void fetchDocumentView()
@@ -96,6 +94,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       closeModal,
       overrideEntityVisibility,
       t,
+      locale,
     ],
   )
 
@@ -154,8 +153,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   // Cleanup any pending requests when the component unmounts
   useEffect(() => {
+    const abortGetDocumentView = abortGetDocumentViewRef.current
+
     return () => {
-      abortAndIgnore(documentViewAbortControllerRef.current)
+      abortAndIgnore(abortGetDocumentView)
     }
   }, [])
 

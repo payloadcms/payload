@@ -11,7 +11,7 @@ interface Args {
 }
 
 // Convert a stream into a promise that resolves with a Buffer
-const streamToBuffer = async (readableStream) => {
+const streamToBuffer = async (readableStream: any) => {
   const chunks = []
   for await (const chunk of readableStream) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
@@ -52,7 +52,7 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         Key: key,
       })
 
-      if (!object.Body) {
+      if (!object.Body || !object.ContentType || !object.ETag) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
@@ -68,6 +68,27 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         status: 200,
       })
     } catch (err: unknown) {
+      /**
+       * If object key does not found, the getObject function attempts a ListBucket operation.
+       * Because of permissions, this will throw very specific error that we can catch and handle.
+       */
+      if (
+        err instanceof Error &&
+        err.name === 'AccessDenied' &&
+        err.message?.includes('s3:ListBucket') &&
+        'type' in err &&
+        err.type === 'S3ServiceException'
+      ) {
+        req.payload.logger.error({
+          collectionSlug: collection.slug,
+          err,
+          msg: `Requested file not found in cloud storage: ${params.filename}`,
+          params,
+          requestedKey: key,
+        })
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
+
       req.payload.logger.error({
         collectionSlug: collection.slug,
         err,

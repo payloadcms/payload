@@ -61,7 +61,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     relationTo,
   } = props
   const [Table, setTable] = useState<React.ReactNode>(null)
-
   const { getEntityConfig } = useConfig()
 
   const { permissions } = useAuth()
@@ -92,9 +91,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [query, setQuery] = useState<ListQuery>()
   const [openColumnSelector, setOpenColumnSelector] = useState(false)
 
-  const [collectionConfig] = useState(
-    () => getEntityConfig({ collectionSlug: relationTo }) as ClientCollectionConfig,
-  )
+  const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug: relationTo }))
 
   const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
   const [data, setData] = useState<PaginatedDocs>(initialData)
@@ -115,7 +112,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
       }
 
-      // map columns from string[] to ColumnPreferences
+      // map columns from string[] to ListPreferences['columns']
       const defaultColumns = field.admin.defaultColumns
         ? field.admin.defaultColumns.map((accessor) => ({
             accessor,
@@ -195,6 +192,14 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [closeDrawer, onDrawerSave],
   )
 
+  const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      const newDocs = data.docs.filter((doc) => doc.id !== args.id)
+      void renderTable(newDocs)
+    },
+    [data.docs, renderTable],
+  )
+
   const preferenceKey = `${relationTo}-list`
 
   const canCreate = allowCreate !== false && permissions?.collections?.[relationTo]?.create
@@ -247,20 +252,20 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           {data.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
-                collectionSlug={relationTo}
                 data={data}
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
                 }
                 modifySearchParams={false}
                 onQueryChange={setQuery}
-                preferenceKey={preferenceKey}
               >
                 <TableColumnsProvider
                   collectionSlug={relationTo}
                   columnState={columnState}
                   docs={data.docs}
-                  LinkedCellOverride={<DrawerLink onDrawerSave={onDrawerSave} />}
+                  LinkedCellOverride={
+                    <DrawerLink onDrawerDelete={onDrawerDelete} onDrawerSave={onDrawerSave} />
+                  }
                   preferenceKey={preferenceKey}
                   renderRowTypes
                   setTable={setTable}

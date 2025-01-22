@@ -25,7 +25,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -41,7 +40,6 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
-  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
@@ -71,12 +69,9 @@ const dirname = path.dirname(filename)
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let global: AdminUrlUtil
-let id: string
-
 let context: BrowserContext
 
-describe('versions', () => {
+describe('Versions', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
@@ -84,7 +79,6 @@ describe('versions', () => {
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
-  let global: AdminUrlUtil
   let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -432,6 +426,59 @@ describe('versions', () => {
       await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
+    test('collection - should update updatedAt', async () => {
+      await page.goto(url.create)
+      await page.waitForURL(`**/${url.create}`)
+
+      // fill out doc in english
+      await page.locator('#field-title').fill('title')
+      await page.locator('#field-description').fill('initial description')
+      await saveDocAndAssert(page)
+
+      const updatedAtWrapper = await page.locator(
+        '.doc-controls .doc-controls__content .doc-controls__list-item',
+        {
+          hasText: 'Last Modified',
+        },
+      )
+      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      // wait for 1 second so that the timestamp can be different
+      await wait(1000)
+
+      await page.locator('#field-description').fill('changed description')
+      await saveDocAndAssert(page)
+
+      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+    })
+
+    test('collection - should update updatedAt on autosave', async () => {
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const updatedAtWrapper = await page.locator(
+        '.doc-controls .doc-controls__content .doc-controls__list-item',
+        {
+          hasText: 'Last Modified',
+        },
+      )
+      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      // wait for 1 second so that the timestamp can be different
+      await wait(1000)
+
+      await page.locator('#field-title').fill('autosave title updated')
+      await waitForAutoSaveToRunAndComplete(page)
+
+      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+    })
+
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       await page.goto(url.global(autoSaveGlobalSlug))
@@ -641,8 +688,8 @@ describe('versions', () => {
   describe('Collections - publish specific locale', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, localizedCollectionSlug)
-      global = new AdminUrlUtil(serverURL, localizedGlobalSlug)
     })
+
     test('should show publish individual locale dropdown', async () => {
       await page.goto(url.create)
       const publishOptions = page.locator('.doc-controls__controls .popup')

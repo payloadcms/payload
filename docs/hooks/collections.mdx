@@ -22,7 +22,7 @@ export const CollectionWithHooks: CollectionConfig = {
 ```
 
 <Banner type="info">
-  <strong>Tip:</strong>
+  **Tip:**
   You can also set hooks on the field-level to isolate hook logic to specific fields. [More details](./fields).
 </Banner>
 
@@ -91,9 +91,9 @@ The following arguments are provided to the `beforeOperation` hook:
 
 ### beforeValidate
 
-Runs before the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated server-side.
+Runs during the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated server-side.
 
-Please do note that this does not run before the client-side validation. If you added a `validate` function, this would be the lifecycle:
+Please do note that this does not run before client-side validation. If you render a custom field component in your front-end and provide it with a `validate` function, the order that validations will run in is:
 
 1. `validate` runs on the client
 2. if successful, `beforeValidate` runs on the server
@@ -186,13 +186,13 @@ const beforeReadHook: CollectionBeforeReadHook = async ({
 
 The following arguments are provided to the `beforeRead` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`doc`**               | The resulting Document after changes are applied. |
-| **`query`**          | The [Query](../queries/overview) of the request.
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`doc`**        | The resulting Document after changes are applied.                                                                                                     |
+| **`query`**      | The [Query](../queries/overview) of the request.                                                                                                      |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### afterRead
 
@@ -210,13 +210,13 @@ const afterReadHook: CollectionAfterReadHook = async ({
 
 The following arguments are provided to the `afterRead` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`doc`**               | The resulting Document after changes are applied. |
-| **`query`**          | The [Query](../queries/overview) of the request.
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`doc`**        | The resulting Document after changes are applied.                                                                                                     |
+| **`query`**      | The [Query](../queries/overview) of the request.                                                                                                      |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### beforeDelete
 

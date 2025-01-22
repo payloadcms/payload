@@ -740,6 +740,34 @@ describe('Collections - Uploads', () => {
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
     })
+
+    it('should not enlarge image if `withoutEnlargement` is set to undefined and width or height is undefined when imageSizes are larger than the uploaded image', async () => {
+      const small = await getFileByPath(path.resolve(dirname, './small.png'))
+
+      const result = await payload.create({
+        collection: enlargeSlug,
+        data: {},
+        file: small,
+      })
+
+      expect(result).toBeTruthy()
+
+      const { sizes } = result as unknown as Enlarge
+
+      expect(sizes.undefinedHeightWithoutEnlargement).toMatchObject({
+        filename: null,
+        filesize: null,
+        height: null,
+        mimeType: null,
+        url: null,
+        width: null,
+      })
+
+      await payload.delete({
+        collection: enlargeSlug,
+        id: result.id,
+      })
+    })
   })
 
   describe('Required Files', () => {

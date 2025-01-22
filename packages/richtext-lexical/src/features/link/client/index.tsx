@@ -22,7 +22,10 @@ import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor/index.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands.js'
 import { LinkPlugin } from './plugins/link/index.js'
 
-export type ClientProps = ExclusiveLinkCollectionsProps
+export type ClientProps = {
+  defaultLinkType?: string
+  defaultLinkURL?: string
+} & ExclusiveLinkCollectionsProps
 
 const toolbarGroups: ToolbarGroup[] = [
   toolbarFeatureButtonsGroupWithItems([
@@ -57,11 +60,9 @@ const toolbarGroups: ToolbarGroup[] = [
             return
           }
 
-          const linkFields: LinkFields = {
+          const linkFields: Partial<LinkFields> = {
             doc: null,
-            linkType: 'custom',
             newTab: false,
-            url: 'https://',
           }
 
           editor.dispatchCommand(TOGGLE_LINK_WITH_MODAL_COMMAND, {

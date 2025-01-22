@@ -50,6 +50,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           config,
           currentSchema,
           field,
+          i18n,
           interfaceNameDefinitions,
         }) => {
           if (!props?.blocks?.length && !props?.inlineBlocks?.length) {
@@ -82,7 +83,13 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           if (fields.length) {
             // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
             // we don't actually use the JSON Schema itself in the generated types yet.
-            fieldsToJSONSchema(collectionIDFieldTypes, fields, interfaceNameDefinitions, config)
+            fieldsToJSONSchema(
+              collectionIDFieldTypes,
+              fields,
+              interfaceNameDefinitions,
+              config,
+              i18n,
+            )
           }
 
           return currentSchema

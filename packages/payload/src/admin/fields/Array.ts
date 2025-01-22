@@ -1,6 +1,6 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { ArrayField, ArrayFieldClient, ClientField } from '../../fields/config/types.js'
+import type { ArrayField, ArrayFieldClient } from '../../fields/config/types.js'
 import type { ArrayFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
@@ -21,17 +21,20 @@ type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
 
 type ArrayFieldBaseClientProps = {
   readonly validate?: ArrayFieldValidation
-} & FieldPaths &
-  Pick<ServerFieldBase, 'permissions'>
+} & FieldPaths
+
+type ArrayFieldBaseServerProps = Pick<FieldPaths, 'path'>
 
 export type ArrayFieldClientProps = ArrayFieldBaseClientProps &
   ClientFieldBase<ArrayFieldClientWithoutType>
 
-export type ArrayFieldServerProps = ServerFieldBase<ArrayField, ArrayFieldClientWithoutType>
+export type ArrayFieldServerProps = ArrayFieldBaseServerProps &
+  ServerFieldBase<ArrayField, ArrayFieldClientWithoutType>
 
 export type ArrayFieldServerComponent = FieldServerComponent<
   ArrayField,
-  ArrayFieldClientWithoutType
+  ArrayFieldClientWithoutType,
+  ArrayFieldBaseServerProps
 >
 
 export type ArrayFieldClientComponent = FieldClientComponent<

@@ -36,7 +36,7 @@ describe('Array', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
 
@@ -84,12 +84,32 @@ describe('Array', () => {
     await page.goto(url.create)
     await page.locator('#field-rowLabelAsComponent >> .array-field__add-row').click()
 
+    // ensure the default label does not blink in before form state returns
+    const defaultRowLabelWasAttached = await page
+      .waitForSelector('#field-rowLabelAsComponent .array-field__row-header .row-label', {
+        state: 'attached',
+        timeout: 100, // A small timeout to catch any transient rendering
+      })
+      .catch(() => false) // If it doesn't appear, this resolves to `false`
+
+    expect(defaultRowLabelWasAttached).toBeFalsy()
+
+    await expect(page.locator('#field-rowLabelAsComponent #custom-array-row-label')).toBeVisible()
+
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
     await wait(100)
+
     const customRowLabel = page.locator(
       '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("custom row label")',
     )
+
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
+  })
+
+  test('should render default array field within custom component', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-customArrayField >> .array-field__add-row').click()
+    await expect(page.locator('#field-customArrayField__0__text')).toBeVisible()
   })
 
   // eslint-disable-next-line playwright/expect-expect
@@ -299,7 +319,7 @@ describe('Array', () => {
   test('should externally update array rows and render custom fields', async () => {
     await page.goto(url.create)
     await page.locator('#updateArrayExternally').click()
-    await expect(page.locator('#custom-field')).toBeVisible()
+    await expect(page.locator('#custom-text-field')).toBeVisible()
   })
 
   test('should not re-close initCollapsed true array rows on input in create new view', async () => {

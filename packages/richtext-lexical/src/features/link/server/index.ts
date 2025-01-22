@@ -100,12 +100,39 @@ export const LinkFeature = createServerFeature<
       (field) => !('name' in field) || field.name !== 'text',
     )
 
+    let linkTypeField: Field | null = null
+    let linkURLField: Field | null = null
+
+    for (const field of sanitizedFields) {
+      if ('name' in field && field.name === 'linkType') {
+        linkTypeField = field
+      }
+
+      if ('name' in field && field.name === 'url') {
+        linkURLField = field
+      }
+    }
+
+    const defaultLinkType = linkTypeField
+      ? 'defaultValue' in linkTypeField && typeof linkTypeField.defaultValue === 'string'
+        ? linkTypeField.defaultValue
+        : 'custom'
+      : undefined
+
+    const defaultLinkURL = linkURLField
+      ? 'defaultValue' in linkURLField && typeof linkURLField.defaultValue === 'string'
+        ? linkURLField.defaultValue
+        : 'https://'
+      : undefined
+
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#LinkFeatureClient',
       clientFeatureProps: {
+        defaultLinkType,
+        defaultLinkURL,
         disabledCollections: props.disabledCollections,
         enabledCollections: props.enabledCollections,
-      } as ExclusiveLinkCollectionsProps,
+      } as ClientProps,
       generateSchemaMap: () => {
         if (!sanitizedFields || !Array.isArray(sanitizedFields) || sanitizedFields.length === 0) {
           return null
@@ -153,7 +180,7 @@ export const LinkFeature = createServerFeature<
                 const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
                 const target: string = node.fields.newTab ? ' target="_blank"' : ''
 
-                let href: string = node.fields.url
+                let href: string = node.fields.url ?? ''
                 if (node.fields.linkType === 'internal') {
                   href =
                     typeof node.fields.doc?.value !== 'object'

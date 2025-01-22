@@ -32,6 +32,8 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
 
+export const lexicalTargetVersion = '0.21.0'
+
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   if (
     process.env.NODE_ENV !== 'production' &&
@@ -54,7 +56,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             '@lexical/selection',
             '@lexical/utils',
           ],
-          targetVersion: '0.20.0',
+          targetVersion: lexicalTargetVersion,
         },
       ],
     })
@@ -772,6 +774,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         collectionIDFieldTypes,
         config,
         field,
+        i18n,
         interfaceNameDefinitions,
         isRequired,
       }) => {
@@ -838,6 +841,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             config,
             currentSchema: outputSchema,
             field,
+            i18n,
             interfaceNameDefinitions,
             isRequired,
           })
@@ -855,10 +859,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 export { AlignFeature } from './features/align/server/index.js'
 export { BlockquoteFeature } from './features/blockquote/server/index.js'
 export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/server/index.js'
-export { type BlockFields } from './features/blocks/server/nodes/BlocksNode.js'
+export {
+  $createServerBlockNode,
+  $isServerBlockNode,
+  type BlockFields,
+  ServerBlockNode,
+} from './features/blocks/server/nodes/BlocksNode.js'
 
 export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
 export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
+
+export { TabHTMLConverter } from './features/converters/html/converter/converters/tab.js'
 
 export { TextHTMLConverter } from './features/converters/html/converter/converters/text.js'
 export { defaultHTMLConverters } from './features/converters/html/converter/defaultConverters.js'
@@ -1003,14 +1014,15 @@ export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 
 export type * from './nodeTypes.js'
 
-export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
+export { $convertFromMarkdownString } from './packages/@lexical/markdown/index.js'
 
+export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
 export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
+
 export { createServerFeature } from './utilities/createServerFeature.js'
 
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
-
 export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
 export {
   extractFrontmatter,
@@ -1018,5 +1030,4 @@ export {
   objectToFrontmatter,
   propsToJSXString,
 } from './utilities/jsx/jsx.js'
-export { $convertFromMarkdownString } from './utilities/jsx/lexicalMarkdownCopy.js'
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
