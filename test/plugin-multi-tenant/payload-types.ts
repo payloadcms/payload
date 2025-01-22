@@ -11,22 +11,24 @@ export interface Config {
     users: UserAuthOperations;
   };
   collections: {
-    users: User;
     tenants: Tenant;
-    posts: Post;
-    links: Link;
-    'navigation-global': NavigationGlobal;
+    users: User;
+    menu: Menu;
+    'menu-items': MenuItem;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    tenants: {
+      users: 'users';
+    };
+  };
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
-    links: LinksSelect<false> | LinksSelect<true>;
-    'navigation-global': NavigationGlobalSelect<false> | NavigationGlobalSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    menu: MenuSelect<false> | MenuSelect<true>;
+    'menu-items': MenuItemsSelect<false> | MenuItemsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -65,6 +67,21 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants".
+ */
+export interface Tenant {
+  id: string;
+  name: string;
+  domain: string;
+  users?: {
+    docs?: (string | User)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -90,49 +107,34 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants".
+ * via the `definition` "menu".
  */
-export interface Tenant {
-  id: string;
-  name: string;
-  slug: string;
-  domain: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
+export interface Menu {
   id: string;
   tenant?: (string | null) | Tenant;
   title: string;
-  relatedLinks?: (string | null) | Link;
-  author?: (string | null) | User;
+  description?: string | null;
+  menuItems?:
+    | {
+        /**
+         * Automatically filtered by selected tenant
+         */
+        menuItem: string | MenuItem;
+        active?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "links".
+ * via the `definition` "menu-items".
  */
-export interface Link {
+export interface MenuItem {
   id: string;
   tenant?: (string | null) | Tenant;
-  title?: string | null;
-  url?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "navigation-global".
- */
-export interface NavigationGlobal {
-  id: string;
-  tenant?: (string | null) | Tenant;
-  title?: string | null;
+  name: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -144,24 +146,20 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
         relationTo: 'tenants';
         value: string | Tenant;
       } | null)
     | ({
-        relationTo: 'posts';
-        value: string | Post;
+        relationTo: 'users';
+        value: string | User;
       } | null)
     | ({
-        relationTo: 'links';
-        value: string | Link;
+        relationTo: 'menu';
+        value: string | Menu;
       } | null)
     | ({
-        relationTo: 'navigation-global';
-        value: string | NavigationGlobal;
+        relationTo: 'menu-items';
+        value: string | MenuItem;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -207,6 +205,17 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants_select".
+ */
+export interface TenantsSelect<T extends boolean = true> {
+  name?: T;
+  domain?: T;
+  users?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -230,45 +239,29 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants_select".
+ * via the `definition` "menu_select".
  */
-export interface TenantsSelect<T extends boolean = true> {
+export interface MenuSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  description?: T;
+  menuItems?:
+    | T
+    | {
+        menuItem?: T;
+        active?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu-items_select".
+ */
+export interface MenuItemsSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
-  slug?: T;
-  domain?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  tenant?: T;
-  title?: T;
-  relatedLinks?: T;
-  author?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "links_select".
- */
-export interface LinksSelect<T extends boolean = true> {
-  tenant?: T;
-  title?: T;
-  url?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "navigation-global_select".
- */
-export interface NavigationGlobalSelect<T extends boolean = true> {
-  tenant?: T;
-  title?: T;
   updatedAt?: T;
   createdAt?: T;
 }
