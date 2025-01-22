@@ -585,15 +585,15 @@ describe('Hooks', () => {
         }),
         ...formatExpectedFieldPaths('fieldWithinUnnamedTab', {
           path: ['fieldWithinUnnamedTab'],
-          schemaPath: ['_index-3', '0', 'fieldWithinUnnamedTab'],
+          schemaPath: ['_index-3-0', 'fieldWithinUnnamedTab'],
         }),
         ...formatExpectedFieldPaths('fieldWithinNestedUnnamedTab', {
           path: ['fieldWithinNestedUnnamedTab'],
-          schemaPath: ['_index-3', '0', '1', '0', 'fieldWithinNestedUnnamedTab'],
+          schemaPath: ['_index-3-0-1-0', 'fieldWithinNestedUnnamedTab'],
         }),
         ...formatExpectedFieldPaths('fieldWithinNamedTab', {
           path: ['namedTab', 'fieldWithinNamedTab'],
-          schemaPath: ['_index-3', '1', 'namedTab', 'fieldWithinNamedTab'],
+          schemaPath: ['_index-3-1', 'fieldWithinNamedTab'],
         }),
       })
     })

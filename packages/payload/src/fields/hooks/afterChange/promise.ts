@@ -7,7 +7,7 @@ import type { Field } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPaths } from '../../getFieldPaths.js'
+import { getTabPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -268,15 +268,12 @@ export const promise = async ({
           indexPath: tabIndexPath,
           path: tabPath,
           schemaPath: tabSchemaPath,
-        } = getFieldPaths({
-          field: {
-            ...tab,
-            type: 'tab',
-          },
+        } = getTabPaths({
           index: tabIndex,
           parentIndexPath: indexPath,
           parentPath: '',
           parentSchemaPath,
+          tab,
         })
 
         await traverseFields({
@@ -289,7 +286,7 @@ export const promise = async ({
           operation,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentPath: isNamedTab ? tabPath : parentPath,
-          parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
+          parentSchemaPath: tabSchemaPath,
           previousDoc,
           previousSiblingDoc: { ...tabPreviousSiblingDoc },
           req,

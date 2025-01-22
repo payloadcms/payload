@@ -14,7 +14,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
-import { getFieldPaths } from '../../getFieldPaths.js'
+import { getTabPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -782,12 +782,12 @@ export const promise = async ({
           indexPath: tabIndexPath,
           path: tabPath,
           schemaPath: tabSchemaPath,
-        } = getFieldPaths({
-          field: tabAsField,
+        } = getTabPaths({
           index: tabIndex,
           parentIndexPath: indexPath,
           parentPath: '',
           parentSchemaPath,
+          tab,
         })
 
         traverseFields({
@@ -807,7 +807,7 @@ export const promise = async ({
           overrideAccess,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentPath: isNamedTab ? tabPath : parentPath,
-          parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
+          parentSchemaPath: tabSchemaPath,
           populate,
           populationPromises,
           req,

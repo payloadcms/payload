@@ -4,7 +4,7 @@ import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, FieldHookArgs } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPaths } from '../../getFieldPaths.js'
+import { getTabPaths } from '../../getFieldPaths.js'
 import { runBeforeDuplicateHooks } from './runHook.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -340,15 +340,12 @@ export const promise = async <T>({
             indexPath: tabIndexPath,
             path: tabPath,
             schemaPath: tabSchemaPath,
-          } = getFieldPaths({
-            field: {
-              ...tab,
-              type: 'tab',
-            },
+          } = getTabPaths({
             index: tabIndex,
             parentIndexPath: indexPath,
             parentPath: '',
             parentSchemaPath,
+            tab,
           })
 
           await traverseFields({
@@ -360,7 +357,7 @@ export const promise = async <T>({
             overrideAccess,
             parentIndexPath: isNamedTab ? '' : tabIndexPath,
             parentPath: isNamedTab ? tabPath : parentPath,
-            parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
+            parentSchemaPath: tabSchemaPath,
             req,
             siblingDoc,
           })

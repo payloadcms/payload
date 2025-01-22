@@ -11,7 +11,7 @@ import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPaths } from '../../getFieldPaths.js'
+import { getTabPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -452,15 +452,12 @@ export const promise = async ({
           indexPath: tabIndexPath,
           path: tabPath,
           schemaPath: tabSchemaPath,
-        } = getFieldPaths({
-          field: {
-            ...tab,
-            type: 'tab',
-          },
+        } = getTabPaths({
           index: tabIndex,
           parentIndexPath: indexPath,
           parentPath: '',
           parentSchemaPath,
+          tab,
         })
 
         await traverseFields({
@@ -477,7 +474,7 @@ export const promise = async ({
           operation,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentPath: isNamedTab ? tabPath : parentPath,
-          parentSchemaPath: isNamedTab ? tabSchemaPath : schemaPath,
+          parentSchemaPath: tabSchemaPath,
           req,
           siblingData: tabSiblingData,
           siblingDoc: tabSiblingDoc,

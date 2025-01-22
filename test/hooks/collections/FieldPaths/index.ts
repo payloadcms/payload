@@ -75,7 +75,7 @@ export const FieldPaths: CollectionConfig = {
       fields: [
         {
           // schemaPath: 'array.fieldWithinArray'
-          // path: 'array.fieldWithinArray'
+          // path: 'array.[n].fieldWithinArray'
           name: 'fieldWithinArray',
           type: 'text',
           hooks: attachHooks('fieldWithinArray'),
@@ -137,13 +137,13 @@ export const FieldPaths: CollectionConfig = {
           ],
         },
         {
-          // schemaPath: '_index-3.namedTab'
+          // schemaPath: '_index-3-1'
           // path: 'namedTab'
           label: 'Named Tab',
           name: 'namedTab',
           fields: [
             {
-              // schemaPath: '_index-3.namedTab.fieldWithinNamedTab'
+              // schemaPath: '_index-3-1.fieldWithinNamedTab'
               // path: 'namedTab.fieldWithinNamedTab'
               name: 'fieldWithinNamedTab',
               type: 'text',
