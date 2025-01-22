@@ -1,4 +1,6 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
+
+import { getTenantFromCookie } from '@payloadcms/plugin-multi-tenant/utilities'
 
 import { postsSlug } from '../shared.js'
 
@@ -19,19 +21,36 @@ export const Posts: CollectionConfig = {
       required: true,
     },
     {
-      name: 'excerpt',
-      label: 'Excerpt',
-      type: 'text',
-    },
-    {
-      type: 'text',
-      name: 'slug',
-      localized: true,
-    },
-    {
       name: 'relatedLinks',
       relationTo: 'links',
       type: 'relationship',
+    },
+    {
+      name: 'author',
+      relationTo: 'users',
+      type: 'relationship',
+      filterOptions: ({ req }) => {
+        // try using coookies from next?
+        const selectedTenant = getTenantFromCookie(req.headers, req.payload.db.defaultIDType)
+        if (!selectedTenant) {
+          return false
+        }
+
+        return {
+          or: [
+            {
+              'tenants.tenant': {
+                equals: selectedTenant,
+              },
+            },
+            {
+              roles: {
+                in: ['admin'],
+              },
+            },
+          ],
+        }
+      },
     },
   ],
 }

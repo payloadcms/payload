@@ -35,6 +35,7 @@ export const TenantSelectionProviderClient = ({
     initialValue || SELECT_ALL,
   )
   const [preventRefreshOnChange, setPreventRefreshOnChange] = React.useState(false)
+  const preventOnRefreshRef = React.useRef(false)
   const { user } = useAuth()
   const userID = React.useMemo(() => user?.id, [user?.id])
 
@@ -78,6 +79,15 @@ export const TenantSelectionProviderClient = ({
   React.useEffect(() => {
     router.refresh()
   }, [userID, router])
+
+  React.useEffect(() => {
+    if (preventOnRefreshRef.current && !preventRefreshOnChange) {
+      preventOnRefreshRef.current = false
+      router.refresh()
+    } else {
+      preventOnRefreshRef.current = preventRefreshOnChange
+    }
+  }, [router, preventRefreshOnChange])
 
   return (
     <Context.Provider
