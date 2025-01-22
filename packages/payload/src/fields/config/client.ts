@@ -318,10 +318,10 @@ export const createClientField = ({
                 switch (adminKey) {
                   case 'description':
                     if ('description' in tab.admin) {
-                      if (typeof tab.admin?.description !== 'function') {
-                        clientTab.admin.description = tab.admin.description
-                      } else {
+                      if (typeof tab.admin?.description === 'function') {
                         clientTab.admin.description = tab.admin.description({ t: i18n.t })
+                      } else {
+                        clientTab.admin.description = tab.admin.description
                       }
                     }
 
