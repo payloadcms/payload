@@ -242,6 +242,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     duplicate: 'Dupliceren',
     duplicateWithoutSaving: 'Dupliceren zonder wijzigingen te bewaren',
     edit: 'Bewerk',
+    editAll: 'Bewerk alles',
     editedSince: 'Bewerkt sinds',
     editing: 'Bewerken',
     editingLabel_many: 'Bewerken {{count}} {{label}}',

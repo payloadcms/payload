@@ -241,6 +241,7 @@ export const huTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplikálás',
     duplicateWithoutSaving: 'Duplikálás a módosítások mentése nélkül',
     edit: 'Szerkesztés',
+    editAll: 'Összes szerkesztése',
     editedSince: 'Szerkesztve',
     editing: 'Szerkesztés',
     editingLabel_many: '{{count}} {{label}} szerkesztése',

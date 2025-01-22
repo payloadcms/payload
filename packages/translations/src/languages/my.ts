@@ -241,6 +241,7 @@ export const myTranslations: DefaultTranslationsObject = {
     duplicate: 'ပုံတူပွားမည်။',
     duplicateWithoutSaving: 'သေချာပါပြီ။',
     edit: 'တည်းဖြတ်ပါ။',
+    editAll: 'အားလုံးကို တည်းဖြတ်ပါ။',
     editedSince: 'ကစပြီးတည်းဖြတ်ခဲ့သည်',
     editing: 'ပြင်ဆင်နေသည်။',
     editingLabel_many: 'တည်းဖြတ်ခြင်း {{count}} {{label}}',

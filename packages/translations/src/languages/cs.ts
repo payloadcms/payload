@@ -237,6 +237,7 @@ export const csTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplikovat',
     duplicateWithoutSaving: 'Duplikovat bez uložení změn',
     edit: 'Upravit',
+    editAll: 'Upravit vše',
     editedSince: 'Upraveno od',
     editing: 'Úprava',
     editingLabel_many: 'Úprava {{count}} {{label}}',

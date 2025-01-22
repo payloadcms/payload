@@ -239,6 +239,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     duplicate: '複製',
     duplicateWithoutSaving: '変更を保存せずに複製',
     edit: '編集',
+    editAll: 'すべてを編集',
     editedSince: 'から編集',
     editing: '編集',
     editingLabel_many: '{{count}}つの{{label}}を編集しています',

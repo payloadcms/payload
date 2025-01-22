@@ -241,6 +241,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     duplicate: 'Дублировать',
     duplicateWithoutSaving: 'Дублирование без сохранения изменений',
     edit: 'Редактировать',
+    editAll: 'Редактировать все',
     editedSince: 'Отредактировано с',
     editing: 'Редактирование',
     editingLabel_many: 'Редактирование {{count}} {{label}}',

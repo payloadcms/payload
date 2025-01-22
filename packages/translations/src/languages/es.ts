@@ -243,6 +243,7 @@ export const esTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplicar sin guardar cambios',
     edit: 'Editar',
+    editAll: 'Editar Todo',
     editedSince: 'Editado desde',
     editing: 'Editando',
     editingLabel_many: 'Edición de {{count}} {{label}}',

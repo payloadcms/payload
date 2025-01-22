@@ -237,6 +237,7 @@ export const koTranslations: DefaultTranslationsObject = {
     duplicate: '복제',
     duplicateWithoutSaving: '변경 사항 저장 없이 복제',
     edit: '수정',
+    editAll: '모두 수정',
     editedSince: '편집됨',
     editing: '수정 중',
     editingLabel_many: '{{count}}개의 {{label}} 수정 중',

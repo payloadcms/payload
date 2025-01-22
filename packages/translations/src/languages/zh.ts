@@ -229,6 +229,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     duplicate: '重复',
     duplicateWithoutSaving: '重复而不保存更改。',
     edit: '编辑',
+    editAll: '编辑全部',
     editedSince: '自...以来编辑',
     editing: '编辑中',
     editingLabel_many: '编辑 {{count}} {{label}}',

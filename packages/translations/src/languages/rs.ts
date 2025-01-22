@@ -239,6 +239,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     duplicate: 'Дупликат',
     duplicateWithoutSaving: 'Понови без чувања промена',
     edit: 'Уреди',
+    editAll: 'Уреди све',
     editedSince: 'Измењено од',
     editing: 'Уређивање',
     editingLabel_many: 'Уређивање {{count}} {{label}}',
