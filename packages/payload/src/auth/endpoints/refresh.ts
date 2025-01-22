@@ -3,7 +3,6 @@ import { status as httpStatus } from 'http-status'
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
-import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { generatePayloadCookie } from '../cookies.js'
 import { refreshOperation } from '../operations/refresh.js'
 
@@ -11,10 +10,7 @@ export const refreshHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
   const { t } = req
 
-  const headers = headersWithCors({
-    headers: new Headers(),
-    req,
-  })
+  const headers = new Headers()
 
   const result = await refreshOperation({
     collection,

@@ -35,6 +35,7 @@ import {
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
   withoutMetadataSlug,
+  customUploadFieldSlug,
 } from './shared.js'
 import { startMockCorsServer } from './startMockCorsServer.js'
 const filename = fileURLToPath(import.meta.url)
@@ -61,6 +62,7 @@ let relationPreviewURL: AdminUrlUtil
 let customFileNameURL: AdminUrlUtil
 let uploadsOne: AdminUrlUtil
 let uploadsTwo: AdminUrlUtil
+let customUploadFieldURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -89,6 +91,7 @@ describe('Uploads', () => {
     customFileNameURL = new AdminUrlUtil(serverURL, customFileNameMediaSlug)
     uploadsOne = new AdminUrlUtil(serverURL, 'uploads-1')
     uploadsTwo = new AdminUrlUtil(serverURL, 'uploads-2')
+    customUploadFieldURL = new AdminUrlUtil(serverURL, customUploadFieldSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -670,6 +673,20 @@ describe('Uploads', () => {
 
     // With metadata, the animated image filesize would be 218762
     expect(webpMediaDoc.sizes.sizeThree.filesize).toEqual(211638)
+  })
+
+  test('should show custom upload component', async () => {
+    await page.goto(customUploadFieldURL.create)
+
+    const serverText = page.locator(
+      '.collection-edit--custom-upload-field .document-fields__edit h2',
+    )
+    await expect(serverText).toHaveText('This text was rendered on the server')
+
+    const clientText = page.locator(
+      '.collection-edit--custom-upload-field .document-fields__edit h3',
+    )
+    await expect(clientText).toHaveText('This text was rendered on the client')
   })
 
   describe('remote url fetching', () => {

@@ -3,7 +3,6 @@ import { status as httpStatus } from 'http-status'
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
-import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { generateExpiredPayloadCookie } from '../cookies.js'
 import { logoutOperation } from '../operations/logout.js'
 
@@ -15,18 +14,12 @@ export const logoutHandler: PayloadHandler = async (req) => {
     req,
   })
 
-  const headers = headersWithCors({
-    headers: new Headers(),
-    req,
-  })
-
   if (!result) {
     return Response.json(
       {
         message: t('error:logoutFailed'),
       },
       {
-        headers,
         status: httpStatus.BAD_REQUEST,
       },
     )
@@ -38,7 +31,9 @@ export const logoutHandler: PayloadHandler = async (req) => {
     cookiePrefix: req.payload.config.cookiePrefix,
   })
 
-  headers.set('Set-Cookie', expiredCookie)
+  const headers = new Headers({
+    'Set-Cookie': expiredCookie,
+  })
 
   return Response.json(
     {

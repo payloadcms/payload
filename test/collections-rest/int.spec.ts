@@ -1128,6 +1128,48 @@ describe('collections-rest', () => {
           expect(resultCount.totalDocs).toBe(1)
         })
 
+        it('should omit maxDistance and return a document from minDistance', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+
+          const near = `${lat + 0.01}, ${lng + 0.01}, null, 1500`
+          const response = await restClient.GET(`/${pointSlug}`, {
+            query: {
+              where: {
+                point: {
+                  near,
+                },
+              },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toEqual(200)
+          expect(result.docs).toHaveLength(1)
+        })
+
+        it('should omit maxDistance and not return a document because exceeds minDistance', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+
+          const near = `${lat + 0.01}, ${lng + 0.01}, null, 1700`
+          const response = await restClient.GET(`/${pointSlug}`, {
+            query: {
+              where: {
+                point: {
+                  near,
+                },
+              },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toEqual(200)
+          expect(result.docs).toHaveLength(0)
+        })
+
         it('should not return a point far away', async () => {
           if (payload.db.name === 'sqlite') {
             return
