@@ -11,13 +11,16 @@ import { headersWithCors } from './headersWithCors.js'
 import { mergeHeaders } from './mergeHeaders.js'
 import { routeError } from './routeError.js'
 
-const notFoundResponse = (req: PayloadRequest, headers: Headers) => {
+const notFoundResponse = (req: PayloadRequest) => {
   return Response.json(
     {
       message: `Route not found "${new URL(req.url).pathname}"`,
     },
     {
-      headers,
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.NOT_FOUND,
     },
   )
@@ -97,16 +100,14 @@ export const handleEndpoints = async ({
   try {
     req = await createPayloadRequest({ config: incomingConfig, request })
 
-    let headers = headersWithCors({
-      headers: new Headers(),
-      req,
-    })
-
     if (req.method.toLowerCase() === 'options') {
       return Response.json(
         {},
         {
-          headers,
+          headers: headersWithCors({
+            headers: new Headers(),
+            req,
+          }),
           status: 200,
         },
       )
@@ -118,7 +119,7 @@ export const handleEndpoints = async ({
     const pathname = `${basePath}${new URL(req.url).pathname}`
 
     if (!pathname.startsWith(config.routes.api)) {
-      return notFoundResponse(req, headers)
+      return notFoundResponse(req)
     }
 
     // /api/posts/route -> /posts/route
@@ -172,7 +173,10 @@ export const handleEndpoints = async ({
           message: `Cannot ${req.method.toUpperCase()} ${req.url}`,
         },
         {
-          headers,
+          headers: headersWithCors({
+            headers: new Headers(),
+            req,
+          }),
           status: httpStatus.NOT_IMPLEMENTED,
         },
       )
@@ -209,19 +213,12 @@ export const handleEndpoints = async ({
     }
 
     if (!handler) {
-      return notFoundResponse(req, headers)
-    }
-
-    if (req.responseHeaders) {
-      headers = mergeHeaders(req.responseHeaders, headers)
+      return notFoundResponse(req)
     }
 
     const response = await handler(req)
-
-    headers = mergeHeaders(response.headers, headers)
-
     return new Response(response.body, {
-      headers,
+      headers: mergeHeaders(req.responseHeaders ?? new Headers(), response.headers),
       status: response.status,
       statusText: response.statusText,
     })
