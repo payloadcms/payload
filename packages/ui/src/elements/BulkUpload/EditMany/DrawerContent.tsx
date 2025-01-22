@@ -17,6 +17,7 @@ import { useAuth } from '../../../providers/Auth/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../../utilities/abortAndIgnore.js'
+import { filterOutUploadFields } from '../../../utilities/filterOutUploadFields.js'
 import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { baseClass, type EditManyBulkUploadsProps } from './index.js'
@@ -29,7 +30,12 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     forms: State['forms']
   } & EditManyBulkUploadsProps
 > = (props) => {
-  const { collection: { slug, fields, labels: { plural } } = {}, drawerSlug, forms } = props
+  const {
+    collection: { slug, fields, labels: { plural } } = {},
+    collection,
+    drawerSlug,
+    forms,
+  } = props
 
   const { getFormState } = useServerFunctions()
 
@@ -43,6 +49,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
   const hasInitializedState = React.useRef(false)
   const abortOnChangeRef = useRef<AbortController>(null)
   const collectionPermissions = permissions?.collections?.[slug]
+  const filteredFields = filterOutUploadFields(collection, fields)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -124,7 +131,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
         </button>
       </div>
       <Form className={`${baseClass}__form`} initialState={initialState} onSubmit={handleSubmit}>
-        <FieldSelect fields={fields} setSelected={setSelectedFields} />
+        <FieldSelect fields={filteredFields} setSelected={setSelectedFields} />
         {selectedFields.length === 0 ? null : (
           <RenderFields
             fields={selectedFields}
