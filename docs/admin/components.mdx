@@ -20,7 +20,7 @@ There are four main types of Custom Components in Payload:
 - [Root Components](#root-components)
 - [Collection Components](./collections#custom-components)
 - [Global Components](./globals#custom-components)
-- [Field Components](./fields#custom-components)
+- [Field Components](../fields/overview#custom-components)
 
 To swap in your own Custom Component, first consult the list of available components, determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
 
@@ -185,7 +185,7 @@ Each Custom Component receives the following props by default:
 
 <Banner type="warning">
   **Reminder:**
-  All Custom Components also receive various other props that are specific component being rendered. See [Root Components](#root-components), [Collection Components](./collections#custom-components), [Global Components](./globals#custom-components), or [Field Components](./fields#custom-components) for a complete list of all default props per component.
+  All Custom Components also receive various other props that are specific component being rendered. See [Root Components](#root-components), [Collection Components](./collections#custom-components), [Global Components](./globals#custom-components), or [Field Components](../fields/overview#custom-components) for a complete list of all default props per component.
 </Banner>
 
 ### Custom Props
@@ -291,7 +291,7 @@ export const MyClientComponent: React.FC = () => {
   See [Using Hooks](#using-hooks) for more details.
 </Banner>
 
-All [Field Components](./fields) automatically receive their respective Field Config through props.
+All [Field Components](../fields/overview#custom-components) automatically receive their respective Field Config through props.
 
 ```tsx
 import React from 'react'
