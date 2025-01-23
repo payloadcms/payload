@@ -143,7 +143,7 @@ The above example shows how to add a new [Root View](#root-views), but the patte
 
 Collection Views are views that are scoped under the `/collections` route, such as the Collection List and Document Edit views.
 
-To swap out Collection Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Collection Config](../collections/overview):
+To swap out Collection Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Collection Config](../configuration/collections):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -248,7 +248,7 @@ The following options are available:
 
 Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View or the API View. All Document Views keep their overall structure across navigation changes, such as their title and tabs, and replace only the content below.
 
-To swap out Document Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views.Edit[key]` property in your [Collection Config](../collections/overview) or [Global Config](../configuration/globals):
+To swap out Document Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views.Edit[key]` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
