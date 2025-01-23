@@ -98,3 +98,89 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { NumberField } from '@payloadcms/ui'
+import type { NumberFieldServerComponent } from 'payload'
+
+export const CustomNumberFieldServer: NumberFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <NumberField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { NumberField } from '@payloadcms/ui'
+import type { NumberFieldClientComponent } from 'payload'
+
+export const CustomNumberFieldClient: NumberFieldClientComponent = (props) => {
+  return <NumberField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { NumberFieldLabelServerComponent } from 'payload'
+
+export const CustomNumberFieldLabelServer: NumberFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { NumberFieldLabelClientComponent } from 'payload'
+
+export const CustomNumberFieldLabelClient: NumberFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```

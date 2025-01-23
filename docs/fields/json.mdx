@@ -154,3 +154,89 @@ export const ExampleCollection: CollectionConfig = {
 // {"foo": "bar"} or {"foo": "foobar"} - ok
 // Attempting to create {"foo": "not-bar"} will throw an error
 ```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { JSONField } from '@payloadcms/ui'
+import type { JSONFieldServerComponent } from 'payload'
+
+export const CustomJSONFieldServer: JSONFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <JSONField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { JSONField } from '@payloadcms/ui'
+import type { JSONFieldClientComponent } from 'payload'
+
+export const CustomJSONFieldClient: JSONFieldClientComponent = (props) => {
+  return <JSONField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { JSONFieldLabelServerComponent } from 'payload'
+
+export const CustomJSONFieldLabelServer: JSONFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { JSONFieldLabelClientComponent } from 'payload'
+
+export const CustomJSONFieldLabelClient: JSONFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```

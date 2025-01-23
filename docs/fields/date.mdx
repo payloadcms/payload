@@ -135,3 +135,90 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { DateTimeField } from '@payloadcms/ui'
+import type { DateFieldServerComponent } from 'payload'
+
+export const CustomDateFieldServer: DateFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <DateTimeField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { DateTimeField } from '@payloadcms/ui'
+import type { DateFieldClientComponent } from 'payload'
+
+export const CustomDateFieldClient: DateFieldClientComponent = (props) => {
+  return <DateTimeField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { DateFieldLabelServerComponent } from 'payload'
+
+export const CustomDateFieldLabelServer: DateFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { DateFieldLabelClientComponent } from 'payload'
+
+export const CustomDateFieldLabelClient: DateFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```
+

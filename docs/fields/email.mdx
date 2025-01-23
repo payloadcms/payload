@@ -90,3 +90,83 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { EmailField } from '@payloadcms/ui'
+import type { EmailFieldServerComponent } from 'payload'
+
+export const CustomEmailFieldServer: EmailFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <EmailField field={clientField} path={path} schemaPath={schemaPath} permissions={permissions} />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { EmailField } from '@payloadcms/ui'
+import type { EmailFieldClientComponent } from 'payload'
+
+export const CustomEmailFieldClient: EmailFieldClientComponent = (props) => {
+  return <EmailField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { EmailFieldLabelServerComponent } from 'payload'
+
+export const CustomEmailFieldLabelServer: EmailFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { EmailFieldLabelClientComponent } from 'payload'
+
+export const CustomEmailFieldLabelClient: EmailFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )}
+```

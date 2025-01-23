@@ -209,6 +209,92 @@ export const ExampleCollection: CollectionConfig = {
 }
 ```
 
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { BlocksField } from '@payloadcms/ui'
+import type { BlocksFieldServerComponent } from 'payload'
+
+export const CustomBlocksFieldServer: BlocksFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions
+}) => {
+  return (
+    <BlocksField field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { BlocksField } from '@payloadcms/ui'
+import type { BlocksFieldClientComponent } from 'payload'
+
+export const CustomBlocksFieldClient: BlocksFieldClientComponent = (props) => {
+  return <BlocksField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { BlocksFieldLabelServerComponent } from 'payload'
+
+export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { BlocksFieldLabelClientComponent } from 'payload'
+
+export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
+  label,
+  path,
+  required,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```
+
 ## TypeScript
 
 As you build your own Block configs, you might want to store them in separate files but retain typing accordingly. To do so, you can import and use Payload's `Block` type:
