@@ -14,7 +14,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
-import { getTabPaths } from '../../getFieldPaths.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -91,6 +91,7 @@ const stripUnselectedFields = ({
 // - Execute field hooks
 // - Execute read access control
 // - Populate relationships
+
 export const promise = async ({
   collection,
   context,
@@ -782,12 +783,12 @@ export const promise = async ({
           indexPath: tabIndexPath,
           path: tabPath,
           schemaPath: tabSchemaPath,
-        } = getTabPaths({
+        } = getFieldPaths({
+          field: tab,
           index: tabIndex,
           parentIndexPath: indexPath,
-          parentPath: '',
+          parentPath: isNamedTab ? '' : parentPath,
           parentSchemaPath,
-          tab,
         })
 
         traverseFields({

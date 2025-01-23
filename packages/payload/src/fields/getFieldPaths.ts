@@ -1,7 +1,7 @@
-import type { ClientField, Field, Tab, TabAsField, TabAsFieldClient } from './config/types.js'
+import type { ClientField, Field, Tab, TabAsFieldClient } from './config/types.js'
 
 type Args = {
-  field: ClientField | Field | TabAsField | TabAsFieldClient
+  field: ClientField | Field | Tab | TabAsFieldClient
   index: number
   parentIndexPath: string
   parentPath: string
@@ -46,27 +46,5 @@ export function getFieldPaths({
     indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
     path: `${parentPath ? parentPath + '.' : ''}${indexSuffix}`,
     schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
-  }
-}
-
-export function getTabPaths({
-  index,
-  parentIndexPath,
-  parentPath,
-  parentSchemaPath,
-  tab,
-}: {
-  index: number
-  parentIndexPath: string
-  parentPath: string
-  parentSchemaPath: string
-  tab: Tab
-}): FieldPaths {
-  const indexSuffix = `_index-${`${parentIndexPath ? parentIndexPath + '-' : ''}${index}`}`
-
-  return {
-    indexPath: [parentIndexPath, index].filter(Boolean).join('-'),
-    path: [parentPath, 'name' in tab && tab.name].filter(Boolean).join('.'),
-    schemaPath: [parentSchemaPath, indexSuffix].filter(Boolean).join('.'),
   }
 }
