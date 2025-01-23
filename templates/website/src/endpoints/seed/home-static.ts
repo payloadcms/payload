@@ -1,8 +1,7 @@
 import type { Page } from '@/payload-types'
 
 // Used for pre-seeded content so that the homepage is not empty
-// @ts-expect-error
-export const homeStatic: Page = {
+export const homeStatic: Partial<Page> = {
   slug: 'home',
   _status: 'published',
   hero: {

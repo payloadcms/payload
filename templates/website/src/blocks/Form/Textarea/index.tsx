@@ -10,11 +10,7 @@ import { Width } from '../Width'
 
 export const Textarea: React.FC<
   TextField & {
-    errors: Partial<
-      FieldErrorsImpl<{
-        [x: string]: any
-      }>
-    >
+    errors: Partial<FieldErrorsImpl>
     register: UseFormRegister<FieldValues>
     rows?: number
   }
