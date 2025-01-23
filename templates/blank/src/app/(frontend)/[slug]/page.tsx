@@ -22,7 +22,6 @@ export default async function Page({ params: paramsPromise }: Args) {
     collection: 'pages',
     draft: false,
     limit: 1,
-    overrideAccess: false,
     where: {
       slug: {
         equals: slug,
@@ -55,7 +54,6 @@ export async function generateStaticParams() {
     collection: 'pages',
     draft: false,
     limit: 100,
-    overrideAccess: false,
     pagination: false,
   })
 
