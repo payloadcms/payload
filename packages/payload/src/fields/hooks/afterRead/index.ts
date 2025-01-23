@@ -101,7 +101,7 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
    * This is why we need to loop again to process the new field promises, until there are no more field promises left.
    */
   let iterations = 0
-  while ((fieldPromises.length > 0 || populationPromises.length > 0) && iterations < 10) {
+  while (fieldPromises.length > 0 || populationPromises.length > 0) {
     const currentFieldPromises = fieldPromises.splice(0, fieldPromises.length)
     const currentPopulationPromises = populationPromises.splice(0, populationPromises.length)
 
@@ -109,7 +109,7 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     await Promise.all(currentPopulationPromises)
 
     iterations++
-    if (iterations >= 10) {
+    if (iterations >= 100) {
       throw new Error(
         'Infinite afterRead promise loop detected. A hook is likely adding field promises in an infinitely recursive way.',
       )
