@@ -39,7 +39,7 @@ const reduceFields = (
       return fieldsToUse
     }
     if (field.type === 'collapsible') {
-      return [...fieldsToUse, ...reduceFields(field.fields, i18n, path)]
+      return [...fieldsToUse, ...reduceFields(field.fields, i18n, path, labelPrefix)]
     }
     if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
       return [
