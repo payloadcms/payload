@@ -46,6 +46,8 @@ export const tenantField = ({
           }
           throw new APIError('You must select a tenant', 400, null, true)
         }
+
+        return req.payload.db.defaultIDType === 'number' ? parseInt(value) : value
       },
     ],
   },
