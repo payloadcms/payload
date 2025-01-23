@@ -105,7 +105,9 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     const currentFieldPromises = fieldPromises.splice(0, fieldPromises.length)
     const currentPopulationPromises = populationPromises.splice(0, populationPromises.length)
 
-    await Promise.all([...currentFieldPromises, ...currentPopulationPromises])
+    await Promise.all(currentFieldPromises)
+    await Promise.all(currentPopulationPromises)
+
     iterations++
     if (iterations >= 10) {
       throw new Error(
