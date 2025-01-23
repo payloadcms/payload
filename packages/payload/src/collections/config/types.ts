@@ -335,6 +335,11 @@ export type CollectionAdminOptions = {
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
+   * Forces all fields in the Edit view to render immediately, regardless of scroll position
+   * @default false
+   */
+  forceRenderAllFields?: boolean
+  /**
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
    * - Provide a record to define localized group names.

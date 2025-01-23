@@ -11,6 +11,7 @@ export type RenderFieldsProps = {
    * If a number is provided, will immediately render fields _up to that index_.
    */
   readonly forceRender?: boolean
+  readonly forceRenderAllFields?: boolean
   readonly margins?: 'small' | false
   readonly parentIndexPath: string
   readonly parentPath: string

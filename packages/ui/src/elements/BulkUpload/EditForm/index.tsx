@@ -166,6 +166,7 @@ export function EditForm({ submitted }: EditFormProps) {
             }
             docPermissions={docPermissions}
             fields={collectionConfig.fields}
+            forceRenderAllFields={collectionConfig?.admin?.forceRenderAllFields}
             schemaPathSegments={[collectionConfig.slug]}
           />
           <ReportAllErrors />

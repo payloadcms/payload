@@ -530,6 +530,7 @@ const PreviewView: React.FC<Props> = ({
               Description={Description}
               docPermissions={docPermissions}
               fields={fields}
+              forceRenderAllFields={docConfig?.admin?.forceRenderAllFields}
               forceSidebarWrap
               readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
               schemaPathSegments={[collectionSlug || globalSlug]}

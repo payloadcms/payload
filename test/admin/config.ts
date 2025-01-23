@@ -8,6 +8,7 @@ import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
+import { CollectionForceRender } from './collections/ForceRender.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -15,6 +16,7 @@ import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
+import { CollectionNoForceRender } from './collections/NoForceRender.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
@@ -22,11 +24,13 @@ import { Users } from './collections/Users.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
+import { GlobalForceRender } from './globals/ForceRender.js'
 import { Global } from './globals/Global.js'
 import { GlobalGroup1A } from './globals/Group1A.js'
 import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
+import { GlobalNoForceRender } from './globals/NoForceRender.js'
 import { GlobalNotInView } from './globals/NotInView.js'
 import { Settings } from './globals/Settings.js'
 import { seed } from './seed.js'
@@ -153,12 +157,16 @@ export default buildConfigWithDefaults({
     CollectionGroup1B,
     CollectionGroup2A,
     CollectionGroup2B,
+    CollectionForceRender,
+    CollectionNoForceRender,
     Geo,
     DisableDuplicate,
     BaseListFilter,
     with300Documents,
   ],
   globals: [
+    GlobalForceRender,
+    GlobalNoForceRender,
     GlobalHidden,
     GlobalNotInView,
     GlobalNoApiView,
