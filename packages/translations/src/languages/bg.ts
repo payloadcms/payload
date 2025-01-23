@@ -238,6 +238,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     duplicate: 'Дупликирай',
     duplicateWithoutSaving: 'Дупликирай без да запазваш промените',
     edit: 'Редактирай',
+    editAll: 'Редактирай всички',
     editedSince: 'Редактирано от',
     editing: 'Редактиране',
     editingLabel_many: 'Редактиране на {{count}} {{label}}',

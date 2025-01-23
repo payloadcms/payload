@@ -158,9 +158,7 @@ export const promise = async <T>({
         if (Array.isArray(field.relationTo)) {
           if (Array.isArray(value)) {
             value.forEach((relatedDoc: { relationTo: string; value: JsonValue }, i) => {
-              const relatedCollection = req.payload.config.collections.find(
-                (collection) => collection.slug === relatedDoc.relationTo,
-              )
+              const relatedCollection = req.payload.collections?.[relatedDoc.relationTo]?.config
 
               if (
                 typeof relatedDoc.value === 'object' &&
@@ -185,9 +183,7 @@ export const promise = async <T>({
             })
           }
           if (field.hasMany !== true && valueIsValueWithRelation(value)) {
-            const relatedCollection = req.payload.config.collections.find(
-              (collection) => collection.slug === value.relationTo,
-            )
+            const relatedCollection = req.payload.collections?.[value.relationTo]?.config
 
             if (typeof value.value === 'object' && value.value && 'id' in value.value) {
               value.value = (value.value as TypeWithID).id
@@ -206,9 +202,9 @@ export const promise = async <T>({
         } else {
           if (Array.isArray(value)) {
             value.forEach((relatedDoc: unknown, i) => {
-              const relatedCollection = req.payload.config.collections.find(
-                (collection) => collection.slug === field.relationTo,
-              )
+              const relatedCollection = Array.isArray(field.relationTo)
+                ? undefined
+                : req.payload.collections?.[field.relationTo]?.config
 
               if (typeof relatedDoc === 'object' && relatedDoc && 'id' in relatedDoc) {
                 value[i] = relatedDoc.id
@@ -226,9 +222,7 @@ export const promise = async <T>({
             })
           }
           if (field.hasMany !== true && value) {
-            const relatedCollection = req.payload.config.collections.find(
-              (collection) => collection.slug === field.relationTo,
-            )
+            const relatedCollection = req.payload.collections?.[field.relationTo]?.config
 
             if (typeof value === 'object' && value && 'id' in value) {
               siblingData[field.name] = value.id

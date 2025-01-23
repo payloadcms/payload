@@ -10,15 +10,12 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     },
   })
 
-  // The 'domains' field is used to associate a domain with this tenant.
-  // Uncomment and set the domain if you want to enable domain-based tenant assignment.
-
   const tenant1 = await payload.create({
     collection: 'tenants',
     data: {
       name: 'Tenant 1',
-      slug: 'tenant-1',
-      // domains: [{ domain: 'abc.localhost.com:3000' }],
+      slug: 'gold',
+      domain: 'gold.localhost.com',
     },
   })
 
@@ -26,8 +23,8 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     collection: 'tenants',
     data: {
       name: 'Tenant 2',
-      slug: 'tenant-2',
-      // domains: [{ domain: 'bbc.localhost.com:3000' }],
+      slug: 'silver',
+      domain: 'silver.localhost.com',
     },
   })
 
@@ -35,8 +32,8 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     collection: 'tenants',
     data: {
       name: 'Tenant 3',
-      slug: 'tenant-3',
-      // domains: [{ domain: 'cbc.localhost.com:3000' }],
+      slug: 'bronze',
+      domain: 'bronze.localhost.com',
     },
   })
 

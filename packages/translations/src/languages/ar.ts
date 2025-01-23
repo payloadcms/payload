@@ -235,6 +235,7 @@ export const arTranslations: DefaultTranslationsObject = {
     duplicate: 'استنساخ',
     duplicateWithoutSaving: 'استنساخ بدون حفظ التغييرات',
     edit: 'تعديل',
+    editAll: 'تحرير الكل',
     editedSince: 'تم التحرير منذ',
     editing: 'جاري التعديل',
     editingLabel_many: 'تعديل {{count}} {{label}}',

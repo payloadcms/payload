@@ -3,6 +3,8 @@
 @layer payload-default {
   .inline-block-container {
     display: inline-block;
+    margin-right: base(0.2);
+    margin-left: base(0.2);
   }
 
   .inline-block.inline-block-not-found {
@@ -22,8 +24,6 @@
     border-radius: $style-radius-s;
     max-width: calc(var(--base) * 15);
     font-family: var(--font-body);
-    margin-right: base(0.2);
-    margin-left: base(0.2);
 
     &::selection {
       background: transparent;
@@ -36,11 +36,6 @@
     &__wrap {
       flex-grow: 1;
       overflow: hidden;
-    }
-
-    &--selected {
-      background: var(--theme-success-100);
-      outline: 1px solid var(--theme-success-400);
     }
 
     &__editButton.btn {

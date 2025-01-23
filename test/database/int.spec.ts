@@ -26,6 +26,7 @@ import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
+import { postsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -34,7 +35,7 @@ let payload: Payload
 let user: Record<string, unknown> & TypeWithID
 let token: string
 let restClient: NextRESTClient
-const collection = 'posts'
+const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
@@ -142,7 +143,7 @@ describe('database', () => {
       const blockID = '6764de9af79a863575c5f58c'
 
       const doc = await payload.create({
-        collection: 'posts',
+        collection: postsSlug,
         data: {
           title: 'test',
           arrayWithIDs: [
@@ -168,7 +169,7 @@ describe('database', () => {
       const blockID = '6764dec58c68f337a758180c'
 
       const doc = await payload.create({
-        collection: 'posts',
+        collection: postsSlug,
         data: {
           title: 'test',
           arrayWithIDs: [
@@ -186,7 +187,7 @@ describe('database', () => {
       })
 
       const duplicate = await payload.duplicate({
-        collection: 'posts',
+        collection: postsSlug,
         id: doc.id,
       })
 
@@ -198,7 +199,7 @@ describe('database', () => {
   describe('timestamps', () => {
     it('should have createdAt and updatedAt timestamps to the millisecond', async () => {
       const result = await payload.create({
-        collection: 'posts',
+        collection: postsSlug,
         data: {
           title: 'hello',
         },
@@ -212,7 +213,7 @@ describe('database', () => {
     it('should allow createdAt to be set in create', async () => {
       const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
-        collection: 'posts',
+        collection: postsSlug,
         data: {
           createdAt,
           title: 'hello',
@@ -221,7 +222,7 @@ describe('database', () => {
 
       const doc = await payload.findByID({
         id: result.id,
-        collection: 'posts',
+        collection: postsSlug,
       })
 
       expect(result.createdAt).toStrictEqual(createdAt)
@@ -231,7 +232,7 @@ describe('database', () => {
     it('updatedAt cannot be set in create', async () => {
       const updatedAt = new Date('2022-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
-        collection: 'posts',
+        collection: postsSlug,
         data: {
           title: 'hello',
           updatedAt,
@@ -875,6 +876,53 @@ describe('database', () => {
     })
   })
 
+  describe('Error Handler', () => {
+    it('should return proper top-level field validation errors', async () => {
+      let errorMessage: string = ''
+
+      try {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            // @ts-expect-error
+            title: undefined,
+          },
+        })
+      } catch (e: any) {
+        errorMessage = e.message
+      }
+
+      await expect(errorMessage).toBe('The following field is invalid: Title')
+    })
+
+    it('should return proper deeply nested field validation errors', async () => {
+      try {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'Title',
+            D1: {
+              D2: {
+                D3: {
+                  // @ts-expect-error
+                  D4: {},
+                },
+              },
+            },
+          },
+        })
+      } catch (e: any) {
+        await expect(e.message).toMatch(
+          payload.db.name === 'mongoose'
+            ? 'posts validation failed: D1.D2.D3.D4: Cast to string failed for value "{}" (type Object) at path "D4"'
+            : payload.db.name === 'sqlite'
+              ? 'SQLite3 can only bind numbers, strings, bigints, buffers, and null'
+              : '',
+        )
+      }
+    })
+  })
+
   describe('defaultValue', () => {
     it('should set default value from db.create', async () => {
       // call the db adapter create directly to bypass Payload's default value assignment
@@ -1257,7 +1305,7 @@ describe('database', () => {
   it('should upsert', async () => {
     const postShouldCreated = await payload.db.upsert({
       req: {},
-      collection: 'posts',
+      collection: postsSlug,
       data: {
         title: 'some-title-here',
       },
@@ -1272,7 +1320,7 @@ describe('database', () => {
 
     const postShouldUpdated = await payload.db.upsert({
       req: {},
-      collection: 'posts',
+      collection: postsSlug,
       data: {
         title: 'some-title-here',
       },
@@ -1288,9 +1336,9 @@ describe('database', () => {
   })
 
   it('should enforce unique ids on db level even after delete', async () => {
-    const { id } = await payload.create({ collection: 'posts', data: { title: 'ASD' } })
-    await payload.delete({ id, collection: 'posts' })
-    const { id: id_2 } = await payload.create({ collection: 'posts', data: { title: 'ASD' } })
+    const { id } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
+    await payload.delete({ id, collection: postsSlug })
+    const { id: id_2 } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
     expect(id_2).not.toBe(id)
   })
 })

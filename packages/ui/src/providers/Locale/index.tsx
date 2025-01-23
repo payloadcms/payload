@@ -19,8 +19,9 @@ export const LocaleLoadingContext = createContext({
 
 const fetchPreferences = async <T extends Record<string, unknown> | string>(
   key: string,
+  baseURL: string,
 ): Promise<{ id: string; value: T }> =>
-  await fetch(`/api/payload-preferences/${key}`, {
+  await fetch(`${baseURL}/payload-preferences/${key}`, {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
@@ -38,7 +39,11 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   locale: initialLocaleFromPrefs,
 }) => {
   const {
-    config: { localization = false },
+    config: {
+      localization = false,
+      routes: { api: apiRoute },
+      serverURL,
+    },
   } = useConfig()
 
   const { user } = useAuth()
@@ -80,6 +85,8 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     prevLocale.current = locale
   }, [locale])
 
+  const fetchURL = `${serverURL}${apiRoute}`
+
   useEffect(() => {
     /**
      * This effect should only run when `localeFromParams` changes, i.e. when the user clicks an anchor link
@@ -90,7 +97,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
       if (localization && user?.id) {
         const localeToUse =
           localeFromParams ||
-          (await fetchPreferences<Locale['code']>('locale')?.then((res) => res.value)) ||
+          (await fetchPreferences<Locale['code']>('locale', fetchURL)?.then((res) => res.value)) ||
           defaultLocale
 
         const newLocale =
@@ -102,7 +109,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     }
 
     void resetLocale()
-  }, [defaultLocale, getPreference, localization, localeFromParams, user?.id])
+  }, [defaultLocale, getPreference, localization, fetchURL, localeFromParams, user?.id])
 
   return (
     <LocaleContext.Provider value={locale}>

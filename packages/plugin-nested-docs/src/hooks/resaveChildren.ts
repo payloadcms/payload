@@ -27,6 +27,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
     collection: collection.slug,
     depth: 0,
     draft: true,
+    limit: 0,
     locale: req.locale,
     req,
     where: {
@@ -39,16 +40,14 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
   const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
 
   try {
-    await children.docs.reduce(async (priorSave, child) => {
-      await priorSave
-
+    for (const child of children.docs) {
       const childIsPublished =
         typeof collection.versions === 'object' &&
         collection.versions.drafts &&
         child._status === 'published'
 
       if (!parentDocIsPublished && childIsPublished) {
-        return
+        continue
       }
 
       await req.payload.update({
@@ -63,7 +62,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
         locale: req.locale,
         req,
       })
-    }, Promise.resolve())
+    }
   } catch (err: unknown) {
     req.payload.logger.error(
       `Nested Docs plugin has had an error while re-saving a child document${

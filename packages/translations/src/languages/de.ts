@@ -243,6 +243,7 @@ export const deTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplizieren',
     duplicateWithoutSaving: 'Dupliziere ohne Änderungen zu speichern',
     edit: 'Bearbeiten',
+    editAll: 'Bearbeite alle',
     editedSince: 'Bearbeitet seit',
     editing: 'Bearbeite',
     editingLabel_many: 'Bearbeiten von {{count}} {{label}}',

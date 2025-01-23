@@ -240,6 +240,7 @@ export const skTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplikovať',
     duplicateWithoutSaving: 'Duplikovať bez uloženia zmien',
     edit: 'Upraviť',
+    editAll: 'Upraviť všetko',
     editedSince: 'Upravené od',
     editing: 'Úpravy',
     editingLabel_many: 'Úprava {{count}} {{label}}',

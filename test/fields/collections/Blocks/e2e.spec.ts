@@ -168,6 +168,25 @@ describe('Block fields', () => {
     await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en')
   })
 
+  test('should render custom block row label', async () => {
+    await page.goto(url.create)
+    const addButton = page.locator('#field-blocks > .blocks-field__drawer-toggler')
+    await addButton.click()
+    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
+
+    await blocksDrawer
+      .locator('.blocks-drawer__block .thumbnail-card__label', {
+        hasText: 'Content',
+      })
+      .click()
+
+    await expect(
+      await page.locator('#field-blocks .blocks-field__row .blocks-field__block-header', {
+        hasText: 'Custom Block Label',
+      }),
+    ).toBeVisible()
+  })
+
   test('should add different blocks with similar field configs', async () => {
     await page.goto(url.create)
 

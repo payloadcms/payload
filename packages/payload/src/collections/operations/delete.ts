@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
@@ -23,6 +23,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
+import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -170,6 +171,18 @@ export const deleteOperation = async <
 
         if (collectionConfig.versions) {
           await deleteCollectionVersions({
+            id,
+            slug: collectionConfig.slug,
+            payload,
+            req,
+          })
+        }
+
+        // /////////////////////////////////////
+        // Delete scheduled posts
+        // /////////////////////////////////////
+        if (collectionConfig.versions?.drafts && collectionConfig.versions.drafts.schedulePublish) {
+          await deleteScheduledPublishJobs({
             id,
             slug: collectionConfig.slug,
             payload,

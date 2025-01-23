@@ -567,9 +567,9 @@ export const LivePreviewClient: React.FC<
     url,
   })
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+  const globalConfig = getEntityConfig({ globalSlug })
 
   const schemaPath = collectionSlug || globalSlug
 

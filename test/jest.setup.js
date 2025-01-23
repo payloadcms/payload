@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import console from 'console'
 global.console = console
 

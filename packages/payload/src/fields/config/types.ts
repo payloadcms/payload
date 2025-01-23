@@ -23,6 +23,8 @@ import type {
   BlocksFieldClientProps,
   BlocksFieldErrorClientComponent,
   BlocksFieldErrorServerComponent,
+  BlocksFieldLabelClientComponent,
+  BlocksFieldLabelServerComponent,
   CheckboxFieldClientProps,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
@@ -342,6 +344,7 @@ export type LabelsClient = {
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   collectionSlug?: string
   data: Partial<TData>
+  event?: 'onChange' | 'submit'
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
@@ -714,6 +717,10 @@ export type CollapsibleFieldClient = {
   Pick<CollapsibleField, 'type'>
 
 type TabBase = {
+  /**
+   * @deprecated
+   * Use `admin.description` instead. This will be removed in a future major version.
+   */
   description?: LabelFunction | StaticDescription
   fields: Field[]
   interfaceName?: string
@@ -1335,6 +1342,7 @@ export type BlocksField = {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
       Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
+      Label?: CustomComponent<BlocksFieldLabelClientComponent | BlocksFieldLabelServerComponent>
     } & Admin['components']
     initCollapsed?: boolean
     /**

@@ -143,13 +143,12 @@ export const renderDocumentHandler = async (args: {
   const { data, Document } = await renderDocument({
     clientConfig,
     disableActions,
+    documentSubViewType: 'default',
     drawerSlug,
     importMap: payload.importMap,
     initialData,
     initPageResult: {
-      collectionConfig: payload.config.collections.find(
-        (collection) => collection.slug === collectionSlug,
-      ),
+      collectionConfig: payload?.collections?.[collectionSlug]?.config,
       cookies,
       docID,
       globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
@@ -167,6 +166,7 @@ export const renderDocumentHandler = async (args: {
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},
+    viewType: 'document',
   })
 
   return {

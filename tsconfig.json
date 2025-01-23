@@ -65,6 +65,9 @@
       "path": "./packages/plugin-stripe"
     },
     {
+      "path": "./packages/plugin-multi-tenant"
+    },
+    {
       "path": "./packages/richtext-slate"
     },
     {
@@ -75,10 +78,11 @@
     },
     {
       "path": "./packages/ui"
-    }
+    },
   ],
   "include": [
     "${configDir}/src",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "./scripts/**/*.ts",
   ]
 }

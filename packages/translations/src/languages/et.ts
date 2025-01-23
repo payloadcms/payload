@@ -236,6 +236,7 @@ export const etTranslations: DefaultTranslationsObject = {
     duplicate: 'Dubleeri',
     duplicateWithoutSaving: 'Dubleeri ilma muudatusi salvestamata',
     edit: 'Muuda',
+    editAll: 'Muuda kõiki',
     editedSince: 'Muudetud alates',
     editing: 'Muutmine',
     editingLabel_many: 'Muudan {{count}} {{label}}',

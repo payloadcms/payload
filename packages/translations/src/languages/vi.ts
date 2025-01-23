@@ -238,6 +238,7 @@ export const viTranslations: DefaultTranslationsObject = {
     duplicate: 'Tạo bản sao',
     duplicateWithoutSaving: 'Không lưu dữ liệu và tạo bản sao',
     edit: 'Chỉnh sửa',
+    editAll: 'Chỉnh sửa tất cả',
     editedSince: 'Được chỉnh sửa từ',
     editing: 'Đang chỉnh sửa',
     editingLabel_many: 'Đang chỉnh sửa {{count}} {{label}}',

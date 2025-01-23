@@ -138,11 +138,6 @@
       text-overflow: ellipsis;
     }
 
-    &--selected {
-      box-shadow: $focus-box-shadow;
-      outline: none;
-    }
-
     @include small-break {
       &__topRowRightPanel {
         padding: calc(var(--base) * 0.75) calc(var(--base) * 0.5);

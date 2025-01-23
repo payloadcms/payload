@@ -60,6 +60,8 @@ export type {
 } from './fields/Array.js'
 
 export type {
+  BlockRowLabelClientComponent,
+  BlockRowLabelServerComponent,
   BlocksFieldClientComponent,
   BlocksFieldClientProps,
   BlocksFieldDescriptionClientComponent,

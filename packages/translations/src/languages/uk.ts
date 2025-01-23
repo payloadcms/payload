@@ -238,6 +238,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     duplicate: 'Дублювати',
     duplicateWithoutSaving: 'Дублювання без збереження змін',
     edit: 'Редагувати',
+    editAll: 'Редагувати все',
     editedSince: 'Відредаговано з',
     editing: 'Редагування',
     editingLabel_many: 'Редагування {{count}} {{label}}',

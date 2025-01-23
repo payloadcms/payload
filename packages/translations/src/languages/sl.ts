@@ -238,6 +238,7 @@ export const slTranslations: DefaultTranslationsObject = {
     duplicate: 'Podvoji',
     duplicateWithoutSaving: 'Podvoji brez shranjevanja sprememb',
     edit: 'Uredi',
+    editAll: 'Uredi vse',
     editedSince: 'Urejeno od',
     editing: 'Urejanje',
     editingLabel_many: 'Urejanje {{count}} {{label}}',

@@ -148,6 +148,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
                 id,
                 collectionSlug,
                 data: getData(),
+                event: 'onChange',
                 operation,
                 preferences: {} as any,
                 req: {
