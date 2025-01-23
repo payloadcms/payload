@@ -1,8 +1,9 @@
 'use client'
 import { Header } from '@/payload-types'
-import { RowLabelProps, useRowLabel } from '@payloadcms/ui'
+import { useRowLabel } from '@payloadcms/ui'
+import type { ArrayFieldClientProps } from 'payload'
 
-export const RowLabel: React.FC<RowLabelProps> = () => {
+export const RowLabel: React.FC<ArrayFieldClientProps> = () => {
   const data = useRowLabel<NonNullable<Header['navItems']>[number]>()
 
   const label = data?.data?.link?.label
