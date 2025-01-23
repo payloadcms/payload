@@ -31,7 +31,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     uploadStatus,
   } = useDocumentInfo()
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
@@ -51,17 +51,13 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
 
   const entityConfig = React.useMemo(() => {
     if (collectionSlug) {
-      return config.collections.find(({ slug }) => slug === collectionSlug)
+      return getEntityConfig({ collectionSlug })
     }
 
     if (globalSlug) {
-      return config.globals.find(({ slug }) => slug === globalSlug)
+      return getEntityConfig({ globalSlug })
     }
-  }, [collectionSlug, globalSlug, config])
-
-  const scheduledPublishEnabled =
-    typeof entityConfig?.versions?.drafts === 'object' &&
-    entityConfig?.versions?.drafts.schedulePublish
+  }, [collectionSlug, globalSlug, getEntityConfig])
 
   const hasNewerVersions = unpublishedVersionCount > 0
 
@@ -69,6 +65,14 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     hasPublishPermission &&
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
+
+  const scheduledPublishEnabled =
+    typeof entityConfig?.versions?.drafts === 'object' &&
+    entityConfig?.versions?.drafts.schedulePublish
+
+  const canSchedulePublish = Boolean(
+    scheduledPublishEnabled && hasPublishPermission && (globalSlug || (collectionSlug && id)),
+  )
 
   const operation = useOperation()
 
@@ -173,11 +177,11 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
         onClick={publish}
         size="medium"
         SubMenuPopupContent={
-          localization || scheduledPublishEnabled
+          localization || canSchedulePublish
             ? ({ close }) => {
                 return (
                   <React.Fragment>
-                    {scheduledPublishEnabled && (
+                    {canSchedulePublish && (
                       <PopupList.ButtonGroup key="schedule-publish">
                         <PopupList.Button onClick={() => [toggleModal(drawerSlug), close()]}>
                           {t('version:schedulePublish')}
@@ -220,7 +224,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       >
         {label}
       </FormSubmit>
-      {scheduledPublishEnabled && isModalOpen(drawerSlug) && <ScheduleDrawer slug={drawerSlug} />}
+      {canSchedulePublish && isModalOpen(drawerSlug) && <ScheduleDrawer slug={drawerSlug} />}
     </React.Fragment>
   )
 }

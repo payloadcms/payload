@@ -44,14 +44,14 @@ export function getRouteInfo({
     let idType = defaultIDType
 
     if (collectionSlug) {
-      collectionConfig = config.collections.find((collection) => collection.slug === collectionSlug)
+      collectionConfig = payload.collections?.[collectionSlug]?.config
     }
 
     if (globalSlug) {
       globalConfig = config.globals.find((global) => global.slug === globalSlug)
     }
 
-    // If the collection is using a custom ID, we need to determine it's type
+    // If the collection is using a custom ID, we need to determine its type
     if (collectionConfig && payload) {
       if (payload.collections?.[collectionSlug]?.customIDType) {
         idType = payload.collections?.[collectionSlug].customIDType

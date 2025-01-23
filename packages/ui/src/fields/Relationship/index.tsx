@@ -60,10 +60,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     validate,
   } = props
 
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const {
-    collections,
     routes: { api },
     serverURL,
   } = config
@@ -169,7 +168,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           }
 
           if (resultsFetched < 10) {
-            const collection = collections.find((coll) => coll.slug === relation)
+            const collection = getEntityConfig({ collectionSlug: relation })
             const fieldToSearch = collection?.admin?.useAsTitle || 'id'
             let fieldToSort = collection?.defaultSort || 'id'
             if (typeof sortOptions === 'string') {
@@ -275,7 +274,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       hasMany,
       errorLoading,
       search,
-      collections,
+      getEntityConfig,
       locale,
       serverURL,
       sortOptions,
@@ -354,7 +353,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               method: 'POST',
             })
 
-            const collection = collections.find((coll) => coll.slug === relation)
+            const collection = getEntityConfig({ collectionSlug: relation })
             let docs = []
 
             if (response.ok) {
@@ -380,7 +379,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       options,
       hasMany,
       errorLoading,
-      collections,
+      getEntityConfig,
       hasMultipleRelations,
       serverURL,
       api,
@@ -395,12 +394,12 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   useEffect(() => {
     const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
     const isIdOnly = relations.reduce((idOnly, relation) => {
-      const collection = collections.find((coll) => coll.slug === relation)
+      const collection = getEntityConfig({ collectionSlug: relation })
       const fieldToSearch = collection?.admin?.useAsTitle || 'id'
       return fieldToSearch === 'id' && idOnly
     }, true)
     setEnableWordBoundarySearch(!isIdOnly)
-  }, [relationTo, collections])
+  }, [relationTo, getEntityConfig])
 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run

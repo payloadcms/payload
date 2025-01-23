@@ -17,8 +17,10 @@ export const getAfterDeleteHook = ({
       const { identityID, storageClient } = await getStorageClient()
 
       const filesToDelete: string[] = [
-        doc.filename,
-        ...Object.values(doc?.sizes || []).map((resizedFileData) => resizedFileData?.filename),
+        doc.filename || '',
+        ...Object.values(doc?.sizes || [])
+          .map((resizedFileData) => resizedFileData.filename)
+          .filter((filename): filename is string => filename !== null),
       ]
 
       const promises = filesToDelete.map(async (filename) => {

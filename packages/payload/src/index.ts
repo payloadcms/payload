@@ -63,6 +63,8 @@ import type {
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export type { FieldState } from './admin/forms/Form.js'
+import { Cron } from 'croner'
+
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -75,6 +77,7 @@ import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
+import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -578,9 +581,9 @@ export class BasePayload {
       config: this.config.globals,
     }
 
-    this.config.collections.forEach((collection) => {
+    for (const collection of this.config.collections) {
       let customIDType = undefined
-      const findCustomID: TraverseFieldsCallback = ({ field, next }) => {
+      const findCustomID: TraverseFieldsCallback = ({ field }) => {
         if (
           ['array', 'blocks', 'group'].includes(field.type) ||
           (field.type === 'tab' && 'name' in field)
@@ -604,7 +607,7 @@ export class BasePayload {
         config: collection,
         customIDType,
       }
-    })
+    }
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
@@ -704,13 +707,38 @@ export class BasePayload {
       })
     }
 
-    if (!options.disableOnInit) {
-      if (typeof options.onInit === 'function') {
-        await options.onInit(this)
+    try {
+      if (!options.disableOnInit) {
+        if (typeof options.onInit === 'function') {
+          await options.onInit(this)
+        }
+        if (typeof this.config.onInit === 'function') {
+          await this.config.onInit(this)
+        }
       }
-      if (typeof this.config.onInit === 'function') {
-        await this.config.onInit(this)
-      }
+    } catch (error) {
+      this.logger.error({ err: error }, 'Error running onInit function')
+      throw error
+    }
+
+    if (this.config.jobs.autoRun && !isNextBuild()) {
+      const DEFAULT_CRON = '* * * * *'
+      const DEFAULT_LIMIT = 10
+
+      const cronJobs =
+        typeof this.config.jobs.autoRun === 'function'
+          ? await this.config.jobs.autoRun(this)
+          : this.config.jobs.autoRun
+      await Promise.all(
+        cronJobs.map((cronConfig) => {
+          new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            await this.jobs.run({
+              limit: cronConfig.limit ?? DEFAULT_LIMIT,
+              queue: cronConfig.queue,
+            })
+          })
+        }),
+      )
     }
 
     return this
@@ -912,6 +940,7 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+export { JWTAuthentication } from './auth/strategies/jwt.js'
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -1009,7 +1038,7 @@ export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
-export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
+export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 export { createMigration } from './database/migrations/createMigration.js'
 export { getMigrations } from './database/migrations/getMigrations.js'
@@ -1083,6 +1112,7 @@ export type {
   UpdateVersion,
   UpdateVersionArgs,
   Upsert,
+  UpsertArgs,
 } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
@@ -1296,6 +1326,7 @@ export type {
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
+  ListPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
   TabsPreferences,
@@ -1329,6 +1360,9 @@ export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
+
+export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
+export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
@@ -1338,6 +1372,7 @@ export {
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from './utilities/createLocalReq.js'
+export { createPayloadRequest } from './utilities/createPayloadRequest.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,
@@ -1367,6 +1402,9 @@ export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
+export { getRequestLanguage } from './utilities/getRequestLanguage.js'
+export { handleEndpoints } from './utilities/handleEndpoints.js'
+export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
@@ -1376,6 +1414,7 @@ export { killTransaction } from './utilities/killTransaction.js'
 export { logError } from './utilities/logError.js'
 export { defaultLoggerOptions } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
+export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'

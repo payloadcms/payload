@@ -182,6 +182,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:duplicate',
   'general:duplicateWithoutSaving',
   'general:edit',
+  'general:editAll',
   'general:editing',
   'general:editingLabel',
   'general:editingTakenOver',

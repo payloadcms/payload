@@ -32,6 +32,7 @@ import {
   TextBlock,
   UploadAndRichTextBlock,
 } from './blocks.js'
+import { ModifyInlineBlockFeature } from './ModifyInlineBlockFeature/feature.server.js'
 
 const editorConfig: ServerEditorConfig = {
   features: [
@@ -69,6 +70,7 @@ const editorConfig: ServerEditorConfig = {
         },
       },
     }),
+    ModifyInlineBlockFeature(),
     BlocksFeature({
       blocks: [
         RichTextBlock,
@@ -174,6 +176,25 @@ const editorConfig: ServerEditorConfig = {
         },
       ],
       inlineBlocks: [
+        {
+          slug: 'AvatarGroup',
+          interfaceName: 'AvatarGroupBlock',
+          fields: [
+            {
+              name: 'avatars',
+              type: 'array',
+              minRows: 1,
+              maxRows: 6,
+              fields: [
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'uploads',
+                },
+              ],
+            },
+          ],
+        },
         {
           slug: 'myInlineBlock',
           admin: {

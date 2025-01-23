@@ -1,9 +1,8 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 
-import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
+import { type RequestContext } from '../../../index.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
@@ -38,13 +37,11 @@ export const beforeValidate = async <T extends JsonObject>({
   overrideAccess,
   req,
 }: Args<T>): Promise<T> => {
-  const data = deepCopyObjectSimple(incomingData)
-
   await traverseFields({
     id,
     collection,
     context,
-    data,
+    data: incomingData,
     doc,
     fields: collection?.fields || global?.fields,
     global,
@@ -53,9 +50,9 @@ export const beforeValidate = async <T extends JsonObject>({
     path: [],
     req,
     schemaPath: [],
-    siblingData: data,
+    siblingData: incomingData,
     siblingDoc: doc,
   })
 
-  return data
+  return incomingData
 }

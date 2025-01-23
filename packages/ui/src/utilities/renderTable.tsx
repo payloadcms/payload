@@ -1,18 +1,19 @@
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import {
-  type ClientCollectionConfig,
-  type CollectionConfig,
-  type Field,
-  type ImportMap,
-  type PaginatedDocs,
-  type Payload,
-  type SanitizedCollectionConfig,
+import type {
+  ClientCollectionConfig,
+  CollectionConfig,
+  Field,
+  ImportMap,
+  ListPreferences,
+  PaginatedDocs,
+  Payload,
+  SanitizedCollectionConfig,
 } from 'payload'
+
+import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
-import type { ColumnPreferences } from '../providers/ListQuery/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
@@ -62,8 +63,8 @@ export const renderTable = ({
 }: {
   clientCollectionConfig: ClientCollectionConfig
   collectionConfig: SanitizedCollectionConfig
-  columnPreferences: ColumnPreferences
-  columns?: ColumnPreferences
+  columnPreferences: ListPreferences['columns']
+  columns?: ListPreferences['columns']
   customCellProps?: Record<string, any>
   docs: PaginatedDocs['docs']
   drawerSlug?: string

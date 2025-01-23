@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
     "composite": true,
     "declaration": true,
     "declarationMap": true,
@@ -21,14 +25,13 @@
     "types": ["jest", "node", "@types/jest"],
     "incremental": true,
     "isolatedModules": true,
-    "strict": false,
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@payload-config": ["./test/admin/config.ts"],
+      "@payload-config": ["./test/fields/config.ts"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
       "@payloadcms/live-preview-vue": ["./packages/live-preview-vue/src/index.ts"],
@@ -52,6 +55,17 @@
       "@payloadcms/plugin-form-builder/client": [
         "./packages/plugin-form-builder/src/exports/client.ts"
       ],
+      "@payloadcms/plugin-multi-tenant/rsc": ["./packages/plugin-multi-tenant/src/exports/rsc.ts"],
+      "@payloadcms/plugin-multi-tenant/utilities": [
+        "./packages/plugin-multi-tenant/src/exports/utilities.ts"
+      ],
+      "@payloadcms/plugin-multi-tenant/fields": [
+        "./packages/plugin-multi-tenant/src/exports/fields.ts"
+      ],
+      "@payloadcms/plugin-multi-tenant/client": [
+        "./packages/plugin-multi-tenant/src/exports/client.ts"
+      ],
+      "@payloadcms/plugin-multi-tenant": ["./packages/plugin-multi-tenant/src/index.ts"],
       "@payloadcms/next": ["./packages/next/src/exports/*"]
     }
   },

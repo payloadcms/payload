@@ -88,25 +88,27 @@ export const Media: CollectionConfig = {
 
 _An asterisk denotes that an option is required._
 
-| Option                         | Description                                                                                                                                                                                                                           |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`adminThumbnail`**           | Set the way that the [Admin Panel](../admin/overview) will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                                          |
-| **`bulkUpload`**               | Allow users to upload in bulk from the list view, default is true                                                                                                                                                                     |
-| **`crop`**                     | Set to `false` to disable the cropping tool in the [Admin Panel](../admin/overview). Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                                               |
-| **`disableLocalStorage`**      | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                                                                                                           |
-| **`displayPreview`**           | Enable displaying preview of the uploaded file in Upload fields related to this Collection. Can be locally overridden by `displayPreview` option in Upload field. [More](/docs/fields/upload#config-options).                         |
-| **`externalFileHeaderFilter`** | Accepts existing headers and returns the headers after filtering or modifying.                                                                                                                                                        |
-| **`filesRequiredOnCreate`**    | Mandate file data on creation, default is true.                                                                                                                                                                                       |
-| **`filenameCompoundIndex`**    | Field slugs to use for a compound index instead of the default filename index. |
-| **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the [Admin Panel](../admin/overview). The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector) |
-| **`formatOptions`**            | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat)                                                               |
-| **`handlers`**                 | Array of Request handlers to execute when fetching a file, if a handler returns a Response it will be sent to the client. Otherwise Payload will retrieve and send back the file.                                                     |
-| **`imageSizes`**               | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                                                                    |
-| **`mimeTypes`**                | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                                                                                                              |
-| **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                       |
-| **`staticDir`**                | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. Defaults to your collection slug                                                                |
-| **`trimOptions`**              | An object passed to the the Sharp image library to trim the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize#trim)                                                                                                    |
-| **`withMetadata`**             | If specified, appends metadata to the output image file.  Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                                                                    |
+| Option                         | Description                                                                                                                                                                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`adminThumbnail`**           | Set the way that the [Admin Panel](../admin/overview) will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                                                       |
+| **`bulkUpload`**               | Allow users to upload in bulk from the list view, default is true                                                                                                                                                                                  |
+| **`cacheTags`**                | Set to `false` to disable the cache tag set in the UI for the admin thumbnail component. Useful for when CDNs don't allow certain cache queries.                                                                                                   |
+| **`crop`**                     | Set to `false` to disable the cropping tool in the [Admin Panel](../admin/overview). Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                                                            |
+| **`disableLocalStorage`**      | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                                                                                                                        |
+| **`displayPreview`**           | Enable displaying preview of the uploaded file in Upload fields related to this Collection. Can be locally overridden by `displayPreview` option in Upload field. [More](/docs/fields/upload#config-options).                                      |
+| **`externalFileHeaderFilter`** | Accepts existing headers and returns the headers after filtering or modifying.                                                                                                                                                                     |
+| **`filesRequiredOnCreate`**    | Mandate file data on creation, default is true.                                                                                                                                                                                                    |
+| **`filenameCompoundIndex`**    | Field slugs to use for a compound index instead of the default filename index.                                                                                                                                                                     |
+| **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the [Admin Panel](../admin/overview). The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector)              |
+| **`formatOptions`**            | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat)                                                                            |
+| **`handlers`**                 | Array of Request handlers to execute when fetching a file, if a handler returns a Response it will be sent to the client. Otherwise Payload will retrieve and send back the file.                                                                  |
+| **`imageSizes`**               | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                                                                                 |
+| **`mimeTypes`**                | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                                                                                                                           |
+| **`pasteURL`**                 | Controls whether files can be uploaded from remote URLs by pasting them into the Upload field. **Enabled by default.** Accepts `false` to disable or an object with an `allowList` of valid remote URLs. [More](#uploading-files-from-remote-urls) |
+| **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                                    |
+| **`staticDir`**                | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. Defaults to your collection slug                                                                             |
+| **`trimOptions`**              | An object passed to the the Sharp image library to trim the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize#trim)                                                                                                                 |
+| **`withMetadata`**             | If specified, appends metadata to the output image file.  Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                                                                                 |
 
 
 ### Payload-wide Upload Options
@@ -325,6 +327,64 @@ fetch('api/:upload-slug', {
    */
 })
 ```
+
+## Uploading Files from Remote URLs
+
+The `pasteURL` option allows users to fetch files from remote URLs by pasting them into an Upload field. This option is **enabled by default** and can be configured to either **allow unrestricted client-side fetching** or **restrict server-side fetching** to specific trusted domains.
+
+By default, Payload uses **client-side fetching**, where the browser downloads the file directly from the provided URL. However, **client-side fetching will fail if the URL’s server has CORS restrictions**, making it suitable only for internal URLs or public URLs without CORS blocks.
+
+To fetch files from **restricted URLs** that would otherwise be blocked by CORS, use **server-side fetching** by configuring the `pasteURL` option with an `allowList` of trusted domains. This method ensures that Payload downloads the file on the server and streams it to the browser. However, for security reasons, only URLs that match the specified `allowList` will be allowed.
+
+#### Configuration Example
+
+Here’s how to configure the pasteURL option to control remote URL fetching:
+
+```
+import type { CollectionConfig } from 'payload'
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  upload: {
+    pasteURL: {
+      allowList: [
+        {
+          hostname: 'payloadcms.com', // required
+          pathname: '',
+          port: '',
+          protocol: 'https',
+          search: ''
+        },
+        {
+          hostname: 'example.com',
+          pathname: '/images/*',
+        },
+      ],
+    },
+  },
+}
+```
+
+##### Accepted Values for `pasteURL`
+
+| Option          | Description                                                                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`undefined`** | Default behavior. Enables client-side fetching for internal or public URLs.                                                                                    |
+| **`false`**     | Disables the ability to paste URLs into Upload fields.                                                                                                         |
+| **`allowList`** | Enables server-side fetching for specific trusted URLs. Requires an array of objects defining trusted domains. See the table below for details on `AllowItem`. |
+
+##### `AllowItem` Properties
+
+_An asterisk denotes that an option is required._
+
+| Option           | Description                                                                                          | Example       |
+| ---------------- | ---------------------------------------------------------------------------------------------------- | ------------- |
+| **`hostname`** * | The hostname of the allowed URL. This is required to ensure the URL is coming from a trusted source. | `example.com` |
+| **`pathname`**   | The path portion of the URL. Supports wildcards to match multiple paths.                             | `/images/*`   |
+| **`port`**       | The port number of the URL. If not specified, the default port for the protocol will be used.        | `3000`        |
+| **`protocol`**   | The protocol to match. Must be either `http` or `https`. Defaults to `https`.                        | `https`       |
+| **`search`**     | The query string of the URL. If specified, the URL must match this exact query string.               | `?version=1`  |
+
 
 ## Access Control
 

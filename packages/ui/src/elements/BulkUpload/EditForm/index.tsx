@@ -1,7 +1,5 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
-
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback, useEffect } from 'react'
 
@@ -58,7 +56,7 @@ export function EditForm({ submitted }: EditFormProps) {
 
   const abortOnChangeRef = React.useRef<AbortController>(null)
 
-  const collectionConfig = getEntityConfig({ collectionSlug: docSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug: docSlug })
   const router = useRouter()
   const depth = useEditDepth()
   const params = useSearchParams()

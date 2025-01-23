@@ -28,20 +28,18 @@ export const beforeDuplicate = async <T extends JsonObject>({
   overrideAccess,
   req,
 }: Args<T>): Promise<T> => {
-  const newDoc = deepCopyObjectSimple(doc)
-
   await traverseFields({
     id,
     collection,
     context,
-    doc: newDoc,
+    doc,
     fields: collection?.fields,
     overrideAccess,
     path: [],
     req,
     schemaPath: [],
-    siblingDoc: newDoc,
+    siblingDoc: doc,
   })
 
-  return newDoc
+  return doc
 }

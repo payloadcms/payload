@@ -4,7 +4,7 @@ import type {
   SerializedParagraphNode,
   SerializedTextNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -28,6 +28,7 @@ import { RESTClient } from '../../../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
+import { except } from 'drizzle-orm/mysql-core'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -69,7 +70,7 @@ describe('lexicalMain', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -1218,9 +1219,135 @@ describe('lexicalMain', () => {
     await page.getByText('Creating new User')
   })
 
+  test('ensure links can created from clipboard and deleted', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    await richTextField.locator('.ContentEditable__root').first().click()
+    const lastParagraph = richTextField.locator('p').first()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    await lastParagraph.click()
+
+    page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+
+    // Paste in a link copied from a html page
+    const link = '<a href="https://www.google.com">Google</a>'
+    await page.evaluate(
+      async ([link]) => {
+        const blob = new Blob([link], { type: 'text/html' })
+        const clipboardItem = new ClipboardItem({ 'text/html': blob })
+        await navigator.clipboard.write([clipboardItem])
+      },
+      [link],
+    )
+
+    await page.keyboard.press('Meta+v')
+    await page.keyboard.press('Control+v')
+
+    const linkNode = richTextField.locator('a.LexicalEditorTheme__link').first()
+    await linkNode.scrollIntoViewIfNeeded()
+    await expect(linkNode).toBeVisible()
+
+    // Check link node text and attributes
+    await expect(linkNode).toHaveText('Google')
+    await expect(linkNode).toHaveAttribute('href', 'https://www.google.com/')
+
+    // Expect floating link editor link-input to be there
+    const linkInput = richTextField.locator('.link-input').first()
+    await expect(linkInput).toBeVisible()
+
+    const linkInInput = linkInput.locator('a').first()
+    expect(linkInInput).toBeVisible()
+
+    expect(linkInInput).toContainText('https://www.google.com/')
+    await expect(linkInInput).toHaveAttribute('href', 'https://www.google.com/')
+
+    // Click remove button
+    const removeButton = linkInput.locator('.link-trash').first()
+    await removeButton.click()
+
+    // Expect link to be removed
+    await expect(linkNode).not.toBeVisible()
+  })
+
   describe('localization', () => {
+    test('ensure lexical translations from other languages do not get sent to the client', async () => {
+      await navigateToLexicalFields()
+      // Now check if the html contains "Comience a escribir"
+
+      const htmlContent = await page.content()
+
+      // Check if the HTML contains "Comience a escribir"
+      expect(htmlContent).not.toContain('Comience a escribir')
+      expect(htmlContent).not.toContain('Beginne zu tippen oder')
+      expect(htmlContent).not.toContain('Cargando...')
+      expect(htmlContent).toContain('Start typing, or press')
+    })
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)
     })
+  })
+
+  test('select decoratorNodes', async () => {
+    // utils
+    const decoratorLocator = page.locator('.decorator-selected') // [data-lexical-decorator="true"]
+    const expectInsideSelectedDecorator = async (innerLocator: Locator) => {
+      await expect(decoratorLocator).toBeVisible()
+      await expect(decoratorLocator.locator(innerLocator)).toBeVisible()
+    }
+
+    // test
+    await navigateToLexicalFields()
+    const bottomOfUploadNode = page
+      .locator('div')
+      .filter({ hasText: /^payload\.jpg$/ })
+      .first()
+    await bottomOfUploadNode.click()
+    await expectInsideSelectedDecorator(bottomOfUploadNode)
+
+    const textNode = page.getByText('Upload Node:', { exact: true })
+    await textNode.click()
+    await expect(decoratorLocator).not.toBeVisible()
+
+    const closeTagInMultiSelect = page
+      .getByRole('button', { name: 'payload.jpg Edit payload.jpg' })
+      .getByLabel('Remove')
+    await closeTagInMultiSelect.click()
+    await expect(decoratorLocator).not.toBeVisible()
+
+    const labelInsideCollapsableBody = page.locator('label').getByText('Sub Blocks')
+    await labelInsideCollapsableBody.click()
+    await expectInsideSelectedDecorator(labelInsideCollapsableBody)
+
+    const textNodeInNestedEditor = page.getByText('Some text below relationship node 1')
+    await textNodeInNestedEditor.click()
+    await expect(decoratorLocator).not.toBeVisible()
+
+    await page.getByRole('button', { name: 'Tab2' }).click()
+    await expect(decoratorLocator).not.toBeVisible()
+
+    const labelInsideCollapsableBody2 = page.getByText('Text2')
+    await labelInsideCollapsableBody2.click()
+    await expectInsideSelectedDecorator(labelInsideCollapsableBody2)
+
+    // TEST DELETE!
+    await page.keyboard.press('Backspace')
+    await expect(labelInsideCollapsableBody2).not.toBeVisible()
+
+    const monacoLabel = page.locator('label').getByText('Code')
+    await monacoLabel.click()
+    await expectInsideSelectedDecorator(monacoLabel)
+
+    const monacoCode = page.getByText('Some code')
+    await monacoCode.click()
+    await expect(decoratorLocator).not.toBeVisible()
   })
 })

@@ -33,6 +33,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
     collection: collection.slug,
     depth: 0,
     draft: true,
+    limit: 0,
     locale: req.locale,
     req,
     where: {
@@ -46,6 +47,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
     collection: collection.slug,
     depth: 0,
     draft: false,
+    limit: 0,
     locale: req.locale,
     req,
     where: {

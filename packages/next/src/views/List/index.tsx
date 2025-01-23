@@ -69,12 +69,13 @@ export const renderListView = async (
 
   const query = queryFromArgs || queryFromReq
 
-  const preferenceKey = `${collectionSlug}-list`
-
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
     req,
-    value: { limit: isNumber(query?.limit) ? Number(query.limit) : undefined, sort: query?.sort },
+    value: {
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      sort: query?.sort as string,
+    },
   })
 
   const {
@@ -201,12 +202,10 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
-            collectionSlug={collectionSlug}
             data={data}
             defaultLimit={limit}
             defaultSort={sort}
             modifySearchParams={!isInDrawer}
-            preferenceKey={preferenceKey}
           >
             {RenderServerComponent({
               clientProps,

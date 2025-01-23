@@ -8,6 +8,7 @@ import { v4 as uuid } from 'uuid'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { postsSlug } from './shared.js'
 
 const defaultValueField: TextField = {
   name: 'defaultValue',
@@ -23,12 +24,71 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
-      slug: 'posts',
+      slug: postsSlug,
       fields: [
         {
           name: 'title',
           type: 'text',
           required: true,
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'D1',
+              fields: [
+                {
+                  name: 'D2',
+                  type: 'group',
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          type: 'collapsible',
+                          fields: [
+                            {
+                              type: 'tabs',
+                              tabs: [
+                                {
+                                  fields: [
+                                    {
+                                      name: 'D3',
+                                      type: 'group',
+                                      fields: [
+                                        {
+                                          type: 'row',
+                                          fields: [
+                                            {
+                                              type: 'collapsible',
+                                              fields: [
+                                                {
+                                                  name: 'D4',
+                                                  type: 'text',
+                                                },
+                                              ],
+                                              label: 'Collapsible2',
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                  label: 'Tab1',
+                                },
+                              ],
+                            },
+                          ],
+                          label: 'Collapsible2',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+              label: 'Tab1',
+            },
+          ],
         },
         {
           name: 'hasTransaction',

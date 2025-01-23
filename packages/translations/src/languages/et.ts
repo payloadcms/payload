@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const etTranslations = {
+export const etTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
     accountOfCurrentUser: 'Praeguse kasutaja konto',
@@ -236,6 +236,7 @@ export const etTranslations = {
     duplicate: 'Dubleeri',
     duplicateWithoutSaving: 'Dubleeri ilma muudatusi salvestamata',
     edit: 'Muuda',
+    editAll: 'Muuda kõiki',
     editedSince: 'Muudetud alates',
     editing: 'Muutmine',
     editingLabel_many: 'Muudan {{count}} {{label}}',

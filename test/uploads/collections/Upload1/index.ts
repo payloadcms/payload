@@ -9,6 +9,15 @@ export const Uploads1: CollectionConfig = {
   slug: 'uploads-1',
   upload: {
     staticDir: path.resolve(dirname, 'uploads'),
+    pasteURL: {
+      allowList: [
+        {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: '4000',
+        },
+      ],
+    },
   },
   fields: [
     {

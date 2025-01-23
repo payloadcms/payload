@@ -2,6 +2,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import type { CollectionConfig } from 'payload'
+
 import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -18,6 +20,7 @@ import { RichTextCollection } from './collections/RichText/index.js'
 import { Tab } from './collections/Tab/index.js'
 import {
   blocksWithLocalizedSameName,
+  cannotCreateDefaultLocale,
   defaultLocale,
   englishTitle,
   hungarianLocale,
@@ -42,7 +45,7 @@ export type LocalizedPostAllLocale = {
   }
 } & LocalizedPost
 
-const openAccess = {
+const openAccess: CollectionConfig['access'] = {
   create: () => true,
   delete: () => true,
   read: () => true,
@@ -258,14 +261,14 @@ export default buildConfigWithDefaults({
         // Relation multiple relationTo
         {
           name: 'localizedRelationMultiRelationTo',
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         // Relation multiple relationTo hasMany
         {
           name: 'localizedRelationMultiRelationToHasMany',
           hasMany: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
       ],
@@ -289,14 +292,14 @@ export default buildConfigWithDefaults({
         {
           name: 'relationMultiRelationTo',
           localized: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         {
           name: 'relationMultiRelationToHasMany',
           hasMany: true,
           localized: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         {
@@ -317,14 +320,17 @@ export default buildConfigWithDefaults({
       slug: relationshipLocalizedSlug,
     },
     {
-      access: openAccess,
+      access: {
+        ...openAccess,
+        create: ({ req }) => req.locale !== defaultLocale,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
       ],
-      slug: 'dummy',
+      slug: cannotCreateDefaultLocale,
     },
     NestedToArrayAndBlock,
     Group,

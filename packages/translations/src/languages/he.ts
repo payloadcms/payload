@@ -233,6 +233,7 @@ export const heTranslations: DefaultTranslationsObject = {
     duplicate: 'שכפול',
     duplicateWithoutSaving: 'שכפול ללא שמירת שינויים',
     edit: 'עריכה',
+    editAll: 'עריכה הכל',
     editedSince: 'נערך מאז',
     editing: 'עריכה',
     editingLabel_many: 'עריכת {{count}} {{label}}',

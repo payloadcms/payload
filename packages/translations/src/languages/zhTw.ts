@@ -229,6 +229,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     duplicate: '複製',
     duplicateWithoutSaving: '複製而不儲存變更。',
     edit: '編輯',
+    editAll: '編輯全部',
     editedSince: '自...以來編輯',
     editing: '編輯中',
     editingLabel_many: '編輯 {{count}} 個 {{label}}',

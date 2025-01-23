@@ -307,6 +307,30 @@ export const createClientField = ({
               typeof tabProp === 'function'
             ) {
               clientTab[key] = tabProp({ t: i18n.t })
+            } else if (key === 'admin') {
+              clientTab.admin = {} as AdminClient
+
+              for (const adminKey in tab.admin) {
+                if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {
+                  continue
+                }
+
+                switch (adminKey) {
+                  case 'description':
+                    if ('description' in tab.admin) {
+                      if (typeof tab.admin?.description === 'function') {
+                        clientTab.admin.description = tab.admin.description({ t: i18n.t })
+                      } else {
+                        clientTab.admin.description = tab.admin.description
+                      }
+                    }
+
+                    break
+
+                  default:
+                    clientField.admin[adminKey] = tab.admin[adminKey]
+                }
+              }
             } else {
               clientTab[key] = tabProp
             }

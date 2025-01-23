@@ -68,6 +68,14 @@ export const rootEslintConfig = [
       'perfectionist/sort-objects': 'off',
     },
   },
+  {
+    files: ['tools/**/*.ts'],
+    rules: {
+      'no-console': 'off',
+      'perfectionist/sort-object-types': 'off',
+      'perfectionist/sort-objects': 'off',
+    },
+  },
 ]
 
 export default [

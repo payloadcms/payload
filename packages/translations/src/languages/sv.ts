@@ -239,6 +239,7 @@ export const svTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplicera',
     duplicateWithoutSaving: 'Duplicera utan att spara ändringar',
     edit: 'Redigera',
+    editAll: 'Redigera alla',
     editedSince: 'Redigerad sedan',
     editing: 'Redigerar',
     editingLabel_many: 'Redigerar {{count}} {{label}}',

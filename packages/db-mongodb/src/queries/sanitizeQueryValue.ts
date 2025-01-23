@@ -349,10 +349,11 @@ export const sanitizeQueryValue = ({
         $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
       }
 
-      if (maxDistance) {
+      if (maxDistance && !Number.isNaN(Number(maxDistance))) {
         formattedValue.$maxDistance = parseFloat(maxDistance)
       }
-      if (minDistance) {
+
+      if (minDistance && !Number.isNaN(Number(minDistance))) {
         formattedValue.$minDistance = parseFloat(minDistance)
       }
     }

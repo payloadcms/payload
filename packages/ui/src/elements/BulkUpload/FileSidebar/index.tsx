@@ -16,9 +16,9 @@ import { Pill } from '../../Pill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
+import './index.scss'
 import { AddFilesView } from '../AddFilesView/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import './index.scss'
 import { useBulkUpload } from '../index.js'
 
 const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
@@ -88,8 +88,13 @@ export function FileSidebar() {
           </div>
 
           <div className={`${baseClass}__header__actions`}>
-            {typeof maxFiles === 'number' && totalFileCount < maxFiles ? (
-              <Pill onClick={() => openModal(addMoreFilesDrawerSlug)}>{t('upload:addFile')}</Pill>
+            {(typeof maxFiles === 'number' ? totalFileCount < maxFiles : true) ? (
+              <Pill
+                className={`${baseClass}__header__addFile`}
+                onClick={() => openModal(addMoreFilesDrawerSlug)}
+              >
+                {t('upload:addFile')}
+              </Pill>
             ) : null}
             <Button
               buttonStyle="transparent"

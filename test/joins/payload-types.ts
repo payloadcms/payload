@@ -41,6 +41,7 @@ export interface Config {
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
       arrayPosts: 'posts';
+      localizedArrayPosts: 'posts';
       blocksPosts: 'posts';
       polymorphic: 'posts';
       polymorphics: 'posts';
@@ -199,6 +200,12 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
+  localizedArray?:
+    | {
+        category?: (string | null) | Category;
+        id?: string | null;
+      }[]
+    | null;
   blocks?:
     | {
         category?: (string | null) | Category;
@@ -269,6 +276,10 @@ export interface Category {
     } | null;
   };
   arrayPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  localizedArrayPosts?: {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
@@ -649,6 +660,12 @@ export interface PostsSelect<T extends boolean = true> {
         category?: T;
         id?: T;
       };
+  localizedArray?:
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
   blocks?:
     | T
     | {
@@ -680,6 +697,7 @@ export interface CategoriesSelect<T extends boolean = true> {
         camelCasePosts?: T;
       };
   arrayPosts?: T;
+  localizedArrayPosts?: T;
   blocksPosts?: T;
   polymorphic?: T;
   polymorphics?: T;

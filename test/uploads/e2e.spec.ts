@@ -22,6 +22,8 @@ import { RESTClient } from '../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
+  adminThumbnailWithSearchQueries,
+  mediaWithoutCacheTagsSlug,
   adminThumbnailSizeSlug,
   animatedTypeMedia,
   audioSlug,
@@ -33,11 +35,13 @@ import {
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
   withoutMetadataSlug,
+  customUploadFieldSlug,
 } from './shared.js'
+import { startMockCorsServer } from './startMockCorsServer.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, beforeEach, describe } = test
+const { afterAll, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
@@ -48,15 +52,21 @@ let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
+let adminThumbnailWithSearchQueriesURL: AdminUrlUtil
+let mediaWithoutCacheTagsSlugURL: AdminUrlUtil
 let focalOnlyURL: AdminUrlUtil
 let withMetadataURL: AdminUrlUtil
 let withoutMetadataURL: AdminUrlUtil
 let withOnlyJPEGMetadataURL: AdminUrlUtil
 let relationPreviewURL: AdminUrlUtil
 let customFileNameURL: AdminUrlUtil
+let uploadsOne: AdminUrlUtil
+let uploadsTwo: AdminUrlUtil
+let customUploadFieldURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
+  let mockCorsServer: ReturnType<typeof startMockCorsServer> | undefined
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -68,17 +78,25 @@ describe('Uploads', () => {
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
+    adminThumbnailWithSearchQueriesURL = new AdminUrlUtil(
+      serverURL,
+      adminThumbnailWithSearchQueries,
+    )
+    mediaWithoutCacheTagsSlugURL = new AdminUrlUtil(serverURL, mediaWithoutCacheTagsSlug)
     focalOnlyURL = new AdminUrlUtil(serverURL, focalOnlySlug)
     withMetadataURL = new AdminUrlUtil(serverURL, withMetadataSlug)
     withoutMetadataURL = new AdminUrlUtil(serverURL, withoutMetadataSlug)
     withOnlyJPEGMetadataURL = new AdminUrlUtil(serverURL, withOnlyJPEGMetadataSlug)
     relationPreviewURL = new AdminUrlUtil(serverURL, relationPreviewSlug)
     customFileNameURL = new AdminUrlUtil(serverURL, customFileNameMediaSlug)
+    uploadsOne = new AdminUrlUtil(serverURL, 'uploads-1')
+    uploadsTwo = new AdminUrlUtil(serverURL, 'uploads-2')
+    customUploadFieldURL = new AdminUrlUtil(serverURL, customUploadFieldSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
 
-    initPageConsoleErrorCatch(page)
+    initPageConsoleErrorCatch(page, { ignoreCORS: true })
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -95,6 +113,12 @@ describe('Uploads', () => {
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  afterAll(() => {
+    if (mockCorsServer) {
+      mockCorsServer.close()
+    }
   })
 
   test('should show upload filename in upload collection list', async () => {
@@ -163,6 +187,16 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('image.png')
 
     await saveDocAndAssert(page)
+  })
+
+  test('should remove remote URL button if pasteURL is false', async () => {
+    // pasteURL option is set to false in the media collection
+    await page.goto(mediaURL.create)
+
+    const pasteURLButton = page.locator('.file-field__upload button', {
+      hasText: 'Paste URL',
+    })
+    await expect(pasteURLButton).toBeHidden()
   })
 
   test('should properly create IOS file upload', async () => {
@@ -379,7 +413,7 @@ describe('Uploads', () => {
     // save the document and expect an error
     await page.locator('button#action-save').click()
     await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-      'The following field is invalid: audio',
+      'The following field is invalid: Audio',
     )
   })
 
@@ -428,6 +462,77 @@ describe('Uploads', () => {
       'src',
       'https://payloadcms.com/images/universal-truth.jpg',
     )
+  })
+
+  test('should render adminThumbnail when using a custom thumbnail URL with additional queries', async () => {
+    await page.goto(adminThumbnailWithSearchQueriesURL.list)
+    await page.waitForURL(adminThumbnailWithSearchQueriesURL.list)
+
+    const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
+    // Match the URL with the regex pattern
+    const regexPattern = /\/_next\/image\?url=.*?&w=384&q=5/
+
+    await expect(genericUploadImage).toHaveAttribute('src', regexPattern)
+  })
+
+  test('should render adminThumbnail without the additional cache tag', async () => {
+    const imageDoc = (
+      await payload.find({
+        collection: mediaWithoutCacheTagsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          mimeType: {
+            equals: 'image/png',
+          },
+        },
+      })
+    ).docs[0]
+
+    await page.goto(mediaWithoutCacheTagsSlugURL.edit(imageDoc.id))
+
+    const genericUploadImage = page.locator('.file-details .thumbnail img')
+
+    const src = await genericUploadImage.getAttribute('src')
+
+    /**
+     * Regex matcher for date cache tags.
+     *
+     * @example it will match `?2022-01-01T00:00:00.000Z`
+     */
+    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
+
+    expect(src).not.toMatch(cacheTagPattern)
+  })
+
+  test('should render adminThumbnail with the cache tag by default', async () => {
+    const imageDoc = (
+      await payload.find({
+        collection: adminThumbnailFunctionSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          mimeType: {
+            equals: 'image/png',
+          },
+        },
+      })
+    ).docs[0]
+
+    await page.goto(adminThumbnailFunctionURL.edit(imageDoc.id))
+
+    const genericUploadImage = page.locator('.file-details .thumbnail img')
+
+    const src = await genericUploadImage.getAttribute('src')
+
+    /**
+     * Regex matcher for date cache tags.
+     *
+     * @example it will match `?2022-01-01T00:00:00.000Z`
+     */
+    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
+
+    expect(src).toMatch(cacheTagPattern)
   })
 
   test('should render adminThumbnail when using a specific size', async () => {
@@ -568,6 +673,262 @@ describe('Uploads', () => {
 
     // With metadata, the animated image filesize would be 218762
     expect(webpMediaDoc.sizes.sizeThree.filesize).toEqual(211638)
+  })
+
+  test('should show custom upload component', async () => {
+    await page.goto(customUploadFieldURL.create)
+
+    const serverText = page.locator(
+      '.collection-edit--custom-upload-field .document-fields__edit h2',
+    )
+    await expect(serverText).toHaveText('This text was rendered on the server')
+
+    const clientText = page.locator(
+      '.collection-edit--custom-upload-field .document-fields__edit h3',
+    )
+    await expect(clientText).toHaveText('This text was rendered on the client')
+  })
+
+  describe('bulk uploads', () => {
+    test('should bulk upload multiple files', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+      await page.waitForURL(uploadsOne.create)
+
+      // Upload single file
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files at once
+      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './test-image.png'),
+      ])
+
+      await page
+        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .fill('prefix-one')
+
+      const nextImageChevronButton = page.locator(
+        '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      )
+      await nextImageChevronButton.click()
+
+      await page
+        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .fill('prefix-two')
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
+      const itemCount = await page
+        .locator('#field-hasManyUpload .upload--has-many__dragItem')
+        .count()
+      expect(itemCount).toEqual(2)
+
+      await saveDocAndAssert(page)
+    })
+
+    test('should apply field value to all bulk upload files after edit many', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+      await page.waitForURL(uploadsOne.create)
+
+      // Upload single file
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files at once
+      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './test-image.png'),
+      ])
+
+      await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
+      const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
+      await expect(editManyBulkUploadModal).toBeVisible()
+
+      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
+      await fieldSelector.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      // Select an option
+      await options.locator('text=Prefix').click()
+
+      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+
+      await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
+      const itemCount = await page
+        .locator('#field-hasManyUpload .upload--has-many__dragItem')
+        .count()
+      expect(itemCount).toEqual(2)
+
+      await saveDocAndAssert(page)
+    })
+
+    test('should remove validation errors from bulk upload files after correction in edit many drawer', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+      await page.waitForURL(uploadsOne.create)
+
+      // Upload single file
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files at once
+      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './test-image.png'),
+      ])
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+      await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 2 files')
+
+      const errorCount = page
+        .locator('#bulk-upload-drawer-slug-1 .file-selections .error-pill__count')
+        .first()
+      await expect(errorCount).toHaveText('2')
+
+      await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
+      const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
+      await expect(editManyBulkUploadModal).toBeVisible()
+
+      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
+      await fieldSelector.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      // Select an option
+      await options.locator('text=Prefix').click()
+
+      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+
+      await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+
+      await saveButton.click()
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'Successfully saved 2 files',
+      )
+
+      await saveDocAndAssert(page)
+    })
+  })
+
+  describe('remote url fetching', () => {
+    beforeAll(async () => {
+      mockCorsServer = startMockCorsServer()
+    })
+
+    afterAll(() => {
+      if (mockCorsServer) {
+        mockCorsServer.close()
+      }
+    })
+
+    test('should fetch remote URL server-side if pasteURL.allowList is defined', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+
+      // Click the "Paste URL" button
+      const pasteURLButton = page.locator('.file-field__upload button', { hasText: 'Paste URL' })
+      await pasteURLButton.click()
+
+      // Input the remote URL
+      const remoteImage = 'http://localhost:4000/mock-cors-image'
+      const inputField = page.locator('.file-field__upload .file-field__remote-file')
+      await inputField.fill(remoteImage)
+
+      // Intercept the server-side fetch to the paste-url endpoint
+      const encodedImageURL = encodeURIComponent(remoteImage)
+      const pasteUrlEndpoint = `/api/uploads-1/paste-url?src=${encodedImageURL}`
+      const serverSideFetchPromise = page.waitForResponse(
+        (response) => response.url().includes(pasteUrlEndpoint) && response.status() === 200,
+        { timeout: 1000 },
+      )
+
+      // Click the "Add File" button
+      const addFileButton = page.locator('.file-field__add-file')
+      await addFileButton.click()
+
+      // Wait for the server-side fetch to complete
+      const serverSideFetch = await serverSideFetchPromise
+      // Assert that the server-side fetch completed successfully
+      await serverSideFetch.text()
+
+      // Wait for the filename field to be updated
+      const filenameInput = page.locator('.file-field .file-field__filename')
+      await expect(filenameInput).toHaveValue('mock-cors-image', { timeout: 500 })
+
+      // Save and assert the document
+      await saveDocAndAssert(page)
+
+      // Validate the uploaded image
+      const imageDetails = page.locator('.file-field .file-details img')
+      await expect(imageDetails).toHaveAttribute('src', /mock-cors-image/, { timeout: 500 })
+    })
+
+    test('should fail to fetch remote URL server-side if the pasteURL.allowList domains do not match', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsTwo.create)
+
+      // Click the "Paste URL" button
+      const pasteURLButton = page.locator('.file-field__upload button', { hasText: 'Paste URL' })
+      await pasteURLButton.click()
+
+      // Input the remote URL
+      const remoteImage = 'http://localhost:4000/mock-cors-image'
+      const inputField = page.locator('.file-field__upload .file-field__remote-file')
+      await inputField.fill(remoteImage)
+
+      // Click the "Add File" button
+      const addFileButton = page.locator('.file-field__add-file')
+      await addFileButton.click()
+
+      // Verify the toast error appears with the correct message
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'The provided URL is not allowed.',
+      )
+    })
   })
 
   describe('image manipulation', () => {

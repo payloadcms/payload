@@ -43,7 +43,7 @@ describe('Text', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
     }))
@@ -168,6 +168,7 @@ describe('Text', () => {
     await upsertPrefs<Config, GeneratedTypes<any>>({
       payload,
       user: client.user,
+      key: 'text-fields-list',
       value: {
         columns: [
           {
