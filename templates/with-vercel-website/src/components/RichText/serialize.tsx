@@ -160,7 +160,6 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
                     aria-checked={node.checked ? 'true' : 'false'}
                     className={` ${node.checked ? '' : ''}`}
                     key={index}
-                    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
                     role="checkbox"
                     tabIndex={-1}
                     value={node?.value}
@@ -190,7 +189,8 @@ export function serializeLexical({ nodes }: Props): JSX.Element {
                 <CMSLink
                   key={index}
                   newTab={Boolean(fields?.newTab)}
-                  reference={fields.doc as any}
+                  // @ts-expect-error - this should disappear when upgrading to the latest version of Payload
+                  reference={fields.doc}
                   type={fields.linkType === 'internal' ? 'reference' : 'custom'}
                   url={fields.url}
                 >
