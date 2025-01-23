@@ -48,7 +48,7 @@ const TabsFields: CollectionConfig = {
               required: true,
               fields: [
                 // path: 'array.n.text'
-                // schemaPath: '_index-0-1.array.text'
+                // schemaPath: '_index-1-0.array.text'
                 {
                   name: 'text',
                   type: 'text',

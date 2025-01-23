@@ -26,6 +26,11 @@ export const Uploads2: CollectionConfig = {
   },
   fields: [
     {
+      name: 'prefix',
+      type: 'text',
+      required: true,
+    },
+    {
       type: 'text',
       name: 'title',
     },

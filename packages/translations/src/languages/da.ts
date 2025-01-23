@@ -237,6 +237,7 @@ export const daTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplikér',
     duplicateWithoutSaving: 'Dupliker uden at gemme ændringer',
     edit: 'Redigere',
+    editAll: 'Rediger alle',
     editedSince: 'Dette dokument er blevet redigeret siden du startede',
     editing: 'Rediger',
     editingLabel_many: 'Rediger {{count}} {{label}}',

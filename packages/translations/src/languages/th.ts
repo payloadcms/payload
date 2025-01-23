@@ -235,6 +235,7 @@ export const thTranslations: DefaultTranslationsObject = {
     duplicate: 'สำเนา',
     duplicateWithoutSaving: 'สำเนาโดยไม่บันทึกการแก้ไข',
     edit: 'แก้ไข',
+    editAll: 'แก้ไขทั้งหมด',
     editedSince: 'แก้ไขตั้งแต่',
     editing: 'แก้ไข',
     editingLabel_many: 'กำลังแก้ไข {{count}} {{label}}',

@@ -141,6 +141,7 @@ export const promise = async ({
           id,
           collectionSlug: collection?.slug,
           data: deepMergeWithSourceArrays(doc, data),
+          event: 'submit',
           jsonError,
           operation,
           preferences: { fields: {} },

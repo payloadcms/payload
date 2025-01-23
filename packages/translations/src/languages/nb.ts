@@ -239,6 +239,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     duplicate: 'Dupliser',
     duplicateWithoutSaving: 'Dupliser uten å lagre endringer',
     edit: 'Redigere',
+    editAll: 'Rediger alle',
     editedSince: 'Redigert siden',
     editing: 'Redigerer',
     editingLabel_many: 'Redigerer {{count}} {{label}}',

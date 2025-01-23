@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { usersSlug } from '../shared.js'
+import { usersSlug } from '../../shared.js'
 
 export const Users: CollectionConfig = {
   slug: usersSlug,

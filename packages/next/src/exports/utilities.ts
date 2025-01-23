@@ -23,7 +23,9 @@ export const mergeHeaders = _mergeHeaders
 
 /**
  * @deprecated
- * This function is not needed anymore for public usage. CORS headers are applied by default to response.
+ * Use:
+ * ```ts
+ * import { headersWithCors } from 'payload'
  * ```
  */
 export const headersWithCors = _headersWithCors

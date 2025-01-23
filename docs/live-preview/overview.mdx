@@ -30,12 +30,12 @@ const config = buildConfig({
 ```
 <Banner type="warning">
   **Reminder:**
-  Alternatively, you can define the `admin.livePreview` property on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Settings defined here will be merged into the top-level as overrides.
+  Alternatively, you can define the `admin.livePreview` property on individual [Collection Admin Configs](../configuration/collections#admin-options) and [Global Admin Configs](../configuration/globals#admin-options). Settings defined here will be merged into the top-level as overrides.
 </Banner>
 
 ## Options
 
-Setting up Live Preview is easy. This can be done either globally through the [Root Admin Config](../admin/overview), or on individual [Collection Admin Configs](../admin/collections) and [Global Admin Configs](../admin/globals). Once configured, a new "Live Preview" tab will appear at the top of enabled Documents. Navigating to this tab opens the preview window and loads your front-end application.
+Setting up Live Preview is easy. This can be done either globally through the [Root Admin Config](../admin/overview), or on individual [Collection Admin Configs](../configuration/collections#admin-options) and [Global Admin Configs](../configuration/globals#admin-options). Once configured, a new "Live Preview" tab will appear at the top of enabled Documents. Navigating to this tab opens the preview window and loads your front-end application.
 
 The following options are available:
 
@@ -104,8 +104,8 @@ The following arguments are provided to the `url` function:
 | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
 | **`data`**         | The data of the Document being edited. This includes changes that have not yet been saved.                        |
 | **`locale`**       | The locale currently being edited (if applicable). [More details](../configuration/localization).                 |
-| **`collectionConfig`** | The Collection Admin Config of the Document being edited. [More details](../admin/collections).                 |
-| **`globalConfig`** | The Global Admin Config of the Document being edited. [More details](../admin/globals).                          |
+| **`collectionConfig`** | The Collection Admin Config of the Document being edited. [More details](../configuration/collections#admin-options).                 |
+| **`globalConfig`** | The Global Admin Config of the Document being edited. [More details](../configuration/globals#admin-options).                          |
 | **`req`**          | The Payload Request object.  |
 
 If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:

@@ -1,5 +1,7 @@
 export const tenantsSlug = 'tenants'
 
-export const postsSlug = 'posts'
-
 export const usersSlug = 'users'
+
+export const menuItemsSlug = 'menu-items'
+
+export const menuSlug = 'menu'

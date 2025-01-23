@@ -243,6 +243,7 @@ export const roTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplicați',
     duplicateWithoutSaving: 'Duplicați fără salvarea modificărilor',
     edit: 'Editează',
+    editAll: 'Editează toate',
     editedSince: 'Editat din',
     editing: 'Editare',
     editingLabel_many: 'Editare {{count}} {{label}}',

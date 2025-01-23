@@ -237,6 +237,7 @@ export const faTranslations: DefaultTranslationsObject = {
     duplicate: 'تکراری',
     duplicateWithoutSaving: 'رونوشت بدون ذخیره کردن تغییرات',
     edit: 'نگارش',
+    editAll: 'ویرایش همه',
     editedSince: 'ویرایش شده از',
     editing: 'در حال نگارش',
     editingLabel_many: 'در حال نگارش {{count}} از {{label}}',

@@ -239,6 +239,7 @@ export const azTranslations: DefaultTranslationsObject = {
     duplicate: 'Dublikat',
     duplicateWithoutSaving: 'Dəyişiklikləri saxlamadan dublikatla',
     edit: 'Redaktə et',
+    editAll: 'Hamısını redaktə et',
     editedSince: 'Redaktə edilib',
     editing: 'Redaktə olunur',
     editingLabel_many: '{{count}} {{label}} redaktə olunur',

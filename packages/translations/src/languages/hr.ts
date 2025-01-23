@@ -239,6 +239,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Dupliciraj bez spremanja promjena',
     edit: 'Uredi',
+    editAll: 'Uredi sve',
     editedSince: 'Uređeno od',
     editing: 'Uređivanje',
     editingLabel_many: 'Uređivanje {{count}} {{label}}',

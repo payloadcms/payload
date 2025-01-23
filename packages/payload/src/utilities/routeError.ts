@@ -7,7 +7,9 @@ import type { PayloadRequest } from '../types/index.js'
 import { APIError } from '../errors/APIError.js'
 import { getPayload } from '../index.js'
 import { formatErrors } from './formatErrors.js'
+import { headersWithCors } from './headersWithCors.js'
 import { logError } from './logError.js'
+import { mergeHeaders } from './mergeHeaders.js'
 
 export const routeError = async ({
   collection,
@@ -38,6 +40,10 @@ export const routeError = async ({
   const req = incomingReq as PayloadRequest
 
   req.payload = payload
+  const headers = headersWithCors({
+    headers: new Headers(),
+    req,
+  })
 
   const { config } = payload
 
@@ -94,6 +100,7 @@ export const routeError = async ({
   }, Promise.resolve())
 
   return Response.json(response, {
+    headers: req.responseHeaders ? mergeHeaders(req.responseHeaders, headers) : headers,
     status,
   })
 }
