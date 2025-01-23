@@ -137,13 +137,13 @@ export const FieldPaths: CollectionConfig = {
           ],
         },
         {
-          // schemaPath: '_index-3-1'
+          // schemaPath: '_index-3.namedTab'
           // path: 'namedTab'
           label: 'Named Tab',
           name: 'namedTab',
           fields: [
             {
-              // schemaPath: '_index-3-1.fieldWithinNamedTab'
+              // schemaPath: '_index-3.namedTab.fieldWithinNamedTab'
               // path: 'namedTab.fieldWithinNamedTab'
               name: 'fieldWithinNamedTab',
               type: 'text',

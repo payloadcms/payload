@@ -518,7 +518,7 @@ describe('Hooks', () => {
       expect(doc.field_globalAndField).toStrictEqual(globalAndFieldString + globalAndFieldString)
     })
 
-    it('should pass correct field paths to field hooks', async () => {
+    it('should pass correct field paths through field hooks', async () => {
       const formatExpectedFieldPaths = (
         fieldIdentifier: string,
         {
@@ -593,7 +593,7 @@ describe('Hooks', () => {
         }),
         ...formatExpectedFieldPaths('fieldWithinNamedTab', {
           path: ['namedTab', 'fieldWithinNamedTab'],
-          schemaPath: ['_index-3-1', 'fieldWithinNamedTab'],
+          schemaPath: ['_index-3', 'namedTab', 'fieldWithinNamedTab'],
         }),
       })
     })

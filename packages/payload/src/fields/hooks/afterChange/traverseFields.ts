@@ -50,7 +50,7 @@ export const traverseFields = async ({
       index: fieldIndex,
       parentIndexPath: 'name' in field ? '' : parentIndexPath,
       parentPath,
-      parentSchemaPath,
+      parentSchemaPath: !('name' in field) && field.type === 'tabs' ? '' : parentSchemaPath,
     })
 
     promises.push(

@@ -79,7 +79,7 @@ export const traverseFields = ({
       index: fieldIndex,
       parentIndexPath: 'name' in field ? '' : parentIndexPath,
       parentPath,
-      parentSchemaPath,
+      parentSchemaPath: !('name' in field) && field.type === 'tabs' ? '' : parentSchemaPath,
     })
 
     fieldPromises.push(

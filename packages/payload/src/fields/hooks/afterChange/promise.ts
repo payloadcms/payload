@@ -272,8 +272,8 @@ export const promise = async ({
           field: tab,
           index: tabIndex,
           parentIndexPath: indexPath,
-          parentPath: '',
-          parentSchemaPath,
+          parentPath: isNamedTab ? '' : parentPath,
+          parentSchemaPath: isNamedTab ? schemaPath : '',
         })
 
         await traverseFields({
