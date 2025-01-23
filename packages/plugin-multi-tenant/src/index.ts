@@ -7,7 +7,6 @@ import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
-import { addHideTenantCollection } from './utilities/addHideTenantCollection.js'
 import { withTenantListFilter } from './utilities/withTenantListFilter.js'
 
 const defaults = {
@@ -110,14 +109,6 @@ export const multiTenantPlugin =
        */
       if (collection.slug === tenantsCollectionSlug) {
         tenantCollection = collection
-
-        /**
-         * Hide tenants collection from users with only 1 tenant
-         */
-        addHideTenantCollection({
-          collection,
-          userHasAccessToAllTenants,
-        })
 
         /**
          * Add access control constraint to tenants collection
