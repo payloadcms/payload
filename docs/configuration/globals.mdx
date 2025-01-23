@@ -6,7 +6,7 @@ desc: Set up your Global config for your needs by defining fields, adding slugs 
 keywords: globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Globals are in many ways similar to [Collections](../configuration/collections), except that they correspond to only a single Document. You can define as many Globals as your application needs. Each Global Document is stored in the [Database](../database/overview) based on the [Fields](../fields/overview) that you define, and automatically generates a [Local API](../local-api/overview), [REST API](../rest-api/overview), and [GraphQL API](../graphql/overview) used to manage your Documents.
+Globals are in many ways similar to [Collections](./collections), except that they correspond to only a single Document. You can define as many Globals as your application needs. Each Global Document is stored in the [Database](../database/overview) based on the [Fields](../fields/overview) that you define, and automatically generates a [Local API](../local-api/overview), [REST API](../rest-api/overview), and [GraphQL API](../graphql/overview) used to manage your Documents.
 
 Globals are the primary way to structure singletons in Payload, such as a header navigation, site-wide banner alerts, or app-wide localized strings. Each Global can have its own unique [Access Control](../access-control/overview), [Hooks](../hooks/overview), [Admin Options](#admin-options), and more.
 
@@ -25,7 +25,7 @@ export default buildConfig({
 
 <Banner type="success">
   **Tip:**
-  If you have more than one Global that share the same structure, consider using a [Collection](../configuration/collections) instead.
+  If you have more than one Global that share the same structure, consider using a [Collection](./collections) instead.
 </Banner>
 
 ## Config Options
@@ -68,7 +68,7 @@ The following options are available:
 | Option              | Description                                                                                                                                                                                    |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`access`**        | Provide Access Control functions to define exactly who should be able to do what with this Global. [More details](../access-control/globals).                                                  |
-| **`admin`**         | The configuration options for the Admin Panel. [More details](../admin/globals).                                                                                                               |
+| **`admin`**         | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                               |
 | **`custom`**        | Extension point for adding custom data (e.g. for plugins)                                                                                                                                      |
 | **`dbName`**        | Custom table or collection name for this Global depending on the Database Adapter. Auto-generated from slug if not defined.                                                                    |
 | **`description`**   | Text or React component to display below the Global header to give editors more information.                                                                                                   |
@@ -96,9 +96,105 @@ Fields define the schema of the Global. To learn more, go to the [Fields](../fie
 
 [Global Hooks](../hooks/globals) allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. To learn more, go to the [Hooks](../hooks/overview) documentation.
 
-### Admin Options
+## Admin Options
 
-You can customize the way that the [Admin Panel](../admin/overview) behaves on a Global-by-Global basis. To learn more, go to the [Global Admin Options](../admin/globals) documentation.
+The behavior of Globals within the [Admin Panel](../admin/overview) can be fully customized to fit the needs of your application. This includes grouping or hiding their navigation links, adding [Custom Components](../admin/components), setting page metadata, and more.
+
+To configure Admin Options for Globals, use the `admin` property in your Global Config:
+
+```ts
+import { GlobalConfig } from 'payload'
+
+export const MyGlobal: GlobalConfig = {
+  // ...
+  admin: { // highlight-line
+    // ...
+  },
+}
+```
+
+The following options are available:
+
+| Option            | Description                                                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **`group`**       | Text or localization object used to group Collection and Global links in the admin navigation. Set to `false` to hide the link from the navigation while keeping its routes accessible. |
+| **`hidden`**      | Set to true or a function, called with the current user, returning true to exclude this Global from navigation and admin routing. |
+| **`components`**  | Swap in your own React components to be used within this Global. [More details](#custom-components).                           |
+| **`preview`**     | Function to generate a preview URL within the Admin Panel for this Global that can point to your app. [More details](#preview).           |
+| **`livePreview`** | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).          |
+| **`hideAPIURL`**  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
+| **`meta`**        | Page metadata overrides to apply to this Global within the Admin Panel. [More details](../admin/metadata).                                                                           |
+
+### Custom Components
+
+Globals can set their own [Custom Components](../admin/components) which only apply to Global-specific UI within the [Admin Panel](../admin/overview). This includes elements such as the Save Button, or entire layouts such as the Edit View.
+
+To override Global Components, use the `admin.components` property in your Global Config:
+
+```ts
+import type { SanitizedGlobalConfig } from 'payload'
+
+export const MyGlobal: SanitizedGlobalConfig = {
+  // ...
+  admin: {
+    components: { // highlight-line
+      // ...
+    },
+  },
+}
+```
+
+The following options are available:
+
+| Path                           | Description                                                                                                            |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **`elements.SaveButton`**      | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled.                                    |
+| **`elements.SaveDraftButton`** | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. |
+| **`elements.PublishButton`**   | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled.                                  |
+| **`elements.PreviewButton`**   | Replace the default Preview Button with a Custom Component. [Preview](#preview) must be enabled.                                         |
+| **`views`**                    | Override or create new views within the Admin Panel. [More details](../admin/views).                                     |
+
+<Banner type="success">
+  **Note:**
+  For details on how to build Custom Components, see [Building Custom Components](../admin/components#building-custom-components).
+</Banner>
+
+### Preview
+
+It is possible to display a Preview Button within the Edit View of the Admin Panel. This will allow editors to visit the frontend of your app the corresponds to the document they are actively editing. This way they can preview the latest, potentially unpublished changes.
+
+To configure the Preview Button, set the `admin.preview` property to a function in your Global Config:
+
+```ts
+import { GlobalConfig } from 'payload'
+
+export const MainMenu: GlobalConfig = {
+  // ...
+  admin: {
+    // highlight-start
+    preview: (doc, { locale }) => {
+      if (doc?.slug) {
+        return `/${doc.slug}?locale=${locale}`
+      }
+
+      return null
+    },
+    // highlight-end
+  },
+}
+```
+
+The preview function receives two arguments:
+
+| Argument | Description |
+| --- | --- |
+| **`doc`** | The Document being edited. |
+| **`ctx`** | An object containing `locale` and `token` properties. The `token` is the currently logged-in user's JWT. |
+
+<Banner type="success">
+  **Note:**
+  For fully working example of this, check of the official [Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview) in the [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples).
+</Banner>
 
 ## GraphQL
 
