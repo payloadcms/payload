@@ -43,11 +43,6 @@
       overflow: hidden;
     }
 
-    &--selected {
-      box-shadow: $focus-box-shadow;
-      outline: none;
-    }
-
     &__doc-drawer-toggler {
       text-decoration: underline;
       pointer-events: all;

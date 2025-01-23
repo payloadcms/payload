@@ -3,6 +3,7 @@ import { status as httpStatus } from 'http-status'
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { extractJWT } from '../extractJWT.js'
 import { meOperation } from '../operations/me.js'
 
@@ -26,6 +27,10 @@ export const meHandler: PayloadHandler = async (req) => {
       message: req.t('authentication:account'),
     },
     {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.OK,
     },
   )

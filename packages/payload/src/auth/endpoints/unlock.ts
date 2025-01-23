@@ -3,6 +3,7 @@ import { status as httpStatus } from 'http-status'
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { unlockOperation } from '../operations/unlock.js'
 
 export const unlockHandler: PayloadHandler = async (req) => {
@@ -30,6 +31,10 @@ export const unlockHandler: PayloadHandler = async (req) => {
       message: t('general:success'),
     },
     {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.OK,
     },
   )

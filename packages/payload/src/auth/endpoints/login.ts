@@ -3,6 +3,7 @@ import { status as httpStatus } from 'http-status'
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { generatePayloadCookie } from '../cookies.js'
 import { loginOperation } from '../operations/login.js'
@@ -46,8 +47,11 @@ export const loginHandler: PayloadHandler = async (req) => {
       ...result,
     },
     {
-      headers: new Headers({
-        'Set-Cookie': cookie,
+      headers: headersWithCors({
+        headers: new Headers({
+          'Set-Cookie': cookie,
+        }),
+        req,
       }),
       status: httpStatus.OK,
     },

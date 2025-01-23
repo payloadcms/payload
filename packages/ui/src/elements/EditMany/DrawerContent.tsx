@@ -24,11 +24,12 @@ import { SelectAllStatus, useSelection } from '../../providers/Selection/index.j
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
+import { filterOutUploadFields } from '../../utilities/filterOutUploadFields.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
-import './index.scss'
 import { FieldSelect } from '../FieldSelect/index.js'
 import { baseClass, type EditManyProps } from './index.js'
+import './index.scss'
 
 const sanitizeUnselectedFields = (formState: FormState, selected: FieldWithPathClient[]) => {
   const filteredData = selected.reduce((acc, field) => {
@@ -169,6 +170,8 @@ export const EditManyDrawerContent: React.FC<
   const collectionPermissions = permissions?.collections?.[slug]
   const searchParams = useSearchParams()
 
+  const filteredFields = filterOutUploadFields(fields)
+
   React.useEffect(() => {
     const controller = new AbortController()
 
@@ -284,7 +287,7 @@ export const EditManyDrawerContent: React.FC<
             onChange={[onChange]}
             onSuccess={onSuccess}
           >
-            <FieldSelect fields={fields} setSelected={setSelected} />
+            <FieldSelect fields={filteredFields} setSelected={setSelected} />
             {selected.length === 0 ? null : (
               <RenderFields
                 fields={selected}

@@ -1404,7 +1404,7 @@ export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
-export { headersWithCors_public as headersWithCors } from './utilities/headersWithCors.js'
+export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'

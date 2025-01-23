@@ -15,6 +15,7 @@ import { RenderFields } from '../../../forms/RenderFields/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { filterOutUploadFields } from '../../../utilities/filterOutUploadFields.js'
 import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { baseClass, type EditManyBulkUploadsProps } from './index.js'
@@ -36,6 +37,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
 
   const [selectedFields, setSelectedFields] = useState<FieldWithPathClient[]>([])
   const collectionPermissions = permissions?.collections?.[slug]
+  const filteredFields = filterOutUploadFields(fields)
 
   const handleSubmit: FormProps['onSubmit'] = useCallback(
     (formState) => {
@@ -72,7 +74,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
         </button>
       </div>
       <Form className={`${baseClass}__form`} initialState={{}} onSubmit={handleSubmit}>
-        <FieldSelect fields={fields} setSelected={setSelectedFields} />
+        <FieldSelect fields={filteredFields} setSelected={setSelectedFields} />
         {selectedFields.length === 0 ? null : (
           <RenderFields
             fields={selectedFields}

@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 'use client'
 
@@ -27,7 +26,14 @@ export const InsertParagraphAtEndPlugin: React.FC = () => {
   }
 
   return (
-    <div aria-label="Insert Paragraph" className={baseClass} onClick={onClick}>
+    // TODO: convert to button
+    <div
+      aria-label="Insert Paragraph"
+      className={baseClass}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+    >
       <div className={`${baseClass}-inside`}>
         <span>+</span>
       </div>
