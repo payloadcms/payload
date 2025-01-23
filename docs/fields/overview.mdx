@@ -410,7 +410,7 @@ The following options are available:
 | **`disableListFilter`** | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                              |
 | **`hidden`**            | Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.                                                          |
 
-## Field Descriptions
+### Field Descriptions
 
 Field Descriptions are used to provide additional information to the editor about a field, such as special instructions. Their placement varies from field to field, but typically are displayed with subtle style differences beneath the field inputs.
 
@@ -480,7 +480,7 @@ All Description Functions receive the following arguments:
   If you need to subscribe to live updates within your form, use a Description Component instead. [More details](#description).
 </Banner>
 
-## Conditional Logic
+### Conditional Logic
 
 You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes three arguments:
 
@@ -519,7 +519,7 @@ The `condition` function should return a boolean that will control if the field 
 }
 ```
 
-## Custom Components
+### Custom Components
 
 Within the [Admin Panel](../admin/overview), fields are represented in three distinct places:
 
@@ -561,7 +561,7 @@ The following options are available:
 | **`beforeInput`** | An array of elements that will be added before the input of the Field Component. [More details](#afterinput-and-beforeinput).|
 | **`afterInput`**  | An array of elements that will be added after the input of the Field Component. [More details](#afterinput-and-beforeinput). |
 
-### Field
+#### Field
 
 The Field Component is the actual form field rendered in the Edit View. This is the input that user's will interact with when editing a document.
 
@@ -592,7 +592,7 @@ _For details on how to build Custom Components, see [Building Custom Components]
   Instead of replacing the entire Field Component, you can alternately replace or slot-in only specific parts by using the [`Label`](#label), [`Error`](#error), [`beforeInput`](#afterinput-and-beforinput), and [`afterInput`](#afterinput-and-beforinput) properties.
 </Banner>
 
-#### Default Props
+##### Default Props
 
 All Field Components receive the following props by default:
 
@@ -622,7 +622,7 @@ In addition to the above props, all Server Components will also receive the foll
 | **`user`**        | The currently authenticated user. [More details](../authentication/overview). |
 | **`value`**       | The value of the field at render-time.                                        |
 
-#### Sending and receiving values from the form
+##### Sending and receiving values from the form
 
 When swapping out the `Field` component, you are responsible for sending and receiving the field's `value` from the form itself.
 
@@ -648,7 +648,7 @@ export const CustomTextField: React.FC = () => {
   For a complete list of all available React hooks, see the [Payload React Hooks](../admin/hooks) documentation. For additional help, see [Building Custom Components](../admin/components#building-custom-components).
 </Banner>
 
-#### TypeScript
+##### TypeScript#field-component-types
 
 When building Custom Field Components, you can import the client field props to ensure type safety in your component. There is an explicit type for the Field Component, one for every Field Type and server/client environment. The convention is to prepend the field type onto the target type, i.e. `TextFieldClientComponent`:
 
@@ -664,7 +664,7 @@ import type {
 
 See each individual Field Type for exact type imports.
 
-### Cell
+#### Cell
 
 The Cell Component is rendered in the table of the List View. It represents the value of the field when displayed in a table cell.
 
@@ -693,7 +693,7 @@ All Cell Components receive the same [Default Field Component Props](#field), pl
 
 For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
 
-### Filter
+#### Filter
 
 The Filter Component is the actual input element rendered within the "Filter By" dropdown of the List View used to represent this field when building filters.
 
@@ -717,7 +717,7 @@ All Custom Filter Components receive the same [Default Field Component Props](#f
 
 For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
 
-### Label
+#### Label
 
 The Label Component is rendered anywhere a field needs to be represented by a label. This is typically used in the Edit View, but can also be used in the List View and elsewhere.
 
@@ -741,7 +741,7 @@ All Custom Label Components receive the same [Default Field Component Props](#fi
 
 For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
 
-#### TypeScript
+##### TypeScript#label-component-types
 
 When building Custom Label Components, you can import the component types to ensure type safety in your component. There is an explicit type for the Label Component, one for every Field Type and server/client environment. The convention is to append `LabelServerComponent` or `LabelClientComponent` to the type of field, i.e. `TextFieldLabelClientComponent`.
 
@@ -753,7 +753,7 @@ import type {
 } from 'payload'
 ```
 
-### Description
+#### Description
 
 Alternatively to the [Description Property](#field-descriptions), you can also use a [Custom Component](../admin/components) as the Field Description. This can be useful when you need to provide more complex feedback to the user, such as rendering dynamic field values or other interactive elements.
 
@@ -783,7 +783,7 @@ All Custom Description Components receive the same [Default Field Component Prop
 
 For details on how to build a Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
 
-#### TypeScript
+##### TypeScript#description-component-types
 
 When building Custom Description Components, you can import the component props to ensure type safety in your component. There is an explicit type for the Description Component, one for every Field Type and server/client environment. The convention is to append `DescriptionServerComponent` or `DescriptionClientComponent` to the type of field, i.e. `TextFieldDescriptionClientComponent`.
 
@@ -795,7 +795,7 @@ import type {
 } from 'payload'
 ```
 
-### Error
+#### Error
 
 The Error Component is rendered when a field fails validation. It is typically displayed beneath the field input in a visually-compelling style.
 
@@ -819,7 +819,7 @@ All Error Components receive the [Default Field Component Props](#field).
 
 For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
 
-#### TypeScript
+##### TypeScript#error-component-types
 
 When building Custom Error Components, you can import the component types to ensure type safety in your component. There is an explicit type for the Error Component, one for every Field Type and server/client environment. The convention is to append `ErrorServerComponent` or `ErrorClientComponent` to the type of field, i.e. `TextFieldErrorClientComponent`.
 
@@ -831,7 +831,7 @@ import type {
 } from 'payload'
 ```
 
-### afterInput and beforeInput
+#### afterInput and beforeInput
 
 With these properties you can add multiple components _before_ and _after_ the input element, as their name suggests. This is useful when you need to render additional elements alongside the field without replacing the entire field component.
 
