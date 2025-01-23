@@ -16,6 +16,7 @@ import { seed } from './seed/index.js'
 export default buildConfigWithDefaults({
   collections: [Tenants, Users, Menu, MenuItems],
   admin: {
+    autoLogin: false,
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -30,18 +31,6 @@ export default buildConfigWithDefaults({
   plugins: [
     multiTenantPlugin<ConfigType>({
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
-      tenantsArrayField: {
-        rowFields: [
-          {
-            name: 'roles',
-            type: 'select',
-            options: [
-              { label: 'Admin', value: 'admin' },
-              { label: 'User', value: 'user' },
-            ],
-          },
-        ],
-      },
       tenantField: {
         access: {},
       },
