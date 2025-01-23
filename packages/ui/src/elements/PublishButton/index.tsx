@@ -211,9 +211,11 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
                       </PopupList.ButtonGroup>
                     )}
                     {localization && (
-                      <PopupList.Button onClick={secondaryPublish}>
-                        {secondaryLabel}
-                      </PopupList.Button>
+                      <PopupList.ButtonGroup>
+                        <PopupList.Button onClick={secondaryPublish}>
+                          {secondaryLabel}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
                     )}
                   </React.Fragment>
                 )
