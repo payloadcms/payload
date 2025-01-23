@@ -67,3 +67,90 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { CheckboxField } from '@payloadcms/ui'
+import type { CheckboxFieldServerComponent } from 'payload'
+
+export const CustomCheckboxFieldServer: CheckboxFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <CheckboxField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { CheckboxField } from '@payloadcms/ui'
+import type { CheckboxFieldClientComponent } from 'payload'
+
+export const CustomCheckboxFieldClient: CheckboxFieldClientComponent = (props) => {
+  return <CheckboxField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { CheckboxFieldLabelServerComponent } from 'payload'
+
+export const CustomCheckboxFieldLabelServer: CheckboxFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { CheckboxFieldLabelClientComponent } from 'payload'
+
+export const CustomCheckboxFieldLabelClient: CheckboxFieldLabelClientComponent = ({
+  label,
+  path,
+  required,
+}) => {
+  return (
+  <FieldLabel
+    label={field?.label || field?.name}
+    path={path}
+    required={field?.required}
+  />
+)
+}
+```

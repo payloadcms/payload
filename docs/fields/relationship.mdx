@@ -373,3 +373,89 @@ Since we are referencing multiple collections, the field you are querying on may
   You **cannot** query on a field within a polymorphic relationship as you would with a
   non-polymorphic relationship.
 </Banner>
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { RelationshipField } from '@payloadcms/ui'
+import type { RelationshipFieldServerComponent } from 'payload'
+
+export const CustomRelationshipFieldServer: RelationshipFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <RelationshipField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { RelationshipField } from '@payloadcms/ui'
+import type { RelationshipFieldClientComponent } from 'payload'
+
+export const CustomRelationshipFieldClient: RelationshipFieldClientComponent = (props) => {
+  return <RelationshipField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { RelationshipFieldLabelServerComponent } from 'payload'
+
+export const CustomRelationshipFieldLabelServer: RelationshipFieldLabelServerComponent = (
+  clientField,
+  path
+) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { RelationshipFieldLabelClientComponent } from 'payload'
+
+export const CustomRelationshipFieldLabelClient: RelationshipFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```

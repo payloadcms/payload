@@ -93,3 +93,89 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { TextareaField } from '@payloadcms/ui'
+import type { TextareaFieldServerComponent } from 'payload'
+
+export const CustomTextareaFieldServer: TextareaFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <TextareaField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { TextareaField } from '@payloadcms/ui'
+import type { TextareaFieldClientComponent } from 'payload'
+
+export const CustomTextareaFieldClient: TextareaFieldClientComponent = (props) => {
+  return <TextareaField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { TextareaFieldLabelServerComponent } from 'payload'
+
+export const CustomTextareaFieldLabelServer: TextareaFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { TextareaFieldLabelClientComponent } from 'payload'
+
+export const CustomTextareaFieldLabelClient: TextareaFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```

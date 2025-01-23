@@ -125,18 +125,99 @@ export const ExampleCollection: CollectionConfig = {
           type: 'text',
         },
       ],
-      admin: {
-        components: {
-          RowLabel: '/path/to/ArrayRowLabel#ArrayRowLabel',
-        },
-      },
     },
   ],
 }
 ```
 
-### Example of a custom RowLabel component
+## Custom Components
 
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { ArrayField } from '@payloadcms/ui'
+import type { ArrayFieldServerComponent } from 'payload'
+
+export const CustomArrayFieldServer: ArrayFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions
+}) => {
+  return (
+    <ArrayField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { ArrayField } from '@payloadcms/ui'
+import type { ArrayFieldClientComponent } from 'payload'
+
+export const CustomArrayFieldClient: ArrayFieldClientComponent = (props) => {
+  return <ArrayField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { ArrayFieldLabelServerComponent } from 'payload'
+
+export const CustomArrayFieldLabelServer: ArrayFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import type { ArrayFieldLabelClientComponent } from 'payload'
+
+import { FieldLabel } from '@payloadcms/ui'
+import React from 'react'
+
+export const CustomArrayFieldLabelClient: ArrayFieldLabelClientComponent = ({
+  field,
+  path
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```
+
+### Row Label
 
 ```tsx
 'use client'

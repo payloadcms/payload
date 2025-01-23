@@ -129,3 +129,84 @@ payload.find({
   },
 })
 ```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { PointField } from '@payloadcms/ui'
+import type { PointFieldServerComponent } from 'payload'
+
+export const CustomPointFieldServer: PointFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <PointField field={clientField} path={path} schemaPath={schemaPath} permissions={permissions} />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { PointField } from '@payloadcms/ui'
+import type { PointFieldClientComponent } from 'payload'
+
+export const CustomPointFieldClient: PointFieldClientComponent = (props) => {
+  return <PointField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { PointFieldLabelServerComponent } from 'payload'
+
+export const CustomPointFieldLabelServer: PointFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { PointFieldLabelClientComponent } from 'payload'
+
+export const CustomPointFieldLabelClient: PointFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```

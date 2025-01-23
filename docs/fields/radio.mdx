@@ -117,3 +117,90 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { RadioGroupField } from '@payloadcms/ui'
+import type { RadioFieldServerComponent } from 'payload'
+
+export const CustomRadioFieldServer: RadioFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <RadioGroupField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { RadioGroupField } from '@payloadcms/ui'
+import type { RadioFieldClientComponent } from 'payload'
+
+export const CustomRadioFieldClient: RadioFieldClientComponent = (props) => {
+  return <RadioGroupField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { RadioFieldLabelServerComponent } from 'payload'
+
+export const CustomRadioFieldLabelServer: RadioFieldLabelServerComponent = ({
+  clientField,
+  path,
+  required,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { RadioFieldLabelClientComponent } from 'payload'
+
+export const CustomRadioFieldLabelClient: RadioFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```

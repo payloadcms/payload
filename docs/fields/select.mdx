@@ -125,83 +125,90 @@ export const ExampleCollection: CollectionConfig = {
 }
 ```
 
-## Customization
+## Custom Components
 
-The Select field UI component can be customized by providing a custom React component to the `components` object in the Base config.
+### Field
 
-```ts
-export const CustomSelectField: Field = {
-  name: 'customSelectField',
-  type: 'select', // or 'text' if you have dynamic options
-  admin: {
-    components: {
-      Field: CustomSelectComponent({
-        options: [
-          {
-            label: 'Option 1',
-            value: '1',
-          },
-          {
-            label: 'Option 2',
-            value: '2',
-          },
-        ],
-      }),
-    },
-  },
-}
-```
+#### Server Component
 
-You can import the existing Select component directly from Payload, then extend and customize it as needed.
+```tsx
+import type { SelectFieldServerComponent } from 'payload'
+import type React from 'react'
 
-```ts
-import * as React from 'react';
-import { SelectInput, useAuth, useField } from '@payloadcms/ui';
+import { SelectField } from '@payloadcms/ui'
 
-type CustomSelectProps = {
-  path: string;
-  options: {
-    label: string;
-    value: string;
-  }[];
-}
-
-export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, options }) => {
-  const { value, setValue } = useField<string>({ path })
-  const { user } = useAuth()
-
-  const adjustedOptions = options.filter((option) => {
-    /*
-      A common use case for a custom select
-      is to show different options based on
-      the current user's role.
-    */
-    return option;
-  });
-
+export const CustomSelectFieldServer: SelectFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
   return (
-    <div>
-      <label className="field-label">
-        Custom Select
-      </label>
-      <SelectInput
-        path={path}
-        name={path}
-        options={adjustedOptions}
-        value={value}
-        onChange={(e) => setValue(e.value)}
-      />
-    </div>
+    <SelectField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
   )
 }
 ```
 
-If you are looking to create a dynamic select field, the following tutorial will walk you through the process of creating a custom select field that fetches its options from an external API.
+#### Client Component
 
-<VideoDrawer
-  id="Efn9OxSjA6Y"
-  label="How to Create a Custom Select Field"
-  drawerTitle="How to Create a Custom Select Field: A Step-by-Step Guide"
-/>
+```tsx
+'use client'
+import type { SelectFieldClientComponent } from 'payload'
 
-If you want to learn more about custom components check out the [Admin > Custom Component](/docs/admin/fields) docs.
+import { SelectField } from '@payloadcms/ui'
+import React from 'react'
+
+export const CustomSelectFieldClient: SelectFieldClientComponent = (props) => {
+  return <SelectField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { SelectFieldLabelServerComponent } from 'payload'
+
+export const CustomSelectFieldLabelServer: SelectFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { SelectFieldLabelClientComponent } from 'payload'
+
+export const CustomSelectFieldLabelClient: SelectFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```
