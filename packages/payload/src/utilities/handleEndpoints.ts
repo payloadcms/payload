@@ -66,7 +66,7 @@ export const handleEndpoints = async ({
 }: {
   basePath?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
-  /** Override path from the reques */
+  /** Override path from the request */
   path?: string
   request: Request
 }): Promise<Response> => {
@@ -120,7 +120,7 @@ export const handleEndpoints = async ({
     const { payload } = req
     const { config } = payload
 
-    const pathname = `${basePath}${path}`
+    const pathname = `${basePath}${path ?? new URL(req.url).pathname}`
 
     if (!pathname.startsWith(config.routes.api)) {
       return notFoundResponse(req, pathname)
