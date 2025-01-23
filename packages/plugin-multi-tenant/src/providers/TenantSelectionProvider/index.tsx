@@ -25,6 +25,7 @@ export const TenantSelectionProvider = async ({
 
   try {
     const { docs } = await findTenantOptions({
+      limit: 0,
       payload,
       tenantsCollectionSlug,
       useAsTitle,

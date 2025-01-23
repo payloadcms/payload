@@ -83,6 +83,12 @@ export const multiTenantPlugin =
       adminUsersCollection.fields.push(tenantsArrayField(pluginConfig?.tenantsArrayField || {}))
     }
 
+    addCollectionAccess({
+      collection: adminUsersCollection,
+      fieldName: 'tenants.tenant',
+      userHasAccessToAllTenants,
+    })
+
     let tenantCollection: CollectionConfig | undefined
 
     const [collectionSlugs, globalCollectionSlugs] = Object.keys(pluginConfig.collections).reduce<

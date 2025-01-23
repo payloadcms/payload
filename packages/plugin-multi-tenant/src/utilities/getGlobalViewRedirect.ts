@@ -31,6 +31,7 @@ export async function getGlobalViewRedirect({
 
   if (!tenant || tenant === SELECT_ALL) {
     const tenantsQuery = await findTenantOptions({
+      limit: 1,
       payload,
       tenantsCollectionSlug,
       useAsTitle,
