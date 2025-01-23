@@ -1,7 +1,7 @@
 import type { Page } from '@/payload-types'
 
 // Used for pre-seeded content so that the homepage is not empty
-export const homeStatic: Partial<Page> = {
+export const homeStatic: Page = {
   slug: 'home',
   _status: 'published',
   hero: {
@@ -84,4 +84,8 @@ export const homeStatic: Partial<Page> = {
     title: 'Payload Website Template',
   },
   title: 'Home',
+  id: '',
+  layout: [],
+  updatedAt: '',
+  createdAt: '',
 }
