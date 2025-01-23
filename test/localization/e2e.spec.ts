@@ -36,7 +36,7 @@ import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
 import { RESTClient } from 'helpers/rest.js'
 import { GeneratedTypes } from 'helpers/sdk/types.js'
-import { wait } from 'payload/shared'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -49,7 +49,7 @@ const dirname = path.dirname(filename)
  * Repeat above for Globals
  */
 
-const { beforeAll, beforeEach, describe, afterEach } = test
+const { beforeAll, beforeEach, describe } = test
 let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
 let urlRelationshipLocalized: AdminUrlUtil

@@ -7,15 +7,14 @@ const dirname = path.dirname(filename)
 import type { Config as ConfigType } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { LinksCollection } from './collections/Links.js'
-import { Posts } from './collections/Posts.js'
+import { Menu } from './collections/Menu.js'
+import { MenuItems } from './collections/MenuItems.js'
 import { Tenants } from './collections/Tenants.js'
-import { Users } from './collections/Users.js'
-import { NavigationGlobalCollection } from './globals/Navigation.js'
+import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
-  collections: [Users, Tenants, Posts, LinksCollection, NavigationGlobalCollection],
+  collections: [Tenants, Users, Menu, MenuItems],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -47,9 +46,8 @@ export default buildConfigWithDefaults({
         access: {},
       },
       collections: {
-        posts: {},
-        links: {},
-        'navigation-global': {
+        'menu-items': {},
+        menu: {
           isGlobal: true,
         },
       },

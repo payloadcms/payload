@@ -6,8 +6,6 @@ const baseClass = 'inline-block'
 import type { BlocksFieldClient, Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
-import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -24,15 +22,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import {
-  $getNodeByKey,
-  $getSelection,
-  $isNodeSelection,
-  CLICK_COMMAND,
-  COMMAND_PRIORITY_LOW,
-  KEY_BACKSPACE_COMMAND,
-  KEY_DELETE_COMMAND,
-} from 'lexical'
+import { $getNodeByKey } from 'lexical'
 
 import './index.scss'
 
@@ -116,7 +106,6 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
 
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
-  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${formData.blockType}`
@@ -152,56 +141,6 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       $getNodeByKey(nodeKey)?.remove()
     })
   }, [editor, nodeKey])
-
-  const $onDelete = useCallback(
-    (event: KeyboardEvent) => {
-      const deleteSelection = $getSelection()
-      if (isSelected && $isNodeSelection(deleteSelection)) {
-        event.preventDefault()
-        editor.update(() => {
-          deleteSelection.getNodes().forEach((node) => {
-            if ($isInlineBlockNode(node)) {
-              node.remove()
-            }
-          })
-        })
-      }
-      return false
-    },
-    [editor, isSelected],
-  )
-  const onClick = useCallback(
-    (payload: MouseEvent) => {
-      const event = payload
-      // Check if inlineBlockElemElemRef.target or anything WITHIN inlineBlockElemElemRef.target was clicked
-      if (
-        event.target === inlineBlockElemElemRef.current ||
-        inlineBlockElemElemRef.current?.contains(event.target as Node)
-      ) {
-        if (event.shiftKey) {
-          setSelected(!isSelected)
-        } else {
-          if (!isSelected) {
-            clearSelection()
-            setSelected(true)
-          }
-        }
-        return true
-      }
-
-      return false
-    },
-    [isSelected, setSelected, clearSelection],
-  )
-
-  useEffect(() => {
-    return mergeRegister(
-      editor.registerCommand<MouseEvent>(CLICK_COMMAND, onClick, COMMAND_PRIORITY_LOW),
-
-      editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
-      editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
-    )
-  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
 
   const blockDisplayName = clientBlock?.labels?.singular
     ? getTranslation(clientBlock?.labels.singular, i18n)
@@ -362,12 +301,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     () =>
       ({ children, className }: { children: React.ReactNode; className?: string }) => (
         <div
-          className={[
-            baseClass,
-            baseClass + '-' + formData.blockType,
-            isSelected && `${baseClass}--selected`,
-            className,
-          ]
+          className={[baseClass, baseClass + '-' + formData.blockType, className]
             .filter(Boolean)
             .join(' ')}
           ref={inlineBlockElemElemRef}
@@ -375,7 +309,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           {children}
         </div>
       ),
-    [formData.blockType, isSelected],
+    [formData.blockType],
   )
 
   const Label = useMemo(() => {

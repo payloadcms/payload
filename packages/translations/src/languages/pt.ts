@@ -239,6 +239,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplicar sem salvar alterações',
     edit: 'Editar',
+    editAll: 'Editar todos',
     editedSince: 'Editado desde',
     editing: 'Editando',
     editingLabel_many: 'Editando {{count}} {{label}}',

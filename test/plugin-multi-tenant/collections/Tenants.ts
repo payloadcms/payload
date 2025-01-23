@@ -19,14 +19,15 @@ export const Tenants: CollectionConfig = {
       required: true,
     },
     {
-      name: 'slug',
+      name: 'domain',
       type: 'text',
       required: true,
     },
     {
-      name: 'domain',
-      type: 'text',
-      required: true,
+      type: 'join',
+      name: 'users',
+      collection: 'users',
+      on: 'tenants.tenant',
     },
   ],
 }

@@ -50,6 +50,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
         name: 'password',
         type: 'text',
         data: {},
+        event: 'onChange',
         preferences: { fields: {} },
         req: {
           payload: {

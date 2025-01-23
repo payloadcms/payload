@@ -242,6 +242,7 @@ export const trTranslations: DefaultTranslationsObject = {
     duplicate: 'Çoğalt',
     duplicateWithoutSaving: 'Ayarları kaydetmeden çoğalt',
     edit: 'Düzenle',
+    editAll: 'Hepsini düzenle',
     editedSince: 'O tarihten itibaren düzenlendi',
     editing: 'Düzenleniyor',
     editingLabel_many: '{{count}} {{label}} düzenleniyor',

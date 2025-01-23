@@ -246,6 +246,7 @@ export const frTranslations: DefaultTranslationsObject = {
     duplicate: 'Dupliquer',
     duplicateWithoutSaving: 'Dupliquer sans enregistrer les modifications',
     edit: 'Éditer',
+    editAll: 'Modifier tout',
     editedSince: 'Modifié depuis',
     editing: 'Modification en cours',
     editingLabel_many: 'Modification des {{count}} {{label}}',

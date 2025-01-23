@@ -344,6 +344,7 @@ export type LabelsClient = {
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   collectionSlug?: string
   data: Partial<TData>
+  event?: 'onChange' | 'submit'
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences

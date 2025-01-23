@@ -1,4 +1,4 @@
-import type { FilterOptions, Where } from 'payload'
+import type { FilterOptions } from 'payload'
 
 import { getTenantFromCookie } from '@payloadcms/plugin-multi-tenant/utilities'
 
@@ -9,17 +9,8 @@ export const userFilterOptions: FilterOptions = ({ req }) => {
   }
 
   return {
-    or: [
-      {
-        'tenants.tenant': {
-          equals: selectedTenant,
-        },
-      },
-      {
-        roles: {
-          in: ['admin'],
-        },
-      },
-    ],
-  } as Where
+    'tenants.tenant': {
+      equals: selectedTenant,
+    },
+  }
 }

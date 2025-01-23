@@ -1,6 +1,6 @@
 import type { PayloadHandler } from 'payload'
 
-import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
+import { addLocalesToRequestFromData, headersWithCors } from '@payloadcms/next/utilities'
 import { commitTransaction, getAccessResults, initTransaction, killTransaction } from 'payload'
 
 import type { SearchPluginConfigWithLocales } from '../types.js'
@@ -50,14 +50,19 @@ export const generateReindexHandler =
         : { isValid: false, message: t('error:invalidRequestArgs', { args: `'collections'` }) }
     }
 
+    const headers = headersWithCors({
+      headers: new Headers(),
+      req,
+    })
+
     const { isValid: hasPermissions, message: permissionError } = await validatePermissions()
     if (!hasPermissions) {
-      return Response.json({ message: permissionError }, { status: 401 })
+      return Response.json({ message: permissionError }, { headers, status: 401 })
     }
 
     const { isValid: validCollections, message: collectionError } = validateCollections()
     if (!validCollections) {
-      return Response.json({ message: collectionError }, { status: 400 })
+      return Response.json({ message: collectionError }, { headers, status: 400 })
     }
 
     const payload = req.payload
@@ -140,7 +145,7 @@ export const generateReindexHandler =
         payload.logger.error({ err, msg: message })
 
         await killTransaction(req)
-        return Response.json({ message }, { status: 500 })
+        return Response.json({ message }, { headers, status: 500 })
       }
     }
 
@@ -152,5 +157,5 @@ export const generateReindexHandler =
 
     await commitTransaction(req)
 
-    return Response.json({ message }, { status: 200 })
+    return Response.json({ message }, { headers, status: 200 })
   }

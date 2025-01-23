@@ -959,6 +959,7 @@ export interface Uploads1 {
  */
 export interface Uploads2 {
   id: string;
+  prefix: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -2280,6 +2281,7 @@ export interface Uploads1Select<T extends boolean = true> {
  * via the `definition` "uploads-2_select".
  */
 export interface Uploads2Select<T extends boolean = true> {
+  prefix?: T;
   title?: T;
   updatedAt?: T;
   createdAt?: T;

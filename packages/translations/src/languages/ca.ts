@@ -239,6 +239,7 @@ export const caTranslations: DefaultTranslationsObject = {
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplica sense desar',
     edit: 'Edita',
+    editAll: 'Edita-ho tot',
     editedSince: 'Editat des de',
     editing: 'Editant',
     editingLabel_many: 'Editent {{count}} {{label}}',
