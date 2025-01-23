@@ -644,6 +644,7 @@ export type UploadFieldSingleValidation = Validate<unknown, unknown, unknown, Up
 
 export const upload: UploadFieldValidation = async (value, options) => {
   const {
+    event,
     maxRows,
     minRows,
     relationTo,
@@ -714,6 +715,10 @@ export const upload: UploadFieldValidation = async (value, options) => {
         })
         .join(', ')}`
     }
+  }
+
+  if (event === 'onChange') {
+    return true
   }
 
   return validateFilterOptions(value, options)
@@ -742,6 +747,7 @@ export type RelationshipFieldSingleValidation = Validate<
 
 export const relationship: RelationshipFieldValidation = async (value, options) => {
   const {
+    event,
     maxRows,
     minRows,
     relationTo,
@@ -812,6 +818,10 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
         })
         .join(', ')}`
     }
+  }
+
+  if (event === 'onChange') {
+    return true
   }
 
   return validateFilterOptions(value, options)

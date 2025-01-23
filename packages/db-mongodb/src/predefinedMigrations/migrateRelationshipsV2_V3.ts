@@ -111,18 +111,20 @@ export async function migrateRelationshipsV2_V3({
 
   const session = await getSession(db, req)
 
-  for (const collection of payload.config.collections.filter(hasRelationshipOrUploadField)) {
-    payload.logger.info(`Migrating collection "${collection.slug}"`)
+  for (const collection of payload.config.collections) {
+    if (hasRelationshipOrUploadField(collection)) {
+      payload.logger.info(`Migrating collection "${collection.slug}"`)
 
-    await migrateModelWithBatching({
-      batchSize,
-      config,
-      fields: collection.fields,
-      Model: db.collections[collection.slug],
-      session,
-    })
+      await migrateModelWithBatching({
+        batchSize,
+        config,
+        fields: collection.fields,
+        Model: db.collections[collection.slug],
+        session,
+      })
 
-    payload.logger.info(`Migrated collection "${collection.slug}"`)
+      payload.logger.info(`Migrated collection "${collection.slug}"`)
+    }
 
     if (collection.versions) {
       payload.logger.info(`Migrating collection versions "${collection.slug}"`)
@@ -141,33 +143,35 @@ export async function migrateRelationshipsV2_V3({
 
   const { globals: GlobalsModel } = db
 
-  for (const global of payload.config.globals.filter(hasRelationshipOrUploadField)) {
-    payload.logger.info(`Migrating global "${global.slug}"`)
+  for (const global of payload.config.globals) {
+    if (hasRelationshipOrUploadField(global)) {
+      payload.logger.info(`Migrating global "${global.slug}"`)
 
-    const doc = await GlobalsModel.findOne<Record<string, unknown>>(
-      {
-        globalType: {
-          $eq: global.slug,
-        },
-      },
-      {},
-      { lean: true, session },
-    )
-
-    // in case if the global doesn't exist in the database yet  (not saved)
-    if (doc) {
-      sanitizeRelationshipIDs({ config, data: doc, fields: global.fields })
-
-      await GlobalsModel.collection.updateOne(
+      const doc = await GlobalsModel.findOne<Record<string, unknown>>(
         {
-          globalType: global.slug,
+          globalType: {
+            $eq: global.slug,
+          },
         },
-        { $set: doc },
-        { session },
+        {},
+        { lean: true, session },
       )
-    }
 
-    payload.logger.info(`Migrated global "${global.slug}"`)
+      // in case if the global doesn't exist in the database yet  (not saved)
+      if (doc) {
+        sanitizeRelationshipIDs({ config, data: doc, fields: global.fields })
+
+        await GlobalsModel.collection.updateOne(
+          {
+            globalType: global.slug,
+          },
+          { $set: doc },
+          { session },
+        )
+      }
+
+      payload.logger.info(`Migrated global "${global.slug}"`)
+    }
 
     if (global.versions) {
       payload.logger.info(`Migrating global versions "${global.slug}"`)

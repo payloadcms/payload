@@ -324,6 +324,19 @@ export const sanitizeQueryValue = ({
         }
       }
     }
+
+    if (
+      operator === 'all' &&
+      Array.isArray(relationTo) &&
+      path.endsWith('.value') &&
+      Array.isArray(formattedValue)
+    ) {
+      formattedValue.forEach((v, i) => {
+        if (Types.ObjectId.isValid(v)) {
+          formattedValue[i] = new Types.ObjectId(v)
+        }
+      })
+    }
   }
 
   // Set up specific formatting necessary by operators

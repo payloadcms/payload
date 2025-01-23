@@ -190,6 +190,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             id,
             collectionSlug,
             data: fullData,
+            event: 'onChange',
             jsonError,
             operation,
             preferences,
