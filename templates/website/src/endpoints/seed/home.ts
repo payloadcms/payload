@@ -502,7 +502,6 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
     {
       blockName: 'Media Block',
       blockType: 'mediaBlock',
-      // @ts-ignore
       media: '{{IMAGE_2}}',
     },
     {
