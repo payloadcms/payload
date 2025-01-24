@@ -83,6 +83,12 @@ export const multiTenantPlugin =
       adminUsersCollection.fields.push(tenantsArrayField(pluginConfig?.tenantsArrayField || {}))
     }
 
+    addCollectionAccess({
+      collection: adminUsersCollection,
+      fieldName: 'tenants.tenant',
+      userHasAccessToAllTenants,
+    })
+
     let tenantCollection: CollectionConfig | undefined
 
     const [collectionSlugs, globalCollectionSlugs] = Object.keys(pluginConfig.collections).reduce<
@@ -110,6 +116,10 @@ export const multiTenantPlugin =
       if (collection.slug === tenantsCollectionSlug) {
         tenantCollection = collection
 
+        /**
+         * Add access control constraint to tenants collection
+         * - constrains access a users assigned tenants
+         */
         addCollectionAccess({
           collection,
           fieldName: 'id',
@@ -210,6 +220,8 @@ export const multiTenantPlugin =
         serverProps: {
           globalSlugs: globalCollectionSlugs,
           tenantFieldName,
+          tenantsCollectionSlug,
+          useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
         },
       })
     }
