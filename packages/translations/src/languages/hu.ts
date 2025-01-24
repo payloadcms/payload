@@ -448,6 +448,8 @@ export const huTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Automatikus mentés sikeres.',
     autosavedVersion: 'Automatikusan mentett verzió',
     changed: 'Megváltozott',
+    changedFieldsCount_one: '{{count}} megváltozott mező',
+    changedFieldsCount_other: '{{count}} módosított mező',
     compareVersion: 'Hasonlítsa össze a verziót a következőkkel:',
     confirmPublish: 'A közzététel megerősítése',
     confirmRevertToSaved: 'Erősítse meg a mentett verzióra való visszatérést',

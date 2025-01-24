@@ -439,6 +439,8 @@ export const faTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'با موفقیت ذخیره خودکار شد.',
     autosavedVersion: 'نگارش ذخیره شده خودکار',
     changed: 'تغییر کرد',
+    changedFieldsCount_one: '{{count}} فیلد تغییر کرد',
+    changedFieldsCount_other: '{{count}} فیلدهای تغییر یافته',
     compareVersion: 'مقایسه نگارش با:',
     confirmPublish: 'تأیید انتشار',
     confirmRevertToSaved: 'تأیید بازگردانی نگارش ذخیره شده',

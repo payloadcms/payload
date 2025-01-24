@@ -841,15 +841,72 @@ describe('Versions', () => {
       await page.waitForURL(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
 
-      const blocksDiffLabel = page.locator('.field-diff-label', {
-        hasText: exactText('Blocks Field'),
-      })
-
+      const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
-      const blocksDiff = blocksDiffLabel.locator('+ .iterable-diff__wrap > .render-field-diffs')
+
+      const blocksDiff = page.locator('.iterable-diff', { has: blocksDiffLabel })
       await expect(blocksDiff).toBeVisible()
-      const blockTypeDiffLabel = blocksDiff.locator('.render-field-diffs__field').first()
-      await expect(blockTypeDiffLabel).toBeVisible()
+
+      const blocksDiffRows = blocksDiff.locator('.iterable-diff__rows')
+      await expect(blocksDiffRows).toBeVisible()
+
+      const firstBlocksDiffRow = blocksDiffRows.locator('.iterable-diff__row').first()
+      await expect(firstBlocksDiffRow).toBeVisible()
+
+      const firstBlockDiffLabel = firstBlocksDiffRow.getByText('Block 01', { exact: true })
+      await expect(firstBlockDiffLabel).toBeVisible()
+    })
+
+    test('should render diff collapser for nested fields', async () => {
+      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
+      await page.goto(versionURL)
+      await page.waitForURL(versionURL)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+
+      const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
+      await expect(blocksDiffLabel).toBeVisible()
+
+      // Expect iterable rows diff to be visible
+      const blocksDiff = page.locator('.iterable-diff', { has: blocksDiffLabel })
+      await expect(blocksDiff).toBeVisible()
+
+      // Expect iterable change count to be visible
+      const iterableChangeCount = blocksDiff.locator('.diff-collapser__field-change-count').first()
+      await expect(iterableChangeCount).toHaveText('2 changed fields')
+
+      // Expect iterable rows to be visible
+      const blocksDiffRows = blocksDiff.locator('.iterable-diff__rows')
+      await expect(blocksDiffRows).toBeVisible()
+
+      // Expect first iterable row to be visible
+      const firstBlocksDiffRow = blocksDiffRows.locator('.iterable-diff__row').first()
+      await expect(firstBlocksDiffRow).toBeVisible()
+
+      // Expect first row change count to be visible
+      const firstBlocksDiffRowChangeCount = firstBlocksDiffRow
+        .locator('.diff-collapser__field-change-count')
+        .first()
+      await expect(firstBlocksDiffRowChangeCount).toHaveText('2 changed fields')
+
+      // Expect collapser content to be visible
+      const diffCollapserContent = blocksDiffRows.locator('.diff-collapser__content')
+      await expect(diffCollapserContent).toBeVisible()
+
+      // Expect toggle button to be visible
+      const toggleButton = firstBlocksDiffRow.locator('.diff-collapser__toggle-button').first()
+      await expect(toggleButton).toBeVisible()
+
+      // Collapse content
+      await toggleButton.click()
+
+      // Expect collapser content to be hidden
+      await expect(diffCollapserContent).toBeHidden()
+
+      // Uncollapse content
+      await toggleButton.click()
+
+      // Expect collapser content to be visible
+      await expect(diffCollapserContent).toBeVisible()
     })
   })
 })

@@ -451,6 +451,8 @@ export const myTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'အလိုအလျောက် သိမ်းဆည်းပြီးပါပြီ။',
     autosavedVersion: 'အော်တို ဗားရှင်း',
     changed: 'ပြောင်းခဲ့သည်။',
+    changedFieldsCount_one: '{{count}} field telah diubah',
+    changedFieldsCount_other: '{{count}}ကယ်လက်ရှိအရာများပြောင်းလဲလိုက်သည်',
     compareVersion: 'ဗားရှင်းနှင့် နှိုင်းယှဉ်ချက်:',
     confirmPublish: 'ထုတ်ဝေအတည်ပြုပါ။',
     confirmRevertToSaved: 'သိမ်းဆည်းပြီးကြောင်း အတည်ပြုပါ။',

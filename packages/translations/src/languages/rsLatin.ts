@@ -441,6 +441,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Automatsko čuvanje uspešno.',
     autosavedVersion: 'Verzija automatski sačuvanog dokumenta',
     changed: 'Promenjeno',
+    changedFieldsCount_one: '{{count}} promenjeno polje',
+    changedFieldsCount_other: '{{count}} promenjenih polja',
     compareVersion: 'Uporedi verziju sa:',
     confirmPublish: 'Potvrdi objavu',
     confirmRevertToSaved: 'Potvrdite vraćanje na sačuvano',
