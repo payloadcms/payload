@@ -31,7 +31,7 @@ test.describe('Join Field', () => {
   let categoriesURL: AdminUrlUtil
   let uploadsURL: AdminUrlUtil
   let categoriesJoinRestrictedURL: AdminUrlUtil
-  let categoryID
+  let categoryID: string | number
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -49,6 +49,10 @@ test.describe('Join Field', () => {
         },
       },
     })
+
+    if (!docs[0]) {
+      throw new Error('No category found with the name "example"')
+    }
 
     ;({ id: categoryID } = docs[0])
 
@@ -87,6 +91,9 @@ test.describe('Join Field', () => {
       limit: 1,
     })
     const category = result.docs[0]
+    if (!category) {
+      throw new Error('No category found')
+    }
     // seed additional posts to test defaultLimit (5)
     await payload.create({
       collection: postsSlug,

@@ -83,7 +83,7 @@ type PayloadRequestData = {
    * use either:
    *  1. `const data = await req.json()`
    *
-   *  2. import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+   *  2. import { addDataAndFileToRequest } from 'payload'
    *    `await addDataAndFileToRequest(req)`
    * */
   data?: JsonObject
