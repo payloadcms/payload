@@ -439,6 +439,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Аутоматско чување успешно.',
     autosavedVersion: 'Верзија аутоматски сачуваног документа',
     changed: 'Промењено',
+    changedFieldsCount_one: '{{count}} promenjeno polje',
+    changedFieldsCount_other: '{{count}} promenjena polja',
     compareVersion: 'Упореди верзију са:',
     confirmPublish: 'Потврди објаву',
     confirmRevertToSaved: 'Потврдите враћање на сачувано',

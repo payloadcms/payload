@@ -424,6 +424,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: '自动保存成功。',
     autosavedVersion: '自动保存的版本',
     changed: '已更改',
+    changedFieldsCount_one: '{{count}}已更改的字段',
+    changedFieldsCount_other: '{{count}}已更改的字段',
     compareVersion: '对比版本：',
     confirmPublish: '确认发布',
     confirmRevertToSaved: '确认恢复到保存状态',

@@ -438,6 +438,8 @@ export const viTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Đã tự động lưu thành công.',
     autosavedVersion: 'Các phiên bản từ việc tự động lưu dữ liệu',
     changed: 'Đã thay đổi',
+    changedFieldsCount_one: '{{count}} đã thay đổi trường',
+    changedFieldsCount_other: '{{count}} trường đã thay đổi',
     compareVersion: 'So sánh phiên bản này với:',
     confirmPublish: 'Xác nhận xuất bản',
     confirmRevertToSaved: 'Xác nhận, quay về trạng thái đã lưu',
