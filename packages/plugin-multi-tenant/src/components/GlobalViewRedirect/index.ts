@@ -10,12 +10,13 @@ type Args = {
   docID?: number | string
   globalSlugs: string[]
   tenantFieldName: string
+  tenantsCollectionSlug: string
+  useAsTitle: string
   viewType: ViewTypes
 } & ServerProps
 
 export const GlobalViewRedirect = async (args: Args) => {
   const collectionSlug = args?.collectionSlug
-
   if (collectionSlug && args.globalSlugs?.includes(collectionSlug)) {
     const headers = await getHeaders()
     const redirectRoute = await getGlobalViewRedirect({
@@ -24,6 +25,9 @@ export const GlobalViewRedirect = async (args: Args) => {
       headers,
       payload: args.payload,
       tenantFieldName: args.tenantFieldName,
+      tenantsCollectionSlug: args.tenantsCollectionSlug,
+      useAsTitle: args.useAsTitle,
+      user: args.user,
       view: args.viewType,
     })
 
