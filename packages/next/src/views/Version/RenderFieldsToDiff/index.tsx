@@ -8,12 +8,11 @@ import type { diffComponents as _diffComponents } from './fields/index.js'
 import type { FieldDiffProps, Props } from './types.js'
 
 import { diffMethods } from './fields/diffMethods.js'
-import Nested from './fields/Nested/index.js'
 import './index.scss'
 
 const baseClass = 'render-field-diffs'
 
-const RenderFieldsToDiff: React.FC<Props> = ({
+export const RenderFieldsToDiff: React.FC<Props> = ({
   comparison,
   diffComponents: __diffComponents,
   fieldPermissions,
@@ -128,13 +127,13 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             )
           }
 
-          // At this point, we are dealing with a `row`, etc
+          // At this point, we are dealing with a field with subfields but no
+          // nested data, eg. row, collapsible, etc.
           if ('fields' in field) {
             return (
-              <Nested
+              <Component
                 comparison={comparison}
                 diffComponents={diffComponents}
-                disableGutter
                 field={field}
                 fieldPermissions={fieldPermissions}
                 fields={field.fields}
@@ -152,5 +151,3 @@ const RenderFieldsToDiff: React.FC<Props> = ({
     </div>
   )
 }
-
-export default RenderFieldsToDiff

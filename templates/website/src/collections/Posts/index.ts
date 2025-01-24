@@ -80,6 +80,11 @@ export const Posts: CollectionConfig<'posts'> = {
         {
           fields: [
             {
+              name: 'heroImage',
+              type: 'upload',
+              relationTo: 'media',
+            },
+            {
               name: 'content',
               type: 'richText',
               editor: lexicalEditor({
@@ -224,6 +229,7 @@ export const Posts: CollectionConfig<'posts'> = {
       autosave: {
         interval: 100, // We set this interval for optimal live preview
       },
+      schedulePublish: true,
     },
     maxPerDoc: 50,
   },

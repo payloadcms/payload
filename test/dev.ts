@@ -1,3 +1,4 @@
+import nextEnvImport from '@next/env'
 import chalk from 'chalk'
 import { createServer } from 'http'
 import minimist from 'minimist'
@@ -12,7 +13,7 @@ import { parse } from 'url'
 import { getNextRootDir } from './helpers/getNextRootDir.js'
 import startMemoryDB from './helpers/startMemoryDB.js'
 import { runInit } from './runInit.js'
-import { child, safelyRunScriptFunction } from './safelyRunScript.js'
+import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
 const prod = process.argv.includes('--prod')
@@ -38,7 +39,7 @@ const {
   ...args
 } = minimist(process.argv.slice(2))
 
-if (!fs.existsSync(path.resolve(dirname, testSuiteArg))) {
+if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
   process.exit(0)
 }
@@ -52,11 +53,15 @@ await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
-await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
+await runInit(testSuiteArg, true)
 
 if (shouldStartMemoryDB) {
   await startMemoryDB()
 }
+
+// This is needed to forward the environment variables to the next process that were created after loadEnv()
+// for example process.env.MONGODB_MEMORY_SERVER_URI otherwise app.prepare() will clear them
+nextEnvImport.updateInitialEnv(process.env)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
@@ -75,13 +80,13 @@ const app = nextImport({
 
 const handle = app.getRequestHandler()
 
-let resolveServer
+let resolveServer: () => void
 
-const serverPromise = new Promise((res) => (resolveServer = res))
+const serverPromise = new Promise<void>((res) => (resolveServer = res))
 
 void app.prepare().then(() => {
   createServer(async (req, res) => {
-    const parsedUrl = parse(req.url, true)
+    const parsedUrl = parse(req.url || '', true)
     await handle(req, res, parsedUrl)
   }).listen(port, () => {
     resolveServer()

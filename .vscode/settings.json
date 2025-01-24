@@ -52,5 +52,7 @@
   "jestrunner.jestCommand": "pnpm exec cross-env NODE_OPTIONS=\"--no-deprecation\" node 'node_modules/jest/bin/jest.js'",
   "jestrunner.debugOptions": {
     "runtimeArgs": ["--no-deprecation"]
-  }
+  },
+  // Essentially disables bun test buttons
+  "bun.test.filePattern": "bun.test.ts"
 }

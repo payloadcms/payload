@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 import { URL } from 'url'
 
 import type {
@@ -132,6 +132,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // as doing so could lead to the exposure of registered emails.
     // Therefore, we prefer to fail silently.
     if (!user) {
+      await commitTransaction(args.req)
       return null
     }
 

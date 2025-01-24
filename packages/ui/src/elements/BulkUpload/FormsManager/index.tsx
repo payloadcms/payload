@@ -25,6 +25,10 @@ import { formsManagementReducer } from './reducer.js'
 type FormsManagerContext = {
   readonly activeIndex: State['activeIndex']
   readonly addFiles: (filelist: FileList) => Promise<void>
+  readonly bulkUpdateForm: (
+    updatedFields: Record<string, unknown>,
+    afterStateUpdate?: () => void,
+  ) => Promise<void>
   readonly collectionSlug: string
   readonly docPermissions?: SanitizedDocumentPermissions
   readonly documentSlots: DocumentSlots
@@ -51,6 +55,7 @@ type FormsManagerContext = {
 const Context = React.createContext<FormsManagerContext>({
   activeIndex: 0,
   addFiles: () => Promise.resolve(),
+  bulkUpdateForm: () => null,
   collectionSlug: '',
   docPermissions: undefined,
   documentSlots: {},
@@ -300,51 +305,49 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           }
 
           // should expose some sort of helper for this
-          if (json?.errors?.length) {
-            const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-              ([fieldErrs, nonFieldErrs], err) => {
-                const newFieldErrs: any[] = []
-                const newNonFieldErrs: any[] = []
+          const [fieldErrors, nonFieldErrors] = (json?.errors || []).reduce(
+            ([fieldErrs, nonFieldErrs], err) => {
+              const newFieldErrs: any[] = []
+              const newNonFieldErrs: any[] = []
 
-                if (err?.message) {
-                  newNonFieldErrs.push(err)
-                }
-
-                if (Array.isArray(err?.data?.errors)) {
-                  err.data?.errors.forEach((dataError) => {
-                    if (dataError?.path) {
-                      newFieldErrs.push(dataError)
-                    } else {
-                      newNonFieldErrs.push(dataError)
-                    }
-                  })
-                }
-
-                return [
-                  [...fieldErrs, ...newFieldErrs],
-                  [...nonFieldErrs, ...newNonFieldErrs],
-                ]
-              },
-              [[], []],
-            )
-
-            currentForms[i] = {
-              errorCount: fieldErrors.length,
-              formState: fieldReducer(currentForms[i].formState, {
-                type: 'ADD_SERVER_ERRORS',
-                errors: fieldErrors,
-              }),
-            }
-
-            if (req.status === 413) {
-              // file too large
-              currentForms[i] = {
-                ...currentForms[i],
-                errorCount: currentForms[i].errorCount + 1,
+              if (err?.message) {
+                newNonFieldErrs.push(err)
               }
 
-              toast.error(nonFieldErrors[0]?.message)
+              if (Array.isArray(err?.data?.errors)) {
+                err.data?.errors.forEach((dataError) => {
+                  if (dataError?.path) {
+                    newFieldErrs.push(dataError)
+                  } else {
+                    newNonFieldErrs.push(dataError)
+                  }
+                })
+              }
+
+              return [
+                [...fieldErrs, ...newFieldErrs],
+                [...nonFieldErrs, ...newNonFieldErrs],
+              ]
+            },
+            [[], []],
+          )
+
+          currentForms[i] = {
+            errorCount: fieldErrors.length,
+            formState: fieldReducer(currentForms[i].formState, {
+              type: 'ADD_SERVER_ERRORS',
+              errors: fieldErrors,
+            }),
+          }
+
+          if (req.status === 413) {
+            // file too large
+            currentForms[i] = {
+              ...currentForms[i],
+              errorCount: currentForms[i].errorCount + 1,
             }
+
+            toast.error(nonFieldErrors[0]?.message)
           }
         } catch (_) {
           // swallow
@@ -383,6 +386,53 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       })
     },
     [actionURL, activeIndex, forms, onSuccess, t, closeModal, drawerSlug],
+  )
+
+  const bulkUpdateForm = React.useCallback(
+    async (updatedFields: Record<string, unknown>, afterStateUpdate?: () => void) => {
+      for (let i = 0; i < forms.length; i++) {
+        Object.entries(updatedFields).forEach(([path, value]) => {
+          if (forms[i].formState[path]) {
+            forms[i].formState[path].value = value
+
+            dispatch({
+              type: 'UPDATE_FORM',
+              errorCount: forms[i].errorCount,
+              formState: forms[i].formState,
+              index: i,
+            })
+          }
+        })
+
+        if (typeof afterStateUpdate === 'function') {
+          afterStateUpdate()
+        }
+
+        if (hasSubmitted) {
+          const { state } = await getFormState({
+            collectionSlug,
+            docPermissions,
+            docPreferences: null,
+            formState: forms[i].formState,
+            operation: 'create',
+            schemaPath: collectionSlug,
+          })
+
+          const newFormErrorCount = Object.values(state).reduce(
+            (acc, value) => (value?.valid === false ? acc + 1 : acc),
+            0,
+          )
+
+          dispatch({
+            type: 'UPDATE_FORM',
+            errorCount: newFormErrorCount,
+            formState: state,
+            index: i,
+          })
+        }
+      }
+    },
+    [collectionSlug, docPermissions, forms, getFormState, hasSubmitted],
   )
 
   React.useEffect(() => {
@@ -425,6 +475,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       value={{
         activeIndex: state.activeIndex,
         addFiles,
+        bulkUpdateForm,
         collectionSlug,
         docPermissions,
         documentSlots,

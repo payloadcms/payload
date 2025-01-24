@@ -1,22 +1,29 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
-import type { PayloadRequest, SanitizedConfig, SanitizedPermissions, User } from 'payload'
+import type { Locale, PayloadRequest, SanitizedConfig, SanitizedPermissions } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
 import { headers as getHeaders } from 'next/headers.js'
-import { createLocalReq, getPayload, parseCookies } from 'payload'
+import {
+  createLocalReq,
+  executeAuthStrategies,
+  getAccessResults,
+  getPayload,
+  getRequestLanguage,
+  parseCookies,
+} from 'payload'
 import { cache } from 'react'
 
-import { getRequestLanguage } from './getRequestLanguage.js'
+import { getRequestLocale } from './getRequestLocale.js'
 
 type Result = {
-  i18n: I18nClient
+  locale?: Locale
   permissions: SanitizedPermissions
   req: PayloadRequest
-  user: User
 }
 
 export const initReq = cache(async function (
   configPromise: Promise<SanitizedConfig> | SanitizedConfig,
+  overrides?: Parameters<typeof createLocalReq>[0],
 ): Promise<Result> {
   const config = await configPromise
   const payload = await getPayload({ config })
@@ -36,24 +43,46 @@ export const initReq = cache(async function (
     language: languageCode,
   })
 
+  /**
+   * Cannot simply call `payload.auth` here, as we need the user to get the locale, and we need the locale to get the access results
+   * I.e. the `payload.auth` function would call `getAccessResults` without a fully-formed `req` object
+   */
+  const { responseHeaders, user } = await executeAuthStrategies({
+    headers,
+    payload,
+  })
+
+  const { req: reqOverrides, ...optionsOverrides } = overrides || {}
+
   const req = await createLocalReq(
     {
       req: {
         headers,
         host: headers.get('host'),
         i18n: i18n as I18n,
+        responseHeaders,
         url: `${payload.config.serverURL}`,
+        user,
+        ...(reqOverrides || {}),
       },
+      ...(optionsOverrides || {}),
     },
     payload,
   )
 
-  const { permissions, user } = await payload.auth({ headers, req })
+  const locale = await getRequestLocale({
+    req,
+  })
+
+  req.locale = locale?.code
+
+  const permissions = await getAccessResults({
+    req,
+  })
 
   return {
-    i18n,
+    locale,
     permissions,
     req,
-    user,
   }
 })

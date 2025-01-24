@@ -57,7 +57,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     this.__data = data
   }
 
-  static clone(node: RelationshipServerNode): RelationshipServerNode {
+  static override clone(node: RelationshipServerNode): RelationshipServerNode {
     return new this({
       data: node.__data,
       format: node.__format,
@@ -65,11 +65,11 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'relationship'
   }
 
-  static importDOM(): DOMConversionMap<HTMLDivElement> | null {
+  static override importDOM(): DOMConversionMap<HTMLDivElement> | null {
     return {
       div: (domNode: HTMLDivElement) => {
         if (
@@ -86,7 +86,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     }
   }
 
-  static importJSON(serializedNode: SerializedRelationshipNode): RelationshipServerNode {
+  static override importJSON(serializedNode: SerializedRelationshipNode): RelationshipServerNode {
     if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
       serializedNode.value = (serializedNode.value as unknown as { id: string }).id
     }
@@ -104,11 +104,11 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return false
   }
 
-  decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element | null {
+  override decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element | null {
     return null
   }
 
-  exportDOM(): DOMExportOutput {
+  override exportDOM(): DOMExportOutput {
     const element = document.createElement('div')
     element.setAttribute(
       'data-lexical-relationship-id',
@@ -121,7 +121,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return { element }
   }
 
-  exportJSON(): SerializedRelationshipNode {
+  override exportJSON(): SerializedRelationshipNode {
     return {
       ...super.exportJSON(),
       ...this.getData(),
@@ -134,7 +134,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return this.getLatest().__data
   }
 
-  getTextContent(): string {
+  override getTextContent(): string {
     return `${this.__data?.relationTo} relation to ${typeof this.__data?.value === 'object' ? this.__data?.value?.id : this.__data?.value}`
   }
 

@@ -20,7 +20,7 @@ export type Options<TSlug extends CollectionSlug> = {
   fallbackLocale?: string
   locale?: string
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   showHiddenFields?: boolean
 }
 

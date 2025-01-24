@@ -19,7 +19,7 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { tabsFieldsSlug } from '../../slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -39,7 +39,7 @@ describe('Tabs', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
     }))
@@ -131,5 +131,27 @@ describe('Tabs', () => {
     await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
       "Hello, I'm the first row, in a named tab",
     )
+  })
+
+  test('should save preferences for tab order', async () => {
+    await page.goto(url.list)
+
+    const firstItem = page.locator('.cell-id a').nth(0)
+    const href = await firstItem.getAttribute('href')
+    await firstItem.click()
+
+    const regex = new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+
+    await page.waitForURL(regex)
+
+    await page.locator('.tabs-field__tabs button:nth-child(2)').nth(0).click()
+
+    await page.reload()
+
+    const tab2 = page.locator('.tabs-field__tabs button:nth-child(2)').nth(0)
+
+    await expect(async () => await expect(tab2).toHaveClass(/--active/)).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
 })

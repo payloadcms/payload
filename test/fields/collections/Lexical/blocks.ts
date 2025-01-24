@@ -4,6 +4,44 @@ import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/r
 
 import { textFieldsSlug } from '../Text/shared.js'
 
+async function asyncFunction(param: string) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(param?.toUpperCase())
+    }, 1000)
+  })
+}
+export const AsyncHooksBlock: Block = {
+  slug: 'asyncHooksBlock',
+  fields: [
+    {
+      name: 'test1',
+      label: 'Text',
+      type: 'text',
+      hooks: {
+        afterRead: [
+          ({ value }) => {
+            return value?.toUpperCase()
+          },
+        ],
+      },
+    },
+    {
+      name: 'test2',
+      label: 'Text',
+      type: 'text',
+      hooks: {
+        afterRead: [
+          async ({ value }) => {
+            const valuenew = await asyncFunction(value)
+            return valuenew
+          },
+        ],
+      },
+    },
+  ],
+}
+
 export const BlockColumns = ({ name }: { name: string }): ArrayField => ({
   type: 'array',
   name,

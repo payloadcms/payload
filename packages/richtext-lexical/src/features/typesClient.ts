@@ -104,7 +104,7 @@ export type ClientFeature<ClientFeatureProps> = {
   /**
    * The text formats which are enabled by this feature.
    */
-  enableFormats?: Array<Omit<TextFormatType, 'highlight'>>
+  enableFormats?: TextFormatType[]
   markdownTransformers?: (
     | ((props: {
         allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>
@@ -214,7 +214,7 @@ export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<any, an
 export type SanitizedClientFeatures = {
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  enabledFormats: Array<Omit<TextFormatType, 'highlight'>>
+  enabledFormats: TextFormatType[]
   markdownTransformers: Transformer[]
 
   /**

@@ -5,8 +5,6 @@ const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
-import { CustomIdRow } from './collections/CustomIdRow.js'
-import { CustomIdTab } from './collections/CustomIdTab.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
@@ -21,6 +19,7 @@ import { CollectionNotInView } from './collections/NotInView.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
 import { Users } from './collections/Users.js'
+import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -155,10 +154,9 @@ export default buildConfigWithDefaults({
     CollectionGroup2A,
     CollectionGroup2B,
     Geo,
-    CustomIdTab,
-    CustomIdRow,
     DisableDuplicate,
     BaseListFilter,
+    with300Documents,
   ],
   globals: [
     GlobalHidden,

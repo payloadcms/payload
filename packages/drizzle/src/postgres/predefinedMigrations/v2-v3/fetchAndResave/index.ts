@@ -1,7 +1,6 @@
 import type { FlattenedField, Payload, PayloadRequest } from 'payload'
 
-import type { TransactionPg } from '../../../../types.js'
-import type { BasePostgresAdapter } from '../../../types.js'
+import type { BasePostgresAdapter, PostgresDB } from '../../../types.js'
 import type { DocsToResave } from '../types.js'
 
 import { upsertRow } from '../../../../upsertRow/index.js'
@@ -10,14 +9,14 @@ import { traverseFields } from './traverseFields.js'
 type Args = {
   adapter: BasePostgresAdapter
   collectionSlug?: string
-  db: TransactionPg
+  db: PostgresDB
   debug: boolean
   docsToResave: DocsToResave
   fields: FlattenedField[]
   globalSlug?: string
   isVersions: boolean
   payload: Payload
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   tableName: string
 }
 

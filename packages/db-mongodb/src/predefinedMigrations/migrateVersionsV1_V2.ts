@@ -3,12 +3,12 @@ import type { Payload, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
-import { withSession } from '../withSession.js'
+import { getSession } from '../utilities/getSession.js'
 
 export async function migrateVersionsV1_V2({ req }: { req: PayloadRequest }) {
   const { payload } = req
 
-  const { session } = await withSession(payload.db as MongooseAdapter, req)
+  const session = await getSession(payload.db as MongooseAdapter, req)
 
   // For each collection
 
@@ -106,12 +106,12 @@ async function migrateCollectionDocs({
     return
   }
 
-  const remainingDocIds = remainingDocs.map((doc) => doc._versionID)
+  const remainingDocIDs = remainingDocs.map((doc) => doc._versionID)
 
   await VersionsModel.updateMany(
     {
       _id: {
-        $in: remainingDocIds,
+        $in: remainingDocIDs,
       },
     },
     {

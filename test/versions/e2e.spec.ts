@@ -25,7 +25,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -41,7 +40,6 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
-  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
@@ -71,12 +69,9 @@ const dirname = path.dirname(filename)
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let global: AdminUrlUtil
-let id: string
-
 let context: BrowserContext
 
-describe('versions', () => {
+describe('Versions', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
@@ -84,7 +79,6 @@ describe('versions', () => {
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
-  let global: AdminUrlUtil
   let id: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -432,6 +426,59 @@ describe('versions', () => {
       await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
+    test('collection - should update updatedAt', async () => {
+      await page.goto(url.create)
+      await page.waitForURL(`**/${url.create}`)
+
+      // fill out doc in english
+      await page.locator('#field-title').fill('title')
+      await page.locator('#field-description').fill('initial description')
+      await saveDocAndAssert(page)
+
+      const updatedAtWrapper = await page.locator(
+        '.doc-controls .doc-controls__content .doc-controls__list-item',
+        {
+          hasText: 'Last Modified',
+        },
+      )
+      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      // wait for 1 second so that the timestamp can be different
+      await wait(1000)
+
+      await page.locator('#field-description').fill('changed description')
+      await saveDocAndAssert(page)
+
+      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+    })
+
+    test('collection - should update updatedAt on autosave', async () => {
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const updatedAtWrapper = await page.locator(
+        '.doc-controls .doc-controls__content .doc-controls__list-item',
+        {
+          hasText: 'Last Modified',
+        },
+      )
+      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      // wait for 1 second so that the timestamp can be different
+      await wait(1000)
+
+      await page.locator('#field-title').fill('autosave title updated')
+      await waitForAutoSaveToRunAndComplete(page)
+
+      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+
+      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+    })
+
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       await page.goto(url.global(autoSaveGlobalSlug))
@@ -641,8 +688,8 @@ describe('versions', () => {
   describe('Collections - publish specific locale', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, localizedCollectionSlug)
-      global = new AdminUrlUtil(serverURL, localizedGlobalSlug)
     })
+
     test('should show publish individual locale dropdown', async () => {
       await page.goto(url.create)
       const publishOptions = page.locator('.doc-controls__controls .popup')
@@ -794,15 +841,72 @@ describe('versions', () => {
       await page.waitForURL(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
 
-      const blocksDiffLabel = page.locator('.field-diff-label', {
-        hasText: exactText('Blocks Field'),
-      })
-
+      const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
       await expect(blocksDiffLabel).toBeVisible()
-      const blocksDiff = blocksDiffLabel.locator('+ .iterable-diff__wrap > .render-field-diffs')
+
+      const blocksDiff = page.locator('.iterable-diff', { has: blocksDiffLabel })
       await expect(blocksDiff).toBeVisible()
-      const blockTypeDiffLabel = blocksDiff.locator('.render-field-diffs__field').first()
-      await expect(blockTypeDiffLabel).toBeVisible()
+
+      const blocksDiffRows = blocksDiff.locator('.iterable-diff__rows')
+      await expect(blocksDiffRows).toBeVisible()
+
+      const firstBlocksDiffRow = blocksDiffRows.locator('.iterable-diff__row').first()
+      await expect(firstBlocksDiffRow).toBeVisible()
+
+      const firstBlockDiffLabel = firstBlocksDiffRow.getByText('Block 01', { exact: true })
+      await expect(firstBlockDiffLabel).toBeVisible()
+    })
+
+    test('should render diff collapser for nested fields', async () => {
+      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
+      await page.goto(versionURL)
+      await page.waitForURL(versionURL)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+
+      const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
+      await expect(blocksDiffLabel).toBeVisible()
+
+      // Expect iterable rows diff to be visible
+      const blocksDiff = page.locator('.iterable-diff', { has: blocksDiffLabel })
+      await expect(blocksDiff).toBeVisible()
+
+      // Expect iterable change count to be visible
+      const iterableChangeCount = blocksDiff.locator('.diff-collapser__field-change-count').first()
+      await expect(iterableChangeCount).toHaveText('2 changed fields')
+
+      // Expect iterable rows to be visible
+      const blocksDiffRows = blocksDiff.locator('.iterable-diff__rows')
+      await expect(blocksDiffRows).toBeVisible()
+
+      // Expect first iterable row to be visible
+      const firstBlocksDiffRow = blocksDiffRows.locator('.iterable-diff__row').first()
+      await expect(firstBlocksDiffRow).toBeVisible()
+
+      // Expect first row change count to be visible
+      const firstBlocksDiffRowChangeCount = firstBlocksDiffRow
+        .locator('.diff-collapser__field-change-count')
+        .first()
+      await expect(firstBlocksDiffRowChangeCount).toHaveText('2 changed fields')
+
+      // Expect collapser content to be visible
+      const diffCollapserContent = blocksDiffRows.locator('.diff-collapser__content')
+      await expect(diffCollapserContent).toBeVisible()
+
+      // Expect toggle button to be visible
+      const toggleButton = firstBlocksDiffRow.locator('.diff-collapser__toggle-button').first()
+      await expect(toggleButton).toBeVisible()
+
+      // Collapse content
+      await toggleButton.click()
+
+      // Expect collapser content to be hidden
+      await expect(diffCollapserContent).toBeHidden()
+
+      // Uncollapse content
+      await toggleButton.click()
+
+      // Expect collapser content to be visible
+      await expect(diffCollapserContent).toBeVisible()
     })
   })
 })

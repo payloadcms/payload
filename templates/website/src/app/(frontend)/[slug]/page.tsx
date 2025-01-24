@@ -46,6 +46,7 @@ type Args = {
 }
 
 export default async function Page({ params: paramsPromise }: Args) {
+  const { isEnabled: draft } = await draftMode()
   const { slug = 'home' } = await paramsPromise
   const url = '/' + slug
 
@@ -72,7 +73,7 @@ export default async function Page({ params: paramsPromise }: Args) {
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
 
-      <LivePreviewListener />
+      {draft && <LivePreviewListener />}
 
       <RenderHero {...hero} />
       <RenderBlocks blocks={layout} />
@@ -80,7 +81,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   )
 }
 
-export async function generateMetadata({ params: paramsPromise }): Promise<Metadata> {
+export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug = 'home' } = await paramsPromise
   const page = await queryPageBySlug({
     slug,

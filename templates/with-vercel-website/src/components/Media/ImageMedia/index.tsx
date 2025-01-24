@@ -2,7 +2,7 @@
 
 import type { StaticImageData } from 'next/image'
 
-import { cn } from 'src/utilities/cn'
+import { cn } from '@/utilities/ui'
 import NextImage from 'next/image'
 import React from 'react'
 
@@ -47,10 +47,12 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
     height = fullHeight!
     alt = altFromResource || ''
 
-    src = `${getClientSideURL()}${url}`
+    const cacheTag = resource.updatedAt
+
+    src = `${getClientSideURL()}${url}?${cacheTag}`
   }
 
-  const loading = loadingFromProps || 'lazy'
+  const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
   const sizes = sizeFromProps
