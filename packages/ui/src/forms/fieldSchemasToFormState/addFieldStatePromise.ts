@@ -298,8 +298,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const collapsed = (() => {
               // First, check if `previousFormState` has a matching row
               const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
-              if (previousRow?.collapsed !== undefined) {
-                return previousRow.collapsed
+              if (previousRow) {
+                return previousRow.collapsed ?? false
               }
 
               // If previousFormState is undefined, check preferences
