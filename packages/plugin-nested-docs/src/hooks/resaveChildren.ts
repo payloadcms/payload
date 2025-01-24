@@ -26,84 +26,86 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
 
   if (draft) {
     // If the parent is a draft, don't resave children
-    return null
-  }
-
-  const draftChildren = await req.payload.find({
-    collection: collection.slug,
-    depth: 0,
-    draft: true,
-    limit: 0,
-    locale: req.locale,
-    req,
-    where: {
-      [parentSlug]: {
-        equals: doc.id,
+    return
+  } else {
+    const initialDraftChildren = await req.payload.find({
+      collection: collection.slug,
+      depth: 0,
+      draft: true,
+      limit: 0,
+      locale: req.locale,
+      req,
+      where: {
+        [parentSlug]: {
+          equals: doc.id,
+        },
       },
-    },
-  })
-
-  const publishedChildren = await req.payload.find({
-    collection: collection.slug,
-    depth: 0,
-    draft: false,
-    limit: 0,
-    locale: req.locale,
-    req,
-    where: {
-      [parentSlug]: {
-        equals: doc.id,
-      },
-    },
-  })
-
-  const childrenById = [...draftChildren.docs, ...publishedChildren.docs].reduce((acc, child) => {
-    acc[child.id] = acc[child.id] || []
-    acc[child.id].push(child)
-    return acc
-  }, {})
-
-  const sortedChildren = Object.values(childrenById).flatMap((group: JsonObject[]) => {
-    return group.sort((a, b) => {
-      if (a.updatedAt !== b.updatedAt) {
-        return a.updatedAt > b.updatedAt ? -1 : 1
-      }
-      return a._status === 'published' ? -1 : 1
     })
-  })
 
-  if (sortedChildren) {
-    try {
-      for (const child of sortedChildren) {
-        const isDraft = child._status !== 'published'
+    const draftChildren = initialDraftChildren.docs.filter((child) => child._status === 'draft')
 
-        await req.payload.update({
-          id: child.id,
-          collection: collection.slug,
-          data: {
-            ...child,
-            [breadcrumbSlug]: await populateBreadcrumbs(req, pluginConfig, collection, child),
-          },
-          depth: 0,
-          draft: isDraft,
-          locale: req.locale,
-          req,
-        })
-      }
-    } catch (err: unknown) {
-      req.payload.logger.error(
-        `Nested Docs plugin encountered an error while re-saving a child document.`,
-      )
-      req.payload.logger.error(err)
+    const publishedChildren = await req.payload.find({
+      collection: collection.slug,
+      depth: 0,
+      draft: false,
+      limit: 0,
+      locale: req.locale,
+      req,
+      where: {
+        [parentSlug]: {
+          equals: doc.id,
+        },
+      },
+    })
 
-      if (
-        (err as ValidationError)?.name === 'ValidationError' &&
-        (err as ValidationError)?.data?.errors?.length
-      ) {
-        throw new APIError(
-          'Could not publish or save changes: One or more children are invalid.',
-          400,
+    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce((acc, child) => {
+      acc[child.id] = acc[child.id] || []
+      acc[child.id].push(child)
+      return acc
+    }, {})
+
+    const sortedChildren = Object.values(childrenById).flatMap((group: JsonObject[]) => {
+      return group.sort((a, b) => {
+        if (a.updatedAt !== b.updatedAt) {
+          return a.updatedAt > b.updatedAt ? 1 : -1
+        }
+        return a._status === 'published' ? 1 : -1
+      })
+    })
+
+    if (sortedChildren) {
+      try {
+        for (const child of sortedChildren) {
+          const isDraft = child._status !== 'published'
+
+          await req.payload.update({
+            id: child.id,
+            collection: collection.slug,
+            data: {
+              ...child,
+              [breadcrumbSlug]: await populateBreadcrumbs(req, pluginConfig, collection, child),
+            },
+            depth: 0,
+            draft: isDraft,
+            locale: req.locale,
+            req,
+          })
+        }
+      } catch (err: unknown) {
+        req.payload.logger.error(
+          `Nested Docs plugin encountered an error while re-saving a child document.`,
         )
+        req.payload.logger.error(err)
+
+        if (
+          (err as ValidationError)?.name === 'ValidationError' &&
+          (err as ValidationError)?.data?.errors?.length
+        ) {
+          throw new APIError(
+            'Could not publish or save changes: One or more children are invalid.',
+            400,
+          )
+        }
       }
     }
   }
