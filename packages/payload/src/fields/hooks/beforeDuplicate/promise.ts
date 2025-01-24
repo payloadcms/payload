@@ -362,6 +362,27 @@ export const promise = async <T>({
         break
       }
 
+      // Unnamed Tab
+      // @ts-expect-error `fieldAffectsData` inferred return type doesn't account for TabAsField
+      case 'tab': {
+        await traverseFields({
+          id,
+          collection,
+          context,
+          doc,
+          // @ts-expect-error `fieldAffectsData` inferred return type doesn't account for TabAsField
+          fields: field.fields,
+          overrideAccess,
+          parentIndexPath: indexPath,
+          parentPath,
+          parentSchemaPath: schemaPath,
+          req,
+          siblingDoc,
+        })
+
+        break
+      }
+
       case 'tabs': {
         await traverseFields({
           id,
