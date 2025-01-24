@@ -20,6 +20,7 @@ import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/m
 
 import { lexicalFieldsSlug } from '../../slugs.js'
 import {
+  AsyncHooksBlock,
   CodeBlock,
   ConditionalLayoutBlock,
   RadioButtonsBlock,
@@ -73,6 +74,7 @@ const editorConfig: ServerEditorConfig = {
     ModifyInlineBlockFeature(),
     BlocksFeature({
       blocks: [
+        AsyncHooksBlock,
         RichTextBlock,
         TextBlock,
         UploadAndRichTextBlock,
@@ -365,7 +367,7 @@ export const LexicalFields: CollectionConfig = {
             }
 
             // Export to markdown
-            let markdown: string
+            let markdown: string = ''
             headlessEditor.getEditorState().read(() => {
               markdown = $convertToMarkdownString(
                 yourSanitizedEditorConfig?.features?.markdownTransformers,

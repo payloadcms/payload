@@ -4,7 +4,7 @@ import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { BaseValidateOptions, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
@@ -151,6 +151,7 @@ export const promise = async ({
           id,
           collectionSlug: collection?.slug,
           data: deepMergeWithSourceArrays(doc, data),
+          event: 'submit',
           jsonError,
           operation,
           preferences: { fields: {} },

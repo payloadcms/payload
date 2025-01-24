@@ -235,6 +235,25 @@ export const Posts: CollectionConfig = {
         position: 'sidebar',
       },
     },
+    {
+      name: 'validateUsingEvent',
+      type: 'text',
+      admin: {
+        description:
+          'This field should only validate on submit. Try typing "Not allowed" and submitting the form.',
+      },
+      validate: (value, { event }) => {
+        if (event === 'onChange') {
+          return true
+        }
+
+        if (value === 'Not allowed') {
+          return 'This field has been validated only on submit'
+        }
+
+        return true
+      },
+    },
   ],
   labels: {
     plural: slugPluralLabel,
