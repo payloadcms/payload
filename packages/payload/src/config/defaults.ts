@@ -32,6 +32,9 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     },
     theme: 'all',
   },
+  auth: {
+    jwtOrder: ['JWT', 'Bearer', 'cookie'],
+  },
   bin: [],
   collections: [],
   cookiePrefix: 'payload',
