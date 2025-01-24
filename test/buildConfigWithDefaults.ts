@@ -156,11 +156,6 @@ export async function buildConfigWithDefaults(
     config.admin = {}
   }
 
-  config.admin.experimental = {
-    ...(config.admin.experimental || {}),
-    optimizeFormState: true,
-  }
-
   if (config.admin.autoLogin === undefined) {
     config.admin.autoLogin =
       process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' || options?.disableAutoLogin

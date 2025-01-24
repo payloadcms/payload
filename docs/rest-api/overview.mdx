@@ -663,7 +663,7 @@ Data is not automatically appended to the request. You can read the body data by
 Or you could use our helper function that mutates the request and appends data and file if found.
 
 ```ts
-import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+import { addDataAndFileToRequest } from 'payload'
 
 // custom endpoint example
 {
@@ -689,7 +689,7 @@ import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 The locale and the fallback locale are not automatically appended to custom endpoint requests. If you would like to add them you can use this helper function.
 
 ```ts
-import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
+import { addLocalesToRequestFromData } from 'payload'
 
 // custom endpoint example
 {
