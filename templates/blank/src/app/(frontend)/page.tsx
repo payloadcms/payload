@@ -27,7 +27,7 @@ export default async function HomePage() {
           />
         </picture>
         {!user && <h1>Welcome to your new project.</h1>}
-        {user && <h1>Welcome back, {user.email} </h1>}
+        {user && <h1>Welcome back, {user.email}</h1>}
         <div className={classes.links}>
           <a className={classes.admin} href="/admin" rel="noopener noreferrer" target="_blank">
             Go to admin panel
