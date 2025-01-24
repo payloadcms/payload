@@ -440,6 +440,8 @@ export const csTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Úspěšně uloženo automaticky.',
     autosavedVersion: 'Verze automatického uložení',
     changed: 'Změněno',
+    changedFieldsCount_one: '{{count}} změněné pole',
+    changedFieldsCount_other: '{{count}} změněná pole',
     compareVersion: 'Porovnat verzi s:',
     confirmPublish: 'Potvrďte publikování',
     confirmRevertToSaved: 'Potvrdit vrácení k uloženému',

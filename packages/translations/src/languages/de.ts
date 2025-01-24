@@ -448,6 +448,8 @@ export const deTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Erfolgreich automatisch gespeichert.',
     autosavedVersion: 'Automatisch gespeicherte Version',
     changed: 'Geändert',
+    changedFieldsCount_one: '{{count}} geändertes Feld',
+    changedFieldsCount_other: '{{count}} geänderte Felder',
     compareVersion: 'Vergleiche Version zu:',
     confirmPublish: 'Veröffentlichung bestätigen',
     confirmRevertToSaved: 'Zurücksetzen auf die letzte Speicherung bestätigen',

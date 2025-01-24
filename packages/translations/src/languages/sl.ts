@@ -440,6 +440,8 @@ export const slTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Samodejno shranjeno uspešno.',
     autosavedVersion: 'Samodejno shranjena različica',
     changed: 'Spremenjeno',
+    changedFieldsCount_one: '{{count}} spremenjeno polje',
+    changedFieldsCount_other: '{{count}} spremenjena polja',
     compareVersion: 'Primerjaj različico z:',
     confirmPublish: 'Potrdi objavo',
     confirmRevertToSaved: 'Potrdi vrnitev na shranjeno',

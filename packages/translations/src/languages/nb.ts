@@ -444,6 +444,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Lagret automatisk.',
     autosavedVersion: 'Automatisk lagret versjon',
     changed: 'Endret',
+    changedFieldsCount_one: '{{count}} endret felt',
+    changedFieldsCount_other: '{{count}} endrede felt',
     compareVersion: 'Sammenlign versjon mot:',
     confirmPublish: 'Bekreft publisering',
     confirmRevertToSaved: 'Bekreft tilbakestilling til lagret',

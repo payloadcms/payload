@@ -443,6 +443,8 @@ export const skTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Úspešne uložené automaticky.',
     autosavedVersion: 'Verzia automatického uloženia',
     changed: 'Zmenené',
+    changedFieldsCount_one: '{{count}} zmenené pole',
+    changedFieldsCount_other: '{{count}} zmenených polí',
     compareVersion: 'Porovnať verziu s:',
     confirmPublish: 'Potvrdiť publikovanie',
     confirmRevertToSaved: 'Potvrdiť vrátenie k uloženému',
