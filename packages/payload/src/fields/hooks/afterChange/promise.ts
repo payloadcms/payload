@@ -280,10 +280,10 @@ export const promise = async ({
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         previousDoc,
-        previousSiblingDoc: { ...tabPreviousSiblingDoc },
+        previousSiblingDoc: tabPreviousSiblingDoc,
         req,
         siblingData: tabSiblingData,
-        siblingDoc: { ...tabSiblingDoc },
+        siblingDoc: tabSiblingDoc,
       })
 
       break

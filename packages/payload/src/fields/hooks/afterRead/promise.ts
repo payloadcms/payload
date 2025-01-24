@@ -730,6 +730,10 @@ export const promise = async ({
         if (typeof siblingDoc[field.name] !== 'object') {
           tabDoc = {}
         }
+
+        if (typeof select?.[field.name] === 'object') {
+          tabSelect = select?.[field.name] as SelectType
+        }
       } else {
         tabSelect = select
       }
