@@ -7,6 +7,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { getFieldPathsModified } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -15,16 +16,15 @@ type Args = {
   data: JsonObject
   doc: JsonObject
   field: Field | TabAsField
+  fieldIndex: number
   global: null | SanitizedGlobalConfig
-  indexPath: string
   operation: 'create' | 'update'
   parentIndexPath: string
   parentPath: string
-  path: string
+  parentSchemaPath: string
   previousDoc: JsonObject
   previousSiblingDoc: JsonObject
   req: PayloadRequest
-  schemaPath: string
   siblingData: JsonObject
   siblingDoc: JsonObject
 }
@@ -38,18 +38,26 @@ export const promise = async ({
   data,
   doc,
   field,
+  fieldIndex,
   global,
-  indexPath,
   operation,
+  parentIndexPath,
   parentPath,
-  path,
+  parentSchemaPath,
   previousDoc,
   previousSiblingDoc,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
 }: Args): Promise<void> => {
+  const { indexPath, path, schemaPath } = getFieldPathsModified({
+    field,
+    index: fieldIndex,
+    parentIndexPath,
+    parentPath,
+    parentSchemaPath,
+  })
+
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []

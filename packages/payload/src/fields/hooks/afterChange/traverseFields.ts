@@ -4,7 +4,6 @@ import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
-import { getFieldPathsModified } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
 
 type Args = {
@@ -45,14 +44,6 @@ export const traverseFields = async ({
   const promises = []
 
   fields.forEach((field, fieldIndex) => {
-    const { indexPath, path, schemaPath } = getFieldPathsModified({
-      field,
-      index: fieldIndex,
-      parentIndexPath,
-      parentPath,
-      parentSchemaPath,
-    })
-
     promises.push(
       promise({
         collection,
@@ -60,16 +51,15 @@ export const traverseFields = async ({
         data,
         doc,
         field,
+        fieldIndex,
         global,
-        indexPath,
         operation,
         parentIndexPath,
         parentPath,
-        path,
+        parentSchemaPath,
         previousDoc,
         previousSiblingDoc,
         req,
-        schemaPath,
         siblingData,
         siblingDoc,
       }),

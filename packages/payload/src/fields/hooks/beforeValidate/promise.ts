@@ -8,6 +8,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
+import { getFieldPathsModified } from '../../getFieldPaths.js'
 import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
@@ -21,16 +22,15 @@ type Args<T> = {
    */
   doc: T
   field: Field | TabAsField
+  fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
-  indexPath: string
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
   parentPath: string
-  path: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string
   siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
@@ -52,17 +52,25 @@ export const promise = async <T>({
   data,
   doc,
   field,
+  fieldIndex,
   global,
-  indexPath,
   operation,
   overrideAccess,
+  parentIndexPath,
   parentPath,
-  path,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
+  const { indexPath, path, schemaPath } = getFieldPathsModified({
+    field,
+    index: fieldIndex,
+    parentIndexPath,
+    parentPath,
+    parentSchemaPath,
+  })
+
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []

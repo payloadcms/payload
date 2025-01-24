@@ -4,6 +4,7 @@ import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData } from '../../config/types.js'
+import { getFieldPathsModified } from '../../getFieldPaths.js'
 import { runBeforeDuplicateHooks } from './runHook.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -12,14 +13,13 @@ type Args<T> = {
   context: RequestContext
   doc: T
   field: Field | TabAsField
+  fieldIndex: number
   id?: number | string
-  indexPath: string
   overrideAccess: boolean
   parentIndexPath: string
   parentPath: string
-  path: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string
   siblingDoc: JsonObject
 }
 
@@ -29,14 +29,22 @@ export const promise = async <T>({
   context,
   doc,
   field,
-  indexPath,
+  fieldIndex,
   overrideAccess,
+  parentIndexPath,
   parentPath,
-  path,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingDoc,
 }: Args<T>): Promise<void> => {
+  const { indexPath, path, schemaPath } = getFieldPathsModified({
+    field,
+    index: fieldIndex,
+    parentIndexPath,
+    parentPath,
+    parentSchemaPath,
+  })
+
   const { localization } = req.payload.config
 
   const pathSegments = path ? path.split('.') : []

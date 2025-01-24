@@ -11,6 +11,7 @@ import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { getFieldPathsModified } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -22,16 +23,15 @@ type Args = {
   docWithLocales: JsonObject
   errors: ValidationFieldError[]
   field: Field | TabAsField
+  fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
-  indexPath: string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
   parentIndexPath: string
   parentPath: string
-  path: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingDocWithLocales?: JsonObject
@@ -55,19 +55,27 @@ export const promise = async ({
   docWithLocales,
   errors,
   field,
+  fieldIndex,
   global,
-  indexPath,
   mergeLocaleActions,
   operation,
+  parentIndexPath,
   parentPath,
-  path,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
   skipValidation,
 }: Args): Promise<void> => {
+  const { indexPath, path, schemaPath } = getFieldPathsModified({
+    field,
+    index: fieldIndex,
+    parentIndexPath,
+    parentPath,
+    parentSchemaPath,
+  })
+
   const passesCondition = field.admin?.condition
     ? Boolean(field.admin.condition(data, siblingData, { user: req.user }))
     : true
