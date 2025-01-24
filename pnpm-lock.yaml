@@ -965,6 +965,9 @@ importers:
 
   packages/plugin-form-builder:
     dependencies:
+      '@payloadcms/richtext-lexical':
+        specifier: workspace:*
+        version: link:../richtext-lexical
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
