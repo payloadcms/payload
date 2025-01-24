@@ -22,6 +22,26 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'value',
+          type: 'text',
+          defaultValue: 'group value',
+        },
+        {
+          name: 'ignore',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'relationship',
+      type: 'relationship',
+      relationTo: 'users',
+    },
+    {
       name: 'excerpt',
       label: 'Excerpt',
       type: 'text',

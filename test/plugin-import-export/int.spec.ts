@@ -1,4 +1,6 @@
 import type { Payload } from 'payload'
+import fs from 'fs'
+import { parse } from 'csv-parse'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -6,7 +8,6 @@ import { fileURLToPath } from 'url'
 import type { Page } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { pagesSlug } from './shared.js'
 
 let payload: Payload
 let page: Page
@@ -15,14 +16,20 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-import-export', () => {
+  let pageData = {
+    title: 'Test',
+    group: {
+      value: 'Group Value',
+      ignore: 'Ignore',
+    },
+  }
+
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(dirname))
 
     page = await payload.create({
       collection: 'pages',
-      data: {
-        title: 'Test',
-      },
+      data: pageData,
     })
   })
 
@@ -33,16 +40,16 @@ describe('@payloadcms/plugin-import-export', () => {
   })
 
   describe('exports', () => {
-    it('should create a file for collection csv', async () => {
+    it('should create a file for collection csv from defined fields', async () => {
       // large data set
-      // for (let i = 0; i < 1000000; i++) {
-      //   await payload.create({
-      //     collection: 'pages',
-      //     data: {
-      //       title: `Page ${i}`,
-      //     },
-      //   })
-      // }
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Page ${i}`,
+          },
+        })
+      }
 
       let doc = await payload.create({
         collection: 'exports',
@@ -50,7 +57,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collections: [
             {
               slug: 'pages',
-              fields: ['id', 'title', 'createdAt', 'updatedAt'],
+              fields: ['id', 'title', 'group.value', 'createdAt', 'updatedAt'],
             },
           ],
           format: 'csv',
@@ -63,6 +70,46 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].group_value).toStrictEqual('group value')
     })
   })
 })
+
+export const readCSV = async (path: string): Promise<any[]> => {
+  const buffer = fs.readFileSync(path)
+  const data: any[] = []
+  const promise = new Promise<void>((resolve) => {
+    const parser = parse({ bom: true, columns: true })
+
+    // Collect data from the CSV
+    parser.on('readable', () => {
+      let record
+      while ((record = parser.read())) {
+        data.push(record)
+      }
+    })
+
+    // Resolve the promise on 'end'
+    parser.on('end', () => {
+      resolve()
+    })
+
+    // Handle errors (optional, but good practice)
+    parser.on('error', (error) => {
+      console.error('Error parsing CSV:', error)
+      resolve() // Ensures promise doesn't hang on error
+    })
+
+    // Pipe the buffer into the parser
+    parser.write(buffer)
+    parser.end()
+  })
+
+  // Await the promise
+  await promise
+
+  return data
+}

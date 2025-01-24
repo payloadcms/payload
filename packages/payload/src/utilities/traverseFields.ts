@@ -9,7 +9,7 @@ const traverseArrayOrBlocksField = ({
   fillEmpty,
   parentRef,
 }: {
-  callback: TraverseFieldsCallback
+  callback: TraverseFieldsCallback<unknown>
   data: Record<string, unknown>[]
   field: ArrayField | BlocksField
   fillEmpty: boolean
@@ -41,7 +41,7 @@ const traverseArrayOrBlocksField = ({
   }
 }
 
-export type TraverseFieldsCallback = (args: {
+export type TraverseFieldsCallback<T = unknown> = (args: {
   /**
    * The current field
    */
@@ -53,19 +53,19 @@ export type TraverseFieldsCallback = (args: {
   /**
    * The parent reference object
    */
-  parentRef?: Record<string, unknown> | unknown
+  parentRef: Record<string, T> | T
   /**
    * The current reference object
    */
-  ref?: Record<string, unknown> | unknown
+  ref: Record<string, T> | T
 }) => boolean | void
 
-type TraverseFieldsArgs = {
-  callback: TraverseFieldsCallback
+type TraverseFieldsArgs<T = unknown> = {
+  callback: TraverseFieldsCallback<T>
   fields: (Field | TabAsField)[]
   fillEmpty?: boolean
-  parentRef?: Record<string, unknown> | unknown
-  ref?: Record<string, unknown> | unknown
+  parentRef?: Record<string, T> | T
+  ref?: Record<string, T> | T
 }
 
 /**
@@ -77,13 +77,13 @@ type TraverseFieldsArgs = {
  * @param ref the data or any artifacts assigned in the callback during field recursion
  * @param parentRef the data or any artifacts assigned in the callback during field recursion one level up
  */
-export const traverseFields = ({
+export const traverseFields = <T = unknown>({
   callback,
   fields,
   fillEmpty = true,
   parentRef = {},
   ref = {},
-}: TraverseFieldsArgs): void => {
+}: TraverseFieldsArgs<T>): void => {
   fields.some((field) => {
     let skip = false
     const next = () => {

@@ -10,7 +10,12 @@ import { translations } from './translations/index.js'
 export const importExportPlugin =
   (pluginConfig: ImportExportPluginConfig) =>
   (config: Config): Config => {
-    config.collections.push(getExportCollection({ pluginConfig }))
+    const exportCollection = getExportCollection({ pluginConfig })
+    if (config.collections) {
+      config.collections.push(exportCollection)
+    } else {
+      config.collections = [exportCollection]
+    }
 
     config.i18n = deepMergeSimple(translations, config.i18n?.translations ?? {})
 

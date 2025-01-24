@@ -68,7 +68,7 @@ export const getExportCollection = ({
             return
           }
           // TODO:
-          //  if configured for to use jobs, queue the export job
+          //  if configured to use jobs, queue the export job
           //  await req.payload.jobs.queue({ input: { doc, req }, task: 'createExport' })
           //  otherwise, start the export immediately and don't await it
 

@@ -65,6 +65,7 @@
     "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
+    "csv-parse": "^5.6.0",
     "dotenv": "16.4.7",
     "drizzle-kit": "0.28.0",
     "eslint-plugin-playwright": "2.1.0",
