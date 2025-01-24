@@ -550,18 +550,24 @@ describe('Hooks', () => {
       const originalDoc = await payload.create({
         collection: fieldPathsSlug,
         data: {
-          topLevelNamedField: '',
+          topLevelNamedField: 'Test',
           array: [
             {
-              fieldWithinArray: '',
+              fieldWithinArray: 'Test',
+              nestedArray: [
+                {
+                  fieldWithinNestedArray: 'Test',
+                  fieldWithinNestedRow: 'Test',
+                },
+              ],
             },
           ],
-          fieldWithinRow: '',
-          fieldWithinUnnamedTab: '',
+          fieldWithinRow: 'Test',
+          fieldWithinUnnamedTab: 'Test',
           namedTab: {
-            fieldWithinNamedTab: '',
+            fieldWithinNamedTab: 'Test',
           },
-          fieldWithinNestedUnnamedTab: '',
+          fieldWithinNestedUnnamedTab: 'Test',
         },
       })
 
@@ -579,6 +585,14 @@ describe('Hooks', () => {
         ...formatExpectedFieldPaths('fieldWithinArray', {
           path: ['array', '0', 'fieldWithinArray'],
           schemaPath: ['array', 'fieldWithinArray'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinNestedArray', {
+          path: ['array', '0', 'nestedArray', '0', 'fieldWithinNestedArray'],
+          schemaPath: ['array', 'nestedArray', 'fieldWithinNestedArray'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinNestedRow', {
+          path: ['array', '0', 'nestedArray', '0', 'fieldWithinNestedRow'],
+          schemaPath: ['array', '_index-2', 'fieldWithinNestedRow'],
         }),
         ...formatExpectedFieldPaths('fieldWithinRow', {
           path: ['fieldWithinRow'],

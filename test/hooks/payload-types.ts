@@ -248,6 +248,12 @@ export interface FieldPath {
   array?:
     | {
         fieldWithinArray?: string | null;
+        nestedArray?:
+          | {
+              fieldWithinNestedArray?: string | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -321,6 +327,42 @@ export interface FieldPath {
     | boolean
     | null;
   fieldWithinArray_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedArray_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedArray_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedArray_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedArray_beforeDuplicate_FieldPaths?:
     | {
         [k: string]: unknown;
       }
@@ -724,6 +766,12 @@ export interface FieldPathsSelect<T extends boolean = true> {
     | T
     | {
         fieldWithinArray?: T;
+        nestedArray?:
+          | T
+          | {
+              fieldWithinNestedArray?: T;
+              id?: T;
+            };
         id?: T;
       };
   fieldWithinRow?: T;
@@ -742,6 +790,10 @@ export interface FieldPathsSelect<T extends boolean = true> {
   fieldWithinArray_beforeChange_FieldPaths?: T;
   fieldWithinArray_afterRead_FieldPaths?: T;
   fieldWithinArray_beforeDuplicate_FieldPaths?: T;
+  fieldWithinNestedArray_beforeValidate_FieldPaths?: T;
+  fieldWithinNestedArray_beforeChange_FieldPaths?: T;
+  fieldWithinNestedArray_afterRead_FieldPaths?: T;
+  fieldWithinNestedArray_beforeDuplicate_FieldPaths?: T;
   fieldWithinRow_beforeValidate_FieldPaths?: T;
   fieldWithinRow_beforeChange_FieldPaths?: T;
   fieldWithinRow_afterRead_FieldPaths?: T;

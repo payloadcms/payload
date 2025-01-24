@@ -61,39 +61,72 @@ export const FieldPaths: CollectionConfig = {
   slug: fieldPathsSlug,
   fields: [
     {
-      // schemaPath: 'topLevelNamedField'
       // path: 'topLevelNamedField'
+      // schemaPath: 'topLevelNamedField'
       // indexPath: ''
       name: 'topLevelNamedField',
       type: 'text',
       hooks: attachHooks('topLevelNamedField'),
     },
     {
-      // schemaPath: 'array'
       // path: 'array'
+      // schemaPath: 'array'
       // indexPath: ''
       name: 'array',
       type: 'array',
       fields: [
         {
-          // schemaPath: 'array.fieldWithinArray'
           // path: 'array.[n].fieldWithinArray'
+          // schemaPath: 'array.fieldWithinArray'
           // indexPath: ''
           name: 'fieldWithinArray',
           type: 'text',
           hooks: attachHooks('fieldWithinArray'),
         },
+        {
+          // path: 'array.[n].nestedArray'
+          // schemaPath: 'array.nestedArray'
+          // indexPath: ''
+          name: 'nestedArray',
+          type: 'array',
+          fields: [
+            {
+              // schemaPath: 'array.nestedArray.fieldWithinNestedArray'
+              // path: 'array.[n].nestedArray.[n].fieldWithinNestedArray'
+              // indexPath: ''
+              name: 'fieldWithinNestedArray',
+              type: 'text',
+              hooks: attachHooks('fieldWithinNestedArray'),
+            },
+          ],
+        },
+        {
+          // path: 'array._index-2'
+          // schemaPath: 'array._index-2'
+          // indexPath: ''
+          type: 'row',
+          fields: [
+            {
+              // schemaPath: 'array._index-2.fieldWithinRow'
+              // path: 'array.[n].nestedArray.[n].fieldWithinNestedRow'
+              // indexPath: ''
+              name: 'fieldWithinNestedRow',
+              type: 'text',
+              hooks: attachHooks('fieldWithinNestedRow'),
+            },
+          ],
+        },
       ],
     },
     {
+      // path: '_index-2'
       // schemaPath: '_index-2'
-      // path: ''
       // indexPath: '2'
       type: 'row',
       fields: [
         {
-          // schemaPath: '_index-2.fieldWithinRow'
           // path: 'fieldWithinRow'
+          // schemaPath: '_index-2.fieldWithinRow'
           // indexPath: ''
           name: 'fieldWithinRow',
           type: 'text',
@@ -102,40 +135,40 @@ export const FieldPaths: CollectionConfig = {
       ],
     },
     {
+      // path: '_index-3'
       // schemaPath: '_index-3'
-      // path: ''
       // indexPath: '3'
       type: 'tabs',
       tabs: [
         {
+          // path: '_index-3-0'
           // schemaPath: '_index-3-0'
-          // path: ''
           // indexPath: '3-0'
           label: 'Unnamed Tab',
           fields: [
             {
-              // schemaPath: '_index-3-0.fieldWithinUnnamedTab'
               // path: 'fieldWithinUnnamedTab'
+              // schemaPath: '_index-3-0.fieldWithinUnnamedTab'
               // indexPath: ''
               name: 'fieldWithinUnnamedTab',
               type: 'text',
               hooks: attachHooks('fieldWithinUnnamedTab'),
             },
             {
+              // path: '_index-3-0-1'
               // schemaPath: '_index-3-0-1'
-              // path: ''
               // indexPath: '3-0-1'
               type: 'tabs',
               tabs: [
                 {
+                  // path: '_index-3-0-1-0'
                   // schemaPath: '_index-3-0-1-0'
-                  // path: ''
                   // indexPath: '3-0-1-0'
                   label: 'Nested Unnamed Tab',
                   fields: [
                     {
-                      // schemaPath: '_index-3-0-1-0.fieldWithinNestedUnnamedTab'
                       // path: 'fieldWithinNestedUnnamedTab'
+                      // schemaPath: '_index-3-0-1-0.fieldWithinNestedUnnamedTab'
                       // indexPath: ''
                       name: 'fieldWithinNestedUnnamedTab',
                       type: 'text',
@@ -148,15 +181,15 @@ export const FieldPaths: CollectionConfig = {
           ],
         },
         {
-          // schemaPath: '_index-3.namedTab'
           // path: 'namedTab'
+          // schemaPath: '_index-3.namedTab'
           // indexPath: ''
           label: 'Named Tab',
           name: 'namedTab',
           fields: [
             {
-              // schemaPath: '_index-3.namedTab.fieldWithinNamedTab'
               // path: 'namedTab.fieldWithinNamedTab'
+              // schemaPath: '_index-3.namedTab.fieldWithinNamedTab'
               // indexPath: ''
               name: 'fieldWithinNamedTab',
               type: 'text',
@@ -170,6 +203,8 @@ export const FieldPaths: CollectionConfig = {
     ...createFields([
       'topLevelNamedField',
       'fieldWithinArray',
+      'fieldWithinNestedArray',
+      'fieldWithinNestedRow',
       'fieldWithinRow',
       'fieldWithinUnnamedTab',
       'fieldWithinNestedUnnamedTab',
