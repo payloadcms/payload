@@ -90,7 +90,6 @@ describe('@payloadcms/plugin-nested-docs', () => {
       const { docs } = await payload.find({
         collection: 'pages',
         limit: 0,
-        draft: true,
         where: {
           parent: {
             equals: parentDoc.id,
